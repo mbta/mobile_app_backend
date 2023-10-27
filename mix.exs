@@ -50,6 +50,7 @@ defmodule MobileAppBackend.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},
+      {:logster, "~> 1.1"},
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:telemetry_metrics, "~> 0.6"},
