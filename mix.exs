@@ -18,7 +18,12 @@ defmodule MobileAppBackend.MixProject do
   # Type `mix help compile.app` for more information.
   def application do
     extra_applications = [:logger, :runtime_tools]
-    extra_applications = if(Mix.env() == :prod, do: extra_applications ++ [:ehmon], else: extra_applications)
+
+    extra_applications =
+      if(Mix.env() == :prod,
+        do: extra_applications ++ [:diskusage_logger, :ehmon],
+        else: extra_applications
+      )
 
     [
       mod: {MobileAppBackend.Application, []},
@@ -45,6 +50,7 @@ defmodule MobileAppBackend.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:swoosh, "~> 1.3"},
       {:finch, "~> 0.13"},
+      {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
