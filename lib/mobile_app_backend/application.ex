@@ -9,7 +9,8 @@ defmodule MobileAppBackend.Application do
   def start(_type, _args) do
     children = [
       MobileAppBackendWeb.Telemetry,
-      {DNSCluster, query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
+      {DNSCluster,
+       query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: MobileAppBackend.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: MobileAppBackend.Finch},
