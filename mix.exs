@@ -53,6 +53,7 @@ defmodule MobileAppBackend.MixProject do
       {:logster, "~> 1.1"},
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
