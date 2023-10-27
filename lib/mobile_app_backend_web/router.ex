@@ -20,6 +20,10 @@ defmodule MobileAppBackendWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/", MobileAppBackendWeb do
+    get("/_health", HealthController, :index)
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", MobileAppBackendWeb do
   #   pipe_through :api
