@@ -63,6 +63,7 @@ defmodule MobileAppBackend.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:v3_api, git: "https://github.com/arkadyan/v3_api.git"}
+      # {:v3_api, path: "/Users/mshanley/dev/v3_api"}
     ]
   end
 

@@ -25,9 +25,11 @@ defmodule MobileAppBackendWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", MobileAppBackendWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", MobileAppBackendWeb do
+    pipe_through :api
+
+    get("/route/by-stop/:stop_id", RouteController, :by_stop)
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:mobile_app_backend, :dev_routes) do

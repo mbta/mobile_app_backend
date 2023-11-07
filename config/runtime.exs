@@ -7,8 +7,8 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
-config :mobile_app_backend,
-  api_url: System.get_env("API_URL"),
+config :v3_api,
+  base_url: System.get_env("API_URL"),
   api_key: System.get_env("API_KEY")
 
 # ## Using releases
