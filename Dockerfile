@@ -32,7 +32,7 @@ FROM debian:bullseye-slim
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
 RUN apt-get update --allow-releaseinfo-change \
-  && apt-get install --no-install-recommends --yes dumb-init \
+  && apt-get install --no-install-recommends --yes dumb-init wget \
   && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
