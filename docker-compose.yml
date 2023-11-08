@@ -1,3 +1,4 @@
+# For smoke testing the Docker container in CI
 services:
   mobile-app-backend:
     build: .
