@@ -1,0 +1,8 @@
+# For smoke testing the Docker container in CI
+services:
+  mobile-app-backend:
+    build: .
+    environment:
+      - SECRET_KEY_BASE=/insecure/insecure/insecure/insecure/insecure/insecure/insecure/
+    ports:
+      - 4000

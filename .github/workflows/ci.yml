@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  setup:
+    name: asdf and Elixir dependencies
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key-asdf: ${{ steps.cache-keys.outputs.asdf }}
+      cache-key-mix: ${{ steps.cache-keys.outputs.mix }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set cache keys
+        id: cache-keys
+        run: |
+          echo "asdf-restore=cache-asdf-" >> $GITHUB_OUTPUT
+          echo "asdf=cache-asdf-${{ hashFiles('.tool-versions') }}" >> $GITHUB_OUTPUT
+          echo "mix-restore=cache-mix-" >> $GITHUB_OUTPUT
+          echo "mix=cache-mix-${{ hashFiles('**/mix.lock', '.tool-versions') }}" >> $GITHUB_OUTPUT
+      - name: asdf cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.asdf
+          key: ${{ steps.cache-keys.outputs.asdf }}
+          restore-keys: ${{ steps.cache-keys.outputs.asdf-restore }}
+        id: asdf-cache
+      - uses: asdf-vm/actions/install@v3
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+      - name: Setup asdf environment
+        uses: mbta/actions/reshim-asdf@v2
+      - name: mix rebar and hex
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+      - name: Mix cache
+        id: deps-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ steps.cache-keys.outputs.mix }}
+          restore-keys: ${{ steps.cache-keys.outputs.mix-restore }}
+      - name: Install and compile Mix dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+          MIX_ENV=test mix deps.compile
+
+  build_elixir:
+    name: Build and test Elixir
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: asdf cache
+        uses: actions/cache/restore@v3
+        with:
+          path: ~/.asdf
+          key: ${{ needs.setup.outputs.cache-key-asdf }}
+      - name: Setup asdf environment
+        uses: mbta/actions/reshim-asdf@v2
+      - uses: actions/checkout@v4
+      - name: Restore Mix cache
+        uses: actions/cache/restore@v3
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ needs.setup.outputs.cache-key-mix }}
+      - name: Compile (warnings as errors)
+        run: mix compile --force --warnings-as-errors
+      - name: Credo
+        run: mix credo --strict
+      - name: Check formatting
+        run: mix format --check-formatted
+      - name: Run tests
+        run: mix test
+      - uses: mbta/actions/dialyzer@v2
+      - name: Check for unused dependencies
+        run: mix deps.unlock --check-unused
+
+  docker_build:
+    name: Check that the Docker container will build and run
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: docker build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: docker compose build
+        run: docker compose build
+      - name: docker compose up
+        run: docker compose up --wait
+      - name: ensure running properly
+        run: docker compose exec --no-TTY mobile-app-backend wget --spider -S http://localhost:4000/
+      - name: show docker container logs
+        run: docker compose logs mobile-app-backend
+        if: ${{ !cancelled() }}
