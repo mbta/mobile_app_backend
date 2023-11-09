@@ -1,11 +1,10 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.15.7-erlang-26.1.2-debian-bullseye-20231009-slim as elixir-builder
+FROM hexpm/elixir:1.15.7-erlang-26.1.2-alpine-3.18.4 as elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
-RUN apt-get update --allow-releaseinfo-change
-RUN apt-get install --no-install-recommends --yes \
-  build-essential ca-certificates git
+RUN apk add --no-cache \
+  git
 RUN mix local.hex --force
 RUN mix local.rebar --force
 
@@ -33,13 +32,12 @@ RUN mix release
 
 
 # --- Set up runtime container ---
-FROM debian:bullseye-slim
+FROM alpine:3.18.4
 
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
-RUN apt-get update --allow-releaseinfo-change \
-  && apt-get install --no-install-recommends --yes dumb-init wget \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+  dumb-init libgcc libstdc++ ncurses-libs
 
 # Create non-root user
 RUN addgroup --system mobileappbackend && adduser --system --ingroup mobileappbackend mobileappbackend
