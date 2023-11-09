@@ -10,8 +10,10 @@ RUN mix local.hex --force
 RUN mix local.rebar --force
 
 WORKDIR /root
-ADD . .
+COPY ./mix.exs mix.exs
+COPY ./mix.lock mix.lock
 RUN mix deps.get --only prod
+RUN mix deps.compile
 
 
 # --- Build Elixir release ---
@@ -20,6 +22,10 @@ FROM elixir-builder as app-builder
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
 WORKDIR /root
+COPY ./assets assets
+COPY ./config config
+COPY ./lib lib
+COPY ./priv priv
 RUN mix compile
 RUN mix assets.deploy
 RUN mix phx.digest
