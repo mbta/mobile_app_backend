@@ -1,0 +1,12 @@
+name: Deploy to Dev-Orange
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.ref }} to Dev-Orange
+    uses: ./.github/workflows/deploy.yml
+    with:
+      env: dev-orange
+    secrets: inherit
