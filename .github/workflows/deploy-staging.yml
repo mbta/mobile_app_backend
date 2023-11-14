@@ -3,7 +3,7 @@ name: Deploy to Staging
 on:
   workflow_dispatch:
   push:
-    branches: [main, mth-deploy]
+    branches: [main]
 
 jobs:
   deploy:
