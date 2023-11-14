@@ -2,8 +2,6 @@ name: Deploy to Dev-Orange
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main, mth-deploy]
 
 jobs:
   deploy:
