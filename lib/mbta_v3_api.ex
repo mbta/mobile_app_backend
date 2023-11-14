@@ -137,8 +137,8 @@ defmodule MBTAV3API do
 
   defp default_options do
     [
-      base_url: Application.fetch_env!(:mbta_v3_api, :base_url),
-      api_key: Application.fetch_env!(:mbta_v3_api, :api_key),
+      base_url: Application.fetch_env!(:mobile_app_backend, :base_url),
+      api_key: Application.fetch_env!(:mobile_app_backend, :api_key),
       timeout: 10_000
     ]
   end
