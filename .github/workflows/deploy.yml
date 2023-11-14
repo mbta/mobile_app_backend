@@ -68,4 +68,4 @@ jobs:
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           job-status: ${{ job.status }}
-          custom-message: Deployed ${{ github.ref }} to ${{ inputs.env }}
+          custom-message: Deployed ${{ github.ref_type }} ${{ github.ref_name }} to ${{ inputs.env }}

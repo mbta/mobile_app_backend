@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy ${{ github.ref }} to Dev-Orange
+    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Dev-Orange
     uses: ./.github/workflows/deploy.yml
     with:
       env: dev-orange
