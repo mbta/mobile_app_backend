@@ -11,4 +11,5 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       env: staging
+      deploy-desc: ${{ github.ref_type }} ${{ github.ref_name }}
     secrets: inherit

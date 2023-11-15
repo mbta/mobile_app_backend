@@ -7,6 +7,10 @@ on:
       version-name:
         required: false
         type: string
+      deploy-desc:
+        required: true
+        type: string
+        description: A description of what was deployed ("branch main", "PR 483", "tag 2023-11-15-1", etc)
     secrets:
       AWS_ROLE_ARN:
         required: true
@@ -68,4 +72,4 @@ jobs:
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           job-status: ${{ job.status }}
-          custom-message: Deployed ${{ github.ref_type }} ${{ github.ref_name }} to ${{ inputs.env }}
+          custom-message: Deployed ${{ inputs.deploy-desc }} to ${{ inputs.env }}
