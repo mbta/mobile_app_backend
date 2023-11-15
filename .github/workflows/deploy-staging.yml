@@ -3,6 +3,11 @@ run-name: ${{ github.event_name == 'workflow_dispatch' && format('Deploy {0} {1}
 
 on:
   workflow_dispatch:
+    inputs:
+      release-name:
+        description: The name to use for the created release
+        type: string
+        required: false
   push:
     branches: [main]
 
@@ -12,5 +17,6 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     with:
       env: staging
+      version-name: ${{ inputs.release-name }}
       deploy-desc: ${{ github.ref_type }} ${{ github.ref_name }}
     secrets: inherit
