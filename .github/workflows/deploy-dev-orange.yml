@@ -1,12 +1,19 @@
 name: Deploy to Dev-Orange
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Deploy {0} {1} to Dev-Orange', github.ref_type, github.ref_name) || '' }}
 
 on:
   workflow_dispatch:
+  pull_request:
+    types:
+      - synchronize
+      - labeled
 
 jobs:
   deploy:
-    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Dev-Orange
+    name: Deploy ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }} to Dev-Orange
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'deploy to dev-orange') }}
     uses: ./.github/workflows/deploy.yml
     with:
       env: dev-orange
+      deploy-desc: ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
     secrets: inherit
