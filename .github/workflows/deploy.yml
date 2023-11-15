@@ -1,0 +1,71 @@
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      version-name:
+        required: false
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      DOCKER_REPO:
+        required: true
+      SLACK_WEBHOOK:
+        required: true
+
+concurrency:
+  group: deploy-${{ inputs.env }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to ${{ inputs.env }}
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.env }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get versions
+        id: calc-version
+        run: |
+          git_hash_tag="${{ secrets.DOCKER_REPO }}:git-$(git rev-parse --short HEAD)"
+          latest_env_tag="${{ secrets.DOCKER_REPO }}:latest-${{ inputs.env }}"
+          if [ -n "${{ inputs.version-name }}" ]; then
+            version_tag="${{ secrets.DOCKER_REPO }}:${{ inputs.version-name }}"
+            echo "deploy-tag=$version_tag" | tee -a $GITHUB_OUTPUT
+            printf "tag-list=%s,%s,%s\n" "$git_hash_tag" "$latest_env_tag" "$version_tag" | tee -a $GITHUB_OUTPUT
+          else
+            echo "deploy-tag=$git_hash_tag" | tee -a $GITHUB_OUTPUT
+            printf "tag-list=%s,%s\n" "$git_hash_tag" "$latest_env_tag" | tee -a $GITHUB_OUTPUT
+          fi
+      - uses: aws-actions/amazon-ecr-login@v2
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          cache-from: type=gha
+          tags: ${{ steps.calc-version.outputs.tag-list }}
+          push: true
+      - uses: mbta/actions/deploy-ecs@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          ecs-cluster: mobile-app-backend
+          ecs-service: mobile-app-backend-${{ inputs.env }}
+          docker-tag: ${{ steps.calc-version.outputs.deploy-tag }}
+      - uses: mbta/actions/notify-slack-deploy@v2
+        if: ${{ !cancelled() }}
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          job-status: ${{ job.status }}
+          custom-message: Deployed ${{ github.ref_type }} ${{ github.ref_name }} to ${{ inputs.env }}

@@ -1,0 +1,14 @@
+name: Deploy to Staging
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Staging
+    uses: ./.github/workflows/deploy.yml
+    with:
+      env: staging
+    secrets: inherit
