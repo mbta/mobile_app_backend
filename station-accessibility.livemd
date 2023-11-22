@@ -1,0 +1,696 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# Station Accessibility
+
+```elixir
+Mix.install([
+  {:csv, "~> 3.2"},
+  {:req, "~> 0.4.5"},
+  {:kino, "~> 0.11.3"}
+])
+```
+
+## GTFS Schedule
+
+```elixir
+gtfs_files =
+  Req.get!("https://cdn.mbta.com/MBTA_GTFS.zip").body
+  |> Map.new(fn {name, body} -> {to_string(name), body} end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  "agency.txt" => "agency_id,agency_name,agency_url,agency_timezone,agency_lang,agency_phone\n3,Cape Cod Regional Transit Authority,http://www.capecodrta.org/,America/New_York,EN,800-352-7155\n1,MBTA,http://www.mbta.com,America/New_York,EN,617-222-3200\n",
+  "areas.txt" => "area_id,area_name\narea_bl,Blue Line\narea_bl_airport,Blue Line - Airport Station\narea_cf_zone_buzzards,CapeFLYER - Wareham/Buzzards Bay/Bourne\narea_cf_zone_hyannis,CapeFLYER - Hyannis\narea_commuter_rail_zone_1,Commuter Rail Zone 1\narea_commuter_rail_zone_10,Commuter Rail Zone 10\narea_commuter_rail_zone_1a,Commuter Rail Zone 1A\narea_commuter_rail_zone_2,Commuter Rail Zone 2\narea_commuter_rail_zone_3,Commuter Rail Zone 3\narea_commuter_rail_zone_4,Commuter Rail Zone 4\narea_commuter_rail_zone_5,Commuter Rail Zone 5\narea_commuter_rail_zone_6,Commuter Rail Zone 6\narea_commuter_rail_zone_7,Commuter Rail Zone 7\narea_commuter_rail_zone_8,Commuter Rail Zone 8\narea_commuter_rail_zone_9,Commuter Rail Zone 9\narea_fairmount_line_zone_1a,Commuter Rail Zone 1A - Fairmount Line\narea_gl_govt_ctr,Green Line - Government Center\narea_green_b_west_of_kenmore,Green Line B - West of Kenmore\narea_green_c_west_of_kenmore,Green Line C - West of Kenmore\narea_green_e_west_of_symphony,Green Line E - West of Symphony\narea_m_ashmont_mattapan,Mattapan Trolley - Ashmont and Mattapan\narea_ol_state,Orange Line - State\narea_red_south_station,Red Line - South Station\narea_route_354_downtown,Route 354 - Downtown\narea_route_354_outside_downtown,Route 354 - Outside Downtown\narea_route_426_downtown,Route 426 - Downtown\narea_route_426_outside_downtown,Route 426 - Outside Downtown\narea_route_450_downtown,Route 450 - Downtown\narea_route_450_outside_downtown,Route 450 - Outside Downtown\narea_sl3_north_of_airport,Silver Line - North of Airport Station\narea_sl_airport,Silver Line - Airport Station\narea_sl_courthouse,Silver Line - Courthouse\narea_sl_logan_terminal,Silver Line - Airport Terminals\narea_sl_silver_line_way,Silver Line - Silver Line Way\narea_sl_south_station,Silver Line - South Station\narea_sl_world_trade_center,Silver Line - World Trade Center\narea_ss_commuter_rail_zone_1a,Commuter Rail Zone 1A - South Station\n",
+  "calendar.txt" => "service_id,monday,tuesday,wednesday,thursday,friday,saturday,sunday,start_date,end_date\nBUS42023-hbs43sp1-Weekday-02,1,1,1,0,0,0,0,20231120,20231122\nBUS42023-hbs43sp6-Saturday-02,0,0,0,0,0,1,0,20231118,20231125\nBUS42023-hbs43sp7-Sunday-02,0,0,0,0,0,0,1,20231119,20231126\nBUS42023-hbs43sw1-Weekday-02,1,1,1,1,1,0,0,20231127,20231215\nBUS42023-hbs43sw6-Saturday-02,0,0,0,0,0,1,0,20231202,20231216\nBUS42023-hbs43sw7-Sunday-02,0,0,0,0,0,0,1,20231203,20231210\nBoat-EastBoston-Saturday-Fall-23,0,0,0,0,0,1,0,20231118,20231125\nBoat-EastBoston-Sunday-Fall-23,0,0,0,0,0,0,1,20231119,20231126\nBoat-EastBoston-Weekday-Fall-23,1,1,1,1,1,0,0,20231114,20231130\nBoat-F1-ThanksgivingEve-Fall-23,0,0,1,0,0,0,0,20231122,20231122\nBoat-F1-Weekday-Fall-23,1,1,1,1,1,0,0,20231114,20231215\nBoat-F4-Saturday-Fall-23,0,0,0,0,0,1,0,20231118,20231216\nBoat-F4-Sunday-Fall-23,0,0,0,0,0,0,1,20231119,20231210\nBoat-F4-Weekday-Fall-23,1,1,1,1,1,0,0,20231114,20231215\nBoat-F6-Weekday-Fall-23,1,1,1,1,1,0,0,20231114,20231130\nCR-Newburyport-LynnShttlFall-StdNv,0,0,0,0,0,1,0,20231118,20231216\nCR-Newburyport-LynnShttlFall-SundayNov,0,0,0,1,1,0,1,20231119,20231126\nCR-Newburyport-LynnShttlFall-WeekdayNov,1,1,1,1,1,0,0,20231114,20231215\nDayafterThanksgivingDay,0,0,0,0,0,0,0,20231124,20231124\nFALL 2023-NORTHSUN-Sunday-1,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-NORTHSUN-Sunday-1-S6561ad1d,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-NORTHSUN-Sunday-1-S7d8482ee,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-NORTHSUN-Sunday-1-S9d378dcf,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSAT-Saturday-1-Sb0e4ed14,0,0,0,0,0,1,0,20231202,20231216\nFALL 2023-SOUTHSUN-Sunday-1,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-1-S85407dc6,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-1-S859962ef,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-1-Sb0e4ed14,0,0,0,0,0,0,1,20231203,20231210\nFALL 2023-SOUTHSUN-Sunday-1-Sb7371956,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-1-Sc9a3b080,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-1-Scbbf1ea5,0,0,0,1,1,0,1,20231119,20231126\nFALL 2023-SOUTHSUN-Sunday-70,0,0,0,0,0,0,1,20231203,20231203\nFALL 2023-SOUTHWKD-Weekday-1-Sb0e4ed14,1,1,1,1,1,0,0,20231204,20231215\nFLL 23-S-Sa-1-Sb0e4ed14-AshCldFrmShlDn,0,0,0,0,0,1,0,20231118,20231125\nFLL 23-S-Su-1-Sb0e4ed14-AshCldFrmShlDn,0,0,0,1,1,0,1,20231119,20231126\nFLL 23-S-Wdy-1-Sb0e4ed14-AshCldFrmShlDn,1,1,1,1,1,0,0,20231114,20231201\nFall/WinterSaturday,0,0,0,0,0,1,0,20231118,20231216\nFall/WinterWeekday,1,1,1,1,1,0,0,20231114,20231215\nFallSaturday,0,0,0,0,0,1,0,20231118,20231216\nFallSunday,0,0,0,0,0,0,1,20231119,20231210\nFallWeekday,1,1,1,1,1,0,0,20231114,20231215\nLRV42023-hlb43011-Wdy-01-HGLHGLHGLHGL,1,1,1,1,1,0,0,20231206,20231215\nLRV42023-hlb43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231122\nLRV42023-hlb43016-Sa-01-HGLHGLHGLHGL,0,0,0,0,0,1,0,20231209,20231216\nLRV42023-hlb43016-Saturday-01,0,0,0,0,0,1,0,20231118,20231125\nLRV42023-hlb43017-Su-01-HGLHGLHGLHGL,0,0,0,0,0,0,1,20231210,20231210\nLRV42023-hlb43017-Sunday-01,0,0,0,0,0,0,1,20231119,20231126\nLRV42023-hlm43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231215\nLRV423-hlb43011-Wdy-01-3d75c0c1,1,1,1,1,1,0,0,20231127,20231205\nLRV423-hlb43016-Sa-01-3d75c0c1,0,0,0,0,0,1,0,20231202,20231202\nLRV423-hlb43017-Su-01-3d75c0c1,0,0,0,0,0,0,1,20231203,20231203\nPRIV42023-hpa43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231215\nPRIV42023-hpj43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231215\nPRIV42023-hpj43017-Sunday-01,0,0,0,0,0,0,1,20231119,20231210\nRTL42023-hmb43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231215\nRTL42023-hmo43011-Weekday-01,1,1,1,1,1,0,0,20231114,20231122\nRTL42023-hmo43011-Weekday-01-HayOL,1,1,1,1,1,0,0,20231127,20231215\nRTL42023-hmo43016-Saturday-01,0,0,0,0,0,1,0,20231118,20231125\nRTL42023-hmo43016-Saturday-01-HayOL,0,0,0,0,0,1,0,20231202,20231216\nRTL42023-hmo43017-Sunday-01,0,0,0,0,0,0,1,20231119,20231126\nRTL42023-hmo43017-Sunday-01-HayOL,0,0,0,0,0,0,1,20231203,20231210\nRTL42023-hms43sp1-Weekday-01,1,1,1,1,1,0,0,20231117,20231215\nRTL42023-hms43sp6-Saturday-01,0,0,0,0,0,1,0,20231125,20231216\nRTL42023-hms43sp7-Sunday-01,0,0,0,0,0,0,1," <> ...,
+  "calendar_attributes.txt" => "service_id,service_description,service_schedule_name,service_schedule_type,service_schedule_typicality,rating_start_date,rating_end_date,rating_description\nBUS42023-hbs43sp1-Weekday-02,Weekday schedule (reduced service),Weekday (reduced service),Weekday,5,20230827,20231216,Fall\nBUS42023-hbs43sp6-Saturday-02,Saturday schedule,Saturday,Saturday,1,20230827,20231216,Fall\nBUS42023-hbs43sp7-Sunday-02,Sunday schedule,Sunday,Sunday,1,20230827,20231216,Fall\nBUS42023-hbs43sw1-Weekday-02,Weekday schedule,Weekday,Weekday,1,20230827,20231216,Fall\nBUS42023-hbs43sw6-Saturday-02,Saturday schedule,Saturday,Saturday,1,20230827,20231216,Fall\nBUS42023-hbs43sw7-Sunday-02,Sunday schedule,Sunday,Sunday,1,20230827,20231216,Fall\nBoat-EastBoston-Saturday-Fall-23,Saturday schedule,Saturday,Saturday,1,20231010,,Fall\nBoat-EastBoston-Sunday-Fall-23,Sunday schedule,Sunday,Sunday,1,20231010,,Fall\nBoat-EastBoston-Weekday-Fall-23,Weekday schedule,Weekday,Weekday,1,20231010,,Fall\nBoat-F1-ThanksgivingEve-Fall-23,Weekday schedule (modified),Pre-holiday,Weekday,2,20231010,,Fall\nBoat-F1-Weekday-Fall-23,Weekday schedule,Weekday,Weekday,1,20231010,,Fall\nBoat-F4-Saturday-Fall-23,Saturday schedule,Saturday,Saturday,1,20231010,,Fall\nBoat-F4-Sunday-Fall-23,Sunday schedule,Sunday,Sunday,1,20231010,,Fall\nBoat-F4-Weekday-Fall-23,Weekday schedule,Weekday,Weekday,1,20231010,,Fall\nBoat-F6-Weekday-Fall-23,Weekday schedule,Weekday,Weekday,1,20231010,,Fall\nCR-Newburyport-LynnShttlFall-StdNv,Saturday schedule,Saturday,Saturday,4,20231002,20231216,Fall/Winter\nCR-Newburyport-LynnShttlFall-SundayNov,Sunday schedule,Sunday,Sunday,4,20231002,20231216,Fall/Winter\nCR-Newburyport-LynnShttlFall-WeekdayNov,Weekday schedule,Weekday,Weekday,4,20231002,20231216,Fall/Winter\nDayafterThanksgivingDay,Weekday schedule (no school),Weekday (no school),Weekday,1,20230827,20231216,Fall\nFALL 2023-NORTHSUN-Sunday-1,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-NORTHSUN-Sunday-1-S6561ad1d,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-NORTHSUN-Sunday-1-S7d8482ee,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-NORTHSUN-Sunday-1-S9d378dcf,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSAT-Saturday-1-Sb0e4ed14,Saturday schedule,Saturday,Saturday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-S85407dc6,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-S859962ef,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-Sb0e4ed14,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-Sb7371956,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-Sc9a3b080,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-1-Scbbf1ea5,Sunday schedule,Sunday,Sunday,1,20231002,,Fall/Winter\nFALL 2023-SOUTHSUN-Sunday-70,Sunday schedule (modified service),Sunday (modified service),Sunday,4,20231002,,Fall/Winter\nFALL 2023-SOUTHWKD-Weekday-1-Sb0e4ed14,Weekday schedule,Weekday,Weekday,1,20231002,,Fall/Winter\nFLL 23-S-Sa-1-Sb0e4ed14-AshCldFrmShlDn,Saturday schedule,Saturday,Saturday,4,20231002,,Fall/Winter\nFLL 23-S-Su-1-Sb0e4ed14-AshCldFrmShlDn,Sunday schedule,Sunday,Sunday,4,20231002,,Fall/Winter\nFLL 23-S-Wdy-1-Sb0e4ed14-AshCldFrmShlDn,Weekday schedule,Weekday,Weekday,4,20231002,,Fall/Winter\nFall/WinterSaturday,Saturday schedule,Saturday,Saturday,1,20231002,,Fall/Winter\nFall/WinterWeekday,Weekday schedule,Weekday,Weekday,1,20231002,,Fall/Winter\nFallSaturday,Saturday schedule,Saturday,Saturday,1,20230827,20231216,Fall\nFallSunday,Sunday schedule,Sunday,Sunday,1,20230827,20231216,Fall\nFallWeekday,Weekday schedule,Weekday,Weekday,1,20230827,20231216,Fall\nLRV42023-hlb43011-Wdy-01-HGLHGLHGLHGL,Weekday schedule,Weekday,Weekday,4,20230827,20231216,Fall\nLRV42023-hlb43011-Weekday-01,Weekday schedule,Weekday,Weekday,1,20230827,20231216,Fall\nLRV42023-hlb43016-Sa-01-HGLHGLHGLHGL,Saturday schedule,Saturday,Saturday,4,20230827,20231216,Fall\nLRV42023-" <> ...,
+  "calendar_dates.txt" => "service_id,date,exception_type,holiday_name\nBUS42023-hbs43sw1-Weekday-02,20231114,1,\nBUS42023-hbs43sw1-Weekday-02,20231115,1,\nBUS42023-hbs43sw1-Weekday-02,20231116,1,\nBUS42023-hbs43sw1-Weekday-02,20231117,1,\nBoat-F1-Weekday-Fall-23,20231122,2,\nBoat-EastBoston-Weekday-Fall-23,20231123,2,Thanksgiving Day\nBoat-F1-Weekday-Fall-23,20231123,2,Thanksgiving Day\nBoat-F4-Weekday-Fall-23,20231123,2,Thanksgiving Day\nBoat-F6-Weekday-Fall-23,20231123,2,Thanksgiving Day\nCR-Newburyport-LynnShttlFall-WeekdayNov,20231123,2,Thanksgiving Day\nFLL 23-S-Wdy-1-Sb0e4ed14-AshCldFrmShlDn,20231123,2,Thanksgiving Day\nFall/WinterWeekday,20231123,2,Thanksgiving Day\nFallWeekday,20231123,2,Thanksgiving Day\nLRV42023-hlm43011-Weekday-01,20231123,2,Thanksgiving Day\nPRIV42023-hpa43011-Weekday-01,20231123,2,Thanksgiving Day\nPRIV42023-hpj43011-Weekday-01,20231123,2,Thanksgiving Day\nPRIV42023-hpj43017-Sunday-01,20231123,1,Thanksgiving Day\nRTL42023-hmb43011-Weekday-01,20231123,2,Thanksgiving Day\nRTL42023-hms43sp1-Weekday-01,20231123,2,Thanksgiving Day\nThanksgivingDay,20231123,1,Thanksgiving Day\nCR-Newburyport-LynnShttlFall-WeekdayNov,20231124,2,Day after Thanksgiving Day\nDayafterThanksgivingDay,20231124,1,Day after Thanksgiving Day\nFLL 23-S-Wdy-1-Sb0e4ed14-AshCldFrmShlDn,20231124,2,Day after Thanksgiving Day\nFall/WinterWeekday,20231124,2,Day after Thanksgiving Day\nFallWeekday,20231124,2,Day after Thanksgiving Day\nLRV42023-hlb43011-Weekday-01,20231124,1,Day after Thanksgiving Day\nRTL42023-hmo43011-Weekday-01,20231124,1,Day after Thanksgiving Day\nCR-Newburyport-LynnShttlFall-SundayNov,20231203,1,\nFALL 2023-NORTHSUN-Sunday-1,20231203,1,\nFALL 2023-NORTHSUN-Sunday-1-S6561ad1d,20231203,1,\nFALL 2023-NORTHSUN-Sunday-1-S7d8482ee,20231203,1,\nFALL 2023-NORTHSUN-Sunday-1-S9d378dcf,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1-S85407dc6,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1-S859962ef,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1-Sb7371956,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1-Sc9a3b080,20231203,1,\nFALL 2023-SOUTHSUN-Sunday-1-Scbbf1ea5,20231203,1,\nCR-Newburyport-LynnShttlFall-SundayNov,20231210,1,\nFALL 2023-NORTHSUN-Sunday-1,20231210,1,\nFALL 2023-NORTHSUN-Sunday-1-S6561ad1d,20231210,1,\nFALL 2023-NORTHSUN-Sunday-1-S7d8482ee,20231210,1,\nFALL 2023-NORTHSUN-Sunday-1-S9d378dcf,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1-S85407dc6,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1-S859962ef,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1-Sb7371956,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1-Sc9a3b080,20231210,1,\nFALL 2023-SOUTHSUN-Sunday-1-Scbbf1ea5,20231210,1,\n",
+  "checkpoints.txt" => "checkpoint_id,checkpoint_name\n1010m,1010 Massachusetts Avenue @ Magazine Street\n400cp,400 West Cummings Park\nabase,Air Base\nabmta,Aberdeen & Mount Auburn\nacorn,Acorn Park Drive @ Route 2\nadgal,Adams & Gallivan Boulevard\nadmhl,Admiral's Hill @ Commandants Way\nadrob,Adams & Robertson Streets\nairbs,Airport Station Busway\nalban,Albany Garage\nalewf,Alewife Station\naleyn,Adams @ Alleyne\nalfcl,Alewife\nalmnt,Arlmont Village\nalrmp,Allston Trpk Ramps\nalsgr,Allston Street\nalwpk,Alewife Brook Parkway\namall,Assembly Mall & Row\namory,Amory Street\nandrw,Andrew\naport,Airport\nappma,Appleton Street & Massachusetts Avenue\naqucl,Aquarium\narlct,Arlington Center\narlht,Arlington Heights\narlwi,Arlington/Winchester Line\narmnl,Arlington\nashmt,Ashmont Terminal\nasmnl,Ashmont\nastao,Assembly\natlst,Atlantic & State Streets\naubnd,Auburndale\navnsq,Avon Square\nbabck,Babcock Street\nbaker,Baker & Vermont Streets\nbally,Harvard Bus Tunnels\nbalsq,Ball Square\nbaspt,Bass Point (Nahant)\nbauck,Bay Street @ Auckland Street\nbbsta,Back Bay\nbcec,Boston Convention Center\nbchmt,Beachmont\nbchmw,Beachmont West\nbckhl,Back of the Hill\nbcnfd,Beaconsfield\nbcnwa,Washington Square\nbdfch,Bedford & Chauncy Streets\nbdfrd,Bedford Center\nbdfwd,Bedford Woods\nbdoin,Bowdoin Street\nbelco,Belgrade & Corinth Streets (Roslindale Square)\nbell,Bell Circle\nbelsq,Bellingham Square (Chelsea)\nbethi,Beth Israel Hospital @ Fenway\nbevsq,Beverly Square\nbhdud,Blue Hill Avenue @ Dudley Street\nbhqui,Blue Hill Avenue @ Quincy Street\nbilng,Billing's Road @ Beach Street\nbknsq,Bicknell Square\nbland,Blandford Street\nblcon,Blanchard & Concord\nblsqs,Bellingham Square\nbltal,Blue Hill Avenue @ Talbot Avenue\nbmall,Burlington Mall\nbmmnl,Beachmont\nbndhl,Brandon Hall\nbntns,Benton Square\nbocnh,Boylston @ Chestnut Hill Avenue\nboham,Boylston @ Hammond\nbomnl,Bowdoin\nboshi,Boston Street @ High Street\nbotul,Boylston @ Tully\nbowin,Boston Street @ Winthrop Street\nboxds,Box District\nboyls,Boylston\nbrcom,Brighton & Commonwealth Avenue\nbrcon,Broadway @ Conomo Avenue (Pickering Middle School)\nbrctr,Brighton Center\nbrdwy,Broadway\nbrfli,Broadway @ Felton Street\nbrghm,Brigham Circle (Bus)\nbrhlb,Brockton/Holbrook Line\nbrico,Packard's Corner\nbrkcn,Brook Road @ Central Avenue\nbrkhl,Brookline Hills\nbrkpk,Brookline Avenue @ Park Drive\nbrkvl,Brookline Village\nbrlng,Brookline & Longwood Avenues\nbrmdl,Broad Street @ Middle Street\nbrmnl,Brigham Circle\nbrnst,Braintree Station\nbrntn,Braintree\nbrown,Brown Circle\nbrway,Broadway Station\nbrwcr,Broadway @ Cross Street\nbrypl,Broadway Plaza @ Broadway\nbryup,Bryant Avenue & Upton Street (West Quincy)\nbubrg,Commonwealth Avenue @ BU Bridge\nbucen,Boston University Central\nbuchb,Buchanan Circle (East Lynn)\nbuest,Boston University East\nbumed,BU Medical Campus\nbunco,Bunker Hill & Concord Street\nburlc,Burlington Center\nbutlr,Butler\nbvmnl,Brookline Village\nbwcen,Broadway & Central (Revere)\nbwsvl,Bow Street (Somerville)\nbwybc,Broadway & Beacon\nbwypk,Broadway & Park (Revere)\nbwysq,Broadway Square @ Salem Street\ncabgr,C @ Cabot Garage\ncacom,Causeway Street & Commercial Street\ncamar,Cambridge Street @ Arlington Road\ncamwd,Cambridge Street @ Windsor Street\ncancr,Canton Center\ncapst,Capen Street\nccmnl,Community College\ncdrwd,Cedarwood\ncedgr,Cedar Grove\ncenav,Central Avenue\ncenpk,Centennial Park (Peabody)\ncensq,\"Central Square, Lynn (Busway)\"\nchest,Chestnut Street & Western Avenue (Lynn)\nchhil,Chestnut Hill\nchild,Boston Children's Hospital on Longwood Avenue\nchill,Chestnut Hill Avenue\nchlst,Chelsea\nchmnl,Charles/MGH\nchncl,Chinatown\nchnut,Chestnut Avenue (Burlington)\nchswk,Chiswick Road\nclarh,Clarendon Hill\nclift,Cliftondale Square (Saugus)\nclmnl,Cleveland Circle\nclmof,Calvin Road @ Moffat Road (Broad Meadows Middle School)\ncloop,Charles River Loop\nclsq,Cleary Square\ncmaml,Cummins Highway @ American Legion Highway\ncmbfl,Cambridge Street @ Felton Street (Cambridge Rindge & Latin School)\ncmbwr,Cambridge Street @ Warren Street (Brighton High School)\ncmhwy,Cummins Highway\ncnhlm,Chestnut Hill Mall\ncntle,Central Square (East Boston)\ncntrl,Central Avenue Station\ncntsq,Central Square (Cambridge)\ncobcr,Cobbs Corner (Canto" <> ...,
+  "directions.txt" => "route_id,direction_id,direction,direction_destination\nRed,0,South,Ashmont/Braintree\nRed,1,North,Alewife\nMattapan,0,Outbound,Mattapan\nMattapan,1,Inbound,Ashmont\nOrange,0,South,Forest Hills\nOrange,1,North,Oak Grove\nGreen-B,0,West,Boston College\nGreen-B,1,East,Government Center\nGreen-C,0,West,Cleveland Circle\nGreen-C,1,East,Government Center\nGreen-D,0,West,Riverside\nGreen-D,1,East,Union Square\nGreen-E,0,West,Heath Street\nGreen-E,1,East,Medford/Tufts\nBlue,0,West,Bowdoin\nBlue,1,East,Wonderland\n741,0,Outbound,Logan Airport Terminals\n741,1,Inbound,South Station\n742,0,Outbound,Drydock Avenue\n742,1,Inbound,South Station\n743,0,Outbound,Chelsea Station\n743,1,Inbound,South Station\n751,0,Outbound,Nubian Station\n751,1,Inbound,South Station\n749,0,Outbound,Nubian Station\n749,1,Inbound,Temple Place\n746,0,Outbound,Silver Line Way\n746,1,Inbound,South Station\nCR-Fairmount,0,Outbound,Fairmount\nCR-Fairmount,1,Inbound,South Station\nCR-Fitchburg,0,Outbound,Wachusett\nCR-Fitchburg,1,Inbound,North Station\nCR-Worcester,0,Outbound,Worcester\nCR-Worcester,1,Inbound,South Station\nCR-Franklin,0,Outbound,Forge Park/495 or Foxboro\nCR-Franklin,1,Inbound,South Station\nCR-Greenbush,0,Outbound,Greenbush\nCR-Greenbush,1,Inbound,South Station\nCR-Haverhill,0,Outbound,Haverhill\nCR-Haverhill,1,Inbound,North Station\nCR-Kingston,0,Outbound,Kingston\nCR-Kingston,1,Inbound,South Station\nCR-Lowell,0,Outbound,Lowell\nCR-Lowell,1,Inbound,North Station\nCR-Middleborough,0,Outbound,Middleborough/Lakeville\nCR-Middleborough,1,Inbound,South Station\nCR-Needham,0,Outbound,Needham Heights\nCR-Needham,1,Inbound,South Station\nCR-Newburyport,0,Outbound,Newburyport or Rockport\nCR-Newburyport,1,Inbound,North Station\nCR-Providence,0,Outbound,Stoughton or Wickford Junction\nCR-Providence,1,Inbound,South Station\nCR-Foxboro,0,Outbound,Foxboro or Providence\nCR-Foxboro,1,Inbound,South Station or Foxboro\nCapeFlyer,0,Outbound,Hyannis\nCapeFlyer,1,Inbound,South Station\nBoat-F4,0,Outbound,Charlestown\nBoat-F4,1,Inbound,Long Wharf\nBoat-F1,0,Outbound,Hingham or Hull\nBoat-F1,1,Inbound,Long Wharf or Rowes Wharf\nBoat-EastBoston,0,Outbound,Lewis Mall Wharf\nBoat-EastBoston,1,Inbound,Long Wharf\nBoat-F6,0,Outbound,Winthrop\nBoat-F6,1,Inbound,Central Wharf\n747,0,Outbound,Sullivan Square Station\n747,1,Inbound,Ruggles Station\n708,0,Outbound,Beth Israel Deaconess Hospital\n708,1,Inbound,Andrew Station\n1,0,Outbound,Harvard Square\n1,1,Inbound,Nubian Station\n4,0,Outbound,North Station\n4,1,Inbound,Tide Street\n7,0,Outbound,City Point\n7,1,Inbound,Otis Street & Summer Street\n8,0,Outbound,Harbor Point\n8,1,Inbound,Kenmore Station\n9,0,Outbound,City Point\n9,1,Inbound,Copley Square\n10,0,Outbound,City Point\n10,1,Inbound,Copley Square\n11,0,Outbound,City Point\n11,1,Inbound,Chauncy Street & Summer Street\n14,0,Outbound,Roslindale Square\n14,1,Inbound,Heath Street\n15,0,Outbound,Fields Corner Station or Kane Square\n15,1,Inbound,Ruggles Station\n16,0,Outbound,Forest Hills Station\n16,1,Inbound,Andrew Station or Harbor Point\n17,0,Outbound,Fields Corner Station\n17,1,Inbound,Andrew Station\n18,0,Outbound,Ashmont Station\n18,1,Inbound,Andrew Station\n19,0,Outbound,Fields Corner Station\n19,1,Inbound,Kenmore or Ruggles Station\n21,0,Outbound,Ashmont Station\n21,1,Inbound,Forest Hills Station\n22,0,Outbound,Ashmont Station\n22,1,Inbound,Ruggles Station\n23,0,Outbound,Ashmont Station\n23,1,Inbound,Ruggles Station\n24,0,Outbound,Wakefield Avenue & Truman Parkway\n24,1,Inbound,Ashmont Station\n26,0,Outbound,Ashmont Station\n26,1,Inbound,Norfolk Street Loop\n28,0,Outbound,Mattapan Station\n28,1,Inbound,Ruggles Station\n29,0,Outbound,Mattapan Station\n29,1,Inbound,Jackson Square Station\n30,0,Outbound,Mattapan Station\n30,1,Inbound,Forest Hills Station\n31,0,Outbound,Mattapan Station\n31,1,Inbound,Forest Hills Station\n32,0,Outbound,Wolcott or Cleary Square\n32,1,Inbound,Forest Hills Station\n3233,0,Outbound,River Street & Milton Street\n3233,1,Inbound,Mattapan Station\n33,0,Outbound,River Street & Milton Street\n33,1,Inbound,Mattapan Station\n34,0,Outbound,Dedham Square\n34,1,Inbound,Forest Hills Station\n34E,0,Outbound,Walpole Center\n34E,1,Inbound,Forest Hills Station\n35,0,Outb" <> ...,
+  "facilities.txt" => "facility_id,facility_code,facility_class,facility_type,stop_id,facility_short_name,facility_long_name,facility_desc,facility_lat,facility_lon,wheelchair_facility\n102,102,1,escalator,place-ogmnl,Washington Street to unpaid lobby,Oak Grove Escalator 102 (Washington Street to unpaid lobby),,,,2\n103,103,1,escalator,place-ogmnl,Orange Line platform to paid lobby,Oak Grove Escalator 103 (Orange Line platform to paid lobby),,,,2\n104,104,1,escalator,place-ogmnl,\"Parking, busway to unpaid lobby\",\"Oak Grove Escalator 104 (Parking, busway to unpaid lobby)\",,,,2\n105,105,1,escalator,place-ogmnl,Commuter Rail platform to unpaid lobby,Oak Grove Escalator 105 (Commuter Rail platform to unpaid lobby),,,,2\n112,112,1,escalator,place-dwnxg,Ashmont/Braintree platform to Chauncy Street,Downtown Crossing Escalator 112 (Ashmont/Braintree platform to Chauncy Street),,,,2\n113,113,1,escalator,place-dwnxg,Alewife platform to Hawley Street,Downtown Crossing Escalator 113 (Alewife platform to Hawley Street),,,,2\n123,123,1,escalator,place-andrw,Ashmont/Braintree platform to busway,Andrew Escalator 123 (Ashmont/Braintree platform to busway),,,,2\n124,124,1,escalator,place-andrw,Ashmont/Braintree platform to busway,Andrew Escalator 124 (Ashmont/Braintree platform to busway),,,,2\n125,125,1,escalator,place-bomnl,Lobby to street,Bowdoin Escalator 125 (Lobby to street),,,,2\n127,127,1,escalator,place-forhl,Lower busway north to upper lobby,Forest Hills Escalator 127 (Lower busway north to upper lobby),,,,2\n128,128,1,escalator,place-forhl,Lower busway south to upper lobby,Forest Hills Escalator 128 (Lower busway south to upper lobby),,,,2\n129,129,1,escalator,place-forhl,Orange Line platform to upper lobby,Forest Hills Escalator 129 (Orange Line platform to upper lobby),,,,2\n130,130,1,escalator,place-forhl,Orange Line platform to upper lobby,Forest Hills Escalator 130 (Orange Line platform to upper lobby),,,,2\n131,131,1,escalator,place-grnst,Platform to paid lobby,Green Street Escalator 131 (Platform to paid lobby),,,,2\n132,132,1,escalator,place-sbmnl,Platform to paid lobby,Stony Brook Escalator 132 (Platform to paid lobby),,,,2\n133,133,1,escalator,place-jaksn,Platform to paid lobby,Jackson Square Escalator 133 (Platform to paid lobby),,,,2\n134,134,1,escalator,place-rcmnl,Platform to paid lobby,Roxbury Crossing Escalator 134 (Platform to paid lobby),,,,2\n135,135,1,escalator,place-rugg,Lower busway to upper lobby,Ruggles Escalator 135 (Lower busway to upper lobby),,,,2\n136,136,1,escalator,place-rugg,Orange Line platform to upper lobby,Ruggles Escalator 136 (Orange Line platform to upper lobby),,,,2\n137,137,1,escalator,place-rugg,Orange Line platform to upper lobby,Ruggles Escalator 137 (Orange Line platform to upper lobby),,,,2\n138,138,1,escalator,place-rugg,Forsyth Street to upper lobby,Ruggles Escalator 138 (Forsyth Street to upper lobby),,,,2\n139,139,1,escalator,place-masta,Platform to paid lobby,Massachusetts Avenue Escalator 139 (Platform to paid lobby),,,,2\n140,140,1,escalator,place-bbsta,Orange Line platform to lobby,Back Bay Escalator 140 (Orange Line platform to lobby),,,,2\n141,141,1,escalator,place-bbsta,Orange Line platform to lobby,Back Bay Escalator 141 (Orange Line platform to lobby),,,,2\n142,142,1,escalator,place-bbsta,Commuter Rail tracks 1 and 3 to lobby,Back Bay Escalator 142 (Commuter Rail tracks 1 and 3 to lobby),,,,2\n143,143,1,escalator,place-bbsta,Lobby to Commuter Rail tracks 1 and 3,Back Bay Escalator 143 (Lobby to Commuter Rail tracks 1 and 3),,,,2\n144,144,1,escalator,place-bbsta,Commuter Rail track 2 to lobby,Back Bay Escalator 144 (Commuter Rail track 2 to lobby),,,,2\n145,145,1,escalator,place-tumnl,Lobby to Washington Street,Tufts Medical Center Escalator 145 (Lobby to Washington Street),,,,2\n146,146,1,escalator,place-tumnl,Oak Grove platform to Washington Street lobby,Tufts Medical Center Escalator 146 (Oak Grove platform to Washington Street lobby),,,,2\n147,147,1,escalator,place-tumnl,Forest Hills platform to Washington Street lobby,Tufts Medical Center Escalator 147 (Forest Hills platform to Washington Street lobby),,,,2\n148,148,1," <> ...,
+  "facilities_properties.txt" => "facility_id,property_id,value\n102,direction,up\n102,excludes-stop,9328\n102,excludes-stop,door-ogmnl-banks\n102,excludes-stop,door-ogmnl-washel\n102,excludes-stop,node-102-lobby\n102,excludes-stop,node-102-street\n102,excludes-stop,node-103-lobby\n102,excludes-stop,node-103-platform\n102,excludes-stop,node-104-lobby\n102,excludes-stop,node-104-street\n102,excludes-stop,node-105-crplatform\n102,excludes-stop,node-105-lobby\n102,excludes-stop,node-743-lobby\n102,excludes-stop,node-743-platform\n102,excludes-stop,node-744-lobby\n102,excludes-stop,node-745-lobby\n102,excludes-stop,node-745-street\n102,excludes-stop,node-746-lobby\n102,excludes-stop,node-746-platform\n102,excludes-stop,node-800-crplatform\n102,excludes-stop,node-800-lobby\n102,excludes-stop,node-800-street\n102,excludes-stop,node-801-lobby\n102,excludes-stop,node-801-platform\n102,excludes-stop,node-ogmnl-banksstair-lobby\n102,excludes-stop,node-ogmnl-banksstair-street\n102,excludes-stop,node-ogmnl-crstair-crplatform\n102,excludes-stop,node-ogmnl-crstair-lobby\n102,excludes-stop,node-ogmnl-farepaid\n102,excludes-stop,node-ogmnl-fareunpaid\n102,excludes-stop,node-ogmnl-olstair-lobby\n102,excludes-stop,node-ogmnl-olstair-platform\n102,excludes-stop,node-ogmnl-washstair-lobby\n102,excludes-stop,node-ogmnl-washstair-street\n103,direction,up\n103,excludes-stop,9328\n103,excludes-stop,WR-0053-S\n103,excludes-stop,door-ogmnl-banks\n103,excludes-stop,door-ogmnl-wash\n103,excludes-stop,door-ogmnl-washel\n103,excludes-stop,node-102-lobby\n103,excludes-stop,node-102-street\n103,excludes-stop,node-103-lobby\n103,excludes-stop,node-103-platform\n103,excludes-stop,node-104-lobby\n103,excludes-stop,node-104-street\n103,excludes-stop,node-105-crplatform\n103,excludes-stop,node-105-lobby\n103,excludes-stop,node-743-lobby\n103,excludes-stop,node-743-platform\n103,excludes-stop,node-744-lobby\n103,excludes-stop,node-745-lobby\n103,excludes-stop,node-745-street\n103,excludes-stop,node-746-lobby\n103,excludes-stop,node-746-platform\n103,excludes-stop,node-800-crplatform\n103,excludes-stop,node-800-lobby\n103,excludes-stop,node-800-street\n103,excludes-stop,node-801-lobby\n103,excludes-stop,node-801-platform\n103,excludes-stop,node-ogmnl-banksstair-lobby\n103,excludes-stop,node-ogmnl-banksstair-street\n103,excludes-stop,node-ogmnl-crstair-crplatform\n103,excludes-stop,node-ogmnl-crstair-lobby\n103,excludes-stop,node-ogmnl-farepaid\n103,excludes-stop,node-ogmnl-fareunpaid\n103,excludes-stop,node-ogmnl-olstair-lobby\n103,excludes-stop,node-ogmnl-olstair-platform\n103,excludes-stop,node-ogmnl-washstair-lobby\n103,excludes-stop,node-ogmnl-washstair-street\n104,direction,up\n104,excludes-stop,9328\n104,excludes-stop,door-ogmnl-wash\n104,excludes-stop,door-ogmnl-washel\n104,excludes-stop,node-102-lobby\n104,excludes-stop,node-102-street\n104,excludes-stop,node-103-lobby\n104,excludes-stop,node-103-platform\n104,excludes-stop,node-104-lobby\n104,excludes-stop,node-104-street\n104,excludes-stop,node-105-crplatform\n104,excludes-stop,node-105-lobby\n104,excludes-stop,node-743-lobby\n104,excludes-stop,node-743-platform\n104,excludes-stop,node-744-lobby\n104,excludes-stop,node-745-lobby\n104,excludes-stop,node-745-street\n104,excludes-stop,node-746-lobby\n104,excludes-stop,node-746-platform\n104,excludes-stop,node-800-crplatform\n104,excludes-stop,node-800-lobby\n104,excludes-stop,node-800-street\n104,excludes-stop,node-801-lobby\n104,excludes-stop,node-801-platform\n104,excludes-stop,node-ogmnl-banksstair-lobby\n104,excludes-stop,node-ogmnl-banksstair-street\n104,excludes-stop,node-ogmnl-crstair-crplatform\n104,excludes-stop,node-ogmnl-crstair-lobby\n104,excludes-stop,node-ogmnl-farepaid\n104,excludes-stop,node-ogmnl-fareunpaid\n104,excludes-stop,node-ogmnl-olstair-lobby\n104,excludes-stop,node-ogmnl-olstair-platform\n104,excludes-stop,node-ogmnl-washstair-lobby\n104,excludes-stop,node-ogmnl-washstair-street\n105,direction,up\n105,excludes-stop,70036\n105,excludes-stop,9328\n105,excludes-stop,Oak Grove-01\n105,excludes-stop,Oak Grove-02\n105,excludes-stop,door-ogmnl-banks\n105,excludes-stop,door-ogmnl-wash\n105,excludes-stop,door-ogmnl-washel\n105,excludes-stop,node-102-lobby\n105,excludes-stop,node-1" <> ...,
+  "facilities_properties_definitions.txt" => "property_id,definition,possible_values\naddress,Facility address,Text\nalternate-service-text,Intended for internal use only; gives information on alternate service if facility is out of service,Text\nattended,Indicates that the facility is regularly staffed,\"1 for true, 2 for false, or 0 for no information\"\ncapacity,\"Number of objects, such as automobiles, automobile chargers, or bicycles, permitted inside the facility\",Integer\ncapacity-accessible,\"Capacity inside the facility which is accessible; for example, this is used for 'parking-area' spaces reserved for drivers with disabled placards\",Integer\ncar-sharing,\"Name of a carsharing service for which vehicles are available at the associated station or parking area; a single facility may have multiple instances of this property, each with a different carsharing service\",Text\ncontact,Entity which is responsible for customer relations at a facility and can be contacted through the 'contact-phone' or 'contact-url' fields,Text\ncontact-phone,Contact phone number from which more information about the facility can be obtained,Text\ncontact-url,Contact website URL from which more information about the facility can be obtained,Text\ndirection,Utilized for escalators to define whether it is used for upward or downward travel,'up' or 'down'\ndispenses,\"Objects, such as fare media cards, which are distributed at the facility\",Text\nenclosed,\"Indicates if the facility is covered and protected from the elements; for example, used for 'parking-area' to indicate parking garages, and for 'bike-storage' to indicate an enclosed bicycle cage\",\"1 for true, 2 for false, or 0 for no information\"\nexcludes-stop,\"Specifies a specific, non-parent stop that the facility does not service; used only if the facility does not serve all possible child stops within the stop specified in the 'stop_id' field in facilities.txt; a single facility may have multiple instances of this property, each with a different excluded stop\",Single 'stop_id' corresponding to an entry in stops.txt\nfee-daily,\"Per day fee for usage of the facility, typically a 'parking-area'\",Text\nfee-monthly,\"Per month fee for usage of the facility, typically a 'parking-area'\",Text\nmunicipality,City or town in which the facility is located,Text\nnote,Additional notes or information,Text\noperator,\"Operator of the facility, if not the MBTA directly\",Text\novernight-allowed,Indicates when a parking area permits overnight parking,\"yes if always permitted, no if never permitted, yes-except-snow if typically permitted but banned during snow emergencies, yes-snow-unknown if typically permitted but no information is available as to whether it is banned during snow emergencies\"\nowner,Owner of the facility,Text\npayment-app,Name of mobile application available to pay for facility usage,Text\npayment-app-id,\"Mobile application payment zone or ID associated with a facility, such as a 'parking-area'\",Text\npayment-app-url,\"Mobile application URL to make a payment required for use of a facility, such as a 'parking-area'\",Text\npayment-form-accepted,\"Inclusion of a value indicates that the respective form of payment is accepted for usage of the facility; a single facility may have multiple instances of this property, each with a different payment form\",\"'cash', 'check', 'coin', 'credit-debit-card', 'e-zpass', 'invoice', 'mobile-app', or 'smartcard'\"\nsecured,\"Indicates if the facility requires special access for security; for example, used for 'bike-storage' to indicate an bicycle cage which requires advance registration and use of a special access card, and for 'elevator' to indicate that its usage requires the assistance of an employee\",\"1 for true, 2 for false, or 0 for no information\"\nweekday-arrive-before,Typical morning time at which a 'parking-area' or 'bike-storage' facility fills to capacity on weekdays,Timestamp in the format required in stop_times.txt\nweekday-typical-utilization,\"Typical number of capacity units that a 'parking-area' or 'bike-storage' facility fills to on weekdays; for example, 100 at a parking garage indicates that 100 parking spaces are t" <> ...,
+  "fare_leg_rules.txt" => "leg_group_id,network_id,from_area_id,to_area_id,fare_product_id,from_timeframe_group_id,to_timeframe_group_id,transfer_only\nleg_airport_rapid_transit_quick_subway,rapid_transit,area_bl_airport,,prod_rapid_transit_quick_subway,,,\nleg_cape_buzzards_hyannis_cash,cape_flyer,area_cf_zone_buzzards,area_cf_zone_hyannis,prod_cape_buzzards_hyannis_fare,,,\nleg_cape_buzzards_hyannis_cash,cape_flyer,area_cf_zone_hyannis,area_cf_zone_buzzards,prod_cape_buzzards_hyannis_fare,,,\nleg_cape_buzzards_hyannis_cash,cape_flyer,area_cf_zone_hyannis,area_commuter_rail_zone_8,prod_cape_buzzards_hyannis_fare,,,\nleg_cape_buzzards_hyannis_cash,cape_flyer,area_commuter_rail_zone_8,area_cf_zone_hyannis,prod_cape_buzzards_hyannis_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_cf_zone_buzzards,area_commuter_rail_zone_1a,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_cf_zone_buzzards,area_commuter_rail_zone_2,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_cf_zone_buzzards,area_commuter_rail_zone_4,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_commuter_rail_zone_1a,area_cf_zone_buzzards,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_commuter_rail_zone_2,area_cf_zone_buzzards,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_buzzards_cash,cape_flyer,area_commuter_rail_zone_4,area_cf_zone_buzzards,prod_cape_sbb_buzzards_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_cf_zone_hyannis,area_commuter_rail_zone_1a,prod_cape_sbb_hyannis_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_cf_zone_hyannis,area_commuter_rail_zone_2,prod_cape_sbb_hyannis_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_cf_zone_hyannis,area_commuter_rail_zone_4,prod_cape_sbb_hyannis_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_commuter_rail_zone_1a,area_cf_zone_hyannis,prod_cape_sbb_hyannis_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_commuter_rail_zone_2,area_cf_zone_hyannis,prod_cape_sbb_hyannis_fare,,,\nleg_cape_sbb_hyannis_cash,cape_flyer,area_commuter_rail_zone_4,area_cf_zone_hyannis,prod_cape_sbb_hyannis_fare,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_1,prod_cr_inter_1,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_10,prod_cr_inter_10,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_1a,prod_cr_zone_1,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_2,prod_cr_inter_2,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_3,prod_cr_inter_3,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_4,prod_cr_inter_4,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_5,prod_cr_inter_5,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_6,prod_cr_inter_6,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_7,prod_cr_inter_7,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_8,prod_cr_inter_8,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_commuter_rail_zone_9,prod_cr_inter_9,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_fairmount_line_zone_1a,prod_cr_zone_1,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_1,area_ss_commuter_rail_zone_1a,prod_cr_zone_1,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_10,area_commuter_rail_zone_1,prod_cr_inter_10,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_10,area_commuter_rail_zone_10,prod_cr_inter_1,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_10,area_commuter_rail_zone_1a,prod_cr_zone_10,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_10,area_commuter_rail_zone_2,prod_cr_inter_9,,,\nleg_commuter_rail_cash,commuter_rail,area_commuter_rail_zone_10,area_commuter_rail_zone_3,prod_cr_inter_8,,,\nleg_commuter_rail_cash,commuter" <> ...,
+  "fare_media.txt" => "fare_media_id,fare_media_name,fare_media_type\ncash,Cash,0\ncredit_debit,Credit/debit card,0\ncharlieticket,CharlieTicket,1\nmticket,mTicket app,4\n",
+  "fare_products.txt" => "fare_product_id,fare_product_name,fare_media_id,amount,currency\nprod_boat_zone_1,Ferry Zone 1 one-way fare,cash,6.50,USD\nprod_boat_zone_1,Ferry Zone 1 one-way fare,credit_debit,6.50,USD\nprod_boat_zone_1,Ferry Zone 1 one-way fare,mticket,6.50,USD\nprod_boat_zone_1a,Ferry Zone 1A one-way fare,cash,2.40,USD\nprod_boat_zone_1a,Ferry Zone 1A one-way fare,credit_debit,2.40,USD\nprod_boat_zone_1a,Ferry Zone 1A one-way fare,mticket,2.40,USD\nprod_boat_zone_2,Ferry Zone 2 one-way fare,cash,7.00,USD\nprod_boat_zone_2,Ferry Zone 2 one-way fare,credit_debit,7.00,USD\nprod_boat_zone_2,Ferry Zone 2 one-way fare,mticket,7.00,USD\nprod_cape_buzzards_hyannis_fare,CapeFLYER Middleborough/Lakeville one-way fare,cash,5.00,USD\nprod_cape_buzzards_hyannis_fare,CapeFLYER Middleborough/Lakeville one-way fare,credit_debit,5.00,USD\nprod_cape_buzzards_hyannis_fare,CapeFLYER Middleborough/Lakeville one-way fare,mticket,5.00,USD\nprod_cape_sbb_buzzards_fare,CapeFLYER Bourne one-way fare,cash,20.00,USD\nprod_cape_sbb_buzzards_fare,CapeFLYER Bourne one-way fare,credit_debit,20.00,USD\nprod_cape_sbb_buzzards_fare,CapeFLYER Bourne one-way fare,mticket,20.00,USD\nprod_cape_sbb_hyannis_fare,CapeFLYER Hyannis one-way fare,cash,22.00,USD\nprod_cape_sbb_hyannis_fare,CapeFLYER Hyannis one-way fare,credit_debit,22.00,USD\nprod_cape_sbb_hyannis_fare,CapeFLYER Hyannis one-way fare,mticket,22.00,USD\nprod_cr_inter_1,Commuter Rail Interzone 1 one-way fare,cash,2.75,USD\nprod_cr_inter_1,Commuter Rail Interzone 1 one-way fare,credit_debit,2.75,USD\nprod_cr_inter_1,Commuter Rail Interzone 1 one-way fare,mticket,2.75,USD\nprod_cr_inter_10,Commuter Rail Interzone 10 one-way fare,cash,7.25,USD\nprod_cr_inter_10,Commuter Rail Interzone 10 one-way fare,credit_debit,7.25,USD\nprod_cr_inter_10,Commuter Rail Interzone 10 one-way fare,mticket,7.25,USD\nprod_cr_inter_2,Commuter Rail Interzone 2 one-way fare,cash,3.25,USD\nprod_cr_inter_2,Commuter Rail Interzone 2 one-way fare,credit_debit,3.25,USD\nprod_cr_inter_2,Commuter Rail Interzone 2 one-way fare,mticket,3.25,USD\nprod_cr_inter_3,Commuter Rail Interzone 3 one-way fare,cash,3.50,USD\nprod_cr_inter_3,Commuter Rail Interzone 3 one-way fare,credit_debit,3.50,USD\nprod_cr_inter_3,Commuter Rail Interzone 3 one-way fare,mticket,3.50,USD\nprod_cr_inter_4,Commuter Rail Interzone 4 one-way fare,cash,4.25,USD\nprod_cr_inter_4,Commuter Rail Interzone 4 one-way fare,credit_debit,4.25,USD\nprod_cr_inter_4,Commuter Rail Interzone 4 one-way fare,mticket,4.25,USD\nprod_cr_inter_5,Commuter Rail Interzone 5 one-way fare,cash,4.75,USD\nprod_cr_inter_5,Commuter Rail Interzone 5 one-way fare,credit_debit,4.75,USD\nprod_cr_inter_5,Commuter Rail Interzone 5 one-way fare,mticket,4.75,USD\nprod_cr_inter_6,Commuter Rail Interzone 6 one-way fare,cash,5.25,USD\nprod_cr_inter_6,Commuter Rail Interzone 6 one-way fare,credit_debit,5.25,USD\nprod_cr_inter_6,Commuter Rail Interzone 6 one-way fare,mticket,5.25,USD\nprod_cr_inter_7,Commuter Rail Interzone 7 one-way fare,cash,5.75,USD\nprod_cr_inter_7,Commuter Rail Interzone 7 one-way fare,credit_debit,5.75,USD\nprod_cr_inter_7,Commuter Rail Interzone 7 one-way fare,mticket,5.75,USD\nprod_cr_inter_8,Commuter Rail Interzone 8 one-way fare,cash,6.25,USD\nprod_cr_inter_8,Commuter Rail Interzone 8 one-way fare,credit_debit,6.25,USD\nprod_cr_inter_8,Commuter Rail Interzone 8 one-way fare,mticket,6.25,USD\nprod_cr_inter_9,Commuter Rail Interzone 9 one-way fare,cash,6.75,USD\nprod_cr_inter_9,Commuter Rail Interzone 9 one-way fare,credit_debit,6.75,USD\nprod_cr_inter_9,Commuter Rail Interzone 9 one-way fare,mticket,6.75,USD\nprod_cr_zone_1,Commuter Rail Zone 1 one-way fare,cash,6.50,USD\nprod_cr_zone_1,Commuter Rail Zone 1 one-way fare,credit_debit,6.50,USD\nprod_cr_zone_1,Commuter Rail Zone 1 one-way fare,mticket,6.50,USD\nprod_cr_zone_10,Commuter Rail Zone 10 one-way fare,cash,13.25,USD\nprod_cr_zone_10,Commuter Rail Zone 10 one-way fare,credit_debit,13.25,USD\nprod_cr_zone_10,Commuter Rail Zone 10 one-way fare,mticket,13.25,USD\nprod_cr_zone_1a,Commuter Rail Zone 1A one-way fare,cash,2.40,USD\nprod_cr_zone_1a,Commuter Rail Zone 1A one-way fare,credit_debit,2.40,U" <> ...,
+  "fare_transfer_rules.txt" => "from_leg_group_id,to_leg_group_id,transfer_count,duration_limit,duration_limit_type,fare_transfer_type,fare_product_id\nleg_airport_rapid_transit_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_airport_rapid_transit_quick_subway,leg_rapid_transit_quick_subway,,,,0,\nleg_mattapan_rapid_transit_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_mattapan_rapid_transit_quick_subway,leg_rail_replacement_quick_subway,,,,0,\nleg_mattapan_rapid_transit_quick_subway,leg_rapid_transit_quick_subway,,7200,1,0,\nleg_mattapan_rapid_transit_quick_subway,leg_ss_rapid_transit_quick_subway,,7200,1,0,\nleg_rail_replacement_quick_subway,leg_airport_rapid_transit_quick_subway,,,,0,\nleg_rail_replacement_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_rail_replacement_quick_subway,leg_mattapan_rapid_transit_quick_subway,,,,0,\nleg_rail_replacement_quick_subway,leg_rail_replacement_quick_subway,-1,,,0,\nleg_rail_replacement_quick_subway,leg_rapid_transit_quick_subway,,,,0,\nleg_rail_replacement_quick_subway,leg_sl_rapid_transit_quick_subway,,,,0,\nleg_rail_replacement_quick_subway,leg_ss_rapid_transit_quick_subway,,,,0,\nleg_rapid_transit_cash,leg_rapid_transit_cash,-1,,,0,\nleg_rapid_transit_cash,leg_sl_rapid_transit_cash,,,,0,\nleg_rapid_transit_free,leg_rapid_transit_free,-1,,,0,\nleg_rapid_transit_free,leg_sl_rapid_transit_free,,,,0,\nleg_rapid_transit_quick_subway,leg_airport_rapid_transit_quick_subway,,7200,1,0,\nleg_rapid_transit_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_rapid_transit_quick_subway,leg_mattapan_rapid_transit_quick_subway,,7200,1,0,\nleg_rapid_transit_quick_subway,leg_rail_replacement_quick_subway,,,,0,\nleg_rapid_transit_quick_subway,leg_rapid_transit_quick_subway,-1,,,0,\nleg_rapid_transit_quick_subway,leg_sl_rapid_transit_quick_subway,,,,0,\nleg_rapid_transit_quick_subway,leg_ss_rapid_transit_quick_subway,,7200,1,0,\nleg_sl_rapid_transit_cash,leg_ss_rapid_transit_cash,,,,0,\nleg_sl_rapid_transit_free,leg_ss_rapid_transit_free,,,,0,\nleg_sl_rapid_transit_quick_subway,leg_airport_rapid_transit_quick_subway,,7200,1,0,\nleg_sl_rapid_transit_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_sl_rapid_transit_quick_subway,leg_mattapan_rapid_transit_quick_subway,,7200,1,0,\nleg_sl_rapid_transit_quick_subway,leg_rail_replacement_quick_subway,,,,0,\nleg_sl_rapid_transit_quick_subway,leg_ss_rapid_transit_quick_subway,,,,0,\nleg_ss_rapid_transit_cash,leg_rapid_transit_cash,,,,0,\nleg_ss_rapid_transit_free,leg_rapid_transit_free,,,,0,\nleg_ss_rapid_transit_quick_subway,leg_local_bus_quick_subway,,7200,1,0,\nleg_ss_rapid_transit_quick_subway,leg_mattapan_rapid_transit_quick_subway,,7200,1,0,\nleg_ss_rapid_transit_quick_subway,leg_rail_replacement_quick_subway,,,,0,\nleg_ss_rapid_transit_quick_subway,leg_rapid_transit_quick_subway,,,,0,\n",
+  "feed_info.txt" => "feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version,feed_contact_email,feed_id\nMBTA,http://www.mbta.com,EN,20231114,20231216,\"Fall 2023, 2023-11-21T20:49:57+00:00, version D\",developer@mbta.com,mbta-ma-us\n",
+  "levels.txt" => "level_id,level_index,level_name,level_elevation\nlevel_-4_alewife_platform,-4.0000000,Alewife platform,\nlevel_-3_red_platform,-3.0000000,Red Line platforms,\nlevel_-3_southbound_platform,-3.0000000,Ashmont/Braintree platform,\nlevel_-2_blue_platform,-2.0000000,Blue Line platforms,\nlevel_-2_lobby,-2.0000000,Lobby,\nlevel_-2_low_busway,-2.0000000,Lower Busway,\nlevel_-2_low_platform,-2.0000000,Lower platforms,\nlevel_-2_oak_grove_platform,-2.0000000,Oak Grove platform,\nlevel_-2_passageway,-2.0000000,Passageway,\nlevel_-2_platform,-2.0000000,Platform,\nlevel_-2_red_platform,-2.0000000,Red Line platforms,\nlevel_-2_silver_platform,-2.0000000,Silver Line platforms,\nlevel_-2_southbound_platform,-2.0000000,Ashmont/Braintree platform,\nlevel_-1.5_in_street,-1.5000000,On street,\nlevel_-1.5_landing,-1.5000000,Landing,\nlevel_-1.5_lobby,-1.5000000,Lobby,\nlevel_-1_alewife_platform,-1.0000000,Alewife platform,\nlevel_-1_concourse,-1.0000000,Concourse,\nlevel_-1_cr_platform,-1.0000000,Commuter Rail platform,\nlevel_-1_green_platform,-1.0000000,Green Line platforms,\nlevel_-1_ground,-1.0000000,Street,\nlevel_-1_in_street,-1.0000000,On street,\nlevel_-1_landing,-1.0000000,Landing,\nlevel_-1_lechmere_platform,-1.0000000,Lechmere platform,\nlevel_-1_lobby,-1.0000000,Lobby,\nlevel_-1_orange_platform,-1.0000000,Orange Line platforms,\nlevel_-1_passageway,-1.0000000,Passageway,\nlevel_-1_platform,-1.0000000,Platform,\nlevel_-1_red_platform,-1.0000000,Red Line platforms,\nlevel_-1_rlsl_lobby,-1.0000000,\"Red Line, Silver Line lobby\",\nlevel_-1_up_busway,-1.0000000,Upper Busway,\nlevel_-1_up_platform,-1.0000000,Upper platforms,\nlevel_boylston_st,-1.0000000,Boylston Street,\nlevel_hyde_park_ave,-1.0000000,Hyde Park Avenue,\nlevel_-0.9_lobby,-0.9000000,Lobby,\nlevel_-0.5_building,-0.5000000,Building access,\nlevel_-0.5_landing,-0.5000000,Landing,\nlevel_-0.5_lobby,-0.5000000,Lobby,\nlevel_-0.5_passageway,-0.5000000,Passageway,\nlevel_-0.5_platform,-0.5000000,Platform,\nlevel_-0.1_landing,-0.1000000,Landing,\nlevel_0_boston_ave,0.0000000,Boston Avenue,\nlevel_0_building,0.0000000,Building access,\nlevel_0_cr_platform,0.0000000,Commuter Rail platform,\nlevel_0_orange_platform,0.0000000,Orange Line platforms,\nlevel_0_platform,0.0000000,Platform,\nlevel_0_red_platform,0.0000000,Red Line platforms,\nlevel_congress_st,0.0000000,Congress Street,\nlevel_ground,0.0000000,Street,\nlevel_in_street,0.0000000,On street,\nlevel_logan_arrivals,0.0000000,Arrivals,\nlevel_median,0.0000000,Street median,\nlevel_washington_st,0.0000000,Washington Street,\nlevel_0.5_cr_platform,0.5000000,Commuter Rail platform,\nlevel_0.5_ground,0.5000000,Street,\nlevel_0.5_landing,0.5000000,Landing,\nlevel_0.5_lobby,0.5000000,Lobby,\nlevel_1_bridge,1.0000000,Bridge,\nlevel_1_broadway,1.0000000,Broadway,\nlevel_1_cr_platform,1.0000000,Commuter Rail platform,\nlevel_1_ground,1.0000000,Street,\nlevel_1_in_street,1.0000000,On street,\nlevel_1_lobby,1.0000000,Lobby,\nlevel_1_orange_platform,1.0000000,Orange Line platforms,\nlevel_1_platform,1.0000000,Platform,\nlevel_1_red_platform,1.0000000,Red Line platforms,\nlevel_beacon_st,1.0000000,Beacon Street,\nlevel_columbia_rd,1.0000000,Columbia Road,\nlevel_wtc_ave,1.0000000,World Trade Center Avenue,\nlevel_2_bridge,2.0000000,Bridge,\nlevel_2_platform,2.0000000,Platform,\nlevel_2_plaza,2.0000000,Plaza,\nlevel_3_garage,3.0000000,Garage 3,\nlevel_independence_ave,4.0000000,Independence Avenue,\n",
+  "lines.txt" => "line_id,line_short_name,line_long_name,line_desc,line_url,line_color,line_text_color,line_sort_order\nline-Red,,Red Line,,,DA291C,FFFFFF,10010\nline-Mattapan,,Mattapan Trolley,,,DA291C,FFFFFF,10011\nline-Orange,,Orange Line,,,ED8B00,FFFFFF,10020\nline-Green,,Green Line,,,00843D,FFFFFF,10032\nline-Blue,,Blue Line,,,003DA5,FFFFFF,10040\nline-SLWaterfront,,Silver Line SL1/SL2/SL3,,,7C878E,FFFFFF,10051\nline-SLWashington,,Silver Line SL4/SL5,,,7C878E,FFFFFF,10055\nline-Fairmount,,Fairmount Line,,,80276C,FFFFFF,20001\nline-Fitchburg,,Fitchburg Line,,,80276C,FFFFFF,20002\nline-Worcester,,Framingham/Worcester Line,,,80276C,FFFFFF,20003\nline-Franklin,,Franklin/Foxboro Line,,,80276C,FFFFFF,20004\nline-Greenbush,,Greenbush Line,,,80276C,FFFFFF,20005\nline-Haverhill,,Haverhill Line,,,80276C,FFFFFF,20006\nline-Kingston,,Kingston Line,,,80276C,FFFFFF,20007\nline-Lowell,,Lowell Line,,,80276C,FFFFFF,20008\nline-Middleborough,,Middleborough/Lakeville Line,,,80276C,FFFFFF,20009\nline-Needham,,Needham Line,,,80276C,FFFFFF,20010\nline-Newburyport,,Newburyport/Rockport Line,,,80276C,FFFFFF,20011\nline-Providence,,Providence/Stoughton Line,,,80276C,FFFFFF,20012\nline-Foxboro,,Foxboro Event Service,,,80276C,FFFFFF,20013\nline-CapeFlyer,,CapeFlyer,,,006595,FFFFFF,21000\nline-Boat-F4,,Charlestown Ferry,,,008EAA,FFFFFF,30001\nline-Boat-F1,,Hingham/Hull Ferry,,,008EAA,FFFFFF,30002\nline-Boat-EastBoston,,East Boston Ferry,,,008EAA,FFFFFF,30005\nline-Boat-F6,,Winthrop Ferry,,,008EAA,FFFFFF,30009\nline-1,1,Harvard - Nubian via Massachusetts Avenue,,,FFC72C,000000,40010\nline-747,CT2,Sullivan - Ruggles,,,FFC72C,000000,40020\nline-171708,CT3/171,\"Beth Israel Deaconess, Boston Medical Center, or Nubian - Andrew or Logan Airport\",,,FFC72C,000000,40030\nline-4,4,North Station - Tide Street,,,FFC72C,000000,50040\nline-10,10,City Point - Copley,,,FFC72C,000000,50050\nline-7,7,City Point - Downtown Boston,,,FFC72C,000000,50070\nline-8,8,Harbor Point/UMass - Kenmore,,,FFC72C,000000,50080\nline-9,9,City Point - Copley via Broadway Station,,,FFC72C,000000,50090\nline-11,11,City Point - Downtown Boston,,,FFC72C,000000,50110\nline-14,14,Roslindale Square - Heath Street,,,FFC72C,000000,50140\nline-15,15,Kane Square - Ruggles,,,FFC72C,000000,50150\nline-16,16,Forest Hills - Andrew or UMass,,,FFC72C,000000,50160\nline-1719,17/19,\"Fields Corner - Kenmore, Ruggles, or Andrew\",,,FFC72C,000000,50170\nline-18,18,Ashmont - Andrew,,,FFC72C,000000,50180\nline-21,21,Ashmont - Forest Hills,,,FFC72C,000000,50210\nline-22,22,Ashmont - Ruggles via Jackson Square,,,FFC72C,000000,50220\nline-23,23,Ashmont - Ruggles via Washington Street,,,FFC72C,000000,50230\nline-242733,24/27/33,Wakefield Avenue or Dedham - Mattapan - Ashmont,,,FFC72C,000000,50240\nline-26,26,Ashmont - Gallivan Boulevard,,,FFC72C,000000,50260\nline-28,28,Mattapan - Ruggles,,,FFC72C,000000,50280\nline-29,29,Mattapan - Jackson Square,,,FFC72C,000000,50290\nline-30,30,Mattapan - Forest Hills via Roslindale Square,,,FFC72C,000000,50300\nline-31,31,Mattapan - Forest Hills via Morton Street,,,FFC72C,000000,50310\nline-32,32,Wolcott Square - Forest Hills,,,FFC72C,000000,50320\nline-3434E,34/34E,Walpole or Dedham Square - Forest Hills,,,FFC72C,000000,50340\nline-35,35,Dedham Mall - Forest Hills,,,FFC72C,000000,50350\nline-36,36,Charles River Loop - Forest Hills,,,FFC72C,000000,50360\nline-37,37,Baker Street & Vermont Street - Forest Hills,,,FFC72C,000000,50370\nline-38,38,Wren Street - Forest Hills,,,FFC72C,000000,50371\nline-39,39,Forest Hills - Back Bay Station,,,FFC72C,000000,50390\nline-4050,40,Cleary Square or Georgetowne - Forest Hills,,,FFC72C,000000,50400\nline-41,41,Centre Street & Eliot Street - JFK/UMass Station,,,FFC72C,000000,50410\nline-42,42,Forest Hills - Nubian,,,FFC72C,000000,50420\nline-43,43,Ruggles - Downtown Boston,,,FFC72C,000000,50430\nline-44,44,Jackson Square - Ruggles,,,FFC72C,000000,50440\nline-45,45,Franklin Park - Ruggles,,,FFC72C,000000,50450\nline-47,47,\"Central Square, Cambridge - Broadway Station\",,,FFC72C,000000,50470\nline-51,51,Reservoir - Forest Hills,,,FFC72C,000000,50510\nline-5259,52/59,Needham Junction or Dedham Mall - Watertown,,,FFC72C,00" <> ...,
+  "linked_datasets.txt" => "url,trip_updates,vehicle_positions,service_alerts,authentication_type\nhttps://cdn.mbta.com/realtime/TripUpdates.pb,1,0,0,0\nhttps://cdn.mbta.com/realtime/VehiclePositions.pb,0,1,0,0\nhttps://cdn.mbta.com/realtime/Alerts.pb,0,0,1,0\n",
+  "multi_route_trips.txt" => "added_route_id,trip_id\n32,58870319\n33,58870319\n32,58870345\n33,58870345\n32,58713811\n33,58713811\n32,58766235\n33,58766235\n32,58779744\n33,58779744\n40,58870956\n50,58870956\n40,58871043\n50,58871043\n40,58713370\n50,58713370\n40,58713371\n50,58713371\n40,58713373\n50,58713373\n40,58713376\n50,58713376\n40,58717582\n50,58717582\n40,58717583\n50,58717583\n40,58717584\n50,58717584\n40,58717585\n50,58717585\n40,58717586\n50,58717586\n40,58717587\n50,58717587\n40,58717588\n50,58717588\n40,58717589\n50,58717589\n40,58789301\n50,58789301\n40,58789302\n50,58789302\n40,58789303\n50,58789303\n40,58789304\n50,58789304\n40,58789305\n50,58789305\n40,58789306\n50,58789306\n40,58789307\n50,58789307\n40,58789308\n50,58789308\n40,58780355\n50,58780355\n40,58780442\n50,58780442\n40,58870933\n50,58870933\n40,58870944\n50,58870944\n40,58713372\n50,58713372\n40,58713374\n50,58713374\n40,58713375\n50,58713375\n40,58713377\n50,58713377\n40,58717581\n50,58717581\n40,58717590\n50,58717590\n40,58717591\n50,58717591\n40,58717592\n50,58717592\n40,58717593\n50,58717593\n40,58717594\n50,58717594\n40,58717595\n50,58717595\n40,58717596\n50,58717596\n40,58789300\n50,58789300\n40,58789309\n50,58789309\n40,58789310\n50,58789310\n40,58789311\n50,58789311\n40,58789312\n50,58789312\n40,58789313\n50,58789313\n40,58789314\n50,58789314\n40,58789315\n50,58789315\n40,58780332\n50,58780332\n40,58780343\n50,58780343\n441,58653521\n442,58653521\n441,58653523\n442,58653523\n441,58653525\n442,58653525\n441,58653527\n442,58653527\n441,58653529\n442,58653529\n441,58653531\n442,58653531\n441,58653532\n442,58653532\n441,58653534\n442,58653534\n441,58653536\n442,58653536\n441,58653538\n442,58653538\n441,58653558\n442,58653558\n441,58653569\n442,58653569\n441,58653906\n442,58653906\n441,58653984\n442,58653984\n441,58653986\n442,58653986\n441,58656987\n442,58656987\n441,58657006\n442,58657006\n441,58658401\n442,58658401\n441,58658420\n442,58658420\n441,58654871\n442,58654871\n441,58654873\n442,58654873\n441,58654875\n442,58654875\n441,58654877\n442,58654877\n441,58654879\n442,58654879\n441,58654881\n442,58654881\n441,58654882\n442,58654882\n441,58654884\n442,58654884\n441,58654886\n442,58654886\n441,58654888\n442,58654888\n441,58654908\n442,58654908\n441,58654919\n442,58654919\n441,58655253\n442,58655253\n441,58655331\n442,58655331\n441,58655333\n442,58655333\n441,58653520\n442,58653520\n441,58653522\n442,58653522\n441,58653524\n442,58653524\n441,58653526\n442,58653526\n441,58653528\n442,58653528\n441,58653530\n442,58653530\n441,58653533\n442,58653533\n441,58653535\n442,58653535\n441,58653537\n442,58653537\n441,58653544\n442,58653544\n441,58653554\n442,58653554\n441,58653555\n442,58653555\n441,58653572\n442,58653572\n441,58653574\n442,58653574\n441,58653985\n442,58653985\n441,58656986\n442,58656986\n441,58656989\n442,58656989\n441,58657028\n442,58657028\n441,58658400\n442,58658400\n441,58658403\n442,58658403\n441,58658442\n442,58658442\n441,58654870\n442,58654870\n441,58654872\n442,58654872\n441,58654874\n442,58654874\n441,58654876\n442,58654876\n441,58654878\n442,58654878\n441,58654880\n442,58654880\n441,58654883\n442,58654883\n441,58654885\n442,58654885\n441,58654887\n442,58654887\n441,58654894\n442,58654894\n441,58654904\n442,58654904\n441,58654905\n442,58654905\n441,58654922\n442,58654922\n441,58654924\n442,58654924\n441,58655332\n442,58655332\n62,58555908\n76,58555908\n62,58555920\n76,58555920\n62,58555923\n76,58555923\n62,58555945\n76,58555945\n62,58555946\n76,58555946\n62,58555947\n76,58555947\n62,58555952\n76,58555952\n62,58555957\n76,58555957\n62,58555933\n76,58555933\n62,58555961\n76,58555961\n62,58557482\n76,58557482\n62,58557484\n76,58557484\n62,58557486\n76,58557486\n62,58557488\n76,58557488\n62,58557490\n76,58557490\n62,58557492\n76,58557492\n62,58557495\n76,58557495\n62,58557497\n76,58557497\n62,58557499\n76,58557499\n62,58557501\n76,58557501\n62,58557503\n76,58557503\n62,58557505\n76,58557505\n62,58651593\n76,58651593\n62,58651605\n76,58651605\n62,58651608\n76,58651608\n62,58651630\n76,58651630\n62,58651631\n76,58651631\n62,58651632\n76,58651632\n62,58651637\n76,58651637\n62,58651642\n76,58651642\n62,58651618\n76,58651618\n62,58651646\n76,58651646\n62,58555906\n76,58555906\n62,58555926\n76,58555926\n62,58555951\n76,58555951\n62,58555955\n76,58555955\n62,58555962\n76,58555962\n62,58555919\n76,58555919\n62,58555922\n76,58555922\n62,58555950\n76,58555950\n62,58555953\n76,585559" <> ...,
+  "pathways.txt" => "pathway_id,from_stop_id,to_stop_id,facility_id,pathway_mode,is_bidirectional,length,wheelchair_length,traversal_time,wheelchair_traversal_time,stair_count,max_slope,pathway_name,pathway_code,signposted_as,instructions\nWML-0081-000,door-WML-0081-harvard,node-WML-0081-harvardstairs-bottom,,2,0,,,,,-34,,Newtonville - Harvard St to Bottom of stairs for Harvard St,,,\nWML-0081-001,node-WML-0081-harvardstairs-bottom,door-WML-0081-harvard,,2,0,,,,,34,,Bottom of stairs for Harvard St to Newtonville - Harvard St,,Newtonville - Harvard St,\nWML-0081-002,node-WML-0081-harvardstairs-bottom,WML-0081-02,,1,0,262.7376000,262.7376000,,,,,Bottom of stairs for Harvard St to Commuter Rail (Track 2 (All Trains)),,Commuter Rail - Track 2 (All Trains),\nWML-0081-003,WML-0081-02,node-WML-0081-harvardstairs-bottom,,1,0,262.7376000,262.7376000,,,,,Commuter Rail (Track 2 (All Trains)) to Bottom of stairs for Harvard St,,,\nWML-0081-004,door-WML-0081-walnut,node-WML-0081-walnutstairs-bottom,,2,0,,,,,-35,,Newtonville - Walnut St to Bottom of stairs for Walnut St,,,\nWML-0081-005,node-WML-0081-walnutstairs-bottom,door-WML-0081-walnut,,2,0,,,,,35,,Bottom of stairs for Walnut St to Newtonville - Walnut St,,Newtonville - Walnut St,\nWML-0081-006,node-WML-0081-walnutstairs-bottom,WML-0081-02,,1,0,123.7488000,123.7488000,,,,,Bottom of stairs for Walnut St to Commuter Rail (Track 2 (All Trains)),,Commuter Rail - Track 2 (All Trains),\nWML-0081-007,WML-0081-02,node-WML-0081-walnutstairs-bottom,,1,0,123.7488000,123.7488000,,,,,Commuter Rail (Track 2 (All Trains)) to Bottom of stairs for Walnut St,,,\nWML-0091-000,door-WML-0091-ebwas,node-WML-0091-ebwasstairs-bottom,,2,0,,,,,-38,,West Newton - Washington St (East) to Bottom of stairs for Washington St (East),,,\nWML-0091-001,node-WML-0091-ebwasstairs-bottom,door-WML-0091-ebwas,,2,0,,,,,38,,Bottom of stairs for Washington St (East) to West Newton - Washington St (East),,West Newton - Washington St (East),\nWML-0091-002,node-WML-0091-ebwasstairs-bottom,WML-0091-02,,1,0,137.1600000,137.1600000,,,,,Bottom of stairs for Washington St (East) to Commuter Rail (Track 2 (All Trains)),,Commuter Rail - Track 2 (All Trains),\nWML-0091-003,WML-0091-02,node-WML-0091-ebwasstairs-bottom,,1,0,137.1600000,137.1600000,,,,,Commuter Rail (Track 2 (All Trains)) to Bottom of stairs for Washington St (East),,,\nWML-0091-004,door-WML-0091-wbwas,node-WML-0091-wbwasstairs-bottom,,2,0,,,,,-39,,West Newton - Washington St (West) to Bottom of stairs for Washington St (West),,,\nWML-0091-005,node-WML-0091-wbwasstairs-bottom,door-WML-0091-wbwas,,2,0,,,,,39,,Bottom of stairs for Washington St (West) to West Newton - Washington St (West),,West Newton - Washington St (West),\nWML-0091-006,node-WML-0091-wbwasstairs-bottom,WML-0091-02,,1,0,137.1600000,137.1600000,,,,,Bottom of stairs for Washington St (West) to Commuter Rail (Track 2 (All Trains)),,Commuter Rail - Track 2 (All Trains),\nWML-0091-007,WML-0091-02,node-WML-0091-wbwasstairs-bottom,,1,0,137.1600000,137.1600000,,,,,Commuter Rail (Track 2 (All Trains)) to Bottom of stairs for Washington St (West),,,\nWML-0102-000,door-WML-0102-auburn,node-WML-0102-auburnstairs-bottom,,2,0,,,,,-39,,Auburndale - Auburn St to Bottom of stairs for Auburn St,,,\nWML-0102-001,node-WML-0102-auburnstairs-bottom,door-WML-0102-auburn,,2,0,,,,,39,,Bottom of stairs for Auburn St to Auburndale - Auburn St,,Auburndale - Auburn St,\nWML-0102-002,node-WML-0102-auburnstairs-bottom,WML-0102-02,,1,0,262.7376000,262.7376000,,,,,Bottom of stairs for Auburn St to Commuter Rail (Track 2 (All Trains)),,Commuter Rail - Track 2 (All Trains),\nWML-0102-003,WML-0102-02,node-WML-0102-auburnstairs-bottom,,1,0,262.7376000,262.7376000,,,,,Commuter Rail (Track 2 (All Trains)) to Bottom of stairs for Auburn St,,,\nWML-0102-004,door-WML-0102-woodland,node-WML-0102-woodlandstairs-bottom,,2,0,,,,,-45,,Auburndale - Woodland Rd to Bottom of stairs for Woodland Rd,,,\nWML-0102-005,node-WML-0102-woodlandstairs-bottom,door-WML-0102-woodland,,2,0,,,,,45,,Bottom of stairs for Woodland Rd to Auburndale - Woodland Rd,,Auburndale - Woodland Rd,\nWML-0102-006,node-WML-0" <> ...,
+  "route_patterns.txt" => "route_pattern_id,route_id,direction_id,route_pattern_name,route_pattern_time_desc,route_pattern_typicality,route_pattern_sort_order,representative_trip_id,canonical_route_pattern\nRed-3-0,Red,0,Alewife - Braintree,,1,100100000,canonical-Red-C1-0,1\nRed-1-0,Red,0,Alewife - Ashmont,,1,100100001,canonical-Red-C2-0,1\nRed-1-0_70075_70085_0,Red,0,Alewife - Park Street,,4,100100990,59095716-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms0,2\nRed-1-0_70075_70085_2,Red,0,JFK/UMass - Ashmont,,4,100100990,59095716-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms2,2\nRed-3-0_70075_70095_0,Red,0,Alewife - Park Street,,4,100100990,59095840-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms0,2\nRed-3-0_70075_70095_2,Red,0,JFK/UMass - Braintree,,4,100100990,59095840-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms2,2\nRed-3-1,Red,1,Braintree - Alewife,,1,100101000,canonical-Red-C1-1,1\nRed-1-1,Red,1,Ashmont - Alewife,,1,100101001,canonical-Red-C2-1,1\nRed-1-1_70086_70076_0,Red,1,Ashmont - JFK/UMass,,4,100101990,59095656-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms0,2\nRed-1-1_70086_70076_2,Red,1,Park Street - Alewife,,4,100101990,59095656-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms2,2\nRed-3-1_70096_70076_0,Red,1,Braintree - JFK/UMass,,4,100101990,59095731-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms0,2\nRed-3-1_70096_70076_2,Red,1,Park Street - Alewife,,4,100101990,59095731-20:15-JFKParkAshmontPlatformsJFKParkSuspendBraintreePlatforms2,2\nMattapan-_-0,Mattapan,0,Ashmont - Mattapan,,1,100110000,canonical-Mattapan-C1-0,1\nMattapan-_-1,Mattapan,1,Mattapan - Ashmont,,1,100111000,canonical-Mattapan-C1-1,1\nOrange-3-0,Orange,0,Oak Grove - Forest Hills,,1,100200000,canonical-Orange-C1-0,1\nOrange-3-1,Orange,1,Forest Hills - Oak Grove,,1,100201000,canonical-Orange-C1-1,1\nGreen-B-812-0,Green-B,0,Government Center - Boston College,,1,100320000,canonical-Green-B-C1-0,1\nGreen-B-816-0,Green-B,0,Medford/Tufts - Boston College,Mornings only,3,100320040,58397599,2\nGreen-B-812-0_70202_170137_2,Green-B,0,Babcock Street - Boston College,,4,100320990,58397501-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD2,2\nGreen-B-816-0_70202_170137_0_70206_70202_0,Green-B,0,Medford/Tufts - North Station,,4,100320990,58397599-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD00,2\nGreen-B-816-0_70202_170137_2,Green-B,0,Babcock Street - Boston College,,4,100320990,58397599-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD2,2\nGreen-B-812-1,Green-B,1,Boston College - Government Center,,1,100321000,canonical-Green-B-C1-1,1\nGreen-B-816-1,Green-B,1,Boston College - Medford/Tufts,Early mornings only,3,100321040,58397508,2\nGreen-B-812-1_170136_70201_0,Green-B,1,Boston College - Babcock Street,,4,100321990,58397500-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,2\nGreen-B-816-1_170136_70201_0,Green-B,1,Boston College - Babcock Street,,4,100321990,58397508-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,2\nGreen-B-816-1_170136_70201_2_70201_70205_2,Green-B,1,North Station - Medford/Tufts,,4,100321990,58397508-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD22,2\nGreen-C-832-0,Green-C,0,Government Center - Cleveland Circle,,1,100330000,canonical-Green-C-C1-0,1\nGreen-C-836-0,Green-C,0,Medford/Tufts - Cleveland Circle,Mornings only,3,100330040,58397581,2\nGreen-C-832-1,Green-C,1,Cleveland Circle - Government Center,,1,100331000,canonical-Green-C-C1-1,1\nGreen-C-836-1,Green-C,1,Cleveland Circle - Medford/Tufts,Early mornings only,3,100331040,58397582,2\nGreen-D-855-0,Green-D,0,Union Square - Riverside,,1,100340000,canonical-Green-D-C1-0,1\nGreen-D-856-0,Green-D,0,Medford/Tufts - Riverside,Weekday mornings only,3,100340040,58398269,2\nGreen-D-855-0_70504_70206_2,Green-D,0,North Station - Riverside,,4,100340990,58398315-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD2,2\nGreen-D-855-1,Green-D,1,Riverside - Union Square,,1,100" <> ...,
+  "routes.txt" => "route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color,route_sort_order,route_fare_class,line_id,listed_route,network_id\nRed,1,,Red Line,Rapid Transit,1,https://www.mbta.com/schedules/Red,DA291C,FFFFFF,10010,Rapid Transit,line-Red,,rapid_transit\nMattapan,1,,Mattapan Trolley,Rapid Transit,0,https://www.mbta.com/schedules/Mattapan,DA291C,FFFFFF,10011,Rapid Transit,line-Mattapan,,m_rapid_transit\nOrange,1,,Orange Line,Rapid Transit,1,https://www.mbta.com/schedules/Orange,ED8B00,FFFFFF,10020,Rapid Transit,line-Orange,,rapid_transit\nGreen-B,1,B,Green Line B,Rapid Transit,0,https://www.mbta.com/schedules/Green-B,00843D,FFFFFF,10032,Rapid Transit,line-Green,,rapid_transit\nGreen-C,1,C,Green Line C,Rapid Transit,0,https://www.mbta.com/schedules/Green-C,00843D,FFFFFF,10033,Rapid Transit,line-Green,,rapid_transit\nGreen-D,1,D,Green Line D,Rapid Transit,0,https://www.mbta.com/schedules/Green-D,00843D,FFFFFF,10034,Rapid Transit,line-Green,,rapid_transit\nGreen-E,1,E,Green Line E,Rapid Transit,0,https://www.mbta.com/schedules/Green-E,00843D,FFFFFF,10035,Rapid Transit,line-Green,,rapid_transit\nBlue,1,,Blue Line,Rapid Transit,1,https://www.mbta.com/schedules/Blue,003DA5,FFFFFF,10040,Rapid Transit,line-Blue,,rapid_transit\n741,1,SL1,Logan Airport Terminals - South Station,Key Bus,3,https://www.mbta.com/schedules/741,7C878E,FFFFFF,10051,Rapid Transit,line-SLWaterfront,,sl_rapid_transit\n742,1,SL2,Drydock Avenue - South Station,Key Bus,3,https://www.mbta.com/schedules/742,7C878E,FFFFFF,10052,Rapid Transit,line-SLWaterfront,,sl_rapid_transit\n743,1,SL3,Chelsea Station - South Station,Key Bus,3,https://www.mbta.com/schedules/743,7C878E,FFFFFF,10053,Rapid Transit,line-SLWaterfront,,sl_rapid_transit\n751,1,SL4,Nubian Station - South Station,Key Bus,3,https://www.mbta.com/schedules/751,7C878E,FFFFFF,10055,Local Bus,line-SLWashington,,local_bus\n749,1,SL5,Nubian Station - Temple Place,Key Bus,3,https://www.mbta.com/schedules/749,7C878E,FFFFFF,10056,Local Bus,line-SLWashington,,local_bus\n746,1,SLW,Silver Line Way - South Station,Key Bus,3,,7C878E,FFFFFF,10057,Rapid Transit,line-SLWaterfront,,sl_rapid_transit\nCR-Fairmount,1,,Fairmount Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Fairmount,80276C,FFFFFF,20001,Commuter Rail,line-Fairmount,,commuter_rail\nCR-Fitchburg,1,,Fitchburg Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Fitchburg,80276C,FFFFFF,20002,Commuter Rail,line-Fitchburg,,commuter_rail\nCR-Worcester,1,,Framingham/Worcester Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Worcester,80276C,FFFFFF,20003,Commuter Rail,line-Worcester,,commuter_rail\nCR-Franklin,1,,Franklin/Foxboro Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Franklin,80276C,FFFFFF,20004,Commuter Rail,line-Franklin,,commuter_rail\nCR-Greenbush,1,,Greenbush Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Greenbush,80276C,FFFFFF,20005,Commuter Rail,line-Greenbush,,commuter_rail\nCR-Haverhill,1,,Haverhill Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Haverhill,80276C,FFFFFF,20006,Commuter Rail,line-Haverhill,,commuter_rail\nCR-Kingston,1,,Kingston Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Kingston,80276C,FFFFFF,20007,Commuter Rail,line-Kingston,,commuter_rail\nCR-Lowell,1,,Lowell Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Lowell,80276C,FFFFFF,20008,Commuter Rail,line-Lowell,,commuter_rail\nCR-Middleborough,1,,Middleborough/Lakeville Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Middleborough,80276C,FFFFFF,20009,Commuter Rail,line-Middleborough,,commuter_rail\nCR-Needham,1,,Needham Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Needham,80276C,FFFFFF,20010,Commuter Rail,line-Needham,,commuter_rail\nCR-Newburyport,1,,Newburyport/Rockport Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Newburyport,80276C,FFFFFF,20011,Commuter Rail,line-Newburyport,,commuter_rail\nCR-Providence,1,,Providence/Stoughton Line,Commuter Rail,2,https://www.mbta.com/schedules/CR-Providence,80276C,FFFFFF,20012,Commuter Rail,line-Providence,,commuter_rail\nCR-Foxboro,1,,Foxb" <> ...,
+  "shapes.txt" => "shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence,shape_dist_traveled\n010125,42.329848,-71.083876,10001,\n010125,42.329788,-71.083268,10002,\n010125,42.330089,-71.083198,10003,\n010125,42.330296,-71.083161,10004,\n010125,42.330493,-71.083112,10005,\n010125,42.330643,-71.083066,10006,\n010125,42.330817,-71.082987,10007,\n010125,42.330984,-71.082797,10008,\n010125,42.330984,-71.082797,20001,\n010125,42.331055,-71.082716,20002,\n010125,42.331371,-71.082372,20003,\n010125,42.331752,-71.081934,20004,\n010125,42.331940,-71.081717,20005,\n010125,42.332274,-71.081414,20006,\n010125,42.332364,-71.081324,20007,\n010125,42.332364,-71.081324,30001,\n010125,42.332436,-71.081253,30002,\n010125,42.332513,-71.081194,30003,\n010125,42.332644,-71.081107,30004,\n010125,42.332822,-71.081002,30005,\n010125,42.332626,-71.080671,30006,\n010125,42.332457,-71.080373,30007,\n010125,42.332311,-71.080082,30008,\n010125,42.332147,-71.079741,30009,\n010125,42.332060,-71.079541,30010,\n010125,42.332060,-71.079541,40001,\n010125,42.332010,-71.079427,40002,\n010125,42.331846,-71.079053,40003,\n010125,42.331588,-71.078364,40004,\n010125,42.331313,-71.077489,40005,\n010125,42.331182,-71.076993,40006,\n010125,42.331239,-71.076879,40007,\n010125,42.331624,-71.076273,40008,\n010125,42.331624,-71.076273,50001,\n010125,42.331689,-71.076170,50002,\n010125,42.331976,-71.075655,50003,\n010125,42.332275,-71.075155,50004,\n010125,42.332517,-71.074775,50005,\n010125,42.332833,-71.074359,50006,\n010125,42.333206,-71.073910,50007,\n010125,42.333495,-71.073514,50008,\n010125,42.333601,-71.073388,50009,\n010125,42.333783,-71.073605,50010,\n010125,42.333783,-71.073605,60001,\n010125,42.334924,-71.074967,60002,\n010125,42.334924,-71.074967,70001,\n010125,42.335008,-71.075068,70002,\n010125,42.336168,-71.076518,70003,\n010125,42.336517,-71.076938,70004,\n010125,42.336580,-71.077016,70005,\n010125,42.336580,-71.077016,80001,\n010125,42.337374,-71.078004,80002,\n010125,42.337860,-71.078592,80003,\n010125,42.338795,-71.079717,80004,\n010125,42.339140,-71.080130,80005,\n010125,42.339321,-71.080320,80006,\n010125,42.339423,-71.080425,80007,\n010125,42.339423,-71.080425,90001,\n010125,42.339923,-71.080939,90002,\n010125,42.340288,-71.081301,90003,\n010125,42.340436,-71.081479,90004,\n010125,42.340638,-71.081747,90005,\n010125,42.340801,-71.082025,90006,\n010125,42.341458,-71.083025,90007,\n010125,42.341535,-71.083136,90008,\n010125,42.341535,-71.083136,100001,\n010125,42.341559,-71.083172,100002,\n010125,42.341610,-71.083256,100003,\n010125,42.342178,-71.084097,100004,\n010125,42.342244,-71.084194,100005,\n010125,42.342244,-71.084194,110001,\n010125,42.342688,-71.084854,110002,\n010125,42.342811,-71.085047,110003,\n010125,42.343318,-71.085798,110004,\n010125,42.343374,-71.085853,110005,\n010125,42.343473,-71.085908,110006,\n010125,42.344847,-71.086549,110007,\n010125,42.344937,-71.086597,110008,\n010125,42.345319,-71.086784,110009,\n010125,42.345319,-71.086784,120001,\n010125,42.345439,-71.086843,120002,\n010125,42.345910,-71.087068,120003,\n010125,42.346472,-71.087346,120004,\n010125,42.346631,-71.087429,120005,\n010125,42.346900,-71.087549,120006,\n010125,42.347286,-71.087759,120007,\n010125,42.347990,-71.088089,120008,\n010125,42.347990,-71.088089,130001,\n010125,42.348105,-71.088142,130002,\n010125,42.348464,-71.088317,130003,\n010125,42.348851,-71.088521,130004,\n010125,42.348884,-71.088534,130005,\n010125,42.349251,-71.088699,130006,\n010125,42.349690,-71.088925,130007,\n010125,42.350050,-71.089100,130008,\n010125,42.350444,-71.089293,130009,\n010125,42.350502,-71.089328,130010,\n010125,42.350740,-71.089450,130011,\n010125,42.350740,-71.089450,140001,\n010125,42.350834,-71.089499,140002,\n010125,42.351766,-71.089941,140003,\n010125,42.354330,-71.091202,140004,\n010125,42.357010,-71.092517,140005,\n010125,42.357269,-71.092641,140006,\n010125,42.357609,-71.092805,140007,\n010125,42.358175,-71.093091,140008,\n010125,42.358449,-71.093226,140009,\n010125,42.358717,-71.093377,140010,\n010125,42.358877,-71.093476,140011,\n010125,42.358975,-71.093537,140012,\n010125,42.359202,-71.093711,140013,\n010125,42.359303,-71.093806,140014,\n010125,42.359303,-71.093806,150001,\n010125,42.359331,-71" <> ...,
+  "stop_areas.txt" => "stop_id,area_id\n117,area_route_426_downtown\n117,area_route_450_downtown\n14460,area_route_450_outside_downtown\n14465,area_route_450_outside_downtown\n14470,area_route_450_outside_downtown\n14544,area_route_450_outside_downtown\n14548,area_route_450_outside_downtown\n14551,area_route_450_outside_downtown\n14553,area_route_450_outside_downtown\n14717,area_route_426_outside_downtown\n14717,area_route_450_outside_downtown\n14748,area_route_426_outside_downtown\n15795,area_route_426_outside_downtown\n15795,area_route_450_outside_downtown\n16653,area_route_426_outside_downtown\n1684,area_route_354_outside_downtown\n1686,area_route_354_outside_downtown\n1687,area_route_354_outside_downtown\n1688,area_route_354_outside_downtown\n16881,area_route_354_outside_downtown\n1689,area_route_354_outside_downtown\n1690,area_route_354_outside_downtown\n1691,area_route_354_outside_downtown\n1692,area_route_354_outside_downtown\n1693,area_route_354_outside_downtown\n1694,area_route_354_outside_downtown\n1695,area_route_354_outside_downtown\n1696,area_route_354_outside_downtown\n1697,area_route_354_outside_downtown\n16971,area_route_354_outside_downtown\n1698,area_route_354_outside_downtown\n1699,area_route_354_outside_downtown\n170136,area_green_b_west_of_kenmore\n170137,area_green_b_west_of_kenmore\n170140,area_green_b_west_of_kenmore\n170141,area_green_b_west_of_kenmore\n17091,area_sl_logan_terminal\n17093,area_sl_logan_terminal\n17094,area_sl_logan_terminal\n17095,area_sl_logan_terminal\n17419,area_route_426_outside_downtown\n17422,area_route_426_outside_downtown\n17429,area_route_426_outside_downtown\n17449,area_route_426_outside_downtown\n18239,area_route_354_outside_downtown\n18244,area_route_354_outside_downtown\n24716,area_route_426_outside_downtown\n24716,area_route_450_outside_downtown\n24717,area_route_426_outside_downtown\n24717,area_route_450_outside_downtown\n27092,area_sl_logan_terminal\n2829,area_route_426_downtown\n37150,area_route_450_outside_downtown\n41686,area_route_354_outside_downtown\n41692,area_route_354_outside_downtown\n41693,area_route_354_outside_downtown\n4451,area_route_426_outside_downtown\n4453,area_route_450_outside_downtown\n4455,area_route_450_outside_downtown\n4456,area_route_450_outside_downtown\n4457,area_route_450_outside_downtown\n4458,area_route_450_outside_downtown\n4459,area_route_450_outside_downtown\n4462,area_route_450_outside_downtown\n4463,area_route_450_outside_downtown\n4465,area_route_450_outside_downtown\n4467,area_route_450_outside_downtown\n4469,area_route_450_outside_downtown\n4470,area_route_450_outside_downtown\n4472,area_route_450_outside_downtown\n4473,area_route_450_outside_downtown\n4474,area_route_450_outside_downtown\n4475,area_route_450_outside_downtown\n4477,area_route_450_outside_downtown\n4479,area_route_450_outside_downtown\n4480,area_route_450_outside_downtown\n4481,area_route_450_outside_downtown\n4482,area_route_450_outside_downtown\n4483,area_route_450_outside_downtown\n4484,area_route_450_outside_downtown\n4485,area_route_450_outside_downtown\n4486,area_route_450_outside_downtown\n4487,area_route_426_outside_downtown\n4487,area_route_450_outside_downtown\n4488,area_route_426_outside_downtown\n4488,area_route_450_outside_downtown\n4489,area_route_450_outside_downtown\n4490,area_route_450_outside_downtown\n4491,area_route_450_outside_downtown\n4492,area_route_450_outside_downtown\n4494,area_route_450_outside_downtown\n4495,area_route_450_outside_downtown\n4497,area_route_450_outside_downtown\n4498,area_route_426_outside_downtown\n4498,area_route_450_outside_downtown\n4500,area_route_426_outside_downtown\n4500,area_route_450_outside_downtown\n45003,area_route_354_outside_downtown\n4510,area_route_354_downtown\n4511,area_route_354_downtown\n4512,area_route_426_outside_downtown\n4512,area_route_450_outside_downtown\n4513,area_route_426_outside_downtown\n4513,area_route_450_outside_downtown\n4515,area_route_426_outside_downtown\n4515,area_route_450_outside_downtown\n4516,area_route_450_outside_downtown\n4518,area_route_450_outside_downtown\n4520,area_route_450_outside_downtown\n4521,area_route_426_outside_downtown\n4521,area_route_450_outside_downtown\n45211,area_route_450_outside_" <> ...,
+  "stop_times.txt" => "trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,pickup_type,drop_off_type,timepoint,checkpoint_id,continuous_pickup,continuous_drop_off\n57817312,05:16:00,05:16:00,70001,1,,0,1,0,forhl,,\n57817312,05:17:00,05:17:00,70003,10,,0,0,0,grnst,,\n57817312,05:19:00,05:19:00,70005,20,,0,0,0,sbmnl,,\n57817312,05:21:00,05:21:00,70007,30,,0,0,0,jaksn,,\n57817312,05:23:00,05:23:00,70009,40,,0,0,0,rcmnl,,\n57817312,05:25:00,05:25:00,70011,50,,0,0,0,rugg,,\n57817312,05:26:00,05:26:00,70013,60,,0,0,0,masta,,\n57817312,05:29:00,05:29:00,70015,70,,0,0,0,bbsta,,\n57817312,05:31:00,05:31:00,70017,80,,0,0,0,tumnl,,\n57817312,05:33:00,05:33:00,70019,90,,0,0,0,chncl,,\n57817312,05:35:00,05:35:00,70021,100,,0,0,0,dwnxg,,\n57817312,05:37:00,05:37:00,70023,110,,0,0,0,state,,\n57817312,05:38:00,05:38:00,70025,120,,0,0,0,haecl,,\n57817312,05:39:00,05:39:00,70027,130,,0,0,0,north,,\n57817312,05:41:00,05:41:00,70029,140,,0,0,0,ccmnl,,\n57817312,05:44:00,05:44:00,70031,150,,0,0,0,sull,,\n57817312,05:47:00,05:47:00,70279,160,,0,0,0,astao,,\n57817312,05:49:00,05:49:00,70033,170,,0,0,0,welln,,\n57817312,05:53:00,05:53:00,70035,180,,0,0,0,mlmnl,,\n57817312,05:56:00,05:56:00,70036,190,,1,0,0,ogmnl,,\n57817312-HayOL,05:16:00,05:16:00,70001,1,,0,1,0,forhl,,\n57817312-HayOL,05:17:00,05:17:00,70003,10,,0,0,0,grnst,,\n57817312-HayOL,05:19:00,05:19:00,70005,20,,0,0,0,sbmnl,,\n57817312-HayOL,05:21:00,05:21:00,70007,30,,0,0,0,jaksn,,\n57817312-HayOL,05:23:00,05:23:00,70009,40,,0,0,0,rcmnl,,\n57817312-HayOL,05:25:00,05:25:00,70011,50,,0,0,0,rugg,,\n57817312-HayOL,05:26:00,05:26:00,70013,60,,0,0,0,masta,,\n57817312-HayOL,05:29:00,05:29:00,70015,70,,0,0,0,bbsta,,\n57817312-HayOL,05:31:00,05:31:00,70017,80,,0,0,0,tumnl,,\n57817312-HayOL,05:33:00,05:33:00,70019,90,,0,0,0,chncl,,\n57817312-HayOL,05:35:00,05:35:00,70021,100,,0,0,0,dwnxg,,\n57817312-HayOL,05:37:00,05:37:00,70023,110,,0,0,0,state,,\n57817312-HayOL,05:39:00,05:39:00,70027,130,,0,0,0,north,,\n57817312-HayOL,05:41:00,05:41:00,70029,140,,0,0,0,ccmnl,,\n57817312-HayOL,05:44:00,05:44:00,70031,150,,0,0,0,sull,,\n57817312-HayOL,05:47:00,05:47:00,70279,160,,0,0,0,astao,,\n57817312-HayOL,05:49:00,05:49:00,70033,170,,0,0,0,welln,,\n57817312-HayOL,05:53:00,05:53:00,70035,180,,0,0,0,mlmnl,,\n57817312-HayOL,05:56:00,05:56:00,70036,190,,1,0,0,ogmnl,,\n57817313,05:26:00,05:26:00,70001,1,,0,1,0,forhl,,\n57817313,05:27:00,05:27:00,70003,10,,0,0,0,grnst,,\n57817313,05:29:00,05:29:00,70005,20,,0,0,0,sbmnl,,\n57817313,05:31:00,05:31:00,70007,30,,0,0,0,jaksn,,\n57817313,05:33:00,05:33:00,70009,40,,0,0,0,rcmnl,,\n57817313,05:35:00,05:35:00,70011,50,,0,0,0,rugg,,\n57817313,05:36:00,05:36:00,70013,60,,0,0,0,masta,,\n57817313,05:39:00,05:39:00,70015,70,,0,0,0,bbsta,,\n57817313,05:41:00,05:41:00,70017,80,,0,0,0,tumnl,,\n57817313,05:43:00,05:43:00,70019,90,,0,0,0,chncl,,\n57817313,05:45:00,05:45:00,70021,100,,0,0,0,dwnxg,,\n57817313,05:47:00,05:47:00,70023,110,,0,0,0,state,,\n57817313,05:48:00,05:48:00,70025,120,,0,0,0,haecl,,\n57817313,05:49:00,05:49:00,70027,130,,0,0,0,north,,\n57817313,05:51:00,05:51:00,70029,140,,0,0,0,ccmnl,,\n57817313,05:54:00,05:54:00,70031,150,,0,0,0,sull,,\n57817313,05:57:00,05:57:00,70279,160,,0,0,0,astao,,\n57817313,05:59:00,05:59:00,70033,170,,0,0,0,welln,,\n57817313,06:03:00,06:03:00,70035,180,,0,0,0,mlmnl,,\n57817313,06:06:00,06:06:00,70036,190,,1,0,0,ogmnl,,\n57817313-HayOL,05:26:00,05:26:00,70001,1,,0,1,0,forhl,,\n57817313-HayOL,05:27:00,05:27:00,70003,10,,0,0,0,grnst,,\n57817313-HayOL,05:29:00,05:29:00,70005,20,,0,0,0,sbmnl,,\n57817313-HayOL,05:31:00,05:31:00,70007,30,,0,0,0,jaksn,,\n57817313-HayOL,05:33:00,05:33:00,70009,40,,0,0,0,rcmnl,,\n57817313-HayOL,05:35:00,05:35:00,70011,50,,0,0,0,rugg,,\n57817313-HayOL,05:36:00,05:36:00,70013,60,,0,0,0,masta,,\n57817313-HayOL,05:39:00,05:39:00,70015,70,,0,0,0,bbsta,,\n57817313-HayOL,05:41:00,05:41:00,70017,80,,0,0,0,tumnl,,\n57817313-HayOL,05:43:00,05:43:00,70019,90,,0,0,0,chncl,,\n57817313-HayOL,05:45:00,05:45:00,70021,100,,0,0,0,dwnxg,,\n57817313-HayOL,05:47:00,05:47:00,70023,110,,0,0,0,state,,\n57817313-HayOL,05:49:00,05:49:00,70027,130,,0,0,0,north,,\n57817313-HayOL,05:51:00,05:51:00,70029,140,,0,0,0,c" <> ...,
+  "stops.txt" => "stop_id,stop_code,stop_name,stop_desc,platform_code,platform_name,stop_lat,stop_lon,zone_id,stop_address,stop_url,level_id,location_type,parent_station,wheelchair_boarding,municipality,on_street,at_street,vehicle_type\n1,1,Washington St opp Ruggles St,,,,42.330957,-71.082754,ExpressBus-Downtown,,https://www.mbta.com/stops/1,,0,,1,Boston,Washington Street,Ruggles Street,3\n10,10,Theo Glynn Way @ Newmarket Sq,,,,42.330555,-71.068787,LocalBus,,https://www.mbta.com/stops/10,,0,,1,Boston,Theodore Glynn Way,Newmarket Square,3\n10000,10000,Tremont St opp Temple Pl,,,,42.355692,-71.062911,LocalBus,,https://www.mbta.com/stops/10000,,0,,1,Boston,Tremont Street,Temple Place,3\n10003,10003,Albany St opp Randall St,,,,42.331591,-71.076237,LocalBus,,https://www.mbta.com/stops/10003,,0,,1,Boston,Albany Street,Randall Street,3\n10005,10005,Albany St opp E Concord St,,,,42.335017,-71.071280,LocalBus,,https://www.mbta.com/stops/10005,,0,,1,Boston,Albany Street,,3\n10006,10006,Albany St opp E Newton St,,,,42.335814,-71.070135,LocalBus,,https://www.mbta.com/stops/10006,,0,,1,Boston,Albany Street,East Newton Street,3\n10007,10007,540 Albany St opp Wareham St,,,,42.338372,-71.066556,LocalBus,,https://www.mbta.com/stops/10007,,0,,1,Boston,Albany Street,Wareham Street,3\n10008,10008,Albany St opp Randolph St,,,,42.339915,-71.064356,LocalBus,,https://www.mbta.com/stops/10008,,0,,1,Boston,Albany Street,,3\n10009,10009,High St @ Duck Lane,,,,42.214986,-70.915924,LocalBus,,https://www.mbta.com/stops/10009,,0,,1,Hingham,High Street,,3\n10010,10010,Southampton St @ Newmarket St,,,,42.330944,-71.064621,LocalBus,,https://www.mbta.com/stops/10010,,0,,1,Boston,Southampton Street,Newmarket Square,3\n10011,10011,Albany St @ Randolph St,,,,42.340162,-71.064227,LocalBus,,https://www.mbta.com/stops/10011,,0,,1,Boston,Albany Street,,3\n10012,10012,Albany St @ Wareham St,,,,42.338361,-71.066667,LocalBus,,https://www.mbta.com/stops/10012,,0,,1,Boston,Albany Street,Wareham Street,3\n10013,10013,Albany St @ E Dedham St,,,,42.337556,-71.067875,LocalBus,,https://www.mbta.com/stops/10013,,0,,1,Boston,Albany Street,East Dedham Street,3\n10014,10014,Albany St opp Boston Medical,,,,42.334117,-71.072510,LocalBus,,https://www.mbta.com/stops/10014,,0,,1,Boston,Albany Street,,3\n10015,10015,Harrison Ave @ E Newton St,,,,42.337402,-71.072162,LocalBus,,https://www.mbta.com/stops/10015,,0,,1,Boston,Harrison Avenue,East Newton Street,3\n10016,10016,TradeCenter 128,,,,42.499312,-71.162566,LocalBus,,https://www.mbta.com/stops/10016,,0,,1,Woburn,,,3\n10031,10031,E 1st St @ P St,,,,42.338307,-71.027132,LocalBus,,https://www.mbta.com/stops/10031,,0,,1,Boston,East First Street,P Street,3\n10032,10032,E 1st St opp O St,,,,42.338274,-71.029203,LocalBus,,https://www.mbta.com/stops/10032,,0,,1,Boston,East First Street,O Street,3\n10033,10033,E 1st St @ O St,,,,42.338176,-71.029444,LocalBus,,https://www.mbta.com/stops/10033,,0,,1,Boston,East First Street,O Street,3\n101,101,Massachusetts Ave @ Sidney St,,,,42.362988,-71.099486,LocalBus,,https://www.mbta.com/stops/101,,0,,1,Cambridge,Massachusetts Avenue,Sidney Street,3\n10100,10100,Albany St @ Randall St,,,,42.331675,-71.076347,LocalBus,,https://www.mbta.com/stops/10100,,0,,1,Boston,Albany Street,Randall Street,3\n10101,10101,Melnea Cass Blvd @ Harrison Ave,,,,42.332066,-71.079147,LocalBus,,https://www.mbta.com/stops/10101,,0,,1,Boston,Melnea Cass Boulevard,Harrison Avenue,3\n102,102,Massachusetts Ave @ Prospect St,,,,42.365291,-71.103404,LocalBus,,https://www.mbta.com/stops/102,,0,,1,Cambridge,Massachusetts Avenue,Essex Street,3\n1026,1026,Chestnut Hill Ave @ Veronica Smith Ctr,,,,42.348296,-71.153761,LocalBus,,https://www.mbta.com/stops/1026,,0,,1,Boston,Chestnut Hill Avenue,,3\n1027,1027,Chestnut Hill Ave @ Englewood Ave,,,,42.337121,-71.152079,LocalBus,,https://www.mbta.com/stops/1027,,0,,1,Boston,Chestnut Hill Avenue,Englewood Avenue,3\n1029,1029,Chestnut Hill Ave @ Commonwealth Ave,,,,42.338312,-71.153451,LocalBus,,https://www.mbta.com/stops/1029,,0,,1,Boston,Chestnut Hill Avenue,Commonwealth Avenue,3\n1030,1030,Chestnut Hill Ave @ Strathmore Rd,,,,42.340595," <> ...,
+  "transfers.txt" => "from_stop_id,to_stop_id,transfer_type,min_transfer_time,min_walk_time,min_wheelchair_time,suggested_buffer_time,wheelchair_transfer,from_trip_id,to_trip_id\n170136,933,1,,,,,,58397500-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397500-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397502-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397502-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397503-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397503-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397504-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397504-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397505-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397505-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397506-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397506-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397507-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397507-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397509-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397509-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397510-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397510-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397511-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397511-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397512-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397512-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397513-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397513-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397514-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397514-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397515-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397515-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397516-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397516-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397517-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397517-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397518-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397518-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397519-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397519-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendDBabcockGovernmentCenter\n170136,933,1,,,,,,58397520-20:45-BabcockGovernmentCenterGovtCtrNorthStaNorthMedfordNorthUnionSuspendD0,58397520-20:45-BabcockGovernmentCenterGovtCtrNorthStaNort" <> ...,
+  "trips.txt" => "route_id,service_id,trip_id,trip_headsign,trip_short_name,direction_id,block_id,shape_id,wheelchair_accessible,trip_route_type,route_pattern_id,bikes_allowed\n1,DayafterThanksgivingDay,58444229,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444231,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444234,Harvard,,0,C01-7,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444237,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444239,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444241,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444243,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444245,Harvard,,0,C01-7,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444247,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444249,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444251,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444254,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444256,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444257,Harvard,,0,C01-5,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444259,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444261,Harvard,,0,C01-7,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444263,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444264,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444266,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444270,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444272,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444274,Harvard,,0,C01-5,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444276,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444278,Harvard,,0,C01-7,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444280,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444281,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444283,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444285,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444289,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444291,Harvard,,0,C01-5,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444292,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444294,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444296,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444298,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444300,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444303,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444304,Harvard,,0,C01-5,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444306,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444308,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444310,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444312,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444314,Harvard,,0,C01-5,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444318,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444320,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444321,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444323,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444324,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444327,Harvard,,0,C01-3,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444328,Harvard,,0,C01-4,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444332,Harvard,,0,C01-15,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444334,Harvard,,0,C01-6,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444336,Harvard,,0,C01-8,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444338,Harvard,,0,C01-9,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444340,Harvard,,0,C01-10,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444342,Harvard,,0,C01-1,010125,1,,1-_-0,1\n1,DayafterThanksgivingDay,58444344,Harvard,,0,C01-2,010125,1,,1-_-0,1\n1,Dayafter" <> ...,
+  "trips_properties.txt" => "trip_id,trip_property_id,value\n57817527,note,Waits at State for last Blue Line train\n57817527,note,Waits at Downtown Crossing for last Red Line train\n57817527,trip_type,wait\n57817528,note,Waits at Downtown Crossing for last Red Line train\n57817528,trip_type,wait\n58236230,note,Waits at Ruggles for last Orange Line train\n58236230,trip_type,wait\n58236256,note,Waits at Tremont St opp Temple Pl for last Red Line and Green Line trains\n58236256,trip_type,wait\n58236366,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58236366,trip_type,wait\n58236576,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58236576,trip_type,wait\n58236610,note,Waits at Ruggles for last Orange Line train\n58236610,trip_type,wait\n58236682,note,Waits at Massachusetts Ave @ Pearl St for last Red Line train\n58236682,trip_type,wait\n58236689,note,Waits at Ruggles for last Orange Line train\n58236689,trip_type,wait\n58236828,note,Waits at Boylston St @ Dartmouth St for last Green Line train\n58236828,trip_type,wait\n58236895,note,Waits at Kenmore for last Green Line train\n58236895,trip_type,wait\n58237090,note,Waits at Ashmont for last Red Line train\n58237090,trip_type,wait\n58237144,note,Waits at Ruggles for last Orange Line train\n58237144,trip_type,wait\n58237218,note,Waits at Andrew for last Red Line train\n58237218,trip_type,wait\n58237219,note,Waits at Forest Hills for last Orange Line train\n58237219,trip_type,wait\n58237337,note,Waits at Harvard Sq @ Garden St - Dawes Island for last Red Line train\n58237337,trip_type,wait\n58237378,note,Waits at Nubian for last Silver Line bus\n58237378,trip_type,wait\n58237653,note,Waits at Nubian for last Silver Line bus\n58237653,trip_type,wait\n58237748,note,Waits at Massachusetts Ave @ Holyoke St for last Red Line train\n58237748,trip_type,wait\n58240359,note,Waits at Ruggles for last Orange Line train\n58240359,trip_type,wait\n58240398,note,Waits at Tremont St opp Temple Pl for last Red Line and Green Line trains\n58240398,trip_type,wait\n58240539,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58240539,trip_type,wait\n58240650,note,Waits at Massachusetts Ave @ Holyoke St for last Red Line train\n58240650,trip_type,wait\n58240652,note,Waits at Nubian for last Silver Line bus\n58240652,trip_type,wait\n58240762,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58240762,trip_type,wait\n58240895,note,Waits at Ruggles for last Orange Line train\n58240895,trip_type,wait\n58241104,note,Waits at Nubian for last Silver Line bus\n58241104,trip_type,wait\n58241114,note,Waits at Harvard Sq @ Garden St - Dawes Island for last Red Line train\n58241114,trip_type,wait\n58241254,note,Waits at Kenmore for last Green Line train\n58241254,trip_type,wait\n58241315,note,Waits at Boylston St @ Dartmouth St for last Green Line train\n58241315,trip_type,wait\n58241394,note,Waits at Andrew for last Red Line train\n58241394,trip_type,wait\n58241395,note,Waits at Forest Hills for last Orange Line train\n58241395,trip_type,wait\n58241590,note,Waits at Ashmont for last Red Line train\n58241590,trip_type,wait\n58241661,note,Waits at Ruggles for last Orange Line train\n58241661,trip_type,wait\n58312487,note,Waits at Ruggles for last Orange Line train\n58312487,trip_type,wait\n58312526,note,Waits at Tremont St opp Temple Pl for last Red Line and Green Line trains\n58312526,trip_type,wait\n58312667,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58312667,trip_type,wait\n58312778,note,Waits at Massachusetts Ave @ Holyoke St for last Red Line train\n58312778,trip_type,wait\n58312780,note,Waits at Nubian for last Silver Line bus\n58312780,trip_type,wait\n58312890,note,Waits at W Broadway @ Broadway Station for last Red Line train\n58312890,trip_type,wait\n58313023,note,Waits at Ruggles for last Orange Line train\n58313023,trip_type,wait\n58313232,note,Waits at Nubian for last Silver Line bus\n58313232,trip_type,wait\n58313242,note,Waits at Harvard Sq @ Garden St - Dawes Island for last Red Line train\n58313242,trip_type,wait\n58313382,note,Waits at Kenmore for last Green Line train\n58313382,trip_type,wait\n58313443,note,W" <> ...,
+  "trips_properties_definitions.txt" => "trip_property_id,definition,possible_values\nnote,Extra details about the trip,Text\ntrip_type,Type of trip,\"'supplemental' for irregular trips that only run on certain days, such as school days; 'wait' for trips that hold at one or more stops for a scheduled connection\"\n"
+}
+```
+
+```elixir
+parse_csv = fn csv_data ->
+  [header, data] = String.split(csv_data, "\n", parts: 2)
+
+  headers =
+    [header]
+    |> CSV.decode!()
+    |> Enum.at(0)
+    |> Enum.map(&String.to_atom/1)
+
+  [data]
+  |> CSV.decode!(headers: headers, validate_row_length: true)
+end
+
+gtfs_pathways =
+  gtfs_files["pathways.txt"]
+  |> parse_csv.()
+  |> Map.new(&{&1.pathway_id, &1})
+
+gtfs_pathways |> Enum.take(1) |> Map.new()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  "nqncy-006" => %{
+    length: "12.1920000",
+    instructions: "",
+    from_stop_id: "70098",
+    to_stop_id: "node-325-platform",
+    pathway_id: "nqncy-006",
+    facility_id: "",
+    pathway_mode: "1",
+    is_bidirectional: "0",
+    wheelchair_length: "12.1920000",
+    traversal_time: "",
+    wheelchair_traversal_time: "",
+    stair_count: "",
+    max_slope: "",
+    pathway_name: "Red Line (Alewife) to Bottom of escalator from platform to Squantum Street lobby",
+    pathway_code: "",
+    signposted_as: "Exit, buses"
+  }
+}
+```
+
+```elixir
+gtfs_facilities =
+  gtfs_files["facilities.txt"]
+  |> parse_csv.()
+  |> Map.new(&{&1.facility_id, &1})
+
+gtfs_facilities |> Enum.take(1) |> Map.new()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  "918" => %{
+    facility_id: "918",
+    facility_code: "918",
+    facility_class: "1",
+    facility_type: "elevator",
+    stop_id: "place-sstat",
+    facility_short_name: "Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby",
+    facility_long_name: "South Station Elevator 918 (Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby)",
+    facility_desc: "",
+    facility_lat: "",
+    facility_lon: "",
+    wheelchair_facility: "1"
+  }
+}
+```
+
+```elixir
+gtfs_stops =
+  gtfs_files["stops.txt"]
+  |> parse_csv.()
+  |> Map.new(&{&1.stop_id, &1})
+
+gtfs_stops |> Enum.take(1) |> Map.new()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  "3992" => %{
+    stop_id: "3992",
+    stop_code: "3992",
+    stop_name: "S Franklin St @ Emery St",
+    stop_desc: "",
+    platform_code: "",
+    platform_name: "",
+    stop_lat: "42.125615",
+    stop_lon: "-71.011556",
+    zone_id: "LocalBus",
+    stop_address: "",
+    stop_url: "https://www.mbta.com/stops/3992",
+    level_id: "",
+    location_type: "0",
+    parent_station: "",
+    wheelchair_boarding: "1",
+    municipality: "Holbrook",
+    on_street: "South Franklin Street",
+    at_street: "Emery Street",
+    vehicle_type: "3"
+  }
+}
+```
+
+## GTFS Realtime
+
+```elixir
+alerts_feed =
+  Req.get!(
+    "https://cdn.mbta.com/realtime/Alerts_enhanced.json",
+    decode_json: [keys: :atoms]
+  ).body
+
+alerts_feed |> Map.update!(:entity, &Enum.take(&1, 1))
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  header: %{timestamp: 1700695058, gtfs_realtime_version: "2.0", incrementality: "FULL_DATASET"},
+  entity: [
+    %{
+      id: "352844",
+      alert: %{
+        cause: "CONSTRUCTION",
+        severity: 3,
+        effect: "OTHER_EFFECT",
+        effect_detail: "PARKING_ISSUE",
+        cause_detail: "CONSTRUCTION",
+        header_text: %{
+          translation: [
+            %{
+              text: "The two outer lanes at the Quincy Adams Garage toll plaza over Centre St are closed until further notice. Repairing the bridge is part of the South Shore Garage Project. More: https://www.mbta.com/south-shore-garages",
+              language: "en"
+            }
+          ]
+        },
+        description_text: %{translation: [%{text: "", language: "en"}]},
+        severity_level: "WARNING",
+        service_effect_text: %{translation: [%{text: "Quincy Adams parking issue", language: "en"}]},
+        short_header_text: %{
+          translation: [
+            %{
+              text: "The two outer lanes at the Quincy Adams Garage toll plaza over Centre St are closed until further notice.",
+              language: "en"
+            }
+          ]
+        },
+        created_timestamp: 1578936824,
+        last_modified_timestamp: 1666290118,
+        last_push_notification_timestamp: 1578936824,
+        timeframe_text: %{translation: [%{text: "ongoing", language: "en"}]},
+        alert_lifecycle: "ONGOING",
+        duration_certainty: "UNKNOWN",
+        active_period: [%{start: 1578936720}],
+        informed_entity: [
+          %{facility_id: "park-qamnl-garage", stop_id: "41031", activities: ["PARK_CAR"]},
+          %{facility_id: "park-qamnl-garage", stop_id: "70103", activities: ["PARK_CAR"]},
+          %{facility_id: "park-qamnl-garage", stop_id: "70104", activities: ["PARK_CAR"]},
+          %{
+            facility_id: "park-qamnl-garage",
+            stop_id: "door-qamnl-burgin",
+            activities: ["PARK_CAR"]
+          },
+          %{facility_id: "park-qamnl-garage", stop_id: "door-qamnl-indep", activities: ["PARK_CAR"]},
+          %{
+            facility_id: "park-qamnl-garage",
+            stop_id: "door-qamnl-pickup",
+            activities: ["PARK_CAR"]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+```elixir
+accessibility_alerts =
+  alerts_feed.entity
+  |> Enum.filter(&(&1.alert.effect == "ACCESSIBILITY_ISSUE"))
+  |> Map.new(&{&1.id, Map.put(&1.alert, :alert_id, &1.id)})
+
+accessibility_alerts |> Enum.take(1) |> Map.new()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+%{
+  "390223" => %{
+    cause: "MAINTENANCE",
+    severity: 1,
+    effect: "ACCESSIBILITY_ISSUE",
+    effect_detail: "ESCALATOR_CLOSURE",
+    cause_detail: "MAINTENANCE",
+    header_text: %{
+      translation: [
+        %{
+          text: "Courthouse Escalator 415 (Airport/Design Center platform to lobby) unavailable due to ongoing construction at the station. ",
+          language: "en"
+        }
+      ]
+    },
+    description_text: %{translation: [%{text: "", language: "en"}]},
+    severity_level: "INFO",
+    service_effect_text: %{
+      translation: [%{text: "Courthouse escalator unavailable", language: "en"}]
+    },
+    short_header_text: %{
+      translation: [
+        %{
+          text: "Courthouse Escalator 415 (Airport/Design Center platform to lobby) unavailable due to ongoing construction at the station. ",
+          language: "en"
+        }
+      ]
+    },
+    created_timestamp: 1621976889,
+    last_modified_timestamp: 1692187096,
+    timeframe_text: %{translation: [%{text: "ongoing", language: "en"}]},
+    alert_lifecycle: "ONGOING",
+    duration_certainty: "UNKNOWN",
+    active_period: [%{start: 1621976880}],
+    informed_entity: [%{facility_id: "415", stop_id: "74612", activities: ["USING_ESCALATOR"]}],
+    alert_id: "390223"
+  }
+}
+```
+
+```elixir
+now = DateTime.utc_now() |> DateTime.to_unix()
+
+open_accessibility_alerts =
+  accessibility_alerts
+  |> Map.values()
+  |> Enum.filter(fn alert ->
+    time_ranges = Map.get(alert, :active_period, [%{}])
+
+    time_ranges
+    |> Enum.any?(fn
+      %{start: start_time, end: end_time} -> start_time <= now and now <= end_time
+      %{start: start_time} -> start_time <= now
+      _ -> true
+    end)
+  end)
+
+open_accessibility_alerts |> Enum.take(1)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  %{
+    cause: "MAINTENANCE",
+    severity: 1,
+    effect: "ACCESSIBILITY_ISSUE",
+    effect_detail: "ESCALATOR_CLOSURE",
+    cause_detail: "MAINTENANCE",
+    header_text: %{
+      translation: [
+        %{
+          text: "Courthouse Escalator 415 (Airport/Design Center platform to lobby) unavailable due to ongoing construction at the station. ",
+          language: "en"
+        }
+      ]
+    },
+    description_text: %{translation: [%{text: "", language: "en"}]},
+    severity_level: "INFO",
+    service_effect_text: %{
+      translation: [%{text: "Courthouse escalator unavailable", language: "en"}]
+    },
+    short_header_text: %{
+      translation: [
+        %{
+          text: "Courthouse Escalator 415 (Airport/Design Center platform to lobby) unavailable due to ongoing construction at the station. ",
+          language: "en"
+        }
+      ]
+    },
+    created_timestamp: 1621976889,
+    last_modified_timestamp: 1692187096,
+    timeframe_text: %{translation: [%{text: "ongoing", language: "en"}]},
+    alert_lifecycle: "ONGOING",
+    duration_certainty: "UNKNOWN",
+    active_period: [%{start: 1621976880}],
+    informed_entity: [%{facility_id: "415", stop_id: "74612", activities: ["USING_ESCALATOR"]}],
+    alert_id: "390223"
+  }
+]
+```
+
+## Accessibility Issue Detection
+
+```elixir
+top_level_stop = fn stop_id ->
+  Stream.unfold(stop_id, fn
+    nil ->
+      nil
+
+    stop_id ->
+      case gtfs_stops[stop_id] do
+        %{parent_station: ""} -> {stop_id, nil}
+        %{parent_station: parent_station} -> {stop_id, parent_station}
+      end
+  end)
+  |> Enum.at(-1)
+end
+
+alerts_by_station =
+  for alert <- open_accessibility_alerts, reduce: %{} do
+    acc ->
+      stops =
+        alert.informed_entity
+        |> Enum.map(&top_level_stop.(&1.stop_id))
+        |> Enum.uniq()
+
+      Map.merge(
+        acc,
+        Map.new(stops, &{&1, [alert]}),
+        fn _k, v1, v2 -> v1 ++ v2 end
+      )
+  end
+
+stations_with_alerts = alerts_by_station |> Map.keys()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+["place-NEC-1851", "place-alfcl", "place-andrw", "place-astao", "place-bomnl", "place-chncl",
+ "place-crtst", "place-fldcr", "place-mvbcl", "place-north", "place-nqncy", "place-ogmnl",
+ "place-portr", "place-rugg", "place-state", "place-sull"]
+```
+
+```elixir
+pathways_by_station =
+  for {_, pathway} <- gtfs_pathways, reduce: %{} do
+    acc ->
+      acc
+      |> Map.update(
+        top_level_stop.(pathway.from_stop_id),
+        MapSet.new([pathway]),
+        &MapSet.put(&1, pathway)
+      )
+      |> Map.update(
+        top_level_stop.(pathway.to_stop_id),
+        MapSet.new([pathway]),
+        &MapSet.put(&1, pathway)
+      )
+  end
+
+pathways_by_station |> Map.keys()
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+["place-bbsta", "place-qnctr", "place-newto", "place-brkhl", "place-kencl", "place-symcl",
+ "place-spmnl", "place-fldcr", "place-alfcl", "place-forhl", "place-babck", "place-cedgr",
+ "place-belsq", "place-astao", "place-rcmnl", "place-knncl", "place-eliot", "place-rbmnl",
+ "place-mlmnl", "place-rsmnl", "place-woodl", "place-esomr", "place-lech", "place-prmnl",
+ "place-river", "place-masta", "place-wtcst", "place-bmmnl", "place-butlr", "place-unsqu",
+ "place-mvbcl", "place-longw", "place-mgngl", "place-chncl", "place-state", "place-wondl",
+ "place-fenwy", "place-valrd", "place-WML-0091", "place-shmnl", "place-WML-0102", "place-ogmnl",
+ "place-harsq", "place-bvmnl", "place-coecl", "place-bomnl", "place-asmnl", "place-qamnl",
+ "place-smmnl", "place-gover", ...]
+```
+
+<!-- livebook:{"reevaluate_automatically":true} -->
+
+```elixir
+defmodule StationViz do
+  def clean_id(stop_id) do
+    stop_id
+    |> String.replace(" ", "-")
+  end
+
+  def any_informed_entity?(alerts, predicate) do
+    Enum.any?(
+      alerts,
+      fn %{informed_entity: informed_entity} -> Enum.any?(informed_entity, predicate) end
+    )
+  end
+
+  def node(gtfs_stop, alerts) do
+    stop_id = gtfs_stop.stop_id
+
+    closed_icon =
+      if any_informed_entity?(alerts, &(&1.stop_id == stop_id)) do
+        "⚠️"
+      end
+
+    {stop_before, stop_title_pieces, stop_after} =
+      case gtfs_stop do
+        %{location_type: "0", stop_id: id, stop_desc: desc} ->
+          {"[[", [closed_icon, id, desc], "]]"}
+
+        %{location_type: "2", stop_desc: desc} ->
+          {"[/", [closed_icon, desc], "\\]"}
+
+        %{stop_desc: desc} ->
+          {"[", [closed_icon, desc], "]"}
+      end
+
+    stop_title =
+      stop_title_pieces
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join(" ")
+
+    ~s(#{clean_id(stop_id)}#{stop_before}"#{stop_title}"#{stop_after})
+  end
+
+  def relevant_pathway_data(%{
+        pathway_mode: mode,
+        facility_id: facility,
+        from_stop_id: from,
+        to_stop_id: to
+      }) do
+    %{
+      mode:
+        case mode do
+          "1" -> nil
+          "2" -> "Stairs"
+          "3" -> "Moving walkway"
+          "4" -> "Escalator"
+          "5" -> "Elevator"
+          "6" -> "Fare gate"
+          "7" -> "Exit gate"
+        end,
+      facility: facility,
+      from: from,
+      to: to,
+      directed: true
+    }
+  end
+
+  def flatten_symmetric_pathways(pathways) do
+    for pathway <- pathways, reduce: %{} do
+      acc ->
+        map_key = {pathway.mode, pathway.facility, Enum.sort([pathway.from, pathway.to])}
+        Map.update(acc, map_key, pathway, &Map.merge(&1, %{directed: false, name: nil}))
+    end
+    |> Map.values()
+  end
+
+  def pathway(pathway, alerts) do
+    closed_icon =
+      if any_informed_entity?(alerts, &(&1.facility_id == pathway.facility)) do
+        "🚫"
+      else
+        ""
+      end
+
+    label =
+      case pathway do
+        %{mode: nil} -> []
+        %{mode: mode, facility: facility} -> [closed_icon, mode, facility]
+      end
+      |> Enum.reject(&(&1 == ""))
+      |> Enum.join(" ")
+
+    tail =
+      case pathway.directed do
+        true -> ">"
+        false -> "-"
+      end
+
+    case label do
+      "" -> "#{clean_id(pathway.from)} --#{tail} #{clean_id(pathway.to)}"
+      label -> ~s(#{clean_id(pathway.from)} -- "#{label}" --#{tail} #{clean_id(pathway.to)})
+    end
+  end
+
+  def graph(station_id, subgraph_mode, pathways_by_station, gtfs_stops, alerts_by_station) do
+    alerts = alerts_by_station[station_id]
+
+    pathways =
+      Map.get(pathways_by_station, station_id, [])
+      |> Enum.map(&relevant_pathway_data/1)
+
+    if pathways == [] do
+      IO.puts("Warning: no pathways available for #{gtfs_stops[station_id].stop_name}")
+    end
+
+    child_stops =
+      pathways
+      |> Enum.flat_map(&[&1.from, &1.to])
+      |> Enum.uniq()
+      |> Enum.map(&gtfs_stops[&1])
+
+    fare_gate_subgraphs =
+      pathways
+      |> Enum.filter(&(&1.mode == "Fare gate"))
+      |> Enum.map(fn %{from: from, to: to} ->
+        "subgraph #{:erlang.unique_integer()} [ ]\n#{clean_id(from)}\n#{clean_id(to)}\nend"
+      end)
+
+    digraph = :digraph.new()
+    Enum.each(child_stops, &:digraph.add_vertex(digraph, &1.stop_id, &1))
+    Enum.each(pathways, &:digraph.add_edge(digraph, &1.from, &1.to, &1))
+
+    no_fare_gates_digraph = :digraph_utils.subgraph(digraph, :digraph.vertices(digraph))
+
+    pathways
+    |> Enum.flat_map(fn
+      %{mode: "Fare gate", from: from, to: to} ->
+        no_fare_gates_digraph
+        |> :digraph.edges(from)
+        |> Enum.filter(fn edge_id ->
+          case :digraph.edge(no_fare_gates_digraph, edge_id) do
+            {_, ^from, ^to, _} -> true
+            _ -> false
+          end
+        end)
+
+      _ ->
+        []
+    end)
+    |> then(&:digraph.del_edges(no_fare_gates_digraph, &1))
+
+    unpaid_subgraph =
+      child_stops
+      # entrance/exit
+      |> Enum.filter(&(&1.location_type == "2"))
+      |> Enum.map(& &1.stop_id)
+      |> :digraph_utils.reachable(no_fare_gates_digraph)
+
+    mermaid_text =
+      [
+        ["graph TD"],
+        child_stops
+        |> Enum.map(&node(&1, alerts))
+        |> Enum.sort(),
+        case subgraph_mode do
+          nil -> []
+          :fare_gates -> fare_gate_subgraphs
+          :unpaid -> Enum.concat([["subgraph unpaid", "direction LR"], unpaid_subgraph, ["end"]])
+        end,
+        pathways
+        |> flatten_symmetric_pathways()
+        |> Enum.map(&pathway(&1, alerts))
+        |> Enum.sort()
+      ]
+      |> Enum.concat()
+      |> Enum.join("\n")
+
+    mermaid_debug_url =
+      mermaid_text
+      |> then(&Jason.encode_to_iodata!(%{code: &1, mermaid: %{}}))
+      |> :zlib.compress()
+      |> Base.url_encode64(padding: false)
+      |> then(&"https://mermaid.live/edit#pako:#{&1}")
+
+    Kino.Layout.tabs(
+      Diagram: Kino.Mermaid.new(mermaid_text),
+      "Inspect Alerts": Kino.Inspect.new(alerts),
+      "Inspect Child Stops": Kino.DataTable.new(child_stops),
+      "Debug Diagram":
+        Kino.Markdown.new("[Debug diagram in Mermaid editor](#{mermaid_debug_url})")
+    )
+  end
+end
+
+station_id =
+  Kino.Shorts.read_select(
+    "Station",
+    stations_with_alerts |> Enum.map(&{&1, gtfs_stops[&1].stop_name})
+  )
+
+subgraph_mode =
+  Kino.Shorts.read_select(
+    "Subgraph",
+    nil: "None",
+    fare_gates: "Fare Gates",
+    unpaid: "Unpaid Zone"
+  )
+
+StationViz.graph(
+  station_id,
+  subgraph_mode,
+  pathways_by_station,
+  gtfs_stops,
+  alerts_by_station
+)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  %{
+    cause: "MAINTENANCE",
+    severity: 3,
+    effect: "ACCESSIBILITY_ISSUE",
+    effect_detail: "ESCALATOR_CLOSURE",
+    cause_detail: "MAINTENANCE",
+    header_text: %{
+      translation: [
+        %{
+          text: "Fields Corner Escalator 427 (Paid lobby to Alewife platform) unavailable due to maintenance",
+          language: "en"
+        }
+      ]
+    },
+    description_text: %{translation: [%{text: "", language: "en"}]},
+    severity_level: "WARNING",
+    service_effect_text: %{
+      translation: [%{text: "Fields Corner escalator unavailable", language: "en"}]
+    },
+    short_header_text: %{
+      translation: [
+        %{
+          text: "Fields Corner Escalator 427 (Paid lobby to Alewife platform) unavailable due to maintenance",
+          language: "en"
+        }
+      ]
+    },
+    created_timestamp: 1700582851,
+    last_modified_timestamp: 1700582896,
+    last_push_notification_timestamp: 1700582851,
+    alert_lifecycle: "NEW",
+    duration_certainty: "UNKNOWN",
+    active_period: [%{start: 1700582820}],
+    informed_entity: [%{facility_id: "427", stop_id: "70090", activities: ["USING_ESCALATOR"]}],
+    alert_id: "537825"
+  }
+]
+```
