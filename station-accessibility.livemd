@@ -441,6 +441,13 @@ defmodule ExtraDigraphUtils do
     :digraph_utils.subgraph(digraph, :digraph.vertices(digraph))
   end
 
+  def add_edge!(digraph, from, to, edge_label, edge_id \\ :erlang.unique_integer()) do
+    case :digraph.add_edge(digraph, edge_id, from, to, edge_label) do
+      {:error, error} -> raise inspect(error)
+      _ -> :ok
+    end
+  end
+
   def filter_edges(digraph, predicate) do
     :digraph.edges(digraph)
     |> Enum.reject(fn edge_id ->
@@ -449,13 +456,126 @@ defmodule ExtraDigraphUtils do
     end)
     |> then(&:digraph.del_edges(digraph, &1))
   end
+
+  def map_labels(digraph, map_vertex_label, map_edge_label) do
+    result = :digraph.new()
+
+    for vertex_id <- :digraph.vertices(digraph) do
+      {^vertex_id, vertex_label} = :digraph.vertex(digraph, vertex_id)
+      :digraph.add_vertex(result, vertex_id, map_vertex_label.(vertex_label))
+    end
+
+    for edge_id <- :digraph.edges(digraph) do
+      {^edge_id, from, to, edge_label} = :digraph.edge(digraph, edge_id)
+      :digraph.add_edge(result, from, to, map_edge_label.(edge_label))
+    end
+
+    result
+  end
 end
 ```
 
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, ExtraDigraphUtils, <<70, 79, 82, 49, 0, 0, 9, ...>>, {:filter_edges, 2}}
+{:module, ExtraDigraphUtils, <<70, 79, 82, 49, 0, 0, 16, ...>>, {:map_labels, 3}}
+```
+
+```elixir
+defmodule DigraphRender do
+  defmodule Node do
+    defstruct [:id, :shape, :label]
+  end
+
+  defmodule Edge do
+    defstruct [:from_id, :to_id, :directed, :label]
+  end
+
+  defmodule Subgraph do
+    defstruct [:id, :label, :node_ids]
+  end
+end
+
+defmodule Mermaid do
+  def clean_id(id) do
+    String.replace(id, " ", "-")
+  end
+
+  def render_node(%DigraphRender.Node{id: node_id, shape: shape, label: label}) do
+    {prefix, postfix} =
+      case shape do
+        :rectangle -> {"[", "]"}
+        :trapezoid -> {"[/", "\\]"}
+        :double_rect -> {"[[", "]]"}
+      end
+
+    ~s(#{clean_id(node_id)}#{prefix}"#{label}"#{postfix})
+  end
+
+  def flatten_edges(edges) do
+    for edge <- edges, reduce: %{} do
+      acc ->
+        map_key = {Enum.sort([edge.from_id, edge.to_id]), edge.label}
+        Map.update(acc, map_key, edge, &Map.merge(&1, %{directed: false}))
+    end
+    |> Map.values()
+  end
+
+  def render_edge(%DigraphRender.Edge{
+        from_id: from_id,
+        to_id: to_id,
+        directed: directed,
+        label: label
+      }) do
+    tail =
+      case directed do
+        true -> ">"
+        false -> "-"
+      end
+
+    case label do
+      "" -> "#{Mermaid.clean_id(from_id)} --#{tail} #{Mermaid.clean_id(to_id)}"
+      label -> ~s(#{Mermaid.clean_id(from_id)} -- "#{label}" --#{tail} #{Mermaid.clean_id(to_id)})
+    end
+  end
+
+  def render_subgraph(%DigraphRender.Subgraph{
+        id: subgraph_id,
+        label: label,
+        node_ids: node_ids
+      }) do
+    ~s(subgraph #{subgraph_id} [#{label}]\n#{Enum.join(node_ids, "\n")}\nend)
+  end
+
+  def render(digraph, subgraphs, direction) do
+    [
+      ["graph #{direction}"],
+      :digraph.vertices(digraph)
+      |> Enum.map(fn vertex_id ->
+        {^vertex_id, vertex} = :digraph.vertex(digraph, vertex_id)
+        render_node(vertex)
+      end)
+      |> Enum.sort(),
+      subgraphs |> Enum.map(&render_subgraph/1),
+      :digraph.edges(digraph)
+      |> Enum.map(fn edge_id ->
+        {^edge_id, _, _, edge} = :digraph.edge(digraph, edge_id)
+        edge
+      end)
+      |> flatten_edges()
+      |> Enum.map(&render_edge/1)
+      |> Enum.sort()
+    ]
+    |> Enum.concat()
+    |> Enum.join("\n")
+  end
+end
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+{:module, Mermaid, <<70, 79, 82, 49, 0, 0, 24, ...>>, {:render, 3}}
 ```
 
 ```elixir
@@ -472,10 +592,17 @@ defmodule StationGraph do
       |> Map.values()
       |> Enum.filter(&(&1.parent_station == station_id))
 
+    child_stop_ids = Enum.map(child_stops, & &1.stop_id)
+
     digraph = :digraph.new()
 
     Enum.each(child_stops, &:digraph.add_vertex(digraph, &1.stop_id, &1))
-    Enum.each(pathways, &:digraph.add_edge(digraph, &1.from, &1.to, &1))
+
+    Enum.each(pathways, fn pathway ->
+      if pathway.from in child_stop_ids and pathway.to in child_stop_ids do
+        ExtraDigraphUtils.add_edge!(digraph, pathway.from, pathway.to, pathway)
+      end
+    end)
 
     %__MODULE__{
       station_id: station_id,
@@ -498,6 +625,27 @@ defmodule StationGraph do
     |> Enum.map(fn {_, _, _, pathway} -> pathway end)
   end
 
+  def with_reentry(station_graph) do
+    entrances = entrances(station_graph)
+    temp_graph = ExtraDigraphUtils.clone(station_graph.digraph)
+
+    for first_entrance <- entrances do
+      for second_entrance <- entrances do
+        if first_entrance != second_entrance do
+          ExtraDigraphUtils.add_edge!(temp_graph, first_entrance, second_entrance, %{
+            mode: "Re-entry",
+            facility: "",
+            from: first_entrance,
+            to: second_entrance,
+            directed: true
+          })
+        end
+      end
+    end
+
+    %__MODULE__{station_graph | digraph: temp_graph}
+  end
+
   def platform_accessibility(station_graph, alerts) do
     closed_facilities =
       alerts
@@ -506,15 +654,17 @@ defmodule StationGraph do
         |> Enum.map(& &1.facility_id)
       end)
 
+    with_reentry_graph = with_reentry(station_graph)
+
     regular_elevator_graph =
-      with_edge_filter(station_graph, fn
+      with_edge_filter(with_reentry_graph, fn
         %{mode: "Stairs"} -> false
         %{mode: "Escalator"} -> false
         _ -> true
       end)
 
     regular_escalator_graph =
-      with_edge_filter(station_graph, fn
+      with_edge_filter(with_reentry_graph, fn
         %{mode: "Stairs"} -> false
         _ -> true
       end)
@@ -523,15 +673,32 @@ defmodule StationGraph do
       with_edge_filter(regular_elevator_graph, fn
         %{facility: ""} -> true
         %{facility: facility} -> facility not in closed_facilities
+        _ -> true
       end)
 
     current_escalator_graph =
       with_edge_filter(regular_escalator_graph, fn
         %{facility: ""} -> true
         %{facility: facility} -> facility not in closed_facilities
+        _ -> true
       end)
 
-    reachable = %{
+    graphs = %{
+      elevator: %{regular: regular_elevator_graph, current: current_elevator_graph},
+      escalator: %{regular: regular_escalator_graph, current: current_escalator_graph}
+    }
+
+    platforms = platforms(station_graph)
+
+    platform_pairs =
+      platforms
+      |> Enum.flat_map(fn first_platform ->
+        platforms
+        |> Enum.reject(&(&1 == first_platform))
+        |> Enum.map(&{first_platform, &1})
+      end)
+
+    can_enter = %{
       elevator: %{
         regular: reachable_from_entrances(regular_elevator_graph),
         current: reachable_from_entrances(current_elevator_graph)
@@ -542,23 +709,70 @@ defmodule StationGraph do
       }
     }
 
-    child_stops(station_graph)
-    |> Enum.filter(&(&1.location_type == "0"))
-    |> Map.new(fn %{stop_id: stop_id} ->
-      status = fn %{regular: regular, current: current} ->
-        cond do
-          stop_id in current -> :accessible
-          stop_id in regular -> :temporarily_inaccessible
-          true -> :regularly_inaccessible
-        end
-      end
+    can_exit = %{
+      elevator: %{
+        regular: reaching_to_entrances(regular_elevator_graph),
+        current: reaching_to_entrances(current_elevator_graph)
+      },
+      escalator: %{
+        regular: reaching_to_entrances(regular_escalator_graph),
+        current: reaching_to_entrances(current_escalator_graph)
+      }
+    }
 
-      {stop_id,
-       %{
-         elevator: status.(reachable.elevator),
-         escalator: status.(reachable.escalator)
-       }}
-    end)
+    [
+      Enum.map(platforms, fn platform ->
+        key = {:entrance, platform}
+
+        value =
+          [:regular, :current]
+          |> Map.new(fn state ->
+            {state,
+             cond do
+               platform in can_enter.elevator[state] -> :elevator
+               platform in can_enter.escalator[state] -> :escalator
+               true -> :stairs
+             end}
+          end)
+
+        {key, value}
+      end),
+      Enum.map(platforms, fn platform ->
+        key = {platform, :exit}
+
+        value =
+          [:regular, :current]
+          |> Map.new(fn state ->
+            {state,
+             cond do
+               platform in can_exit.elevator[state] -> :elevator
+               platform in can_exit.escalator[state] -> :escalator
+               true -> :stairs
+             end}
+          end)
+
+        {key, value}
+      end),
+      Enum.map(platform_pairs, fn {from, to} ->
+        key = {from, to}
+
+        value =
+          [:regular, :current]
+          |> Map.new(fn state ->
+            {state,
+             cond do
+               reachable?(graphs.elevator[state], from, to) -> :elevator
+               reachable?(graphs.escalator[state], from, to) -> :escalator
+               reachable?(with_reentry_graph, from, to) -> :stairs
+               true -> false
+             end}
+          end)
+
+        {key, value}
+      end)
+    ]
+    |> Enum.concat()
+    |> Map.new()
   end
 
   def reachable_with_edge_filter(station_graph, edge_filter) do
@@ -597,6 +811,12 @@ defmodule StationGraph do
     |> Enum.map(& &1.stop_id)
   end
 
+  defp platforms(station_graph) do
+    child_stops(station_graph)
+    |> Enum.filter(&(&1.location_type == "0"))
+    |> Enum.map(& &1.stop_id)
+  end
+
   defp with_edge_filter(station_graph, edge_filter) do
     temp_graph = ExtraDigraphUtils.clone(station_graph.digraph)
 
@@ -608,22 +828,28 @@ defmodule StationGraph do
   defp reachable_from_entrances(station_graph) do
     :digraph_utils.reachable(entrances(station_graph), station_graph.digraph)
   end
+
+  defp reaching_to_entrances(station_graph) do
+    :digraph_utils.reaching(entrances(station_graph), station_graph.digraph)
+  end
+
+  defp reachable?(station_graph, from, to) do
+    case :digraph.get_path(station_graph.digraph, from, to) do
+      false -> false
+      _ -> true
+    end
+  end
 end
 ```
 
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, StationGraph, <<70, 79, 82, 49, 0, 0, 41, ...>>, {:reachable_from_entrances, 1}}
+{:module, StationGraph, <<70, 79, 82, 49, 0, 0, 59, ...>>, {:reachable?, 3}}
 ```
 
 ```elixir
 defmodule StationViz do
-  def clean_id(stop_id) do
-    stop_id
-    |> String.replace(" ", "-")
-  end
-
   def any_informed_entity?(alerts, predicate) do
     Enum.any?(
       alerts,
@@ -639,16 +865,16 @@ defmodule StationViz do
         "⚠️"
       end
 
-    {stop_before, stop_title_pieces, stop_after} =
+    {shape, stop_title_pieces} =
       case gtfs_stop do
         %{location_type: "0", stop_id: id, stop_desc: desc} ->
-          {"[[", [closed_icon, id, desc], "]]"}
+          {:double_rect, [closed_icon, id, desc]}
 
         %{location_type: "2", stop_desc: desc} ->
-          {"[/", [closed_icon, desc], "\\]"}
+          {:trapezoid, [closed_icon, desc]}
 
         %{stop_desc: desc} ->
-          {"[", [closed_icon, desc], "]"}
+          {:rectangle, [closed_icon, desc]}
       end
 
     stop_title =
@@ -656,31 +882,7 @@ defmodule StationViz do
       |> Enum.reject(&is_nil/1)
       |> Enum.join(" ")
 
-    ~s(#{clean_id(stop_id)}#{stop_before}"#{stop_title}"#{stop_after})
-  end
-
-  def relevant_pathway_data(%{
-        pathway_mode: mode,
-        facility_id: facility,
-        from_stop_id: from,
-        to_stop_id: to
-      }) do
-    %{
-      mode:
-        case mode do
-          "1" -> nil
-          "2" -> "Stairs"
-          "3" -> "Moving walkway"
-          "4" -> "Escalator"
-          "5" -> "Elevator"
-          "6" -> "Fare gate"
-          "7" -> "Exit gate"
-        end,
-      facility: facility,
-      from: from,
-      to: to,
-      directed: true
-    }
+    %DigraphRender.Node{id: stop_id, shape: shape, label: stop_title}
   end
 
   def flatten_symmetric_pathways(pathways) do
@@ -708,16 +910,12 @@ defmodule StationViz do
       |> Enum.reject(&(&1 == ""))
       |> Enum.join(" ")
 
-    tail =
-      case pathway.directed do
-        true -> ">"
-        false -> "-"
-      end
-
-    case label do
-      "" -> "#{clean_id(pathway.from)} --#{tail} #{clean_id(pathway.to)}"
-      label -> ~s(#{clean_id(pathway.from)} -- "#{label}" --#{tail} #{clean_id(pathway.to)})
-    end
+    %DigraphRender.Edge{
+      from_id: pathway.from,
+      to_id: pathway.to,
+      directed: pathway.directed,
+      label: label
+    }
   end
 
   def graph(station_graph, subgraph_mode, alerts_by_station) do
@@ -731,75 +929,85 @@ defmodule StationViz do
 
     child_stops = StationGraph.child_stops(station_graph)
 
-    fare_gate_subgraphs =
-      pathways
-      |> Enum.filter(&(&1.mode == "Fare gate"))
-      |> Enum.map(fn %{from: from, to: to} ->
-        "subgraph #{:erlang.unique_integer()} [ ]\n#{clean_id(from)}\n#{clean_id(to)}\nend"
-      end)
+    subgraphs =
+      case subgraph_mode do
+        nil ->
+          []
 
-    unpaid_subgraph =
-      StationGraph.reachable_with_edge_filter(station_graph, fn
-        %{mode: "Fare gate"} -> false
-        _ -> true
-      end)
+        :fare_gates ->
+          pathways
+          |> Enum.filter(&(&1.mode == "Fare gate"))
+          |> Enum.map(fn %{from: from, to: to} ->
+            %DigraphRender.Subgraph{
+              id: :erlang.unique_integer(),
+              label: " ",
+              node_ids: [from, to]
+            }
+          end)
 
-    reachable_elevator_subgraph =
-      StationGraph.reachable_with_edge_filter(station_graph, fn
-        %{mode: "Stairs"} -> false
-        %{mode: "Escalator"} -> false
-        %{facility: ""} -> true
-        %{facility: facility} -> not any_informed_entity?(alerts, &(&1.facility_id == facility))
-      end)
+        :unpaid ->
+          [
+            %DigraphRender.Subgraph{
+              id: :unpaid,
+              label: "Reachable without paying",
+              node_ids:
+                StationGraph.reachable_with_edge_filter(station_graph, fn
+                  %{mode: "Fare gate"} -> false
+                  _ -> true
+                end)
+            }
+          ]
 
-    reachable_escalator_subgraph =
-      StationGraph.reachable_with_edge_filter(station_graph, fn
-        %{mode: "Stairs"} -> false
-        %{facility: ""} -> true
-        %{facility: facility} -> not any_informed_entity?(alerts, &(&1.facility_id == facility))
-      end)
+        :reachable_elevator ->
+          [
+            %DigraphRender.Subgraph{
+              id: :reachable,
+              label: "Reachable without escalator or stairs",
+              node_ids:
+                StationGraph.reachable_with_edge_filter(station_graph, fn
+                  %{mode: "Stairs"} ->
+                    false
 
-    mermaid_text =
-      [
-        ["graph TD"],
-        child_stops
-        |> Enum.map(&node(&1, alerts))
-        |> Enum.sort(),
-        case subgraph_mode do
-          nil ->
-            []
+                  %{mode: "Escalator"} ->
+                    false
 
-          :fare_gates ->
-            fare_gate_subgraphs
+                  %{facility: ""} ->
+                    true
 
-          :unpaid ->
-            Enum.concat([
-              ["subgraph unpaid", "direction LR"],
-              unpaid_subgraph |> Enum.map(&clean_id/1),
-              ["end"]
-            ])
+                  %{facility: facility} ->
+                    not any_informed_entity?(alerts, &(&1.facility_id == facility))
+                end)
+            }
+          ]
 
-          :reachable_elevator ->
-            Enum.concat([
-              ["subgraph reachable", "direction LR"],
-              reachable_elevator_subgraph |> Enum.map(&clean_id/1),
-              ["end"]
-            ])
+        :reachable_escalator ->
+          [
+            %DigraphRender.Subgraph{
+              id: :reachable,
+              label: "Reachable without stairs",
+              node_ids:
+                StationGraph.reachable_with_edge_filter(station_graph, fn
+                  %{mode: "Stairs"} ->
+                    false
 
-          :reachable_escalator ->
-            Enum.concat([
-              ["subgraph reachable", "direction LR"],
-              reachable_escalator_subgraph |> Enum.map(&clean_id/1),
-              ["end"]
-            ])
-        end,
-        pathways
-        |> flatten_symmetric_pathways()
-        |> Enum.map(&pathway(&1, alerts))
-        |> Enum.sort()
-      ]
-      |> Enum.concat()
-      |> Enum.join("\n")
+                  %{facility: ""} ->
+                    true
+
+                  %{facility: facility} ->
+                    not any_informed_entity?(alerts, &(&1.facility_id == facility))
+                end)
+            }
+          ]
+      end
+
+    renderable_graph =
+      station_graph.digraph
+      |> ExtraDigraphUtils.map_labels(
+        fn child_stop -> node(child_stop, alerts) end,
+        fn pathway -> pathway(pathway, alerts) end
+      )
+
+    mermaid_text = Mermaid.render(renderable_graph, subgraphs, :TD)
 
     mermaid_debug_url =
       mermaid_text
@@ -826,7 +1034,7 @@ end
 <!-- livebook:{"output":true} -->
 
 ```
-{:module, StationViz, <<70, 79, 82, 49, 0, 0, 52, ...>>, {:graph, 3}}
+{:module, StationViz, <<70, 79, 82, 49, 0, 0, 45, ...>>, {:graph, 3}}
 ```
 
 <!-- livebook:{"reevaluate_automatically":true} -->
@@ -856,8 +1064,12 @@ StationGraph.new(station_id, pathways_by_station, gtfs_stops)
 
 ```
 %{
-  "70018" => %{elevator: :temporarily_inaccessible, escalator: :temporarily_inaccessible},
-  "70019" => %{elevator: :accessible, escalator: :accessible}
+  {:entrance, "70018"} => %{regular: :elevator, current: :stairs},
+  {:entrance, "70019"} => %{regular: :elevator, current: :elevator},
+  {"70018", :exit} => %{regular: :elevator, current: :stairs},
+  {"70018", "70019"} => %{regular: :elevator, current: :stairs},
+  {"70019", :exit} => %{regular: :elevator, current: :elevator},
+  {"70019", "70018"} => %{regular: :elevator, current: :stairs}
 }
 ```
 
@@ -874,26 +1086,17 @@ stations_with_alerts
     if :digraph.no_edges(station_graph.digraph) == 0 do
       :no_pathways_data
     else
-      [:elevator, :escalator]
-      |> Map.new(fn mode ->
-        platforms_by_state =
-          platform_accessibility
-          |> Enum.group_by(
-            fn {_platform, state} -> state[mode] end,
-            fn {platform, _state} -> platform end
-          )
+      motions_blocked =
+        platform_accessibility
+        |> Map.filter(fn {_motion, %{regular: regular, current: current}} ->
+          regular != current
+        end)
 
-        platform_states = Map.keys(platforms_by_state)
-
-        status =
-          cond do
-            platform_states == [:accessible] -> :accessible
-            platform_states == [:regularly_inaccessible] -> :regularly_inaccessible
-            true -> Map.take(platforms_by_state, [:temporarily_inaccessible])
-          end
-
-        {mode, status}
-      end)
+      if map_size(motions_blocked) == 0 do
+        :no_impact
+      else
+        motions_blocked
+      end
     end
 
   {station_graph.station_name, status_report}
@@ -904,27 +1107,29 @@ end)
 
 ```
 %{
-  "Andrew" => %{elevator: :accessible, escalator: :accessible},
-  "Ashmont" => %{elevator: :accessible, escalator: :accessible},
-  "Assembly" => %{elevator: :accessible, escalator: :accessible},
-  "Bowdoin" => %{elevator: :regularly_inaccessible, escalator: :regularly_inaccessible},
+  "Andrew" => :no_impact,
+  "Ashmont" => :no_impact,
+  "Assembly" => :no_impact,
+  "Bowdoin" => :no_impact,
   "Chinatown" => %{
-    elevator: %{temporarily_inaccessible: ["70018"]},
-    escalator: %{temporarily_inaccessible: ["70018"]}
+    {:entrance, "70018"} => %{regular: :elevator, current: :stairs},
+    {"70018", :exit} => %{regular: :elevator, current: :stairs},
+    {"70018", "70019"} => %{regular: :elevator, current: :stairs},
+    {"70019", "70018"} => %{regular: :elevator, current: :stairs}
   },
-  "Courthouse" => %{elevator: :accessible, escalator: :accessible},
-  "Downtown Crossing" => %{elevator: :accessible, escalator: :accessible},
-  "Fields Corner" => %{elevator: :accessible, escalator: :accessible},
-  "Forest Hills" => %{elevator: :accessible, escalator: :accessible},
-  "Maverick" => %{elevator: :accessible, escalator: :accessible},
-  "North Quincy" => %{elevator: :accessible, escalator: :accessible},
+  "Courthouse" => :no_impact,
+  "Downtown Crossing" => :no_impact,
+  "Fields Corner" => :no_impact,
+  "Forest Hills" => :no_impact,
+  "Maverick" => :no_impact,
+  "North Quincy" => :no_impact,
   "North Station" => :no_pathways_data,
-  "Oak Grove" => %{elevator: :accessible, escalator: :accessible},
-  "Porter" => %{elevator: :accessible, escalator: :accessible},
+  "Oak Grove" => :no_impact,
+  "Porter" => :no_impact,
   "Providence" => :no_pathways_data,
-  "Quincy Adams" => %{elevator: :accessible, escalator: :accessible},
-  "Ruggles" => %{elevator: :accessible, escalator: :accessible},
-  "State" => %{elevator: :accessible, escalator: :accessible},
-  "Sullivan Square" => %{elevator: :accessible, escalator: :accessible}
+  "Quincy Adams" => :no_impact,
+  "Ruggles" => :no_impact,
+  "State" => :no_impact,
+  "Sullivan Square" => :no_impact
 }
 ```
