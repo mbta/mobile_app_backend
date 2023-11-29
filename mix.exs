@@ -67,7 +67,8 @@ defmodule MobileAppBackend.MixProject do
       {:sentry, "~> 7.0"},
       {:con_cache, "~> 0.12.0"},
       {:absinthe, "~> 1.7"},
-      {:absinthe_plug, "~> 1.5"}
+      {:absinthe_plug, "~> 1.5"},
+      {:timex, "~> 3.7"}
     ]
   end
 
