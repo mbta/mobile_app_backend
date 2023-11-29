@@ -3,8 +3,8 @@ defmodule Stops.Repo do
   Matches the Ecto API, but fetches Stops from the Stop Info API instead.
   """
   use RepoCache, ttl: :timer.hours(1)
-  alias Stops.{Api, Stop}
   alias Routes.Route
+  alias Stops.{Api, Stop}
 
   @type stop_feature ::
           Route.route_type()
