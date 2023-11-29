@@ -5,7 +5,7 @@ defmodule Schedules.Trip do
 
   alias RoutePatterns.RoutePattern
   alias Routes.Shape
-  alias Vehicles.Vehicle
+  # alias Vehicles.Vehicle
 
   @derive Jason.Encoder
 
@@ -16,7 +16,7 @@ defmodule Schedules.Trip do
     :direction_id,
     :shape_id,
     :route_pattern_id,
-    :occupancy,
+    # :occupancy,
     bikes_allowed?: false
   ]
 
@@ -29,7 +29,7 @@ defmodule Schedules.Trip do
           direction_id: 0 | 1,
           shape_id: Shape.id_t() | nil,
           route_pattern_id: RoutePattern.id_t() | nil,
-          bikes_allowed?: boolean,
-          occupancy: Vehicle.crowding() | nil
+          bikes_allowed?: boolean
+          # occupancy: Vehicle.crowding() | nil
         }
 end
