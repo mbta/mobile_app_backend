@@ -1,6 +1,7 @@
 defmodule Stops.ApiTest do
   use ExUnit.Case
   import Stops.Api
+  import Test.Support.Helpers
   alias Stops.Stop
 
   describe "by_gtfs_id/1" do
@@ -98,14 +99,7 @@ defmodule Stops.ApiTest do
     end
 
     test "returns an error if the API returns an error" do
-      bypass = Bypass.open()
-      v3_url = Application.get_env(:mobile_app_backend, :base_url)
-
-      on_exit(fn ->
-        Application.put_env(:mobile_app_backend, :base_url, v3_url)
-      end)
-
-      Application.put_env(:mobile_app_backend, :base_url, "http://localhost:#{bypass.port}")
+      bypass = bypass_api()
 
       Bypass.expect(bypass, fn conn ->
         Plug.Conn.resp(conn, 200, "")
@@ -116,14 +110,7 @@ defmodule Stops.ApiTest do
   end
 
   test "all/0 returns error if API returns error" do
-    bypass = Bypass.open()
-    v3_url = Application.get_env(:mobile_app_backend, :base_url)
-
-    on_exit(fn ->
-      Application.put_env(:mobile_app_backend, :base_url, v3_url)
-    end)
-
-    Application.put_env(:mobile_app_backend, :base_url, "http://localhost:#{bypass.port}")
+    bypass = bypass_api()
 
     Bypass.expect(bypass, fn conn ->
       Plug.Conn.resp(conn, 200, "")
@@ -133,14 +120,7 @@ defmodule Stops.ApiTest do
   end
 
   test "by_route returns an error tuple if the V3 API returns an error" do
-    bypass = Bypass.open()
-    v3_url = Application.get_env(:mobile_app_backend, :base_url)
-
-    on_exit(fn ->
-      Application.put_env(:mobile_app_backend, :base_url, v3_url)
-    end)
-
-    Application.put_env(:mobile_app_backend, :base_url, "http://localhost:#{bypass.port}")
+    bypass = bypass_api()
 
     Bypass.expect(bypass, fn conn ->
       Plug.Conn.resp(conn, 200, "")
@@ -154,14 +134,7 @@ defmodule Stops.ApiTest do
   end
 
   # test "by_trip returns an empty list if the V3 API returns an error" do
-  #   bypass = Bypass.open()
-  #   v3_url = Application.get_env(:mobile_app_backend, :base_url)
-
-  #   on_exit(fn ->
-  #     Application.put_env(:mobile_app_backend, :base_url, v3_url)
-  #   end)
-
-  #   Application.put_env(:mobile_app_backend, :base_url, "http://localhost:#{bypass.port}")
+  #   bypass = bypass_api()
 
   #   Bypass.expect(bypass, fn conn ->
   #     Plug.Conn.resp(conn, 500, "")
