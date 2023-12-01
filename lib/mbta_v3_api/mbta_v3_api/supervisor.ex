@@ -12,6 +12,7 @@ defmodule MBTAV3API.Supervisor do
     children = [
       RepoCache.Supervisor,
       Routes.Supervisor,
+      Stops.Repo,
       MBTAV3API.Cache
     ]
 

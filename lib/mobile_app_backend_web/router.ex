@@ -31,6 +31,16 @@ defmodule MobileAppBackendWeb.Router do
     get("/route/by-stop/:stop_id", RouteController, :by_stop)
   end
 
+  scope "/graphql" do
+    pipe_through :api
+
+    forward "/graphiql", Absinthe.Plug.GraphiQL,
+      schema: MobileAppBackendWeb.Schema,
+      interface: :playground
+
+    forward "/", Absinthe.Plug, schema: MobileAppBackendWeb.Schema
+  end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:mobile_app_backend, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put

@@ -2,8 +2,7 @@ defmodule Stops.Stop do
   @moduledoc """
   Domain model for a Stop.
   """
-  # alias Stops.{Api, Stop}
-  alias Stops.Stop
+  alias Stops.{Api, Stop}
 
   @derive {Jason.Encoder, except: [:bike_storage, :fare_facilities]}
 
@@ -44,9 +43,8 @@ defmodule Stops.Stop do
           accessibility: [String.t()],
           address: String.t() | nil,
           municipality: String.t() | nil,
-          parking_lots: [Stop.ParkingLot.t()],
-          # TODO: Restore fare_facilities once we've copied in Stops.Api
-          # fare_facilities: MapSet.t(Api.fare_facility()),
+          # parking_lots: [Stop.ParkingLot.t()],
+          fare_facilities: MapSet.t(Api.fare_facility()),
           bike_storage: [Api.bike_storage_types()],
           latitude: float,
           longitude: float,
@@ -303,17 +301,17 @@ end
 #   end
 # end
 
-# defmodule Stops.Stop.ClosedStopInfo do
-#   @moduledoc """
-#   Information about stations not in API data.
-#   """
-#   @derive Jason.Encoder
+defmodule Stops.Stop.ClosedStopInfo do
+  @moduledoc """
+  Information about stations not in API data.
+  """
+  @derive Jason.Encoder
 
-#   defstruct reason: "",
-#             info_link: ""
+  defstruct reason: "",
+            info_link: ""
 
-#   @type t :: %Stops.Stop.ClosedStopInfo{
-#           reason: String.t(),
-#           info_link: String.t()
-#         }
-# end
+  @type t :: %Stops.Stop.ClosedStopInfo{
+          reason: String.t(),
+          info_link: String.t()
+        }
+end
