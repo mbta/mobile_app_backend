@@ -9,7 +9,8 @@ defmodule MobileAppBackend.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      test_coverage: [tool: LcovEx]
     ]
   end
 
@@ -68,7 +69,8 @@ defmodule MobileAppBackend.MixProject do
       {:con_cache, "~> 0.12.0"},
       {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
-      {:timex, "~> 3.7"}
+      {:timex, "~> 3.7"},
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
     ]
   end
 
