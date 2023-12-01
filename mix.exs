@@ -63,7 +63,7 @@ defmodule MobileAppBackend.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:bypass, "~> 2.1", only: :test},
-      {:httpoison, "~> 1.5"},
+      {:httpoison, "~> 2.2"},
       {:sentry, "~> 7.0"},
       {:con_cache, "~> 0.12.0"},
       {:absinthe, "~> 1.7"},
