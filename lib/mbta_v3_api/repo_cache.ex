@@ -23,7 +23,7 @@ defmodule RepoCache do
 
   """
   defmacro __using__(opts \\ []) do
-    opts = include_defaults(opts)
+    opts = include_defaults(opts, __CALLER__.module)
 
     quote location: :keep do
       require unquote(__MODULE__)
@@ -35,14 +35,15 @@ defmodule RepoCache do
     end
   end
 
-  defp include_defaults(opts) do
+  defp include_defaults(opts, name) do
     opts =
       opts
-      |> Keyword.put_new(:ttl, :timer.seconds(1))
+      |> Keyword.put_new(:global_ttl, :timer.seconds(1))
       |> Keyword.put(:read_concurrency, true)
       |> Keyword.put(:write_concurrency, true)
+      |> Keyword.put(:name, name)
 
-    Keyword.put_new(opts, :ttl_check, opts[:ttl])
+    Keyword.put_new(opts, :ttl_check_interval, opts[:ttl])
   end
 
   defmacro cache(fun_param, fun, cache_opts \\ []) do
@@ -63,11 +64,11 @@ defmodule RepoCache do
   def server_functions do
     quote do
       def start_link do
-        ConCache.start_link(opts(), name: __MODULE__)
+        ConCache.start_link(opts())
       end
 
       def default_ttl do
-        Keyword.get(opts(), :ttl)
+        Keyword.get(opts(), :global_ttl)
       end
 
       def clear_cache do

@@ -65,7 +65,7 @@ defmodule MobileAppBackend.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:httpoison, "~> 2.2"},
       {:sentry, "~> 10.0"},
-      {:con_cache, "~> 0.12.0"},
+      {:con_cache, "~> 1.0.0"},
       {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
       {:timex, "~> 3.7"}
