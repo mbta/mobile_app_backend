@@ -88,7 +88,13 @@ jobs:
       - name: Check formatting
         run: mix format --check-formatted
       - name: Run tests
-        run: source envrc.example && mix test
+        run: source envrc.example && mix test --cover
+      - name: Report test coverage
+        uses: mbta/github-actions-report-lcov@v1
+        with:
+          coverage-files: cover/lcov.info
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: mbta/actions/dialyzer@v2
       - name: Check for unused dependencies
         run: mix deps.unlock --check-unused
