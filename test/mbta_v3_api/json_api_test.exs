@@ -1,5 +1,7 @@
-defmodule JsonApiTest do
+defmodule MBTAV3API.JsonApiTest do
   use ExUnit.Case, async: true
+
+  alias MBTAV3API.JsonApi
 
   test ".parse parses an error into a JsonApi.Error struct" do
     body = """

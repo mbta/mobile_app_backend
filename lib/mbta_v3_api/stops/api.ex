@@ -3,7 +3,8 @@ defmodule Stops.Api do
   Wrapper around the remote stop information service.
   """
   require Logger
-  alias JsonApi.Item
+  alias MBTAV3API.JsonApi
+  alias MBTAV3API.JsonApi.Item
   alias Stops.Stop
 
   @type fare_facility ::

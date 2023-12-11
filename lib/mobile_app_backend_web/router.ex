@@ -14,6 +14,12 @@ defmodule MobileAppBackendWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :jsonapi do
+    plug JSONAPI.EnsureSpec
+    plug JSONAPI.Deserializer
+    plug JSONAPI.UnderscoreParameters
+  end
+
   scope "/", MobileAppBackendWeb do
     pipe_through :browser
 
@@ -29,6 +35,12 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through :api
 
     get("/route/by-stop/:stop_id", RouteController, :by_stop)
+  end
+
+  scope "/jsonapi", MobileAppBackendWeb do
+    pipe_through :jsonapi
+
+    resources("/stop", StopController, only: [:show])
   end
 
   scope "/graphql" do

@@ -3,6 +3,7 @@ defmodule MBTAV3APITest do
 
   import Plug.Conn, only: [fetch_query_params: 1, send_resp: 3]
   import Test.Support.Helpers
+  alias MBTAV3API.JsonApi
 
   setup _ do
     bypass = Bypass.open()

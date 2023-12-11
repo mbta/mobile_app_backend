@@ -1,4 +1,4 @@
-defmodule JsonApi.Item do
+defmodule MBTAV3API.JsonApi.Item do
   @moduledoc """
   JSON API results data.
   """
@@ -6,15 +6,15 @@ defmodule JsonApi.Item do
 
   defstruct [:type, :id, :attributes, :relationships]
 
-  @type t :: %JsonApi.Item{
+  @type t :: %__MODULE__{
           type: String.t(),
           id: String.t(),
           attributes: %{String.t() => any},
-          relationships: %{String.t() => list(JsonApi.Item.t())}
+          relationships: %{String.t() => list(t())}
         }
 end
 
-defmodule JsonApi.Error do
+defmodule MBTAV3API.JsonApi.Error do
   @moduledoc """
   JSON API error data.
   """
@@ -30,36 +30,40 @@ defmodule JsonApi.Error do
         }
 end
 
-defmodule JsonApi do
+defmodule MBTAV3API.JsonApi do
   @moduledoc """
   Helpers for working with a JSON API.
   """
   @derive Jason.Encoder
 
   defstruct links: %{}, data: []
-  @type t :: %JsonApi{links: %{String.t() => String.t()}, data: list(JsonApi.Item.t())}
 
-  @spec empty() :: JsonApi.t()
+  @type t :: %__MODULE__{
+          links: %{String.t() => String.t()},
+          data: list(MBTAV3API.JsonApi.Item.t())
+        }
+
+  @spec empty() :: t()
   def empty do
-    %JsonApi{
+    %__MODULE__{
       links: %{},
       data: []
     }
   end
 
-  @spec merge(JsonApi.t(), JsonApi.t()) :: JsonApi.t()
+  @spec merge(t(), t()) :: t()
   def merge(j1, j2) do
-    %JsonApi{
+    %__MODULE__{
       links: Map.merge(j1.links, j2.links),
       data: j1.data ++ j2.data
     }
   end
 
-  @spec parse(String.t()) :: JsonApi.t() | {:error, any}
+  @spec parse(String.t()) :: t() | {:error, any}
   def parse(body) do
     with {:ok, parsed} <- Jason.decode(body),
          {:ok, data} <- parse_data(parsed) do
-      %JsonApi{
+      %__MODULE__{
         links: parse_links(parsed),
         data: data
       }
@@ -83,7 +87,7 @@ defmodule JsonApi do
     %{}
   end
 
-  @spec parse_data(term()) :: {:ok, [JsonApi.Item.t()]} | {:error, any}
+  @spec parse_data(term()) :: {:ok, [MBTAV3API.JsonApi.Item.t()]} | {:error, any}
   defp parse_data(%{"data" => data} = parsed) when is_list(data) do
     included = parse_included(parsed)
     {:ok, Enum.map(data, &parse_data_item(&1, included))}
@@ -113,7 +117,7 @@ defmodule JsonApi do
   end
 
   def parse_data_item(%{"type" => type, "id" => id, "attributes" => attributes} = item, included) do
-    %JsonApi.Item{
+    %MBTAV3API.JsonApi.Item{
       type: type,
       id: id,
       attributes: attributes,
@@ -122,7 +126,7 @@ defmodule JsonApi do
   end
 
   def parse_data_item(%{"type" => type, "id" => id}, _) do
-    %JsonApi.Item{
+    %MBTAV3API.JsonApi.Item{
       type: type,
       id: id
     }
@@ -196,7 +200,7 @@ defmodule JsonApi do
   end
 
   defp parse_error(error) do
-    %JsonApi.Error{
+    %MBTAV3API.JsonApi.Error{
       code: error["code"],
       detail: error["detail"],
       source: error["source"],

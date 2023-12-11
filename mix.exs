@@ -70,7 +70,8 @@ defmodule MobileAppBackend.MixProject do
       {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
       {:timex, "~> 3.7"},
-      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
+      {:jsonapi, "~> 1.6"}
     ]
   end
 

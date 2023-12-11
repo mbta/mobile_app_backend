@@ -8,7 +8,7 @@ defmodule Routes.Repo do
 
   import Routes.Parser
 
-  alias JsonApi
+  alias MBTAV3API.JsonApi
   # alias Routes.{Route, Shape}
   alias Routes.Route
   # alias MBTAV3API.{Shapes}
