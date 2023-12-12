@@ -3,6 +3,13 @@ defmodule MobileAppBackendWeb.StopControllerTest do
 
   import Test.Support.Helpers
 
+  setup do
+    Routes.Repo.clear_cache()
+    Stops.Repo.clear_cache()
+
+    :ok
+  end
+
   describe "/jsonapi/stop/place-boyls" do
     test "defaults to all fields no includes", %{conn: conn} do
       conn = get(conn, ~p"/jsonapi/stop/place-boyls")

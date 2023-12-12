@@ -3,6 +3,13 @@ defmodule MobileAppBackendWeb.SchemaTest do
 
   import Test.Support.Helpers
 
+  setup do
+    Routes.Repo.clear_cache()
+    Stops.Repo.clear_cache()
+
+    :ok
+  end
+
   @stop_query """
   query {
     stop(id: "place-boyls") {
