@@ -1,7 +1,7 @@
 defmodule MobileAppBackendWeb.StopControllerTest do
   use MobileAppBackendWeb.ConnCase
 
-  require Test.Support.Helpers
+  import Test.Support.Helpers
 
   describe "/jsonapi/stop/place-boyls" do
     test "defaults to all fields no includes", %{conn: conn} do
@@ -12,7 +12,7 @@ defmodule MobileAppBackendWeb.StopControllerTest do
     end
 
     test "processes includes", %{conn: conn} do
-      bypass = Test.Support.Helpers.bypass_api()
+      bypass = bypass_api()
 
       Bypass.expect(bypass, "GET", "/stops/place-boyls", fn conn ->
         Phoenix.Controller.json(conn, %{
