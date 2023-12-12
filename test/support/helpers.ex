@@ -2,6 +2,7 @@ defmodule Test.Support.Helpers do
   @moduledoc "Test helpers"
 
   alias Test.Support.Helpers
+  alias Test.Support.MockApiData
 
   defmacro reassign_env(app, var, value) do
     quote do
@@ -31,7 +32,7 @@ defmodule Test.Support.Helpers do
       )
 
       if unquote(use_mock_data) do
-        Test.Support.MockApiData.mount(bypass)
+        MockApiData.mount(bypass)
       end
 
       bypass
