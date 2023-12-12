@@ -18,7 +18,9 @@ defmodule Test.Support.Helpers do
     end
   end
 
-  defmacro bypass_api do
+  defmacro bypass_api(opts \\ []) do
+    use_mock_data = Keyword.get(opts, :use_mock_data, true)
+
     quote do
       bypass = Bypass.open()
 
@@ -27,6 +29,10 @@ defmodule Test.Support.Helpers do
         :base_url,
         "http://localhost:#{bypass.port}"
       )
+
+      if unquote(use_mock_data) do
+        Test.Support.MockApiData.mount(bypass)
+      end
 
       bypass
     end
