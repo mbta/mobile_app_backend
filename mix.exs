@@ -10,6 +10,7 @@ defmodule MobileAppBackend.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      dialyzer: [plt_add_apps: [:mix]],
       test_coverage: [tool: LcovEx]
     ]
   end
