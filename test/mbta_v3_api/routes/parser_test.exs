@@ -2,7 +2,7 @@ defmodule Routes.ParserTest do
   use ExUnit.Case, async: true
 
   import Routes.Parser
-  alias JsonApi.Item
+  alias MBTAV3API.JsonApi.Item
   alias Routes.Shape
 
   describe "parse_route/1" do

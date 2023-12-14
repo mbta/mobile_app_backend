@@ -19,7 +19,7 @@ defmodule RoutePatterns.RoutePattern do
   Junction branch and the other for the Stoughton branch.
   """
 
-  alias JsonApi.Item
+  alias MBTAV3API.JsonApi.Item
   alias Routes.Route
   alias Schedules.Trip
   alias Stops.Stop

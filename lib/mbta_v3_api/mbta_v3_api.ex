@@ -4,6 +4,7 @@ defmodule MBTAV3API do
   use HTTPoison.Base
   require Logger
   alias MBTAV3API.Cache
+  alias MBTAV3API.JsonApi
   alias Util
 
   @spec get_json(String.t(), Keyword.t()) :: JsonApi.t() | {:error, any}

@@ -2,6 +2,7 @@ defmodule MBTAV3API.Routes do
   @moduledoc """
   Responsible for fetching Route data from the V3 API.
   """
+  alias MBTAV3API.JsonApi
   alias Routes.Route
   alias Stops.Stop
 
