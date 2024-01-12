@@ -35,6 +35,7 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through :api
 
     get("/route/by-stop/:stop_id", RouteController, :by_stop)
+    get("/search/query", SearchController, :query)
   end
 
   scope "/jsonapi", MobileAppBackendWeb do

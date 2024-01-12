@@ -30,6 +30,10 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :mobile_app_backend, MobileAppBackend.Mailer, adapter: Swoosh.Adapters.Local
 
+config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+  route_index: "routes_test",
+  stop_index: "stops_test"
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

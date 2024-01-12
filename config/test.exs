@@ -18,3 +18,8 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+  app_id: "fake_app",
+  search_key: "fake_key",
+  base_url: "fake_url"

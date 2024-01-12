@@ -11,6 +11,11 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: MobileAppBackend.Finch
 
+config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+  route_index: "routes",
+  stop_index: "stops",
+  track_analytics?: true
+
 # Disable Swoosh Local Memory Storage
 config :swoosh, local: false
 

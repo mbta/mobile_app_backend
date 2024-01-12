@@ -12,6 +12,13 @@ config :mobile_app_backend,
   base_url: System.get_env("API_URL"),
   api_key: System.get_env("API_KEY")
 
+if config_env() != :test do
+  config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+    app_id: System.get_env("ALGOLIA_APP_ID"),
+    search_key: System.get_env("ALGOLIA_SEARCH_KEY"),
+    base_url: System.get_env("ALGOLIA_BASE_URL")
+end
+
 # ## Using releases
 #
 # If you use `mix release`, you need to explicitly enable the server
