@@ -16,7 +16,7 @@ if config_env() != :test do
   config :mobile_app_backend, MobileAppBackend.Search.Algolia,
     app_id: System.get_env("ALGOLIA_APP_ID"),
     search_key: System.get_env("ALGOLIA_SEARCH_KEY"),
-    base_url: System.get_env("ALGOLIA_BASE_URL")
+    base_url: System.get_env("ALGOLIA_READ_URL")
 end
 
 # ## Using releases
