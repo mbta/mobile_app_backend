@@ -67,7 +67,6 @@ defmodule MobileAppBackend.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:httpoison, "~> 2.2"},
       {:sentry, "~> 10.0"},
-      {:con_cache, "~> 1.0.0"},
       {:timex, "~> 3.7"},
       {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
     ]
