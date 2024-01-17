@@ -6,13 +6,13 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
   describe "multi_index_search/2" do
     test "when request is successful, returns flattened list of parsed results" do
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, &mock_perform_request_fn/3)
+
       assert {:ok, results} =
-               Api.multi_index_search(
-                 [QueryPayload.for_index(:stop, "1"), QueryPayload.for_index(:route, "1")],
-                 perform_request_fn: fn url, body, headers ->
-                   mock_perform_request_fn(url, body, headers)
-                 end
-               )
+               Api.multi_index_search([
+                 QueryPayload.for_index(:stop, "1"),
+                 QueryPayload.for_index(:route, "1")
+               ])
 
       assert [
                %StopResult{
@@ -36,6 +36,8 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
     end
 
     test "makes requests to the algolia endpoint with expected headers and parameters properly encoded" do
+      pid = self()
+
       default_env = Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)
 
       reassign_env(
@@ -47,15 +49,15 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
         )
       )
 
-      pid = self()
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn url, body, headers ->
+        send(pid, %{url: url, body: body, headers: headers})
+        {:ok, %{body: "\{\"results\":[]\}"}}
+      end)
 
-      Api.multi_index_search(
-        [QueryPayload.for_index(:stop, "1"), QueryPayload.for_index(:route, "1")],
-        perform_request_fn: fn url, body, headers ->
-          send(pid, %{url: url, body: body, headers: headers})
-          {:ok, %{body: "\{\"results\":[]\}"}}
-        end
-      )
+      Api.multi_index_search([
+        QueryPayload.for_index(:stop, "1"),
+        QueryPayload.for_index(:route, "1")
+      ])
 
       assert_received(%{url: url, body: body, headers: headers})
 
@@ -80,36 +82,40 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
         Keyword.merge(default_env, search_key: nil)
       )
 
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, &mock_perform_request_fn/3)
+
       assert {:error, :search_failed} =
-               Api.multi_index_search(
-                 [QueryPayload.for_index(:stop, "1"), QueryPayload.for_index(:route, "1")],
-                 perform_request_fn: fn url, body, headers ->
-                   mock_perform_request_fn(url, body, headers)
-                 end
-               )
+               Api.multi_index_search([
+                 QueryPayload.for_index(:stop, "1"),
+                 QueryPayload.for_index(:route, "1")
+               ])
     end
 
     @tag capture_log: true
     test "when invalid json, returns error" do
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn _url, _body, _headers ->
+        {:ok, %{body: "[123 this is not json]"}}
+      end)
+
       assert {:error, :search_failed} =
-               Api.multi_index_search(
-                 [QueryPayload.for_index(:stop, "1"), QueryPayload.for_index(:route, "1")],
-                 perform_request_fn: fn _url, _body, _headers ->
-                   {:ok, %{body: "[123 this is not json]"}}
-                 end
-               )
+               Api.multi_index_search([
+                 QueryPayload.for_index(:stop, "1"),
+                 QueryPayload.for_index(:route, "1")
+               ])
     end
 
     @tag capture_log: true
 
     test "when request is unsuccessful, returns error" do
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn _url, _body, _headers ->
+        {:error, "oops"}
+      end)
+
       assert {:error, :search_failed} =
-               Api.multi_index_search(
-                 [QueryPayload.for_index(:stop, "1"), QueryPayload.for_index(:route, "1")],
-                 perform_request_fn: fn _url, _body, _headers ->
-                   {:error, "oops"}
-                 end
-               )
+               Api.multi_index_search([
+                 QueryPayload.for_index(:stop, "1"),
+                 QueryPayload.for_index(:route, "1")
+               ])
     end
   end
 

@@ -8,16 +8,18 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   alias MobileAppBackend.Search.Algolia
   require Logger
 
-  @spec multi_index_search([Algolia.QueryPayload.t()], Keyword.t()) ::
+  @spec multi_index_search([Algolia.QueryPayload.t()]) ::
           {:ok, [any()]} | {:error, any}
   @doc """
   Perform the given index queries and return a flattened list of parsed results
   """
-  def multi_index_search(queries, opts \\ []) do
+  def multi_index_search(queries) do
     perform_request_fn =
-      Keyword.get(opts, :perform_request_fn, fn url, body, headers ->
-        HTTPoison.post(url, body, headers)
-      end)
+      Application.get_env(
+        :mobile_app_backend,
+        :algolia_perform_request_fn,
+        &HTTPoison.post/3
+      )
 
     body = multi_query_encoded_payload(queries)
 
