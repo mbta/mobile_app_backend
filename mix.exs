@@ -69,8 +69,7 @@ defmodule MobileAppBackend.MixProject do
       {:sentry, "~> 10.0"},
       {:con_cache, "~> 1.0.0"},
       {:timex, "~> 3.7"},
-      {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
-      {:jsonapi, "~> 1.6"}
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
     ]
   end
 
