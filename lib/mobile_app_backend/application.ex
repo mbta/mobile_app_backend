@@ -12,8 +12,6 @@ defmodule MobileAppBackend.Application do
       {DNSCluster,
        query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: MobileAppBackend.PubSub},
-      # Start the Finch HTTP client for sending emails
-      {Finch, name: MobileAppBackend.Finch},
       # Start a worker by calling: MobileAppBackend.Worker.start_link(arg)
       # {MobileAppBackend.Worker, arg},
       # Start to serve requests, typically the last entry
