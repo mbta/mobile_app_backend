@@ -3,7 +3,6 @@ defmodule MBTAV3API do
 
   use HTTPoison.Base
   require Logger
-  alias MBTAV3API.Cache
   alias MBTAV3API.JsonApi
   alias Util
 
@@ -20,7 +19,6 @@ defmodule MBTAV3API do
     with {time, response} <- timed_get(url, params, opts),
          :ok <- log_response(url, params, time, response),
          {:ok, http_response} <- response,
-         {:ok, http_response} <- Cache.cache_response(url, params, http_response),
          {:ok, body} <- body(http_response) do
       body
       |> JsonApi.parse()
@@ -40,13 +38,7 @@ defmodule MBTAV3API do
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
 
-    headers =
-      MBTAV3API.Headers.build(
-        api_key,
-        params: params,
-        url: url,
-        use_cache?: true
-      )
+    headers = MBTAV3API.Headers.build(api_key)
 
     url = base_url <> URI.encode(url)
     timeout = Keyword.fetch!(opts, :timeout)

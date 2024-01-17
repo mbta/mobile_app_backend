@@ -7,12 +7,6 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   secret_key_base: "i2tUYeAO95DpQJMjLPg+aBuneGbF6hGMyTvth/i1csZT7LeeH6ZsWpDO9F9IkJ7f",
   server: false
 
-# In test we don't send emails.
-config :mobile_app_backend, MobileAppBackend.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters.
-config :swoosh, :api_client, false
-
 # Print only warnings and errors during test
 config :logger, level: :warning
 

@@ -50,8 +50,6 @@ defmodule MobileAppBackend.MixProject do
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
-      {:swoosh, "~> 1.3"},
-      {:finch, "~> 0.13"},
       {:logster, "~> 1.1"},
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
@@ -67,12 +65,8 @@ defmodule MobileAppBackend.MixProject do
       {:bypass, "~> 2.1", only: :test},
       {:httpoison, "~> 2.2"},
       {:sentry, "~> 10.0"},
-      {:con_cache, "~> 1.0.0"},
-      {:absinthe, "~> 1.7"},
-      {:absinthe_plug, "~> 1.5"},
       {:timex, "~> 3.7"},
-      {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
-      {:jsonapi, "~> 1.6"}
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
     ]
   end
 

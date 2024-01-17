@@ -21,15 +21,6 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   pubsub_server: MobileAppBackend.PubSub,
   live_view: [signing_salt: "EPNVgKKu"]
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :mobile_app_backend, MobileAppBackend.Mailer, adapter: Swoosh.Adapters.Local
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
@@ -59,11 +50,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-config :jsonapi,
-  namespace: "/jsonapi",
-  field_transformation: :camelize,
-  remove_links: true
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
