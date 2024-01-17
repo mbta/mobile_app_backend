@@ -9,17 +9,12 @@ defmodule MBTAV3API.HeadersTest do
              "x-api-key",
              "MBTA-Version"
            ]
-
-    assert Headers.build("API_KEY", params: [], url: "url") |> Enum.map(&elem(&1, 0)) == [
-             "x-api-key",
-             "MBTA-Version"
-           ]
   end
 
   test "accepts an :api_version configuration" do
     reassign_env(:mbta_v3_api, :api_version, "3005-01-02")
 
-    assert Headers.build("API_KEY", params: [], url: "url") == [
+    assert Headers.build("API_KEY") == [
              {"x-api-key", "API_KEY"},
              {"MBTA-Version", "3005-01-02"}
            ]

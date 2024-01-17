@@ -38,12 +38,7 @@ defmodule MBTAV3API do
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
 
-    headers =
-      MBTAV3API.Headers.build(
-        api_key,
-        params: params,
-        url: url
-      )
+    headers = MBTAV3API.Headers.build(api_key)
 
     url = base_url <> URI.encode(url)
     timeout = Keyword.fetch!(opts, :timeout)

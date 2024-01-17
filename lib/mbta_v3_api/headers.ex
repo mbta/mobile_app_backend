@@ -5,8 +5,8 @@ defmodule MBTAV3API.Headers do
 
   @type header_list :: [{String.t(), String.t()}]
 
-  @spec build(String.t() | nil, Keyword.t()) :: header_list
-  def build(api_key, _opts) do
+  @spec build(String.t() | nil) :: header_list
+  def build(api_key) do
     []
     |> api_key_header(api_key)
   end
