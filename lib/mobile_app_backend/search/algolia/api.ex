@@ -14,12 +14,11 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   Perform the given index queries and return a flattened list of parsed results
   """
   def multi_index_search(queries) do
-
     perform_request_fn =
       Application.get_env(
         :mobile_app_backend,
         :algolia_perform_request_fn,
-        &HTTPoison.post/3
+        &make_request/3
       )
 
     body = multi_query_encoded_payload(queries)
@@ -34,6 +33,10 @@ defmodule MobileAppBackend.Search.Algolia.Api do
         Logger.error("#{__MODULE__} search_failed. reason=#{inspect(error)}")
         {:error, :search_failed}
     end
+  end
+
+  defp make_request(url, body, headers) do
+    Req.post(url, body: body, headers: headers)
   end
 
   defp parse_results(%{"results" => results_per_index}) do

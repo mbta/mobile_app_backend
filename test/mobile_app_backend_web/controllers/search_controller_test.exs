@@ -65,13 +65,13 @@ defmodule MobileAppBackendWeb.SearchControllerTest do
 
     @tag capture_log: true
     test "when there is an error performing algolia search, returns an error", %{conn: conn} do
-      conn = get(conn, "/api/search/query?query=1")
-
       reassign_env(
         :mobile_app_backend,
         :algolia_multi_index_search_fn,
         fn _queries -> {:error, "something_went_wrong"} end
       )
+
+      conn = get(conn, "/api/search/query?query=1")
 
       assert %{
                "error" => "search_failed"
