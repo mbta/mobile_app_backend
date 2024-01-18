@@ -27,6 +27,8 @@ defmodule MobileAppBackendWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
+
+    get("/nearby", NearbyController, :show)
   end
 
   # Enable LiveDashboard in development

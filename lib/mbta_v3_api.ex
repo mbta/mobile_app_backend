@@ -8,7 +8,7 @@ defmodule MBTAV3API do
   def get_json(url, params \\ [], opts \\ []) do
     _ =
       Logger.debug(fn ->
-        "MBTAV3API.get_json url=#{url} params=#{params |> Map.new() |> Jason.encode!()}"
+        "MBTAV3API.get_json url=#{url} params=#{inspect(params)}"
       end)
 
     body = ""
@@ -39,7 +39,8 @@ defmodule MBTAV3API do
 
     {time, response} =
       :timer.tc(fn ->
-        Req.get(
+        Req.new(
+          method: :get,
           base_url: base_url,
           url: URI.encode(url),
           headers: headers,
@@ -50,6 +51,7 @@ defmodule MBTAV3API do
           pool_timeout: timeout,
           receive_timeout: timeout
         )
+        |> MobileAppBackend.HTTP.request()
       end)
 
     {time, response}
@@ -92,7 +94,7 @@ defmodule MBTAV3API do
   end
 
   defp log_body({:ok, response}) do
-    "status=#{response.status_code} content_length=#{byte_size(response.body)}"
+    "status=#{response.status} content_length=#{byte_size(response.body)}"
   end
 
   defp log_body({:error, error}) do
