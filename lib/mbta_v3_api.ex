@@ -103,8 +103,8 @@ defmodule MBTAV3API do
 
   defp default_options do
     [
-      base_url: Application.fetch_env!(:mobile_app_backend, :base_url),
-      api_key: Application.fetch_env!(:mobile_app_backend, :api_key),
+      base_url: Application.get_env(:mobile_app_backend, :base_url),
+      api_key: Application.get_env(:mobile_app_backend, :api_key),
       timeout: 10_000
     ]
   end
