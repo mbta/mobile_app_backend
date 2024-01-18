@@ -14,6 +14,7 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   Perform the given index queries and return a flattened list of parsed results
   """
   def multi_index_search(queries) do
+
     perform_request_fn =
       Application.get_env(
         :mobile_app_backend,

@@ -1,11 +1,8 @@
 defmodule MBTAV3API do
   @moduledoc "Handles fetching and caching generic JSON:API responses from the V3 API."
 
-  use HTTPoison.Base
   require Logger
-  alias MBTAV3API.Cache
   alias MBTAV3API.JsonApi
-  alias Util
 
   @spec get_json(String.t(), Keyword.t()) :: JsonApi.t() | {:error, any}
   def get_json(url, params \\ [], opts \\ []) do
@@ -19,9 +16,7 @@ defmodule MBTAV3API do
 
     with {time, response} <- timed_get(url, params, opts),
          :ok <- log_response(url, params, time, response),
-         {:ok, http_response} <- response,
-         {:ok, http_response} <- Cache.cache_response(url, params, http_response),
-         {:ok, body} <- body(http_response) do
+         {:ok, %Req.Response{body: body}} <- response do
       body
       |> JsonApi.parse()
       |> maybe_log_parse_error(url, params, body)
@@ -39,25 +34,21 @@ defmodule MBTAV3API do
   defp timed_get(url, params, opts) do
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
-
-    headers =
-      MBTAV3API.Headers.build(
-        api_key,
-        params: params,
-        url: url,
-        use_cache?: true
-      )
-
-    url = base_url <> URI.encode(url)
+    headers = [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
     timeout = Keyword.fetch!(opts, :timeout)
 
     {time, response} =
       :timer.tc(fn ->
-        get(url, headers,
+        Req.get(
+          base_url: base_url,
+          url: URI.encode(url),
+          headers: headers,
           params: params,
-          timeout: timeout,
-          recv_timeout: timeout,
-          hackney: [pool: :v3_api_http_pool]
+          compressed: true,
+          decode_body: false,
+          cache: true,
+          pool_timeout: timeout,
+          receive_timeout: timeout
         )
       end)
 
@@ -106,34 +97,6 @@ defmodule MBTAV3API do
 
   defp log_body({:error, error}) do
     ~s(status=error error="#{inspect(error)}")
-  end
-
-  def body(%{headers: headers, body: body}) do
-    case Enum.find(
-           headers,
-           &(String.downcase(elem(&1, 0)) == "content-encoding")
-         ) do
-      {_, "gzip"} ->
-        {:ok, :zlib.gunzip(body)}
-
-      _ ->
-        {:ok, body}
-    end
-  rescue
-    e in ErlangError -> {:error, e.original}
-  end
-
-  def body(other) do
-    other
-  end
-
-  @impl HTTPoison.Base
-  def process_request_headers(headers) do
-    [
-      {"accept-encoding", "gzip"},
-      {"accept", "application/vnd.api+json"}
-      | headers
-    ]
   end
 
   defp default_options do

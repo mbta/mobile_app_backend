@@ -14,12 +14,6 @@ defmodule MobileAppBackendWeb.Router do
     plug :accepts, ["json"]
   end
 
-  pipeline :jsonapi do
-    plug JSONAPI.EnsureSpec
-    plug JSONAPI.Deserializer
-    plug JSONAPI.UnderscoreParameters
-  end
-
   scope "/", MobileAppBackendWeb do
     pipe_through :browser
 
@@ -33,28 +27,10 @@ defmodule MobileAppBackendWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
-
-    get("/route/by-stop/:stop_id", RouteController, :by_stop)
     get("/search/query", SearchController, :query)
   end
 
-  scope "/jsonapi", MobileAppBackendWeb do
-    pipe_through :jsonapi
-
-    resources("/stop", StopController, only: [:show])
-  end
-
-  scope "/graphql" do
-    pipe_through :api
-
-    forward "/graphiql", Absinthe.Plug.GraphiQL,
-      schema: MobileAppBackendWeb.Schema,
-      interface: :playground
-
-    forward "/", Absinthe.Plug, schema: MobileAppBackendWeb.Schema
-  end
-
-  # Enable LiveDashboard and Swoosh mailbox preview in development
+  # Enable LiveDashboard in development
   if Application.compile_env(:mobile_app_backend, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
@@ -67,7 +43,6 @@ defmodule MobileAppBackendWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end
