@@ -42,7 +42,7 @@ defmodule Test.Support.Data do
     defstruct [:id, :new_data, touched: false]
   end
 
-  def start_link() do
+  def start_link do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
@@ -69,11 +69,11 @@ defmodule Test.Support.Data do
     end
   end
 
-  def write_new_data() do
+  def write_new_data do
     GenServer.call(__MODULE__, :write_new_data)
   end
 
-  def warn_untouched() do
+  def warn_untouched do
     GenServer.call(__MODULE__, :warn_untouched)
   end
 
