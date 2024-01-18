@@ -7,6 +7,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         "filter[latitude]": String.to_float(params["latitude"]),
         "filter[longitude]": String.to_float(params["longitude"]),
         "filter[location_type]": "0,1",
+        "filter[radius]": miles_to_degrees(0.5),
         include: :parent_station,
         sort: :distance
       )
@@ -37,4 +38,9 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     json(conn, %{stops: stops, stop_patterns: stop_patterns, route_patterns: route_patterns})
   end
+
+  # The V3 API does not actually calculate distance,
+  # and it just pretends latitude degrees and longitude degrees are equally sized.
+  # For now, this is fine.
+  defp miles_to_degrees(miles), do: miles * 0.02
 end
