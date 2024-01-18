@@ -163,10 +163,10 @@ defmodule Test.Support.Data do
   defp flatten_map_entries(%{} = map) do
     Stream.flat_map(map, fn
       {key, val} when is_map(val) ->
-        flatten_map_entries(val) |> Stream.flat_map(&Tuple.insert_at(&1, 0, key))
+        flatten_map_entries(val) |> Stream.map(&Tuple.insert_at(&1, 0, key))
 
       {key, val} ->
-        {key, val}
+        [{key, val}]
     end)
   end
 
