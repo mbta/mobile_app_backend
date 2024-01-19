@@ -3,7 +3,7 @@ defmodule MBTAV3API.Trip do
 
   @behaviour JsonApi.Object
 
-  @type t :: %__MODULE__{id: String.t(), stops: [MBTAV3API.Stop.t()]}
+  @type t :: %__MODULE__{id: String.t(), stops: [MBTAV3API.Stop.t() | JsonApi.Reference.t()]}
 
   @derive Jason.Encoder
   defstruct [:id, :stops]
@@ -16,7 +16,7 @@ defmodule MBTAV3API.Trip do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      stops: Enum.map(item.relationships["stops"], &MBTAV3API.Stop.parse/1)
+      stops: Enum.map(item.relationships["stops"], &JsonApi.Object.parse/1)
     }
   end
 end

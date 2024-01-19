@@ -8,14 +8,14 @@ defmodule MBTAV3API.Stop do
           latitude: float(),
           longitude: float(),
           name: String.t(),
-          parent_station: t() | nil
+          parent_station: t() | JsonApi.Reference.t() | nil
         }
 
   @derive Jason.Encoder
   defstruct [:id, :latitude, :longitude, :name, :parent_station]
 
   def parent(%__MODULE__{parent_station: %__MODULE__{} = parent}), do: parent
-  def parent(stop), do: stop
+  def parent(%__MODULE__{parent_station: nil} = stop), do: stop
 
   @impl JsonApi.Object
   def fields, do: [:latitude, :longitude, :name]
@@ -44,7 +44,7 @@ defmodule MBTAV3API.Stop do
         case item.relationships["parent_station"] do
           nil -> nil
           [] -> nil
-          [parent_station] -> parse(parent_station)
+          [parent_station] -> JsonApi.Object.parse(parent_station)
           [_ | _] -> raise "Multiple parent stations"
         end
     }

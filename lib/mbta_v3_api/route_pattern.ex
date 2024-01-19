@@ -8,8 +8,8 @@ defmodule MBTAV3API.RoutePattern do
           direction_id: 0 | 1,
           name: String.t(),
           sort_order: integer(),
-          representative_trip: MBTAV3API.Trip.t() | nil,
-          route: MBTAV3API.Route.t() | nil
+          representative_trip: MBTAV3API.Trip.t() | JsonApi.Reference.t() | nil,
+          route: MBTAV3API.Route.t() | JsonApi.Reference.t() | nil
         }
 
   @derive Jason.Encoder
@@ -42,14 +42,14 @@ defmodule MBTAV3API.RoutePattern do
         case item.relationships["representative_trip"] do
           nil -> nil
           [] -> raise "No representative trip"
-          [trip] -> MBTAV3API.Trip.parse(trip)
+          [trip] -> JsonApi.Object.parse(trip)
           [_ | _] -> raise "Multiple representative trips"
         end,
       route:
         case item.relationships["route"] do
           nil -> nil
           [] -> raise "No route"
-          [route] -> MBTAV3API.Route.parse(route)
+          [route] -> JsonApi.Object.parse(route)
           [_ | _] -> raise "Multiple routes"
         end
     }
