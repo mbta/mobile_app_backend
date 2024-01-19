@@ -43,6 +43,7 @@ defmodule MobileAppBackendWeb.NearbyController do
 
   # The V3 API does not actually calculate distance,
   # and it just pretends latitude degrees and longitude degrees are equally sized.
+  # See https://github.com/mbta/api/blob/1671ba02d4669827fb2a58966d8c3ab39c939b0e/apps/api_web/lib/api_web/controllers/stop_controller.ex#L27-L31.
   # For now, this is fine.
   defp miles_to_degrees(miles), do: miles * 0.02
 end
