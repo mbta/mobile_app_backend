@@ -8,17 +8,18 @@ defmodule MBTAV3API.RoutePattern do
           direction_id: 0 | 1,
           name: String.t(),
           sort_order: integer(),
+          representative_trip: MBTAV3API.Trip.t() | nil,
           route: MBTAV3API.Route.t() | nil
         }
 
   @derive Jason.Encoder
-  defstruct [:id, :direction_id, :name, :sort_order, :route]
+  defstruct [:id, :direction_id, :name, :sort_order, :representative_trip, :route]
 
   @impl JsonApi.Object
   def fields, do: [:direction_id, :name, :sort_order]
 
   @impl JsonApi.Object
-  def includes, do: %{route: :route}
+  def includes, do: %{representative_trip: :trip, route: :route}
 
   @spec get_all(Keyword.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
   def get_all(params, opts \\ []) do
@@ -37,6 +38,13 @@ defmodule MBTAV3API.RoutePattern do
       direction_id: item.attributes["direction_id"],
       name: item.attributes["name"],
       sort_order: item.attributes["sort_order"],
+      representative_trip:
+        case item.relationships["representative_trip"] do
+          nil -> nil
+          [] -> raise "No representative trip"
+          [trip] -> MBTAV3API.Trip.parse(trip)
+          [_ | _] -> raise "Multiple representative trips"
+        end,
       route:
         case item.relationships["route"] do
           nil -> nil

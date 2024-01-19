@@ -6,14 +6,20 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
   test "put_fields" do
     assert Object.put_fields([include: :parent_station], :stop) |> Enum.sort() == [
              "fields[stop]": "latitude,longitude,name",
-             include: :parent_station
+             include: "parent_station"
            ]
 
-    assert Object.put_fields([include: :route], :route_pattern) |> Enum.sort() == [
+    assert Object.put_fields(
+             [include: [:route, representative_trip: :stops], "fields[stop]": ""],
+             :route_pattern
+           )
+           |> Enum.sort() == [
              "fields[route]":
                "color,direction_names,direction_destinations,long_name,short_name,sort_order,text_color",
              "fields[route_pattern]": "direction_id,name,sort_order",
-             include: :route
+             "fields[stop]": "",
+             "fields[trip]": "",
+             include: "route,representative_trip,representative_trip.stops"
            ]
   end
 end

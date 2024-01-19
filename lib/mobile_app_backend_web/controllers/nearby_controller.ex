@@ -17,24 +17,26 @@ defmodule MobileAppBackendWeb.NearbyController do
       |> Enum.map(&MBTAV3API.Stop.parent/1)
       |> Enum.uniq()
 
-    # Getting all route patterns at any stop loses the information of which stop is in which route patterns.
-    {stop_patterns, route_patterns} =
-      stops
-      |> Task.async_stream(fn stop ->
-        {:ok, route_patterns} =
-          MBTAV3API.RoutePattern.get_all(
-            "filter[stop]": stop.id,
-            include: :route,
-            sort: :sort_order
-          )
+    {:ok, route_patterns} =
+      MBTAV3API.RoutePattern.get_all(
+        "filter[stop]": Enum.map_join(stops, ",", & &1.id),
+        include: [:route, representative_trip: :stops],
+        "fields[stop]": ""
+      )
 
-        {stop.id, route_patterns}
+    stop_patterns =
+      route_patterns
+      |> Enum.flat_map(fn
+        %MBTAV3API.RoutePattern{
+          id: route_pattern_id,
+          representative_trip: %MBTAV3API.Trip{stops: stops}
+        } ->
+          Enum.map(stops, &%{stop_id: &1.id, route_pattern_id: route_pattern_id})
       end)
-      |> Enum.reduce({%{}, %{}}, fn {:ok, {stop_id, route_patterns}},
-                                    {stop_patterns, route_pattern_map} ->
-        {Map.put(stop_patterns, stop_id, Enum.map(route_patterns, & &1.id)),
-         Map.merge(route_pattern_map, Map.new(route_patterns, &{&1.id, &1}))}
-      end)
+      |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
+
+    route_patterns =
+      Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})
 
     json(conn, %{stops: stops, stop_patterns: stop_patterns, route_patterns: route_patterns})
   end
