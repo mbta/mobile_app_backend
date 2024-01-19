@@ -26,7 +26,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         fields: [stop: []]
       )
 
-    stop_patterns =
+    pattern_ids_by_stop =
       route_patterns
       |> Enum.flat_map(fn
         %MBTAV3API.RoutePattern{
@@ -40,7 +40,11 @@ defmodule MobileAppBackendWeb.NearbyController do
     route_patterns =
       Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})
 
-    json(conn, %{stops: stops, stop_patterns: stop_patterns, route_patterns: route_patterns})
+    json(conn, %{
+      stops: stops,
+      route_patterns: route_patterns,
+      pattern_ids_by_stop: pattern_ids_by_stop
+    })
   end
 
   # The V3 API does not actually calculate distance,

@@ -68,7 +68,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                    "sort_order" => 503_601_060
                  }
                },
-               "stop_patterns" => %{
+               "pattern_ids_by_stop" => %{
                  "120" => ["36-5-0", "36-5-1"],
                  "129" => ["36-5-1"],
                  "137" => ["36-1-0", "36-5-0"],
