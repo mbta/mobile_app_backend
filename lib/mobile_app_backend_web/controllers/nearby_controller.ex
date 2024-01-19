@@ -4,12 +4,14 @@ defmodule MobileAppBackendWeb.NearbyController do
   def show(conn, params) do
     {:ok, stops} =
       MBTAV3API.Stop.get_all(
-        "filter[latitude]": String.to_float(params["latitude"]),
-        "filter[longitude]": String.to_float(params["longitude"]),
-        "filter[location_type]": "0,1",
-        "filter[radius]": miles_to_degrees(0.5),
+        filter: [
+          latitude: String.to_float(params["latitude"]),
+          longitude: String.to_float(params["longitude"]),
+          location_type: [0, 1],
+          radius: miles_to_degrees(0.5)
+        ],
         include: :parent_station,
-        sort: :distance
+        sort: {:distance, :asc}
       )
 
     stops =
@@ -19,9 +21,9 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
-        "filter[stop]": Enum.map_join(stops, ",", & &1.id),
+        filter: [stop: Enum.map_join(stops, ",", & &1.id)],
         include: [:route, representative_trip: :stops],
-        "fields[stop]": ""
+        fields: [stop: []]
       )
 
     stop_patterns =

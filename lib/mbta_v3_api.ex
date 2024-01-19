@@ -4,11 +4,13 @@ defmodule MBTAV3API do
   require Logger
   alias MBTAV3API.JsonApi
 
-  @spec get_json(String.t(), Keyword.t()) :: JsonApi.t() | {:error, any}
-  def get_json(url, params \\ [], opts \\ []) do
+  @type params :: %{String.t() => String.t()}
+
+  @spec get_json(String.t(), params(), Keyword.t()) :: JsonApi.t() | {:error, any}
+  def get_json(url, params \\ %{}, opts \\ []) do
     _ =
       Logger.debug(fn ->
-        "MBTAV3API.get_json url=#{url} params=#{inspect(params)}"
+        "MBTAV3API.get_json url=#{url} params=#{params |> Jason.encode!()}"
       end)
 
     body = ""
@@ -57,7 +59,7 @@ defmodule MBTAV3API do
     {time, response}
   end
 
-  @spec maybe_log_parse_error(JsonApi.t() | {:error, any}, String.t(), Keyword.t(), String.t()) ::
+  @spec maybe_log_parse_error(JsonApi.t() | {:error, any}, String.t(), params(), String.t()) ::
           JsonApi.t() | {:error, any}
   defp maybe_log_parse_error({:error, error}, url, params, body) do
     _ = log_response_error(url, params, body)
@@ -68,11 +70,11 @@ defmodule MBTAV3API do
     response
   end
 
-  @spec log_response(String.t(), Keyword.t(), integer, any) :: :ok
+  @spec log_response(String.t(), params(), integer, any) :: :ok
   defp log_response(url, params, time, response) do
     entry = fn ->
       "MBTAV3API.get_json_response url=#{inspect(url)} " <>
-        "params=#{params |> Map.new() |> Jason.encode!()} " <>
+        "params=#{params |> Jason.encode!()} " <>
         log_body(response) <>
         " duration=#{time / 1000}" <>
         " request_id=#{Logger.metadata() |> Keyword.get(:request_id)}"
@@ -82,11 +84,11 @@ defmodule MBTAV3API do
     :ok
   end
 
-  @spec log_response_error(String.t(), Keyword.t(), String.t()) :: :ok
+  @spec log_response_error(String.t(), params(), String.t()) :: :ok
   defp log_response_error(url, params, body) do
     entry = fn ->
       "MBTAV3API.get_json_response url=#{inspect(url)} " <>
-        "params=#{params |> Map.new() |> Jason.encode!()} response=" <> body
+        "params=#{params |> Jason.encode!()} response=" <> body
     end
 
     _ = Logger.info(entry)
