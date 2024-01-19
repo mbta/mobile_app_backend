@@ -1,8 +1,17 @@
 defmodule Test.Support.Data do
+  @moduledoc """
+  Manages the use of recorded responses to HTTP requests from tests.
+  """
   require Logger
   use GenServer
 
   defmodule Request do
+    @doc """
+    Represents a request that was made to a backend HTTP service.
+
+    `:host` is an abstract value denoting the config source, rather than the literal hostname.
+    This avoids issues with connecting to the dev vs prod API invalidating the tests.
+    """
     defstruct [:host, :path, :query]
 
     def from_conn(%Plug.Conn{host: host, request_path: path, query_string: query}) do
@@ -38,14 +47,24 @@ defmodule Test.Support.Data do
   end
 
   defmodule Response do
+    @doc """
+    Represents a response which was received from a backend API,
+    and which may or may not have been used in this test session.
+    """
     @enforce_keys [:id]
     defstruct [:id, :new_data, touched: false]
   end
 
+  @doc "Starts the server."
+  @spec start_link :: GenServer.on_start()
   def start_link do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
+  @doc """
+  Sends a response to the given request.
+  """
+  @spec respond(Plug.Conn.t()) :: Plug.Conn.t()
   def respond(conn) do
     request = Request.from_conn(conn)
 
@@ -69,10 +88,20 @@ defmodule Test.Support.Data do
     end
   end
 
+  @doc """
+  Creates new and deletes unused backend responses.
+
+  Assumes that test data is being updated.
+  """
+  @spec write_new_data :: :ok
   def write_new_data do
     GenServer.call(__MODULE__, :write_new_data)
   end
 
+  @doc """
+  Issues warnings for recorded responses which were not used in this test session.
+  """
+  @spec warn_untouched :: :ok
   def warn_untouched do
     GenServer.call(__MODULE__, :warn_untouched)
   end
