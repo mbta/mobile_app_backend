@@ -135,7 +135,7 @@ defmodule Test.Support.Data do
 
     state = touched
     meta = dehydrate_state(state)
-    File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta))
+    File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta, pretty: true))
 
     {:reply, :ok, state}
   end
