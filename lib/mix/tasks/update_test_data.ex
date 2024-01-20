@@ -14,9 +14,7 @@ defmodule Mix.Tasks.UpdateTestData do
   def run(args) do
     case Code.ensure_loaded(Test.Support.Data) do
       {:module, data} ->
-        Application.put_env(:mobile_app_backend, :updating_test_data?, true)
-
-        data.start_link()
+        data.start_link(updating_test_data?: true)
 
         Mix.Task.run("test", ["--raise"] ++ args)
 

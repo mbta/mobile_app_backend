@@ -14,6 +14,8 @@ defmodule Test.Support.Data do
     """
     defstruct [:host, :path, :query]
 
+    @type t :: %__MODULE__{host: String.t(), path: String.t(), query: String.t()}
+
     def from_conn(%Plug.Conn{host: host, request_path: path, query_string: query}) do
       %URI{host: v3_host} = URI.parse(Application.get_env(:mobile_app_backend, :base_url))
 
@@ -53,28 +55,39 @@ defmodule Test.Support.Data do
     """
     @enforce_keys [:id]
     defstruct [:id, :new_data, touched: false]
+    @type t :: %__MODULE__{id: String.t(), new_data: binary() | nil, touched: boolean()}
+  end
+
+  defmodule State do
+    @moduledoc """
+    The state for the Data server.
+    """
+    defstruct data: %{}, updating_test_data?: false
+    @type t :: %__MODULE__{data: %{Request.t() => Response.t()}, updating_test_data?: boolean()}
   end
 
   @doc "Starts the server."
-  @spec start_link :: GenServer.on_start()
-  def start_link do
-    GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  @spec start_link(Keyword.t()) :: GenServer.on_start()
+  def start_link(opts \\ []) do
+    {server_opts, state_opts} = Keyword.split(opts, [:name])
+    server_opts = Keyword.put_new(server_opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, state_opts, server_opts)
   end
 
   @doc """
   Sends a response to the given request.
   """
-  @spec respond(Plug.Conn.t()) :: Plug.Conn.t()
-  def respond(conn) do
+  @spec respond(Plug.Conn.t(), GenServer.server()) :: Plug.Conn.t()
+  def respond(conn, server \\ __MODULE__) do
     request = Request.from_conn(conn)
 
-    stored_response = GenServer.call(__MODULE__, {:get, request})
+    stored_response = GenServer.call(server, {:get, request})
 
     conn = conn |> Plug.Conn.put_resp_content_type("application/vnd.api+json")
 
     cond do
-      updating_test_data?() ->
-        data = update_response(conn, stored_response)
+      GenServer.call(server, :updating_test_data?) ->
+        data = update_response(conn, stored_response, server)
 
         Plug.Conn.send_resp(conn, :ok, Jason.encode_to_iodata!(data))
 
@@ -107,8 +120,10 @@ defmodule Test.Support.Data do
   end
 
   @impl GenServer
-  def init(_) do
-    initial_state =
+  def init(opts) do
+    updating_test_data? = Keyword.get(opts, :updating_test_data?, false)
+
+    initial_data =
       with meta_path <- test_data_path("meta.json"),
            {:ok, meta} <- File.read(meta_path),
            {:ok, meta} <- Jason.decode(meta) do
@@ -117,27 +132,27 @@ defmodule Test.Support.Data do
         _ -> %{}
       end
 
-    {:ok, initial_state}
+    {:ok, %State{data: initial_data, updating_test_data?: updating_test_data?}}
   end
 
   @impl GenServer
-  def handle_call({:get, request}, _from, state) do
+  def handle_call({:get, request}, _from, %State{} = state) do
     # set touched: true if req in state, but do not put if req not in state
 
-    case Map.get(state, request) do
+    case Map.get(state.data, request) do
       nil ->
         {:reply, nil, state}
 
       result ->
         result = %Response{result | touched: true}
-        state = Map.put(state, request, result)
+        state = put_in(state.data[request], result)
         {:reply, result, state}
     end
   end
 
-  def handle_call({:put, request, data}, _from, state) do
+  def handle_call({:put, request, data}, _from, %State{} = state) do
     state =
-      update_in(state[request], fn
+      update_in(state.data[request], fn
         nil -> %Response{id: Uniq.UUID.uuid7(), new_data: data, touched: true}
         resp -> %Response{resp | new_data: data, touched: true}
       end)
@@ -145,9 +160,13 @@ defmodule Test.Support.Data do
     {:reply, :ok, state}
   end
 
-  def handle_call(:write_new_data, _from, state) do
+  def handle_call(:write_new_data, _from, %State{} = state) do
+    unless state.updating_test_data? do
+      raise "Wrote new data, but not updating test data"
+    end
+
     {touched, untouched} =
-      state
+      state.data
       |> Map.split_with(fn {_req, %Response{touched: touched}} -> touched end)
 
     untouched
@@ -162,16 +181,16 @@ defmodule Test.Support.Data do
       File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data))
     end)
 
-    state = touched
-    meta = dehydrate_state(state)
+    state = %State{state | data: touched}
+    meta = dehydrate_state(state.data)
     File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta, pretty: true))
 
     {:reply, :ok, state}
   end
 
-  def handle_call(:warn_untouched, _from, state) do
-    unless updating_test_data?() do
-      for {req, resp} <- state do
+  def handle_call(:warn_untouched, _from, %State{} = state) do
+    unless state.updating_test_data? do
+      for {req, resp} <- state.data do
         unless resp.touched do
           Logger.warning("Unused test data for #{req}")
         end
@@ -179,6 +198,10 @@ defmodule Test.Support.Data do
     end
 
     {:reply, :ok, state}
+  end
+
+  def handle_call(:updating_test_data?, _from, %State{} = state) do
+    {:reply, state.updating_test_data?, state}
   end
 
   defp hydrate_state(meta_json) do
@@ -210,10 +233,6 @@ defmodule Test.Support.Data do
     end
   end
 
-  defp updating_test_data? do
-    Application.get_env(:mobile_app_backend, :updating_test_data?, false)
-  end
-
   defp test_data_path(file) do
     Application.app_dir(:mobile_app_backend, ["priv", "test_data", file])
   end
@@ -222,7 +241,8 @@ defmodule Test.Support.Data do
     test_data_path("#{id}.json")
   end
 
-  defp update_response(conn, stored_response) do
+  @spec update_response(Plug.Conn.t(), Response.t() | nil, GenServer.server()) :: binary()
+  defp update_response(conn, stored_response, server) do
     request = Request.from_conn(conn)
 
     expected_response =
@@ -240,7 +260,7 @@ defmodule Test.Support.Data do
     cond do
       is_nil(expected_response) ->
         Logger.info("Creating #{request}")
-        GenServer.call(__MODULE__, {:put, request, actual_response})
+        GenServer.call(server, {:put, request, actual_response})
 
       expected_response == actual_response ->
         :ok
