@@ -79,5 +79,29 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
              } =
                json_response(conn, 200)
     end
+
+    test "includes child stop info", %{conn: conn} do
+      conn =
+        get(conn, "/api/nearby", %{latitude: 42.562535, longitude: -70.869116})
+
+      assert %{
+               "stops" => [
+                 %{
+                   "id" => "place-GB-0198",
+                   "latitude" => 42.562171,
+                   "longitude" => -70.869254,
+                   "name" => "Montserrat",
+                   "parent_station" => nil
+                 } = parent_station,
+                 %{"id" => "GB-0198", "parent_station" => parent_station},
+                 %{"id" => "GB-0198-01", "parent_station" => parent_station},
+                 %{"id" => "GB-0198-02", "parent_station" => parent_station}
+               ],
+               "route_patterns" => %{},
+               "pattern_ids_by_stop" => %{} = pattern_ids_by_stop
+             } = json_response(conn, 200)
+
+      assert Map.keys(pattern_ids_by_stop) == ["GB-0198-01", "GB-0198-02"]
+    end
   end
 end

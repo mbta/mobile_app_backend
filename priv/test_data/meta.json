@@ -1,10 +1,12 @@
 {
   "V3_API": {
     "/route_patterns": {
-      "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=67120%2C120%2C129%2C137%2C10830%2C10821&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d2356-5ddd-7dc9-a139-9d8fe6b0a44b"
+      "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=10821%2C10830%2C120%2C129%2C137%2C67120&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d3216-51c1-7f1c-bf27-7221e39ab293",
+      "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=GB-0198%2CGB-0198-01%2CGB-0198-02%2Cplace-GB-0198&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d3216-5250-7087-a8a3-fd451c0f56db"
     },
     "/stops": {
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname&filter%5Blatitude%5D=42.281877070443166&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.18020826779917&filter%5Bradius%5D=0.01&include=parent_station&sort=distance": "018d2356-5dad-7360-a086-f08b2e1973ba"
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname&filter%5Blatitude%5D=42.281877070443166&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.18020826779917&filter%5Bradius%5D=0.01&include=parent_station&sort=distance": "018d2356-5dad-7360-a086-f08b2e1973ba",
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.01&include=parent_station&sort=distance": "018d3216-521f-71c7-a060-a812cf402906"
     }
   }
 }

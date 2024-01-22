@@ -14,14 +14,11 @@ defmodule MobileAppBackendWeb.NearbyController do
         sort: {:distance, :asc}
       )
 
-    stops =
-      stops
-      |> Enum.map(&MBTAV3API.Stop.parent/1)
-      |> Enum.uniq()
+    stop_ids = MapSet.new(stops, & &1.id)
 
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
-        filter: [stop: Enum.map_join(stops, ",", & &1.id)],
+        filter: [stop: Enum.join(stop_ids, ",")],
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )
@@ -33,7 +30,9 @@ defmodule MobileAppBackendWeb.NearbyController do
           id: route_pattern_id,
           representative_trip: %MBTAV3API.Trip{stops: stops}
         } ->
-          Enum.map(stops, &%{stop_id: &1.id, route_pattern_id: route_pattern_id})
+          stops
+          |> Enum.filter(&(&1.id in stop_ids))
+          |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
       end)
       |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
 
