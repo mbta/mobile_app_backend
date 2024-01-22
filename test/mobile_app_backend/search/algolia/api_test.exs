@@ -51,7 +51,7 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
       reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn url, body, headers ->
         send(pid, %{url: url, body: body, headers: headers})
-        {:ok, %{body: "\{\"results\":[]\}"}}
+        {:ok, %{body: %{"results" => []}}}
       end)
 
       Api.multi_index_search([
@@ -97,7 +97,7 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
         {:ok, %{body: "[123 this is not json]"}}
       end)
 
-      assert {:error, :search_failed} =
+      assert {:error, :malformed_results} =
                Api.multi_index_search([
                  QueryPayload.for_index(:stop, "1"),
                  QueryPayload.for_index(:route, "1")
@@ -122,46 +122,45 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
   def mock_perform_request_fn(_url, _body, _headers) do
     {:ok,
      %{
-       body:
-         Jason.encode!(%{
-           results: [
-             %{
-               index: "stops_test",
-               hits: [
-                 %{
-                   "stop" => %{
-                     "zone" => "8",
-                     "station?" => true,
-                     "name" => "Wachusett",
-                     "id" => "place-FR-3338"
-                   },
-                   "routes" => [
-                     %{
-                       "type" => 2,
-                       "icon" => "commuter_rail",
-                       "display_name" => "Commuter Rail"
-                     }
-                   ],
-                   "rank" => 3
-                 }
-               ]
-             },
-             %{
-               index: "routes_test",
-               hits: [
-                 %{
-                   "route" => %{
-                     "type" => 3,
-                     "name" => "33Name",
-                     "long_name" => "33 Long Name",
-                     "id" => "33"
-                   },
-                   "rank" => 5
-                 }
-               ]
-             }
-           ]
-         })
+       body: %{
+         "results" => [
+           %{
+             "index" => "stops_test",
+             "hits" => [
+               %{
+                 "stop" => %{
+                   "zone" => "8",
+                   "station?" => true,
+                   "name" => "Wachusett",
+                   "id" => "place-FR-3338"
+                 },
+                 "routes" => [
+                   %{
+                     "type" => 2,
+                     "icon" => "commuter_rail",
+                     "display_name" => "Commuter Rail"
+                   }
+                 ],
+                 "rank" => 3
+               }
+             ]
+           },
+           %{
+             "index" => "routes_test",
+             "hits" => [
+               %{
+                 "route" => %{
+                   "type" => 3,
+                   "name" => "33Name",
+                   "long_name" => "33 Long Name",
+                   "id" => "33"
+                 },
+                 "rank" => 5
+               }
+             ]
+           }
+         ]
+       }
      }}
   end
 end

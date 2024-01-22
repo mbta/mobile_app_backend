@@ -25,9 +25,8 @@ defmodule MobileAppBackend.Search.Algolia.Api do
 
     with {:ok, url} <- multi_index_url(),
          {:ok, headers} <- headers(),
-         {:ok, raw_response} <- perform_request_fn.(url, body, headers),
-         {:ok, response} <- Jason.decode(raw_response.body) do
-      {:ok, parse_results(response)}
+         {:ok, response} <- perform_request_fn.(url, body, headers) do
+      parse_results(response.body)
     else
       error ->
         Logger.error("#{__MODULE__} search_failed. reason=#{inspect(error)}")
@@ -40,20 +39,25 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   end
 
   defp parse_results(%{"results" => results_per_index}) do
-    Enum.flat_map(results_per_index, fn index_results ->
-      hits = index_results["hits"]
+    {:ok,
+     Enum.flat_map(results_per_index, fn index_results ->
+       hits = index_results["hits"]
 
-      cond do
-        index_results["index"] === Algolia.Index.index_name(:route) ->
-          Enum.map(hits, &Algolia.RouteResult.parse(&1))
+       cond do
+         index_results["index"] === Algolia.Index.index_name(:route) ->
+           Enum.map(hits, &Algolia.RouteResult.parse(&1))
 
-        index_results["index"] === Algolia.Index.index_name(:stop) ->
-          Enum.map(hits, &Algolia.StopResult.parse(&1))
+         index_results["index"] === Algolia.Index.index_name(:stop) ->
+           Enum.map(hits, &Algolia.StopResult.parse(&1))
 
-        true ->
-          []
-      end
-    end)
+         true ->
+           []
+       end
+     end)}
+  end
+
+  defp parse_results(_bad_format) do
+    {:error, :malformed_results}
   end
 
   defp multi_query_encoded_payload(queries) do
