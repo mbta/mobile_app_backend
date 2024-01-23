@@ -149,7 +149,7 @@ defmodule MBTAV3API.JsonApiTest do
                  id: "20761",
                  attributes: %{},
                  relationships: %{
-                   "other" => [%JsonApi.Item{type: "other", id: "1"}]
+                   "other" => [%JsonApi.Reference{type: "other", id: "1"}]
                  }
                }
              ]

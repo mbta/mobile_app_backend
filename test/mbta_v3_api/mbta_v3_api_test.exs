@@ -1,99 +1,111 @@
 defmodule MBTAV3APITest do
   use ExUnit.Case, async: true
 
-  import Plug.Conn, only: [fetch_query_params: 1, send_resp: 3]
+  import Mox
   import Test.Support.Helpers
   alias MBTAV3API.JsonApi
 
   setup _ do
-    bypass = Bypass.open()
-    reassign_env(:mbta_v3_api, :base_url, "")
-    reassign_env(:mbta_v3_api, :api_key, "")
-    {:ok, %{bypass: bypass, url: "http://localhost:#{bypass.port}"}}
+    reassign_env(:mobile_app_backend, :base_url, "")
+    reassign_env(:mobile_app_backend, :api_key, "")
+    :ok
   end
+
+  setup :verify_on_exit!
 
   describe "get_json/1" do
     @tag :capture_log
-    test "normal responses return a JsonApi struct", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert conn.request_path == "/normal_response"
-        send_resp(conn, 200, ~s({"data": []}))
-      end)
+    test "normal responses return a JsonApi struct" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/normal_response"}} ->
+          {:ok, Req.Response.json(%{data: []})}
+        end
+      )
 
-      response = MBTAV3API.get_json("/normal_response", [], base_url: url)
+      response = MBTAV3API.get_json("/normal_response")
       assert %JsonApi{} = response
       refute response.data == %{}
     end
 
     @tag :capture_log
-    test "encodes the URL", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert conn.request_path == "/normal%20response"
-        send_resp(conn, 200, ~s({"data": []}))
-      end)
+    test "encodes the URL" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/normal%20response"}} ->
+          {:ok, Req.Response.json(%{data: []})}
+        end
+      )
 
-      response = MBTAV3API.get_json("/normal response", [], base_url: url)
+      response = MBTAV3API.get_json("/normal response")
       assert %JsonApi{} = response
       refute response.data == %{}
     end
 
     @tag :capture_log
-    test "does not add headers normally", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert List.keyfind(conn.req_headers, "x-wm-proxy-url", 0) == nil
-        send_resp(conn, 200, ~s({"data": []}))
-      end)
+    test "missing endpoints return an error" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/missing"}} ->
+          {:ok,
+           Req.Response.new(status: 404)
+           |> Req.Response.json(%{errors: [%{code: :not_found}]})}
+        end
+      )
 
-      MBTAV3API.get_json("/normal_response", [], base_url: url)
-    end
-
-    @tag :capture_log
-    test "missing endpoints return an error", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert conn.request_path == "/missing"
-        send_resp(conn, 404, ~s({"errors":[{"code": "not_found"}]}))
-      end)
-
-      response = MBTAV3API.get_json("/missing", [], base_url: url)
+      response = MBTAV3API.get_json("/missing")
       assert {:error, [%JsonApi.Error{code: "not_found"}]} = response
     end
 
     @tag :capture_log
-    test "can't connect returns an error", %{bypass: bypass, url: url} do
-      Bypass.down(bypass)
+    test "can't connect returns an error" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/cant_connect"}} ->
+          {:error, %Mint.TransportError{reason: :nxdomain}}
+        end
+      )
 
-      response = MBTAV3API.get_json("/cant_connect", [], base_url: url)
+      response = MBTAV3API.get_json("/cant_connect")
       assert {:error, %{reason: _}} = response
     end
 
     @tag :capture_log
-    test "passes an API key if present", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert conn.request_path == "/with_api_key"
-        conn = fetch_query_params(conn)
+    test "passes an API key if present" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/with_api_key"},
+             headers: %{"x-api-key" => ["test_key"]},
+             options: %{params: [other: "value"]}
+           } ->
+          {:ok, Req.Response.json(%{data: []})}
+        end
+      )
 
-        # make sure the key is in headers
-        assert Enum.member?(conn.req_headers, {"x-api-key", "test_key"})
-
-        # make sure the key is not in params and other param values are there
-        assert conn.query_params["api_key"] == nil
-        assert conn.query_params["other"] == "value"
-        send_resp(conn, 200, "")
-      end)
-
-      # make sure we keep other params
-      MBTAV3API.get_json("/with_api_key", [other: "value"], base_url: url, api_key: "test_key")
+      %JsonApi{} = MBTAV3API.get_json("/with_api_key", [other: "value"], api_key: "test_key")
     end
 
     @tag :capture_log
-    test "does not pass an API key if not set", %{bypass: bypass, url: url} do
-      Bypass.expect(bypass, fn conn ->
-        assert conn.request_path == "/without_api_key"
-        refute fetch_query_params(conn).query_params["api_key"]
-        send_resp(conn, 200, "")
-      end)
+    test "does not pass an API key if not set" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/without_api_key"},
+             headers: %{} = headers
+           } ->
+          refute Map.has_key?(headers, "x-api-key")
+          {:ok, Req.Response.json(%{data: []})}
+        end
+      )
 
-      MBTAV3API.get_json("/without_api_key", [], base_url: url, api_key: nil)
+      %JsonApi{} = MBTAV3API.get_json("/without_api_key", [], api_key: nil)
     end
   end
 end
