@@ -1,7 +1,13 @@
 {
+  "OPEN_TRIP_PLANNER": {
+    "/otp/routers/default/index/graphql": {
+      "{\"variables\":{\"latitude\":42.281877070443166,\"longitude\":-71.18020826779917,\"radius\":805},\"query\":\"query NearbyQuery($latitude: Float!, $longitude: Float!, $radius: Int!) {\\n  nearest(lat: $latitude, lon: $longitude, maxDistance: $radius, filterByPlaceTypes: [STOP]) {\\n    edges {\\n      node {\\n        place {\\n          ... on Stop {\\n            ...stopDetails\\n            parentStation {\\n              ...stopDetails\\n            }\\n            patterns {\\n              route {\\n                gtfsId\\n                shortName\\n                longName\\n                mode\\n                color\\n                textColor\\n              }\\n              directionId\\n              name\\n              code\\n              headsign\\n            }\\n          }\\n        }\\n        distance\\n      }\\n    }\\n  }\\n}\\n\\nfragment stopDetails on Stop {\\n  gtfsId\\n  lat\\n  lon\\n  name\\n}\\n\"}": "018d3879-35ab-71e6-8b5b-d4f36e881a5b"
+    }
+  },
   "V3_API": {
     "/route_patterns": {
       "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=10821%2C10830%2C120%2C129%2C137%2C67120&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d3216-51c1-7f1c-bf27-7221e39ab293",
+      "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=129%2C137%2C67120&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d3879-36f2-709a-b94f-1c2cba8612fb",
       "fields%5Broute%5D=color%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=direction_id%2Cname%2Csort_order&fields%5Bstop%5D=&fields%5Btrip%5D=&filter%5Bstop%5D=GB-0198%2CGB-0198-01%2CGB-0198-02%2Cplace-GB-0198&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018d3216-5250-7087-a8a3-fd451c0f56db"
     },
     "/stops": {

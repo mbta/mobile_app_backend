@@ -9,7 +9,7 @@ defmodule Test.Support.DataTest do
     :sys.replace_state(server, fn _ ->
       %MockData.State{
         data: %{
-          %MockData.Request{host: "V3_API", path: "/test-only/is-ok", query: "a=b&c=d"} =>
+          %MockData.Request{host: "V3_API", path: "/test-only/is-ok", body: "a=b&c=d"} =>
             %MockData.Response{id: "cfbff0d1-9375-5685-968c-48ce8b15ae17"}
         },
         updating_test_data?: false
