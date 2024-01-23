@@ -14,6 +14,20 @@ defmodule MBTAV3API.JsonApi.Item do
         }
 end
 
+defmodule MBTAV3API.JsonApi.Reference do
+  @moduledoc """
+  A JSON:API "resource identifier object", with no attribute information.
+  """
+
+  @derive Jason.Encoder
+  defstruct [:type, :id]
+
+  @type t :: %__MODULE__{
+          type: String.t(),
+          id: String.t()
+        }
+end
+
 defmodule MBTAV3API.JsonApi.Error do
   @moduledoc """
   JSON API error data.
@@ -40,7 +54,7 @@ defmodule MBTAV3API.JsonApi do
 
   @type t :: %__MODULE__{
           links: %{String.t() => String.t()},
-          data: list(MBTAV3API.JsonApi.Item.t())
+          data: list(MBTAV3API.JsonApi.Item.t() | MBTAV3API.JsonApi.Reference.t())
         }
 
   @spec empty() :: t()
@@ -87,7 +101,8 @@ defmodule MBTAV3API.JsonApi do
     %{}
   end
 
-  @spec parse_data(term()) :: {:ok, [MBTAV3API.JsonApi.Item.t()]} | {:error, any}
+  @spec parse_data(term()) ::
+          {:ok, [MBTAV3API.JsonApi.Item.t() | MBTAV3API.JsonApi.Reference.t()]} | {:error, any}
   defp parse_data(%{"data" => data} = parsed) when is_list(data) do
     included = parse_included(parsed)
     {:ok, Enum.map(data, &parse_data_item(&1, included))}
@@ -126,7 +141,7 @@ defmodule MBTAV3API.JsonApi do
   end
 
   def parse_data_item(%{"type" => type, "id" => id}, _) do
-    %MBTAV3API.JsonApi.Item{
+    %MBTAV3API.JsonApi.Reference{
       type: type,
       id: id
     }

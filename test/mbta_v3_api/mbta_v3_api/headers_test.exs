@@ -12,7 +12,7 @@ defmodule MBTAV3API.HeadersTest do
   end
 
   test "accepts an :api_version configuration" do
-    reassign_env(:mbta_v3_api, :api_version, "3005-01-02")
+    reassign_env(:mobile_app_backend, :api_version, "3005-01-02")
 
     assert Headers.build("API_KEY") == [
              {"x-api-key", "API_KEY"},

@@ -15,7 +15,7 @@ defmodule MBTAV3API.Headers do
   defp api_key_header(headers, nil), do: headers
 
   defp api_key_header(headers, <<key::binary>>) do
-    api_version = Application.get_env(:mbta_v3_api, :api_version)
+    api_version = Application.get_env(:mobile_app_backend, :api_version)
     [{"x-api-key", key}, {"MBTA-Version", api_version} | headers]
   end
 end
