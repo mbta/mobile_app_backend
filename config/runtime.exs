@@ -7,12 +7,12 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
-# mbta_v3_api configuration in disguise
-config :mobile_app_backend,
-  base_url: System.get_env("API_URL"),
-  api_key: System.get_env("API_KEY")
-
 if config_env() != :test do
+  # mbta_v3_api configuration in disguise
+  config :mobile_app_backend,
+    base_url: System.get_env("API_URL"),
+    api_key: System.get_env("API_KEY")
+
   config :mobile_app_backend, MobileAppBackend.Search.Algolia,
     app_id: System.get_env("ALGOLIA_APP_ID"),
     search_key: System.get_env("ALGOLIA_SEARCH_KEY"),
