@@ -13,31 +13,15 @@ defmodule OpenTripPlannerClient.Nearby do
   def parse(data) do
     case data do
       %{"data" => %{"nearest" => %{"edges" => edges}}} ->
-        for edge <- edges, reduce: {:ok, {[], %{}}} do
-          {:ok, {stops, route_patterns}} ->
+        for edge <- edges, reduce: {:ok, []} do
+          {:ok, stops} ->
             with %{"node" => %{"place" => stop}} <- edge,
-                 {:ok, {stop, new_route_patterns}} <- parse_stop(stop) do
-              {:ok,
-               {[stop | stops],
-                Map.merge(route_patterns, new_route_patterns, fn _,
-                                                                 %MBTAV3API.RoutePattern{
-                                                                   representative_trip:
-                                                                     %MBTAV3API.Trip{
-                                                                       stops: stops1
-                                                                     }
-                                                                 } = pattern,
-                                                                 %MBTAV3API.RoutePattern{
-                                                                   representative_trip:
-                                                                     %MBTAV3API.Trip{
-                                                                       stops: stops2
-                                                                     }
-                                                                 } ->
-                  put_in(pattern.representative_trip.stops, stops1 ++ stops2)
-                end)}}
+                 {:ok, stop} <- parse_stop(stop) do
+              {:ok, [stop | stops]}
             end
         end
         |> case do
-          {:ok, {stops, patterns}} -> {:ok, {Enum.reverse(stops), Map.values(patterns)}}
+          {:ok, stops} -> {:ok, Enum.reverse(stops)}
         end
 
       _ ->
@@ -57,20 +41,6 @@ defmodule OpenTripPlannerClient.Nearby do
                 parentStation {
                   ...stopDetails
                 }
-                patterns {
-                  route {
-                    gtfsId
-                    shortName
-                    longName
-                    mode
-                    color
-                    textColor
-                  }
-                  directionId
-                  name
-                  code
-                  headsign
-                }
               }
             }
             distance
@@ -88,54 +58,25 @@ defmodule OpenTripPlannerClient.Nearby do
     """
   end
 
-  @spec parse_stop(map()) ::
-          {:ok, {MBTAV3API.Stop.t(), %{String.t() => MBTAV3API.RoutePattern.t()}}}
-          | {:error, term()}
+  @spec parse_stop(map()) :: {:ok, MBTAV3API.Stop.t()} | {:error, term()}
   defp parse_stop(place) do
     case place do
       %{"lat" => latitude, "lon" => longitude, "gtfsId" => "mbta-ma-us:" <> id, "name" => name} ->
         {:ok,
-         {
-           %MBTAV3API.Stop{
-             id: id,
-             latitude: latitude,
-             longitude: longitude,
-             name: name,
-             parent_station:
-               with {:ok, parent_station} when not is_nil(parent_station) <-
-                      Map.fetch(place, "parentStation"),
-                    {:ok, {parent_station, _}} <- parse_stop(parent_station) do
-                 parent_station
-               else
-                 _ -> nil
-               end
-           },
-           Map.get(place, "patterns", [])
-           |> Enum.map(&parse_pattern(&1, id))
-           |> Map.new(&{&1.id, &1})
+         %MBTAV3API.Stop{
+           id: id,
+           latitude: latitude,
+           longitude: longitude,
+           name: name,
+           parent_station:
+             with {:ok, parent_station} when not is_nil(parent_station) <-
+                    Map.fetch(place, "parentStation"),
+                  {:ok, parent_station} <- parse_stop(parent_station) do
+               parent_station
+             else
+               _ -> nil
+             end
          }}
     end
-  end
-
-  defp parse_pattern(pattern, stop_id) do
-    %MBTAV3API.RoutePattern{
-      id: pattern["code"] |> String.replace_prefix("mbta-ma-us:", ""),
-      direction_id: pattern["directionId"],
-      name: pattern["name"],
-      sort_order: nil,
-      representative_trip: %MBTAV3API.Trip{
-        stops: [%MBTAV3API.JsonApi.Reference{type: "stop", id: stop_id}]
-      },
-      route: %MBTAV3API.Route{
-        id: pattern["route"]["gtfsId"] |> String.replace_prefix("mbta-ma-us:", ""),
-        color: pattern["route"]["color"],
-        direction_destinations: nil,
-        direction_names: nil,
-        long_name: pattern["route"]["longName"],
-        short_name: pattern["route"]["shortName"],
-        sort_order: nil,
-        text_color: pattern["route"]["textColor"]
-      }
-    }
   end
 end

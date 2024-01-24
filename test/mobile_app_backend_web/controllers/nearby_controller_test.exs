@@ -89,7 +89,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         get(conn, "/api/nearby", %{
           latitude: 42.281877070443166,
           longitude: -71.18020826779917,
-          source: "split"
+          source: "otp"
         })
 
       assert %{
@@ -150,76 +150,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  "129" => ["36-5-1"],
                  "137" => ["36-1-0", "36-5-0"],
                  "67120" => ["36-1-0", "36-1-1"]
-               }
-             } =
-               json_response(conn, 200)
-    end
-
-    test "retrieves nearby stop and route info from OpenTripPlanner", %{conn: conn} do
-      conn =
-        get(conn, "/api/nearby", %{
-          latitude: 42.281877070443166,
-          longitude: -71.18020826779917,
-          source: "otp"
-        })
-
-      assert %{
-               "stops" => [
-                 %{
-                   "id" => "67120",
-                   "latitude" => 42.28101,
-                   "longitude" => -71.177035,
-                   "name" => "Millennium Park"
-                 },
-                 %{"id" => "129", "name" => "Rivermoor St @ Charles Park Rd"},
-                 %{"id" => "137", "name" => "Charles Park Rd @ Rivermoor St"}
-               ],
-               "route_patterns" => %{
-                 "36:0:03" => %{
-                   "direction_id" => 0,
-                   "id" => "36:0:03",
-                   "name" => "36 to Millennium Park (mbta-ma-us:67120)",
-                   "route" =>
-                     %{
-                       "color" => "FFC72C",
-                       "direction_destinations" => nil,
-                       "direction_names" => nil,
-                       "id" => "36",
-                       "long_name" => "Millennium Park or VA Hospital - Forest Hills Station",
-                       "short_name" => "36",
-                       "sort_order" => nil,
-                       "text_color" => "000000"
-                     } = route_36,
-                   "sort_order" => nil
-                 },
-                 "36:1:03" => %{
-                   "direction_id" => 1,
-                   "id" => "36:1:03",
-                   "name" =>
-                     "36 to Forest Hills (mbta-ma-us:10642) from Millennium Park (mbta-ma-us:67120)",
-                   "route" => route_36,
-                   "sort_order" => nil
-                 },
-                 "36:0:04" => %{
-                   "direction_id" => 0,
-                   "id" => "36:0:04",
-                   "name" => "36 to Rivermoor St @ Industrial Park (mbta-ma-us:120)",
-                   "route" => route_36,
-                   "sort_order" => nil
-                 },
-                 "36:1:04" => %{
-                   "direction_id" => 1,
-                   "id" => "36:1:04",
-                   "name" =>
-                     "36 to Forest Hills (mbta-ma-us:10642) from Rivermoor St @ Industrial Park (mbta-ma-us:120)",
-                   "route" => route_36,
-                   "sort_order" => nil
-                 }
-               },
-               "pattern_ids_by_stop" => %{
-                 "129" => ["36:1:04"],
-                 "137" => ["36:0:03", "36:0:04"],
-                 "67120" => ["36:0:03", "36:1:03"]
                }
              } =
                json_response(conn, 200)

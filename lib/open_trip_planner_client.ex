@@ -15,11 +15,10 @@ defmodule OpenTripPlannerClient do
   alias OpenTripPlannerClient.Nearby
 
   @doc """
-  Fetches stops (and route patterns and routes) within the given number of meters of the given position.
+  Fetches stops within the given number of meters of the given position.
   """
   @spec nearby(float(), float(), integer(), Keyword.t()) ::
-          {:ok, {[MBTAV3API.Stop.t()], [MBTAV3API.RoutePattern.t()]}}
-          | {:error, term()}
+          {:ok, [MBTAV3API.Stop.t()]} | {:error, term()}
   def nearby(latitude, longitude, radius, opts \\ []) do
     root_url =
       Keyword.get(opts, :root_url, Application.fetch_env!(:mobile_app_backend, :otp_url))

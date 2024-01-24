@@ -11,10 +11,9 @@ defmodule MobileAppBackendWeb.NearbyController do
       case Map.fetch!(params, "source") do
         "v3" -> :v3
         "otp" -> :otp
-        "split" -> :split
       end
 
-    {stops, otp_route_patterns} =
+    stops =
       case source do
         :v3 ->
           {:ok, stops} =
@@ -29,32 +28,23 @@ defmodule MobileAppBackendWeb.NearbyController do
               sort: {:distance, :asc}
             )
 
-          {stops, nil}
+          stops
 
-        source when source in [:otp, :split] ->
-          {:ok, {stops, route_patterns}} =
+        :otp ->
+          {:ok, stops} =
             OpenTripPlannerClient.nearby(latitude, longitude, miles_to_meters(radius))
 
-          {stops, route_patterns}
+          stops
       end
 
     stop_ids = MapSet.new(stops, & &1.id)
 
-    route_patterns =
-      case source do
-        :otp ->
-          otp_route_patterns
-
-        source when source in [:v3, :split] ->
-          {:ok, route_patterns} =
-            MBTAV3API.RoutePattern.get_all(
-              filter: [stop: Enum.join(stop_ids, ",")],
-              include: [:route, representative_trip: :stops],
-              fields: [stop: []]
-            )
-
-          route_patterns
-      end
+    {:ok, route_patterns} =
+      MBTAV3API.RoutePattern.get_all(
+        filter: [stop: Enum.join(stop_ids, ",")],
+        include: [:route, representative_trip: :stops],
+        fields: [stop: []]
+      )
 
     pattern_ids_by_stop =
       route_patterns

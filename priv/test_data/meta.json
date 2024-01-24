@@ -1,7 +1,7 @@
 {
   "OPEN_TRIP_PLANNER": {
     "/otp/routers/default/index/graphql": {
-      "{\"variables\":{\"latitude\":42.281877070443166,\"longitude\":-71.18020826779917,\"radius\":805},\"query\":\"query NearbyQuery($latitude: Float!, $longitude: Float!, $radius: Int!) {\\n  nearest(lat: $latitude, lon: $longitude, maxDistance: $radius, filterByPlaceTypes: [STOP]) {\\n    edges {\\n      node {\\n        place {\\n          ... on Stop {\\n            ...stopDetails\\n            parentStation {\\n              ...stopDetails\\n            }\\n            patterns {\\n              route {\\n                gtfsId\\n                shortName\\n                longName\\n                mode\\n                color\\n                textColor\\n              }\\n              directionId\\n              name\\n              code\\n              headsign\\n            }\\n          }\\n        }\\n        distance\\n      }\\n    }\\n  }\\n}\\n\\nfragment stopDetails on Stop {\\n  gtfsId\\n  lat\\n  lon\\n  name\\n}\\n\"}": "018d3879-35ab-71e6-8b5b-d4f36e881a5b"
+      "{\"variables\":{\"latitude\":42.281877070443166,\"longitude\":-71.18020826779917,\"radius\":805},\"query\":\"query NearbyQuery($latitude: Float!, $longitude: Float!, $radius: Int!) {\\n  nearest(lat: $latitude, lon: $longitude, maxDistance: $radius, filterByPlaceTypes: [STOP]) {\\n    edges {\\n      node {\\n        place {\\n          ... on Stop {\\n            ...stopDetails\\n            parentStation {\\n              ...stopDetails\\n            }\\n          }\\n        }\\n        distance\\n      }\\n    }\\n  }\\n}\\n\\nfragment stopDetails on Stop {\\n  gtfsId\\n  lat\\n  lon\\n  name\\n}\\n\"}": "018d3c77-9e37-7ec8-b618-b1d5ec8fc4ba"
     }
   },
   "V3_API": {
