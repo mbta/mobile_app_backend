@@ -7,34 +7,22 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
-    source =
+    {:ok, stops} =
       case Map.fetch!(params, "source") do
-        "v3" -> :v3
-        "otp" -> :otp
-      end
+        "v3" ->
+          MBTAV3API.Stop.get_all(
+            filter: [
+              latitude: latitude,
+              longitude: longitude,
+              location_type: [0, 1],
+              radius: miles_to_degrees(radius)
+            ],
+            include: :parent_station,
+            sort: {:distance, :asc}
+          )
 
-    stops =
-      case source do
-        :v3 ->
-          {:ok, stops} =
-            MBTAV3API.Stop.get_all(
-              filter: [
-                latitude: latitude,
-                longitude: longitude,
-                location_type: [0, 1],
-                radius: miles_to_degrees(radius)
-              ],
-              include: :parent_station,
-              sort: {:distance, :asc}
-            )
-
-          stops
-
-        :otp ->
-          {:ok, stops} =
-            OpenTripPlannerClient.nearby(latitude, longitude, miles_to_meters(radius))
-
-          stops
+        "otp" ->
+          OpenTripPlannerClient.nearby(latitude, longitude, miles_to_meters(radius))
       end
 
     stop_ids = MapSet.new(stops, & &1.id)
