@@ -7,9 +7,7 @@ defmodule OpenTripPlannerClient.Nearby do
     )
   end
 
-  @spec parse(map()) ::
-          {:ok, {[MBTAV3API.Stop.t()], [MBTAV3API.RoutePattern.t()]}}
-          | {:error, term()}
+  @spec parse(map()) :: {:ok, [MBTAV3API.Stop.t()]} | {:error, term()}
   def parse(data) do
     case data do
       %{"data" => %{"nearest" => %{"edges" => edges}}} ->
