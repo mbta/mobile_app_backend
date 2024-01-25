@@ -14,7 +14,8 @@ config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
 
 config :mobile_app_backend,
-  base_url: "https://api-dev.mbtace.com/"
+  base_url: "https://api-dev.mbtace.com/",
+  otp_url: "http://otp.example.com/"
 
 config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   app_id: "fake_app",

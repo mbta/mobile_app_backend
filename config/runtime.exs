@@ -17,6 +17,10 @@ if config_env() != :test do
     app_id: System.get_env("ALGOLIA_APP_ID"),
     search_key: System.get_env("ALGOLIA_SEARCH_KEY"),
     base_url: System.get_env("ALGOLIA_READ_URL")
+
+  # open_trip_planner_client configuration in disguise
+  config :mobile_app_backend,
+    otp_url: System.get_env("OTP_URL")
 end
 
 # ## Using releases
