@@ -40,20 +40,20 @@ defmodule MobileAppBackend.Search.Algolia.Api do
 
   defp parse_results(%{"results" => results_per_index}) do
     {:ok,
-     Enum.flat_map(results_per_index, fn index_results ->
+     for index_results <- results_per_index,
+         Algolia.Index.valid_index_name?(index_results["index"]),
+         into: %{} do
        hits = index_results["hits"]
+       index = index_results["index"]
 
        cond do
-         index_results["index"] === Algolia.Index.index_name(:route) ->
-           Enum.map(hits, &Algolia.RouteResult.parse(&1))
+         index === Algolia.Index.index_name(:route) ->
+           {:routes, Enum.map(hits, &Algolia.RouteResult.parse(&1))}
 
-         index_results["index"] === Algolia.Index.index_name(:stop) ->
-           Enum.map(hits, &Algolia.StopResult.parse(&1))
-
-         true ->
-           []
+         index === Algolia.Index.index_name(:stop) ->
+           {:stops, Enum.map(hits, &Algolia.StopResult.parse(&1))}
        end
-     end)}
+     end}
   end
 
   defp parse_results(_bad_format) do
