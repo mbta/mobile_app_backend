@@ -33,6 +33,10 @@ defmodule MobileAppBackend.MixProject do
     ]
   end
 
+  def cli do
+    [preferred_envs: [update_test_data: :test]]
+  end
+
   # Specifies which paths to compile per environment.
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
@@ -62,11 +66,13 @@ defmodule MobileAppBackend.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:bypass, "~> 2.1", only: :test},
-      {:req, "~> 0.4.8"},
+      {:mox, "~> 1.0", only: :test},
+      {:uniq, "~> 0.6", only: :test},
+      {:req, "~> 0.3"},
       {:sentry, "~> 10.0"},
       {:timex, "~> 3.7"},
-      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
+      {:absinthe_client, "~> 0.1.0"}
     ]
   end
 

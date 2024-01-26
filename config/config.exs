@@ -21,6 +21,10 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   pubsub_server: MobileAppBackend.PubSub,
   live_view: [signing_salt: "EPNVgKKu"]
 
+config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+  route_index: "routes_test",
+  stop_index: "stops_test"
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
@@ -50,6 +54,9 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+# Use Req for making HTTP requests
+config :mobile_app_backend, MobileAppBackend.HTTP, Req
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
