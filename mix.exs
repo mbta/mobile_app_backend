@@ -68,10 +68,11 @@ defmodule MobileAppBackend.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:mox, "~> 1.0", only: :test},
       {:uniq, "~> 0.6", only: :test},
-      {:req, "~> 0.4.8"},
+      {:req, "~> 0.3"},
       {:sentry, "~> 10.0"},
       {:timex, "~> 3.7"},
-      {:lcov_ex, "~> 0.3", only: [:test], runtime: false}
+      {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
+      {:absinthe_client, "~> 0.1.0"}
     ]
   end
 

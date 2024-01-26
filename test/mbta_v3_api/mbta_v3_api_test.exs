@@ -81,9 +81,10 @@ defmodule MBTAV3APITest do
         :request,
         fn %Req.Request{
              url: %URI{path: "/with_api_key"},
-             headers: %{"x-api-key" => ["test_key"]},
+             headers: headers,
              options: %{params: [other: "value"]}
            } ->
+          assert {"x-api-key", "test_key"} in headers
           {:ok, Req.Response.json(%{data: []})}
         end
       )
@@ -98,9 +99,9 @@ defmodule MBTAV3APITest do
         :request,
         fn %Req.Request{
              url: %URI{path: "/without_api_key"},
-             headers: %{} = headers
+             headers: headers
            } ->
-          refute Map.has_key?(headers, "x-api-key")
+          refute Enum.any?(headers, &(elem(&1, 0) == "x-api-key"))
           {:ok, Req.Response.json(%{data: []})}
         end
       )

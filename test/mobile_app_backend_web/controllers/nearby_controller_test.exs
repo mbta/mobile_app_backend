@@ -7,9 +7,13 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
   end
 
   describe "GET /api/nearby" do
-    test "retrieves nearby stop and route info", %{conn: conn} do
+    test "retrieves nearby stop and route info from the V3 API", %{conn: conn} do
       conn =
-        get(conn, "/api/nearby", %{latitude: 42.281877070443166, longitude: -71.18020826779917})
+        get(conn, "/api/nearby", %{
+          latitude: 42.281877070443166,
+          longitude: -71.18020826779917,
+          source: "v3"
+        })
 
       assert %{
                "stops" => [
@@ -80,9 +84,80 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                json_response(conn, 200)
     end
 
-    test "includes child stop info", %{conn: conn} do
+    test "retrieves nearby stop info from OTP and route info from the V3 API", %{conn: conn} do
       conn =
-        get(conn, "/api/nearby", %{latitude: 42.562535, longitude: -70.869116})
+        get(conn, "/api/nearby", %{
+          latitude: 42.281877070443166,
+          longitude: -71.18020826779917,
+          source: "otp"
+        })
+
+      assert %{
+               "stops" => [
+                 %{
+                   "id" => "67120",
+                   "latitude" => 42.28101,
+                   "longitude" => -71.177035,
+                   "name" => "Millennium Park"
+                 },
+                 %{"id" => "129", "name" => "Rivermoor St @ Charles Park Rd"},
+                 %{"id" => "137", "name" => "Charles Park Rd @ Rivermoor St"}
+               ],
+               "route_patterns" => %{
+                 "36-1-0" => %{
+                   "direction_id" => 0,
+                   "id" => "36-1-0",
+                   "name" => "Forest Hills Station - Millennium Park",
+                   "route" =>
+                     %{
+                       "color" => "FFC72C",
+                       "direction_destinations" => [
+                         "Millennium Park or VA Hospital",
+                         "Forest Hills Station"
+                       ],
+                       "direction_names" => ["Outbound", "Inbound"],
+                       "id" => "36",
+                       "long_name" => "Millennium Park or VA Hospital - Forest Hills Station",
+                       "short_name" => "36",
+                       "sort_order" => 50_360,
+                       "text_color" => "000000"
+                     } = route_36,
+                   "sort_order" => 503_600_040
+                 },
+                 "36-1-1" => %{
+                   "direction_id" => 1,
+                   "id" => "36-1-1",
+                   "name" => "Millennium Park - Forest Hills Station",
+                   "route" => route_36,
+                   "sort_order" => 503_601_040
+                 },
+                 "36-5-0" => %{
+                   "direction_id" => 0,
+                   "id" => "36-5-0",
+                   "name" => "Forest Hills Station - Millennium Park",
+                   "route" => route_36,
+                   "sort_order" => 503_600_060
+                 },
+                 "36-5-1" => %{
+                   "direction_id" => 1,
+                   "id" => "36-5-1",
+                   "name" => "Millennium Park - Forest Hills Station",
+                   "route" => route_36,
+                   "sort_order" => 503_601_060
+                 }
+               },
+               "pattern_ids_by_stop" => %{
+                 "129" => ["36-5-1"],
+                 "137" => ["36-1-0", "36-5-0"],
+                 "67120" => ["36-1-0", "36-1-1"]
+               }
+             } =
+               json_response(conn, 200)
+    end
+
+    test "includes child stop info from the V3 API", %{conn: conn} do
+      conn =
+        get(conn, "/api/nearby", %{latitude: 42.562535, longitude: -70.869116, source: "v3"})
 
       assert %{
                "stops" => [
