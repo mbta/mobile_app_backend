@@ -7,7 +7,7 @@ defmodule MobileAppBackendWeb.SearchController do
 
   @spec query(Conn.t(), map) :: Conn.t()
   def query(%Conn{} = conn, %{"query" => ""}) do
-    json(conn, %{data: []})
+    json(conn, %{data: %{}})
   end
 
   def query(%Conn{} = conn, %{"query" => query}) do
