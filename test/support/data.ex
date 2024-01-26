@@ -11,36 +11,48 @@ defmodule Test.Support.Data do
 
     `:host` is an abstract value denoting the config source, rather than the literal hostname.
     This avoids issues with connecting to the dev vs prod API invalidating the tests.
+
+    For the V3 API, `:body` is the query string in the GET request.
+    For OpenTripPlanner, `:body` is the body in the POST request.
     """
-    defstruct [:host, :path, :query]
+    defstruct [:host, :path, :body]
 
-    @type t :: %__MODULE__{host: String.t(), path: String.t(), query: String.t()}
+    @type t :: %__MODULE__{host: String.t(), path: String.t(), body: String.t()}
 
-    def from_conn(%Plug.Conn{host: host, request_path: path, query_string: query}) do
+    def from_conn(%Plug.Conn{host: host, request_path: path} = conn) do
       %URI{host: v3_host} = URI.parse(Application.get_env(:mobile_app_backend, :base_url))
+      %URI{host: otp_host} = URI.parse(Application.get_env(:mobile_app_backend, :otp_url))
 
-      host =
+      {host, body} =
         case host do
-          ^v3_host -> "V3_API"
-          _ -> raise "Unknown host reference #{host}"
+          ^v3_host ->
+            {"V3_API", conn.query_string}
+
+          ^otp_host ->
+            {:ok, body, _conn} = Plug.Conn.read_body(conn)
+            {"OPEN_TRIP_PLANNER", body}
+
+          _ ->
+            raise "Unknown host reference #{host}"
         end
 
       %Request{
         host: host,
         path: path,
-        query: query
+        body: body
       }
     end
 
     defimpl String.Chars do
-      def to_string(%{host: host, path: path, query: query}) do
+      def to_string(%{host: host, path: path, body: body}) do
         %URI{
           host: host,
           path: path,
           query:
-            case query do
-              "" -> nil
-              _ -> query
+            case {host, body} do
+              {"OPEN_TRIP_PLANNER", _} -> nil
+              {_, ""} -> nil
+              _ -> body
             end
         }
         |> URI.to_string()
@@ -207,8 +219,8 @@ defmodule Test.Support.Data do
   defp hydrate_state(meta_json) do
     meta_json
     |> flatten_map_entries()
-    |> Map.new(fn {host, path, query, id} ->
-      {%Request{host: host, path: path, query: query}, %Response{id: id}}
+    |> Map.new(fn {host, path, body, id} ->
+      {%Request{host: host, path: path, body: body}, %Response{id: id}}
     end)
   end
 
@@ -223,13 +235,13 @@ defmodule Test.Support.Data do
   end
 
   defp dehydrate_state(state) do
-    for {%Request{host: host, path: path, query: query}, %Response{id: id}} <- state,
+    for {%Request{host: host, path: path, body: body}, %Response{id: id}} <- state,
         reduce: %{} do
       data ->
         data
         |> Map.put_new(host, %{})
         |> update_in([host], &Map.put_new(&1, path, %{}))
-        |> put_in([host, path, query], id)
+        |> put_in([host, path, body], id)
     end
   end
 
@@ -254,8 +266,20 @@ defmodule Test.Support.Data do
         _ -> nil
       end
 
+    body =
+      case conn.method do
+        "GET" -> nil
+        "POST" -> request.body
+      end
+
     %Req.Response{status: 200, body: actual_response} =
-      Req.get!(Plug.Conn.request_url(conn), headers: conn.req_headers)
+      Req.new(
+        url: Plug.Conn.request_url(conn),
+        method: conn.method,
+        headers: conn.req_headers,
+        body: body
+      )
+      |> Req.request!()
 
     cond do
       is_nil(expected_response) ->
