@@ -3,8 +3,8 @@ defmodule MBTAV3APITest do
 
   import Mox
   import Test.Support.Helpers
-  alias Test.Support.SSEStub
   alias MBTAV3API.JsonApi
+  alias Test.Support.SSEStub
 
   setup _ do
     reassign_env(:mobile_app_backend, :base_url, "")

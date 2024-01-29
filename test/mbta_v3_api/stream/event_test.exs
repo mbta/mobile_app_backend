@@ -3,11 +3,11 @@ defmodule MBTAV3API.Stream.EventTest do
 
   import Test.Support.Sigils
 
-  alias ServerSentEventStage.Event, as: RawEvent
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
   alias MBTAV3API.Stream.Event
   alias MBTAV3API.Trip
+  alias ServerSentEventStage.Event, as: RawEvent
 
   describe "parse/1" do
     test "parses reset" do
