@@ -3,6 +3,7 @@ defmodule MBTAV3APITest do
 
   import Mox
   import Test.Support.Helpers
+  alias Test.Support.SSEStub
   alias MBTAV3API.JsonApi
 
   setup _ do
@@ -107,6 +108,30 @@ defmodule MBTAV3APITest do
       )
 
       %JsonApi{} = MBTAV3API.get_json("/without_api_key", [], api_key: nil)
+    end
+  end
+
+  describe "start_stream/3" do
+    @tag :capture_log
+    test "streams" do
+      {:ok, stream_instance} =
+        MBTAV3API.start_stream("/ok", %{"a" => "b", "c" => "d"},
+          base_url: "http://example.com",
+          api_key: "efg"
+        )
+
+      refute_receive _
+
+      sse_stub = SSEStub.get_from_instance(stream_instance)
+
+      assert SSEStub.get_args(sse_stub) == [
+               url: "http://example.com/ok?a=b&c=d",
+               headers: [{"x-api-key", "efg"}]
+             ]
+
+      SSEStub.push_events(sse_stub, [%ServerSentEventStage.Event{event: "reset", data: "[]"}])
+
+      assert_receive {:stream_events, [%MBTAV3API.Stream.Event.Reset{data: []}]}
     end
   end
 end

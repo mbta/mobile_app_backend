@@ -342,6 +342,39 @@ defmodule MBTAV3API.JsonApiTest do
            }
   end
 
+  test ".parse handles server-sent events with included objects" do
+    list = ~s([
+      {"type":"stop","links":{},"id":"20761","attributes":{},"relationships":{"parent_station":{"data":{"id":"place-harsq","type":"stop"}}}},
+      {"type":"stop","links":{},"id":"place-harsq","attributes":{}}
+    ])
+
+    assert JsonApi.parse(list) == %JsonApi{
+             data: [
+               %JsonApi.Item{
+                 id: "20761",
+                 type: "stop",
+                 attributes: %{},
+                 relationships: %{
+                   "parent_station" => [
+                     %JsonApi.Item{
+                       id: "place-harsq",
+                       type: "stop",
+                       attributes: %{},
+                       relationships: %{}
+                     }
+                   ]
+                 }
+               },
+               %JsonApi.Item{
+                 id: "place-harsq",
+                 type: "stop",
+                 attributes: %{},
+                 relationships: %{}
+               }
+             ]
+           }
+  end
+
   describe "empty/0" do
     test "empty generates the correct struct" do
       assert JsonApi.empty() == %JsonApi{

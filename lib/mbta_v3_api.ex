@@ -33,6 +33,29 @@ defmodule MBTAV3API do
     end
   end
 
+  @spec start_stream(String.t(), %{String.t() => String.t()}, Keyword.t()) ::
+          MBTAV3API.Stream.Supervisor.on_start_instance()
+  def start_stream(url, params \\ %{}, opts \\ []) do
+    _ =
+      Logger.debug(fn ->
+        "MBTAV3API.start_stream url=#{url} params=#{params |> Jason.encode!()}"
+      end)
+
+    opts = Keyword.merge(default_stream_options(), opts)
+    api_key = Keyword.fetch!(opts, :api_key)
+    base_url = Keyword.fetch!(opts, :base_url)
+    send_to = Keyword.fetch!(opts, :send_to)
+    headers = MBTAV3API.Headers.build(api_key) |> Keyword.reject(fn {_, v} -> is_nil(v) end)
+
+    url =
+      URI.parse(base_url)
+      |> URI.append_path(URI.encode(url))
+      |> URI.append_query(URI.encode_query(params))
+      |> URI.to_string()
+
+    MBTAV3API.Stream.Supervisor.start_instance(url: url, headers: headers, send_to: send_to)
+  end
+
   defp timed_get(url, params, opts) do
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
@@ -109,5 +132,10 @@ defmodule MBTAV3API do
       api_key: Application.get_env(:mobile_app_backend, :api_key),
       timeout: 10_000
     ]
+  end
+
+  defp default_stream_options do
+    Keyword.take(default_options(), [:base_url, :api_key])
+    |> Keyword.merge(send_to: self())
   end
 end
