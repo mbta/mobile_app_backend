@@ -4,8 +4,8 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
   import Test.Support.Helpers
   import Test.Support.Sigils
   alias MBTAV3API.JsonApi
-  alias MBTAV3API.Trip
   alias MBTAV3API.Prediction
+  alias MBTAV3API.Trip
   alias Test.Support.SSEStub
 
   setup do
