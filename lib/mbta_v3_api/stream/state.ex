@@ -1,4 +1,14 @@
 defmodule MBTAV3API.Stream.State do
+  @moduledoc """
+  Tracks the state of the world as remembered by a `MBTAV3API.Stream.Consumer`.
+
+  Objects are grouped first by type and then by ID,
+  to simplify both resolving references and querying all objects by type.
+
+  Implements `Access` returning an empty map for previously unused types,
+  so that, e.g., `put_in/2` works whether an object's type has been seen before or not.
+  """
+
   alias MBTAV3API.JsonApi
 
   @behaviour Access
