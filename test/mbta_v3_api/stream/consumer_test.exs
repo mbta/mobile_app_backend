@@ -2,6 +2,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
   use ExUnit.Case, async: true
 
   alias MBTAV3API.JsonApi
+  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stream
 
@@ -12,6 +13,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
           event: "reset",
           data: """
           [
+            {"attributes":{},"id":"Green-B","type":"route"},
             {"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000},"id":"Green-B-812-0","links":{"self":"/route_patterns/Green-B-812-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-0","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"},
             {"attributes":{"direction_id":0,"name":"Government Center - Cleveland Circle","sort_order":100330000},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
           ]
@@ -26,25 +28,35 @@ defmodule MBTAV3API.Stream.ConsumerTest do
         %ServerSentEventStage.Event{
           event: "update",
           data: """
-          {"attributes":{"direction_id":0,"name":"Union Square - Riverside","sort_order":100340000},"id":"Green-D-855-0","links":{"self":"/route_patterns/Green-D-855-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-D-C1-0","type":"trip"}},"route":{"data":{"id":"Green-D","type":"route"}}},"type":"route_pattern"}
+          {"attributes":{"direction_id":1,"name":"Not Government Center - Not Cleveland Circle","sort_order":100330001},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
           """
         },
         %ServerSentEventStage.Event{
           event: "remove",
           data: """
-          {"id":"Green-E-886-0","type":"route_pattern"}
+          {"id":"Green-B-812-0","type":"route_pattern"}
           """
         }
       ])
 
-    _consumer = start_supervised!({Stream.Consumer, subscribe_to: [producer], send_to: self()})
+    _consumer =
+      start_link_supervised!(
+        {Stream.Consumer, subscribe_to: [producer], send_to: self(), type: RoutePattern},
+        restart: :transient
+      )
 
-    assert_receive {:stream_events,
+    assert_receive {:stream_data,
                     [
-                      %Stream.Event.Reset{data: [%RoutePattern{}, %RoutePattern{}]},
-                      %Stream.Event.Add{data: %RoutePattern{}},
-                      %Stream.Event.Update{data: %RoutePattern{}},
-                      %Stream.Event.Remove{data: %JsonApi.Reference{}}
+                      %RoutePattern{
+                        id: "Green-B-812-1",
+                        name: "Boston College - Government Center",
+                        route: %Route{}
+                      },
+                      %RoutePattern{
+                        id: "Green-C-832-0",
+                        name: "Not Government Center - Not Cleveland Circle",
+                        route: %JsonApi.Reference{}
+                      }
                     ]}
   end
 end

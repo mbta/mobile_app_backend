@@ -16,7 +16,11 @@ defmodule MBTAV3API.Trip do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      stops: Enum.map(item.relationships["stops"], &JsonApi.Object.parse/1)
+      stops:
+        case item.relationships["stops"] do
+          nil -> nil
+          stops -> Enum.map(stops, &JsonApi.Object.parse/1)
+        end
     }
   end
 end

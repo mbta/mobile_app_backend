@@ -117,7 +117,8 @@ defmodule MBTAV3APITest do
       {:ok, stream_instance} =
         MBTAV3API.start_stream("/ok", %{"a" => "b", "c" => "d"},
           base_url: "http://example.com",
-          api_key: "efg"
+          api_key: "efg",
+          type: MBTAV3API.Stop
         )
 
       refute_receive _
@@ -131,7 +132,7 @@ defmodule MBTAV3APITest do
 
       SSEStub.push_events(sse_stub, [%ServerSentEventStage.Event{event: "reset", data: "[]"}])
 
-      assert_receive {:stream_events, [%MBTAV3API.Stream.Event.Reset{data: []}]}
+      assert_receive {:stream_data, []}
     end
   end
 end

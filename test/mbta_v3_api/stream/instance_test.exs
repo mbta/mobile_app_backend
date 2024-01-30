@@ -1,13 +1,14 @@
 defmodule MBTAV3API.Stream.InstanceTest do
   use ExUnit.Case, async: true
 
+  alias MBTAV3API.Route
   alias Test.Support.SSEStub
 
   test "starts pipeline and sends messages" do
     instance =
-      start_supervised!(
+      start_link_supervised!(
         {MBTAV3API.Stream.Instance,
-         url: "https://example.com", headers: [{"a", "b"}], send_to: self()}
+         url: "https://example.com", headers: [{"a", "b"}], send_to: self(), type: Route}
       )
 
     sse_stage = SSEStub.get_from_instance(instance)
@@ -16,14 +17,12 @@ defmodule MBTAV3API.Stream.InstanceTest do
     refute_receive _
 
     SSEStub.push_events(sse_stage, [
-      %ServerSentEventStage.Event{event: "remove", data: ~s({"id":"1723","type":"vehicle"})}
+      %ServerSentEventStage.Event{
+        event: "add",
+        data: ~s({"attributes":{},"id":"1723","type":"route"})
+      }
     ])
 
-    assert_receive {:stream_events,
-                    [
-                      %MBTAV3API.Stream.Event.Remove{
-                        data: %MBTAV3API.JsonApi.Reference{id: "1723", type: "vehicle"}
-                      }
-                    ]}
+    assert_receive {:stream_data, [%Route{id: "1723"}]}
   end
 end

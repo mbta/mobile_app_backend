@@ -3,7 +3,11 @@ defmodule MBTAV3API.Stream.Instance do
 
   @opaque t :: pid()
 
-  @type opt :: {:url, String.t()} | {:headers, [{String.t(), String.t()}]} | {:send_to, pid()}
+  @type opt ::
+          {:url, String.t()}
+          | {:headers, [{String.t(), String.t()}]}
+          | {:send_to, pid()}
+          | {:type, module()}
   @type opts :: [opt()]
 
   @spec start_link(opts()) :: {:ok, t()} | :ignore | {:error, {:already_started, t()} | term()}
@@ -22,13 +26,14 @@ defmodule MBTAV3API.Stream.Instance do
 
     url = Keyword.fetch!(opts, :url)
     headers = Keyword.fetch!(opts, :headers)
+    type = Keyword.fetch!(opts, :type)
     send_to = Keyword.fetch!(opts, :send_to)
 
     children = [
       {MobileAppBackend.SSE,
        name: MBTAV3API.Stream.Registry.via_name(ref), url: url, headers: headers},
       {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}], send_to: send_to}
+       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}], send_to: send_to, type: type}
     ]
 
     Supervisor.init(children, strategy: :rest_for_one)
