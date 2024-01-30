@@ -1,8 +1,8 @@
 defmodule MBTAV3API.Stream.StateTest do
   use ExUnit.Case, async: true
 
-  alias MBTAV3API.RoutePattern
   alias MBTAV3API.Route
+  alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MBTAV3API.Stream.State
   alias ServerSentEventStage.Event
