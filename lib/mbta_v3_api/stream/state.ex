@@ -58,6 +58,8 @@ defmodule MBTAV3API.Stream.State do
     end
   end
 
+  defp resolve_references(object, _state) when is_struct(object, DateTime), do: object
+
   defp resolve_references(object, state) when is_struct(object) do
     %module{} = object
 
