@@ -211,13 +211,90 @@ defmodule MBTAV3API.JsonApiTest do
                        attributes: %{},
                        relationships: %{
                          "stop" => [
-                           %JsonApi.Item{
+                           %JsonApi.Reference{
                              type: "stop",
-                             id: "Worcester",
-                             attributes: %{},
-                             relationships: %{}
+                             id: "Worcester"
                            }
                          ]
+                       }
+                     }
+                   ]
+                 }
+               }
+             ]
+           }
+  end
+
+  @tag timeout: 5000
+  test ".parse handles cycles in included objects" do
+    body = """
+    {
+      "data": {
+        "attributes": {},
+        "id": "subplat-WML-0442-1",
+        "links": {"self": "/facilities/subplat-WML-0442-1"},
+        "relationships": {"stop": {"data": {"id": "place-WML-0442", "type": "stop"}}},
+        "type": "facility"
+      },
+      "included": [
+        {
+          "attributes": {},
+          "id": "WML-0442-CS",
+          "links": {"self": "/stops/WML-0442-CS"},
+          "relationships": {
+            "facilities": {"links": {"related": "/facilities/?filter[stop]=WML-0442-CS"}},
+            "parent_station": {"data": {"id": "place-WML-0442", "type": "stop"}},
+            "zone": {"data": {"id": "CR-zone-8", "type": "zone"}}
+          },
+          "type": "stop"
+        },
+        {
+          "attributes": {},
+          "id": "place-WML-0442",
+          "links": {"self": "/stops/place-WML-0442"},
+          "relationships": {
+            "child_stops": {"data": [{"id": "WML-0442-CS", "type": "stop"}]},
+            "facilities": {"links": {"related": "/facilities/?filter[stop]=place-WML-0442"}},
+            "parent_station": {"data": null},
+            "zone": {"data": {"id": "CR-zone-8", "type": "zone"}}
+          },
+          "type": "stop"
+        }
+      ],
+      "jsonapi": {"version": "1.0"}
+    }
+    """
+
+    assert JsonApi.parse(body) == %JsonApi{
+             data: [
+               %JsonApi.Item{
+                 type: "facility",
+                 id: "subplat-WML-0442-1",
+                 attributes: %{},
+                 relationships: %{
+                   "stop" => [
+                     %JsonApi.Item{
+                       type: "stop",
+                       id: "place-WML-0442",
+                       attributes: %{},
+                       relationships: %{
+                         "child_stops" => [
+                           %JsonApi.Item{
+                             type: "stop",
+                             id: "WML-0442-CS",
+                             attributes: %{},
+                             relationships: %{
+                               "facilities" => [],
+                               "parent_station" => [
+                                 %JsonApi.Reference{type: "stop", id: "place-WML-0442"}
+                               ],
+                               "zone" => [%JsonApi.Reference{type: "zone", id: "CR-zone-8"}]
+                             }
+                           }
+                         ],
+                         "facilities" => [],
+                         "parent_station" => [],
+                         "zone" => [%JsonApi.Reference{type: "zone", id: "CR-zone-8"}]
                        }
                      }
                    ]
