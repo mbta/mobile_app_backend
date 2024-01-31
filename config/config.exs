@@ -58,6 +58,9 @@ config :phoenix, :json_library, Jason
 # Use Req for making HTTP requests
 config :mobile_app_backend, MobileAppBackend.HTTP, Req
 
+# Use ServerSentEventStage for making SSE requests
+config :mobile_app_backend, MobileAppBackend.SSE, ServerSentEventStage
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

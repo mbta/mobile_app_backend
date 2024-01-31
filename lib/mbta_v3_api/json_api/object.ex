@@ -1,6 +1,8 @@
 defmodule MBTAV3API.JsonApi.Object do
   alias MBTAV3API.JsonApi
 
+  @type t :: struct()
+
   @callback fields :: [atom()]
   @callback includes :: %{atom() => atom()}
 
@@ -14,7 +16,8 @@ defmodule MBTAV3API.JsonApi.Object do
     def module_for(unquote("#{type}")), do: unquote(module)
   end
 
-  @spec parse(JsonApi.Item.t() | JsonApi.Reference.t()) :: struct() | JsonApi.Reference.t()
+  @spec parse(JsonApi.Item.t()) :: t()
+  @spec parse(JsonApi.Reference.t()) :: JsonApi.Reference.t()
   def parse(%JsonApi.Item{type: type} = item), do: module_for(type).parse(item)
   def parse(%JsonApi.Reference{} = ref), do: ref
 end
