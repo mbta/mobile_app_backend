@@ -31,7 +31,11 @@ defmodule MBTAV3API.JsonApi.Object do
   modules_guard =
     modules
     |> Enum.map(fn module ->
-      quote(do: is_struct(unquote(Macro.var(:x, nil)), unquote(module)))
+      # Due to macro hygiene, `quote(do: is_struct(x, unquote(module)))` will fail
+      # because there is no variable `x`. To reference the yet-to-be-defined guard parameter,
+      # we need to bypass macro hygiene entirely.
+      unhygenic_x = Macro.var(:x, nil)
+      quote(do: is_struct(unquote(unhygenic_x), unquote(module)))
     end)
     |> Enum.reduce(fn clause, acc -> quote(do: unquote(acc) or unquote(clause)) end)
 
