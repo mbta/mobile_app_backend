@@ -20,18 +20,8 @@ defmodule MBTAV3API.Trip do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      route_pattern:
-        case item.relationships["route_pattern"] do
-          nil -> nil
-          [] -> nil
-          [route_pattern] -> JsonApi.Object.parse(route_pattern)
-          [_ | _] -> raise "Multiple route patterns"
-        end,
-      stops:
-        case item.relationships["stops"] do
-          nil -> nil
-          stops -> Enum.map(stops, &JsonApi.Object.parse/1)
-        end
+      route_pattern: JsonApi.Object.parse_one_related(item.relationships["route_pattern"]),
+      stops: JsonApi.Object.parse_many_related(item.relationships["stops"])
     }
   end
 end

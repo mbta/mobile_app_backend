@@ -65,13 +65,7 @@ defmodule MBTAV3API.Prediction do
         parse_schedule_relationship(item.attributes["schedule_relationship"]),
       stop_sequence: item.attributes["stop_sequence"],
       status: item.attributes["status"],
-      trip:
-        case item.relationships["trip"] do
-          nil -> nil
-          [] -> nil
-          [trip] -> JsonApi.Object.parse(trip)
-          [_ | _] -> raise "Multiple trips"
-        end
+      trip: JsonApi.Object.parse_one_related(item.relationships["trip"])
     }
   end
 

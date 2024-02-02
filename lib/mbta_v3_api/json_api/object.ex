@@ -57,4 +57,18 @@ defmodule MBTAV3API.JsonApi.Object do
   @spec parse(JsonApi.Reference.t()) :: JsonApi.Reference.t()
   def parse(%JsonApi.Item{type: type} = item), do: module_for(type).parse(item)
   def parse(%JsonApi.Reference{} = ref), do: ref
+
+  @spec parse_one_related(nil | []) :: nil
+  @spec parse_one_related(nonempty_list(JsonApi.Item.t())) :: t()
+  @spec parse_one_related(nonempty_list(JsonApi.Reference.t())) :: JsonApi.Reference.t()
+  def parse_one_related(nil), do: nil
+  def parse_one_related([]), do: nil
+  def parse_one_related([object]), do: parse(object)
+  def parse_one_related([_ | _]), do: raise("Unexpected multiple related objects")
+
+  @spec parse_many_related(nil) :: nil
+  @spec parse_many_related([JsonApi.Item.t()]) :: [t()]
+  @spec parse_many_related([JsonApi.Reference.t()]) :: [JsonApi.Reference.t()]
+  def parse_many_related(nil), do: nil
+  def parse_many_related(objects), do: Enum.map(objects, &parse/1)
 end
