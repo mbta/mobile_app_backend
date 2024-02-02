@@ -39,19 +39,8 @@ defmodule MBTAV3API.RoutePattern do
       name: item.attributes["name"],
       sort_order: item.attributes["sort_order"],
       representative_trip:
-        case item.relationships["representative_trip"] do
-          nil -> nil
-          [] -> raise "No representative trip"
-          [trip] -> JsonApi.Object.parse(trip)
-          [_ | _] -> raise "Multiple representative trips"
-        end,
-      route:
-        case item.relationships["route"] do
-          nil -> nil
-          [] -> raise "No route"
-          [route] -> JsonApi.Object.parse(route)
-          [_ | _] -> raise "Multiple routes"
-        end
+        JsonApi.Object.parse_one_related(item.relationships["representative_trip"]),
+      route: JsonApi.Object.parse_one_related(item.relationships["route"])
     }
   end
 end

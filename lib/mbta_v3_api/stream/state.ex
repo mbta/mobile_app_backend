@@ -10,6 +10,7 @@ defmodule MBTAV3API.Stream.State do
   """
 
   alias MBTAV3API.JsonApi
+  import MBTAV3API.JsonApi.Object, only: [is_json_object: 1]
 
   @behaviour Access
 
@@ -58,7 +59,7 @@ defmodule MBTAV3API.Stream.State do
     end
   end
 
-  defp resolve_references(object, state) when is_struct(object) do
+  defp resolve_references(object, state) when is_json_object(object) do
     %module{} = object
 
     object
@@ -74,7 +75,8 @@ defmodule MBTAV3API.Stream.State do
   defp resolve_references(object, _state)
        when is_atom(object)
        when is_binary(object)
-       when is_number(object),
+       when is_number(object)
+       when is_struct(object),
        do: object
 
   @impl Access
