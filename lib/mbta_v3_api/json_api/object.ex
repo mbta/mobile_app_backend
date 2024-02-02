@@ -1,20 +1,57 @@
 defmodule MBTAV3API.JsonApi.Object do
   alias MBTAV3API.JsonApi
 
-  @type t :: struct()
-
   @callback fields :: [atom()]
   @callback includes :: %{atom() => atom()}
 
   @spec module_for(atom() | String.t()) :: module()
   def module_for(type)
 
-  for type <- [:prediction, :route, :route_pattern, :stop, :trip] do
-    module = :"#{MBTAV3API}.#{Macro.camelize(to_string(type))}"
+  modules =
+    for type <- [:prediction, :route, :route_pattern, :stop, :trip] do
+      module = :"#{MBTAV3API}.#{Macro.camelize(to_string(type))}"
 
-    def module_for(unquote(type)), do: unquote(module)
-    def module_for(unquote("#{type}")), do: unquote(module)
-  end
+      def module_for(unquote(type)), do: unquote(module)
+      def module_for(unquote("#{type}")), do: unquote(module)
+
+      module
+    end
+
+  # Bafflingly, | is right-associative but or is left-associative,
+  # so matching that in these quotes requires some juggling
+
+  modules_type =
+    modules
+    |> Enum.reverse()
+    |> Enum.map(fn module -> quote(do: unquote(module).t()) end)
+    |> Enum.reduce(fn t, acc -> quote(do: unquote(t) | unquote(acc)) end)
+
+  @type t :: unquote(modules_type)
+
+  modules_guard =
+    modules
+    |> Enum.map(fn module ->
+      quote(do: is_struct(unquote(Macro.var(:x, nil)), unquote(module)))
+    end)
+    |> Enum.reduce(fn clause, acc -> quote(do: unquote(acc) or unquote(clause)) end)
+
+  guard_doctest =
+    modules
+    |> Enum.map_join(
+      "\n",
+      &"    iex> MBTAV3API.JsonApi.Object.is_json_object(%#{Macro.to_string(&1)}{})\n    true"
+    )
+
+  @doc """
+  Checks whether or not the given value is an instance of a JSON:API object.
+
+  ## Examples
+
+  #{guard_doctest}
+      iex> MBTAV3API.JsonApi.Object.is_json_object(~D[2024-02-02])
+      false
+  """
+  defguard is_json_object(x) when unquote(modules_guard)
 
   @spec parse(JsonApi.Item.t()) :: t()
   @spec parse(JsonApi.Reference.t()) :: JsonApi.Reference.t()
