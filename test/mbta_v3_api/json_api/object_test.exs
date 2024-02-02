@@ -1,6 +1,7 @@
 defmodule MBTAV3API.JsonApi.ObjectTest do
   use ExUnit.Case, async: true
 
+  alias MBTAV3API.JsonApi
   import MBTAV3API.JsonApi.Object
 
   doctest MBTAV3API.JsonApi.Object
@@ -35,6 +36,60 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
       refute is_json_object("not even close")
       refute is_json_object(7)
       refute is_json_object(false)
+    end
+  end
+
+  describe "parse/1" do
+    test "dispatches by type" do
+      assert %MBTAV3API.Prediction{} = parse(%JsonApi.Item{type: "prediction"})
+      assert %MBTAV3API.Stop{} = parse(%JsonApi.Item{type: "stop"})
+    end
+
+    test "preserves reference" do
+      assert %JsonApi.Reference{} = parse(%JsonApi.Reference{})
+    end
+  end
+
+  describe "parse_one_related/1" do
+    test "handles nil" do
+      assert is_nil(parse_one_related(nil))
+    end
+
+    test "handles empty list" do
+      assert is_nil(parse_one_related([]))
+    end
+
+    test "handles single item" do
+      assert %MBTAV3API.Route{} = parse_one_related([%JsonApi.Item{type: "route"}])
+    end
+
+    test "handles single reference" do
+      assert %JsonApi.Reference{} = parse_one_related([%JsonApi.Reference{}])
+    end
+
+    test "throws on multiple elements" do
+      assert_raise RuntimeError, fn ->
+        parse_one_related([:a, :b])
+      end
+    end
+  end
+
+  describe "parse_many_related/1" do
+    test "handles nil" do
+      assert is_nil(parse_many_related(nil))
+    end
+
+    test "handles empty list" do
+      assert [] = parse_many_related([])
+    end
+
+    test "handles non-empty list" do
+      assert [%MBTAV3API.Route{}, %JsonApi.Reference{}, %MBTAV3API.Trip{}] =
+               parse_many_related([
+                 %JsonApi.Item{type: "route"},
+                 %JsonApi.Reference{},
+                 %JsonApi.Item{type: "trip"}
+               ])
     end
   end
 end
