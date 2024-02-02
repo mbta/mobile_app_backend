@@ -47,114 +47,151 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
     assert_receive {:DOWN, ^sse_ref, :process, ^sse_stub, :shutdown}
   end
 
-  test "correctly handles messages", %{socket: socket} do
-    {:ok, reply, socket} =
-      subscribe_and_join(socket, "predictions:stops", %{"stop_ids" => ["place-jfk"]})
+  describe "message handling" do
+    setup %{socket: socket} do
+      {:ok, reply, socket} =
+        subscribe_and_join(socket, "predictions:stops", %{"stop_ids" => ["place-jfk"]})
 
-    assert reply == %{}
+      assert reply == %{}
 
-    instance = socket.assigns[:stream_instance]
-    sse_stub = SSEStub.get_from_instance(instance)
+      instance = socket.assigns[:stream_instance]
+      sse_stub = SSEStub.get_from_instance(instance)
 
-    SSEStub.push_events(sse_stub, [
-      %ServerSentEventStage.Event{
-        event: "reset",
-        data: """
-        [
-          {"attributes":{},"id":"60392455","links":{"self":"/trips/60392455"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-1","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0010","type":"shape"}}},"type":"trip"},
-          {"attributes":{},"id":"60392515","links":{"self":"/trips/60392515"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-0","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0009","type":"shape"}}},"type":"trip"},
-          {"attributes":{"arrival_time":"2024-01-30T15:44:09-05:00","departure_time":"2024-01-30T15:45:10-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":90},"id":"prediction-60392455-70086-90","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70086","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F7","type":"vehicle"}}},"type":"prediction"},
-          {"attributes":{"arrival_time":"2024-01-30T15:46:26-05:00","departure_time":"2024-01-30T15:47:48-05:00","direction_id":0,"schedule_relationship":null,"status":null,"stop_sequence":130},"id":"prediction-60392515-70085-130","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70085","type":"stop"}},"trip":{"data":{"id":"60392515","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F8","type":"vehicle"}}},"type":"prediction"}
-        ]
-        """
+      SSEStub.push_events(sse_stub, [
+        %ServerSentEventStage.Event{
+          event: "reset",
+          data: """
+          [
+            {"attributes":{},"id":"60392455","links":{"self":"/trips/60392455"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-1","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0010","type":"shape"}}},"type":"trip"},
+            {"attributes":{},"id":"60392515","links":{"self":"/trips/60392515"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-0","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0009","type":"shape"}}},"type":"trip"},
+            {"attributes":{"arrival_time":"2024-01-30T15:44:09-05:00","departure_time":"2024-01-30T15:45:10-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":90},"id":"prediction-60392455-70086-90","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70086","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F7","type":"vehicle"}}},"type":"prediction"},
+            {"attributes":{"arrival_time":"2024-01-30T15:46:26-05:00","departure_time":"2024-01-30T15:47:48-05:00","direction_id":0,"schedule_relationship":null,"status":null,"stop_sequence":130},"id":"prediction-60392515-70085-130","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70085","type":"stop"}},"trip":{"data":{"id":"60392515","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F8","type":"vehicle"}}},"type":"prediction"}
+          ]
+          """
+        }
+      ])
+
+      assert_push "stream_data", %{predictions: initial_predictions}
+
+      {:ok, %{sse_stub: sse_stub, initial_predictions: initial_predictions}}
+    end
+
+    defp prediction_60392455 do
+      %Prediction{
+        id: "prediction-60392455-70086-90",
+        arrival_time: ~B[2024-01-30 15:44:09],
+        departure_time: ~B[2024-01-30 15:45:10],
+        direction_id: 1,
+        revenue: true,
+        schedule_relationship: :scheduled,
+        stop_sequence: 90,
+        trip: %Trip{
+          id: "60392455",
+          route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
+          stops: nil
+        }
       }
-    ])
+    end
 
-    assert_push "stream_data", %{predictions: predictions}
-    assert length(predictions) == 2
+    defp prediction_60392515 do
+      %Prediction{
+        id: "prediction-60392515-70085-130",
+        arrival_time: ~B[2024-01-30 15:46:26],
+        departure_time: ~B[2024-01-30 15:47:48],
+        direction_id: 0,
+        revenue: true,
+        schedule_relationship: :scheduled,
+        stop_sequence: 130,
+        trip: %Trip{
+          id: "60392515",
+          route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-0"},
+          stops: nil
+        }
+      }
+    end
 
-    assert Enum.find(predictions, &(&1.id == "prediction-60392455-70086-90")) ==
-             %Prediction{
-               id: "prediction-60392455-70086-90",
-               arrival_time: ~B[2024-01-30 15:44:09],
-               departure_time: ~B[2024-01-30 15:45:10],
-               direction_id: 1,
-               revenue: true,
-               schedule_relationship: :scheduled,
-               stop_sequence: 90,
-               trip: %Trip{
-                 id: "60392455",
-                 route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
-                 stops: nil
+    test "correctly handles reset", %{initial_predictions: predictions} do
+      assert predictions == [prediction_60392455(), prediction_60392515()]
+    end
+
+    test "correctly handles add after reset", %{sse_stub: sse_stub} do
+      SSEStub.push_events(sse_stub, [
+        %ServerSentEventStage.Event{
+          event: "add",
+          data: """
+          {"attributes":{},"id":"60392593","links":{"self":"/trips/60392593"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-3-1","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"933_0016","type":"shape"}}},"type":"trip"}
+          """
+        },
+        %ServerSentEventStage.Event{
+          event: "add",
+          data: """
+          {"attributes":{"arrival_time":"2024-01-30T17:54:04-05:00","departure_time":"2024-01-30T17:55:45-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":100},"id":"prediction-60392593-70096-100","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70096","type":"stop"}},"trip":{"data":{"id":"60392593","type":"trip"}},"vehicle":{"data":{"id":"R-547A80A3","type":"vehicle"}}},"type":"prediction"}
+          """
+        }
+      ])
+
+      assert_push "stream_data", %{predictions: predictions}
+
+      assert predictions == [
+               prediction_60392455(),
+               prediction_60392515(),
+               %Prediction{
+                 id: "prediction-60392593-70096-100",
+                 arrival_time: ~B[2024-01-30 17:54:04],
+                 departure_time: ~B[2024-01-30 17:55:45],
+                 direction_id: 1,
+                 revenue: true,
+                 schedule_relationship: :scheduled,
+                 stop_sequence: 100,
+                 trip: %Trip{
+                   id: "60392593",
+                   route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-3-1"},
+                   stops: nil
+                 }
                }
-             }
+             ]
+    end
 
-    SSEStub.push_events(sse_stub, [
-      %ServerSentEventStage.Event{
-        event: "update",
-        data: """
-        {"attributes":{"arrival_time":"2024-01-30T15:44:26-05:00","departure_time":"2024-01-30T15:45:27-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":90},"id":"prediction-60392455-70086-90","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70086","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F7","type":"vehicle"}}},"type":"prediction"}
-        """
-      },
-      %ServerSentEventStage.Event{
-        event: "remove",
-        data: """
-        {"id":"prediction-60392515-70085-130","type":"prediction"}
-        """
-      },
-      %ServerSentEventStage.Event{
-        event: "remove",
-        data: """
-        {"id":"60392515","type":"trip"}
-        """
-      },
-      %ServerSentEventStage.Event{
-        event: "add",
-        data: """
-        {"attributes":{},"id":"60392593","links":{"self":"/trips/60392593"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-3-1","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"933_0016","type":"shape"}}},"type":"trip"}
-        """
-      },
-      %ServerSentEventStage.Event{
-        event: "add",
-        data: """
-        {"attributes":{"arrival_time":"2024-01-30T17:54:04-05:00","departure_time":"2024-01-30T17:55:45-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":100},"id":"prediction-60392593-70096-100","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70096","type":"stop"}},"trip":{"data":{"id":"60392593","type":"trip"}},"vehicle":{"data":{"id":"R-547A80A3","type":"vehicle"}}},"type":"prediction"}
-        """
-      }
-    ])
+    test "correctly handles update after reset", %{sse_stub: sse_stub} do
+      SSEStub.push_events(sse_stub, [
+        %ServerSentEventStage.Event{
+          event: "update",
+          data: """
+          {"attributes":{"arrival_time":"2024-01-30T15:44:26-05:00","departure_time":"2024-01-30T15:45:27-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":90},"id":"prediction-60392455-70086-90","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70086","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F7","type":"vehicle"}}},"type":"prediction"}
+          """
+        }
+      ])
 
-    assert_push "stream_data", %{predictions: predictions}
-    assert length(predictions) == 2
+      assert_push "stream_data", %{predictions: predictions}
 
-    assert Enum.find(predictions, &(&1.id == "prediction-60392455-70086-90")) == %Prediction{
-             id: "prediction-60392455-70086-90",
-             arrival_time: ~B[2024-01-30 15:44:26],
-             departure_time: ~B[2024-01-30 15:45:27],
-             direction_id: 1,
-             revenue: true,
-             schedule_relationship: :scheduled,
-             stop_sequence: 90,
-             trip: %Trip{
-               id: "60392455",
-               route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
-               stops: nil
-             }
-           }
+      assert predictions == [
+               %Prediction{
+                 prediction_60392455()
+                 | arrival_time: ~B[2024-01-30 15:44:26],
+                   departure_time: ~B[2024-01-30 15:45:27]
+               },
+               prediction_60392515()
+             ]
+    end
 
-    refute Enum.find(predictions, &(&1.id == "prediction-60392515-70085-130"))
+    test "correctly handles remove after reset", %{sse_stub: sse_stub} do
+      SSEStub.push_events(sse_stub, [
+        %ServerSentEventStage.Event{
+          event: "remove",
+          data: """
+          {"id":"prediction-60392515-70085-130","type":"prediction"}
+          """
+        },
+        %ServerSentEventStage.Event{
+          event: "remove",
+          data: """
+          {"id":"60392515","type":"trip"}
+          """
+        }
+      ])
 
-    assert Enum.find(predictions, &(&1.id == "prediction-60392593-70096-100")) == %Prediction{
-             id: "prediction-60392593-70096-100",
-             arrival_time: ~B[2024-01-30 17:54:04],
-             departure_time: ~B[2024-01-30 17:55:45],
-             direction_id: 1,
-             revenue: true,
-             schedule_relationship: :scheduled,
-             stop_sequence: 100,
-             trip: %Trip{
-               id: "60392593",
-               route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-3-1"},
-               stops: nil
-             }
-           }
+      assert_push "stream_data", %{predictions: predictions}
+      assert predictions == [prediction_60392455()]
+    end
   end
 end
