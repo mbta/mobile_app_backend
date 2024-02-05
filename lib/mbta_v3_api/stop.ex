@@ -40,13 +40,7 @@ defmodule MBTAV3API.Stop do
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       name: item.attributes["name"],
-      parent_station:
-        case item.relationships["parent_station"] do
-          nil -> nil
-          [] -> nil
-          [parent_station] -> JsonApi.Object.parse(parent_station)
-          [_ | _] -> raise "Multiple parent stations"
-        end
+      parent_station: JsonApi.Object.parse_one_related(item.relationships["parent_station"])
     }
   end
 end

@@ -7,7 +7,7 @@ defmodule MobileAppBackendWeb.SearchControllerTest do
     test "when query is an empty string, returns an empty list", %{conn: conn} do
       conn = get(conn, "/api/search/query?query=")
 
-      assert %{"data" => []} =
+      assert %{"data" => %{}} =
                json_response(conn, 200)
     end
 
@@ -34,31 +34,35 @@ defmodule MobileAppBackendWeb.SearchControllerTest do
       reassign_env(
         :mobile_app_backend,
         :algolia_multi_index_search_fn,
-        fn _queries -> {:ok, [stop, route]} end
+        fn _queries -> {:ok, %{stops: [stop], routes: [route]}} end
       )
 
       conn = get(conn, "/api/search/query?query=1")
 
       assert %{
-               "data" => [
-                 %{
-                   "type" => "stop",
-                   "id" => stop.id,
-                   "name" => stop.name,
-                   "zone" => stop.zone,
-                   "station?" => stop.station?,
-                   "rank" => stop.rank,
-                   "routes" => [%{"type" => 2, "icon" => "commuter_rail"}]
-                 },
-                 %{
-                   "type" => "route",
-                   "id" => route.id,
-                   "name" => route.name,
-                   "long_name" => route.long_name,
-                   "rank" => route.rank,
-                   "route_type" => route.route_type
-                 }
-               ]
+               "data" => %{
+                 "stops" => [
+                   %{
+                     "type" => "stop",
+                     "id" => stop.id,
+                     "name" => stop.name,
+                     "zone" => stop.zone,
+                     "station?" => stop.station?,
+                     "rank" => stop.rank,
+                     "routes" => [%{"type" => 2, "icon" => "commuter_rail"}]
+                   }
+                 ],
+                 "routes" => [
+                   %{
+                     "type" => "route",
+                     "id" => route.id,
+                     "name" => route.name,
+                     "long_name" => route.long_name,
+                     "rank" => route.rank,
+                     "route_type" => route.route_type
+                   }
+                 ]
+               }
              } ==
                json_response(conn, 200)
     end
