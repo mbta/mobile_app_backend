@@ -14,25 +14,29 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
                  QueryPayload.for_index(:route, "1")
                ])
 
-      assert [
-               %StopResult{
-                 type: :stop,
-                 id: "place-FR-3338",
-                 name: "Wachusett",
-                 zone: "8",
-                 station?: true,
-                 rank: 3,
-                 routes: [%{type: 2, icon: "commuter_rail"}]
-               },
-               %RouteResult{
-                 type: :route,
-                 id: "33",
-                 name: "33Name",
-                 long_name: "33 Long Name",
-                 rank: 5,
-                 route_type: 3
-               }
-             ] == results
+      assert %{
+               stops: [
+                 %StopResult{
+                   type: :stop,
+                   id: "place-FR-3338",
+                   name: "Wachusett",
+                   zone: "8",
+                   station?: true,
+                   rank: 3,
+                   routes: [%{type: 2, icon: "commuter_rail"}]
+                 }
+               ],
+               routes: [
+                 %RouteResult{
+                   type: :route,
+                   id: "33",
+                   name: "33Name",
+                   long_name: "33 Long Name",
+                   rank: 5,
+                   route_type: 3
+                 }
+               ]
+             } == results
     end
 
     test "makes requests to the algolia endpoint with expected headers and parameters properly encoded" do

@@ -21,3 +21,6 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   app_id: "fake_app",
   search_key: "fake_key",
   base_url: "fake_url"
+
+# Use server-sent events stub instead of real connections
+config :mobile_app_backend, MobileAppBackend.SSE, Test.Support.SSEStub

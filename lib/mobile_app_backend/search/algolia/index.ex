@@ -10,4 +10,12 @@ defmodule MobileAppBackend.Search.Algolia.Index do
   def index_name(:route) do
     Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)[:route_index]
   end
+
+  @spec valid_index_name?(String.t()) :: boolean()
+  def valid_index_name?(name) do
+    name in [
+      Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)[:stop_index],
+      Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)[:route_index]
+    ]
+  end
 end

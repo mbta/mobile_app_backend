@@ -4,6 +4,7 @@ defmodule MBTAV3APITest do
   import Mox
   import Test.Support.Helpers
   alias MBTAV3API.JsonApi
+  alias Test.Support.SSEStub
 
   setup _ do
     reassign_env(:mobile_app_backend, :base_url, "")
@@ -107,6 +108,31 @@ defmodule MBTAV3APITest do
       )
 
       %JsonApi{} = MBTAV3API.get_json("/without_api_key", [], api_key: nil)
+    end
+  end
+
+  describe "start_stream/3" do
+    @tag :capture_log
+    test "streams" do
+      {:ok, stream_instance} =
+        MBTAV3API.start_stream("/ok", %{"a" => "b", "c" => "d"},
+          base_url: "http://example.com",
+          api_key: "efg",
+          type: MBTAV3API.Stop
+        )
+
+      refute_receive _
+
+      sse_stub = SSEStub.get_from_instance(stream_instance)
+
+      assert SSEStub.get_args(sse_stub) == [
+               url: "http://example.com/ok?a=b&c=d",
+               headers: [{"x-api-key", "efg"}]
+             ]
+
+      SSEStub.push_events(sse_stub, [%ServerSentEventStage.Event{event: "reset", data: "[]"}])
+
+      assert_receive {:stream_data, []}
     end
   end
 end
