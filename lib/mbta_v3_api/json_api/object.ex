@@ -9,7 +9,7 @@ defmodule MBTAV3API.JsonApi.Object do
 
   modules =
     for type <- [:prediction, :route, :route_pattern, :stop, :trip] do
-      module = :"#{MBTAV3API}.#{Macro.camelize(to_string(type))}"
+      module = Module.concat(MBTAV3API, Macro.camelize(to_string(type)))
 
       def module_for(unquote(type)), do: unquote(module)
       def module_for(unquote("#{type}")), do: unquote(module)
