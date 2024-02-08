@@ -8,10 +8,12 @@ defmodule MBTAV3API.Stop do
           latitude: float(),
           longitude: float(),
           name: String.t(),
-          location_type: integer(),
+          location_type: location_type(),
           parent_station: t() | JsonApi.Reference.t() | nil,
           child_stops: t() | JsonApi.Reference.t() | nil
         }
+  @type location_type ::
+          :stop | :station | :entrance_exit | :generic_node | :boarding_area
 
   @derive Jason.Encoder
   defstruct [:id, :latitude, :longitude, :name, :location_type, :parent_station, :child_stops]
@@ -46,9 +48,17 @@ defmodule MBTAV3API.Stop do
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       name: item.attributes["name"],
-      location_type: item.attributes["location_type"],
+      location_type: parse_location_type(item.attributes["location_type"]),
       parent_station: JsonApi.Object.parse_one_related(item.relationships["parent_station"]),
       child_stops: JsonApi.Object.parse_many_related(item.relationships["child_stops"])
     }
   end
+
+  @spec parse_location_type(integer() | nil) :: location_type()
+  defp parse_location_type(nil), do: :stop
+  defp parse_location_type(0), do: :stop
+  defp parse_location_type(1), do: :station
+  defp parse_location_type(2), do: :entrance_exit
+  defp parse_location_type(3), do: :generic_node
+  defp parse_location_type(4), do: :boarding_area
 end

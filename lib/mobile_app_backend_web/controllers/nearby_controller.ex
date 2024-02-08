@@ -1,5 +1,8 @@
 defmodule MobileAppBackendWeb.NearbyController do
   use MobileAppBackendWeb, :controller
+  @compile if Mix.env() == :test, do: :export_all
+
+  @type stop_map() :: %{String.t() => MBTAV3API.Stop.t()}
 
   def show(conn, params) do
     params = Map.merge(%{"radius" => "1.0"}, params)
@@ -7,6 +10,29 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
+    stops = fetch_nearby_stops(latitude, longitude, radius) |> include_missing_siblings()
+    {route_patterns, pattern_ids_by_stop} = fetch_route_patterns(stops)
+
+    json(conn, %{
+      stops:
+        stops
+        |> Map.values()
+        |> Enum.filter(&Map.has_key?(pattern_ids_by_stop, &1.id))
+        |> Enum.sort(
+          &(distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude) <=
+              distance_in_degrees(&2.latitude || 0, &2.longitude || 0, latitude, longitude))
+        ),
+      route_patterns: route_patterns,
+      pattern_ids_by_stop: pattern_ids_by_stop
+    })
+  end
+
+  @spec fetch_nearby_stops(
+          latitude :: float(),
+          longitude :: float(),
+          radius :: float()
+        ) :: stop_map()
+  defp fetch_nearby_stops(latitude, longitude, radius) do
     degree_radius = miles_to_degrees(radius)
 
     {:ok, cr_stops} =
@@ -16,9 +42,9 @@ defmodule MobileAppBackendWeb.NearbyController do
           longitude: longitude,
           location_type: [0, 1],
           radius: degree_radius,
-          route_type: "2"
+          route_type: 2
         ],
-        include: {:parent_station, :child_stops},
+        include: [parent_station: :child_stops],
         sort: {:distance, :asc}
       )
 
@@ -29,70 +55,56 @@ defmodule MobileAppBackendWeb.NearbyController do
           longitude: longitude,
           location_type: [0, 1],
           radius: degree_radius / 2,
-          route_type: "0,1,3,4"
+          route_type: [0, 1, 3, 4]
         ],
         include: {:parent_station, :child_stops},
         sort: {:distance, :asc}
       )
 
-    stops = (cr_stops ++ other_stops) |> Enum.uniq_by(& &1.id)
-    stop_ids = MapSet.new(stops, & &1.id)
+    Map.new(cr_stops ++ other_stops, &{&1.id, &1})
+  end
 
-    missing_sibling_stop_ids =
+  @spec include_missing_siblings(stops :: stop_map()) :: stop_map()
+  defp include_missing_siblings(stops) do
+    parents =
       stops
+      |> Map.values()
       |> Enum.filter(&(&1.parent_station != nil))
-      |> Enum.flat_map(& &1.parent_station.child_stops)
+      |> Map.new(&{&1.parent_station.id, &1.parent_station})
+
+    missing_sibling_stops =
+      parents
+      |> Map.values()
+      |> Enum.flat_map(& &1.child_stops)
       |> Enum.filter(
         &case &1 do
-          %MBTAV3API.Stop{} -> Enum.member?([0, 1], &1.location_type)
+          %MBTAV3API.Stop{} -> Enum.member?([:stop, :station], &1.location_type)
           _ -> false
         end
       )
-      |> Enum.map(& &1.id)
-      |> Enum.uniq()
-      |> Enum.filter(&(!Enum.member?(stop_ids, &1)))
+      |> Enum.map(&%MBTAV3API.Stop{&1 | parent_station: Map.get(parents, &1.parent_station.id)})
 
-    []
+    Map.new(
+      missing_sibling_stops ++ Map.values(stops),
+      &{&1.id,
+       %MBTAV3API.Stop{
+         &1
+         | child_stops: nil,
+           parent_station:
+             if(&1.parent_station == nil,
+               do: nil,
+               else: %MBTAV3API.Stop{&1.parent_station | child_stops: nil}
+             )
+       }}
+    )
+  end
 
-    missing_sibling_stops =
-      if Enum.empty?(missing_sibling_stop_ids) do
-        []
-      else
-        {:ok, missing_sibling_stops} =
-          MBTAV3API.Stop.get_all(
-            filter: [
-              location_type: [0, 1],
-              id: missing_sibling_stop_ids |> Enum.join(",")
-            ],
-            include: :parent_station
-          )
-
-        missing_sibling_stops
-      end
-
-    stops =
-      (stops ++ missing_sibling_stops)
-      |> Enum.map(
-        &%MBTAV3API.Stop{
-          &1
-          | child_stops: nil,
-            parent_station:
-              if(&1.parent_station == nil,
-                do: nil,
-                else: %MBTAV3API.Stop{&1.parent_station | child_stops: nil}
-              )
-        }
-      )
-      |> Enum.sort(
-        &(distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude) <=
-            distance_in_degrees(&2.latitude || 0, &2.longitude || 0, latitude, longitude))
-      )
-
-    stop_ids = MapSet.union(stop_ids, MapSet.new(missing_sibling_stop_ids))
-
+  @spec fetch_route_patterns(stops :: stop_map()) ::
+          {%{String.t() => MBTAV3API.RoutePattern.t()}, %{String.t() => [String.t()]}}
+  defp fetch_route_patterns(stops) do
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
-        filter: [stop: Enum.join(stop_ids, ",")],
+        filter: [stop: Enum.join(Map.keys(stops), ",")],
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )
@@ -102,10 +114,10 @@ defmodule MobileAppBackendWeb.NearbyController do
       |> Enum.flat_map(fn
         %MBTAV3API.RoutePattern{
           id: route_pattern_id,
-          representative_trip: %MBTAV3API.Trip{stops: stops}
+          representative_trip: %MBTAV3API.Trip{stops: trip_stops}
         } ->
-          stops
-          |> Enum.filter(&(&1.id in stop_ids))
+          trip_stops
+          |> Enum.filter(&Map.has_key?(stops, &1.id))
           |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
       end)
       |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
@@ -113,15 +125,15 @@ defmodule MobileAppBackendWeb.NearbyController do
     route_patterns =
       Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})
 
-    stops = stops |> Enum.filter(&Map.has_key?(pattern_ids_by_stop, &1.id))
-
-    json(conn, %{
-      stops: stops,
-      route_patterns: route_patterns,
-      pattern_ids_by_stop: pattern_ids_by_stop
-    })
+    {route_patterns, pattern_ids_by_stop}
   end
 
+  @spec distance_in_degrees(
+          lat1 :: float(),
+          lon1 :: float(),
+          lat2 :: float(),
+          lon2 :: float()
+        ) :: float()
   defp distance_in_degrees(lat1, lon1, lat2, lon2),
     do: abs(:math.sqrt((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2))
 

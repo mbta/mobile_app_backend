@@ -60,7 +60,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                        "long_name" => "Millennium Park or VA Hospital - Forest Hills Station",
                        "short_name" => "36",
                        "sort_order" => 50_360,
-                       "text_color" => "000000"
+                       "text_color" => "000000",
+                       "type" => "bus"
                      } = route_36,
                    "sort_order" => 503_600_040
                  },
@@ -247,6 +248,123 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                }
              } =
                json_response(conn, 200)
+    end
+  end
+
+  describe "controller helper functions" do
+    test "sibling stops which aren't included in the stop map are added to the stop map" do
+      stops_with_missing_sibling = %{
+        "BNT-0000-05" => %MBTAV3API.Stop{
+          id: "BNT-0000-05",
+          latitude: 42.366618,
+          longitude: -71.062601,
+          name: "North Station",
+          location_type: :stop,
+          parent_station: %MBTAV3API.Stop{
+            id: "place-north",
+            latitude: 42.365577,
+            longitude: -71.06129,
+            name: "North Station",
+            location_type: :station,
+            parent_station: nil,
+            child_stops: [
+              %MBTAV3API.Stop{
+                id: "70206",
+                latitude: 42.36528,
+                longitude: -71.060205,
+                name: "North Station",
+                location_type: :stop,
+                parent_station: %MBTAV3API.JsonApi.Reference{
+                  type: "stop",
+                  id: "place-north"
+                },
+                child_stops: nil
+              },
+              %MBTAV3API.Stop{
+                id: "BNT-0000",
+                latitude: 42.366417,
+                longitude: -71.062326,
+                name: "North Station",
+                location_type: :stop,
+                parent_station: %MBTAV3API.JsonApi.Reference{
+                  type: "stop",
+                  id: "place-north"
+                },
+                child_stops: nil
+              },
+              %MBTAV3API.Stop{
+                id: "BNT-0000-01",
+                latitude: 42.366493,
+                longitude: -71.062829,
+                name: "North Station",
+                location_type: :stop,
+                parent_station: %MBTAV3API.JsonApi.Reference{
+                  type: "stop",
+                  id: "place-north"
+                },
+                child_stops: nil
+              },
+              %MBTAV3API.Stop{
+                id: "door-north-causewaye",
+                latitude: 42.365639,
+                longitude: -71.060472,
+                name: "North Station - Causeway St (Elevator)",
+                location_type: :generic_node
+              }
+            ]
+          },
+          child_stops: nil
+        }
+      }
+
+      assert %{
+               "BNT-0000-05" => %MBTAV3API.Stop{
+                 id: "BNT-0000-05",
+                 parent_station: %MBTAV3API.Stop{
+                   id: "place-north",
+                   name: "North Station",
+                   location_type: :station,
+                   parent_station: nil,
+                   child_stops: nil
+                 }
+               },
+               "70206" => %MBTAV3API.Stop{
+                 id: "70206",
+                 latitude: 42.36528,
+                 longitude: -71.060205,
+                 parent_station: %MBTAV3API.Stop{
+                   id: "place-north",
+                   name: "North Station",
+                   location_type: :station,
+                   parent_station: nil,
+                   child_stops: nil
+                 },
+                 child_stops: nil
+               },
+               "BNT-0000" => %MBTAV3API.Stop{
+                 id: "BNT-0000",
+                 latitude: 42.366417,
+                 longitude: -71.062326,
+                 parent_station: %MBTAV3API.Stop{
+                   id: "place-north",
+                   child_stops: nil
+                 },
+                 child_stops: nil
+               },
+               "BNT-0000-01" => %MBTAV3API.Stop{
+                 id: "BNT-0000-01",
+                 latitude: 42.366493,
+                 longitude: -71.062829,
+                 parent_station: %MBTAV3API.Stop{
+                   id: "place-north",
+                   child_stops: nil
+                 },
+                 child_stops: nil
+               }
+             } =
+               MobileAppBackendWeb.NearbyController.include_missing_siblings(
+                 stops_with_missing_sibling
+               )
     end
   end
 end

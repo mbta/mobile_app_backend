@@ -5,7 +5,7 @@ defmodule MBTAV3API.Route do
 
   @type t :: %__MODULE__{
           id: String.t(),
-          type: integer(),
+          type: route_type(),
           color: String.t(),
           direction_names: [String.t()],
           direction_destinations: [String.t()],
@@ -14,6 +14,8 @@ defmodule MBTAV3API.Route do
           sort_order: String.t(),
           text_color: String.t()
         }
+  @type route_type ::
+          :tram | :subway | :rail | :bus | :ferry
 
   @derive Jason.Encoder
   defstruct [
@@ -48,7 +50,7 @@ defmodule MBTAV3API.Route do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      type: item.attributes["type"],
+      type: parse_route_type(item.attributes["type"]),
       color: item.attributes["color"],
       direction_names: item.attributes["direction_names"],
       direction_destinations: item.attributes["direction_destinations"],
@@ -58,4 +60,12 @@ defmodule MBTAV3API.Route do
       text_color: item.attributes["text_color"]
     }
   end
+
+  @spec parse_route_type(integer() | nil) :: route_type() | nil
+  defp parse_route_type(0), do: :tram
+  defp parse_route_type(1), do: :subway
+  defp parse_route_type(2), do: :rail
+  defp parse_route_type(3), do: :bus
+  defp parse_route_type(4), do: :ferry
+  defp parse_route_type(nil), do: nil
 end
