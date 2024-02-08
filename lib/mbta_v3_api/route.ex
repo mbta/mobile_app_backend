@@ -5,6 +5,7 @@ defmodule MBTAV3API.Route do
 
   @type t :: %__MODULE__{
           id: String.t(),
+          type: integer(),
           color: String.t(),
           direction_names: [String.t()],
           direction_destinations: [String.t()],
@@ -17,6 +18,7 @@ defmodule MBTAV3API.Route do
   @derive Jason.Encoder
   defstruct [
     :id,
+    :type,
     :color,
     :direction_names,
     :direction_destinations,
@@ -29,6 +31,7 @@ defmodule MBTAV3API.Route do
   @impl JsonApi.Object
   def fields,
     do: [
+      :type,
       :color,
       :direction_names,
       :direction_destinations,
@@ -45,6 +48,7 @@ defmodule MBTAV3API.Route do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
+      type: item.attributes["type"],
       color: item.attributes["color"],
       direction_names: item.attributes["direction_names"],
       direction_destinations: item.attributes["direction_destinations"],
