@@ -114,13 +114,13 @@ defmodule Test.Support.Data do
   end
 
   @doc """
-  Creates new and deletes unused backend responses.
+  Creates new and optionally deletes unused backend responses.
 
   Assumes that test data is being updated.
   """
-  @spec write_new_data :: :ok
-  def write_new_data do
-    GenServer.call(__MODULE__, :write_new_data)
+  @spec write_new_data(Keyword.t()) :: :ok
+  def write_new_data(opts) do
+    GenServer.call(__MODULE__, {:write_new_data, opts})
   end
 
   @doc """

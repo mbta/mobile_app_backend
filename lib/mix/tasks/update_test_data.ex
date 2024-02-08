@@ -18,11 +18,8 @@ defmodule Mix.Tasks.UpdateTestData do
 
         Mix.Task.run("test", ["--raise"] ++ args)
 
-        if args == [] do
-          data.write_new_data()
-        else
-          Mix.shell().info("Not writing test data, ran with arguments")
-        end
+        ran_all_tests = args == []
+        data.write_new_data(remove_unused: ran_all_tests)
 
       {:error, :nofile} ->
         raise "mix update_test_data must be run in the test env"
