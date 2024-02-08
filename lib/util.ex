@@ -175,24 +175,34 @@ defmodule Util do
   end
 
   @doc """
+  Parses a value as an `America/New_York` datetime.
+
+  ## Examples
+
+      iex> Util.parse_datetime!("2024-02-02T10:45:52-05:00")
+      #DateTime<2024-02-02 10:45:52-05:00 EST America/New_York>
+  """
+  @spec parse_datetime!(String.t()) :: DateTime.t()
+  def parse_datetime!(data) do
+    {:ok, datetime, _} = DateTime.from_iso8601(data)
+    DateTime.shift_zone!(datetime, "America/New_York")
+  end
+
+  @doc """
   Parses an optional value as an `America/New_York` datetime.
 
   ## Examples
 
-      iex> Util.parse_optional_datetime(nil)
+      iex> Util.parse_optional_datetime!(nil)
       nil
 
-      iex> Util.parse_optional_datetime("2024-02-02T10:45:52-05:00")
+      iex> Util.parse_optional_datetime!("2024-02-02T10:45:52-05:00")
       #DateTime<2024-02-02 10:45:52-05:00 EST America/New_York>
   """
-  @spec parse_optional_datetime(String.t() | nil) :: DateTime.t() | nil
-  def parse_optional_datetime(data)
-  def parse_optional_datetime(nil), do: nil
-
-  def parse_optional_datetime(data) do
-    {:ok, datetime, _} = DateTime.from_iso8601(data)
-    DateTime.shift_zone!(datetime, "America/New_York")
-  end
+  @spec parse_optional_datetime!(String.t() | nil) :: DateTime.t() | nil
+  def parse_optional_datetime!(data)
+  def parse_optional_datetime!(nil), do: nil
+  def parse_optional_datetime!(data), do: parse_datetime!(data)
 
   @doc """
   Constructs a union out of a list of types.
