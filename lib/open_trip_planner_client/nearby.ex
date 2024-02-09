@@ -102,7 +102,7 @@ defmodule OpenTripPlannerClient.Nearby do
              else
                _ -> nil
              end,
-           location_type: 0,
+           location_type: :stop,
            child_stops: nil
          }}
 
