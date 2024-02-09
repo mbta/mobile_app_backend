@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Prediction do
+  require Util
   alias MBTAV3API.JsonApi
 
   @behaviour JsonApi.Object
@@ -14,8 +15,13 @@ defmodule MBTAV3API.Prediction do
           stop_sequence: integer() | nil,
           trip: MBTAV3API.Trip.t() | JsonApi.Reference.t() | nil
         }
-  @type schedule_relationship ::
-          :added | :cancelled | :no_data | :skipped | :unscheduled | :scheduled
+  Util.declare_enum(
+    :schedule_relationship,
+    Util.enum_values(
+      :uppercase_string,
+      [:added, :cancelled, :no_data, :skipped, :unscheduled]
+    ) ++ [scheduled: nil]
+  )
 
   @derive Jason.Encoder
   defstruct [
@@ -73,12 +79,4 @@ defmodule MBTAV3API.Prediction do
   defp parse_revenue_status("REVENUE"), do: true
   defp parse_revenue_status("NON_REVENUE"), do: false
   defp parse_revenue_status(nil), do: true
-
-  @spec parse_schedule_relationship(String.t() | nil) :: schedule_relationship()
-  defp parse_schedule_relationship("ADDED"), do: :added
-  defp parse_schedule_relationship("CANCELLED"), do: :cancelled
-  defp parse_schedule_relationship("NO_DATA"), do: :no_data
-  defp parse_schedule_relationship("SKIPPED"), do: :skipped
-  defp parse_schedule_relationship("UNSCHEDULED"), do: :unscheduled
-  defp parse_schedule_relationship(nil), do: :scheduled
 end

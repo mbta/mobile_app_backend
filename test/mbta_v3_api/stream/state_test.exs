@@ -78,7 +78,7 @@ defmodule MBTAV3API.Stream.StateTest do
                %Event{
                  event: "update",
                  data:
-                   ~s({"attributes":{"latitude":-42.35302,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
+                   ~s({"attributes":{"latitude":-42.35302,"location_type":3,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
                }
              ]) == %State{
                data: %{
@@ -88,7 +88,7 @@ defmodule MBTAV3API.Stream.StateTest do
                      latitude: -42.35302,
                      longitude: 71.06459,
                      name: "Not Boylston",
-                     location_type: :stop,
+                     location_type: :generic_node,
                      parent_station: nil
                    }
                  }
@@ -102,6 +102,7 @@ defmodule MBTAV3API.Stream.StateTest do
         |> put_in([Stop, "place-boyls"], %Stop{
           id: "place-boyls",
           latitude: 42.35302,
+          location_type: :station,
           longitude: -71.06459,
           name: "Boylston",
           parent_station: nil
@@ -111,7 +112,7 @@ defmodule MBTAV3API.Stream.StateTest do
                %Event{
                  event: "reset",
                  data:
-                   ~s([{"attributes":{"latitude":42.377359,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
+                   ~s([{"attributes":{"latitude":42.377359,"location_type":1,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
                }
              ]) == %State{
                data: %{
@@ -121,7 +122,7 @@ defmodule MBTAV3API.Stream.StateTest do
                      latitude: 42.377359,
                      longitude: -71.094761,
                      name: "Union Square",
-                     location_type: :stop,
+                     location_type: :station,
                      parent_station: nil
                    }
                  }

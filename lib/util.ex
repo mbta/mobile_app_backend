@@ -1,5 +1,180 @@
 defmodule Util do
   @doc """
+  Define some helper types and functions for working with enums returned from the V3 API.
+
+  ## Examples
+
+      iex> quote do
+      ...>   Util.declare_enum(:lifecycle,
+      ...>     new: "NEW",
+      ...>     ongoing: "ONGOING",
+      ...>     ongoing_upcoming: "ONGOING_UPCOMING",
+      ...>     upcoming: "UPCOMING"
+      ...>   )
+      ...> end
+      ...> |> Macro.expand_once(__ENV__)
+      ...> |> Macro.to_string()
+      ...> |> String.split("\\n")
+      [
+        "@type lifecycle :: :new | :ongoing | :ongoing_upcoming | :upcoming",
+        "@type raw_lifecycle :: String.t()",
+        "@spec parse_lifecycle(raw_lifecycle()) :: lifecycle()",
+        "def parse_lifecycle(lifecycle) do",
+        "  case lifecycle do",
+        "    \\"NEW\\" -> :new",
+        "    \\"ONGOING\\" -> :ongoing",
+        "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
+        "    \\"UPCOMING\\" -> :upcoming",
+        "  end",
+        "end",
+        "",
+        "@spec serialize_lifecycle(lifecycle()) :: raw_lifecycle()",
+        "def serialize_lifecycle(lifecycle) do",
+        "  case lifecycle do",
+        "    :new -> \\"NEW\\"",
+        "    :ongoing -> \\"ONGOING\\"",
+        "    :ongoing_upcoming -> \\"ONGOING_UPCOMING\\"",
+        "    :upcoming -> \\"UPCOMING\\"",
+        "  end",
+        "end"
+      ]
+
+      iex> quote do
+      ...>   Util.declare_enum(:x, a: 0, b: 1)
+      ...> end
+      ...> |> Macro.expand_once(__ENV__)
+      ...> |> Macro.to_string()
+      ...> |> String.split("\\n")
+      [
+        "@type x :: :a | :b",
+        "@type raw_x :: 0 | 1",
+        "@spec parse_x(raw_x()) :: x()",
+        "def parse_x(x) do",
+        "  case x do",
+        "    0 -> :a",
+        "    1 -> :b",
+        "  end",
+        "end",
+        "",
+        "@spec serialize_x(x()) :: raw_x()",
+        "def serialize_x(x) do",
+        "  case x do",
+        "    :a -> 0",
+        "    :b -> 1",
+        "  end",
+        "end"
+      ]
+
+      iex> quote do
+      ...>   Util.declare_enum(:a, x: "X", y: nil)
+      ...> end
+      ...> |> Macro.expand_once(__ENV__)
+      ...> |> Macro.to_string()
+      ...> |> String.replace("\\n\\n", "\\n#\\n")
+      ...> |> then(&(&1 <> "\\n"))
+      \"\"\"
+      @type a :: :x | :y
+      @type raw_a :: String.t() | nil
+      @spec parse_a(raw_a()) :: a()
+      def parse_a(a) do
+        case a do
+          "X" -> :x
+          nil -> :y
+        end
+      end
+      #
+      @spec serialize_a(a()) :: raw_a()
+      def serialize_a(a) do
+        case a do
+          :x -> "X"
+          :y -> nil
+        end
+      end
+      \"\"\"
+  """
+  defmacro declare_enum(name, values) do
+    {values, _} = Code.eval_quoted(values, [], __CALLER__)
+
+    type_spec =
+      values
+      |> Enum.map(fn {value, _raw_value} -> typeof(value) end)
+      |> Enum.uniq()
+      |> type_union()
+
+    raw_type_spec =
+      values
+      |> Enum.map(fn {_value, raw_value} -> typeof(raw_value) end)
+      |> Enum.uniq()
+      |> type_union()
+
+    type_name = Macro.var(name, nil)
+    parse_fn = :"parse_#{name}"
+    serialize_fn = :"serialize_#{name}"
+    method_arg = Macro.var(name, __MODULE__)
+    raw_type = :"raw_#{name}"
+    raw_type_name = Macro.var(raw_type, nil)
+
+    parse_clauses =
+      Enum.map(values, fn {value, raw_value} ->
+        [{:->, _, _} = clause] =
+          quote do
+            unquote(raw_value) -> unquote(value)
+          end
+
+        clause
+      end)
+
+    serialize_clauses =
+      Enum.map(values, fn {value, raw_value} ->
+        [{:->, _, _} = clause] =
+          quote do
+            unquote(value) -> unquote(raw_value)
+          end
+
+        clause
+      end)
+
+    parse_body = {:case, [], [method_arg, [do: parse_clauses]]}
+    serialize_body = {:case, [], [method_arg, [do: serialize_clauses]]}
+
+    quote do
+      @type unquote(type_name) :: unquote(type_spec)
+      @type unquote(raw_type_name) :: unquote(raw_type_spec)
+
+      @spec unquote(parse_fn)(unquote(raw_type)()) :: unquote(name)()
+      def unquote(parse_fn)(unquote(method_arg)) do
+        unquote(parse_body)
+      end
+
+      @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()
+      def unquote(serialize_fn)(unquote(method_arg)) do
+        unquote(serialize_body)
+      end
+    end
+  end
+
+  defp typeof(x) when is_atom(x) when is_integer(x), do: x
+  defp typeof(x) when is_binary(x), do: quote(do: String.t())
+
+  @doc """
+  Builds enum values based on common patterns in the V3 API.
+
+  ## Examples
+
+      iex> Util.enum_values(:uppercase_string, [:new, :ongoing, :ongoing_upcoming, :upcoming])
+      [new: "NEW", ongoing: "ONGOING", ongoing_upcoming: "ONGOING_UPCOMING", upcoming: "UPCOMING"]
+
+      iex> Util.enum_values(:index, [:light_rail, :heavy_rail, :commuter_rail, :bus, :ferry])
+      [light_rail: 0, heavy_rail: 1, commuter_rail: 2, bus: 3, ferry: 4]
+  """
+  def enum_values(transform, values) do
+    case transform do
+      :uppercase_string -> Enum.map(values, &{&1, String.upcase(Atom.to_string(&1))})
+      :index -> Enum.with_index(values)
+    end
+  end
+
+  @doc """
   Parses an optional value as an `America/New_York` datetime.
 
   ## Examples
@@ -17,5 +192,28 @@ defmodule Util do
   def parse_optional_datetime(data) do
     {:ok, datetime, _} = DateTime.from_iso8601(data)
     DateTime.shift_zone!(datetime, "America/New_York")
+  end
+
+  @doc """
+  Constructs a union out of a list of types.
+
+  ## Examples
+
+      iex> values = quote(do: [Foo.t(), Bar.t(), Baz.t()])
+      iex> Util.type_union(values) |> Macro.to_string()
+      "Foo.t() | Bar.t() | Baz.t()"
+
+      iex> options = [:a, :b, :c]
+      iex> quote do
+      ...>   @type test :: unquote(Util.type_union(options))
+      ...> end |> Macro.to_string()
+      "@type test :: :a | :b | :c"
+  """
+  def type_union(args) do
+    # must reverse args because | is right-associative
+
+    args
+    |> Enum.reverse()
+    |> Enum.reduce(fn t, acc -> quote(do: unquote(t) | unquote(acc)) end)
   end
 end

@@ -44,7 +44,7 @@ defmodule MBTAV3API.JsonApi.Params do
         sort(params[:sort]),
         fields(root_type, params[:include], Keyword.get(params, :fields, []))
       ),
-      Map.merge(include(params[:include]), filter(params[:filter]))
+      Map.merge(include(params[:include]), filter(root_type, params[:filter]))
     )
   end
 
@@ -105,12 +105,21 @@ defmodule MBTAV3API.JsonApi.Params do
     Stream.flat_map(includes, &flat_include/1)
   end
 
-  @spec filter(nil | [filter_param()]) :: %{String.t() => String.t()}
-  defp filter(nil), do: %{}
+  @spec filter(atom(), nil | [filter_param()]) :: %{String.t() => String.t()}
+  defp filter(_, nil), do: %{}
 
-  defp filter(filters) do
+  defp filter(root_type, filters) do
+    module = Object.module_for(root_type)
+    has_serialize? = function_exported?(module, :serialize_filter_value, 2)
+
     Map.new(filters, fn {field, value} ->
-      {"filter[#{field}]", FilterValue.filter_value_string(value)}
+      {"filter[#{field}]",
+       FilterValue.filter_value_string(
+         value,
+         if has_serialize? do
+           &module.serialize_filter_value(field, &1)
+         end
+       )}
     end)
   end
 end

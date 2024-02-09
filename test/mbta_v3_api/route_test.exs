@@ -14,7 +14,8 @@ defmodule MBTAV3API.RouteTest do
                "long_name" => "Green Line C",
                "short_name" => "C",
                "sort_order" => 10_033,
-               "text_color" => "FFFFFF"
+               "text_color" => "FFFFFF",
+               "type" => 0
              }
            }) == %Route{
              id: "Green-C",
@@ -24,7 +25,8 @@ defmodule MBTAV3API.RouteTest do
              long_name: "Green Line C",
              short_name: "C",
              sort_order: 10_033,
-             text_color: "FFFFFF"
+             text_color: "FFFFFF",
+             type: :light_rail
            }
   end
 end

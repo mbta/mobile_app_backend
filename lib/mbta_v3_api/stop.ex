@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Stop do
+  require Util
   alias MBTAV3API.JsonApi
 
   @behaviour JsonApi.Object
@@ -12,8 +13,11 @@ defmodule MBTAV3API.Stop do
           parent_station: t() | JsonApi.Reference.t() | nil,
           child_stops: t() | JsonApi.Reference.t() | nil
         }
-  @type location_type ::
-          :stop | :station | :entrance_exit | :generic_node | :boarding_area
+
+  Util.declare_enum(
+    :location_type,
+    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
+  )
 
   @type stop_map() :: %{String.t() => __MODULE__.t()}
 
@@ -33,6 +37,17 @@ defmodule MBTAV3API.Stop do
       child_stops: :stop
     }
 
+  @impl JsonApi.Object
+  def serialize_filter_value(:route_type, route_type) do
+    MBTAV3API.Route.serialize_type(route_type)
+  end
+
+  def serialize_filter_value(:location_type, location_type) do
+    serialize_location_type(location_type)
+  end
+
+  def serialize_filter_value(_field, value), do: value
+
   @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
   def get_all(params, opts \\ []) do
     params = JsonApi.Params.flatten_params(params, :stop)
@@ -50,7 +65,10 @@ defmodule MBTAV3API.Stop do
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       name: item.attributes["name"],
-      location_type: parse_location_type(item.attributes["location_type"]),
+      location_type:
+        if location_type = item.attributes["location_type"] do
+          parse_location_type(location_type)
+        end,
       parent_station: JsonApi.Object.parse_one_related(item.relationships["parent_station"]),
       child_stops: JsonApi.Object.parse_many_related(item.relationships["child_stops"])
     }
@@ -90,12 +108,4 @@ defmodule MBTAV3API.Stop do
        }}
     )
   end
-
-  @spec parse_location_type(integer() | nil) :: location_type()
-  defp parse_location_type(nil), do: :stop
-  defp parse_location_type(0), do: :stop
-  defp parse_location_type(1), do: :station
-  defp parse_location_type(2), do: :entrance_exit
-  defp parse_location_type(3), do: :generic_node
-  defp parse_location_type(4), do: :boarding_area
 end

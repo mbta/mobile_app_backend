@@ -42,9 +42,9 @@ defmodule MobileAppBackendWeb.NearbyController do
         filter: [
           latitude: latitude,
           longitude: longitude,
-          location_type: [0, 1],
+          location_type: [:stop, :station],
           radius: degree_radius,
-          route_type: 2
+          route_type: :commuter_rail
         ],
         include: [parent_station: :child_stops],
         sort: {:distance, :asc}
@@ -55,9 +55,9 @@ defmodule MobileAppBackendWeb.NearbyController do
         filter: [
           latitude: latitude,
           longitude: longitude,
-          location_type: [0, 1],
+          location_type: [:stop, :station],
           radius: degree_radius / 2,
-          route_type: [0, 1, 3, 4]
+          route_type: [:light_rail, :heavy_rail, :bus, :ferry]
         ],
         include: {:parent_station, :child_stops},
         sort: {:distance, :asc}

@@ -3,6 +3,8 @@ defmodule MBTAV3API.JsonApi.Object do
 
   @callback fields :: [atom()]
   @callback includes :: %{atom() => atom()}
+  @callback serialize_filter_value(atom(), JsonApi.FilterValue.t()) :: JsonApi.FilterValue.t()
+  @optional_callbacks serialize_filter_value: 2
 
   @spec module_for(atom() | String.t()) :: module()
   def module_for(type)
@@ -17,16 +19,9 @@ defmodule MBTAV3API.JsonApi.Object do
       module
     end
 
-  # Bafflingly, | is right-associative but or is left-associative,
-  # so matching that in these quotes requires some juggling
+  module_types = Enum.map(modules, fn module -> quote(do: unquote(module).t()) end)
 
-  modules_type =
-    modules
-    |> Enum.reverse()
-    |> Enum.map(fn module -> quote(do: unquote(module).t()) end)
-    |> Enum.reduce(fn t, acc -> quote(do: unquote(t) | unquote(acc)) end)
-
-  @type t :: unquote(modules_type)
+  @type t :: unquote(Util.type_union(module_types))
 
   modules_guard =
     modules
@@ -34,8 +29,7 @@ defmodule MBTAV3API.JsonApi.Object do
       # Due to macro hygiene, `quote(do: is_struct(x, unquote(module)))` will fail
       # because there is no variable `x`. To reference the yet-to-be-defined guard parameter,
       # we need to bypass macro hygiene entirely.
-      unhygenic_x = Macro.var(:x, nil)
-      quote(do: is_struct(unquote(unhygenic_x), unquote(module)))
+      quote(do: is_struct(var!(x), unquote(module)))
     end)
     |> Enum.reduce(fn clause, acc -> quote(do: unquote(acc) or unquote(clause)) end)
 
