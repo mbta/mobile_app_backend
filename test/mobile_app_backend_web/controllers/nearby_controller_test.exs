@@ -1,5 +1,6 @@
 defmodule MobileAppBackendWeb.NearbyControllerTest do
   use MobileAppBackendWeb.ConnCase
+  import Test.Support.Sigils
 
   setup do
     Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
@@ -256,7 +257,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
           latitude: 42.388400,
           longitude: -71.119149,
           source: "v3",
-          radius: 0.01
+          radius: 0.01,
+          now: ~B[2024-02-09 16:00:00] |> DateTime.to_iso8601()
         })
 
       assert %{"stops" => stops, "alerts" => alerts} = json_response(conn, :ok)

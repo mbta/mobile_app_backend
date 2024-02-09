@@ -9,13 +9,20 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
+    now =
+      if now = Map.get(params, "now") do
+        Util.parse_datetime!(now)
+      else
+        DateTime.now!("America/New_York")
+      end
+
     stops =
       fetch_nearby_stops(latitude, longitude, radius)
       |> MBTAV3API.Stop.include_missing_siblings()
 
     {route_patterns, pattern_ids_by_stop} = fetch_route_patterns(stops)
 
-    alerts = fetch_alerts(stops)
+    alerts = fetch_alerts(stops, now)
 
     json(conn, %{
       stops:
@@ -98,11 +105,11 @@ defmodule MobileAppBackendWeb.NearbyController do
     {route_patterns, pattern_ids_by_stop}
   end
 
-  def fetch_alerts(stops) do
+  def fetch_alerts(stops, now) do
     {:ok, alerts} = MBTAV3API.Alert.get_all(filter: [stop: Map.keys(stops)])
 
     Enum.filter(alerts, fn alert ->
-      MBTAV3API.Alert.active?(alert) and
+      MBTAV3API.Alert.active?(alert, now) and
         alert.effect in [
           :detour,
           :shuttle,
