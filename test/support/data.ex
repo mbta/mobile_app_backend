@@ -172,20 +172,24 @@ defmodule Test.Support.Data do
     {:reply, :ok, state}
   end
 
-  def handle_call(:write_new_data, _from, %State{} = state) do
+  def handle_call({:write_new_data, opts}, _from, %State{} = state) do
     unless state.updating_test_data? do
       raise "Wrote new data, but not updating test data"
     end
+
+    remove_unused = Keyword.get(opts, :remove_unused, false)
 
     {touched, untouched} =
       state.data
       |> Map.split_with(fn {_req, %Response{touched: touched}} -> touched end)
 
-    untouched
-    |> Enum.each(fn {req, resp} ->
-      Logger.info("Deleting unused #{req}")
-      File.rm!(response_path(resp))
-    end)
+    if remove_unused do
+      untouched
+      |> Enum.each(fn {req, resp} ->
+        Logger.info("Deleting unused #{req}")
+        File.rm!(response_path(resp))
+      end)
+    end
 
     touched
     |> Enum.filter(fn {_req, %Response{new_data: new_data}} -> not is_nil(new_data) end)
@@ -193,7 +197,13 @@ defmodule Test.Support.Data do
       File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data))
     end)
 
-    state = %State{state | data: touched}
+    state =
+      if remove_unused do
+        %State{state | data: touched}
+      else
+        state
+      end
+
     meta = dehydrate_state(state.data)
     File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta, pretty: true))
 

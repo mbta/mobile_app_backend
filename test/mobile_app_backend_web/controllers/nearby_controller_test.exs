@@ -249,5 +249,35 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
              } =
                json_response(conn, 200)
     end
+
+    test "includes alerts", %{conn: conn} do
+      conn =
+        get(conn, "/api/nearby", %{
+          latitude: 42.388400,
+          longitude: -71.119149,
+          source: "v3",
+          radius: 0.01
+        })
+
+      assert %{"stops" => stops, "alerts" => alerts} = json_response(conn, :ok)
+
+      assert Enum.all?(
+               stops,
+               &(&1["id"] == "place-portr" or &1["parent_station"]["id"] == "place-portr")
+             )
+
+      assert [
+               %{
+                 "active_period" => _,
+                 "effect" => "shuttle",
+                 "effect_name" => nil,
+                 "id" => "553081",
+                 "informed_entity" => informed_entities,
+                 "lifecycle" => "new"
+               }
+             ] = Enum.sort_by(alerts, & &1["id"])
+
+      assert Enum.find(informed_entities, &(&1["stop"] == "place-portr"))
+    end
   end
 end
