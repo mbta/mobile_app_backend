@@ -101,7 +101,9 @@ defmodule OpenTripPlannerClient.Nearby do
                parent_station
              else
                _ -> nil
-             end
+             end,
+           location_type: :stop,
+           child_stops: nil
          }}
 
       %{"gtfsId" => "2272_2274:" <> _} ->

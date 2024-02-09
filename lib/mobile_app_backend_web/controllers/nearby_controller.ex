@@ -1,35 +1,77 @@
 defmodule MobileAppBackendWeb.NearbyController do
   use MobileAppBackendWeb, :controller
 
+  @type stop_map() :: MBTAV3API.Stop.stop_map()
+
   def show(conn, params) do
-    params = Map.merge(%{"source" => "otp", "radius" => "0.5"}, params)
+    params = Map.merge(%{"radius" => "1.0"}, params)
     latitude = String.to_float(Map.fetch!(params, "latitude"))
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
-    {:ok, stops} =
-      case Map.fetch!(params, "source") do
-        "v3" ->
-          MBTAV3API.Stop.get_all(
-            filter: [
-              latitude: latitude,
-              longitude: longitude,
-              location_type: [0, 1],
-              radius: miles_to_degrees(radius)
-            ],
-            include: :parent_station,
-            sort: {:distance, :asc}
-          )
+    stops =
+      fetch_nearby_stops(latitude, longitude, radius)
+      |> MBTAV3API.Stop.include_missing_siblings()
 
-        "otp" ->
-          OpenTripPlannerClient.nearby(latitude, longitude, miles_to_meters(radius))
-      end
+    {route_patterns, pattern_ids_by_stop} = fetch_route_patterns(stops)
 
-    stop_ids = MapSet.new(stops, & &1.id)
+    json(conn, %{
+      stops:
+        stops
+        |> Map.values()
+        |> Enum.filter(&Map.has_key?(pattern_ids_by_stop, &1.id))
+        |> Enum.sort(
+          &(distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude) <=
+              distance_in_degrees(&2.latitude || 0, &2.longitude || 0, latitude, longitude))
+        ),
+      route_patterns: route_patterns,
+      pattern_ids_by_stop: pattern_ids_by_stop
+    })
+  end
 
+  @spec fetch_nearby_stops(
+          latitude :: float(),
+          longitude :: float(),
+          radius :: float()
+        ) :: stop_map()
+  defp fetch_nearby_stops(latitude, longitude, radius) do
+    degree_radius = miles_to_degrees(radius)
+
+    {:ok, cr_stops} =
+      MBTAV3API.Stop.get_all(
+        filter: [
+          latitude: latitude,
+          longitude: longitude,
+          location_type: [0, 1],
+          radius: degree_radius,
+          route_type: 2
+        ],
+        include: [parent_station: :child_stops],
+        sort: {:distance, :asc}
+      )
+
+    {:ok, other_stops} =
+      MBTAV3API.Stop.get_all(
+        filter: [
+          latitude: latitude,
+          longitude: longitude,
+          location_type: [0, 1],
+          radius: degree_radius / 2,
+          route_type: [0, 1, 3, 4]
+        ],
+        include: {:parent_station, :child_stops},
+        sort: {:distance, :asc}
+      )
+
+    Map.new(cr_stops ++ other_stops, &{&1.id, &1})
+  end
+
+  @spec fetch_route_patterns(stops :: stop_map()) ::
+          {%{String.t() => MBTAV3API.RoutePattern.t()}, %{String.t() => [String.t()]}}
+  defp fetch_route_patterns(stops) do
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
-        filter: [stop: Enum.join(stop_ids, ",")],
+        filter: [stop: Enum.join(Map.keys(stops), ",")],
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )
@@ -39,10 +81,10 @@ defmodule MobileAppBackendWeb.NearbyController do
       |> Enum.flat_map(fn
         %MBTAV3API.RoutePattern{
           id: route_pattern_id,
-          representative_trip: %MBTAV3API.Trip{stops: stops}
+          representative_trip: %MBTAV3API.Trip{stops: trip_stops}
         } ->
-          stops
-          |> Enum.filter(&(&1.id in stop_ids))
+          trip_stops
+          |> Enum.filter(&Map.has_key?(stops, &1.id))
           |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
       end)
       |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
@@ -50,18 +92,21 @@ defmodule MobileAppBackendWeb.NearbyController do
     route_patterns =
       Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})
 
-    json(conn, %{
-      stops: stops,
-      route_patterns: route_patterns,
-      pattern_ids_by_stop: pattern_ids_by_stop
-    })
+    {route_patterns, pattern_ids_by_stop}
   end
 
-  defp miles_to_meters(miles), do: round(miles * 1_609.344)
+  @spec distance_in_degrees(
+          lat1 :: float(),
+          lon1 :: float(),
+          lat2 :: float(),
+          lon2 :: float()
+        ) :: float()
+  defp distance_in_degrees(lat1, lon1, lat2, lon2),
+    do: abs(:math.sqrt((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2))
 
   # The V3 API does not actually calculate distance,
   # and it just pretends latitude degrees and longitude degrees are equally sized.
   # See https://github.com/mbta/api/blob/1671ba02d4669827fb2a58966d8c3ab39c939b0e/apps/api_web/lib/api_web/controllers/stop_controller.ex#L27-L31.
   # For now, this is fine.
-  defp miles_to_degrees(miles), do: miles * 0.02
+  defp miles_to_degrees(miles), do: miles * 0.01664
 end

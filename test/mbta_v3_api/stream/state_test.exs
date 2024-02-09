@@ -88,6 +88,7 @@ defmodule MBTAV3API.Stream.StateTest do
                      latitude: -42.35302,
                      longitude: 71.06459,
                      name: "Not Boylston",
+                     location_type: :stop,
                      parent_station: nil
                    }
                  }
@@ -120,6 +121,7 @@ defmodule MBTAV3API.Stream.StateTest do
                      latitude: 42.377359,
                      longitude: -71.094761,
                      name: "Union Square",
+                     location_type: :stop,
                      parent_station: nil
                    }
                  }

@@ -18,13 +18,14 @@ defmodule MBTAV3API.JsonApi.ParamsTest do
     end
 
     test "uses fields for type if no includes or overrides" do
-      assert %{"fields[stop]" => "latitude,longitude,name"} = flatten_params([], :stop)
+      assert %{"fields[stop]" => "latitude,longitude,name,location_type"} =
+               flatten_params([], :stop)
     end
 
     test "uses fields for included type" do
       assert %{
                "fields[route]" =>
-                 "color,direction_names,direction_destinations,long_name,short_name,sort_order,text_color",
+                 "type,color,direction_names,direction_destinations,long_name,short_name,sort_order,text_color",
                "fields[route_pattern]" => "direction_id,name,sort_order"
              } =
                flatten_params([include: :route], :route_pattern)
