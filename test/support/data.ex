@@ -184,11 +184,11 @@ defmodule Test.Support.Data do
       |> Map.split_with(fn {_req, %Response{touched: touched}} -> touched end)
 
     if remove_unused do
-    untouched
-    |> Enum.each(fn {req, resp} ->
-      Logger.info("Deleting unused #{req}")
-      File.rm!(response_path(resp))
-    end)
+      untouched
+      |> Enum.each(fn {req, resp} ->
+        Logger.info("Deleting unused #{req}")
+        File.rm!(response_path(resp))
+      end)
     end
 
     touched
@@ -267,13 +267,13 @@ defmodule Test.Support.Data do
   defp update_response(conn, stored_response, server) do
     request = Request.from_conn(conn)
 
-    expected_response =
-      with %Response{} <- stored_response,
+    {expected_response, response_id} =
+      with %Response{id: response_id} <- stored_response,
            {:ok, old_data} <- File.read(response_path(stored_response)),
            {:ok, old_data} <- Jason.decode(old_data) do
-        old_data
+        {old_data, response_id}
       else
-        _ -> nil
+        _ -> {nil, nil}
       end
 
     body =
@@ -300,14 +300,9 @@ defmodule Test.Support.Data do
         :ok
 
       true ->
-        diff =
-          ExUnit.Formatter.format_assertion_error(%ExUnit.AssertionError{
-            left: expected_response,
-            right: actual_response,
-            context: nil
-          })
+        Logger.warning("Response #{response_id} for #{request} changed")
 
-        Logger.warning("Response for #{request} changed: #{diff}")
+        GenServer.call(server, {:put, request, actual_response})
     end
 
     actual_response
