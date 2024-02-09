@@ -190,7 +190,7 @@ defmodule Test.Support.Data do
     touched
     |> Enum.filter(fn {_req, %Response{new_data: new_data}} -> not is_nil(new_data) end)
     |> Enum.each(fn {_req, resp} ->
-      File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data))
+      File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data, pretty: true))
     end)
 
     state = %State{state | data: touched}

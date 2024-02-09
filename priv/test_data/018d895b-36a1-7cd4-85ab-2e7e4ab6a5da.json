@@ -1,1 +1,2198 @@
-{"data":[{"attributes":{"direction_id":0,"name":"North Station - Rockport","sort_order":200110050},"id":"CR-Newburyport-e54dc640-0","links":{"self":"/route_patterns/CR-Newburyport-e54dc640-0"},"relationships":{"representative_trip":{"data":{"id":"CR-649284-123","type":"trip"}},"route":{"data":{"id":"CR-Newburyport","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":0,"name":"North Station - Rockport","sort_order":200110110},"id":"CR-Newburyport-dd9f791d-0","links":{"self":"/route_patterns/CR-Newburyport-dd9f791d-0"},"relationships":{"representative_trip":{"data":{"id":"CR-649341-103","type":"trip"}},"route":{"data":{"id":"CR-Newburyport","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":0,"name":"North Station - Rockport","sort_order":200110160},"id":"CR-Newburyport-5967b204-0","links":{"self":"/route_patterns/CR-Newburyport-5967b204-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-CR-Newburyport-C2-0","type":"trip"}},"route":{"data":{"id":"CR-Newburyport","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":1,"name":"Rockport - North Station","sort_order":200111040},"id":"CR-Newburyport-d47c5647-1","links":{"self":"/route_patterns/CR-Newburyport-d47c5647-1"},"relationships":{"representative_trip":{"data":{"id":"CR-649335-124","type":"trip"}},"route":{"data":{"id":"CR-Newburyport","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":1,"name":"Rockport - North Station","sort_order":200111140},"id":"CR-Newburyport-05eb9eab-1","links":{"self":"/route_patterns/CR-Newburyport-05eb9eab-1"},"relationships":{"representative_trip":{"data":{"id":"canonical-CR-Newburyport-C2-1","type":"trip"}},"route":{"data":{"id":"CR-Newburyport","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":0,"name":"Beverly - Rockport (Local)","sort_order":607050990},"id":"Shuttle-BeverlyRockportLocal-0-0","links":{"self":"/route_patterns/Shuttle-BeverlyRockportLocal-0-0"},"relationships":{"representative_trip":{"data":{"id":"BeverlyRockport-0-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-BeverlyRockportLocal","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":1,"name":"Rockport - Beverly (Local)","sort_order":607051990},"id":"Shuttle-BeverlyRockportLocal-0-1","links":{"self":"/route_patterns/Shuttle-BeverlyRockportLocal-0-1"},"relationships":{"representative_trip":{"data":{"id":"BeverlyRockport-1-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-BeverlyRockportLocal","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":0,"name":"Oak Grove - Rockport (Limited)","sort_order":621860990},"id":"Shuttle-OakGroveRockportLimited-0-0","links":{"self":"/route_patterns/Shuttle-OakGroveRockportLimited-0-0"},"relationships":{"representative_trip":{"data":{"id":"OakGroveRockportLimited-0-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-OakGroveRockportLimited","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":1,"name":"Rockport - Oak Grove (Limited)","sort_order":621861990},"id":"Shuttle-OakGroveRockportLimited-0-1","links":{"self":"/route_patterns/Shuttle-OakGroveRockportLimited-0-1"},"relationships":{"representative_trip":{"data":{"id":"OakGroveRockportLimited-1-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-OakGroveRockportLimited","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":0,"name":"Salem - Rockport (Local)","sort_order":624060990},"id":"Shuttle-RockportSalemLocal-0-0","links":{"self":"/route_patterns/Shuttle-RockportSalemLocal-0-0"},"relationships":{"representative_trip":{"data":{"id":"RockportSalemForBeverly-0-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-RockportSalemLocal","type":"route"}}},"type":"route_pattern"},{"attributes":{"direction_id":1,"name":"Rockport - Salem (Local)","sort_order":624061990},"id":"Shuttle-RockportSalemLocal-0-1","links":{"self":"/route_patterns/Shuttle-RockportSalemLocal-0-1"},"relationships":{"representative_trip":{"data":{"id":"RockportSalemForBeverly-1-sample","type":"trip"}},"route":{"data":{"id":"Shuttle-RockportSalemLocal","type":"route"}}},"type":"route_pattern"}],"included":[{"attributes":{},"id":"OakGroveRockportLimited-0-sample","links":{"self":"/trips/OakGroveRockportLimited-0-sample"},"relationships":{"route":{"data":{"id":"Shuttle-OakGroveRockportLimited","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-OakGroveRockportLimited-0-0","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"OakGroveToRockportLimited-S","type":"shape"}},"stops":{"data":[{"id":"9328","type":"stop"},{"id":"ER-0168-B","type":"stop"},{"id":"ER-0183-B","type":"stop"},{"id":"GB-0198-B2","type":"stop"},{"id":"GB-0229-B0","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0296-B2","type":"stop"},{"id":"GB-0316-B0","type":"stop"},{"id":"GB-0353-B","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"ER-0168-B","links":{"self":"/stops/ER-0168-B"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0168-B"}},"parent_station":{"data":{"id":"place-ER-0168","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"ER-0183-01","links":{"self":"/stops/ER-0183-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0183-01"}},"parent_station":{"data":{"id":"place-ER-0183","type":"stop"}},"zone":{"data":{"id":"CR-zone-4","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"BeverlyRockport-0-sample","links":{"self":"/trips/BeverlyRockport-0-sample"},"relationships":{"route":{"data":{"id":"Shuttle-BeverlyRockportLocal","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-BeverlyRockportLocal-0-0","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"BeverlyToRockportLocal-S","type":"shape"}},"stops":{"data":[{"id":"ER-0183-B","type":"stop"},{"id":"GB-0198-B2","type":"stop"},{"id":"GB-0229-B0","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0296-B0","type":"stop"},{"id":"GB-0316-B1","type":"stop"},{"id":"GB-0353-B","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"GB-0229-02","links":{"self":"/stops/GB-0229-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0229-02"}},"parent_station":{"data":{"id":"place-GB-0229","type":"stop"}},"zone":{"data":{"id":"CR-zone-5","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0254-B2","links":{"self":"/stops/GB-0254-B2"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0254-B2"}},"parent_station":{"data":{"id":"place-GB-0254","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"CR-649341-103","links":{"self":"/trips/CR-649341-103"},"relationships":{"route":{"data":{"id":"CR-Newburyport","type":"route"}},"route_pattern":{"data":{"id":"CR-Newburyport-dd9f791d-0","type":"route_pattern"}},"service":{"data":{"id":"FALL 2023-NORTHWKD-Weekday-12-S9d378dcf","type":"service"}},"shape":{"data":{"id":"9810007","type":"shape"}},"stops":{"data":[{"id":"BNT-0000","type":"stop"},{"id":"ER-0168-S","type":"stop"},{"id":"ER-0183-01","type":"stop"},{"id":"GB-0198-01","type":"stop"},{"id":"GB-0229-01","type":"stop"},{"id":"GB-0254-01","type":"stop"},{"id":"GB-0296-01","type":"stop"},{"id":"GB-0316-S","type":"stop"},{"id":"GB-0353-S","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"OakGroveRockportLimited-1-sample","links":{"self":"/trips/OakGroveRockportLimited-1-sample"},"relationships":{"route":{"data":{"id":"Shuttle-OakGroveRockportLimited","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-OakGroveRockportLimited-0-1","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"RockportToOakGroveLimited-S","type":"shape"}},"stops":{"data":[{"id":"GB-0353-B","type":"stop"},{"id":"GB-0316-B1","type":"stop"},{"id":"GB-0296-B2","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0229-B1","type":"stop"},{"id":"GB-0198-B3","type":"stop"},{"id":"ER-0183-B","type":"stop"},{"id":"ER-0168-B","type":"stop"},{"id":"9328","type":"stop"}]}},"type":"trip"},{"attributes":{"color":"FFC72C","direction_destinations":["Rockport","North Station"],"direction_names":["Outbound","Inbound"],"long_name":"Rockport - Salem (Local)","short_name":"Rockport Line Shuttle","sort_order":62406,"text_color":"000000","type":3},"id":"Shuttle-RockportSalemLocal","links":{"self":"/routes/Shuttle-RockportSalemLocal"},"relationships":{"line":{"data":{"id":"line-Newburyport","type":"line"}}},"type":"route"},{"attributes":{},"id":"GB-0296-B1","links":{"self":"/stops/GB-0296-B1"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0296-B1"}},"parent_station":{"data":{"id":"place-GB-0296","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"GB-0296-B0","links":{"self":"/stops/GB-0296-B0"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0296-B0"}},"parent_station":{"data":{"id":"place-GB-0296","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"CR-649284-123","links":{"self":"/trips/CR-649284-123"},"relationships":{"route":{"data":{"id":"CR-Newburyport","type":"route"}},"route_pattern":{"data":{"id":"CR-Newburyport-e54dc640-0","type":"route_pattern"}},"service":{"data":{"id":"FALL 2023-NORTHWKD-Weekday-12-S9d378dcf","type":"service"}},"shape":{"data":{"id":"9810007","type":"shape"}},"stops":{"data":[{"id":"BNT-0000","type":"stop"},{"id":"ER-0042-01","type":"stop"},{"id":"ER-0117-01","type":"stop"},{"id":"ER-0128-01","type":"stop"},{"id":"ER-0168-S","type":"stop"},{"id":"ER-0183-01","type":"stop"},{"id":"GB-0198-01","type":"stop"},{"id":"GB-0229-01","type":"stop"},{"id":"GB-0254-01","type":"stop"},{"id":"GB-0296-01","type":"stop"},{"id":"GB-0316-S","type":"stop"},{"id":"GB-0353-S","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"GB-0229-01","links":{"self":"/stops/GB-0229-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0229-01"}},"parent_station":{"data":{"id":"place-GB-0229","type":"stop"}},"zone":{"data":{"id":"CR-zone-5","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0198-B3","links":{"self":"/stops/GB-0198-B3"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0198-B3"}},"parent_station":{"data":{"id":"place-GB-0198","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{"color":"FFC72C","direction_destinations":["Rockport","North Station"],"direction_names":["Outbound","Inbound"],"long_name":"Rockport - Oak Grove (Limited)","short_name":"Newburyport Line Shuttle","sort_order":62186,"text_color":"000000","type":3},"id":"Shuttle-OakGroveRockportLimited","links":{"self":"/routes/Shuttle-OakGroveRockportLimited"},"relationships":{"line":{"data":{"id":"line-Newburyport","type":"line"}}},"type":"route"},{"attributes":{},"id":"GB-0254-02","links":{"self":"/stops/GB-0254-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0254-02"}},"parent_station":{"data":{"id":"place-GB-0254","type":"stop"}},"zone":{"data":{"id":"CR-zone-6","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"ER-0042-01","links":{"self":"/stops/ER-0042-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0042-01"}},"parent_station":{"data":{"id":"place-chels","type":"stop"}},"zone":{"data":{"id":"CR-zone-1A","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"BeverlyRockport-1-sample","links":{"self":"/trips/BeverlyRockport-1-sample"},"relationships":{"route":{"data":{"id":"Shuttle-BeverlyRockportLocal","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-BeverlyRockportLocal-0-1","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"RockportToBeverlyLocal-S","type":"shape"}},"stops":{"data":[{"id":"GB-0353-B","type":"stop"},{"id":"GB-0316-B1","type":"stop"},{"id":"GB-0296-B1","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0229-B1","type":"stop"},{"id":"GB-0198-B3","type":"stop"},{"id":"ER-0183-B","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"ER-0117-02","links":{"self":"/stops/ER-0117-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0117-02"}},"parent_station":{"data":{"id":"place-ER-0117","type":"stop"}},"zone":{"data":{"id":"CR-zone-2","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"ER-0128-01","links":{"self":"/stops/ER-0128-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0128-01"}},"parent_station":{"data":{"id":"place-ER-0128","type":"stop"}},"zone":{"data":{"id":"CR-zone-3","type":"zone"}}},"type":"stop"},{"attributes":{"color":"80276C","direction_destinations":["Newburyport or Rockport","North Station"],"direction_names":["Outbound","Inbound"],"long_name":"Newburyport/Rockport Line","short_name":"","sort_order":20011,"text_color":"FFFFFF","type":2},"id":"CR-Newburyport","links":{"self":"/routes/CR-Newburyport"},"relationships":{"line":{"data":{"id":"line-Newburyport","type":"line"}}},"type":"route"},{"attributes":{},"id":"9328","links":{"self":"/stops/9328"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=9328"}},"parent_station":{"data":{"id":"place-ogmnl","type":"stop"}},"zone":{"data":{"id":"LocalBus","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0296-02","links":{"self":"/stops/GB-0296-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0296-02"}},"parent_station":{"data":{"id":"place-GB-0296","type":"stop"}},"zone":{"data":{"id":"CR-zone-7","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"ER-0117-01","links":{"self":"/stops/ER-0117-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0117-01"}},"parent_station":{"data":{"id":"place-ER-0117","type":"stop"}},"zone":{"data":{"id":"CR-zone-2","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"ER-0099-02","links":{"self":"/stops/ER-0099-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0099-02"}},"parent_station":{"data":{"id":"place-ER-0099","type":"stop"}},"zone":{"data":{"id":"CR-zone-2","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"ER-0183-B","links":{"self":"/stops/ER-0183-B"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0183-B"}},"parent_station":{"data":{"id":"place-ER-0183","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"GB-0254-01","links":{"self":"/stops/GB-0254-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0254-01"}},"parent_station":{"data":{"id":"place-GB-0254","type":"stop"}},"zone":{"data":{"id":"CR-zone-6","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0316-S","links":{"self":"/stops/GB-0316-S"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0316-S"}},"parent_station":{"data":{"id":"place-GB-0316","type":"stop"}},"zone":{"data":{"id":"CR-zone-7","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0296-01","links":{"self":"/stops/GB-0296-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0296-01"}},"parent_station":{"data":{"id":"place-GB-0296","type":"stop"}},"zone":{"data":{"id":"CR-zone-7","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"CR-649335-124","links":{"self":"/trips/CR-649335-124"},"relationships":{"route":{"data":{"id":"CR-Newburyport","type":"route"}},"route_pattern":{"data":{"id":"CR-Newburyport-d47c5647-1","type":"route_pattern"}},"service":{"data":{"id":"FALL 2023-NORTHWKD-Weekday-12-S9d378dcf","type":"service"}},"shape":{"data":{"id":"9810006","type":"shape"}},"stops":{"data":[{"id":"GB-0353-S","type":"stop"},{"id":"GB-0316-S","type":"stop"},{"id":"GB-0296-02","type":"stop"},{"id":"GB-0254-02","type":"stop"},{"id":"GB-0229-02","type":"stop"},{"id":"GB-0198-02","type":"stop"},{"id":"ER-0183-02","type":"stop"},{"id":"ER-0168-S","type":"stop"},{"id":"ER-0128-02","type":"stop"},{"id":"ER-0117-02","type":"stop"},{"id":"ER-0042-02","type":"stop"},{"id":"BNT-0000","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"ER-0183-02","links":{"self":"/stops/ER-0183-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0183-02"}},"parent_station":{"data":{"id":"place-ER-0183","type":"stop"}},"zone":{"data":{"id":"CR-zone-4","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"canonical-CR-Newburyport-C2-0","links":{"self":"/trips/canonical-CR-Newburyport-C2-0"},"relationships":{"route":{"data":{"id":"CR-Newburyport","type":"route"}},"route_pattern":{"data":{"id":"CR-Newburyport-5967b204-0","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"canonical-9810007","type":"shape"}},"stops":{"data":[{"id":"BNT-0000","type":"stop"},{"id":"ER-0042-01","type":"stop"},{"id":"ER-0099-01","type":"stop"},{"id":"ER-0117-01","type":"stop"},{"id":"ER-0128-01","type":"stop"},{"id":"ER-0168-S","type":"stop"},{"id":"ER-0183-01","type":"stop"},{"id":"GB-0198-01","type":"stop"},{"id":"GB-0229-01","type":"stop"},{"id":"GB-0254-01","type":"stop"},{"id":"GB-0296-01","type":"stop"},{"id":"GB-0316-S","type":"stop"},{"id":"GB-0353-S","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"BNT-0000","links":{"self":"/stops/BNT-0000"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=BNT-0000"}},"parent_station":{"data":{"id":"place-north","type":"stop"}},"zone":{"data":{"id":"CR-zone-1A","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0316-B1","links":{"self":"/stops/GB-0316-B1"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0316-B1"}},"parent_station":{"data":{"id":"place-GB-0316","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"canonical-CR-Newburyport-C2-1","links":{"self":"/trips/canonical-CR-Newburyport-C2-1"},"relationships":{"route":{"data":{"id":"CR-Newburyport","type":"route"}},"route_pattern":{"data":{"id":"CR-Newburyport-05eb9eab-1","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"canonical-9810006","type":"shape"}},"stops":{"data":[{"id":"GB-0353-S","type":"stop"},{"id":"GB-0316-S","type":"stop"},{"id":"GB-0296-02","type":"stop"},{"id":"GB-0254-02","type":"stop"},{"id":"GB-0229-02","type":"stop"},{"id":"GB-0198-02","type":"stop"},{"id":"ER-0183-02","type":"stop"},{"id":"ER-0168-S","type":"stop"},{"id":"ER-0128-02","type":"stop"},{"id":"ER-0117-02","type":"stop"},{"id":"ER-0099-02","type":"stop"},{"id":"ER-0042-02","type":"stop"},{"id":"BNT-0000","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"ER-0099-01","links":{"self":"/stops/ER-0099-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0099-01"}},"parent_station":{"data":{"id":"place-ER-0099","type":"stop"}},"zone":{"data":{"id":"CR-zone-2","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0353-B","links":{"self":"/stops/GB-0353-B"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0353-B"}},"parent_station":{"data":{"id":"place-GB-0353","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"GB-0296-B2","links":{"self":"/stops/GB-0296-B2"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0296-B2"}},"parent_station":{"data":{"id":"place-GB-0296","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"RockportSalemForBeverly-0-sample","links":{"self":"/trips/RockportSalemForBeverly-0-sample"},"relationships":{"route":{"data":{"id":"Shuttle-RockportSalemLocal","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-RockportSalemLocal-0-0","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"SalemToRockportLocal-S","type":"shape"}},"stops":{"data":[{"id":"ER-0168-B","type":"stop"},{"id":"ER-0183-B","type":"stop"},{"id":"GB-0198-B2","type":"stop"},{"id":"GB-0229-B0","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0296-B0","type":"stop"},{"id":"GB-0316-B0","type":"stop"},{"id":"GB-0353-B","type":"stop"}]}},"type":"trip"},{"attributes":{},"id":"ER-0128-02","links":{"self":"/stops/ER-0128-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0128-02"}},"parent_station":{"data":{"id":"place-ER-0128","type":"stop"}},"zone":{"data":{"id":"CR-zone-3","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0198-02","links":{"self":"/stops/GB-0198-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0198-02"}},"parent_station":{"data":{"id":"place-GB-0198","type":"stop"}},"zone":{"data":{"id":"CR-zone-4","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0229-B0","links":{"self":"/stops/GB-0229-B0"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0229-B0"}},"parent_station":{"data":{"id":"place-GB-0229","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"GB-0198-01","links":{"self":"/stops/GB-0198-01"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0198-01"}},"parent_station":{"data":{"id":"place-GB-0198","type":"stop"}},"zone":{"data":{"id":"CR-zone-4","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0229-B1","links":{"self":"/stops/GB-0229-B1"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0229-B1"}},"parent_station":{"data":{"id":"place-GB-0229","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"ER-0042-02","links":{"self":"/stops/ER-0042-02"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0042-02"}},"parent_station":{"data":{"id":"place-chels","type":"stop"}},"zone":{"data":{"id":"CR-zone-1A","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0316-B0","links":{"self":"/stops/GB-0316-B0"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0316-B0"}},"parent_station":{"data":{"id":"place-GB-0316","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{"color":"FFC72C","direction_destinations":["Rockport","North Station"],"direction_names":["Outbound","Inbound"],"long_name":"Beverly - Rockport (Local)","short_name":"Rockport Line Shuttle","sort_order":60705,"text_color":"000000","type":3},"id":"Shuttle-BeverlyRockportLocal","links":{"self":"/routes/Shuttle-BeverlyRockportLocal"},"relationships":{"line":{"data":{"id":"line-Newburyport","type":"line"}}},"type":"route"},{"attributes":{},"id":"GB-0353-S","links":{"self":"/stops/GB-0353-S"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0353-S"}},"parent_station":{"data":{"id":"place-GB-0353","type":"stop"}},"zone":{"data":{"id":"CR-zone-8","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"GB-0198-B2","links":{"self":"/stops/GB-0198-B2"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=GB-0198-B2"}},"parent_station":{"data":{"id":"place-GB-0198","type":"stop"}},"zone":{"data":null}},"type":"stop"},{"attributes":{},"id":"ER-0168-S","links":{"self":"/stops/ER-0168-S"},"relationships":{"facilities":{"links":{"related":"/facilities/?filter[stop]=ER-0168-S"}},"parent_station":{"data":{"id":"place-ER-0168","type":"stop"}},"zone":{"data":{"id":"CR-zone-3","type":"zone"}}},"type":"stop"},{"attributes":{},"id":"RockportSalemForBeverly-1-sample","links":{"self":"/trips/RockportSalemForBeverly-1-sample"},"relationships":{"route":{"data":{"id":"Shuttle-RockportSalemLocal","type":"route"}},"route_pattern":{"data":{"id":"Shuttle-RockportSalemLocal-0-1","type":"route_pattern"}},"service":{"data":{"id":"canonical","type":"service"}},"shape":{"data":{"id":"RockportToSalemLocal-S","type":"shape"}},"stops":{"data":[{"id":"GB-0353-B","type":"stop"},{"id":"GB-0316-B1","type":"stop"},{"id":"GB-0296-B1","type":"stop"},{"id":"GB-0254-B2","type":"stop"},{"id":"GB-0229-B1","type":"stop"},{"id":"GB-0198-B3","type":"stop"},{"id":"ER-0183-B","type":"stop"},{"id":"ER-0168-B","type":"stop"}]}},"type":"trip"}],"jsonapi":{"version":"1.0"}}
+{
+  "data": [
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "North Station - Rockport",
+        "sort_order": 200110050
+      },
+      "id": "CR-Newburyport-e54dc640-0",
+      "links": {
+        "self": "/route_patterns/CR-Newburyport-e54dc640-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "CR-649284-123",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "North Station - Rockport",
+        "sort_order": 200110110
+      },
+      "id": "CR-Newburyport-dd9f791d-0",
+      "links": {
+        "self": "/route_patterns/CR-Newburyport-dd9f791d-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "CR-649341-103",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "North Station - Rockport",
+        "sort_order": 200110160
+      },
+      "id": "CR-Newburyport-5967b204-0",
+      "links": {
+        "self": "/route_patterns/CR-Newburyport-5967b204-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "canonical-CR-Newburyport-C2-0",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 1,
+        "name": "Rockport - North Station",
+        "sort_order": 200111040
+      },
+      "id": "CR-Newburyport-d47c5647-1",
+      "links": {
+        "self": "/route_patterns/CR-Newburyport-d47c5647-1"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "CR-649335-124",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 1,
+        "name": "Rockport - North Station",
+        "sort_order": 200111140
+      },
+      "id": "CR-Newburyport-05eb9eab-1",
+      "links": {
+        "self": "/route_patterns/CR-Newburyport-05eb9eab-1"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "canonical-CR-Newburyport-C2-1",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "Beverly - Rockport (Local)",
+        "sort_order": 607050990
+      },
+      "id": "Shuttle-BeverlyRockportLocal-0-0",
+      "links": {
+        "self": "/route_patterns/Shuttle-BeverlyRockportLocal-0-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "BeverlyRockport-0-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 1,
+        "name": "Rockport - Beverly (Local)",
+        "sort_order": 607051990
+      },
+      "id": "Shuttle-BeverlyRockportLocal-0-1",
+      "links": {
+        "self": "/route_patterns/Shuttle-BeverlyRockportLocal-0-1"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "BeverlyRockport-1-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "Oak Grove - Rockport (Limited)",
+        "sort_order": 621860990
+      },
+      "id": "Shuttle-OakGroveRockportLimited-0-0",
+      "links": {
+        "self": "/route_patterns/Shuttle-OakGroveRockportLimited-0-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "OakGroveRockportLimited-0-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 1,
+        "name": "Rockport - Oak Grove (Limited)",
+        "sort_order": 621861990
+      },
+      "id": "Shuttle-OakGroveRockportLimited-0-1",
+      "links": {
+        "self": "/route_patterns/Shuttle-OakGroveRockportLimited-0-1"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "OakGroveRockportLimited-1-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "name": "Salem - Rockport (Local)",
+        "sort_order": 624060990
+      },
+      "id": "Shuttle-RockportSalemLocal-0-0",
+      "links": {
+        "self": "/route_patterns/Shuttle-RockportSalemLocal-0-0"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "RockportSalemForBeverly-0-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 1,
+        "name": "Rockport - Salem (Local)",
+        "sort_order": 624061990
+      },
+      "id": "Shuttle-RockportSalemLocal-0-1",
+      "links": {
+        "self": "/route_patterns/Shuttle-RockportSalemLocal-0-1"
+      },
+      "relationships": {
+        "representative_trip": {
+          "data": {
+            "id": "RockportSalemForBeverly-1-sample",
+            "type": "trip"
+          }
+        },
+        "route": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal",
+            "type": "route"
+          }
+        }
+      },
+      "type": "route_pattern"
+    }
+  ],
+  "included": [
+    {
+      "attributes": {},
+      "id": "OakGroveRockportLimited-0-sample",
+      "links": {
+        "self": "/trips/OakGroveRockportLimited-0-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited-0-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "OakGroveToRockportLimited-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "9328",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-B",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0168-B",
+      "links": {
+        "self": "/stops/ER-0168-B"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0168-B"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0168",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0183-01",
+      "links": {
+        "self": "/stops/ER-0183-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0183-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0183",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "BeverlyRockport-0-sample",
+      "links": {
+        "self": "/trips/BeverlyRockport-0-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal-0-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "BeverlyToRockportLocal-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0229-02",
+      "links": {
+        "self": "/stops/GB-0229-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0229-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0229",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-5",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0254-B2",
+      "links": {
+        "self": "/stops/GB-0254-B2"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0254-B2"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0254",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "CR-649341-103",
+      "links": {
+        "self": "/trips/CR-649341-103"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Newburyport-dd9f791d-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FALL 2023-NORTHWKD-Weekday-12-S9d378dcf",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9810007",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "BNT-0000",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-S",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "OakGroveRockportLimited-1-sample",
+      "links": {
+        "self": "/trips/OakGroveRockportLimited-1-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-OakGroveRockportLimited-0-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "RockportToOakGroveLimited-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B3",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-B",
+              "type": "stop"
+            },
+            {
+              "id": "9328",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {
+        "color": "FFC72C",
+        "direction_destinations": [
+          "Rockport",
+          "North Station"
+        ],
+        "direction_names": [
+          "Outbound",
+          "Inbound"
+        ],
+        "long_name": "Rockport - Salem (Local)",
+        "short_name": "Rockport Line Shuttle",
+        "sort_order": 62406,
+        "text_color": "000000",
+        "type": 3
+      },
+      "id": "Shuttle-RockportSalemLocal",
+      "links": {
+        "self": "/routes/Shuttle-RockportSalemLocal"
+      },
+      "relationships": {
+        "line": {
+          "data": {
+            "id": "line-Newburyport",
+            "type": "line"
+          }
+        }
+      },
+      "type": "route"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0296-B1",
+      "links": {
+        "self": "/stops/GB-0296-B1"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0296-B1"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0296",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0296-B0",
+      "links": {
+        "self": "/stops/GB-0296-B0"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0296-B0"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0296",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "CR-649284-123",
+      "links": {
+        "self": "/trips/CR-649284-123"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Newburyport-e54dc640-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FALL 2023-NORTHWKD-Weekday-12-S9d378dcf",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9810007",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "BNT-0000",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0042-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0117-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0128-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-S",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0229-01",
+      "links": {
+        "self": "/stops/GB-0229-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0229-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0229",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-5",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0198-B3",
+      "links": {
+        "self": "/stops/GB-0198-B3"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0198-B3"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0198",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "color": "FFC72C",
+        "direction_destinations": [
+          "Rockport",
+          "North Station"
+        ],
+        "direction_names": [
+          "Outbound",
+          "Inbound"
+        ],
+        "long_name": "Rockport - Oak Grove (Limited)",
+        "short_name": "Newburyport Line Shuttle",
+        "sort_order": 62186,
+        "text_color": "000000",
+        "type": 3
+      },
+      "id": "Shuttle-OakGroveRockportLimited",
+      "links": {
+        "self": "/routes/Shuttle-OakGroveRockportLimited"
+      },
+      "relationships": {
+        "line": {
+          "data": {
+            "id": "line-Newburyport",
+            "type": "line"
+          }
+        }
+      },
+      "type": "route"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0254-02",
+      "links": {
+        "self": "/stops/GB-0254-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0254-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0254",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-6",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0042-01",
+      "links": {
+        "self": "/stops/ER-0042-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0042-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-chels",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "BeverlyRockport-1-sample",
+      "links": {
+        "self": "/trips/BeverlyRockport-1-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-BeverlyRockportLocal-0-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "RockportToBeverlyLocal-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B3",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0117-02",
+      "links": {
+        "self": "/stops/ER-0117-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0117-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0117",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0128-01",
+      "links": {
+        "self": "/stops/ER-0128-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0128-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0128",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-3",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "color": "80276C",
+        "direction_destinations": [
+          "Newburyport or Rockport",
+          "North Station"
+        ],
+        "direction_names": [
+          "Outbound",
+          "Inbound"
+        ],
+        "long_name": "Newburyport/Rockport Line",
+        "short_name": "",
+        "sort_order": 20011,
+        "text_color": "FFFFFF",
+        "type": 2
+      },
+      "id": "CR-Newburyport",
+      "links": {
+        "self": "/routes/CR-Newburyport"
+      },
+      "relationships": {
+        "line": {
+          "data": {
+            "id": "line-Newburyport",
+            "type": "line"
+          }
+        }
+      },
+      "type": "route"
+    },
+    {
+      "attributes": {},
+      "id": "9328",
+      "links": {
+        "self": "/stops/9328"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=9328"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "LocalBus",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0296-02",
+      "links": {
+        "self": "/stops/GB-0296-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0296-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0296",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-7",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0117-01",
+      "links": {
+        "self": "/stops/ER-0117-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0117-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0117",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0099-02",
+      "links": {
+        "self": "/stops/ER-0099-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0099-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0099",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0183-B",
+      "links": {
+        "self": "/stops/ER-0183-B"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0183-B"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0183",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0254-01",
+      "links": {
+        "self": "/stops/GB-0254-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0254-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0254",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-6",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0316-S",
+      "links": {
+        "self": "/stops/GB-0316-S"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0316-S"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0316",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-7",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0296-01",
+      "links": {
+        "self": "/stops/GB-0296-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0296-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0296",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-7",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "CR-649335-124",
+      "links": {
+        "self": "/trips/CR-649335-124"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Newburyport-d47c5647-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FALL 2023-NORTHWKD-Weekday-12-S9d378dcf",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9810006",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "GB-0353-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-S",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0128-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0117-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0042-02",
+              "type": "stop"
+            },
+            {
+              "id": "BNT-0000",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0183-02",
+      "links": {
+        "self": "/stops/ER-0183-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0183-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0183",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "canonical-CR-Newburyport-C2-0",
+      "links": {
+        "self": "/trips/canonical-CR-Newburyport-C2-0"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Newburyport-5967b204-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "canonical-9810007",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "BNT-0000",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0042-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0099-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0117-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0128-01",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-S",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-01",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "BNT-0000",
+      "links": {
+        "self": "/stops/BNT-0000"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=BNT-0000"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0316-B1",
+      "links": {
+        "self": "/stops/GB-0316-B1"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0316-B1"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0316",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "canonical-CR-Newburyport-C2-1",
+      "links": {
+        "self": "/trips/canonical-CR-Newburyport-C2-1"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Newburyport",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Newburyport-05eb9eab-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "canonical-9810006",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "GB-0353-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-S",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-02",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-S",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0128-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0117-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0099-02",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0042-02",
+              "type": "stop"
+            },
+            {
+              "id": "BNT-0000",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0099-01",
+      "links": {
+        "self": "/stops/ER-0099-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0099-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0099",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0353-B",
+      "links": {
+        "self": "/stops/GB-0353-B"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0353-B"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0353",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0296-B2",
+      "links": {
+        "self": "/stops/GB-0296-B2"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0296-B2"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0296",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "RockportSalemForBeverly-0-sample",
+      "links": {
+        "self": "/trips/RockportSalemForBeverly-0-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal-0-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "SalemToRockportLocal-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "ER-0168-B",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B0",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0128-02",
+      "links": {
+        "self": "/stops/ER-0128-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0128-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0128",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-3",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0198-02",
+      "links": {
+        "self": "/stops/GB-0198-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0198-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0198",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0229-B0",
+      "links": {
+        "self": "/stops/GB-0229-B0"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0229-B0"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0229",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0198-01",
+      "links": {
+        "self": "/stops/GB-0198-01"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0198-01"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0198",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0229-B1",
+      "links": {
+        "self": "/stops/GB-0229-B1"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0229-B1"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0229",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0042-02",
+      "links": {
+        "self": "/stops/ER-0042-02"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0042-02"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-chels",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0316-B0",
+      "links": {
+        "self": "/stops/GB-0316-B0"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0316-B0"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0316",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "color": "FFC72C",
+        "direction_destinations": [
+          "Rockport",
+          "North Station"
+        ],
+        "direction_names": [
+          "Outbound",
+          "Inbound"
+        ],
+        "long_name": "Beverly - Rockport (Local)",
+        "short_name": "Rockport Line Shuttle",
+        "sort_order": 60705,
+        "text_color": "000000",
+        "type": 3
+      },
+      "id": "Shuttle-BeverlyRockportLocal",
+      "links": {
+        "self": "/routes/Shuttle-BeverlyRockportLocal"
+      },
+      "relationships": {
+        "line": {
+          "data": {
+            "id": "line-Newburyport",
+            "type": "line"
+          }
+        }
+      },
+      "type": "route"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0353-S",
+      "links": {
+        "self": "/stops/GB-0353-S"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0353-S"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0353",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-8",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "GB-0198-B2",
+      "links": {
+        "self": "/stops/GB-0198-B2"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=GB-0198-B2"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-GB-0198",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "ER-0168-S",
+      "links": {
+        "self": "/stops/ER-0168-S"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=ER-0168-S"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-ER-0168",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-3",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "RockportSalemForBeverly-1-sample",
+      "links": {
+        "self": "/trips/RockportSalemForBeverly-1-sample"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "Shuttle-RockportSalemLocal-0-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "canonical",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "RockportToSalemLocal-S",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "GB-0353-B",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0316-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0296-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0254-B2",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0229-B1",
+              "type": "stop"
+            },
+            {
+              "id": "GB-0198-B3",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0183-B",
+              "type": "stop"
+            },
+            {
+              "id": "ER-0168-B",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    }
+  ],
+  "jsonapi": {
+    "version": "1.0"
+  }
+}
