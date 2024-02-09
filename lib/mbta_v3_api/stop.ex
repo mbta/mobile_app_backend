@@ -15,6 +15,8 @@ defmodule MBTAV3API.Stop do
   @type location_type ::
           :stop | :station | :entrance_exit | :generic_node | :boarding_area
 
+  @type stop_map() :: %{String.t() => __MODULE__.t()}
+
   @derive Jason.Encoder
   defstruct [:id, :latitude, :longitude, :name, :location_type, :parent_station, :child_stops]
 
@@ -52,6 +54,41 @@ defmodule MBTAV3API.Stop do
       parent_station: JsonApi.Object.parse_one_related(item.relationships["parent_station"]),
       child_stops: JsonApi.Object.parse_many_related(item.relationships["child_stops"])
     }
+  end
+
+  @spec include_missing_siblings(stops :: stop_map()) :: stop_map()
+  def include_missing_siblings(stops) do
+    parents =
+      stops
+      |> Map.values()
+      |> Enum.filter(&(&1.parent_station != nil))
+      |> Map.new(&{&1.parent_station.id, &1.parent_station})
+
+    missing_sibling_stops =
+      parents
+      |> Map.values()
+      |> Enum.flat_map(& &1.child_stops)
+      |> Enum.filter(
+        &case &1 do
+          %__MODULE__{} -> Enum.member?([:stop, :station], &1.location_type)
+          _ -> false
+        end
+      )
+      |> Enum.map(&%__MODULE__{&1 | parent_station: Map.get(parents, &1.parent_station.id)})
+
+    Map.new(
+      missing_sibling_stops ++ Map.values(stops),
+      &{&1.id,
+       %__MODULE__{
+         &1
+         | child_stops: nil,
+           parent_station:
+             if(&1.parent_station == nil,
+               do: nil,
+               else: %__MODULE__{&1.parent_station | child_stops: nil}
+             )
+       }}
+    )
   end
 
   @spec parse_location_type(integer() | nil) :: location_type()

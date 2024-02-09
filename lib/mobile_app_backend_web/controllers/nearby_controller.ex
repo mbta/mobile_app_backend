@@ -1,8 +1,7 @@
 defmodule MobileAppBackendWeb.NearbyController do
   use MobileAppBackendWeb, :controller
-  @compile if Mix.env() == :test, do: :export_all
 
-  @type stop_map() :: %{String.t() => MBTAV3API.Stop.t()}
+  @type stop_map() :: MBTAV3API.Stop.stop_map()
 
   def show(conn, params) do
     params = Map.merge(%{"radius" => "1.0"}, params)
@@ -10,7 +9,10 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
-    stops = fetch_nearby_stops(latitude, longitude, radius) |> include_missing_siblings()
+    stops =
+      fetch_nearby_stops(latitude, longitude, radius)
+      |> MBTAV3API.Stop.include_missing_siblings()
+
     {route_patterns, pattern_ids_by_stop} = fetch_route_patterns(stops)
 
     json(conn, %{
@@ -62,41 +64,6 @@ defmodule MobileAppBackendWeb.NearbyController do
       )
 
     Map.new(cr_stops ++ other_stops, &{&1.id, &1})
-  end
-
-  @spec include_missing_siblings(stops :: stop_map()) :: stop_map()
-  defp include_missing_siblings(stops) do
-    parents =
-      stops
-      |> Map.values()
-      |> Enum.filter(&(&1.parent_station != nil))
-      |> Map.new(&{&1.parent_station.id, &1.parent_station})
-
-    missing_sibling_stops =
-      parents
-      |> Map.values()
-      |> Enum.flat_map(& &1.child_stops)
-      |> Enum.filter(
-        &case &1 do
-          %MBTAV3API.Stop{} -> Enum.member?([:stop, :station], &1.location_type)
-          _ -> false
-        end
-      )
-      |> Enum.map(&%MBTAV3API.Stop{&1 | parent_station: Map.get(parents, &1.parent_station.id)})
-
-    Map.new(
-      missing_sibling_stops ++ Map.values(stops),
-      &{&1.id,
-       %MBTAV3API.Stop{
-         &1
-         | child_stops: nil,
-           parent_station:
-             if(&1.parent_station == nil,
-               do: nil,
-               else: %MBTAV3API.Stop{&1.parent_station | child_stops: nil}
-             )
-       }}
-    )
   end
 
   @spec fetch_route_patterns(stops :: stop_map()) ::
