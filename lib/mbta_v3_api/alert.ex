@@ -1,70 +1,10 @@
 defmodule MBTAV3API.Alert do
   require Util
+  alias MBTAV3API.Alert.ActivePeriod
+  alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.JsonApi
 
   @behaviour JsonApi.Object
-
-  defmodule ActivePeriod do
-    @type t :: %__MODULE__{start: DateTime.t(), end: DateTime.t() | nil}
-    @derive Jason.Encoder
-    defstruct [:start, :end]
-
-    @spec parse(map()) :: t()
-    def parse(data) when is_map(data) do
-      %__MODULE__{
-        start: Util.parse_datetime!(data["start"]),
-        end: Util.parse_optional_datetime!(data["end"])
-      }
-    end
-  end
-
-  defmodule InformedEntity do
-    @type t :: %__MODULE__{
-            activities: [activity()],
-            direction_id: 0 | 1 | nil,
-            facility: String.t() | nil,
-            route: String.t() | nil,
-            route_type: MBTAV3API.Route.type() | nil,
-            stop: String.t() | nil,
-            trip: String.t() | nil
-          }
-
-    Util.declare_enum(
-      :activity,
-      Util.enum_values(
-        :uppercase_string,
-        [
-          :board,
-          :bringing_bike,
-          :exit,
-          :park_car,
-          :ride,
-          :store_bike,
-          :using_escalator,
-          :using_wheelchair
-        ]
-      )
-    )
-
-    @derive Jason.Encoder
-    defstruct [:activities, :direction_id, :facility, :route, :route_type, :stop, :trip]
-
-    @spec parse(map()) :: t()
-    def parse(data) when is_map(data) do
-      %__MODULE__{
-        activities: data["activities"] |> Enum.map(&parse_activity/1),
-        direction_id: data["direction_id"],
-        facility: data["facility"],
-        route: data["route"],
-        route_type:
-          if route_type = data["route_type"] do
-            MBTAV3API.Route.parse_type(route_type)
-          end,
-        stop: data["stop"],
-        trip: data["trip"]
-      }
-    end
-  end
 
   @type t :: %__MODULE__{
           id: String.t(),
