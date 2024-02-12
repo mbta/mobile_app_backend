@@ -59,5 +59,13 @@ defmodule MBTAV3API.JsonApi.ParamsTest do
       assert %{"filter[abc]" => "123,45.67,abc,def"} =
                flatten_params([filter: [abc: [123, 45.67, :abc, "def"]]], :stop)
     end
+
+    test "uses custom serialize for filter" do
+      assert %{"filter[route_type]" => "0,4", "filter[location_type]" => "0,1"} =
+               flatten_params(
+                 [filter: [route_type: [:light_rail, :ferry], location_type: [:stop, :station]]],
+                 :stop
+               )
+    end
   end
 end
