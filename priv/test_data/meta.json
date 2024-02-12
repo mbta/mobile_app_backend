@@ -6,7 +6,6 @@
   },
   "V3_API": {
     "/alerts": {
-      "fields%5Balert%5D=active_period%2Ceffect%2Ceffect_name%2Cinformed_entity%2Clifecycle&filter%5Blifecycle%5D=NEW%2CONGOING%2CONGOING_UPCOMING&filter%5Bstop%5D=9983%2C6542%2C1241%2C8281%2Cplace-boyls%2C8279%2C49002%2C6565%2Cplace-tumnl%2C145%2Cplace-pktrm%2Cplace-bbsta": "018d8ac2-0a6a-7f9c-960e-bbdbb48b83d2",
       "fields%5Balert%5D=active_period%2Ceffect%2Ceffect_name%2Cinformed_entity%2Clifecycle&filter%5Bstop%5D=10820%2C10821%2C10830%2C120%2C129%2C137%2C67120%2C833%2C834%2C8392%2C8393%2C8394%2C853%2C85563%2C85564%2C85565%2C85566%2C85567%2CNB-0080-B0%2CNB-0080-B1%2CNB-0080-S": "018d8b16-50bd-7b74-a802-addd379cf2d3",
       "fields%5Balert%5D=active_period%2Ceffect%2Ceffect_name%2Cinformed_entity%2Clifecycle&filter%5Bstop%5D=39870%2CMM-0186%2CMM-0186-CS%2CMM-0186-S%2CMM-0200%2CMM-0200-CS%2CMM-0200-S": "018d8fa5-bd3a-79d2-a931-9e0455550ada",
       "fields%5Balert%5D=active_period%2Ceffect%2Ceffect_name%2Cinformed_entity%2Clifecycle&filter%5Bstop%5D=70065%2C70066%2CFR-0034%2CFR-0034-01%2CFR-0034-02": "018d8b16-2cc7-732f-88c8-ca05f56fa50a",
