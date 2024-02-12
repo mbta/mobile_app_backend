@@ -114,13 +114,13 @@ defmodule Test.Support.Data do
   end
 
   @doc """
-  Creates new and optionally deletes unused backend responses.
+  Creates new and deletes unused backend responses.
 
   Assumes that test data is being updated.
   """
-  @spec write_new_data(Keyword.t()) :: :ok
-  def write_new_data(opts) do
-    GenServer.call(__MODULE__, {:write_new_data, opts})
+  @spec write_new_data :: :ok
+  def write_new_data do
+    GenServer.call(__MODULE__, :write_new_data)
   end
 
   @doc """
@@ -172,24 +172,20 @@ defmodule Test.Support.Data do
     {:reply, :ok, state}
   end
 
-  def handle_call({:write_new_data, opts}, _from, %State{} = state) do
+  def handle_call(:write_new_data, _from, %State{} = state) do
     unless state.updating_test_data? do
       raise "Wrote new data, but not updating test data"
     end
-
-    remove_unused = Keyword.get(opts, :remove_unused, false)
 
     {touched, untouched} =
       state.data
       |> Map.split_with(fn {_req, %Response{touched: touched}} -> touched end)
 
-    if remove_unused do
-      untouched
-      |> Enum.each(fn {req, resp} ->
-        Logger.info("Deleting unused #{req}")
-        File.rm!(response_path(resp))
-      end)
-    end
+    untouched
+    |> Enum.each(fn {req, resp} ->
+      Logger.info("Deleting unused #{req}")
+      File.rm!(response_path(resp))
+    end)
 
     touched
     |> Enum.filter(fn {_req, %Response{new_data: new_data}} -> not is_nil(new_data) end)
@@ -197,12 +193,7 @@ defmodule Test.Support.Data do
       File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data))
     end)
 
-    state =
-      if remove_unused do
-        %State{state | data: touched}
-      else
-        state
-      end
+    state = %State{state | data: touched}
 
     meta = dehydrate_state(state.data)
     File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta, pretty: true))
@@ -300,77 +291,16 @@ defmodule Test.Support.Data do
         :ok
 
       true ->
-        Logger.warning("Response for #{request} changed")
+        diff =
+          ExUnit.Formatter.format_assertion_error(%ExUnit.AssertionError{
+            left: expected_response,
+            right: actual_response,
+            context: nil
+          })
 
-        format_diff(expected_response, actual_response)
-        |> IO.puts()
-
-        GenServer.call(server, {:put, request, actual_response})
+        Logger.warning("Response for #{request} changed: #{diff}")
     end
 
     actual_response
-  end
-
-  defp format_diff(old_data, new_data) do
-    # salvaged from ExUnit.CLIFormatter
-    colors = [
-      diff_delete: :red,
-      diff_delete_whitespace: IO.ANSI.color_background(2, 0, 0),
-      diff_insert: :green,
-      diff_insert_whitespace: IO.ANSI.color_background(0, 2, 0),
-      extra_info: :cyan
-    ]
-
-    colorize = fn key, string ->
-      escape = Keyword.fetch!(colors, key)
-
-      [escape, string, :reset]
-      |> IO.ANSI.format_fragment()
-    end
-
-    formatter = fn
-      :diff_enabled?, _ ->
-        true
-
-      escape, doc
-      when escape in [
-             :diff_delete,
-             :diff_delete_whitespace,
-             :diff_insert,
-             :diff_inspert_whitespace
-           ] ->
-        Inspect.Algebra.color(doc, escape, %Inspect.Opts{syntax_colors: colors})
-
-      :blame_diff, msg ->
-        colorize.(:diff_delete, msg)
-
-      key, msg ->
-        colorize.(key, msg)
-    end
-
-    ExUnit.Formatter.format_assertion_diff(
-      %ExUnit.AssertionError{
-        left: old_data,
-        right: new_data,
-        message: "Assertion with == failed",
-        context: :==
-      },
-      5,
-      case :io.columns() do
-        {:ok, width} -> width
-        _ -> :infinity
-      end,
-      formatter
-    )
-    |> Enum.map(fn {label, value} ->
-      label =
-        case label do
-          :left -> "was"
-          :right -> "is"
-        end
-
-      [formatter.(:extra_info, String.pad_trailing("#{label}:", 5)), value, "\n"]
-    end)
-    |> IO.iodata_to_binary()
   end
 end
