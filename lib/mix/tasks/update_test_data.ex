@@ -3,7 +3,7 @@ defmodule Mix.Tasks.UpdateTestData do
   Update cached test data based on API calls in tests.
 
   Forwards arguments (such as specific tests to run) to `mix test`.
-  Only writes if run with no arguments.
+  Only deletes unused test data if run with no arguments.
   """
 
   use Mix.Task
@@ -18,11 +18,8 @@ defmodule Mix.Tasks.UpdateTestData do
 
         Mix.Task.run("test", ["--raise"] ++ args)
 
-        if args == [] do
-          data.write_new_data()
-        else
-          Mix.shell().info("Not writing test data, ran with arguments")
-        end
+        ran_all_tests = args == []
+        data.write_new_data(remove_unused: ran_all_tests)
 
       {:error, :nofile} ->
         raise "mix update_test_data must be run in the test env"

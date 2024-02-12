@@ -1,1 +1,100 @@
-{"data":{"nearest":{"edges":[{"node":{"distance":44,"place":{"gtfsId":"mbta-ma-us:7097","lat":42.374518,"lon":-71.029532,"name":"Airport","parentStation":{"gtfsId":"mbta-ma-us:place-aport","lat":42.374262,"lon":-71.030395,"name":"Airport"}}}},{"node":{"distance":44,"place":{"gtfsId":"mbta-ma-us:7096","lat":42.374693,"lon":-71.029333,"name":"Airport","parentStation":{"gtfsId":"mbta-ma-us:place-aport","lat":42.374262,"lon":-71.030395,"name":"Airport"}}}},{"node":{"distance":44,"place":{"gtfsId":"mbta-ma-us:70048","lat":42.374262,"lon":-71.030395,"name":"Airport","parentStation":{"gtfsId":"mbta-ma-us:place-aport","lat":42.374262,"lon":-71.030395,"name":"Airport"}}}},{"node":{"distance":44,"place":{"gtfsId":"mbta-ma-us:70047","lat":42.374262,"lon":-71.030395,"name":"Airport","parentStation":{"gtfsId":"mbta-ma-us:place-aport","lat":42.374262,"lon":-71.030395,"name":"Airport"}}}},{"node":{"distance":69,"place":{"gtfsId":"2272_2274:52","lat":42.373908,"lon":-71.030087,"name":"Blue Line - MBTA","parentStation":null}}},{"node":{"distance":80,"place":{"gtfsId":"2272_2274:41","lat":42.37374,"lon":-71.03005,"name":"Blue Line - MBTA","parentStation":null}}}]}}}
+{
+  "data": {
+    "nearest": {
+      "edges": [
+        {
+          "node": {
+            "distance": 44,
+            "place": {
+              "gtfsId": "mbta-ma-us:7097",
+              "lat": 42.374518,
+              "lon": -71.029532,
+              "name": "Airport",
+              "parentStation": {
+                "gtfsId": "mbta-ma-us:place-aport",
+                "lat": 42.374262,
+                "lon": -71.030395,
+                "name": "Airport"
+              }
+            }
+          }
+        },
+        {
+          "node": {
+            "distance": 44,
+            "place": {
+              "gtfsId": "mbta-ma-us:7096",
+              "lat": 42.374693,
+              "lon": -71.029333,
+              "name": "Airport",
+              "parentStation": {
+                "gtfsId": "mbta-ma-us:place-aport",
+                "lat": 42.374262,
+                "lon": -71.030395,
+                "name": "Airport"
+              }
+            }
+          }
+        },
+        {
+          "node": {
+            "distance": 44,
+            "place": {
+              "gtfsId": "mbta-ma-us:70048",
+              "lat": 42.374262,
+              "lon": -71.030395,
+              "name": "Airport",
+              "parentStation": {
+                "gtfsId": "mbta-ma-us:place-aport",
+                "lat": 42.374262,
+                "lon": -71.030395,
+                "name": "Airport"
+              }
+            }
+          }
+        },
+        {
+          "node": {
+            "distance": 44,
+            "place": {
+              "gtfsId": "mbta-ma-us:70047",
+              "lat": 42.374262,
+              "lon": -71.030395,
+              "name": "Airport",
+              "parentStation": {
+                "gtfsId": "mbta-ma-us:place-aport",
+                "lat": 42.374262,
+                "lon": -71.030395,
+                "name": "Airport"
+              }
+            }
+          }
+        },
+        {
+          "node": {
+            "distance": 69,
+            "place": {
+              "gtfsId": "2272_2274:52",
+              "lat": 42.373908,
+              "lon": -71.030087,
+              "name": "Blue Line - MBTA",
+              "parentStation": null
+            }
+          }
+        },
+        {
+          "node": {
+            "distance": 80,
+            "place": {
+              "gtfsId": "2272_2274:41",
+              "lat": 42.37374,
+              "lon": -71.03005,
+              "name": "Blue Line - MBTA",
+              "parentStation": null
+            }
+          }
+        }
+      ]
+    }
+  }
+}

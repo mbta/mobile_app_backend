@@ -114,13 +114,13 @@ defmodule Test.Support.Data do
   end
 
   @doc """
-  Creates new and deletes unused backend responses.
+  Creates new and optionally deletes unused backend responses.
 
   Assumes that test data is being updated.
   """
-  @spec write_new_data :: :ok
-  def write_new_data do
-    GenServer.call(__MODULE__, :write_new_data)
+  @spec write_new_data(Keyword.t()) :: :ok
+  def write_new_data(opts) do
+    GenServer.call(__MODULE__, {:write_new_data, opts})
   end
 
   @doc """
@@ -172,28 +172,38 @@ defmodule Test.Support.Data do
     {:reply, :ok, state}
   end
 
-  def handle_call(:write_new_data, _from, %State{} = state) do
+  def handle_call({:write_new_data, opts}, _from, %State{} = state) do
     unless state.updating_test_data? do
       raise "Wrote new data, but not updating test data"
     end
+
+    remove_unused = Keyword.get(opts, :remove_unused, false)
 
     {touched, untouched} =
       state.data
       |> Map.split_with(fn {_req, %Response{touched: touched}} -> touched end)
 
-    untouched
-    |> Enum.each(fn {req, resp} ->
-      Logger.info("Deleting unused #{req}")
-      File.rm!(response_path(resp))
-    end)
+    if remove_unused do
+      untouched
+      |> Enum.each(fn {req, resp} ->
+        Logger.info("Deleting unused #{req}")
+        File.rm!(response_path(resp))
+      end)
+    end
 
     touched
     |> Enum.filter(fn {_req, %Response{new_data: new_data}} -> not is_nil(new_data) end)
     |> Enum.each(fn {_req, resp} ->
-      File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data))
+      File.write!(response_path(resp), Jason.encode_to_iodata!(resp.new_data, pretty: true))
     end)
 
-    state = %State{state | data: touched}
+    state =
+      if remove_unused do
+        %State{state | data: touched}
+      else
+        state
+      end
+
     meta = dehydrate_state(state.data)
     File.write!(test_data_path("meta.json"), Jason.encode_to_iodata!(meta, pretty: true))
 
@@ -257,13 +267,13 @@ defmodule Test.Support.Data do
   defp update_response(conn, stored_response, server) do
     request = Request.from_conn(conn)
 
-    expected_response =
-      with %Response{} <- stored_response,
+    {expected_response, response_id} =
+      with %Response{id: response_id} <- stored_response,
            {:ok, old_data} <- File.read(response_path(stored_response)),
            {:ok, old_data} <- Jason.decode(old_data) do
-        old_data
+        {old_data, response_id}
       else
-        _ -> nil
+        _ -> {nil, nil}
       end
 
     body =
@@ -290,14 +300,9 @@ defmodule Test.Support.Data do
         :ok
 
       true ->
-        diff =
-          ExUnit.Formatter.format_assertion_error(%ExUnit.AssertionError{
-            left: expected_response,
-            right: actual_response,
-            context: nil
-          })
+        Logger.warning("Response #{response_id} for #{request} changed")
 
-        Logger.warning("Response for #{request} changed: #{diff}")
+        GenServer.call(server, {:put, request, actual_response})
     end
 
     actual_response
