@@ -126,9 +126,11 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  "NB-0080-S" => [
                    "CR-Needham-a6552e0a-0",
                    "CR-Needham-7f6dbefb-0",
+                   "CR-Needham-69669b59-0",
                    "CR-Needham-C1-0",
                    "CR-Needham-d774fb34-1",
                    "CR-Needham-68a3e69b-1",
+                   "CR-Needham-a01e12e1-1",
                    "CR-Needham-C1-1"
                  ]
                }
