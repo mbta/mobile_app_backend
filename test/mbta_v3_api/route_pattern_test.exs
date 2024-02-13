@@ -15,6 +15,9 @@ defmodule MBTAV3API.RoutePatternTest do
              relationships: %{
                "route" => [
                  %JsonApi.Item{type: "route", id: "Green-C"}
+               ],
+               "representative_trip" => [
+                 %JsonApi.Item{type: "trip", id: "trip123"}
                ]
              }
            }) == %RoutePattern{
@@ -22,7 +25,8 @@ defmodule MBTAV3API.RoutePatternTest do
              direction_id: 1,
              name: "Cleveland Circle - Government Center",
              sort_order: 100_331_000,
-             route: %MBTAV3API.Route{id: "Green-C"}
+             route: %MBTAV3API.Route{id: "Green-C"},
+             representative_trip: %MBTAV3API.Trip{id: "trip123"}
            }
   end
 end
