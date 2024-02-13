@@ -15,11 +15,11 @@ defmodule MobileAppBackendWeb.StopController do
   end
 
   @spec fetch_all_stops() :: [MBTAV3API.Stop.t()]
-  defp fetch_all_stops() do
+  defp fetch_all_stops do
     {:ok, stops} =
       MBTAV3API.Stop.get_all(
         filter: [
-          location_type: [0, 1]
+          location_type: [:stop, :station]
         ],
         include: [:parent_station]
       )
@@ -29,7 +29,7 @@ defmodule MobileAppBackendWeb.StopController do
 
   @spec fetch_all_route_patterns() ::
           {%{String.t() => MBTAV3API.RoutePattern.t()}, %{String.t() => [String.t()]}}
-  defp fetch_all_route_patterns() do
+  defp fetch_all_route_patterns do
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
         include: [:route, representative_trip: :stops],

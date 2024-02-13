@@ -19,7 +19,7 @@ defmodule MBTAV3API.Stop do
     Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
   )
 
-  @type stop_map() :: %{String.t() => __MODULE__.t()}
+  @type stop_map() :: %{String.t() => t()}
 
   defstruct [:id, :latitude, :longitude, :name, :location_type, :parent_station, :child_stops]
 
