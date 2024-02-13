@@ -86,18 +86,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         fields: [stop: []]
       )
 
-    pattern_ids_by_stop =
-      route_patterns
-      |> Enum.flat_map(fn
-        %MBTAV3API.RoutePattern{
-          id: route_pattern_id,
-          representative_trip: %MBTAV3API.Trip{stops: trip_stops}
-        } ->
-          trip_stops
-          |> Enum.filter(&Map.has_key?(stops, &1.id))
-          |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
-      end)
-      |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
+    pattern_ids_by_stop = MBTAV3API.RoutePattern.get_pattern_ids_by_stop(route_patterns, stops)
 
     route_patterns =
       Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})

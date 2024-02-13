@@ -21,8 +21,16 @@ defmodule MBTAV3API.Stop do
 
   @type stop_map() :: %{String.t() => __MODULE__.t()}
 
-  @derive Jason.Encoder
   defstruct [:id, :latitude, :longitude, :name, :location_type, :parent_station, :child_stops]
+
+  defimpl Jason.Encoder do
+    def encode(value, opts) do
+      value
+      |> Map.from_struct()
+      |> Map.reject(fn {_k, v} -> is_nil(v) end)
+      |> Jason.Encode.map(opts)
+    end
+  end
 
   def parent(%__MODULE__{parent_station: %__MODULE__{} = parent}), do: parent
   def parent(%__MODULE__{parent_station: nil} = stop), do: stop

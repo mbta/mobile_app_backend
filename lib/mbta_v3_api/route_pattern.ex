@@ -43,4 +43,20 @@ defmodule MBTAV3API.RoutePattern do
       route: JsonApi.Object.parse_one_related(item.relationships["route"])
     }
   end
+
+  @spec get_pattern_ids_by_stop([t()], MBTAV3API.Stop.stop_map() | nil) ::
+          %{String.t() => String.t()}
+  def get_pattern_ids_by_stop(route_patterns, filter_stop_map \\ nil) do
+    route_patterns
+    |> Enum.flat_map(fn
+      %__MODULE__{
+        id: route_pattern_id,
+        representative_trip: %MBTAV3API.Trip{stops: trip_stops}
+      } ->
+        trip_stops
+        |> Enum.filter(&(filter_stop_map == nil || Map.has_key?(filter_stop_map, &1.id)))
+        |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
+    end)
+    |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
+  end
 end
