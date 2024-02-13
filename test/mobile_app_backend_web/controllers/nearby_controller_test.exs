@@ -23,7 +23,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                    "longitude" => -71.177035,
                    "name" => "Millennium Park"
                  },
-                 %{"id" => "129", "name" => "Rivermoor St @ Charles Park Rd"},
+                 %{"id" => "129", "name" => "Rivermoor St @ Charles Park Rd", },
                  %{"id" => "137", "name" => "Charles Park Rd @ Rivermoor St"},
                  %{"id" => "10830", "name" => "5 Charles Park Rd"},
                  %{"id" => "10821", "name" => "Charles Park Rd @ VFW Pkwy"},
@@ -64,28 +64,35 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                        "text_color" => "000000",
                        "type" => "bus"
                      } = route_36,
-                   "sort_order" => 503_600_040
+                   "sort_order" => 503_600_040,
+                 "representative_trip" => %{"headsign" => "Millennium Park" },
                  },
                  "36-1-1" => %{
                    "direction_id" => 1,
                    "id" => "36-1-1",
                    "name" => "Millennium Park - Forest Hills Station",
                    "route" => route_36,
-                   "sort_order" => 503_601_040
+                   "sort_order" => 503_601_040,
+                                    "representative_trip" => %{"headsign" => "Forest Hills" },
+
                  },
                  "36-5-0" => %{
                    "direction_id" => 0,
                    "id" => "36-5-0",
                    "name" => "Forest Hills Station - Millennium Park",
                    "route" => route_36,
-                   "sort_order" => 503_600_060
+                   "sort_order" => 503_600_060,
+                                    "representative_trip" => %{"headsign" => "Millennium Park"},
+
                  },
                  "36-5-1" => %{
                    "direction_id" => 1,
                    "id" => "36-5-1",
                    "name" => "Millennium Park - Forest Hills Station",
                    "route" => route_36,
-                   "sort_order" => 503_601_060
+                   "sort_order" => 503_601_060,
+                                    "representative_trip" => %{"headsign" => "Forest Hills" },
+
                  },
                  "36-8-0" => %{"name" => "Forest Hills Station - VA Hospital, West Roxbury"},
                  "36-8-1" => %{"name" => "VA Hospital, West Roxbury - Forest Hills Station"},

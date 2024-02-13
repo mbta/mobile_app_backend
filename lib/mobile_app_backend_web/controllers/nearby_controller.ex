@@ -83,7 +83,7 @@ defmodule MobileAppBackendWeb.NearbyController do
       MBTAV3API.RoutePattern.get_all(
         filter: [stop: Enum.join(Map.keys(stops), ",")],
         include: [:route, representative_trip: :stops],
-        fields: [stop: []]
+        fields: [stop: [], trip: [:headsign]]
       )
 
     pattern_ids_by_stop =
@@ -100,7 +100,14 @@ defmodule MobileAppBackendWeb.NearbyController do
       |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
 
     route_patterns =
-      Map.new(route_patterns, &{&1.id, %MBTAV3API.RoutePattern{&1 | representative_trip: nil}})
+      Map.new(
+        route_patterns,
+        &{&1.id,
+         %{
+           &1
+           | representative_trip: %{headsign: &1.representative_trip.headsign}
+         }}
+      )
 
     {route_patterns, pattern_ids_by_stop}
   end
