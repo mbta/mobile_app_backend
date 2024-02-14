@@ -13,7 +13,7 @@ defmodule MBTAV3API.Trip do
   @derive Jason.Encoder
   defstruct [:id, :headsign, :route_pattern, :stops]
 
-  def fields, do: []
+  def fields, do: [:headsign]
 
   def includes, do: %{route_pattern: :route_pattern, stops: :stop}
 
