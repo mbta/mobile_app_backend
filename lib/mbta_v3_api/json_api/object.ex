@@ -27,6 +27,29 @@ defmodule MBTAV3API.JsonApi.Object do
   @optional_callbacks serialize_filter_value: 2
 
   @doc """
+  Sets up the `JsonApi.Object` behaviour with compile-time validation of `c:fields/0` and `c:includes/0` against the `defstruct/1`.
+
+  Expects the `defstruct` to be `[:id, ...field names..., ...related object names...]`.
+  Field names should match the order in `c:fields/1` (which should probably be alphabetized) and related object names should be alphabetized.
+
+  By default, expects the fields and include names to match the struct keys exactly.
+  If renaming a field at parse time, `use MBTAV3API.JsonApi.Object, renames: %{jsonapi_name => struct_name}`.
+  """
+  defmacro __using__(opts) do
+    renames = Keyword.get(opts, :renames, quote(do: %{}))
+
+    quote do
+      alias MBTAV3API.JsonApi
+
+      @behaviour JsonApi.Object
+
+      Module.put_attribute(__MODULE__, :jsonapi_object_renames, unquote(renames))
+
+      @after_compile JsonApi.Object
+    end
+  end
+
+  @doc """
   Retrieves the module for the given JSON:API type.
   """
   @spec module_for(atom() | String.t()) :: module()
@@ -105,4 +128,68 @@ defmodule MBTAV3API.JsonApi.Object do
   @spec parse_many_related([JsonApi.Reference.t()]) :: [JsonApi.Reference.t()]
   def parse_many_related(nil), do: nil
   def parse_many_related(objects), do: Enum.map(objects, &parse/1)
+
+  @doc """
+  Validates that the module being compiled has struct keys that match its `c:fields/0` and `c:includes/0` implementations.
+  """
+  def __after_compile__(module_env, _) do
+    module = module_env.module
+    struct_name = Macro.inspect_atom(:literal, module)
+    actual_struct_keys = module.__info__(:struct) |> Enum.map(fn %{field: field} -> field end)
+
+    renames = Module.get_attribute(module, :jsonapi_object_renames, %{})
+    apply_rename = fn name -> Map.get(renames, name, name) end
+
+    expected_fields = module.fields() |> Enum.map(apply_rename)
+    expected_includes = module.includes() |> Map.keys() |> Enum.map(apply_rename) |> Enum.sort()
+    expected_struct_keys = [:id] ++ expected_fields ++ expected_includes
+
+    if expected_struct_keys == actual_struct_keys do
+      :ok
+    else
+      raise format_struct_mismatch(struct_name, expected_struct_keys, actual_struct_keys)
+    end
+  end
+
+  @spec format_struct_mismatch(String.t(), [atom()], [atom()]) :: String.t()
+  defp format_struct_mismatch(struct_name, expected_struct_keys, actual_struct_keys) do
+    good_prefix =
+      Enum.zip(expected_struct_keys, actual_struct_keys)
+      |> Enum.take_while(fn {expected, actual} -> expected == actual end)
+      |> length()
+
+    good_suffix =
+      Enum.zip(Enum.reverse(expected_struct_keys), Enum.reverse(actual_struct_keys))
+      |> Enum.take_while(fn {expected, actual} -> expected == actual end)
+      |> length()
+
+    bad_expected =
+      inspect_abbreviating(expected_struct_keys, good_prefix - 1, good_suffix - 1)
+
+    bad_actual =
+      inspect_abbreviating(actual_struct_keys, good_prefix - 1, good_suffix - 1)
+
+    "Bad object struct #{struct_name}: struct keys [#{bad_actual}] don't match JsonApi.Object callback values [#{bad_expected}]"
+  end
+
+  @spec inspect_abbreviating([atom()], integer(), integer()) :: String.t()
+  defp inspect_abbreviating(list, remove_start, remove_end) do
+    list = Enum.map(list, &inspect/1)
+
+    list =
+      if remove_start > 0 do
+        ["..."] ++ Enum.drop(list, remove_start)
+      else
+        list
+      end
+
+    list =
+      if remove_end > 0 do
+        Enum.drop(list, -remove_end) ++ ["..."]
+      else
+        list
+      end
+
+    Enum.join(list, ", ")
+  end
 end

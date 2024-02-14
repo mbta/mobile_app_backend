@@ -1,8 +1,6 @@
 defmodule MBTAV3API.Stop do
+  use MBTAV3API.JsonApi.Object
   require Util
-  alias MBTAV3API.JsonApi
-
-  @behaviour JsonApi.Object
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -10,8 +8,8 @@ defmodule MBTAV3API.Stop do
           longitude: float(),
           name: String.t(),
           location_type: location_type(),
-          parent_station: t() | JsonApi.Reference.t() | nil,
-          child_stops: t() | JsonApi.Reference.t() | nil
+          child_stops: t() | JsonApi.Reference.t() | nil,
+          parent_station: t() | JsonApi.Reference.t() | nil
         }
 
   Util.declare_enum(
@@ -22,7 +20,7 @@ defmodule MBTAV3API.Stop do
   @type stop_map() :: %{String.t() => __MODULE__.t()}
 
   @derive Jason.Encoder
-  defstruct [:id, :latitude, :longitude, :name, :location_type, :parent_station, :child_stops]
+  defstruct [:id, :latitude, :longitude, :name, :location_type, :child_stops, :parent_station]
 
   def parent(%__MODULE__{parent_station: %__MODULE__{} = parent}), do: parent
   def parent(%__MODULE__{parent_station: nil} = stop), do: stop
@@ -33,8 +31,8 @@ defmodule MBTAV3API.Stop do
   @impl JsonApi.Object
   def includes,
     do: %{
-      parent_station: :stop,
-      child_stops: :stop
+      child_stops: :stop,
+      parent_station: :stop
     }
 
   @impl JsonApi.Object
