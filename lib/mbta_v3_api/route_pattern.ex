@@ -14,20 +14,11 @@ defmodule MBTAV3API.RoutePattern do
   defstruct [:id, :direction_id, :name, :sort_order, :representative_trip, :route]
 
   @impl JsonApi.Object
+  @spec fields() :: [:direction_id | :name | :sort_order, ...]
   def fields, do: [:direction_id, :name, :sort_order]
 
   @impl JsonApi.Object
   def includes, do: %{representative_trip: :trip, route: :route}
-
-  @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
-  def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :route_pattern)
-
-    case MBTAV3API.get_json("/route_patterns", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}
-      {:error, error} -> {:error, error}
-    end
-  end
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
