@@ -150,8 +150,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                        "id" => "place-GB-0198",
                        "latitude" => 42.562171,
                        "longitude" => -70.869254,
-                       "name" => "Montserrat",
-                       "parent_station" => nil
+                       "name" => "Montserrat"
                      } = parent_station
                  },
                  %{"id" => "GB-0198-02", "parent_station" => parent_station},
