@@ -34,7 +34,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
     assert %{
              "fields[prediction]" =>
                "arrival_time,departure_time,direction_id,revenue_status,schedule_relationship,status,stop_sequence",
-             "fields[trip]" => "",
+             "fields[trip]" => "headsign",
              "filter[stop]" => "12345,67890",
              "include" => "trip"
            } = URI.decode_query(query)
