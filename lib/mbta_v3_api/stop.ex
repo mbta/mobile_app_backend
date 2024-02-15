@@ -19,7 +19,6 @@ defmodule MBTAV3API.Stop do
 
   @type stop_map() :: %{String.t() => t()}
 
-  @derive Jason.Encoder
   defstruct [:id, :latitude, :longitude, :name, :location_type, :child_stops, :parent_station]
 
   defimpl Jason.Encoder do
