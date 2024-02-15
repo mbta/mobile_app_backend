@@ -290,7 +290,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Alewife"
+      },
       "id": "canonical-Red-C2-1",
       "links": {
         "self": "/trips/canonical-Red-C2-1"
@@ -423,7 +425,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Wachusett"
+      },
       "id": "CR-627743-423",
       "links": {
         "self": "/trips/CR-627743-423"
@@ -551,7 +555,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Ashmont"
+      },
       "id": "canonical-Red-C2-0",
       "links": {
         "self": "/trips/canonical-Red-C2-0"
@@ -769,7 +775,9 @@
       "type": "route"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Alewife"
+      },
       "id": "canonical-Red-C1-1",
       "links": {
         "self": "/trips/canonical-Red-C1-1"
@@ -1041,7 +1049,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Wachusett"
+      },
       "id": "canonical-CR-Fitchburg-C1-0",
       "links": {
         "self": "/trips/canonical-CR-Fitchburg-C1-0"
@@ -1201,7 +1211,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "North Station"
+      },
       "id": "CR-627756-482",
       "links": {
         "self": "/trips/CR-627756-482"
@@ -1395,7 +1407,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Littleton/Route 495"
+      },
       "id": "CR-627755-481",
       "links": {
         "self": "/trips/CR-627755-481"
@@ -1863,7 +1877,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Braintree"
+      },
       "id": "canonical-Red-C1-0",
       "links": {
         "self": "/trips/canonical-Red-C1-0"
@@ -2783,7 +2799,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "North Station"
+      },
       "id": "canonical-CR-Fitchburg-C1-1",
       "links": {
         "self": "/trips/canonical-CR-Fitchburg-C1-1"
@@ -2889,7 +2907,9 @@
       "type": "trip"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "North Station"
+      },
       "id": "CR-627730-404",
       "links": {
         "self": "/trips/CR-627730-404"
