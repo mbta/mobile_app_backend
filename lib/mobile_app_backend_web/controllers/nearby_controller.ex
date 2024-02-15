@@ -77,8 +77,8 @@ defmodule MobileAppBackendWeb.NearbyController do
   end
 
   @spec fetch_route_patterns(stops :: stop_map()) ::
-          {%{(route_pattern_id :: String.t()) => route_pattern :: map()},
-           %{(stop_id :: String.t()) => route_patterns :: [String.t()]}}
+          {%{(route_pattern_id :: String.t()) => route_pattern :: MBTAV3API.RoutePattern.t()},
+           %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}}
   defp fetch_route_patterns(stops) do
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
@@ -106,7 +106,11 @@ defmodule MobileAppBackendWeb.NearbyController do
         &{&1.id,
          %{
            &1
-           | representative_trip: %{headsign: &1.representative_trip.headsign}
+           | representative_trip: %MBTAV3API.Trip{
+               &1.representative_trip
+               | stops: nil,
+                 route_pattern: nil
+             }
          }}
       )
 
