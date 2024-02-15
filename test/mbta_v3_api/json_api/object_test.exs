@@ -97,7 +97,7 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
     test "correctly raises errors" do
       bad_module =
         quote do
-          defmodule Foo do
+          defmodule BadModule do
             use MBTAV3API.JsonApi.Object
 
             defstruct [:id, :f1, :f2, :f3, :r2, :r3]
@@ -111,10 +111,29 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
         end
 
       assert_raise RuntimeError,
-                   "Bad object struct Foo: struct keys [..., :f3, :r2, ...] don't match JsonApi.Object callback values [..., :f3, :f4, :r1, :r2, ...]",
+                   "Bad object struct BadModule: struct keys [..., :f3, :r2, ...] don't match JsonApi.Object `fields() ++ includes()` [..., :f3, :f4, :r1, :r2, ...]",
                    fn ->
                      Code.compile_quoted(bad_module)
                    end
+    end
+
+    test "accepts renames" do
+      good_module =
+        quote do
+          defmodule GoodModule do
+            use MBTAV3API.JsonApi.Object, renames: %{field_raw: :field, related_raw: :related}
+
+            defstruct [:id, :field, :related]
+
+            @impl true
+            def fields, do: [:field_raw]
+
+            @impl true
+            def includes, do: %{related_raw: :stop}
+          end
+        end
+
+      assert [{GoodModule, _}] = Code.compile_quoted(good_module)
     end
   end
 end

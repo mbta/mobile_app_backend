@@ -169,7 +169,7 @@ defmodule MBTAV3API.JsonApi.Object do
     bad_actual =
       inspect_abbreviating(actual_struct_keys, good_prefix - 1, good_suffix - 1)
 
-    "Bad object struct #{struct_name}: struct keys [#{bad_actual}] don't match JsonApi.Object callback values [#{bad_expected}]"
+    "Bad object struct #{struct_name}: struct keys [#{bad_actual}] don't match JsonApi.Object `fields() ++ includes()` [#{bad_expected}]"
   end
 
   @spec inspect_abbreviating([atom()], integer(), integer()) :: String.t()
