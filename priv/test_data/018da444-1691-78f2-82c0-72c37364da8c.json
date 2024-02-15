@@ -1415,7 +1415,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Quincy Center via Holbrook Court"
+      },
       "id": "60487921",
       "links": {
         "self": "/trips/60487921"
@@ -1729,7 +1731,9 @@
       "type": "trip"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Hyannis"
+      },
       "id": "canonical-CapeFlyer-C1-0",
       "links": {
         "self": "/trips/canonical-CapeFlyer-C1-0"
@@ -2165,7 +2169,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Montello"
+      },
       "id": "60487896",
       "links": {
         "self": "/trips/60487896"
@@ -2750,7 +2756,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "South Station"
+      },
       "id": "canonical-CapeFlyer-C1-1",
       "links": {
         "self": "/trips/canonical-CapeFlyer-C1-1"
@@ -3138,7 +3146,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Quincy Center"
+      },
       "id": "60487895",
       "links": {
         "self": "/trips/60487895"
@@ -3763,7 +3773,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Middleborough/Lakeville"
+      },
       "id": "canonical-CR-Middleborough-C1-0",
       "links": {
         "self": "/trips/canonical-CR-Middleborough-C1-0"
@@ -4334,7 +4346,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "South Station"
+      },
       "id": "canonical-CR-Middleborough-C1-1",
       "links": {
         "self": "/trips/canonical-CR-Middleborough-C1-1"
@@ -4983,7 +4997,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Montello via Holbrook Court"
+      },
       "id": "60487926",
       "links": {
         "self": "/trips/60487926"

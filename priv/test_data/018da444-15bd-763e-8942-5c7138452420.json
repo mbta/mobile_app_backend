@@ -289,7 +289,9 @@
   ],
   "included": [
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport (Limited shuttle)"
+      },
       "id": "OakGroveRockportLimited-0-sample",
       "links": {
         "self": "/trips/OakGroveRockportLimited-0-sample"
@@ -414,7 +416,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport (Local shuttle)"
+      },
       "id": "BeverlyRockport-0-sample",
       "links": {
         "self": "/trips/BeverlyRockport-0-sample"
@@ -531,7 +535,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport"
+      },
       "id": "CR-649341-103",
       "links": {
         "self": "/trips/CR-649341-103"
@@ -605,7 +611,9 @@
       "type": "trip"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Oak Grove (Limited shuttle)"
+      },
       "id": "OakGroveRockportLimited-1-sample",
       "links": {
         "self": "/trips/OakGroveRockportLimited-1-sample"
@@ -758,7 +766,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport"
+      },
       "id": "CR-649284-123",
       "links": {
         "self": "/trips/CR-649284-123"
@@ -980,7 +990,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Beverly (Local shuttle)"
+      },
       "id": "BeverlyRockport-1-sample",
       "links": {
         "self": "/trips/BeverlyRockport-1-sample"
@@ -1344,7 +1356,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "North Station"
+      },
       "id": "CR-649335-124",
       "links": {
         "self": "/trips/CR-649335-124"
@@ -1457,7 +1471,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport"
+      },
       "id": "canonical-CR-Newburyport-C2-0",
       "links": {
         "self": "/trips/canonical-CR-Newburyport-C2-0"
@@ -1598,7 +1614,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "North Station"
+      },
       "id": "canonical-CR-Newburyport-C2-1",
       "links": {
         "self": "/trips/canonical-CR-Newburyport-C2-1"
@@ -1763,7 +1781,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Rockport (Local shuttle)"
+      },
       "id": "RockportSalemForBeverly-0-sample",
       "links": {
         "self": "/trips/RockportSalemForBeverly-0-sample"
@@ -2122,7 +2142,9 @@
       "type": "stop"
     },
     {
-      "attributes": {},
+      "attributes": {
+        "headsign": "Salem (Local shuttle)"
+      },
       "id": "RockportSalemForBeverly-1-sample",
       "links": {
         "self": "/trips/RockportSalemForBeverly-1-sample"
