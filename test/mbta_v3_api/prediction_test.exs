@@ -31,7 +31,9 @@ defmodule MBTAV3API.PredictionTest do
              schedule_relationship: :added,
              status: nil,
              stop_sequence: 440,
-             trip: %JsonApi.Reference{type: "trip", id: "ADDED-1591587107"}
+             stop: %JsonApi.Reference{type: "stop", id: "70237"},
+             trip: %JsonApi.Reference{type: "trip", id: "ADDED-1591587107"},
+             vehicle: %JsonApi.Reference{type: "vehicle", id: "G-10070"}
            }
   end
 end

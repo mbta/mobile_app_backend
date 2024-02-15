@@ -7,7 +7,7 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
   def join("predictions:stops", payload, socket) do
     case Map.fetch(payload, "stop_ids") do
       {:ok, stop_ids} ->
-        case Prediction.stream_all(filter: [stop: stop_ids], include: :trip) do
+        case Prediction.stream_all(filter: [stop: stop_ids], include: [:trip, :vehicle]) do
           {:ok, stream_instance} ->
             {:ok, assign(socket, :stream_instance, stream_instance)}
 

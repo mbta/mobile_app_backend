@@ -6,6 +6,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
   alias MBTAV3API.Trip
+  alias MBTAV3API.Vehicle
   alias Test.Support.SSEStub
 
   setup do
@@ -35,8 +36,9 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
              "fields[prediction]" =>
                "arrival_time,departure_time,direction_id,revenue_status,schedule_relationship,status,stop_sequence",
              "fields[trip]" => "headsign",
+             "fields[vehicle]" => "current_status",
              "filter[stop]" => "12345,67890",
-             "include" => "trip"
+             "include" => "trip,vehicle"
            } = URI.decode_query(query)
 
     sse_ref = Process.monitor(sse_stub)
@@ -64,6 +66,8 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
           [
             {"attributes":{},"id":"60392455","links":{"self":"/trips/60392455"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-1","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0010","type":"shape"}}},"type":"trip"},
             {"attributes":{},"id":"60392515","links":{"self":"/trips/60392515"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"route_pattern":{"data":{"id":"Red-1-0","type":"route_pattern"}},"service":{"data":{"id":"RTL12024-hms14011-Weekday-01","type":"service"}},"shape":{"data":{"id":"931_0009","type":"shape"}}},"type":"trip"},
+            {"attributes":{"current_status":"IN_TRANSIT_TO"},"id":"R-547A83F7","links":{"self":"/vehicles/R-547A83F7"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70072","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}}},"type":"vehicle"},
+            {"attributes":{"current_status":"STOPPED_AT"},"id":"R-547A83F8","links":{"self":"/vehicles/R-547A83F8"},"relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70085","type":"stop"}},"trip":{"data":{"id":"60392515","type":"trip"}}},"type":"vehicle"},
             {"attributes":{"arrival_time":"2024-01-30T15:44:09-05:00","departure_time":"2024-01-30T15:45:10-05:00","direction_id":1,"schedule_relationship":null,"status":null,"stop_sequence":90},"id":"prediction-60392455-70086-90","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70086","type":"stop"}},"trip":{"data":{"id":"60392455","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F7","type":"vehicle"}}},"type":"prediction"},
             {"attributes":{"arrival_time":"2024-01-30T15:46:26-05:00","departure_time":"2024-01-30T15:47:48-05:00","direction_id":0,"schedule_relationship":null,"status":null,"stop_sequence":130},"id":"prediction-60392515-70085-130","relationships":{"route":{"data":{"id":"Red","type":"route"}},"stop":{"data":{"id":"70085","type":"stop"}},"trip":{"data":{"id":"60392515","type":"trip"}},"vehicle":{"data":{"id":"R-547A83F8","type":"vehicle"}}},"type":"prediction"}
           ]
@@ -85,10 +89,16 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 90,
+        stop: %JsonApi.Reference{type: "stop", id: "70086"},
         trip: %Trip{
           id: "60392455",
           route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
           stops: nil
+        },
+        vehicle: %Vehicle{
+          id: "R-547A83F7",
+          current_status: :in_transit_to,
+          stop: %JsonApi.Reference{type: "stop", id: "70072"}
         }
       }
     end
@@ -102,10 +112,16 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 130,
+        stop: %JsonApi.Reference{type: "stop", id: "70085"},
         trip: %Trip{
           id: "60392515",
           route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-0"},
           stops: nil
+        },
+        vehicle: %Vehicle{
+          id: "R-547A83F8",
+          current_status: :stopped_at,
+          stop: %JsonApi.Reference{type: "stop", id: "70085"}
         }
       }
     end
@@ -143,11 +159,13 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  revenue: true,
                  schedule_relationship: :scheduled,
                  stop_sequence: 100,
+                 stop: %JsonApi.Reference{type: "stop", id: "70096"},
                  trip: %Trip{
                    id: "60392593",
                    route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-3-1"},
                    stops: nil
-                 }
+                 },
+                 vehicle: %JsonApi.Reference{type: "vehicle", id: "R-547A80A3"}
                }
              ]
     end
