@@ -1,10 +1,8 @@
 defmodule MBTAV3API.Alert do
+  use MBTAV3API.JsonApi.Object
   require Util
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
-  alias MBTAV3API.JsonApi
-
-  @behaviour JsonApi.Object
 
   @type t :: %__MODULE__{
           id: String.t(),

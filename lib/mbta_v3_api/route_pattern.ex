@@ -1,7 +1,5 @@
 defmodule MBTAV3API.RoutePattern do
-  alias MBTAV3API.JsonApi
-
-  @behaviour JsonApi.Object
+  use MBTAV3API.JsonApi.Object
 
   @type t :: %__MODULE__{
           id: String.t(),
