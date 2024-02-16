@@ -1,7 +1,10 @@
 defmodule MobileAppBackendWeb.PredictionsChannel do
   use MobileAppBackendWeb, :channel
 
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
+  alias MBTAV3API.Trip
+  alias MBTAV3API.Vehicle
 
   @impl true
   def join("predictions:stops", payload, socket) do
@@ -27,6 +30,29 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
 
   @impl true
   def handle_info({:stream_data, predictions}, socket) do
+    predictions =
+      Enum.map(
+        predictions,
+        &%Prediction{
+          &1
+          | vehicle:
+              case &1.vehicle do
+                %Vehicle{} = vehicle ->
+                  %Vehicle{
+                    vehicle
+                    | trip:
+                        case vehicle.trip do
+                          nil -> nil
+                          %Trip{id: trip_id} -> %JsonApi.Reference{type: "trip", id: trip_id}
+                        end
+                  }
+
+                vehicle ->
+                  vehicle
+              end
+        }
+      )
+
     :ok = push(socket, "stream_data", %{predictions: predictions})
     {:noreply, socket}
   end
