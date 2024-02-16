@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.NearbyController do
+  alias MBTAV3API.JsonApi
   use MobileAppBackendWeb, :controller
 
   @type stop_map() :: MBTAV3API.Stop.stop_map()
@@ -20,7 +21,7 @@ defmodule MobileAppBackendWeb.NearbyController do
       fetch_nearby_stops(latitude, longitude, radius)
       |> MBTAV3API.Stop.include_missing_siblings()
 
-    {route_patterns, pattern_ids_by_stop} = fetch_route_patterns(stops)
+    {route_patterns, pattern_ids_by_stop, routes} = fetch_route_patterns(stops)
 
     alerts = fetch_alerts(stops, now)
 
@@ -35,6 +36,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         ),
       route_patterns: route_patterns,
       pattern_ids_by_stop: pattern_ids_by_stop,
+      routes: routes,
       alerts: alerts
     })
   end
@@ -78,7 +80,8 @@ defmodule MobileAppBackendWeb.NearbyController do
 
   @spec fetch_route_patterns(stops :: stop_map()) ::
           {%{(route_pattern_id :: String.t()) => MBTAV3API.RoutePattern.t()},
-           %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}}
+           %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]},
+           %{(route_id :: String.t()) => MBTAV3API.Route.t()}}
   defp fetch_route_patterns(stops) do
     {:ok, route_patterns} =
       MBTAV3API.RoutePattern.get_all(
@@ -88,17 +91,9 @@ defmodule MobileAppBackendWeb.NearbyController do
       )
 
     pattern_ids_by_stop =
-      route_patterns
-      |> Enum.flat_map(fn
-        %MBTAV3API.RoutePattern{
-          id: route_pattern_id,
-          representative_trip: %MBTAV3API.Trip{stops: trip_stops}
-        } ->
-          trip_stops
-          |> Enum.filter(&Map.has_key?(stops, &1.id))
-          |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
-      end)
-      |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
+      MBTAV3API.RoutePattern.get_pattern_ids_by_stop(route_patterns, MapSet.new(Map.keys(stops)))
+
+    routes = MBTAV3API.RoutePattern.get_route_map(route_patterns)
 
     route_patterns =
       Map.new(
@@ -106,7 +101,8 @@ defmodule MobileAppBackendWeb.NearbyController do
         &{&1.id,
          %{
            &1
-           | representative_trip: %MBTAV3API.Trip{
+           | route: %JsonApi.Reference{type: "route", id: &1.route.id},
+             representative_trip: %MBTAV3API.Trip{
                &1.representative_trip
                | stops: nil,
                  route_pattern: nil
@@ -114,7 +110,7 @@ defmodule MobileAppBackendWeb.NearbyController do
          }}
       )
 
-    {route_patterns, pattern_ids_by_stop}
+    {route_patterns, pattern_ids_by_stop, routes}
   end
 
   def fetch_alerts(stops, now) do
