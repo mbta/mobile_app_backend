@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.StopControllerTest do
+defmodule MobileAppBackendWeb.GlobalControllerTest do
   use MobileAppBackendWeb.ConnCase
 
   setup do
@@ -6,9 +6,9 @@ defmodule MobileAppBackendWeb.StopControllerTest do
     :ok
   end
 
-  describe "GET /api/stops" do
+  describe "GET /api/global" do
     test "retrieves all stop and route info from the V3 API", %{conn: conn} do
-      conn = get(conn, "/api/stops")
+      conn = get(conn, "/api/global")
       stop_response = json_response(conn, 200)
 
       assert %{

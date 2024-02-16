@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.StopController do
+defmodule MobileAppBackendWeb.GlobalController do
   alias MBTAV3API.JsonApi
   use MobileAppBackendWeb, :controller
 

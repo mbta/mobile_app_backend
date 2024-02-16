@@ -28,7 +28,7 @@ defmodule MobileAppBackendWeb.Router do
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
     get("/nearby", NearbyController, :show)
-    get("/stops", StopController, :show)
+    get("/global", GlobalController, :show)
     get("/search/query", SearchController, :query)
   end
 
