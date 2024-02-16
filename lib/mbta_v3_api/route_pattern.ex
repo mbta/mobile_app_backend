@@ -42,9 +42,9 @@ defmodule MBTAV3API.RoutePattern do
     }
   end
 
-  @spec get_pattern_ids_by_stop([t()], MBTAV3API.Stop.stop_map() | nil) ::
+  @spec get_pattern_ids_by_stop([t()], MapSet.t(String.t()) | nil) ::
           %{String.t() => String.t()}
-  def get_pattern_ids_by_stop(route_patterns, filter_stop_map \\ nil) do
+  def get_pattern_ids_by_stop(route_patterns, filter_stop_ids \\ nil) do
     route_patterns
     |> Enum.flat_map(fn
       %__MODULE__{
@@ -52,9 +52,16 @@ defmodule MBTAV3API.RoutePattern do
         representative_trip: %MBTAV3API.Trip{stops: trip_stops}
       } ->
         trip_stops
-        |> Enum.filter(&(filter_stop_map == nil || Map.has_key?(filter_stop_map, &1.id)))
+        |> Enum.filter(&(filter_stop_ids == nil || MapSet.member?(filter_stop_ids, &1.id)))
         |> Enum.map(&%{stop_id: &1.id, route_pattern_id: route_pattern_id})
     end)
     |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
+  end
+
+  @spec get_route_map([t()]) :: %{String.t() => MBTAV3API.Route.t()}
+  def get_route_map(route_patterns) do
+    route_patterns
+    |> Enum.map(& &1.route)
+    |> Map.new(&{&1.id, &1})
   end
 end

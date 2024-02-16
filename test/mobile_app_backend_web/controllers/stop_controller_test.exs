@@ -14,7 +14,8 @@ defmodule MobileAppBackendWeb.StopControllerTest do
       assert %{
                "stops" => stops,
                "route_patterns" => route_patterns,
-               "pattern_ids_by_stop" => pattern_ids
+               "pattern_ids_by_stop" => pattern_ids,
+               "routes" => routes
              } = stop_response
 
       assert length(stops) == 8015
@@ -55,16 +56,20 @@ defmodule MobileAppBackendWeb.StopControllerTest do
                "direction_id" => 1,
                "id" => "Red-1-1",
                "name" => "Ashmont - Alewife",
-               "route" => %{
+               "route" => %{"type" => "route", "id" => "Red"},
+               "sort_order" => 100_101_001
+             } = red_line_pattern
+
+      assert %{
+               "Red" => %{
                  "color" => "DA291C",
                  "direction_destinations" => ["Ashmont/Braintree", "Alewife"],
                  "direction_names" => ["South", "North"],
                  "id" => "Red",
                  "long_name" => "Red Line",
                  "type" => "heavy_rail"
-               },
-               "sort_order" => 100_101_001
-             } = red_line_pattern
+               }
+             } = routes
     end
   end
 end
