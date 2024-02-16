@@ -37,18 +37,22 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
           &1
           | vehicle:
               case &1.vehicle do
+                nil ->
+                  nil
+
+                %JsonApi.Reference{} = vehicle ->
+                  vehicle
+
                 %Vehicle{} = vehicle ->
                   %Vehicle{
                     vehicle
                     | trip:
                         case vehicle.trip do
                           nil -> nil
+                          %JsonApi.Reference{} = vehicle_trip -> vehicle_trip
                           %Trip{id: trip_id} -> %JsonApi.Reference{type: "trip", id: trip_id}
                         end
                   }
-
-                vehicle ->
-                  vehicle
               end
         }
       )
