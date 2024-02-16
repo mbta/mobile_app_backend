@@ -13,20 +13,21 @@ defmodule MBTAV3API.Vehicle do
   )
 
   @derive Jason.Encoder
-  defstruct [:id, :current_status, :stop]
+  defstruct [:id, :current_status, :stop, :trip]
 
   @impl JsonApi.Object
   def fields, do: [:current_status]
 
   @impl JsonApi.Object
-  def includes, do: %{stop: :stop}
+  def includes, do: %{stop: :stop, trip: :trip}
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       current_status: parse_current_status(item.attributes["current_status"]),
-      stop: JsonApi.Object.parse_one_related(item.relationships["stop"])
+      stop: JsonApi.Object.parse_one_related(item.relationships["stop"]),
+      trip: JsonApi.Object.parse_one_related(item.relationships["trip"])
     }
   end
 end

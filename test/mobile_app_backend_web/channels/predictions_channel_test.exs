@@ -98,7 +98,8 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         vehicle: %Vehicle{
           id: "R-547A83F7",
           current_status: :in_transit_to,
-          stop: %JsonApi.Reference{type: "stop", id: "70072"}
+          stop: %JsonApi.Reference{type: "stop", id: "70072"},
+          trip: %JsonApi.Reference{type: "trip", id: "60392455"}
         }
       }
     end
@@ -121,7 +122,8 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         vehicle: %Vehicle{
           id: "R-547A83F8",
           current_status: :stopped_at,
-          stop: %JsonApi.Reference{type: "stop", id: "70085"}
+          stop: %JsonApi.Reference{type: "stop", id: "70085"},
+          trip: %JsonApi.Reference{type: "trip", id: "60392515"}
         }
       }
     end
