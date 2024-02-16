@@ -43,7 +43,7 @@ defmodule MBTAV3API.RoutePattern do
   end
 
   @spec get_pattern_ids_by_stop([t()], MapSet.t(String.t()) | nil) ::
-          %{String.t() => String.t()}
+          %{String.t() => [String.t()]}
   def get_pattern_ids_by_stop(route_patterns, filter_stop_ids \\ nil) do
     route_patterns
     |> Enum.flat_map(fn
