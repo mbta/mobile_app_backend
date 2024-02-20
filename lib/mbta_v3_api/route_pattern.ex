@@ -12,6 +12,14 @@ defmodule MBTAV3API.RoutePattern do
           route: MBTAV3API.Route.t() | JsonApi.Reference.t() | nil
         }
 
+  @typedoc """
+  Denotes how common a route pattern is.
+
+  Deviations are usually more common than atypical patterns.
+  Atypical patterns generally run at specific times, like in early mornings or on school days.
+  Diversions include planned detours, bus shuttles, and snow routes.
+  Canonical-only patterns are, at least in theory, not scheduled to take place at any time.
+  """
   Util.declare_enum(
     :typicality,
     Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only])
