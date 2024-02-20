@@ -3,9 +3,7 @@ defmodule MBTAV3API.AlertTest do
 
   import Mox
 
-  alias MBTAV3API.Repository
-  alias MBTAV3API.Alert
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.{Alert, JsonApi, Repository}
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -69,7 +67,7 @@ defmodule MBTAV3API.AlertTest do
     )
 
     {:ok, alerts} =
-      Repository.Alert.get_all(
+      Repository.all_alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],
           stop: [

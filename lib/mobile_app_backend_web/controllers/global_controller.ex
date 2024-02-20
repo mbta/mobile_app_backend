@@ -1,5 +1,5 @@
 defmodule MobileAppBackendWeb.GlobalController do
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.{JsonApi, Repository}
   use MobileAppBackendWeb, :controller
 
   @type stop_map() :: MBTAV3API.Stop.stop_map()
@@ -19,7 +19,7 @@ defmodule MobileAppBackendWeb.GlobalController do
   @spec fetch_all_stops() :: [MBTAV3API.Stop.t()]
   defp fetch_all_stops do
     {:ok, stops} =
-      MBTAV3API.Stop.get_all(
+      Repository.all_stops(
         filter: [
           location_type: [:stop, :station]
         ],
@@ -35,7 +35,7 @@ defmodule MobileAppBackendWeb.GlobalController do
            %{(route_id :: String.t()) => MBTAV3API.Route.t()}}
   defp fetch_all_route_patterns do
     {:ok, route_patterns} =
-      MBTAV3API.RoutePattern.get_all(
+      Repository.all_route_patterns(
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )

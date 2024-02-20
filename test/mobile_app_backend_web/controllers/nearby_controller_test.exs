@@ -7,19 +7,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
   describe "GET /api/nearby unit tests" do
     setup do
-      Mox.defmock(StopRepositoryMock, for: MBTAV3API.Repository.Behaviour.Stop)
-      Mox.defmock(RoutePatternRepositoryMock, for: MBTAV3API.Repository.Behaviour.RoutePattern)
-      Mox.defmock(AlertRepositoryMock, for: MBTAV3API.Repository.Behaviour.Alert)
-
-      reassign_env(:mobile_app_backend, MBTAV3API.Repository.Stop, StopRepositoryMock)
-
-      reassign_env(
-        :mobile_app_backend,
-        MBTAV3API.Repository.RoutePattern,
-        RoutePatternRepositoryMock
-      )
-
-      reassign_env(:mobile_app_backend, MBTAV3API.Repository.Alert, AlertRepositoryMock)
+      Mox.defmock(RepositoryMock, for: MBTAV3API.Repository.Behaviour)
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
     test "returns stop and route patterns with expected fields", %{conn: conn} do
@@ -41,15 +30,15 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
           representative_trip: build(:trip, %{stops: [stop1, stop2], headsign: "Headsign 2"})
         })
 
-      StopRepositoryMock
-      |> expect(:get_all, 1, fn _params, _opts -> {:ok, [stop1, stop2]} end)
-      |> expect(:get_all, 2, fn _params, _opts -> {:ok, []} end)
+      RepositoryMock
+      |> expect(:all_stops, 1, fn _params, _opts -> {:ok, [stop1, stop2]} end)
+      |> expect(:all_stops, 2, fn _params, _opts -> {:ok, []} end)
 
-      RoutePatternRepositoryMock
-      |> expect(:get_all, fn _params, _opts -> {:ok, [rp1, rp2]} end)
+      RepositoryMock
+      |> expect(:all_route_patterns, fn _params, _opts -> {:ok, [rp1, rp2]} end)
 
-      AlertRepositoryMock
-      |> expect(:get_all, fn _params, _opts -> {:ok, []} end)
+      RepositoryMock
+      |> expect(:all_alerts, fn _params, _opts -> {:ok, []} end)
 
       conn =
         get(conn, "/api/nearby", %{
