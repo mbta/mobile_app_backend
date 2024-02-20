@@ -24,7 +24,7 @@ defmodule MobileAppBackendWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :mobile_app_backend,
-    gzip: false,
+    gzip: true,
     only: MobileAppBackendWeb.static_paths()
 
   # Code reloading can be explicitly enabled under the

@@ -110,7 +110,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       %{
         "stops" => stops,
         "route_patterns" => route_patterns,
-        "pattern_ids_by_stop" => pattern_ids_by_stop
+        "pattern_ids_by_stop" => pattern_ids_by_stop,
+        "routes" => routes
       } =
         json_response(conn, 200)
 
@@ -137,6 +138,15 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                "id" => "36-1-0",
                "name" => "Forest Hills Station - Millennium Park",
                "route" => %{
+                 "type" => "route",
+                 "id" => "36"
+               },
+               "sort_order" => 503_600_040,
+               "representative_trip" => %{"headsign" => "Millennium Park"}
+             } = Map.get(route_patterns, "36-1-0")
+
+      assert %{
+               "36" => %{
                  "color" => "FFC72C",
                  "direction_destinations" => [
                    "Millennium Park or VA Hospital",
@@ -149,10 +159,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  "sort_order" => 50_360,
                  "text_color" => "000000",
                  "type" => "bus"
-               },
-               "sort_order" => 503_600_040,
-               "representative_trip" => %{"headsign" => "Millennium Park"}
-             } = Map.get(route_patterns, "36-1-0")
+               }
+             } = routes
 
       assert ["37-D-0", "37-_-1", "37-3-1", "52-5-1", "52-4-1"] =
                Map.get(pattern_ids_by_stop, "833")
@@ -170,8 +178,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                        "id" => "place-GB-0198",
                        "latitude" => 42.562171,
                        "longitude" => -70.869254,
-                       "name" => "Montserrat",
-                       "parent_station" => nil
+                       "name" => "Montserrat"
                      } = parent_station
                  },
                  %{"id" => "GB-0198-02", "parent_station" => parent_station},
@@ -211,41 +218,28 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                    "direction_id" => 0,
                    "id" => "230-3-0",
                    "name" => "Quincy Center Station - Montello Station",
-                   "route" =>
-                     %{
-                       "color" => "FFC72C",
-                       "direction_destinations" => [
-                         "Montello Station",
-                         "Quincy Center Station"
-                       ],
-                       "direction_names" => ["Outbound", "Inbound"],
-                       "id" => "230",
-                       "long_name" => "Montello Station - Quincy Center Station",
-                       "short_name" => "230",
-                       "sort_order" => 52_300,
-                       "text_color" => "000000"
-                     } = route_230,
+                   "route" => %{"type" => "route", "id" => "230"} = route_230_type,
                    "sort_order" => 523_000_000
                  },
                  "230-3-1" => %{
                    "direction_id" => 1,
                    "id" => "230-3-1",
                    "name" => "Montello Station - Quincy Center Station",
-                   "route" => route_230,
+                   "route" => route_230_type,
                    "sort_order" => 523_001_000
                  },
                  "230-5-0" => %{
                    "direction_id" => 0,
                    "id" => "230-5-0",
                    "name" => "Quincy Center Station - Montello Station via Holbrook Ct",
-                   "route" => route_230,
+                   "route" => route_230_type,
                    "sort_order" => 523_000_040
                  },
                  "230-5-1" => %{
                    "direction_id" => 1,
                    "id" => "230-5-1",
                    "name" => "Montello Station - Quincy Center Station via Holbrook Ct",
-                   "route" => route_230,
+                   "route" => route_230_type,
                    "sort_order" => 523_001_040
                  },
                  "CR-Middleborough-52b80476-0" => %{
@@ -268,6 +262,21 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  "MM-0186-S" => ["CR-Middleborough-52b80476-0"],
                  "MM-0200-CS" => ["CR-Middleborough-75bed2bb-1", "CapeFlyer-C1-1"],
                  "MM-0200-S" => ["CR-Middleborough-52b80476-0", "CapeFlyer-C1-0"]
+               },
+               "routes" => %{
+                 "230" => %{
+                   "color" => "FFC72C",
+                   "direction_destinations" => [
+                     "Montello Station",
+                     "Quincy Center Station"
+                   ],
+                   "direction_names" => ["Outbound", "Inbound"],
+                   "id" => "230",
+                   "long_name" => "Montello Station - Quincy Center Station",
+                   "short_name" => "230",
+                   "sort_order" => 52_300,
+                   "text_color" => "000000"
+                 }
                }
              } =
                json_response(conn, 200)
