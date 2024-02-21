@@ -7,7 +7,7 @@ defmodule MobileAppBackend.Application do
 
   @impl true
   def start(_type, _args) do
-    Logger.add_backend(Sentry.LoggerBackend)
+    Logger.add_backend(Sentry.LoggerHandler)
 
     children = [
       MobileAppBackendWeb.Telemetry,
