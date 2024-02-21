@@ -19,6 +19,8 @@ defmodule MBTAV3API.RoutePattern do
   Atypical patterns generally run at specific times, like in early mornings or on school days.
   Diversions include planned detours, bus shuttles, and snow routes.
   Canonical-only patterns are, at least in theory, not scheduled to take place at any time.
+
+  See the `route_pattern_typicality` docs in the [MBTA GTFS documentation](https://github.com/mbta/gtfs-documentation/blob/7146d103ba0d3894b17f34175abc78ac2a925bd7/reference/gtfs.md#route_patternstxt).
   """
   Util.declare_enum(
     :typicality,
