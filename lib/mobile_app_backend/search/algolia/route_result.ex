@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Search.Algolia.RouteResult do
           id: String.t(),
           name: String.t(),
           long_name: String.t(),
-          route_type: number(),
+          route_type: MBTAV3API.Route.type(),
           rank: number()
         }
 
@@ -22,7 +22,7 @@ defmodule MobileAppBackend.Search.Algolia.RouteResult do
       id: result_response["route"]["id"],
       name: result_response["route"]["name"],
       long_name: result_response["route"]["long_name"],
-      route_type: result_response["route"]["type"],
+      route_type: MBTAV3API.Route.parse_type(result_response["route"]["type"]),
       rank: result_response["rank"]
     }
   end

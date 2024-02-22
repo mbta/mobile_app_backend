@@ -25,7 +25,11 @@ defmodule MobileAppBackend.Search.Algolia.StopResult do
       rank: result_response["rank"],
       zone: result_response["stop"]["zone"],
       station?: result_response["stop"]["station?"],
-      routes: Enum.map(result_response["routes"], &%{type: &1["type"], icon: &1["icon"]})
+      routes:
+        Enum.map(
+          result_response["routes"],
+          &%{type: MBTAV3API.Route.parse_type(&1["type"]), icon: &1["icon"]}
+        )
     }
   end
 end
