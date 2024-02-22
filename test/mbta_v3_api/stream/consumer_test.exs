@@ -14,21 +14,21 @@ defmodule MBTAV3API.Stream.ConsumerTest do
           data: """
           [
             {"attributes":{},"id":"Green-B","type":"route"},
-            {"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000},"id":"Green-B-812-0","links":{"self":"/route_patterns/Green-B-812-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-0","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"},
-            {"attributes":{"direction_id":0,"name":"Government Center - Cleveland Circle","sort_order":100330000},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
+            {"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","links":{"self":"/route_patterns/Green-B-812-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-0","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"},
+            {"attributes":{"direction_id":0,"name":"Government Center - Cleveland Circle","sort_order":100330000,"typicality":1},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
           ]
           """
         },
         %ServerSentEventStage.Event{
           event: "add",
           data: """
-          {"attributes":{"direction_id":1,"name":"Boston College - Government Center","sort_order":100321000},"id":"Green-B-812-1","links":{"self":"/route_patterns/Green-B-812-1"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-1","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"}
+          {"attributes":{"direction_id":1,"name":"Boston College - Government Center","sort_order":100321000,"typicality":1},"id":"Green-B-812-1","links":{"self":"/route_patterns/Green-B-812-1"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-1","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"}
           """
         },
         %ServerSentEventStage.Event{
           event: "update",
           data: """
-          {"attributes":{"direction_id":1,"name":"Not Government Center - Not Cleveland Circle","sort_order":100330001},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
+          {"attributes":{"direction_id":1,"name":"Not Government Center - Not Cleveland Circle","sort_order":100330001,"typicality":1},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
           """
         },
         %ServerSentEventStage.Event{

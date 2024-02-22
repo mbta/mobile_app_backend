@@ -1,20 +1,37 @@
 defmodule MBTAV3API.RoutePattern do
   use MBTAV3API.JsonApi.Object
+  require Util
 
   @type t :: %__MODULE__{
           id: String.t(),
           direction_id: 0 | 1,
           name: String.t(),
           sort_order: integer(),
+          typicality: typicality(),
           representative_trip: MBTAV3API.Trip.t() | JsonApi.Reference.t() | nil,
           route: MBTAV3API.Route.t() | JsonApi.Reference.t() | nil
         }
 
+  @typedoc """
+  Denotes how common a route pattern is.
+
+  Deviations are usually more common than atypical patterns.
+  Atypical patterns generally run at specific times, like in early mornings or on school days.
+  Diversions include planned detours, bus shuttles, and snow routes.
+  Canonical-only patterns are, at least in theory, not scheduled to take place at any time.
+
+  See the `route_pattern_typicality` docs in the [MBTA GTFS documentation](https://github.com/mbta/gtfs-documentation/blob/7146d103ba0d3894b17f34175abc78ac2a925bd7/reference/gtfs.md#route_patternstxt).
+  """
+  Util.declare_enum(
+    :typicality,
+    Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only])
+  )
+
   @derive Jason.Encoder
-  defstruct [:id, :direction_id, :name, :sort_order, :representative_trip, :route]
+  defstruct [:id, :direction_id, :name, :sort_order, :typicality, :representative_trip, :route]
 
   @impl JsonApi.Object
-  def fields, do: [:direction_id, :name, :sort_order]
+  def fields, do: [:direction_id, :name, :sort_order, :typicality]
 
   @impl JsonApi.Object
   def includes, do: %{representative_trip: :trip, route: :route}
@@ -36,6 +53,7 @@ defmodule MBTAV3API.RoutePattern do
       direction_id: item.attributes["direction_id"],
       name: item.attributes["name"],
       sort_order: item.attributes["sort_order"],
+      typicality: parse_typicality(item.attributes["typicality"]),
       representative_trip:
         JsonApi.Object.parse_one_related(item.relationships["representative_trip"]),
       route: JsonApi.Object.parse_one_related(item.relationships["route"])

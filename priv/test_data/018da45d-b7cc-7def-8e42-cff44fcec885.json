@@ -4,7 +4,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Alewife - Braintree",
-        "sort_order": 100100000
+        "sort_order": 100100000,
+        "typicality": 1
       },
       "id": "Red-3-0",
       "links": {
@@ -30,7 +31,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Alewife - Ashmont",
-        "sort_order": 100100001
+        "sort_order": 100100001,
+        "typicality": 1
       },
       "id": "Red-1-0",
       "links": {
@@ -56,7 +58,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Braintree - Alewife",
-        "sort_order": 100101000
+        "sort_order": 100101000,
+        "typicality": 1
       },
       "id": "Red-3-1",
       "links": {
@@ -82,7 +85,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Ashmont - Alewife",
-        "sort_order": 100101001
+        "sort_order": 100101001,
+        "typicality": 1
       },
       "id": "Red-1-1",
       "links": {
@@ -108,7 +112,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Wachusett",
-        "sort_order": 200020000
+        "sort_order": 200020000,
+        "typicality": 1
       },
       "id": "CR-Fitchburg-2a5f6366-0",
       "links": {
@@ -134,7 +139,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Wachusett",
-        "sort_order": 200020020
+        "sort_order": 200020020,
+        "typicality": 2
       },
       "id": "CR-Fitchburg-8294748d-0",
       "links": {
@@ -160,7 +166,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Littleton/Route 495",
-        "sort_order": 200020030
+        "sort_order": 200020030,
+        "typicality": 2
       },
       "id": "CR-Fitchburg-acb28c6e-0",
       "links": {
@@ -186,7 +193,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Wachusett - North Station",
-        "sort_order": 200021000
+        "sort_order": 200021000,
+        "typicality": 1
       },
       "id": "CR-Fitchburg-d82ea33a-1",
       "links": {
@@ -212,7 +220,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Wachusett - North Station",
-        "sort_order": 200021020
+        "sort_order": 200021020,
+        "typicality": 2
       },
       "id": "CR-Fitchburg-94972bc9-1",
       "links": {
@@ -238,7 +247,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Littleton/Route 495 - North Station",
-        "sort_order": 200021030
+        "sort_order": 200021030,
+        "typicality": 2
       },
       "id": "CR-Fitchburg-6528076d-1",
       "links": {
