@@ -5,7 +5,12 @@ import Config
 # system starts, so it is typically used to load production configuration
 # and secrets from environment variables or elsewhere. Do not define
 # any compile-time configuration in here, as it won't be applied.
-# The block below contains prod specific runtime configuration.
+
+config :sentry,
+  dsn: System.get_env("SENTRY_DSN"),
+  environment_name: System.get_env("SENTRY_ENV", "local"),
+  enable_source_code_context: true,
+  root_source_code_path: File.cwd!()
 
 if config_env() != :test do
   # mbta_v3_api configuration in disguise

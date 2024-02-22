@@ -13,3 +13,7 @@ export ALGOLIA_APP_ID=
 export ALGOLIA_SEARCH_KEY=
 export ALGOLIA_READ_URL=
 
+# Configuration for [Sentry](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
+# Used for error logging
+export SENTRY_DSN=
+export SENTRY_ENV=local
