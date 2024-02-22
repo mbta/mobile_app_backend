@@ -10,7 +10,8 @@ defmodule MBTAV3API.RoutePatternTest do
              attributes: %{
                "direction_id" => 1,
                "name" => "Cleveland Circle - Government Center",
-               "sort_order" => 100_331_000
+               "sort_order" => 100_331_000,
+               "typicality" => 1
              },
              relationships: %{
                "route" => [
@@ -25,6 +26,7 @@ defmodule MBTAV3API.RoutePatternTest do
              direction_id: 1,
              name: "Cleveland Circle - Government Center",
              sort_order: 100_331_000,
+             typicality: :typical,
              route: %MBTAV3API.Route{id: "Green-C"},
              representative_trip: %MBTAV3API.Trip{id: "trip123"}
            }

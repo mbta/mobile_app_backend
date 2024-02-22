@@ -4,7 +4,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "South Station - Middleborough/Lakeville",
-        "sort_order": 200090000
+        "sort_order": 200090000,
+        "typicality": 1
       },
       "id": "CR-Middleborough-52b80476-0",
       "links": {
@@ -30,7 +31,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Middleborough/Lakeville - South Station",
-        "sort_order": 200091000
+        "sort_order": 200091000,
+        "typicality": 1
       },
       "id": "CR-Middleborough-75bed2bb-1",
       "links": {
@@ -56,7 +58,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "South Station - Hyannis",
-        "sort_order": 210000991
+        "sort_order": 210000991,
+        "typicality": 5
       },
       "id": "CapeFlyer-C1-0",
       "links": {
@@ -82,7 +85,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Hyannis - South Station",
-        "sort_order": 210001991
+        "sort_order": 210001991,
+        "typicality": 5
       },
       "id": "CapeFlyer-C1-1",
       "links": {
@@ -108,7 +112,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Quincy Center Station - Montello Station",
-        "sort_order": 523000000
+        "sort_order": 523000000,
+        "typicality": 1
       },
       "id": "230-3-0",
       "links": {
@@ -134,7 +139,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Quincy Center Station - Montello Station via Holbrook Ct",
-        "sort_order": 523000040
+        "sort_order": 523000040,
+        "typicality": 3
       },
       "id": "230-5-0",
       "links": {
@@ -160,7 +166,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Montello Station - Quincy Center Station",
-        "sort_order": 523001000
+        "sort_order": 523001000,
+        "typicality": 1
       },
       "id": "230-3-1",
       "links": {
@@ -186,7 +193,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Montello Station - Quincy Center Station via Holbrook Ct",
-        "sort_order": 523001040
+        "sort_order": 523001040,
+        "typicality": 2
       },
       "id": "230-5-1",
       "links": {
