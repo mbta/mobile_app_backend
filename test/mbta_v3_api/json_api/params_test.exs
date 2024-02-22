@@ -26,14 +26,14 @@ defmodule MBTAV3API.JsonApi.ParamsTest do
       assert %{
                "fields[route]" =>
                  "type,color,direction_names,direction_destinations,long_name,short_name,sort_order,text_color",
-               "fields[route_pattern]" => "direction_id,name,sort_order"
+               "fields[route_pattern]" => "direction_id,name,sort_order,typicality"
              } =
                flatten_params([include: :route], :route_pattern)
     end
 
     test "can override fields" do
       assert %{
-               "fields[route_pattern]" => "direction_id,name,sort_order",
+               "fields[route_pattern]" => "direction_id,name,sort_order,typicality",
                "fields[trip]" => "asdf,ghjk"
              } =
                flatten_params(
