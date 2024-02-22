@@ -39,8 +39,8 @@ defmodule MBTAV3API.Stop do
   @impl JsonApi.Object
   def includes,
     do: %{
-      child_stops: :stop,
-      parent_station: :stop
+      child_stops: __MODULE__,
+      parent_station: __MODULE__
     }
 
   @impl JsonApi.Object
@@ -56,7 +56,7 @@ defmodule MBTAV3API.Stop do
 
   @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
   def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :stop)
+    params = JsonApi.Params.flatten_params(params, __MODULE__)
 
     case MBTAV3API.get_json("/stops", params, opts) do
       %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}

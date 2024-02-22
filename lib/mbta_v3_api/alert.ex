@@ -72,7 +72,7 @@ defmodule MBTAV3API.Alert do
 
   @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
   def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :alert)
+    params = JsonApi.Params.flatten_params(params, __MODULE__)
 
     case MBTAV3API.get_json("/alerts", params, opts) do
       %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}

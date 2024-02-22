@@ -13,7 +13,7 @@ defmodule MBTAV3API.Trip do
 
   def fields, do: [:headsign]
 
-  def includes, do: %{route_pattern: :route_pattern, stops: :stop}
+  def includes, do: %{route_pattern: MBTAV3API.RoutePattern, stops: MBTAV3API.Stop}
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
