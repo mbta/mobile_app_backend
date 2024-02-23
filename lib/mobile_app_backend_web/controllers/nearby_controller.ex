@@ -50,7 +50,7 @@ defmodule MobileAppBackendWeb.NearbyController do
     degree_radius = miles_to_degrees(radius)
 
     {:ok, cr_stops} =
-      Repository.all_stops(
+      Repository.stops(
         filter: [
           latitude: latitude,
           longitude: longitude,
@@ -63,7 +63,7 @@ defmodule MobileAppBackendWeb.NearbyController do
       )
 
     {:ok, other_stops} =
-      Repository.all_stops(
+      Repository.stops(
         filter: [
           latitude: latitude,
           longitude: longitude,
@@ -84,7 +84,7 @@ defmodule MobileAppBackendWeb.NearbyController do
            %{(route_id :: String.t()) => MBTAV3API.Route.t()}}
   defp fetch_route_patterns(stops) do
     {:ok, route_patterns} =
-      Repository.all_route_patterns(
+      Repository.route_patterns(
         filter: [stop: Enum.join(Map.keys(stops), ",")],
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
@@ -114,7 +114,7 @@ defmodule MobileAppBackendWeb.NearbyController do
   end
 
   def fetch_alerts(stops, now) do
-    {:ok, alerts} = Repository.all_alerts(filter: [stop: Map.keys(stops)])
+    {:ok, alerts} = Repository.alerts(filter: [stop: Map.keys(stops)])
 
     Enum.filter(alerts, fn alert ->
       MBTAV3API.Alert.active?(alert, now) and

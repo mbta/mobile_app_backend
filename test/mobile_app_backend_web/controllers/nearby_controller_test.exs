@@ -7,7 +7,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
   describe "GET /api/nearby unit tests" do
     setup do
-      Mox.defmock(RepositoryMock, for: MBTAV3API.Repository.Behaviour)
+      :verify_on_exit!
+      Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
@@ -31,14 +32,14 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         })
 
       RepositoryMock
-      |> expect(:all_stops, 1, fn _params, _opts -> {:ok, [stop1, stop2]} end)
-      |> expect(:all_stops, 2, fn _params, _opts -> {:ok, []} end)
+      |> expect(:stops, 1, fn _params, _opts -> {:ok, [stop1, stop2]} end)
+      |> expect(:stops, 2, fn _params, _opts -> {:ok, []} end)
 
       RepositoryMock
-      |> expect(:all_route_patterns, fn _params, _opts -> {:ok, [rp1, rp2]} end)
+      |> expect(:route_patterns, fn _params, _opts -> {:ok, [rp1, rp2]} end)
 
       RepositoryMock
-      |> expect(:all_alerts, fn _params, _opts -> {:ok, []} end)
+      |> expect(:alerts, fn _params, _opts -> {:ok, []} end)
 
       conn =
         get(conn, "/api/nearby", %{
@@ -85,6 +86,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
   describe "GET /api/nearby integration tests" do
     setup do
+      :verify_on_exit!
       Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
       :ok
     end

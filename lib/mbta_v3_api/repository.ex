@@ -1,26 +1,34 @@
 defmodule MBTAV3API.Repository do
+  @moduledoc """
+  Convenience functions for fetching data from the MBTA V3 API.
+  """
   alias MBTAV3API.{JsonApi, Repository}
-  @behaviour Repository.Behaviour
 
-  @impl Repository.Behaviour
-  def all_alerts(params, opts \\ []) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).all_alerts(
+  @callback alerts(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, [MBTAV3API.Alert.t()]} | {:error, term()}
+
+  @callback route_patterns(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, [MBTAV3API.RoutePattern.t()]} | {:error, term()}
+
+  @callback stops(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, [MBTAV3API.Stop.t()]} | {:error, term()}
+
+  def alerts(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
       params,
       opts
     )
   end
 
-  @impl Repository.Behaviour
-  def all_route_patterns(params, opts \\ []) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).all_route_patterns(
+  def route_patterns(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).route_patterns(
       params,
       opts
     )
   end
 
-  @impl Repository.Behaviour
-  def all_stops(params, opts \\ []) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).all_stops(
+  def stops(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).stops(
       params,
       opts
     )
@@ -28,9 +36,11 @@ defmodule MBTAV3API.Repository do
 end
 
 defmodule MBTAV3API.Repository.Impl do
+  @behaviour MBTAV3API.Repository
   alias MBTAV3API.JsonApi
 
-  def all_alerts(params, opts \\ []) do
+  @impl true
+  def alerts(params, opts \\ []) do
     params = JsonApi.Params.flatten_params(params, :alert)
 
     case MBTAV3API.get_json("/alerts", params, opts) do
@@ -39,7 +49,8 @@ defmodule MBTAV3API.Repository.Impl do
     end
   end
 
-  def all_route_patterns(params, opts \\ []) do
+  @impl true
+  def route_patterns(params, opts \\ []) do
     params = JsonApi.Params.flatten_params(params, :route_pattern)
 
     case MBTAV3API.get_json("/route_patterns", params, opts) do
@@ -48,7 +59,8 @@ defmodule MBTAV3API.Repository.Impl do
     end
   end
 
-  def all_stops(params, opts \\ []) do
+  @impl true
+  def stops(params, opts \\ []) do
     params = JsonApi.Params.flatten_params(params, :stop)
 
     case MBTAV3API.get_json("/stops", params, opts) do

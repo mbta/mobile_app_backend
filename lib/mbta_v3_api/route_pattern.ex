@@ -14,7 +14,6 @@ defmodule MBTAV3API.RoutePattern do
   defstruct [:id, :direction_id, :name, :sort_order, :representative_trip, :route]
 
   @impl JsonApi.Object
-  @spec fields() :: [:direction_id | :name | :sort_order, ...]
   def fields, do: [:direction_id, :name, :sort_order]
 
   @impl JsonApi.Object

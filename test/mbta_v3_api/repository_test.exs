@@ -8,7 +8,7 @@ defmodule MBTAV3API.RepositoryTest do
 
   setup :verify_on_exit!
 
-  test "all_alerts/2" do
+  test "alerts/2" do
     expect(
       MobileAppBackend.HTTPMock,
       :request,
@@ -67,7 +67,7 @@ defmodule MBTAV3API.RepositoryTest do
     )
 
     {:ok, alerts} =
-      Repository.all_alerts(
+      Repository.alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],
           stop: [
@@ -121,7 +121,7 @@ defmodule MBTAV3API.RepositoryTest do
            ]
   end
 
-  test "all_route_patterns/2" do
+  test "route_patterns/2" do
     expect(
       MobileAppBackend.HTTPMock,
       :request,
@@ -198,10 +198,10 @@ defmodule MBTAV3API.RepositoryTest do
                 route: %JsonApi.Reference{type: "route", id: "CR-Newburyport"},
                 representative_trip: %JsonApi.Reference{type: "trip", id: "CR-649341-103"}
               }
-            ]} = Repository.all_route_patterns([])
+            ]} = Repository.route_patterns([])
   end
 
-  test "all_stops/2" do
+  test "stops/2" do
     expect(
       MobileAppBackend.HTTPMock,
       :request,
@@ -260,6 +260,6 @@ defmodule MBTAV3API.RepositoryTest do
                 name: "Porter",
                 parent_station: %JsonApi.Reference{type: "stop", id: "place-portr"}
               }
-            ]} = Repository.all_stops([])
+            ]} = Repository.stops([])
   end
 end
