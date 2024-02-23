@@ -133,7 +133,8 @@ defmodule MBTAV3API.RepositoryTest do
                "attributes" => %{
                  "direction_id" => 0,
                  "name" => "North Station - Rockport",
-                 "sort_order" => 200_110_050
+                 "sort_order" => 200_110_050,
+                 "typicality" => 1
                },
                "id" => "CR-Newburyport-e54dc640-0",
                "relationships" => %{
@@ -156,7 +157,8 @@ defmodule MBTAV3API.RepositoryTest do
                "attributes" => %{
                  "direction_id" => 0,
                  "name" => "North Station - Rockport",
-                 "sort_order" => 200_110_110
+                 "sort_order" => 200_110_110,
+                 "typicality" => 1
                },
                "id" => "CR-Newburyport-dd9f791d-0",
                "relationships" => %{

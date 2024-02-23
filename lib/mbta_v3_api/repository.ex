@@ -37,34 +37,34 @@ end
 
 defmodule MBTAV3API.Repository.Impl do
   @behaviour MBTAV3API.Repository
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.{Alert, JsonApi, RoutePattern, Stop}
 
   @impl true
   def alerts(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :alert)
+    params = JsonApi.Params.flatten_params(params, Alert)
 
     case MBTAV3API.get_json("/alerts", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &MBTAV3API.Alert.parse/1)}
+      %JsonApi{data: data} -> {:ok, Enum.map(data, &Alert.parse/1)}
       {:error, error} -> {:error, error}
     end
   end
 
   @impl true
   def route_patterns(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :route_pattern)
+    params = JsonApi.Params.flatten_params(params, RoutePattern)
 
     case MBTAV3API.get_json("/route_patterns", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &MBTAV3API.RoutePattern.parse/1)}
+      %JsonApi{data: data} -> {:ok, Enum.map(data, &RoutePattern.parse/1)}
       {:error, error} -> {:error, error}
     end
   end
 
   @impl true
   def stops(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :stop)
+    params = JsonApi.Params.flatten_params(params, Stop)
 
     case MBTAV3API.get_json("/stops", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &MBTAV3API.Stop.parse/1)}
+      %JsonApi{data: data} -> {:ok, Enum.map(data, &Stop.parse/1)}
       {:error, error} -> {:error, error}
     end
   end
