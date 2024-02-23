@@ -1,10 +1,5 @@
 defmodule OpenTripPlannerClientTest do
-  use ExUnit.Case, async: true
-
-  setup do
-    Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
-    :ok
-  end
+  use HttpStub.Case, async: true
 
   describe "nearby/3" do
     test "handles parent stops" do

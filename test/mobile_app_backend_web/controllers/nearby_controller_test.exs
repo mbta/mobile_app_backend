@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.NearbyControllerTest do
+  use HttpStub.Case
   use MobileAppBackendWeb.ConnCase
   import Test.Support.Sigils
   import Mox
@@ -95,11 +96,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
   end
 
   describe "GET /api/nearby integration tests" do
-    setup do
-      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
-      :ok
-    end
-
     test "retrieves nearby stop and route info from the V3 API", %{conn: conn} do
       conn =
         get(conn, "/api/nearby", %{
