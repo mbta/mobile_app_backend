@@ -19,7 +19,7 @@ defmodule MBTAV3API.Vehicle do
   def fields, do: [:current_status]
 
   @impl JsonApi.Object
-  def includes, do: %{stop: :stop, trip: :trip}
+  def includes, do: %{stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
