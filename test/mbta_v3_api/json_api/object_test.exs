@@ -93,6 +93,34 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
     end
   end
 
+  test "__using__/1" do
+    expected =
+      quote do
+        alias MBTAV3API.JsonApi
+
+        @behaviour JsonApi.Object
+
+        Module.put_attribute(__MODULE__, :jsonapi_object_renames, %{a_raw: :a})
+
+        @impl JsonApi.Object
+        def jsonapi_type, do: :object_test
+
+        @after_compile JsonApi.Object
+      end
+      |> Macro.to_string()
+
+    renames_arg = Macro.escape(%{a_raw: :a})
+
+    actual =
+      quote do
+        MBTAV3API.JsonApi.Object.__using__(renames: unquote(renames_arg))
+      end
+      |> Macro.expand_once(__ENV__)
+      |> Macro.to_string()
+
+    assert expected == actual
+  end
+
   describe "__after_compile__/2" do
     test "correctly raises errors" do
       bad_module =
@@ -106,7 +134,7 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
             def fields, do: [:f1, :f2, :f3, :f4]
 
             @impl true
-            def includes, do: %{r1: :stop, r2: :trip, r3: :alert}
+            def includes, do: %{r1: MBTAV3API.Stop, r2: MBTAV3API.Trip, r3: MBTAV3API.Alert}
           end
         end
 
@@ -129,7 +157,7 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
             def fields, do: [:field_raw]
 
             @impl true
-            def includes, do: %{related_raw: :stop}
+            def includes, do: %{related_raw: MBTAV3API.Stop}
           end
         end
 

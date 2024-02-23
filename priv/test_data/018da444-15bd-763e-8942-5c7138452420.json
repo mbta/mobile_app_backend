@@ -4,7 +4,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Rockport",
-        "sort_order": 200110050
+        "sort_order": 200110050,
+        "typicality": 2
       },
       "id": "CR-Newburyport-e54dc640-0",
       "links": {
@@ -30,7 +31,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Rockport",
-        "sort_order": 200110110
+        "sort_order": 200110110,
+        "typicality": 2
       },
       "id": "CR-Newburyport-dd9f791d-0",
       "links": {
@@ -56,7 +58,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "North Station - Rockport",
-        "sort_order": 200110160
+        "sort_order": 200110160,
+        "typicality": 1
       },
       "id": "CR-Newburyport-5967b204-0",
       "links": {
@@ -82,7 +85,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Rockport - North Station",
-        "sort_order": 200111040
+        "sort_order": 200111040,
+        "typicality": 2
       },
       "id": "CR-Newburyport-d47c5647-1",
       "links": {
@@ -108,7 +112,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Rockport - North Station",
-        "sort_order": 200111140
+        "sort_order": 200111140,
+        "typicality": 1
       },
       "id": "CR-Newburyport-05eb9eab-1",
       "links": {
@@ -134,7 +139,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Beverly - Rockport (Local)",
-        "sort_order": 607050990
+        "sort_order": 607050990,
+        "typicality": 5
       },
       "id": "Shuttle-BeverlyRockportLocal-0-0",
       "links": {
@@ -160,7 +166,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Rockport - Beverly (Local)",
-        "sort_order": 607051990
+        "sort_order": 607051990,
+        "typicality": 5
       },
       "id": "Shuttle-BeverlyRockportLocal-0-1",
       "links": {
@@ -186,7 +193,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Oak Grove - Rockport (Limited)",
-        "sort_order": 621860990
+        "sort_order": 621860990,
+        "typicality": 5
       },
       "id": "Shuttle-OakGroveRockportLimited-0-0",
       "links": {
@@ -212,7 +220,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Rockport - Oak Grove (Limited)",
-        "sort_order": 621861990
+        "sort_order": 621861990,
+        "typicality": 5
       },
       "id": "Shuttle-OakGroveRockportLimited-0-1",
       "links": {
@@ -238,7 +247,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Salem - Rockport (Local)",
-        "sort_order": 624060990
+        "sort_order": 624060990,
+        "typicality": 5
       },
       "id": "Shuttle-RockportSalemLocal-0-0",
       "links": {
@@ -264,7 +274,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Rockport - Salem (Local)",
-        "sort_order": 624061990
+        "sort_order": 624061990,
+        "typicality": 5
       },
       "id": "Shuttle-RockportSalemLocal-0-1",
       "links": {

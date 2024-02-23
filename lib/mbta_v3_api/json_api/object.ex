@@ -5,13 +5,17 @@ defmodule MBTAV3API.JsonApi.Object do
   alias MBTAV3API.JsonApi
 
   @doc """
+  JSON:API type name for the object this module represents.
+  """
+  @callback jsonapi_type :: atom()
+  @doc """
   List of fields to include by default in JSON:API calls. Should match the `defstruct/1` names and orders.
   """
   @callback fields :: [atom()]
   @doc """
-  Map of related objects that can be included to their types. `%{trip: :trip, stops: :stop, parent_station: :stop}`, etc. Names should match `defstruct/1`.
+  Map of related objects that can be included to their struct modules. `%{trip: MBTAV3API.Trip, stops: MBTAV3API.Stop, parent_station: MBTAV3API.Stop}`, etc. Names should match `defstruct/1`.
   """
-  @callback includes :: %{atom() => atom()}
+  @callback includes :: %{atom() => module()}
   @doc """
   If needed, a custom serialize function.
 
@@ -28,6 +32,7 @@ defmodule MBTAV3API.JsonApi.Object do
 
   @doc """
   Sets up the `JsonApi.Object` behaviour with compile-time validation of `c:fields/0` and `c:includes/0` against the `defstruct/1`.
+  Also defines `c:jsonapi_type/0` based on the module name to invert `module_for/1`.
 
   Expects the `defstruct` to be `[:id, ...field names..., ...related object names...]`.
   Field names should match the order in `c:fields/1` (which should probably be alphabetized) and related object names should be alphabetized.
@@ -38,12 +43,22 @@ defmodule MBTAV3API.JsonApi.Object do
   defmacro __using__(opts) do
     renames = Keyword.get(opts, :renames, quote(do: %{}))
 
+    jsonapi_type =
+      __CALLER__.module
+      |> Module.split()
+      |> List.last()
+      |> Macro.underscore()
+      |> String.to_atom()
+
     quote do
       alias MBTAV3API.JsonApi
 
       @behaviour JsonApi.Object
 
       Module.put_attribute(__MODULE__, :jsonapi_object_renames, unquote(renames))
+
+      @impl JsonApi.Object
+      def jsonapi_type, do: unquote(jsonapi_type)
 
       @after_compile JsonApi.Object
     end

@@ -23,7 +23,7 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
                    zone: "8",
                    station?: true,
                    rank: 3,
-                   routes: [%{type: 2, icon: "commuter_rail"}]
+                   routes: [%{type: :commuter_rail, icon: "commuter_rail"}]
                  }
                ],
                routes: [
@@ -33,7 +33,7 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
                    name: "33Name",
                    long_name: "33 Long Name",
                    rank: 5,
-                   route_type: 3
+                   route_type: :bus
                  }
                ]
              } == results

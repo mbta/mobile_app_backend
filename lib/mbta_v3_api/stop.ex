@@ -39,8 +39,8 @@ defmodule MBTAV3API.Stop do
   @impl JsonApi.Object
   def includes,
     do: %{
-      child_stops: :stop,
-      parent_station: :stop
+      child_stops: __MODULE__,
+      parent_station: __MODULE__
     }
 
   @impl JsonApi.Object

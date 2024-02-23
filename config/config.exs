@@ -26,6 +26,13 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   route_index: "routes_test",
   stop_index: "stops_test"
 
+config :mobile_app_backend, :logger, [
+  {:handler, :sentry_handler, Sentry.LoggerHandler,
+   %{
+     config: %{metadata: :all}
+   }}
+]
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

@@ -50,12 +50,12 @@ defmodule MBTAV3API.Prediction do
     ]
   end
 
-  def includes, do: %{stop: :stop, trip: :trip, vehicle: :vehicle}
+  def includes, do: %{stop: MBTAV3API.Stop, trip: MBTAV3API.Trip, vehicle: MBTAV3API.Vehicle}
 
   @spec stream_all(JsonApi.Params.t(), Keyword.t()) ::
           MBTAV3API.Stream.Supervisor.on_start_instance()
   def stream_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :prediction)
+    params = JsonApi.Params.flatten_params(params, __MODULE__)
     opts = Keyword.put(opts, :type, __MODULE__)
 
     MBTAV3API.start_stream("/predictions", params, opts)

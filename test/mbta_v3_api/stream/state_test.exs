@@ -28,7 +28,7 @@ defmodule MBTAV3API.Stream.StateTest do
                %Event{
                  event: "add",
                  data:
-                   ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
+                   ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
                }
              ]) == %State{
                data: %{
@@ -39,6 +39,7 @@ defmodule MBTAV3API.Stream.StateTest do
                      direction_id: 0,
                      name: "Government Center - Boston College",
                      sort_order: 100_320_000,
+                     typicality: :typical,
                      representative_trip: nil,
                      route: green_b
                    }

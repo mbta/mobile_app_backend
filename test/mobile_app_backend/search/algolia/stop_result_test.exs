@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Search.Algolia.StopResultTest do
                zone: "8",
                station?: true,
                rank: 3,
-               routes: [%{type: 2, icon: "commuter_rail"}]
+               routes: [%{type: :commuter_rail, icon: "commuter_rail"}]
              } == StopResult.parse(response)
     end
   end

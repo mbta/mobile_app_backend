@@ -4,7 +4,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "South Station - Needham Heights",
-        "sort_order": 200100000
+        "sort_order": 200100000,
+        "typicality": 1
       },
       "id": "CR-Needham-a6552e0a-0",
       "links": {
@@ -30,7 +31,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills - Needham Heights",
-        "sort_order": 200100010
+        "sort_order": 200100010,
+        "typicality": 2
       },
       "id": "CR-Needham-7f6dbefb-0",
       "links": {
@@ -56,7 +58,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "South Station - Needham Heights",
-        "sort_order": 200100020
+        "sort_order": 200100020,
+        "typicality": 2
       },
       "id": "CR-Needham-69669b59-0",
       "links": {
@@ -82,7 +85,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "South Station - Needham Heights",
-        "sort_order": 200100991
+        "sort_order": 200100991,
+        "typicality": 5
       },
       "id": "CR-Needham-C1-0",
       "links": {
@@ -108,7 +112,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Needham Heights - South Station",
-        "sort_order": 200101000
+        "sort_order": 200101000,
+        "typicality": 1
       },
       "id": "CR-Needham-d774fb34-1",
       "links": {
@@ -134,7 +139,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Needham Heights - Forest Hills",
-        "sort_order": 200101010
+        "sort_order": 200101010,
+        "typicality": 2
       },
       "id": "CR-Needham-68a3e69b-1",
       "links": {
@@ -160,7 +166,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Needham Heights - South Station",
-        "sort_order": 200101020
+        "sort_order": 200101020,
+        "typicality": 2
       },
       "id": "CR-Needham-a01e12e1-1",
       "links": {
@@ -186,7 +193,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Needham Heights - South Station",
-        "sort_order": 200101991
+        "sort_order": 200101991,
+        "typicality": 5
       },
       "id": "CR-Needham-C1-1",
       "links": {
@@ -212,7 +220,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills Station - VA Hospital, West Roxbury",
-        "sort_order": 503600000
+        "sort_order": 503600000,
+        "typicality": 1
       },
       "id": "36-8-0",
       "links": {
@@ -238,7 +247,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills Station - Millennium Park",
-        "sort_order": 503600040
+        "sort_order": 503600040,
+        "typicality": 2
       },
       "id": "36-1-0",
       "links": {
@@ -264,7 +274,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills Station - Millennium Park",
-        "sort_order": 503600060
+        "sort_order": 503600060,
+        "typicality": 3
       },
       "id": "36-5-0",
       "links": {
@@ -290,7 +301,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "VA Hospital, West Roxbury - Forest Hills Station",
-        "sort_order": 503601000
+        "sort_order": 503601000,
+        "typicality": 1
       },
       "id": "36-8-1",
       "links": {
@@ -316,7 +328,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Millennium Park - Forest Hills Station",
-        "sort_order": 503601040
+        "sort_order": 503601040,
+        "typicality": 2
       },
       "id": "36-1-1",
       "links": {
@@ -342,7 +355,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Millennium Park - Forest Hills Station",
-        "sort_order": 503601060
+        "sort_order": 503601060,
+        "typicality": 3
       },
       "id": "36-5-1",
       "links": {
@@ -368,7 +382,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills Station - Baker St & Vermont St",
-        "sort_order": 503700000
+        "sort_order": 503700000,
+        "typicality": 1
       },
       "id": "37-_-0",
       "links": {
@@ -394,7 +409,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills Station - LaGrange St & Corey St",
-        "sort_order": 503700040
+        "sort_order": 503700040,
+        "typicality": 3
       },
       "id": "37-D-0",
       "links": {
@@ -420,7 +436,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Baker St & Vermont St - Forest Hills Station",
-        "sort_order": 503701000
+        "sort_order": 503701000,
+        "typicality": 1
       },
       "id": "37-_-1",
       "links": {
@@ -446,7 +463,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "LaGrange St & Corey St - Forest Hills Station",
-        "sort_order": 503701040
+        "sort_order": 503701040,
+        "typicality": 3
       },
       "id": "37-3-1",
       "links": {
@@ -472,7 +490,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Watertown - Dedham Mall via Meadowbrook Rd",
-        "sort_order": 505200000
+        "sort_order": 505200000,
+        "typicality": 1
       },
       "id": "52-5-0",
       "links": {
@@ -498,7 +517,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Watertown - Charles River Loop via Meadowbrook Rd",
-        "sort_order": 505200020
+        "sort_order": 505200020,
+        "typicality": 2
       },
       "id": "52-4-0",
       "links": {
@@ -524,7 +544,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Dedham Mall - Watertown via Meadowbrook Rd",
-        "sort_order": 505201000
+        "sort_order": 505201000,
+        "typicality": 1
       },
       "id": "52-5-1",
       "links": {
@@ -550,7 +571,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Charles River Loop - Watertown via Meadowbrook Rd",
-        "sort_order": 505201010
+        "sort_order": 505201010,
+        "typicality": 2
       },
       "id": "52-4-1",
       "links": {
@@ -576,7 +598,8 @@
       "attributes": {
         "direction_id": 0,
         "name": "Forest Hills - Needham Heights",
-        "sort_order": 616500990
+        "sort_order": 616500990,
+        "typicality": 5
       },
       "id": "Shuttle-ForestHillsNeedhamHeights-0-0",
       "links": {
@@ -602,7 +625,8 @@
       "attributes": {
         "direction_id": 1,
         "name": "Needham Heights - Forest Hills",
-        "sort_order": 616501990
+        "sort_order": 616501990,
+        "typicality": 5
       },
       "id": "Shuttle-ForestHillsNeedhamHeights-0-1",
       "links": {
