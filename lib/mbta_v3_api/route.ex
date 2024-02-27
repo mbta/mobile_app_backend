@@ -54,16 +54,6 @@ defmodule MBTAV3API.Route do
   def serialize_filter_value(:type, type), do: serialize_type(type)
   def serialize_filter_value(_field, value), do: value
 
-  @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
-  def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, __MODULE__)
-
-    case MBTAV3API.get_json("/routes", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}
-      {:error, error} -> {:error, error}
-    end
-  end
-
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{

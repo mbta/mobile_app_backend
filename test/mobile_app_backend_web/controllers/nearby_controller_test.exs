@@ -6,11 +6,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
   import Test.Support.Helpers
   import MobileAppBackend.Factory
 
-  setup_all do
-    Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
-    :ok
-  end
-
   describe "GET /api/nearby unit tests" do
     setup do
       verify_on_exit!()

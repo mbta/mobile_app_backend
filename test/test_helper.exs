@@ -1,3 +1,4 @@
+Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
 Mox.defmock(MobileAppBackend.HTTPMock, for: MobileAppBackend.HTTP)
 Application.put_env(:mobile_app_backend, MobileAppBackend.HTTP, MobileAppBackend.HTTPMock)
 
