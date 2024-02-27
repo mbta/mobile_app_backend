@@ -1,13 +1,101 @@
 defmodule MobileAppBackendWeb.NearbyControllerTest do
+  use HttpStub.Case
   use MobileAppBackendWeb.ConnCase
   import Test.Support.Sigils
+  import Mox
+  import Test.Support.Helpers
+  import MobileAppBackend.Factory
 
-  setup do
-    Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+  setup_all do
+    Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
     :ok
   end
 
-  describe "GET /api/nearby" do
+  describe "GET /api/nearby unit tests" do
+    setup do
+      verify_on_exit!()
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+    end
+
+    test "returns stop and route patterns with expected fields", %{conn: conn} do
+      stop1 = build(:stop, %{id: "stop1", name: "Stop 1"})
+      stop2 = build(:stop, %{id: "stop2", name: "Stop 2"})
+      route = build(:route, %{id: "66"})
+
+      rp1 =
+        build(:route_pattern, %{
+          route: route,
+          id: "rp1",
+          representative_trip: build(:trip, stops: [stop1], headsign: "Headsign 1")
+        })
+
+      rp2 =
+        build(:route_pattern, %{
+          route: route,
+          id: "rp2",
+          representative_trip: build(:trip, %{stops: [stop1, stop2], headsign: "Headsign 2"})
+        })
+
+      RepositoryMock
+      |> expect(:stops, 2, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:route_type) do
+          [:light_rail, :heavy_rail, :bus, :ferry] -> {:ok, [stop1, stop2]}
+          _ -> {:ok, []}
+        end
+      end)
+
+      RepositoryMock
+      |> expect(:route_patterns, fn _params, _opts -> {:ok, [rp1, rp2]} end)
+
+      RepositoryMock
+      |> expect(:alerts, fn _params, _opts -> {:ok, []} end)
+
+      conn =
+        get(conn, "/api/nearby", %{
+          latitude: 42.281219333648,
+          longitude: -71.17594685509955
+        })
+
+      %{
+        "stops" => stops,
+        "route_patterns" => route_patterns,
+        "pattern_ids_by_stop" => pattern_ids_by_stop
+      } =
+        json_response(conn, 200)
+
+      assert [
+               %{"id" => "stop1", "name" => "Stop 1"},
+               %{"id" => "stop2", "name" => "Stop 2"}
+             ] = stops
+
+      assert %{
+               "rp1" => %{
+                 "id" => "rp1",
+                 "route" => %{"id" => "66"},
+                 "representative_trip" => %{
+                   "headsign" => "Headsign 1",
+                   "route_pattern" => nil,
+                   "stops" => nil
+                 }
+               },
+               "rp2" => %{
+                 "id" => "rp2",
+                 "route" => %{"id" => "66"},
+                 "representative_trip" => %{
+                   "headsign" => "Headsign 2",
+                   "route_pattern" => nil,
+                   "stops" => nil
+                 }
+               }
+             } = route_patterns
+
+      assert %{"stop1" => ["rp1", "rp2"], "stop2" => ["rp2"]} = pattern_ids_by_stop
+    end
+  end
+
+  describe "GET /api/nearby integration tests" do
     test "retrieves nearby stop and route info from the V3 API", %{conn: conn} do
       conn =
         get(conn, "/api/nearby", %{

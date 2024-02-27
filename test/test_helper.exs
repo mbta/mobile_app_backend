@@ -7,6 +7,7 @@ case Test.Support.Data.start_link() do
 end
 
 ExUnit.start()
+{:ok, _} = Application.ensure_all_started(:ex_machina)
 
 unless System.argv() != ["test"] do
   System.at_exit(fn _ -> Test.Support.Data.warn_untouched() end)
