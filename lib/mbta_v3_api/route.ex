@@ -55,15 +55,6 @@ defmodule MBTAV3API.Route do
   def serialize_filter_value(_field, value), do: value
 
   @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
-  @spec get_all([
-          {:fields, [{any(), any()}]}
-          | {:filter, [{any(), any()}]}
-          | {:include,
-             atom()
-             | [atom() | list() | {any(), any()}]
-             | {atom(), atom() | list() | {any(), any()}}}
-          | {:sort, {atom(), :asc | :desc}}
-        ]) :: {:error, any()} | {:ok, [MBTAV3API.Route.t()]}
   def get_all(params, opts \\ []) do
     params = JsonApi.Params.flatten_params(params, __MODULE__)
 
