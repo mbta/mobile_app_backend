@@ -195,7 +195,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         get(conn, "/api/nearby", %{
           latitude: 42.388400,
           longitude: -71.119149,
-          source: "v3",
           radius: 0.01,
           now: ~B[2024-02-09 16:00:00] |> DateTime.to_iso8601()
         })
