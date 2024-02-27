@@ -36,16 +36,6 @@ defmodule MBTAV3API.RoutePattern do
   @impl JsonApi.Object
   def includes, do: %{representative_trip: MBTAV3API.Trip, route: MBTAV3API.Route}
 
-  @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
-  def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, __MODULE__)
-
-    case MBTAV3API.get_json("/route_patterns", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}
-      {:error, error} -> {:error, error}
-    end
-  end
-
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{

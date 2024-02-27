@@ -1,12 +1,12 @@
 defmodule MobileAppBackendWeb.GlobalController do
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.{JsonApi, Repository}
   use MobileAppBackendWeb, :controller
 
   @type stop_map() :: MBTAV3API.Stop.stop_map()
 
   def show(conn, _params) do
-    stops = fetch_all_stops()
-    {route_patterns, pattern_ids_by_stop, routes} = fetch_all_route_patterns()
+    stops = fetch_stops()
+    {route_patterns, pattern_ids_by_stop, routes} = fetch_route_patterns()
 
     json(conn, %{
       stops: stops,
@@ -16,10 +16,10 @@ defmodule MobileAppBackendWeb.GlobalController do
     })
   end
 
-  @spec fetch_all_stops() :: [MBTAV3API.Stop.t()]
-  defp fetch_all_stops do
+  @spec fetch_stops() :: [MBTAV3API.Stop.t()]
+  defp fetch_stops do
     {:ok, stops} =
-      MBTAV3API.Stop.get_all(
+      Repository.stops(
         filter: [
           location_type: [:stop, :station]
         ],
@@ -29,13 +29,13 @@ defmodule MobileAppBackendWeb.GlobalController do
     stops
   end
 
-  @spec fetch_all_route_patterns() ::
+  @spec fetch_route_patterns() ::
           {%{(route_pattern_id :: String.t()) => MBTAV3API.RoutePattern.t()},
            %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]},
            %{(route_id :: String.t()) => MBTAV3API.Route.t()}}
-  defp fetch_all_route_patterns do
+  defp fetch_route_patterns do
     {:ok, route_patterns} =
-      MBTAV3API.RoutePattern.get_all(
+      Repository.route_patterns(
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )

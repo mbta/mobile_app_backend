@@ -70,16 +70,6 @@ defmodule MBTAV3API.Alert do
   def serialize_filter_value(:lifecycle, value), do: serialize_lifecycle(value)
   def serialize_filter_value(_field, value), do: value
 
-  @spec get_all(JsonApi.Params.t(), Keyword.t()) :: {:ok, [t()]} | {:error, term()}
-  def get_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, __MODULE__)
-
-    case MBTAV3API.get_json("/alerts", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &parse/1)}
-      {:error, error} -> {:error, error}
-    end
-  end
-
   @spec active?(t(), DateTime.t()) :: boolean()
   def active?(alert, now \\ DateTime.now!("America/New_York")) do
     Enum.any?(alert.active_period, fn %ActivePeriod{start: ap_start, end: ap_end} ->

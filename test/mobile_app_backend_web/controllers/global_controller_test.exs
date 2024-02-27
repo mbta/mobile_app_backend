@@ -1,10 +1,6 @@
 defmodule MobileAppBackendWeb.GlobalControllerTest do
+  use HttpStub.Case
   use MobileAppBackendWeb.ConnCase
-
-  setup do
-    Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
-    :ok
-  end
 
   describe "GET /api/global" do
     test "retrieves all stop and route info from the V3 API", %{conn: conn} do
