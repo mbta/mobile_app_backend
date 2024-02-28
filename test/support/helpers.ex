@@ -27,4 +27,6 @@ defmodule Test.Support.Helpers do
       Logger.configure(level: unquote(log_level))
     end
   end
+
+  defdelegate to_full_map(objects \\ []), to: MBTAV3API.JsonApi.Object
 end

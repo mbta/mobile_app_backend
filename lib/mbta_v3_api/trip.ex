@@ -4,12 +4,12 @@ defmodule MBTAV3API.Trip do
   @type t :: %__MODULE__{
           id: String.t(),
           headsign: String.t(),
-          route_pattern: MBTAV3API.RoutePattern.t() | JsonApi.Reference.t() | nil,
-          stops: [MBTAV3API.Stop.t() | JsonApi.Reference.t()] | nil
+          route_pattern_id: String.t(),
+          stop_ids: [String.t()] | nil
         }
 
   @derive Jason.Encoder
-  defstruct [:id, :headsign, :route_pattern, :stops]
+  defstruct [:id, :headsign, :route_pattern_id, :stop_ids]
 
   def fields, do: [:headsign]
 
@@ -19,9 +19,9 @@ defmodule MBTAV3API.Trip do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      route_pattern: JsonApi.Object.parse_one_related(item.relationships["route_pattern"]),
       headsign: item.attributes["headsign"],
-      stops: JsonApi.Object.parse_many_related(item.relationships["stops"])
+      route_pattern_id: JsonApi.Object.get_one_id(item.relationships["route_pattern"]),
+      stop_ids: JsonApi.Object.get_many_ids(item.relationships["stops"])
     }
   end
 end

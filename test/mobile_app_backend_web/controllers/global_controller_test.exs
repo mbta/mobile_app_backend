@@ -11,7 +11,8 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "stops" => stops,
                "route_patterns" => route_patterns,
                "pattern_ids_by_stop" => pattern_ids,
-               "routes" => routes
+               "routes" => routes,
+               "trips" => trips
              } = stop_response
 
       assert length(stops) == 8015
@@ -32,19 +33,19 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "id" => "70076",
                "name" => "Park Street",
                "location_type" => "stop",
-               "parent_station" => ^park_st_station
+               "parent_station_id" => "place-pktrm"
              } = park_st_rl_platform
 
       park_st_rl_patterns = Map.get(pattern_ids, Map.get(park_st_rl_platform, "id"))
 
       assert [
-               "Red-3-1",
                "Red-1-1",
+               "Red-3-1",
                "Red-C-1",
-               "Red-R-1",
                "Red-C-1_70076_70068_0",
+               "Red-R-1",
                "Red-R-1_70076_70068_0"
-             ] = park_st_rl_patterns
+             ] = Enum.sort(park_st_rl_patterns)
 
       red_line_pattern = Map.get(route_patterns, "Red-1-1")
 
@@ -52,9 +53,12 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "direction_id" => 1,
                "id" => "Red-1-1",
                "name" => "Ashmont - Alewife",
-               "route" => %{"type" => "route", "id" => "Red"},
+               "representative_trip_id" => red_line_trip_id,
+               "route_id" => "Red",
                "sort_order" => 100_101_001
              } = red_line_pattern
+
+      assert %{"headsign" => "Alewife"} = trips[red_line_trip_id]
 
       assert %{
                "Red" => %{

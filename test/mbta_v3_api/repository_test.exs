@@ -3,7 +3,7 @@ defmodule MBTAV3API.RepositoryTest do
 
   import Mox
 
-  alias MBTAV3API.{Alert, JsonApi, Repository, RoutePattern, Stop}
+  alias MBTAV3API.{Alert, Repository, RoutePattern, Stop}
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -66,7 +66,7 @@ defmodule MBTAV3API.RepositoryTest do
       end
     )
 
-    {:ok, alerts} =
+    {:ok, %{alerts: alerts}} =
       Repository.alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],
@@ -87,8 +87,8 @@ defmodule MBTAV3API.RepositoryTest do
         ]
       )
 
-    assert alerts == [
-             %Alert{
+    assert alerts == %{
+             "552825" => %Alert{
                id: "552825",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 14:38:00], end: ~B[2024-02-08 19:12:40]}
@@ -103,7 +103,7 @@ defmodule MBTAV3API.RepositoryTest do
                ],
                lifecycle: :new
              },
-             %Alert{
+             "552803" => %Alert{
                id: "552803",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 12:55:00], end: ~B[2024-02-08 19:12:40]}
@@ -118,7 +118,7 @@ defmodule MBTAV3API.RepositoryTest do
                ],
                lifecycle: :new
              }
-           ]
+           }
   end
 
   test "route_patterns/2" do
@@ -183,24 +183,26 @@ defmodule MBTAV3API.RepositoryTest do
     )
 
     assert {:ok,
-            [
-              %RoutePattern{
-                id: "CR-Newburyport-e54dc640-0",
-                name: "North Station - Rockport",
-                direction_id: 0,
-                sort_order: 200_110_050,
-                route: %JsonApi.Reference{type: "route", id: "CR-Newburyport"},
-                representative_trip: %JsonApi.Reference{type: "trip", id: "CR-649284-123"}
-              },
-              %RoutePattern{
-                id: "CR-Newburyport-dd9f791d-0",
-                name: "North Station - Rockport",
-                direction_id: 0,
-                sort_order: 200_110_110,
-                route: %JsonApi.Reference{type: "route", id: "CR-Newburyport"},
-                representative_trip: %JsonApi.Reference{type: "trip", id: "CR-649341-103"}
+            %{
+              route_patterns: %{
+                "CR-Newburyport-e54dc640-0" => %RoutePattern{
+                  id: "CR-Newburyport-e54dc640-0",
+                  name: "North Station - Rockport",
+                  direction_id: 0,
+                  sort_order: 200_110_050,
+                  route_id: "CR-Newburyport",
+                  representative_trip_id: "CR-649284-123"
+                },
+                "CR-Newburyport-dd9f791d-0" => %RoutePattern{
+                  id: "CR-Newburyport-dd9f791d-0",
+                  name: "North Station - Rockport",
+                  direction_id: 0,
+                  sort_order: 200_110_110,
+                  route_id: "CR-Newburyport",
+                  representative_trip_id: "CR-649341-103"
+                }
               }
-            ]} = Repository.route_patterns([])
+            }} = Repository.route_patterns([])
   end
 
   test "stops/2" do
@@ -251,17 +253,19 @@ defmodule MBTAV3API.RepositoryTest do
     )
 
     assert {:ok,
-            [
-              %Stop{
-                id: "FR-0034-01",
-                name: "Porter",
-                parent_station: %JsonApi.Reference{type: "stop", id: "place-portr"}
-              },
-              %Stop{
-                id: "FR-0034-02",
-                name: "Porter",
-                parent_station: %JsonApi.Reference{type: "stop", id: "place-portr"}
+            %{
+              stops: %{
+                "FR-0034-01" => %Stop{
+                  id: "FR-0034-01",
+                  name: "Porter",
+                  parent_station_id: "place-portr"
+                },
+                "FR-0034-02" => %Stop{
+                  id: "FR-0034-02",
+                  name: "Porter",
+                  parent_station_id: "place-portr"
+                }
               }
-            ]} = Repository.stops([])
+            }} = Repository.stops([])
   end
 end

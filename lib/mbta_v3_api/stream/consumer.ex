@@ -33,8 +33,7 @@ defmodule MBTAV3API.Stream.Consumer do
   def handle_events(events, _from, state) do
     data = Stream.State.apply_events(state.data, events)
 
-    selected_data = Stream.State.values_of_type(data, state.type)
-    message = {:stream_data, selected_data}
+    message = {:stream_data, data}
     send(state.send_to, message)
 
     {:noreply, [], %{state | data: data}}

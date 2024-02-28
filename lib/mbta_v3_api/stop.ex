@@ -8,8 +8,8 @@ defmodule MBTAV3API.Stop do
           longitude: float(),
           name: String.t(),
           location_type: location_type(),
-          child_stops: t() | JsonApi.Reference.t() | nil,
-          parent_station: t() | JsonApi.Reference.t() | nil
+          child_stop_ids: [String.t()] | nil,
+          parent_station_id: String.t() | nil
         }
 
   Util.declare_enum(
@@ -17,9 +17,15 @@ defmodule MBTAV3API.Stop do
     Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
   )
 
-  @type stop_map() :: %{String.t() => t()}
-
-  defstruct [:id, :latitude, :longitude, :name, :location_type, :child_stops, :parent_station]
+  defstruct [
+    :id,
+    :latitude,
+    :longitude,
+    :name,
+    :location_type,
+    :child_stop_ids,
+    :parent_station_id
+  ]
 
   defimpl Jason.Encoder do
     def encode(value, opts) do
@@ -30,8 +36,8 @@ defmodule MBTAV3API.Stop do
     end
   end
 
-  def parent(%__MODULE__{parent_station: %__MODULE__{} = parent}), do: parent
-  def parent(%__MODULE__{parent_station: nil} = stop), do: stop
+  def parent_id(%__MODULE__{parent_station_id: nil} = stop), do: stop.id
+  def parent_id(%__MODULE__{parent_station_id: parent_id}), do: parent_id
 
   @impl JsonApi.Object
   def fields, do: [:latitude, :longitude, :name, :location_type]
@@ -65,43 +71,8 @@ defmodule MBTAV3API.Stop do
         if location_type = item.attributes["location_type"] do
           parse_location_type(location_type)
         end,
-      parent_station: JsonApi.Object.parse_one_related(item.relationships["parent_station"]),
-      child_stops: JsonApi.Object.parse_many_related(item.relationships["child_stops"])
+      parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"]),
+      child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"])
     }
-  end
-
-  @spec include_missing_siblings(stops :: stop_map()) :: stop_map()
-  def include_missing_siblings(stops) do
-    parents =
-      stops
-      |> Map.values()
-      |> Enum.filter(&(&1.parent_station != nil))
-      |> Map.new(&{&1.parent_station.id, &1.parent_station})
-
-    missing_sibling_stops =
-      parents
-      |> Map.values()
-      |> Enum.flat_map(& &1.child_stops)
-      |> Enum.filter(
-        &case &1 do
-          %__MODULE__{} -> Enum.member?([:stop, :station], &1.location_type)
-          _ -> false
-        end
-      )
-      |> Enum.map(&%__MODULE__{&1 | parent_station: Map.get(parents, &1.parent_station.id)})
-
-    Map.new(
-      missing_sibling_stops ++ Map.values(stops),
-      &{&1.id,
-       %__MODULE__{
-         &1
-         | child_stops: nil,
-           parent_station:
-             if(&1.parent_station == nil,
-               do: nil,
-               else: %__MODULE__{&1.parent_station | child_stops: nil}
-             )
-       }}
-    )
   end
 end

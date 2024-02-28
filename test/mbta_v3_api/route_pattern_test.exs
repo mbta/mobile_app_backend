@@ -14,12 +14,8 @@ defmodule MBTAV3API.RoutePatternTest do
                "typicality" => 1
              },
              relationships: %{
-               "route" => [
-                 %JsonApi.Item{type: "route", id: "Green-C"}
-               ],
-               "representative_trip" => [
-                 %JsonApi.Item{type: "trip", id: "trip123"}
-               ]
+               "route" => %JsonApi.Reference{type: "route", id: "Green-C"},
+               "representative_trip" => %JsonApi.Reference{type: "trip", id: "trip123"}
              }
            }) == %RoutePattern{
              id: "Green-C-832-1",
@@ -27,8 +23,8 @@ defmodule MBTAV3API.RoutePatternTest do
              name: "Cleveland Circle - Government Center",
              sort_order: 100_331_000,
              typicality: :typical,
-             route: %MBTAV3API.Route{id: "Green-C"},
-             representative_trip: %MBTAV3API.Trip{id: "trip123"}
+             route_id: "Green-C",
+             representative_trip_id: "trip123"
            }
   end
 end

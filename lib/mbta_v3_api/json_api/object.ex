@@ -70,12 +70,25 @@ defmodule MBTAV3API.JsonApi.Object do
   @spec module_for(atom() | String.t()) :: module()
   def module_for(type)
 
+  @doc """
+  Converts the given JSON:API type into its plural form.
+  """
+  @spec plural_type(atom()) :: atom()
+  def plural_type(type)
+
+  types = [:alert, :prediction, :route, :route_pattern, :stop, :trip, :vehicle]
+  @plural_types Map.new(types, &{&1, :"#{&1}s"})
+
   modules =
-    for type <- [:alert, :prediction, :route, :route_pattern, :stop, :trip, :vehicle] do
+    for type <- types do
       module = Module.concat(MBTAV3API, Macro.camelize(to_string(type)))
 
       def module_for(unquote(type)), do: unquote(module)
       def module_for(unquote("#{type}")), do: unquote(module)
+
+      def plural_type(unquote(type)), do: unquote(@plural_types[type])
+
+      @type unquote(Macro.var(:"#{type}_map", __MODULE__)) :: %{String.t() => unquote(module).t()}
 
       module
     end
@@ -83,6 +96,34 @@ defmodule MBTAV3API.JsonApi.Object do
   module_types = Enum.map(modules, fn module -> quote(do: unquote(module).t()) end)
 
   @type t :: unquote(Util.type_union(module_types))
+
+  map_elements =
+    Enum.map(types, fn type ->
+      map_type = Macro.var(:"#{type}_map", __MODULE__)
+
+      {:%{}, _, [map_element]} =
+        quote do
+          %{required(unquote(type)) => unquote(map_type)}
+        end
+
+      map_element
+    end)
+
+  @typedoc """
+  A map of objects parsed from a response, grouped by type and by id.
+
+  Types are always present, even if there is no data, so matching on %{stops: stops} will always work.
+  """
+  @type full_map :: %{unquote_splicing(map_elements)}
+
+  @empty_full_map types |> Enum.map(&@plural_types[&1]) |> Map.from_keys(%{})
+
+  @spec to_full_map([t()]) :: full_map()
+  def to_full_map(objects) do
+    Enum.reduce(objects, @empty_full_map, fn %module{id: id} = item, map ->
+      put_in(map, [plural_type(module.jsonapi_type()), id], item)
+    end)
+  end
 
   modules_guard =
     modules
@@ -95,10 +136,12 @@ defmodule MBTAV3API.JsonApi.Object do
     |> Enum.reduce(fn clause, acc -> quote(do: unquote(acc) or unquote(clause)) end)
 
   guard_doctest =
-    modules
+    Enum.zip(types, modules)
     |> Enum.map_join(
       "\n",
-      &"    iex> MBTAV3API.JsonApi.Object.is_json_object(%#{Macro.to_string(&1)}{})\n    true"
+      fn {type, module} ->
+        "    iex> #{type} = %#{Macro.to_string(module)}{}\n    iex> MBTAV3API.JsonApi.Object.is_json_object(#{type})\n    true"
+      end
     )
 
   @doc """
@@ -115,7 +158,7 @@ defmodule MBTAV3API.JsonApi.Object do
   @doc """
   Parses a `t:JsonApi.Item.t/0` into a struct of the right type, or preserves a `t:JsonApi.Reference.t/0` as-is.
 
-  Preserving references is useful when an object may or may not be included.
+  Preserving references is probably not still useful now that we are never nesting objects.
   """
   @spec parse(JsonApi.Item.t()) :: t()
   @spec parse(JsonApi.Reference.t()) :: JsonApi.Reference.t()
@@ -123,26 +166,32 @@ defmodule MBTAV3API.JsonApi.Object do
   def parse(%JsonApi.Reference{} = ref), do: ref
 
   @doc """
-  Calls `parse/1` on the single element of the list, returning `nil` if the list is empty or `nil` or throwing if the list has multiple elements.
+  Parses everything in a `t:JsonApi.t/0`.
+  """
+  @spec parse_all(JsonApi.t()) :: full_map()
+  def parse_all(%JsonApi{data: data, included: included}) do
+    (data ++ included)
+    |> Enum.map(&parse/1)
+    |> to_full_map()
+  end
+
+  @doc """
+  Gets the `id` of a single `JsonApi.Reference`.
 
   Useful for parsing relationships where only a single element is logically valid.
   """
-  @spec parse_one_related(nil | []) :: nil
-  @spec parse_one_related(nonempty_list(JsonApi.Item.t())) :: t()
-  @spec parse_one_related(nonempty_list(JsonApi.Reference.t())) :: JsonApi.Reference.t()
-  def parse_one_related(nil), do: nil
-  def parse_one_related([]), do: nil
-  def parse_one_related([object]), do: parse(object)
-  def parse_one_related([_ | _]), do: raise("Unexpected multiple related objects")
+  @spec get_one_id(nil) :: nil
+  @spec get_one_id(JsonApi.Reference.t()) :: String.t()
+  def get_one_id(nil), do: nil
+  def get_one_id(%JsonApi.Reference{id: id}), do: id
 
   @doc """
-  Calls `parse/1` on each element of the list, returning `nil` if the list is `nil`.
+  Gets the `id` of each element of the list, returning `nil` if the list is `nil`.
   """
-  @spec parse_many_related(nil) :: nil
-  @spec parse_many_related([JsonApi.Item.t()]) :: [t()]
-  @spec parse_many_related([JsonApi.Reference.t()]) :: [JsonApi.Reference.t()]
-  def parse_many_related(nil), do: nil
-  def parse_many_related(objects), do: Enum.map(objects, &parse/1)
+  @spec get_many_ids(nil) :: nil
+  @spec get_many_ids([JsonApi.Reference.t()]) :: [String.t()]
+  def get_many_ids(nil), do: nil
+  def get_many_ids(objects), do: Enum.map(objects, & &1.id)
 
   @doc """
   Validates that the module being compiled has struct keys that match its `c:fields/0` and `c:includes/0` implementations.
@@ -156,7 +205,14 @@ defmodule MBTAV3API.JsonApi.Object do
     apply_rename = fn name -> Map.get(renames, name, name) end
 
     expected_fields = module.fields() |> Enum.map(apply_rename)
-    expected_includes = module.includes() |> Map.keys() |> Enum.map(apply_rename) |> Enum.sort()
+
+    expected_includes =
+      module.includes()
+      |> Map.keys()
+      |> Enum.map(apply_rename)
+      |> Enum.sort()
+      |> Enum.map(&key_for_include_name/1)
+
     expected_struct_keys = [:id] ++ expected_fields ++ expected_includes
 
     if expected_struct_keys == actual_struct_keys do
@@ -164,6 +220,33 @@ defmodule MBTAV3API.JsonApi.Object do
     else
       raise format_struct_mismatch(struct_name, expected_struct_keys, actual_struct_keys)
     end
+  end
+
+  @doc """
+  Transforms a potentially plural included object name into an ID struct key.
+
+  Not intended for public API use, but only testable as a public method.
+
+  ## Examples
+
+      iex> import #{__MODULE__}, only: [key_for_include_name: 1]
+      iex> key_for_include_name(:vehicle)
+      :vehicle_id
+      iex> key_for_include_name(:child_stops)
+      :child_stop_ids
+  """
+  @spec key_for_include_name(atom()) :: atom()
+  def key_for_include_name(name) do
+    name_string = to_string(name)
+
+    key_string =
+      if String.ends_with?(name_string, "s") do
+        String.replace_suffix(name_string, "s", "_ids")
+      else
+        "#{name_string}_id"
+      end
+
+    String.to_atom(key_string)
   end
 
   @spec format_struct_mismatch(String.t(), [atom()], [atom()]) :: String.t()

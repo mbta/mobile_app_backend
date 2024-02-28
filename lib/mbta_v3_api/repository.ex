@@ -5,13 +5,13 @@ defmodule MBTAV3API.Repository do
   alias MBTAV3API.{JsonApi, Repository}
 
   @callback alerts(JsonApi.Params.t(), Keyword.t()) ::
-              {:ok, [MBTAV3API.Alert.t()]} | {:error, term()}
+              {:ok, JsonApi.Object.full_map()} | {:error, term()}
 
   @callback route_patterns(JsonApi.Params.t(), Keyword.t()) ::
-              {:ok, [MBTAV3API.RoutePattern.t()]} | {:error, term()}
+              {:ok, JsonApi.Object.full_map()} | {:error, term()}
 
   @callback stops(JsonApi.Params.t(), Keyword.t()) ::
-              {:ok, [MBTAV3API.Stop.t()]} | {:error, term()}
+              {:ok, JsonApi.Object.full_map()} | {:error, term()}
 
   def alerts(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
@@ -44,7 +44,7 @@ defmodule MBTAV3API.Repository.Impl do
     params = JsonApi.Params.flatten_params(params, Alert)
 
     case MBTAV3API.get_json("/alerts", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &Alert.parse/1)}
+      %JsonApi{} = doc -> {:ok, JsonApi.Object.parse_all(doc)}
       {:error, error} -> {:error, error}
     end
   end
@@ -54,7 +54,7 @@ defmodule MBTAV3API.Repository.Impl do
     params = JsonApi.Params.flatten_params(params, RoutePattern)
 
     case MBTAV3API.get_json("/route_patterns", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &RoutePattern.parse/1)}
+      %JsonApi{} = doc -> {:ok, JsonApi.Object.parse_all(doc)}
       {:error, error} -> {:error, error}
     end
   end
@@ -64,7 +64,7 @@ defmodule MBTAV3API.Repository.Impl do
     params = JsonApi.Params.flatten_params(params, Stop)
 
     case MBTAV3API.get_json("/stops", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &Stop.parse/1)}
+      %JsonApi{} = doc -> {:ok, JsonApi.Object.parse_all(doc)}
       {:error, error} -> {:error, error}
     end
   end

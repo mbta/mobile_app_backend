@@ -22,18 +22,22 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       stop2 = build(:stop, %{id: "stop2", name: "Stop 2"})
       route = build(:route, %{id: "66"})
 
+      t1 = build(:trip, id: "t1", stop_ids: [stop1.id], headsign: "Headsign 1")
+
       rp1 =
         build(:route_pattern, %{
-          route: route,
+          route_id: route.id,
           id: "rp1",
-          representative_trip: build(:trip, stops: [stop1], headsign: "Headsign 1")
+          representative_trip_id: t1.id
         })
+
+      t2 = build(:trip, %{id: "t2", stop_ids: [stop1.id, stop2.id], headsign: "Headsign 2"})
 
       rp2 =
         build(:route_pattern, %{
-          route: route,
+          route_id: route.id,
           id: "rp2",
-          representative_trip: build(:trip, %{stops: [stop1, stop2], headsign: "Headsign 2"})
+          representative_trip_id: t2.id
         })
 
       RepositoryMock
@@ -41,16 +45,21 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         case params
              |> Keyword.get(:filter)
              |> Keyword.get(:route_type) do
-          [:light_rail, :heavy_rail, :bus, :ferry] -> {:ok, [stop1, stop2]}
-          _ -> {:ok, []}
+          [:light_rail, :heavy_rail, :bus, :ferry] ->
+            {:ok, to_full_map([stop1, stop2])}
+
+          _ ->
+            {:ok, to_full_map()}
         end
       end)
 
       RepositoryMock
-      |> expect(:route_patterns, fn _params, _opts -> {:ok, [rp1, rp2]} end)
+      |> expect(:route_patterns, fn _params, _opts ->
+        {:ok, to_full_map([t1, rp1, t2, rp2])}
+      end)
 
       RepositoryMock
-      |> expect(:alerts, fn _params, _opts -> {:ok, []} end)
+      |> expect(:alerts, fn _params, _opts -> {:ok, to_full_map()} end)
 
       conn =
         get(conn, "/api/nearby", %{
@@ -61,7 +70,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       %{
         "stops" => stops,
         "route_patterns" => route_patterns,
-        "pattern_ids_by_stop" => pattern_ids_by_stop
+        "pattern_ids_by_stop" => pattern_ids_by_stop,
+        "trips" => trips
       } =
         json_response(conn, 200)
 
@@ -73,23 +83,28 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       assert %{
                "rp1" => %{
                  "id" => "rp1",
-                 "route" => %{"id" => "66"},
-                 "representative_trip" => %{
-                   "headsign" => "Headsign 1",
-                   "route_pattern" => nil,
-                   "stops" => nil
-                 }
+                 "route_id" => "66",
+                 "representative_trip_id" => "t1"
                },
                "rp2" => %{
                  "id" => "rp2",
-                 "route" => %{"id" => "66"},
-                 "representative_trip" => %{
-                   "headsign" => "Headsign 2",
-                   "route_pattern" => nil,
-                   "stops" => nil
-                 }
+                 "route_id" => "66",
+                 "representative_trip_id" => "t2"
                }
              } = route_patterns
+
+      assert %{
+               "t1" => %{
+                 "headsign" => "Headsign 1",
+                 "route_pattern_id" => nil,
+                 "stop_ids" => nil
+               },
+               "t2" => %{
+                 "headsign" => "Headsign 2",
+                 "route_pattern_id" => nil,
+                 "stop_ids" => nil
+               }
+             } = trips
 
       assert %{"stop1" => ["rp1", "rp2"], "stop2" => ["rp2"]} = pattern_ids_by_stop
     end
@@ -107,11 +122,12 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         "stops" => stops,
         "route_patterns" => route_patterns,
         "pattern_ids_by_stop" => pattern_ids_by_stop,
-        "routes" => routes
+        "routes" => routes,
+        "trips" => trips
       } =
         json_response(conn, 200)
 
-      assert 21 = length(stops)
+      assert 22 = length(stops)
       assert 21 = length(Map.keys(pattern_ids_by_stop))
       assert 24 = length(Map.keys(route_patterns))
 
@@ -133,13 +149,12 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                "direction_id" => 0,
                "id" => "36-1-0",
                "name" => "Forest Hills Station - Millennium Park",
-               "route" => %{
-                 "type" => "route",
-                 "id" => "36"
-               },
+               "route_id" => "36",
                "sort_order" => 503_600_040,
-               "representative_trip" => %{"headsign" => "Millennium Park"}
+               "representative_trip_id" => trip_id
              } = Map.get(route_patterns, "36-1-0")
+
+      assert %{"headsign" => "Millennium Park"} = Map.get(trips, trip_id)
 
       assert %{
                "36" => %{
@@ -158,8 +173,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                }
              } = routes
 
-      assert ["37-D-0", "37-_-1", "37-3-1", "52-5-1", "52-4-1"] =
-               Map.get(pattern_ids_by_stop, "833")
+      assert ["37-3-1", "37-D-0", "37-_-1", "52-4-1", "52-5-1"] =
+               Map.get(pattern_ids_by_stop, "833") |> Enum.sort()
     end
 
     test "includes parent stop info from the V3 API", %{conn: conn} do
@@ -167,19 +182,11 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
       assert %{
                "stops" => [
-                 %{
-                   "id" => "GB-0198-01",
-                   "parent_station" =>
-                     %{
-                       "id" => "place-GB-0198",
-                       "latitude" => 42.562171,
-                       "longitude" => -70.869254,
-                       "name" => "Montserrat"
-                     } = parent_station
-                 },
-                 %{"id" => "GB-0198-02", "parent_station" => parent_station},
-                 %{"id" => "GB-0198-B3", "parent_station" => parent_station},
-                 %{"id" => "GB-0198-B2", "parent_station" => parent_station}
+                 %{"id" => "GB-0198-01", "parent_station_id" => "place-GB-0198"},
+                 %{"id" => "GB-0198-02", "parent_station_id" => "place-GB-0198"},
+                 %{"id" => "place-GB-0198"},
+                 %{"id" => "GB-0198-B3", "parent_station_id" => "place-GB-0198"},
+                 %{"id" => "GB-0198-B2", "parent_station_id" => "place-GB-0198"}
                ],
                "route_patterns" => %{},
                "pattern_ids_by_stop" => %{} = pattern_ids_by_stop
@@ -202,40 +209,63 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                    "id" => "MM-0186-CS",
                    "latitude" => 42.106555,
                    "longitude" => -71.022001,
-                   "name" => "Montello"
+                   "name" => "Montello",
+                   "parent_station_id" => "place-MM-0186"
                  },
-                 %{"id" => "MM-0186-S", "name" => "Montello"},
-                 %{"id" => "39870", "name" => "Montello"},
-                 %{"id" => "MM-0200-CS", "name" => "Brockton"},
-                 %{"id" => "MM-0200-S", "name" => "Brockton"}
+                 %{
+                   "id" => "MM-0186-S",
+                   "name" => "Montello",
+                   "parent_station_id" => "place-MM-0186"
+                 },
+                 %{
+                   "id" => "place-MM-0186",
+                   "name" => "Montello",
+                   "child_stop_ids" => ["39870", "MM-0186", "MM-0186-CS", "MM-0186-S"]
+                 },
+                 %{"id" => "39870", "name" => "Montello", "parent_station_id" => "place-MM-0186"},
+                 %{
+                   "id" => "MM-0200-CS",
+                   "name" => "Brockton",
+                   "parent_station_id" => "place-MM-0200"
+                 },
+                 %{
+                   "id" => "MM-0200-S",
+                   "name" => "Brockton",
+                   "parent_station_id" => "place-MM-0200"
+                 },
+                 %{
+                   "id" => "place-MM-0200",
+                   "name" => "Brockton",
+                   "child_stop_ids" => ["MM-0200", "MM-0200-CS", "MM-0200-S"]
+                 }
                ],
                "route_patterns" => %{
                  "230-3-0" => %{
                    "direction_id" => 0,
                    "id" => "230-3-0",
                    "name" => "Quincy Center Station - Montello Station",
-                   "route" => %{"type" => "route", "id" => "230"} = route_230_type,
+                   "route_id" => "230",
                    "sort_order" => 523_000_000
                  },
                  "230-3-1" => %{
                    "direction_id" => 1,
                    "id" => "230-3-1",
                    "name" => "Montello Station - Quincy Center Station",
-                   "route" => route_230_type,
+                   "route_id" => "230",
                    "sort_order" => 523_001_000
                  },
                  "230-5-0" => %{
                    "direction_id" => 0,
                    "id" => "230-5-0",
                    "name" => "Quincy Center Station - Montello Station via Holbrook Ct",
-                   "route" => route_230_type,
+                   "route_id" => "230",
                    "sort_order" => 523_000_040
                  },
                  "230-5-1" => %{
                    "direction_id" => 1,
                    "id" => "230-5-1",
                    "name" => "Montello Station - Quincy Center Station via Holbrook Ct",
-                   "route" => route_230_type,
+                   "route_id" => "230",
                    "sort_order" => 523_001_040
                  },
                  "CR-Middleborough-52b80476-0" => %{
@@ -250,8 +280,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                "pattern_ids_by_stop" => %{
                  "39870" => [
                    "230-3-0",
-                   "230-5-0",
                    "230-3-1",
+                   "230-5-0",
                    "230-5-1"
                  ],
                  "MM-0186-CS" => ["CR-Middleborough-75bed2bb-1"],
@@ -292,7 +322,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
       assert Enum.all?(
                stops,
-               &(&1["id"] == "place-portr" or &1["parent_station"]["id"] == "place-portr")
+               &(&1["id"] == "place-portr" or &1["parent_station_id"] == "place-portr")
              )
 
       assert [
