@@ -12,13 +12,11 @@ defmodule MobileAppBackendWeb.GlobalController do
       pattern_ids_by_stop: pattern_ids_by_stop
     } = fetch_route_patterns()
 
-    stops = Map.values(stops)
-
     json(conn, %{
-      stops: stops,
-      route_patterns: route_patterns,
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
+      route_patterns: route_patterns,
+      stops: stops,
       trips: trips
     })
   end

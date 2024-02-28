@@ -26,23 +26,24 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     alerts = fetch_alerts(stops, now)
 
-    stops = Map.values(stops)
-    stop_children = Enum.group_by(stops, & &1.parent_station_id, & &1.id)
+    stop_children =
+      Enum.group_by(
+        stops,
+        fn {_stop_id, stop} -> stop.parent_station_id end,
+        fn {stop_id, _} -> stop_id end
+      )
+
+    stops =
+      Map.filter(stops, fn {stop_id, _} ->
+        with_children = [stop_id | Map.get(stop_children, stop_id, [])]
+        Enum.any?(with_children, &Map.has_key?(pattern_ids_by_stop, &1))
+      end)
 
     json(conn, %{
-      stops:
-        stops
-        |> Enum.filter(fn %MBTAV3API.Stop{id: stop_id} ->
-          with_children = [stop_id | Map.get(stop_children, stop_id, [])]
-          Enum.any?(with_children, &Map.has_key?(pattern_ids_by_stop, &1))
-        end)
-        |> Enum.sort(
-          &(distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude) <=
-              distance_in_degrees(&2.latitude || 0, &2.longitude || 0, latitude, longitude))
-        ),
-      route_patterns: route_patterns,
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
+      route_patterns: route_patterns,
+      stops: stops,
       trips: trips,
       alerts: alerts
     })
@@ -134,15 +135,6 @@ defmodule MobileAppBackendWeb.NearbyController do
         ]
     end)
   end
-
-  @spec distance_in_degrees(
-          lat1 :: float(),
-          lon1 :: float(),
-          lat2 :: float(),
-          lon2 :: float()
-        ) :: float()
-  defp distance_in_degrees(lat1, lon1, lat2, lon2),
-    do: abs(:math.sqrt((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2))
 
   # The V3 API does not actually calculate distance,
   # and it just pretends latitude degrees and longitude degrees are equally sized.

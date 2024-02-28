@@ -8,16 +8,16 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
       stop_response = json_response(conn, 200)
 
       assert %{
-               "stops" => stops,
-               "route_patterns" => route_patterns,
                "pattern_ids_by_stop" => pattern_ids,
                "routes" => routes,
+               "route_patterns" => route_patterns,
+               "stops" => stops,
                "trips" => trips
              } = stop_response
 
-      assert length(stops) == 8015
+      assert map_size(stops) == 8015
 
-      park_st_station = Enum.find(stops, &(Map.get(&1, "id") == "place-pktrm"))
+      park_st_station = stops["place-pktrm"]
 
       assert %{
                "id" => "place-pktrm",
@@ -27,7 +27,7 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "longitude" => -71.062424
              } = park_st_station
 
-      park_st_rl_platform = Enum.find(stops, &(Map.get(&1, "id") == "70076"))
+      park_st_rl_platform = stops["70076"]
 
       assert %{
                "id" => "70076",

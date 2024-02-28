@@ -75,10 +75,10 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       } =
         json_response(conn, 200)
 
-      assert [
-               %{"id" => "stop1", "name" => "Stop 1"},
-               %{"id" => "stop2", "name" => "Stop 2"}
-             ] = stops
+      assert %{
+               "stop1" => %{"id" => "stop1", "name" => "Stop 1"},
+               "stop2" => %{"id" => "stop2", "name" => "Stop 2"}
+             } = stops
 
       assert %{
                "rp1" => %{
@@ -127,7 +127,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       } =
         json_response(conn, 200)
 
-      assert 22 = length(stops)
+      assert 22 = map_size(stops)
       assert 21 = length(Map.keys(pattern_ids_by_stop))
       assert 24 = length(Map.keys(route_patterns))
 
@@ -143,7 +143,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                "latitude" => 42.28101,
                "longitude" => -71.177035,
                "name" => "Millennium Park"
-             } = List.first(stops)
+             } = stops["67120"]
 
       assert %{
                "direction_id" => 0,
@@ -181,13 +181,13 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       conn = get(conn, "/api/nearby", %{latitude: 42.562535, longitude: -70.869116})
 
       assert %{
-               "stops" => [
-                 %{"id" => "GB-0198-01", "parent_station_id" => "place-GB-0198"},
-                 %{"id" => "GB-0198-02", "parent_station_id" => "place-GB-0198"},
-                 %{"id" => "place-GB-0198"},
-                 %{"id" => "GB-0198-B3", "parent_station_id" => "place-GB-0198"},
-                 %{"id" => "GB-0198-B2", "parent_station_id" => "place-GB-0198"}
-               ],
+               "stops" => %{
+                 "GB-0198-01" => %{"parent_station_id" => "place-GB-0198"},
+                 "GB-0198-02" => %{"parent_station_id" => "place-GB-0198"},
+                 "place-GB-0198" => %{},
+                 "GB-0198-B3" => %{"parent_station_id" => "place-GB-0198"},
+                 "GB-0198-B2" => %{"parent_station_id" => "place-GB-0198"}
+               },
                "route_patterns" => %{},
                "pattern_ids_by_stop" => %{} = pattern_ids_by_stop
              } = json_response(conn, 200)
@@ -204,41 +204,38 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       conn = get(conn, "/api/nearby", %{latitude: 42.095734, longitude: -71.019708})
 
       assert %{
-               "stops" => [
-                 %{
-                   "id" => "MM-0186-CS",
+               "stops" => %{
+                 "MM-0186-CS" => %{
                    "latitude" => 42.106555,
                    "longitude" => -71.022001,
                    "name" => "Montello",
                    "parent_station_id" => "place-MM-0186"
                  },
-                 %{
-                   "id" => "MM-0186-S",
+                 "MM-0186-S" => %{
                    "name" => "Montello",
                    "parent_station_id" => "place-MM-0186"
                  },
-                 %{
-                   "id" => "place-MM-0186",
+                 "place-MM-0186" => %{
                    "name" => "Montello",
                    "child_stop_ids" => ["39870", "MM-0186", "MM-0186-CS", "MM-0186-S"]
                  },
-                 %{"id" => "39870", "name" => "Montello", "parent_station_id" => "place-MM-0186"},
-                 %{
-                   "id" => "MM-0200-CS",
+                 "39870" => %{
+                   "name" => "Montello",
+                   "parent_station_id" => "place-MM-0186"
+                 },
+                 "MM-0200-CS" => %{
                    "name" => "Brockton",
                    "parent_station_id" => "place-MM-0200"
                  },
-                 %{
-                   "id" => "MM-0200-S",
+                 "MM-0200-S" => %{
                    "name" => "Brockton",
                    "parent_station_id" => "place-MM-0200"
                  },
-                 %{
-                   "id" => "place-MM-0200",
+                 "place-MM-0200" => %{
                    "name" => "Brockton",
                    "child_stop_ids" => ["MM-0200", "MM-0200-CS", "MM-0200-S"]
                  }
-               ],
+               },
                "route_patterns" => %{
                  "230-3-0" => %{
                    "direction_id" => 0,
@@ -321,7 +318,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       assert %{"stops" => stops, "alerts" => alerts} = json_response(conn, :ok)
 
       assert Enum.all?(
-               stops,
+               Map.values(stops),
                &(&1["id"] == "place-portr" or &1["parent_station_id"] == "place-portr")
              )
 
