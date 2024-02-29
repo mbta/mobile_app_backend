@@ -93,6 +93,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         trip: %Trip{
           id: "60392455",
           route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
+          shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "931_0010"},
           stops: nil
         },
         vehicle: %Vehicle{
@@ -117,6 +118,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         trip: %Trip{
           id: "60392515",
           route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-0"},
+          shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "931_0009"},
           stops: nil
         },
         vehicle: %Vehicle{
@@ -165,6 +167,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  trip: %Trip{
                    id: "60392593",
                    route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-3-1"},
+                   shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "933_0016"},
                    stops: nil
                  },
                  vehicle: %JsonApi.Reference{type: "vehicle", id: "R-547A80A3"}

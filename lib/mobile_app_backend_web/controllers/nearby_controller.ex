@@ -71,7 +71,7 @@ defmodule MobileAppBackendWeb.NearbyController do
           radius: degree_radius / 2,
           route_type: [:light_rail, :heavy_rail, :bus, :ferry]
         ],
-        include: {:parent_station, :child_stops},
+        include: [parent_station: :child_stops],
         sort: {:distance, :asc}
       )
 
@@ -104,8 +104,8 @@ defmodule MobileAppBackendWeb.NearbyController do
            | route: %JsonApi.Reference{type: "route", id: &1.route.id},
              representative_trip: %MBTAV3API.Trip{
                &1.representative_trip
-               | stops: nil,
-                 route_pattern: nil
+               | route_pattern: nil,
+                 stops: nil
              }
          }}
       )

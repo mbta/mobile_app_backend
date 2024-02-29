@@ -6,11 +6,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
   import Test.Support.Helpers
   import MobileAppBackend.Factory
 
-  setup_all do
-    Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
-    :ok
-  end
-
   describe "GET /api/nearby unit tests" do
     setup do
       verify_on_exit!()
@@ -283,7 +278,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
         get(conn, "/api/nearby", %{
           latitude: 42.388400,
           longitude: -71.119149,
-          source: "v3",
           radius: 0.01,
           now: ~B[2024-02-09 16:00:00] |> DateTime.to_iso8601()
         })
