@@ -169,7 +169,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                to_full_map([
                  trip_60392455(),
                  trip_60392515(),
-                 %Trip{id: "60392593", route_pattern_id: "Red-3-1"},
+                 %Trip{id: "60392593", route_pattern_id: "Red-3-1", shape_id: "933_0016"},
                  vehicle_r_547a83f7(),
                  vehicle_r_547a83f8(),
                  prediction_60392455(),

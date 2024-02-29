@@ -1,20 +1,23 @@
 defmodule MobileAppBackendWeb.ShapesController do
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
   use MobileAppBackendWeb, :controller
 
-  @type stop_map() :: MBTAV3API.Stop.stop_map()
-
   def rail(conn, _params) do
-    routes = fetch_rail_routes()
+    %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips} =
+      fetch_rail_routes()
 
-    json(conn, %{
-      routes: routes
-    })
+    json(conn, %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips})
   end
 
-  @spec fetch_rail_routes() :: [MBTAV3API.Route.t()]
+  @spec fetch_rail_routes() :: %{
+          routes: JsonApi.Object.route_map(),
+          route_patterns: JsonApi.Object.route_pattern_map(),
+          shapes: JsonApi.Object.shape_map(),
+          trips: JsonApi.Object.trip_map()
+        }
   defp fetch_rail_routes do
-    {:ok, routes} =
+    {:ok, data} =
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
@@ -22,6 +25,6 @@ defmodule MobileAppBackendWeb.ShapesController do
         include: [route_patterns: [representative_trip: :shape]]
       )
 
-    routes
+    Map.take(data, [:routes, :route_patterns, :shapes, :trips])
   end
 end

@@ -11,7 +11,7 @@ defmodule MBTAV3API.Repository do
               {:ok, JsonApi.Object.full_map()} | {:error, term()}
 
   @callback routes(JsonApi.Params.t(), Keyword.t()) ::
-              {:ok, [MBTAV3API.Route.t()]} | {:error, term()}
+              {:ok, JsonApi.Object.full_map()} | {:error, term()}
 
   @callback stops(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Object.full_map()} | {:error, term()}
@@ -74,7 +74,7 @@ defmodule MBTAV3API.Repository.Impl do
     params = JsonApi.Params.flatten_params(params, Route)
 
     case MBTAV3API.get_json("/routes", params, opts) do
-      %JsonApi{data: data} -> {:ok, Enum.map(data, &Route.parse/1)}
+      %JsonApi{} = doc -> {:ok, JsonApi.Object.parse_all(doc)}
       {:error, error} -> {:error, error}
     end
   end
