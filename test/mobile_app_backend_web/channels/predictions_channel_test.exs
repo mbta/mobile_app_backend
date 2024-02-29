@@ -80,11 +80,11 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
     end
 
     defp trip_60392455 do
-      %Trip{id: "60392455", route_pattern_id: "Red-1-1"}
+      %Trip{id: "60392455", route_pattern_id: "Red-1-1", shape_id: "931_0010"}
     end
 
     defp trip_60392515 do
-      %Trip{id: "60392515", route_pattern_id: "Red-1-0"}
+      %Trip{id: "60392515", route_pattern_id: "Red-1-0", shape_id: "931_0009"}
     end
 
     defp vehicle_r_547a83f7 do

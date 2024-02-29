@@ -11,7 +11,8 @@ defmodule MBTAV3API.Route do
           long_name: String.t(),
           short_name: String.t(),
           sort_order: String.t(),
-          text_color: String.t()
+          text_color: String.t(),
+          route_patterns: [MBTAV3API.RoutePattern.t()]
         }
 
   Util.declare_enum(
@@ -29,7 +30,8 @@ defmodule MBTAV3API.Route do
     :long_name,
     :short_name,
     :sort_order,
-    :text_color
+    :text_color,
+    :route_patterns
   ]
 
   @impl JsonApi.Object
@@ -46,7 +48,7 @@ defmodule MBTAV3API.Route do
     ]
 
   @impl JsonApi.Object
-  def includes, do: %{}
+  def includes, do: %{route_patterns: MBTAV3API.RoutePattern}
 
   @impl JsonApi.Object
   def serialize_filter_value(:type, type), do: serialize_type(type)
@@ -66,7 +68,8 @@ defmodule MBTAV3API.Route do
       long_name: item.attributes["long_name"],
       short_name: item.attributes["short_name"],
       sort_order: item.attributes["sort_order"],
-      text_color: item.attributes["text_color"]
+      text_color: item.attributes["text_color"],
+      route_patterns: JsonApi.Object.parse_many_related(item.relationships["route_patterns"])
     }
   end
 end

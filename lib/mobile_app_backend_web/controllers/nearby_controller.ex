@@ -79,7 +79,7 @@ defmodule MobileAppBackendWeb.NearbyController do
           radius: degree_radius / 2,
           route_type: [:light_rail, :heavy_rail, :bus, :ferry]
         ],
-        include: {:parent_station, :child_stops},
+        include: [parent_station: :child_stops],
         sort: {:distance, :asc}
       )
 
