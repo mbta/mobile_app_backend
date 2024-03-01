@@ -176,6 +176,14 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       conn = get(conn, "/api/nearby", %{latitude: 42.562535, longitude: -70.869116})
 
       assert %{
+               "parent_stops" => %{
+                 "place-GB-0198" => %{
+                   "id" => "place-GB-0198",
+                   "latitude" => 42.562171,
+                   "longitude" => -70.869254,
+                   "name" => "Montserrat"
+                 }
+               },
                "stops" => [
                  %{"id" => "GB-0198-01", "parent_station_id" => "place-GB-0198"},
                  %{"id" => "GB-0198-02", "parent_station_id" => "place-GB-0198"},

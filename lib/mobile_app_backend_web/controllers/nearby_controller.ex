@@ -18,6 +18,11 @@ defmodule MobileAppBackendWeb.NearbyController do
     {stops, included_stops} = fetch_nearby_stops(latitude, longitude, radius)
     stops = MBTAV3API.Stop.include_missing_siblings(stops, included_stops)
 
+    parent_stops =
+      Map.filter(included_stops, fn {_, stop} ->
+        not is_nil(stop.child_stop_ids) and length(stop.child_stop_ids) > 0
+      end)
+
     %{
       routes: routes,
       route_patterns: route_patterns,
@@ -29,6 +34,7 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     json(conn, %{
       pattern_ids_by_stop: pattern_ids_by_stop,
+      parent_stops: parent_stops,
       routes: routes,
       route_patterns: route_patterns,
       stops:
