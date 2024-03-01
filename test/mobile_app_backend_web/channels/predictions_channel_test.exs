@@ -3,6 +3,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
 
   import Test.Support.Helpers
   import Test.Support.Sigils
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
   alias MBTAV3API.Trip
   alias MBTAV3API.Vehicle
@@ -137,7 +138,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
 
     test "correctly handles reset", %{initial_data: data} do
       assert data ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  trip_60392455(),
                  trip_60392515(),
                  vehicle_r_547a83f7(),
@@ -166,7 +167,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       assert_push "stream_data", data
 
       assert data ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  trip_60392455(),
                  trip_60392515(),
                  %Trip{id: "60392593", route_pattern_id: "Red-3-1", shape_id: "933_0016"},
@@ -202,7 +203,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       assert_push "stream_data", data
 
       assert data ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  trip_60392455(),
                  trip_60392515(),
                  vehicle_r_547a83f7(),
@@ -235,7 +236,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       assert_push "stream_data", data
 
       assert data ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  trip_60392455(),
                  vehicle_r_547a83f7(),
                  vehicle_r_547a83f8(),

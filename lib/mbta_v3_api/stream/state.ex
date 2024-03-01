@@ -16,20 +16,21 @@ defmodule MBTAV3API.Stream.State do
   def apply_events(state, events) do
     for %ServerSentEventStage.Event{event: event, data: data} <- events, reduce: state do
       state ->
-        data = JsonApi.parse(data)
+        %JsonApi{data: raw_data} = JsonApi.parse(data)
+        data = Enum.map(raw_data, &JsonApi.Object.parse/1)
 
         case event do
           "reset" ->
-            JsonApi.Object.parse_all(data)
+            JsonApi.Object.to_full_map(data)
 
           "add" ->
-            merge(state, JsonApi.Object.parse_all(data))
+            merge(state, JsonApi.Object.to_full_map(data))
 
           "update" ->
-            merge(state, JsonApi.Object.parse_all(data))
+            merge(state, JsonApi.Object.to_full_map(data))
 
           "remove" ->
-            [%JsonApi.Reference{type: type, id: id}] = data.data
+            [%JsonApi.Reference{type: type, id: id}] = raw_data
             type_key = JsonApi.Object.plural_type(String.to_existing_atom(type))
             {_, state} = pop_in(state[type_key][id])
             state

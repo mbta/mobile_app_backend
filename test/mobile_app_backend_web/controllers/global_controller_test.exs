@@ -15,9 +15,9 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "trips" => trips
              } = stop_response
 
-      assert map_size(stops) == 8015
+      assert length(stops) == 8015
 
-      park_st_station = stops["place-pktrm"]
+      park_st_station = Enum.find(stops, &(Map.get(&1, "id") == "place-pktrm"))
 
       assert %{
                "id" => "place-pktrm",
@@ -27,7 +27,7 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "longitude" => -71.062424
              } = park_st_station
 
-      park_st_rl_platform = stops["70076"]
+      park_st_rl_platform = Enum.find(stops, &(Map.get(&1, "id") == "70076"))
 
       assert %{
                "id" => "70076",

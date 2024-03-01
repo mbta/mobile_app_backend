@@ -21,9 +21,9 @@ defmodule MobileAppBackendWeb.GlobalController do
     })
   end
 
-  @spec fetch_stops() :: JsonApi.Object.stop_map()
+  @spec fetch_stops() :: [MBTAV3API.Stop.t()]
   defp fetch_stops do
-    {:ok, %{stops: stops}} =
+    {:ok, %{data: stops}} =
       Repository.stops(
         filter: [
           location_type: [:stop, :station]
@@ -41,7 +41,7 @@ defmodule MobileAppBackendWeb.GlobalController do
           pattern_ids_by_stop: %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}
         }
   defp fetch_route_patterns do
-    {:ok, %{routes: routes, route_patterns: route_patterns, trips: trips}} =
+    {:ok, %{data: route_patterns, included: %{routes: routes, trips: trips}}} =
       Repository.route_patterns(
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
@@ -51,6 +51,8 @@ defmodule MobileAppBackendWeb.GlobalController do
 
     trips =
       Map.new(trips, fn {trip_id, trip} -> {trip_id, %MBTAV3API.Trip{trip | stop_ids: nil}} end)
+
+    route_patterns = Map.new(route_patterns, &{&1.id, &1})
 
     %{
       routes: routes,

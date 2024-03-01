@@ -1,7 +1,7 @@
 defmodule MBTAV3API.Stream.StateTest do
   use ExUnit.Case, async: true
 
-  import Test.Support.Helpers
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
@@ -21,7 +21,7 @@ defmodule MBTAV3API.Stream.StateTest do
         text_color: "FFFFFF"
       }
 
-      state = to_full_map([green_b])
+      state = JsonApi.Object.to_full_map([green_b])
 
       assert State.apply_events(state, [
                %Event{
@@ -30,7 +30,7 @@ defmodule MBTAV3API.Stream.StateTest do
                    ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
                }
              ]) ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  green_b,
                  %RoutePattern{
                    id: "Green-B-812-0",
@@ -46,7 +46,7 @@ defmodule MBTAV3API.Stream.StateTest do
 
     test "removes" do
       state =
-        to_full_map([
+        JsonApi.Object.to_full_map([
           %Stop{
             id: "place-boyls",
             latitude: 42.35302,
@@ -58,12 +58,12 @@ defmodule MBTAV3API.Stream.StateTest do
 
       assert State.apply_events(state, [
                %Event{event: "remove", data: ~s({"id":"place-boyls","type":"stop"})}
-             ]) == to_full_map([])
+             ]) == JsonApi.Object.to_full_map([])
     end
 
     test "updates" do
       state =
-        to_full_map([
+        JsonApi.Object.to_full_map([
           %Stop{
             id: "place-boyls",
             latitude: 42.35302,
@@ -80,7 +80,7 @@ defmodule MBTAV3API.Stream.StateTest do
                    ~s({"attributes":{"latitude":-42.35302,"location_type":3,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
                }
              ]) ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  %Stop{
                    id: "place-boyls",
                    latitude: -42.35302,
@@ -94,7 +94,7 @@ defmodule MBTAV3API.Stream.StateTest do
 
     test "resets" do
       state =
-        to_full_map([
+        JsonApi.Object.to_full_map([
           %Stop{
             id: "place-boyls",
             latitude: 42.35302,
@@ -112,7 +112,7 @@ defmodule MBTAV3API.Stream.StateTest do
                    ~s([{"attributes":{"latitude":42.377359,"location_type":1,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
                }
              ]) ==
-               to_full_map([
+               JsonApi.Object.to_full_map([
                  %Stop{
                    id: "place-unsqu",
                    latitude: 42.377359,

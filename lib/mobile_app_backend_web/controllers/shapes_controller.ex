@@ -11,13 +11,14 @@ defmodule MobileAppBackendWeb.ShapesController do
   end
 
   @spec fetch_rail_routes() :: %{
-          routes: JsonApi.Object.route_map(),
+          routes: [MBTAV3API.Route.t()],
           route_patterns: JsonApi.Object.route_pattern_map(),
           shapes: JsonApi.Object.shape_map(),
           trips: JsonApi.Object.trip_map()
         }
   defp fetch_rail_routes do
-    {:ok, data} =
+    {:ok,
+     %{data: routes, included: %{route_patterns: route_patterns, shapes: shapes, trips: trips}}} =
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
@@ -25,6 +26,6 @@ defmodule MobileAppBackendWeb.ShapesController do
         include: [route_patterns: [representative_trip: :shape]]
       )
 
-    Map.take(data, [:routes, :route_patterns, :shapes, :trips])
+    %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips}
   end
 end

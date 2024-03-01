@@ -33,10 +33,10 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:type) do
           [:light_rail, :heavy_rail, :commuter_rail] ->
-            {:ok, to_full_map([route, pattern1, pattern2, shape1, shape2, trip1, trip2])}
+            ok_response([route], [pattern1, pattern2, shape1, shape2, trip1, trip2])
 
           _ ->
-            {:ok, []}
+            ok_response([])
         end
       end)
 
@@ -49,7 +49,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
         "trips" => trips
       } = json_response(conn, 200)
 
-      assert %{"Blue" => %{"id" => "Blue", "route_pattern_ids" => ["Blue-1", "Blue-2"]}} = routes
+      assert [%{"id" => "Blue", "route_pattern_ids" => ["Blue-1", "Blue-2"]}] = routes
 
       assert %{
                "Blue-1" => %{
@@ -97,7 +97,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
              } =
                stop_response
 
-      assert 21 = map_size(routes)
+      assert 21 = length(routes)
 
       route_patterns = Map.values(route_patterns)
 

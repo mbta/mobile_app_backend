@@ -1,7 +1,7 @@
 defmodule MBTAV3API.Stream.ConsumerTest do
   use ExUnit.Case, async: true
 
-  import Test.Support.Helpers
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stream
@@ -48,7 +48,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
     assert_receive {:stream_data, data}
 
     assert data ==
-             to_full_map([
+             JsonApi.Object.to_full_map([
                %Route{id: "Green-B"},
                %RoutePattern{
                  id: "Green-B-812-1",

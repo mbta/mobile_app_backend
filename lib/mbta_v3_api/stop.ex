@@ -75,4 +75,24 @@ defmodule MBTAV3API.Stop do
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"])
     }
   end
+
+  @spec include_missing_siblings(JsonApi.Object.stop_map(), JsonApi.Object.stop_map()) ::
+          JsonApi.Object.stop_map()
+  def include_missing_siblings(stops, extra_stops) do
+    parents =
+      stops
+      |> Map.values()
+      |> Enum.filter(&(&1.parent_station_id != nil))
+      |> Enum.map(&Map.fetch!(extra_stops, &1.parent_station_id))
+
+    missing_sibling_stops =
+      parents
+      |> Enum.flat_map(& &1.child_stop_ids)
+      |> Enum.reject(&Map.has_key?(stops, &1))
+      |> Enum.map(&Map.fetch!(extra_stops, &1))
+      |> Enum.filter(&(&1.location_type in [:stop, :station]))
+      |> Map.new(&{&1.id, &1})
+
+    Map.merge(stops, missing_sibling_stops)
+  end
 end

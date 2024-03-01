@@ -167,16 +167,6 @@ defmodule MBTAV3API.JsonApi.Object do
   def parse(%JsonApi.Reference{} = ref), do: ref
 
   @doc """
-  Parses everything in a `t:JsonApi.t/0`.
-  """
-  @spec parse_all(JsonApi.t()) :: full_map()
-  def parse_all(%JsonApi{data: data, included: included}) do
-    (data ++ included)
-    |> Enum.map(&parse/1)
-    |> to_full_map()
-  end
-
-  @doc """
   Gets the `id` of a single `JsonApi.Reference`.
 
   Useful for parsing relationships where only a single element is logically valid.

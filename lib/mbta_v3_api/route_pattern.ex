@@ -59,20 +59,15 @@ defmodule MBTAV3API.RoutePattern do
     }
   end
 
-  @spec get_pattern_ids_by_stop(
-          JsonApi.Object.route_pattern_map(),
-          JsonApi.Object.trip_map(),
-          MapSet.t(String.t()) | nil
-        ) ::
+  @spec get_pattern_ids_by_stop([t()], JsonApi.Object.trip_map(), MapSet.t(String.t()) | nil) ::
           %{String.t() => [String.t()]}
   def get_pattern_ids_by_stop(route_patterns, trips, filter_stop_ids \\ nil) do
     route_patterns
     |> Enum.flat_map(fn
-      {_,
-       %__MODULE__{
-         id: route_pattern_id,
-         representative_trip_id: trip_id
-       }} ->
+      %__MODULE__{
+        id: route_pattern_id,
+        representative_trip_id: trip_id
+      } ->
         %Trip{stop_ids: trip_stop_ids} = trips[trip_id]
 
         trip_stop_ids

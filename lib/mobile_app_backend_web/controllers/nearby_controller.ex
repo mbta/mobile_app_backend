@@ -15,7 +15,8 @@ defmodule MobileAppBackendWeb.NearbyController do
         DateTime.now!("America/New_York")
       end
 
-    stops = fetch_nearby_stops(latitude, longitude, radius)
+    {stops, included_stops} = fetch_nearby_stops(latitude, longitude, radius)
+    stops = MBTAV3API.Stop.include_missing_siblings(stops, included_stops)
 
     %{
       routes: routes,
@@ -26,24 +27,17 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     alerts = fetch_alerts(stops, now)
 
-    stop_children =
-      Enum.group_by(
-        stops,
-        fn {_stop_id, stop} -> stop.parent_station_id end,
-        fn {stop_id, _} -> stop_id end
-      )
-
-    stops =
-      Map.filter(stops, fn {stop_id, _} ->
-        with_children = [stop_id | Map.get(stop_children, stop_id, [])]
-        Enum.any?(with_children, &Map.has_key?(pattern_ids_by_stop, &1))
-      end)
-
     json(conn, %{
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
       route_patterns: route_patterns,
-      stops: stops,
+      stops:
+        stops
+        |> Map.values()
+        |> Enum.filter(&Map.has_key?(pattern_ids_by_stop, &1.id))
+        |> Enum.sort_by(
+          &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
+        ),
       trips: trips,
       alerts: alerts
     })
@@ -53,11 +47,11 @@ defmodule MobileAppBackendWeb.NearbyController do
           latitude :: float(),
           longitude :: float(),
           radius :: float()
-        ) :: JsonApi.Object.stop_map()
+        ) :: {primary :: JsonApi.Object.stop_map(), included :: JsonApi.Object.stop_map()}
   defp fetch_nearby_stops(latitude, longitude, radius) do
     degree_radius = miles_to_degrees(radius)
 
-    {:ok, %{stops: cr_stops}} =
+    {:ok, %{data: cr_stops, included: %{stops: cr_included_stops}}} =
       Repository.stops(
         filter: [
           latitude: latitude,
@@ -70,7 +64,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         sort: {:distance, :asc}
       )
 
-    {:ok, %{stops: other_stops}} =
+    {:ok, %{data: other_stops, included: %{stops: other_included_stops}}} =
       Repository.stops(
         filter: [
           latitude: latitude,
@@ -83,8 +77,8 @@ defmodule MobileAppBackendWeb.NearbyController do
         sort: {:distance, :asc}
       )
 
-    Map.merge(cr_stops, other_stops)
-    |> Map.filter(fn {_id, stop} -> stop.location_type in [:stop, :station] end)
+    {Map.new(cr_stops ++ other_stops, &{&1.id, &1}),
+     Map.merge(cr_included_stops, other_included_stops)}
   end
 
   @spec fetch_route_patterns(JsonApi.Object.stop_map()) :: %{
@@ -94,7 +88,7 @@ defmodule MobileAppBackendWeb.NearbyController do
           pattern_ids_by_stop: %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}
         }
   defp fetch_route_patterns(stops) do
-    {:ok, %{routes: routes, route_patterns: route_patterns, trips: trips}} =
+    {:ok, %{data: route_patterns, included: %{routes: routes, trips: trips}}} =
       Repository.route_patterns(
         filter: [stop: Enum.join(Map.keys(stops), ",")],
         include: [:route, representative_trip: :stops],
@@ -111,6 +105,8 @@ defmodule MobileAppBackendWeb.NearbyController do
     trips =
       Map.new(trips, fn {trip_id, trip} -> {trip_id, %MBTAV3API.Trip{trip | stop_ids: nil}} end)
 
+    route_patterns = Map.new(route_patterns, &{&1.id, &1})
+
     %{
       routes: routes,
       route_patterns: route_patterns,
@@ -120,10 +116,9 @@ defmodule MobileAppBackendWeb.NearbyController do
   end
 
   def fetch_alerts(stops, now) do
-    {:ok, %{alerts: alerts}} = Repository.alerts(filter: [stop: Map.keys(stops)])
+    {:ok, %{data: alerts}} = Repository.alerts(filter: [stop: Map.keys(stops)])
 
     alerts
-    |> Map.values()
     |> Enum.filter(fn alert ->
       MBTAV3API.Alert.active?(alert, now) and
         alert.effect in [
@@ -134,6 +129,11 @@ defmodule MobileAppBackendWeb.NearbyController do
           :suspension
         ]
     end)
+  end
+
+  @spec distance_in_degrees(float(), float(), float(), float()) :: float()
+  defp distance_in_degrees(lat1, lon1, lat2, lon2) do
+    abs(:math.sqrt((lat2 - lat1) ** 2 + (lon2 - lon1) ** 2))
   end
 
   # The V3 API does not actually calculate distance,

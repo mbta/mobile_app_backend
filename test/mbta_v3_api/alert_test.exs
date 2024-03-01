@@ -66,7 +66,7 @@ defmodule MBTAV3API.AlertTest do
       end
     )
 
-    {:ok, %{alerts: alerts}} =
+    {:ok, %{data: alerts}} =
       Repository.alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],
@@ -87,8 +87,8 @@ defmodule MBTAV3API.AlertTest do
         ]
       )
 
-    assert alerts == %{
-             "552825" => %Alert{
+    assert alerts == [
+             %Alert{
                id: "552825",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 14:38:00], end: ~B[2024-02-08 19:12:40]}
@@ -103,7 +103,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                lifecycle: :new
              },
-             "552803" => %Alert{
+             %Alert{
                id: "552803",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 12:55:00], end: ~B[2024-02-08 19:12:40]}
@@ -118,7 +118,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                lifecycle: :new
              }
-           }
+           ]
   end
 
   describe "active?/1" do
