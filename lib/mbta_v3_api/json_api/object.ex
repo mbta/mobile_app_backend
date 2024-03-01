@@ -210,8 +210,8 @@ defmodule MBTAV3API.JsonApi.Object do
       module.includes()
       |> Map.keys()
       |> Enum.map(apply_rename)
-      |> Enum.sort()
       |> Enum.map(&key_for_include_name/1)
+      |> Enum.sort()
 
     expected_struct_keys = [:id] ++ expected_fields ++ expected_includes
 
