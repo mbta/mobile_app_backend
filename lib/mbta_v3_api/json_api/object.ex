@@ -34,11 +34,12 @@ defmodule MBTAV3API.JsonApi.Object do
   Sets up the `JsonApi.Object` behaviour with compile-time validation of `c:fields/0` and `c:includes/0` against the `defstruct/1`.
   Also defines `c:jsonapi_type/0` based on the module name to invert `module_for/1`.
 
-  Expects the `defstruct` to be `[:id, ...field names..., ...related object names...]`.
-  Field names should match the order in `c:fields/1` (which should probably be alphabetized) and related object names should be alphabetized.
+  Expects the `defstruct` to be `[:id, ...field names..., ...related object ID fields...]`.
+  Field names should match the order in `c:fields/1` (which should probably be alphabetized) and related object names should be alphabetized and _id or _ids.
 
-  By default, expects the fields and include names to match the struct keys exactly.
+  By default, expects the fields to match the struct keys exactly, and expects singular includes to match with _id and plurals with _ids.
   If renaming a field at parse time, `use MBTAV3API.JsonApi.Object, renames: %{jsonapi_name => struct_name}`.
+  For included objects, the rename will be applied before adding _id, so the rename should not include _id.
   """
   defmacro __using__(opts) do
     renames = Keyword.get(opts, :renames, quote(do: %{}))
