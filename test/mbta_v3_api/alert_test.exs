@@ -66,7 +66,7 @@ defmodule MBTAV3API.AlertTest do
       end
     )
 
-    {:ok, alerts} =
+    {:ok, %{data: alerts}} =
       Repository.alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],

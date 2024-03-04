@@ -3,7 +3,7 @@ defmodule MBTAV3API.RepositoryTest do
 
   import Mox
 
-  alias MBTAV3API.{Alert, JsonApi, Repository, RoutePattern, Stop}
+  alias MBTAV3API.{Alert, Repository, RoutePattern, Stop}
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -66,7 +66,7 @@ defmodule MBTAV3API.RepositoryTest do
       end
     )
 
-    {:ok, alerts} =
+    {:ok, %{data: alerts}} =
       Repository.alerts(
         filter: [
           lifecycle: [:new, :ongoing, :ongoing_upcoming],
@@ -183,24 +183,26 @@ defmodule MBTAV3API.RepositoryTest do
     )
 
     assert {:ok,
-            [
-              %RoutePattern{
-                id: "CR-Newburyport-e54dc640-0",
-                name: "North Station - Rockport",
-                direction_id: 0,
-                sort_order: 200_110_050,
-                route: %JsonApi.Reference{type: "route", id: "CR-Newburyport"},
-                representative_trip: %JsonApi.Reference{type: "trip", id: "CR-649284-123"}
-              },
-              %RoutePattern{
-                id: "CR-Newburyport-dd9f791d-0",
-                name: "North Station - Rockport",
-                direction_id: 0,
-                sort_order: 200_110_110,
-                route: %JsonApi.Reference{type: "route", id: "CR-Newburyport"},
-                representative_trip: %JsonApi.Reference{type: "trip", id: "CR-649341-103"}
-              }
-            ]} = Repository.route_patterns([])
+            %{
+              data: [
+                %RoutePattern{
+                  id: "CR-Newburyport-e54dc640-0",
+                  name: "North Station - Rockport",
+                  direction_id: 0,
+                  sort_order: 200_110_050,
+                  route_id: "CR-Newburyport",
+                  representative_trip_id: "CR-649284-123"
+                },
+                %RoutePattern{
+                  id: "CR-Newburyport-dd9f791d-0",
+                  name: "North Station - Rockport",
+                  direction_id: 0,
+                  sort_order: 200_110_110,
+                  route_id: "CR-Newburyport",
+                  representative_trip_id: "CR-649341-103"
+                }
+              ]
+            }} = Repository.route_patterns([])
   end
 
   test "stops/2" do
@@ -251,17 +253,19 @@ defmodule MBTAV3API.RepositoryTest do
     )
 
     assert {:ok,
-            [
-              %Stop{
-                id: "FR-0034-01",
-                name: "Porter",
-                parent_station: %JsonApi.Reference{type: "stop", id: "place-portr"}
-              },
-              %Stop{
-                id: "FR-0034-02",
-                name: "Porter",
-                parent_station: %JsonApi.Reference{type: "stop", id: "place-portr"}
-              }
-            ]} = Repository.stops([])
+            %{
+              data: [
+                %Stop{
+                  id: "FR-0034-01",
+                  name: "Porter",
+                  parent_station_id: "place-portr"
+                },
+                %Stop{
+                  id: "FR-0034-02",
+                  name: "Porter",
+                  parent_station_id: "place-portr"
+                }
+              ]
+            }} = Repository.stops([])
   end
 end

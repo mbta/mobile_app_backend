@@ -12,7 +12,7 @@ defmodule MBTAV3API.Route do
           short_name: String.t(),
           sort_order: String.t(),
           text_color: String.t(),
-          route_patterns: [MBTAV3API.RoutePattern.t()]
+          route_pattern_ids: [String.t()]
         }
 
   Util.declare_enum(
@@ -31,7 +31,7 @@ defmodule MBTAV3API.Route do
     :short_name,
     :sort_order,
     :text_color,
-    :route_patterns
+    :route_pattern_ids
   ]
 
   @impl JsonApi.Object
@@ -69,7 +69,7 @@ defmodule MBTAV3API.Route do
       short_name: item.attributes["short_name"],
       sort_order: item.attributes["sort_order"],
       text_color: item.attributes["text_color"],
-      route_patterns: JsonApi.Object.parse_many_related(item.relationships["route_patterns"])
+      route_pattern_ids: JsonApi.Object.get_many_ids(item.relationships["route_patterns"])
     }
   end
 end

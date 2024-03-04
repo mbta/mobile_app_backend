@@ -29,7 +29,9 @@ defmodule MobileAppBackend.Factory do
       id: "66-6-0",
       name: "Nubian Station - Harvard Square",
       direction_id: 0,
-      sort_order: 506_600_000
+      sort_order: 506_600_000,
+      representative_trip_id: "60168428",
+      route_id: "66"
     }
   end
 

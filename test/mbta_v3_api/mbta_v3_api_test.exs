@@ -132,7 +132,7 @@ defmodule MBTAV3APITest do
 
       SSEStub.push_events(sse_stub, [%ServerSentEventStage.Event{event: "reset", data: "[]"}])
 
-      assert_receive {:stream_data, []}
+      assert_receive {:stream_data, %{}}
     end
   end
 end

@@ -23,6 +23,6 @@ defmodule MBTAV3API.Stream.InstanceTest do
       }
     ])
 
-    assert_receive {:stream_data, [%Route{id: "1723"}]}
+    assert_receive {:stream_data, %{routes: %{"1723" => %Route{id: "1723"}}}}
   end
 end

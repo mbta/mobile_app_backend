@@ -45,18 +45,29 @@ defmodule MBTAV3API.Stream.ConsumerTest do
         restart: :transient
       )
 
-    assert_receive {:stream_data,
-                    [
-                      %RoutePattern{
-                        id: "Green-B-812-1",
-                        name: "Boston College - Government Center",
-                        route: %Route{}
-                      },
-                      %RoutePattern{
-                        id: "Green-C-832-0",
-                        name: "Not Government Center - Not Cleveland Circle",
-                        route: %JsonApi.Reference{}
-                      }
-                    ]}
+    assert_receive {:stream_data, data}
+
+    assert data ==
+             JsonApi.Object.to_full_map([
+               %Route{id: "Green-B"},
+               %RoutePattern{
+                 id: "Green-B-812-1",
+                 direction_id: 1,
+                 name: "Boston College - Government Center",
+                 sort_order: 100_321_000,
+                 typicality: :typical,
+                 representative_trip_id: "canonical-Green-B-C1-1",
+                 route_id: "Green-B"
+               },
+               %RoutePattern{
+                 id: "Green-C-832-0",
+                 direction_id: 1,
+                 name: "Not Government Center - Not Cleveland Circle",
+                 sort_order: 100_330_001,
+                 typicality: :typical,
+                 representative_trip_id: "canonical-Green-C-C1-0",
+                 route_id: "Green-C"
+               }
+             ])
   end
 end

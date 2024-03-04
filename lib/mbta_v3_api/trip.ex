@@ -4,13 +4,13 @@ defmodule MBTAV3API.Trip do
   @type t :: %__MODULE__{
           id: String.t(),
           headsign: String.t(),
-          route_pattern: MBTAV3API.RoutePattern.t() | JsonApi.Reference.t() | nil,
-          shape: MBTAV3API.Shape.t() | JsonApi.Reference.t() | nil,
-          stops: [MBTAV3API.Stop.t() | JsonApi.Reference.t()] | nil
+          route_pattern_id: String.t(),
+          shape_id: String.t(),
+          stop_ids: [String.t()] | nil
         }
 
   @derive Jason.Encoder
-  defstruct [:id, :headsign, :route_pattern, :shape, :stops]
+  defstruct [:id, :headsign, :route_pattern_id, :shape_id, :stop_ids]
 
   def fields, do: [:headsign]
 
@@ -22,9 +22,9 @@ defmodule MBTAV3API.Trip do
     %__MODULE__{
       id: item.id,
       headsign: item.attributes["headsign"],
-      route_pattern: JsonApi.Object.parse_one_related(item.relationships["route_pattern"]),
-      shape: JsonApi.Object.parse_one_related(item.relationships["shape"]),
-      stops: JsonApi.Object.parse_many_related(item.relationships["stops"])
+      route_pattern_id: JsonApi.Object.get_one_id(item.relationships["route_pattern"]),
+      shape_id: JsonApi.Object.get_one_id(item.relationships["shape"]),
+      stop_ids: JsonApi.Object.get_many_ids(item.relationships["stops"])
     }
   end
 end

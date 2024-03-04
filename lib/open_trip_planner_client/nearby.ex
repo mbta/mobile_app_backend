@@ -94,16 +94,16 @@ defmodule OpenTripPlannerClient.Nearby do
            latitude: latitude,
            longitude: longitude,
            name: name,
-           parent_station:
+           parent_station_id:
              with {:ok, parent_station} when not is_nil(parent_station) <-
                     Map.fetch(place, "parentStation"),
                   {:ok, parent_station} <- parse_stop(parent_station) do
-               parent_station
+               parent_station.id
              else
                _ -> nil
              end,
            location_type: :stop,
-           child_stops: nil
+           child_stop_ids: nil
          }}
 
       %{"gtfsId" => "2272_2274:" <> _} ->
