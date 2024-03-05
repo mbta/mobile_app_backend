@@ -6,11 +6,13 @@ defmodule MBTAV3API.JsonApi.Item do
 
   defstruct [:type, :id, :attributes, :relationships]
 
+  alias MBTAV3API.JsonApi.Reference
+
   @type t :: %__MODULE__{
           type: String.t(),
           id: String.t(),
           attributes: %{String.t() => any},
-          relationships: %{String.t() => list(t())}
+          relationships: %{String.t() => Reference.t() | list(Reference.t()) | nil}
         }
 end
 
@@ -50,18 +52,20 @@ defmodule MBTAV3API.JsonApi do
   """
   @derive Jason.Encoder
 
-  defstruct links: %{}, data: []
+  defstruct links: %{}, data: [], included: []
 
   @type t :: %__MODULE__{
           links: %{String.t() => String.t()},
-          data: list(MBTAV3API.JsonApi.Item.t() | MBTAV3API.JsonApi.Reference.t())
+          data: list(MBTAV3API.JsonApi.Item.t() | MBTAV3API.JsonApi.Reference.t()),
+          included: list(MBTAV3API.JsonApi.Item.t())
         }
 
   @spec empty() :: t()
   def empty do
     %__MODULE__{
       links: %{},
-      data: []
+      data: [],
+      included: []
     }
   end
 
@@ -69,7 +73,8 @@ defmodule MBTAV3API.JsonApi do
   def merge(j1, j2) do
     %__MODULE__{
       links: Map.merge(j1.links, j2.links),
-      data: j1.data ++ j2.data
+      data: j1.data ++ j2.data,
+      included: j1.included ++ j2.included
     }
   end
 
@@ -79,7 +84,8 @@ defmodule MBTAV3API.JsonApi do
          {:ok, data} <- parse_data(parsed) do
       %__MODULE__{
         links: parse_links(parsed),
-        data: data
+        data: data,
+        included: parse_included(parsed)
       }
     else
       {:error, [_ | _] = errors} ->
@@ -103,14 +109,8 @@ defmodule MBTAV3API.JsonApi do
 
   @spec parse_data(term()) ::
           {:ok, [MBTAV3API.JsonApi.Item.t() | MBTAV3API.JsonApi.Reference.t()]} | {:error, any}
-  defp parse_data(%{"data" => data} = parsed) when is_list(data) do
-    included = parse_included(parsed)
-    {:ok, Enum.map(data, &parse_data_item(&1, included, []))}
-  end
-
-  defp parse_data(%{"data" => data} = parsed) do
-    included = parse_included(parsed)
-    {:ok, [parse_data_item(data, included, [])]}
+  defp parse_data(%{"data" => data}) do
+    {:ok, data |> List.wrap() |> Enum.map(&parse_data_item/1)}
   end
 
   defp parse_data(%{"errors" => errors}) do
@@ -131,37 +131,29 @@ defmodule MBTAV3API.JsonApi do
     {:error, :invalid}
   end
 
-  def parse_data_item(
-        %{"type" => type, "id" => id, "attributes" => attributes} = item,
-        included,
-        path
-      ) do
-    if {type, id} in path do
-      %MBTAV3API.JsonApi.Reference{type: type, id: id}
-    else
-      %MBTAV3API.JsonApi.Item{
-        type: type,
-        id: id,
-        attributes: attributes,
-        relationships: load_relationships(item["relationships"], included, [{type, id} | path])
-      }
-    end
+  def parse_data_item(%{"type" => type, "id" => id, "attributes" => attributes} = item) do
+    %MBTAV3API.JsonApi.Item{
+      type: type,
+      id: id,
+      attributes: attributes,
+      relationships: load_relationships(item["relationships"])
+    }
   end
 
-  def parse_data_item(%{"type" => type, "id" => id}, _, _) do
+  def parse_data_item(%{"type" => type, "id" => id}) do
     %MBTAV3API.JsonApi.Reference{
       type: type,
       id: id
     }
   end
 
-  defp load_relationships(nil, _, _) do
+  defp load_relationships(nil) do
     %{}
   end
 
-  defp load_relationships(%{} = relationships, included, path) do
+  defp load_relationships(%{} = relationships) do
     relationships
-    |> map_values(&load_single_relationship(&1, included, path))
+    |> map_values(&load_single_relationship/1)
   end
 
   defp map_values(map, f) do
@@ -169,51 +161,28 @@ defmodule MBTAV3API.JsonApi do
     |> Map.new(fn {key, value} -> {key, f.(value)} end)
   end
 
-  defp load_single_relationship(relationship, _, _) when relationship == %{} do
-    []
-  end
-
-  defp load_single_relationship(%{"data" => data}, included, path) when is_list(data) do
-    data
-    |> Enum.map(&match_included(&1, included))
-    |> Enum.reject(&is_nil/1)
-    |> Enum.map(&parse_data_item(&1, included, path))
-  end
-
-  defp load_single_relationship(%{"data" => %{} = data}, included, path) do
-    case data |> match_included(included) do
-      nil -> []
-      item -> [parse_data_item(item, included, path)]
-    end
-  end
-
-  defp load_single_relationship(_, _, _) do
-    []
-  end
-
-  defp match_included(nil, _) do
+  defp load_single_relationship(relationship) when relationship == %{} do
     nil
   end
 
-  defp match_included(%{"type" => type, "id" => id} = item, included) do
-    Map.get(included, {type, id}, item)
+  defp load_single_relationship(%{"data" => data}) when is_list(data) do
+    Enum.map(data, &parse_data_item/1)
   end
 
-  defp parse_included(params) do
-    included = Map.get(params, "included", [])
+  defp load_single_relationship(%{"data" => %{} = data}) do
+    parse_data_item(data)
+  end
 
-    data =
-      case Map.get(params, "data") do
-        nil -> []
-        list when is_list(list) -> list
-        item -> [item]
-      end
+  defp load_single_relationship(%{}) do
+    nil
+  end
 
-    included
-    |> Enum.concat(data)
-    |> Map.new(fn %{"type" => type, "id" => id} = item ->
-      {{type, id}, item}
-    end)
+  defp parse_included(%{"included" => included}) do
+    Enum.map(included, &parse_data_item/1)
+  end
+
+  defp parse_included(_) do
+    []
   end
 
   defp parse_errors(errors) do

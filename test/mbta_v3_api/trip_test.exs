@@ -8,11 +8,8 @@ defmodule MBTAV3API.TripTest do
     assert %Trip{
              id: "60451275",
              headsign: "Wakefield Ave",
-             route_pattern: %JsonApi.Reference{type: "route_pattern", id: "24-2-0"},
-             stops: [
-               %JsonApi.Reference{type: "stop", id: "334"},
-               %JsonApi.Reference{type: "stop", id: "536"}
-             ]
+             route_pattern_id: "24-2-0",
+             stop_ids: ["334", "536"]
            } ==
              Trip.parse(%JsonApi.Item{
                id: "60451275",
@@ -20,9 +17,7 @@ defmodule MBTAV3API.TripTest do
                  "headsign" => "Wakefield Ave"
                },
                relationships: %{
-                 "route_pattern" => [
-                   %JsonApi.Reference{type: "route_pattern", id: "24-2-0"}
-                 ],
+                 "route_pattern" => %JsonApi.Reference{type: "route_pattern", id: "24-2-0"},
                  "stops" => [
                    %JsonApi.Reference{type: "stop", id: "334"},
                    %JsonApi.Reference{type: "stop", id: "536"}

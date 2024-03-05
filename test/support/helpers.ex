@@ -27,4 +27,15 @@ defmodule Test.Support.Helpers do
       Logger.configure(level: unquote(log_level))
     end
   end
+
+  @spec ok_response([primary_data], [MBTAV3API.JsonApi.Object.t()]) ::
+          {:ok, MBTAV3API.JsonApi.Response.t(primary_data)}
+        when primary_data: MBTAV3API.JsonApi.Object.t()
+  def ok_response(data, included \\ []) do
+    {:ok,
+     %MBTAV3API.JsonApi.Response{
+       data: data,
+       included: MBTAV3API.JsonApi.Object.to_full_map(included)
+     }}
+  end
 end

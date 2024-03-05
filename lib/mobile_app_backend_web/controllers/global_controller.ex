@@ -2,23 +2,28 @@ defmodule MobileAppBackendWeb.GlobalController do
   alias MBTAV3API.{JsonApi, Repository}
   use MobileAppBackendWeb, :controller
 
-  @type stop_map() :: MBTAV3API.Stop.stop_map()
-
   def show(conn, _params) do
     stops = fetch_stops()
-    {route_patterns, pattern_ids_by_stop, routes} = fetch_route_patterns()
+
+    %{
+      routes: routes,
+      route_patterns: route_patterns,
+      trips: trips,
+      pattern_ids_by_stop: pattern_ids_by_stop
+    } = fetch_route_patterns()
 
     json(conn, %{
-      stops: stops,
-      route_patterns: route_patterns,
       pattern_ids_by_stop: pattern_ids_by_stop,
-      routes: routes
+      routes: routes,
+      route_patterns: route_patterns,
+      stops: stops,
+      trips: trips
     })
   end
 
   @spec fetch_stops() :: [MBTAV3API.Stop.t()]
   defp fetch_stops do
-    {:ok, stops} =
+    {:ok, %{data: stops}} =
       Repository.stops(
         filter: [
           location_type: [:stop, :station]
@@ -29,31 +34,31 @@ defmodule MobileAppBackendWeb.GlobalController do
     stops
   end
 
-  @spec fetch_route_patterns() ::
-          {%{(route_pattern_id :: String.t()) => MBTAV3API.RoutePattern.t()},
-           %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]},
-           %{(route_id :: String.t()) => MBTAV3API.Route.t()}}
+  @spec fetch_route_patterns() :: %{
+          routes: JsonApi.Object.route_map(),
+          route_patterns: JsonApi.Object.route_pattern_map(),
+          trips: JsonApi.Object.trip_map(),
+          pattern_ids_by_stop: %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}
+        }
   defp fetch_route_patterns do
-    {:ok, route_patterns} =
+    {:ok, %{data: route_patterns, included: %{routes: routes, trips: trips}}} =
       Repository.route_patterns(
         include: [:route, representative_trip: :stops],
         fields: [stop: []]
       )
 
-    pattern_ids_by_stop = MBTAV3API.RoutePattern.get_pattern_ids_by_stop(route_patterns)
-    routes = MBTAV3API.RoutePattern.get_route_map(route_patterns)
+    pattern_ids_by_stop = MBTAV3API.RoutePattern.get_pattern_ids_by_stop(route_patterns, trips)
 
-    route_patterns =
-      Map.new(
-        route_patterns,
-        &{&1.id,
-         %MBTAV3API.RoutePattern{
-           &1
-           | route: %JsonApi.Reference{type: "route", id: &1.route.id},
-             representative_trip: nil
-         }}
-      )
+    trips =
+      Map.new(trips, fn {trip_id, trip} -> {trip_id, %MBTAV3API.Trip{trip | stop_ids: nil}} end)
 
-    {route_patterns, pattern_ids_by_stop, routes}
+    route_patterns = Map.new(route_patterns, &{&1.id, &1})
+
+    %{
+      routes: routes,
+      route_patterns: route_patterns,
+      trips: trips,
+      pattern_ids_by_stop: pattern_ids_by_stop
+    }
   end
 end

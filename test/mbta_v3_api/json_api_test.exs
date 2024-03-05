@@ -69,20 +69,21 @@ defmodule MBTAV3API.JsonApiTest do
                    "longitude" => -71.118956
                  },
                  relationships: %{
-                   "parent_station" => [
-                     %JsonApi.Item{
-                       type: "stop",
-                       id: "place-harsq",
-                       attributes: %{
-                         "name" => "Harvard",
-                         "wheelchair_boarding" => 1,
-                         "latitude" => 42.373362,
-                         "longitude" => -71.118956
-                       },
-                       relationships: %{}
-                     }
-                   ]
+                   "parent_station" => %JsonApi.Reference{type: "stop", id: "place-harsq"}
                  }
+               }
+             ],
+             included: [
+               %JsonApi.Item{
+                 type: "stop",
+                 id: "place-harsq",
+                 attributes: %{
+                   "name" => "Harvard",
+                   "wheelchair_boarding" => 1,
+                   "latitude" => 42.373362,
+                   "longitude" => -71.118956
+                 },
+                 relationships: %{}
                }
              ]
            }
@@ -106,19 +107,7 @@ defmodule MBTAV3API.JsonApiTest do
                    "longitude" => -71.118956
                  },
                  relationships: %{
-                   "parent_station" => [
-                     %JsonApi.Item{
-                       type: "stop",
-                       id: "place-harsq",
-                       attributes: %{
-                         "name" => "Harvard",
-                         "wheelchair_boarding" => 1,
-                         "latitude" => 42.373362,
-                         "longitude" => -71.118956
-                       },
-                       relationships: %{}
-                     }
-                   ]
+                   "parent_station" => %JsonApi.Reference{type: "stop", id: "place-harsq"}
                  }
                },
                %JsonApi.Item{
@@ -132,7 +121,8 @@ defmodule MBTAV3API.JsonApiTest do
                  },
                  relationships: %{}
                }
-             ]
+             ],
+             included: []
            }
   end
 
@@ -149,7 +139,7 @@ defmodule MBTAV3API.JsonApiTest do
                  id: "20761",
                  attributes: %{},
                  relationships: %{
-                   "other" => [%JsonApi.Reference{type: "other", id: "1"}]
+                   "other" => %JsonApi.Reference{type: "other", id: "1"}
                  }
                }
              ]
@@ -205,20 +195,21 @@ defmodule MBTAV3API.JsonApiTest do
                  attributes: %{},
                  relationships: %{
                    "facilities" => [
-                     %JsonApi.Item{
-                       type: "facility",
-                       id: "subplat-056",
-                       attributes: %{},
-                       relationships: %{
-                         "stop" => [
-                           %JsonApi.Reference{
-                             type: "stop",
-                             id: "Worcester"
-                           }
-                         ]
-                       }
-                     }
+                     %JsonApi.Reference{type: "facility", id: "subplat-056"}
                    ]
+                 }
+               }
+             ],
+             included: [
+               %JsonApi.Item{
+                 type: "facility",
+                 id: "subplat-056",
+                 attributes: %{},
+                 relationships: %{
+                   "stop" => %JsonApi.Reference{
+                     type: "stop",
+                     id: "Worcester"
+                   }
                  }
                }
              ]
@@ -272,32 +263,30 @@ defmodule MBTAV3API.JsonApiTest do
                  id: "subplat-WML-0442-1",
                  attributes: %{},
                  relationships: %{
-                   "stop" => [
-                     %JsonApi.Item{
-                       type: "stop",
-                       id: "place-WML-0442",
-                       attributes: %{},
-                       relationships: %{
-                         "child_stops" => [
-                           %JsonApi.Item{
-                             type: "stop",
-                             id: "WML-0442-CS",
-                             attributes: %{},
-                             relationships: %{
-                               "facilities" => [],
-                               "parent_station" => [
-                                 %JsonApi.Reference{type: "stop", id: "place-WML-0442"}
-                               ],
-                               "zone" => [%JsonApi.Reference{type: "zone", id: "CR-zone-8"}]
-                             }
-                           }
-                         ],
-                         "facilities" => [],
-                         "parent_station" => [],
-                         "zone" => [%JsonApi.Reference{type: "zone", id: "CR-zone-8"}]
-                       }
-                     }
-                   ]
+                   "stop" => %JsonApi.Reference{type: "stop", id: "place-WML-0442"}
+                 }
+               }
+             ],
+             included: [
+               %JsonApi.Item{
+                 type: "stop",
+                 id: "WML-0442-CS",
+                 attributes: %{},
+                 relationships: %{
+                   "facilities" => nil,
+                   "parent_station" => %JsonApi.Reference{type: "stop", id: "place-WML-0442"},
+                   "zone" => %JsonApi.Reference{type: "zone", id: "CR-zone-8"}
+                 }
+               },
+               %JsonApi.Item{
+                 type: "stop",
+                 id: "place-WML-0442",
+                 attributes: %{},
+                 relationships: %{
+                   "child_stops" => [%JsonApi.Reference{type: "stop", id: "WML-0442-CS"}],
+                   "facilities" => nil,
+                   "parent_station" => nil,
+                   "zone" => %JsonApi.Reference{type: "zone", id: "CR-zone-8"}
                  }
                }
              ]
@@ -320,8 +309,8 @@ defmodule MBTAV3API.JsonApiTest do
                  id: "20761",
                  attributes: %{},
                  relationships: %{
-                   "parent_station" => [],
-                   "other" => []
+                   "parent_station" => nil,
+                   "other" => nil
                  }
                }
              ]

@@ -75,9 +75,35 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         }
       ])
 
-      assert_push "stream_data", %{predictions: initial_predictions}
+      assert_push "stream_data", initial_data
 
-      {:ok, %{sse_stub: sse_stub, initial_predictions: initial_predictions}}
+      {:ok, %{sse_stub: sse_stub, initial_data: initial_data}}
+    end
+
+    defp trip_60392455 do
+      %Trip{id: "60392455", route_pattern_id: "Red-1-1", shape_id: "931_0010"}
+    end
+
+    defp trip_60392515 do
+      %Trip{id: "60392515", route_pattern_id: "Red-1-0", shape_id: "931_0009"}
+    end
+
+    defp vehicle_r_547a83f7 do
+      %Vehicle{
+        id: "R-547A83F7",
+        current_status: :in_transit_to,
+        stop_id: "70072",
+        trip_id: trip_60392455().id
+      }
+    end
+
+    defp vehicle_r_547a83f8 do
+      %Vehicle{
+        id: "R-547A83F8",
+        current_status: :stopped_at,
+        stop_id: "70085",
+        trip_id: trip_60392515().id
+      }
     end
 
     defp prediction_60392455 do
@@ -89,19 +115,9 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 90,
-        stop: %JsonApi.Reference{type: "stop", id: "70086"},
-        trip: %Trip{
-          id: "60392455",
-          route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-1"},
-          shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "931_0010"},
-          stops: nil
-        },
-        vehicle: %Vehicle{
-          id: "R-547A83F7",
-          current_status: :in_transit_to,
-          stop: %JsonApi.Reference{type: "stop", id: "70072"},
-          trip: %JsonApi.Reference{type: "trip", id: "60392455"}
-        }
+        stop_id: "70086",
+        trip_id: trip_60392455().id,
+        vehicle_id: vehicle_r_547a83f7().id
       }
     end
 
@@ -114,24 +130,22 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 130,
-        stop: %JsonApi.Reference{type: "stop", id: "70085"},
-        trip: %Trip{
-          id: "60392515",
-          route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-1-0"},
-          shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "931_0009"},
-          stops: nil
-        },
-        vehicle: %Vehicle{
-          id: "R-547A83F8",
-          current_status: :stopped_at,
-          stop: %JsonApi.Reference{type: "stop", id: "70085"},
-          trip: %JsonApi.Reference{type: "trip", id: "60392515"}
-        }
+        stop_id: "70085",
+        trip_id: trip_60392515().id,
+        vehicle_id: vehicle_r_547a83f8().id
       }
     end
 
-    test "correctly handles reset", %{initial_predictions: predictions} do
-      assert predictions == [prediction_60392455(), prediction_60392515()]
+    test "correctly handles reset", %{initial_data: data} do
+      assert data ==
+               JsonApi.Object.to_full_map([
+                 trip_60392455(),
+                 trip_60392515(),
+                 vehicle_r_547a83f7(),
+                 vehicle_r_547a83f8(),
+                 prediction_60392455(),
+                 prediction_60392515()
+               ])
     end
 
     test "correctly handles add after reset", %{sse_stub: sse_stub} do
@@ -150,29 +164,30 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         }
       ])
 
-      assert_push "stream_data", %{predictions: predictions}
+      assert_push "stream_data", data
 
-      assert predictions == [
-               prediction_60392455(),
-               prediction_60392515(),
-               %Prediction{
-                 id: "prediction-60392593-70096-100",
-                 arrival_time: ~B[2024-01-30 17:54:04],
-                 departure_time: ~B[2024-01-30 17:55:45],
-                 direction_id: 1,
-                 revenue: true,
-                 schedule_relationship: :scheduled,
-                 stop_sequence: 100,
-                 stop: %JsonApi.Reference{type: "stop", id: "70096"},
-                 trip: %Trip{
-                   id: "60392593",
-                   route_pattern: %JsonApi.Reference{type: "route_pattern", id: "Red-3-1"},
-                   shape: %MBTAV3API.JsonApi.Reference{type: "shape", id: "933_0016"},
-                   stops: nil
-                 },
-                 vehicle: %JsonApi.Reference{type: "vehicle", id: "R-547A80A3"}
-               }
-             ]
+      assert data ==
+               JsonApi.Object.to_full_map([
+                 trip_60392455(),
+                 trip_60392515(),
+                 %Trip{id: "60392593", route_pattern_id: "Red-3-1", shape_id: "933_0016"},
+                 vehicle_r_547a83f7(),
+                 vehicle_r_547a83f8(),
+                 prediction_60392455(),
+                 prediction_60392515(),
+                 %Prediction{
+                   id: "prediction-60392593-70096-100",
+                   arrival_time: ~B[2024-01-30 17:54:04],
+                   departure_time: ~B[2024-01-30 17:55:45],
+                   direction_id: 1,
+                   revenue: true,
+                   schedule_relationship: :scheduled,
+                   stop_sequence: 100,
+                   stop_id: "70096",
+                   trip_id: "60392593",
+                   vehicle_id: "R-547A80A3"
+                 }
+               ])
     end
 
     test "correctly handles update after reset", %{sse_stub: sse_stub} do
@@ -185,16 +200,21 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         }
       ])
 
-      assert_push "stream_data", %{predictions: predictions}
+      assert_push "stream_data", data
 
-      assert predictions == [
-               %Prediction{
-                 prediction_60392455()
-                 | arrival_time: ~B[2024-01-30 15:44:26],
-                   departure_time: ~B[2024-01-30 15:45:27]
-               },
-               prediction_60392515()
-             ]
+      assert data ==
+               JsonApi.Object.to_full_map([
+                 trip_60392455(),
+                 trip_60392515(),
+                 vehicle_r_547a83f7(),
+                 vehicle_r_547a83f8(),
+                 %Prediction{
+                   prediction_60392455()
+                   | arrival_time: ~B[2024-01-30 15:44:26],
+                     departure_time: ~B[2024-01-30 15:45:27]
+                 },
+                 prediction_60392515()
+               ])
     end
 
     test "correctly handles remove after reset", %{sse_stub: sse_stub} do
@@ -213,8 +233,15 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         }
       ])
 
-      assert_push "stream_data", %{predictions: predictions}
-      assert predictions == [prediction_60392455()]
+      assert_push "stream_data", data
+
+      assert data ==
+               JsonApi.Object.to_full_map([
+                 trip_60392455(),
+                 vehicle_r_547a83f7(),
+                 vehicle_r_547a83f8(),
+                 prediction_60392455()
+               ])
     end
   end
 end
