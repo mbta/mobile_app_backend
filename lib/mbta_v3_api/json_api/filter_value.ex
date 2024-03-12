@@ -15,7 +15,7 @@ defimpl MBTAV3API.JsonApi.FilterValue, for: BitString do
   end
 end
 
-defimpl MBTAV3API.JsonApi.FilterValue, for: [Atom, Float, Integer] do
+defimpl MBTAV3API.JsonApi.FilterValue, for: [Atom, Date, Float, Integer] do
   def filter_value_string(data, nil), do: String.Chars.to_string(data)
 
   def filter_value_string(data, serializer) do
