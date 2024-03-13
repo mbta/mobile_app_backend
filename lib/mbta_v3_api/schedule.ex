@@ -8,6 +8,7 @@ defmodule MBTAV3API.Schedule do
           departure_time: DateTime.t() | nil,
           drop_off_type: stop_edge_type(),
           pick_up_type: stop_edge_type(),
+          stop_sequence: integer(),
           stop_id: String.t() | nil,
           trip_id: String.t() | nil
         }
@@ -24,12 +25,13 @@ defmodule MBTAV3API.Schedule do
     :departure_time,
     :drop_off_type,
     :pick_up_type,
+    :stop_sequence,
     :stop_id,
     :trip_id
   ]
 
   @impl JsonApi.Object
-  def fields, do: [:arrival_time, :departure_time, :drop_off_type, :pickup_type]
+  def fields, do: [:arrival_time, :departure_time, :drop_off_type, :pickup_type, :stop_sequence]
 
   @impl JsonApi.Object
   def includes, do: %{stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
@@ -42,6 +44,7 @@ defmodule MBTAV3API.Schedule do
       departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
       drop_off_type: parse_stop_edge_type(item.attributes["drop_off_type"]),
       pick_up_type: parse_stop_edge_type(item.attributes["pickup_type"]),
+      stop_sequence: item.attributes["stop_sequence"],
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"])
     }

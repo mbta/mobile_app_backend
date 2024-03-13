@@ -20,6 +20,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
         departure_time: ~B[2024-03-13 01:07:00],
         drop_off_type: :regular,
         pick_up_type: :regular,
+        stop_sequence: 90,
         stop_id: "70159",
         trip_id: "60565179"
       }
@@ -30,6 +31,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       departure_time: "2024-03-13T01:15:00-04:00",
       drop_off_type: :regular,
       pick_up_type: :regular,
+      stop_sequence: 590,
       stop_id: "70158",
       trip_id: "60565145"
     }
@@ -67,6 +69,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  "id" => "schedule-60565179-70159-90",
                  "pick_up_type" => "regular",
                  "stop_id" => "70159",
+                 "stop_sequence" => 90,
                  "trip_id" => "60565179"
                },
                %{
@@ -76,6 +79,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  "id" => "schedule-60565145-70158-590",
                  "pick_up_type" => "regular",
                  "stop_id" => "70158",
+                 "stop_sequence" => 590,
                  "trip_id" => "60565145"
                }
              ],

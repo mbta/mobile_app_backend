@@ -12,7 +12,8 @@ defmodule MBTAV3API.ScheduleTest do
                "arrival_time" => "2024-03-13T01:07:00-04:00",
                "departure_time" => "2024-03-13T01:07:00-04:00",
                "drop_off_type" => 0,
-               "pickup_type" => 0
+               "pickup_type" => 0,
+               "stop_sequence" => 90
              },
              relationships: %{
                "route" => %JsonApi.Reference{type: "route", id: "Green-D"},
@@ -25,6 +26,7 @@ defmodule MBTAV3API.ScheduleTest do
              departure_time: ~B[2024-03-13 01:07:00],
              drop_off_type: :regular,
              pick_up_type: :regular,
+             stop_sequence: 90,
              stop_id: "70159",
              trip_id: "60565179"
            }
