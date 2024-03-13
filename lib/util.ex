@@ -226,4 +226,38 @@ defmodule Util do
     |> Enum.reverse()
     |> Enum.reduce(fn t, acc -> quote(do: unquote(t) | unquote(acc)) end)
   end
+
+  @doc """
+  Converts a local time into a GTFS {service date, HH:MM}.
+
+  ## Examples
+
+      iex> import Test.Support.Sigils
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 10:55:39])
+      {~D[2024-03-12], "10:55"}
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 00:19:03])
+      {~D[2024-03-11], "24:19"}
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 01:23:45])
+      {~D[2024-03-11], "25:23"}
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 02:11:00])
+      {~D[2024-03-12], "02:11"}
+  """
+  @spec datetime_to_gtfs(DateTime.t()) :: {Date.t(), String.t()}
+  def datetime_to_gtfs(
+        %DateTime{hour: hour, minute: minute, time_zone: "America/New_York"} = datetime
+      ) do
+    date = DateTime.to_date(datetime)
+
+    {date, hour} =
+      if hour in [0, 1] do
+        {Date.add(date, -1), hour + 24}
+      else
+        {date, hour}
+      end
+
+    hour = to_string(hour) |> String.pad_leading(2, "0")
+    minute = to_string(minute) |> String.pad_leading(2, "0")
+
+    {date, "#{hour}:#{minute}"}
+  end
 end

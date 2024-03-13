@@ -77,7 +77,7 @@ defmodule MBTAV3API.JsonApi.Object do
   @spec plural_type(atom()) :: atom()
   def plural_type(type)
 
-  types = [:alert, :prediction, :route, :route_pattern, :shape, :stop, :trip, :vehicle]
+  types = [:alert, :prediction, :route, :route_pattern, :schedule, :shape, :stop, :trip, :vehicle]
   @plural_types Map.new(types, &{&1, :"#{&1}s"})
 
   modules =

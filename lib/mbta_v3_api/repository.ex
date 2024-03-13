@@ -13,6 +13,9 @@ defmodule MBTAV3API.Repository do
   @callback routes(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Route.t())} | {:error, term()}
 
+  @callback schedules(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, JsonApi.Response.t(MBTAV3API.Schedule.t())} | {:error, term()}
+
   @callback stops(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Stop.t())} | {:error, term()}
 
@@ -32,6 +35,13 @@ defmodule MBTAV3API.Repository do
 
   def routes(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).routes(
+      params,
+      opts
+    )
+  end
+
+  def schedules(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).schedules(
       params,
       opts
     )
@@ -57,6 +67,9 @@ defmodule MBTAV3API.Repository.Impl do
 
   @impl true
   def routes(params, opts \\ []), do: all(MBTAV3API.Route, params, opts)
+
+  @impl true
+  def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
 
   @impl true
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
