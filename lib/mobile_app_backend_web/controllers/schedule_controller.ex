@@ -22,12 +22,9 @@ defmodule MobileAppBackendWeb.ScheduleController do
           {:ok, %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}}
           | {:error, term()}
   defp fetch_schedules(filter) do
-    case Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
-      {:ok, %{data: schedules, included: %{trips: trips}}} ->
-        {:ok, %{schedules: schedules, trips: trips}}
-
-      {:error, error} ->
-        {:error, error}
+    with {:ok, %{data: schedules, included: %{trips: trips}}} <-
+           Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
+      {:ok, %{schedules: schedules, trips: trips}}
     end
   end
 end
