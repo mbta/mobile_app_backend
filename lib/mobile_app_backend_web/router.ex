@@ -31,7 +31,7 @@ defmodule MobileAppBackendWeb.Router do
     get("/global", GlobalController, :show)
     get("/search/query", SearchController, :query)
     get("/shapes/rail", ShapesController, :rail)
-    get("/schedule", ScheduleController, :schedule)
+    get("/schedules", ScheduleController, :schedules)
   end
 
   # Enable LiveDashboard in development

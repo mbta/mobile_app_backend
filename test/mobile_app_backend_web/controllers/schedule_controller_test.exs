@@ -4,7 +4,10 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
 
   test "returns schedules", %{conn: conn} do
     conn =
-      get(conn, "/api/schedule", %{stop_ids: "place-boyls", time: "2024-03-13T01:06:30-04:00"})
+      get(conn, "/api/schedules", %{
+        stop_ids: "place-boyls",
+        date_time: "2024-03-13T01:06:30-04:00"
+      })
 
     assert %{
              "schedules" => [

@@ -3,28 +3,31 @@ defmodule MobileAppBackendWeb.ScheduleController do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
 
-  def schedule(conn, params) do
-    filter = get_filter(params)
-    data = fetch_schedules(filter)
+  def schedules(conn, %{"stop_ids" => stop_ids, "date_time" => date_time}) do
+    {:ok, data} =
+      get_filter(stop_ids, date_time)
+      |> fetch_schedules()
 
     json(conn, data)
   end
 
-  @spec get_filter(map()) :: [JsonApi.Params.filter_param()]
-  defp get_filter(%{"stop_ids" => stop_ids, "time" => time}) do
-    time = Util.parse_datetime!(time)
-    {service_date, min_time} = Util.datetime_to_gtfs(time)
+  @spec get_filter(String.t(), String.t()) :: [JsonApi.Params.filter_param()]
+  defp get_filter(stop_ids, date_time) do
+    date_time = Util.parse_datetime!(date_time)
+    {service_date, min_time} = Util.datetime_to_gtfs(date_time)
     [stop: stop_ids, date: service_date, min_time: min_time]
   end
 
-  @spec fetch_schedules([JsonApi.Params.filter_param()]) :: %{
-          schedules: [MBTAV3API.Schedule.t()],
-          trips: JsonApi.Object.trip_map()
-        }
+  @spec fetch_schedules([JsonApi.Params.filter_param()]) ::
+          {:ok, %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}}
+          | {:error, term()}
   defp fetch_schedules(filter) do
-    {:ok, %{data: schedules, included: %{trips: trips}}} =
-      Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc})
+    case Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
+      {:ok, %{data: schedules, included: %{trips: trips}}} ->
+        {:ok, %{schedules: schedules, trips: trips}}
 
-    %{schedules: schedules, trips: trips}
+      {:error, error} ->
+        {:error, error}
+    end
   end
 end
