@@ -14,7 +14,7 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
                api_key: "931"
              ) == %{
                id: {Stream.StaticInstance, "some:topic"},
-               restart: :transient,
+               restart: :permanent,
                start:
                  {Stream.Instance, :start_link,
                   [

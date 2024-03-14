@@ -15,7 +15,7 @@ defmodule MBTAV3API.Stream.StaticInstance do
     (MBTAV3API.stream_args(url, params, opts ++ [destination: topic]) ++
        [name: Stream.Registry.via_name(topic)])
     |> Stream.Instance.child_spec()
-    |> Map.put(:id, {__MODULE__, topic})
+    |> Map.merge(%{id: {__MODULE__, topic}, restart: :permanent})
   end
 
   @spec subscribe(Phoenix.PubSub.topic()) :: {:ok, Stream.State.t()} | {:error, term()}
