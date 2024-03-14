@@ -13,7 +13,7 @@ defmodule MBTAV3API.Supervisor do
         MBTAV3API.Stream.PubSub,
         MBTAV3API.Stream.Supervisor
       ] ++
-        if Application.get_env(:mobile_app_backend, :api_key) do
+        if Application.get_env(:mobile_app_backend, :base_url) do
           [
             {MBTAV3API.Stream.StaticInstance,
              type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"}
