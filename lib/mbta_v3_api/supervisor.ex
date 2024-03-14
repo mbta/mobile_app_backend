@@ -7,12 +7,20 @@ defmodule MBTAV3API.Supervisor do
 
   @impl true
   def init(_) do
-    children = [
-      MBTAV3API.Stream.Registry,
-      MBTAV3API.Stream.PubSub,
-      MBTAV3API.Stream.Supervisor,
-      {MBTAV3API.Stream.StaticInstance, type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"}
-    ]
+    children =
+      [
+        MBTAV3API.Stream.Registry,
+        MBTAV3API.Stream.PubSub,
+        MBTAV3API.Stream.Supervisor
+      ] ++
+        if Application.get_env(:mobile_app_backend, :api_key) do
+          [
+            {MBTAV3API.Stream.StaticInstance,
+             type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"}
+          ]
+        else
+          []
+        end
 
     Supervisor.init(children, strategy: :one_for_one)
   end
