@@ -8,7 +8,7 @@ defmodule MBTAV3API.Stream.InstanceTest do
     instance =
       start_link_supervised!(
         {MBTAV3API.Stream.Instance,
-         url: "https://example.com", headers: [{"a", "b"}], send_to: self(), type: Route}
+         url: "https://example.com", headers: [{"a", "b"}], destination: self(), type: Route}
       )
 
     sse_stage = SSEStub.get_from_instance(instance)

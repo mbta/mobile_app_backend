@@ -6,7 +6,7 @@ defmodule MBTAV3API.Stream.Instance do
   @type opt ::
           {:url, String.t()}
           | {:headers, [{String.t(), String.t()}]}
-          | {:send_to, pid()}
+          | {:destination, pid() | Phoenix.PubSub.topic()}
           | {:type, module()}
   @type opts :: [opt()]
 
@@ -27,13 +27,17 @@ defmodule MBTAV3API.Stream.Instance do
     url = Keyword.fetch!(opts, :url)
     headers = Keyword.fetch!(opts, :headers)
     type = Keyword.fetch!(opts, :type)
-    send_to = Keyword.fetch!(opts, :send_to)
+    destination = Keyword.fetch!(opts, :destination)
+    name = Keyword.get(opts, :name)
 
     children = [
       {MobileAppBackend.SSE,
        name: MBTAV3API.Stream.Registry.via_name(ref), url: url, headers: headers},
       {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}], send_to: send_to, type: type}
+       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+       destination: destination,
+       type: type,
+       name: name}
     ]
 
     Supervisor.init(children, strategy: :rest_for_one)
