@@ -8,7 +8,7 @@ defmodule MBTAV3API.Alert do
           id: String.t(),
           active_period: [ActivePeriod.t()],
           effect: effect(),
-          effect_name: String.t(),
+          effect_name: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           lifecycle: lifecycle()
         }

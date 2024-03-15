@@ -6,9 +6,9 @@ defmodule MBTAV3API.Stream.ConsumerTest do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stream
 
-  test "parses events and sends messages" do
-    {:ok, producer} =
-      GenStage.from_enumerable([
+  describe "parses events and sends messages" do
+    def events do
+      [
         %ServerSentEventStage.Event{
           event: "reset",
           data: """
@@ -37,37 +37,79 @@ defmodule MBTAV3API.Stream.ConsumerTest do
           {"id":"Green-B-812-0","type":"route_pattern"}
           """
         }
+      ]
+    end
+
+    def expected_data do
+      JsonApi.Object.to_full_map([
+        %Route{id: "Green-B"},
+        %RoutePattern{
+          id: "Green-B-812-1",
+          direction_id: 1,
+          name: "Boston College - Government Center",
+          sort_order: 100_321_000,
+          typicality: :typical,
+          representative_trip_id: "canonical-Green-B-C1-1",
+          route_id: "Green-B"
+        },
+        %RoutePattern{
+          id: "Green-C-832-0",
+          direction_id: 1,
+          name: "Not Government Center - Not Cleveland Circle",
+          sort_order: 100_330_001,
+          typicality: :typical,
+          representative_trip_id: "canonical-Green-C-C1-0",
+          route_id: "Green-C"
+        }
       ])
+    end
 
-    _consumer =
-      start_link_supervised!(
-        {Stream.Consumer, subscribe_to: [producer], send_to: self(), type: RoutePattern},
-        restart: :transient
-      )
+    test "sends directly to pid" do
+      {:ok, producer} = GenStage.from_enumerable(events())
 
-    assert_receive {:stream_data, data}
+      _consumer =
+        start_link_supervised!(
+          {Stream.Consumer, subscribe_to: [producer], destination: self(), type: RoutePattern},
+          restart: :transient
+        )
 
-    assert data ==
-             JsonApi.Object.to_full_map([
-               %Route{id: "Green-B"},
-               %RoutePattern{
-                 id: "Green-B-812-1",
-                 direction_id: 1,
-                 name: "Boston College - Government Center",
-                 sort_order: 100_321_000,
-                 typicality: :typical,
-                 representative_trip_id: "canonical-Green-B-C1-1",
-                 route_id: "Green-B"
-               },
-               %RoutePattern{
-                 id: "Green-C-832-0",
-                 direction_id: 1,
-                 name: "Not Government Center - Not Cleveland Circle",
-                 sort_order: 100_330_001,
-                 typicality: :typical,
-                 representative_trip_id: "canonical-Green-C-C1-0",
-                 route_id: "Green-C"
-               }
-             ])
+      assert_receive {:stream_data, data}
+
+      assert data == expected_data()
+    end
+
+    test "broadcasts over PubSub" do
+      topic = "test:abcdefg"
+      MBTAV3API.Stream.PubSub.subscribe(topic)
+
+      {:ok, producer} = GenStage.from_enumerable(events())
+
+      _consumer =
+        start_link_supervised!(
+          {Stream.Consumer, subscribe_to: [producer], destination: topic, type: RoutePattern},
+          restart: :transient
+        )
+
+      assert_receive {:stream_data, data}
+
+      assert data == expected_data()
+    end
+
+    test "remembers state" do
+      {:ok, producer} = GenStage.from_enumerable(events())
+
+      consumer =
+        start_link_supervised!(
+          {Stream.Consumer,
+           subscribe_to: [{producer, [cancel: :temporary]}],
+           destination: self(),
+           type: RoutePattern},
+          restart: :transient
+        )
+
+      assert_receive {:stream_data, _}
+
+      assert GenServer.call(consumer, :get_data) == expected_data()
+    end
   end
 end

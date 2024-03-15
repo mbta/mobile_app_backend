@@ -41,10 +41,14 @@ defmodule MBTAV3API do
         "MBTAV3API.start_stream url=#{url} params=#{params |> Jason.encode!()}"
       end)
 
+    MBTAV3API.Stream.Supervisor.start_instance(stream_args(url, params, opts))
+  end
+
+  def stream_args(url, params \\ %{}, opts \\ []) do
     opts = Keyword.merge(default_stream_options(), opts)
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
-    send_to = Keyword.fetch!(opts, :send_to)
+    destination = Keyword.fetch!(opts, :destination)
     type = Keyword.fetch!(opts, :type)
     headers = MBTAV3API.Headers.build(api_key) |> Keyword.reject(fn {_, v} -> is_nil(v) end)
 
@@ -54,12 +58,12 @@ defmodule MBTAV3API do
       |> URI.append_query(URI.encode_query(params))
       |> URI.to_string()
 
-    MBTAV3API.Stream.Supervisor.start_instance(
+    [
       url: url,
       headers: headers,
-      send_to: send_to,
+      destination: destination,
       type: type
-    )
+    ]
   end
 
   defp timed_get(url, params, opts) do
@@ -142,6 +146,6 @@ defmodule MBTAV3API do
 
   defp default_stream_options do
     Keyword.take(default_options(), [:base_url, :api_key])
-    |> Keyword.merge(send_to: self())
+    |> Keyword.merge(destination: self())
   end
 end

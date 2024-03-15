@@ -6,14 +6,15 @@ defmodule MBTAV3API.Stream.Consumer do
   defmodule State do
     @type t :: %__MODULE__{
             data: Stream.State.t(),
-            send_to: pid(),
+            destination: pid() | Phoenix.PubSub.topic(),
             type: module()
           }
-    defstruct [:data, :send_to, :type]
+    defstruct [:data, :destination, :type]
   end
 
   def start_link(opts) do
-    GenStage.start_link(__MODULE__, opts)
+    {start_opts, opts} = Keyword.split(opts, [:name])
+    GenStage.start_link(__MODULE__, opts, start_opts)
   end
 
   @impl GenStage
@@ -22,7 +23,7 @@ defmodule MBTAV3API.Stream.Consumer do
 
     state = %State{
       data: Stream.State.new(),
-      send_to: Keyword.fetch!(opts, :send_to),
+      destination: Keyword.fetch!(opts, :destination),
       type: Keyword.fetch!(opts, :type)
     }
 
@@ -34,8 +35,17 @@ defmodule MBTAV3API.Stream.Consumer do
     data = Stream.State.apply_events(state.data, events)
 
     message = {:stream_data, data}
-    send(state.send_to, message)
+
+    case state.destination do
+      pid when is_pid(pid) -> send(pid, message)
+      topic when is_binary(topic) -> MBTAV3API.Stream.PubSub.broadcast!(topic, message)
+    end
 
     {:noreply, [], %{state | data: data}}
+  end
+
+  @impl true
+  def handle_call(:get_data, _from, state) do
+    {:reply, state.data, [], state}
   end
 end
