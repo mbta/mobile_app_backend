@@ -9,6 +9,7 @@ defmodule MBTAV3API.Schedule do
           drop_off_type: stop_edge_type(),
           pick_up_type: stop_edge_type(),
           stop_sequence: integer(),
+          route_id: String.t(),
           stop_id: String.t() | nil,
           trip_id: String.t() | nil
         }
@@ -26,6 +27,7 @@ defmodule MBTAV3API.Schedule do
     :drop_off_type,
     :pick_up_type,
     :stop_sequence,
+    :route_id,
     :stop_id,
     :trip_id
   ]
@@ -34,7 +36,7 @@ defmodule MBTAV3API.Schedule do
   def fields, do: [:arrival_time, :departure_time, :drop_off_type, :pickup_type, :stop_sequence]
 
   @impl JsonApi.Object
-  def includes, do: %{stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
+  def includes, do: %{route: MBTAV3API.Route, stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
@@ -45,6 +47,7 @@ defmodule MBTAV3API.Schedule do
       drop_off_type: parse_stop_edge_type(item.attributes["drop_off_type"]),
       pick_up_type: parse_stop_edge_type(item.attributes["pickup_type"]),
       stop_sequence: item.attributes["stop_sequence"],
+      route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"])
     }

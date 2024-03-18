@@ -11,6 +11,7 @@ defmodule MBTAV3API.Prediction do
           schedule_relationship: schedule_relationship(),
           status: String.t(),
           stop_sequence: integer() | nil,
+          route_id: String.t(),
           stop_id: String.t(),
           trip_id: String.t(),
           vehicle_id: String.t() | nil
@@ -33,6 +34,7 @@ defmodule MBTAV3API.Prediction do
     :schedule_relationship,
     :status,
     :stop_sequence,
+    :route_id,
     :stop_id,
     :trip_id,
     :vehicle_id
@@ -50,7 +52,14 @@ defmodule MBTAV3API.Prediction do
     ]
   end
 
-  def includes, do: %{stop: MBTAV3API.Stop, trip: MBTAV3API.Trip, vehicle: MBTAV3API.Vehicle}
+  def includes do
+    %{
+      route: MBTAV3API.Route,
+      stop: MBTAV3API.Stop,
+      trip: MBTAV3API.Trip,
+      vehicle: MBTAV3API.Vehicle
+    }
+  end
 
   @spec stream_all(JsonApi.Params.t(), Keyword.t()) ::
           MBTAV3API.Stream.Supervisor.on_start_instance()
@@ -73,6 +82,7 @@ defmodule MBTAV3API.Prediction do
         parse_schedule_relationship(item.attributes["schedule_relationship"]),
       stop_sequence: item.attributes["stop_sequence"],
       status: item.attributes["status"],
+      route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"]),
       vehicle_id: JsonApi.Object.get_one_id(item.relationships["vehicle"])

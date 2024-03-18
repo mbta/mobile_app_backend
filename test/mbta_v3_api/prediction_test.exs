@@ -31,6 +31,7 @@ defmodule MBTAV3API.PredictionTest do
              schedule_relationship: :added,
              status: nil,
              stop_sequence: 440,
+             route_id: "Green-C",
              stop_id: "70237",
              trip_id: "ADDED-1591587107",
              vehicle_id: "G-10070"
