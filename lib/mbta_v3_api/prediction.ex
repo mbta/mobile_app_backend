@@ -11,6 +11,7 @@ defmodule MBTAV3API.Prediction do
           schedule_relationship: schedule_relationship(),
           status: String.t(),
           stop_sequence: integer() | nil,
+          route_id: String.t(),
           stop_id: String.t(),
           trip_id: String.t(),
           vehicle_id: String.t() | nil
