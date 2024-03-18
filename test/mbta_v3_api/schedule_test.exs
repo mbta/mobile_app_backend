@@ -27,6 +27,7 @@ defmodule MBTAV3API.ScheduleTest do
              drop_off_type: :regular,
              pick_up_type: :regular,
              stop_sequence: 90,
+             route_id: "Green-D",
              stop_id: "70159",
              trip_id: "60565179"
            }

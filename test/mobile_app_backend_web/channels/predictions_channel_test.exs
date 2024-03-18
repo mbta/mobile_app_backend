@@ -115,6 +115,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 90,
+        route_id: "Red",
         stop_id: "70086",
         trip_id: trip_60392455().id,
         vehicle_id: vehicle_r_547a83f7().id
@@ -130,6 +131,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         revenue: true,
         schedule_relationship: :scheduled,
         stop_sequence: 130,
+        route_id: "Red",
         stop_id: "70085",
         trip_id: trip_60392515().id,
         vehicle_id: vehicle_r_547a83f8().id
@@ -183,6 +185,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                    revenue: true,
                    schedule_relationship: :scheduled,
                    stop_sequence: 100,
+                   route_id: "Red",
                    stop_id: "70096",
                    trip_id: "60392593",
                    vehicle_id: "R-547A80A3"
