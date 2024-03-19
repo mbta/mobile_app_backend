@@ -8,13 +8,6 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
-    now =
-      if now = Map.get(params, "now") do
-        Util.parse_datetime!(now)
-      else
-        DateTime.now!("America/New_York")
-      end
-
     {stops, included_stops} = fetch_nearby_stops(latitude, longitude, radius)
     stops = MBTAV3API.Stop.include_missing_siblings(stops, included_stops)
 
@@ -30,8 +23,6 @@ defmodule MobileAppBackendWeb.NearbyController do
       pattern_ids_by_stop: pattern_ids_by_stop
     } = fetch_route_patterns(stops)
 
-    alerts = fetch_alerts(stops, now)
-
     json(conn, %{
       pattern_ids_by_stop: pattern_ids_by_stop,
       parent_stops: parent_stops,
@@ -44,8 +35,7 @@ defmodule MobileAppBackendWeb.NearbyController do
         |> Enum.sort_by(
           &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
         ),
-      trips: trips,
-      alerts: alerts
+      trips: trips
     })
   end
 
@@ -119,22 +109,6 @@ defmodule MobileAppBackendWeb.NearbyController do
       trips: trips,
       pattern_ids_by_stop: pattern_ids_by_stop
     }
-  end
-
-  def fetch_alerts(stops, now) do
-    {:ok, %{data: alerts}} = Repository.alerts(filter: [stop: Map.keys(stops)])
-
-    alerts
-    |> Enum.filter(fn alert ->
-      MBTAV3API.Alert.active?(alert, now) and
-        alert.effect in [
-          :detour,
-          :shuttle,
-          :station_closure,
-          :stop_closure,
-          :suspension
-        ]
-    end)
   end
 
   @spec distance_in_degrees(float(), float(), float(), float()) :: float()
