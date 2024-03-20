@@ -34,11 +34,12 @@ defmodule MBTAV3API.Stream.Consumer do
   def handle_events(events, _from, state) do
     data = Stream.State.apply_events(state.data, events)
 
-    message = {:stream_data, data}
-
     case state.destination do
-      pid when is_pid(pid) -> send(pid, message)
-      topic when is_binary(topic) -> MBTAV3API.Stream.PubSub.broadcast!(topic, message)
+      pid when is_pid(pid) ->
+        send(pid, {:stream_data, data})
+
+      topic when is_binary(topic) ->
+        MBTAV3API.Stream.PubSub.broadcast!(topic, {:stream_data, topic, data})
     end
 
     {:noreply, [], %{state | data: data}}

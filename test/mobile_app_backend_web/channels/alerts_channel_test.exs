@@ -1,8 +1,10 @@
 defmodule MobileAppBackendWeb.AlertsChannelTest do
   use MobileAppBackendWeb.ChannelCase
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
+  import Test.Support.Helpers
   import Test.Support.Sigils
   alias MBTAV3API.Alert
+  alias Test.Support.FakeStaticInstance
 
   setup do
     {:ok, socket} = connect(MobileAppBackendWeb.UserSocket, %{})
@@ -48,16 +50,14 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_full_map([alert1, alert2])
 
-    :sys.replace_state(MBTAV3API.Stream.Registry.via_name("alerts"), fn state ->
-      put_in(state.state.data, data1)
-    end)
+    start_supervised_replacing!({FakeStaticInstance, topic: "alerts", data: data1})
 
     {:ok, ^data1, _socket} =
       subscribe_and_join(socket, MobileAppBackendWeb.AlertsChannel, "alerts")
 
     data2 = to_full_map([alert1])
 
-    MBTAV3API.Stream.PubSub.broadcast!("alerts", {:stream_data, data2})
+    MBTAV3API.Stream.PubSub.broadcast!("alerts", {:stream_data, "alerts", data2})
 
     assert_push("stream_data", ^data2)
   end

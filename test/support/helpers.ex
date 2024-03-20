@@ -38,4 +38,15 @@ defmodule Test.Support.Helpers do
        included: MBTAV3API.JsonApi.Object.to_full_map(included)
      }}
   end
+
+  def start_supervised_replacing!(child) do
+    case ExUnit.Callbacks.start_supervised(child) do
+      {:ok, _pid} ->
+        :ok
+
+      {:error, {:already_started, pid}} ->
+        Process.exit(pid, :shutdown)
+        start_supervised_replacing!(child)
+    end
+  end
 end
