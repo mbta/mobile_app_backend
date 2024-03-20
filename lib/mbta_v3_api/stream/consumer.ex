@@ -7,9 +7,10 @@ defmodule MBTAV3API.Stream.Consumer do
     @type t :: %__MODULE__{
             data: Stream.State.t(),
             destination: pid() | Phoenix.PubSub.topic(),
-            type: module()
+            type: module(),
+            throttler: GenServer.server()
           }
-    defstruct [:data, :destination, :type]
+    defstruct [:data, :destination, :type, :throttler]
   end
 
   def start_link(opts) do
@@ -21,10 +22,21 @@ defmodule MBTAV3API.Stream.Consumer do
   def init(opts) do
     subscribe_to = Keyword.fetch!(opts, :subscribe_to)
 
+    throttle_ms =
+      Keyword.get(
+        opts,
+        :throttle_ms,
+        Keyword.fetch!(Application.get_env(:mobile_app_backend, __MODULE__), :default_throttle_ms)
+      )
+
+    {:ok, throttler} =
+      MobileAppBackend.Throttler.start_link(target: self(), cast: :send_update, ms: throttle_ms)
+
     state = %State{
       data: Stream.State.new(),
       destination: Keyword.fetch!(opts, :destination),
-      type: Keyword.fetch!(opts, :type)
+      type: Keyword.fetch!(opts, :type),
+      throttler: throttler
     }
 
     {:consumer, state, subscribe_to: subscribe_to}
@@ -34,15 +46,22 @@ defmodule MBTAV3API.Stream.Consumer do
   def handle_events(events, _from, state) do
     data = Stream.State.apply_events(state.data, events)
 
-    case state.destination do
-      pid when is_pid(pid) ->
-        send(pid, {:stream_data, data})
-
-      topic when is_binary(topic) ->
-        MBTAV3API.Stream.PubSub.broadcast!(topic, {:stream_data, topic, data})
-    end
+    MobileAppBackend.Throttler.request(state.throttler)
 
     {:noreply, [], %{state | data: data}}
+  end
+
+  @impl true
+  def handle_cast(:send_update, state) do
+    case state.destination do
+      pid when is_pid(pid) ->
+        send(pid, {:stream_data, state.data})
+
+      topic when is_binary(topic) ->
+        Stream.PubSub.broadcast!(topic, {:stream_data, topic, state.data})
+    end
+
+    {:noreply, [], state}
   end
 
   @impl true
