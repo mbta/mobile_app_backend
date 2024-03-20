@@ -5,6 +5,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stream
+  alias Test.Support.SSEStub
 
   describe "parses events and sends messages" do
     def events do
@@ -110,6 +111,39 @@ defmodule MBTAV3API.Stream.ConsumerTest do
       assert_receive {:stream_data, _}
 
       assert GenServer.call(consumer, :get_data) == expected_data()
+    end
+
+    test "throttles new updates" do
+      throttle_interval = 25
+
+      producer = start_link_supervised!(SSEStub)
+
+      _consumer =
+        start_link_supervised!(
+          {Stream.Consumer,
+           subscribe_to: [producer],
+           destination: self(),
+           type: RoutePattern,
+           throttle_ms: throttle_interval},
+          restart: :transient
+        )
+
+      SSEStub.push_events(producer, [Enum.at(events(), 0)])
+
+      assert_receive {:stream_data, _}
+
+      SSEStub.push_events(producer, [Enum.at(events(), 1)])
+
+      refute_receive {:stream_data, _}, throttle_interval - 1
+      assert_receive {:stream_data, _}
+
+      SSEStub.push_events(producer, [Enum.at(events(), 2)])
+      SSEStub.push_events(producer, [Enum.at(events(), 3)])
+
+      refute_receive {:stream_data, _}, throttle_interval - 1
+      assert_receive {:stream_data, final_data}
+
+      assert final_data == expected_data()
     end
   end
 end

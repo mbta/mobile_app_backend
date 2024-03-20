@@ -12,6 +12,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
   setup do
     reassign_env(:mobile_app_backend, :base_url, "https://api.example.net")
     reassign_env(:mobile_app_backend, :api_key, "abcdef")
+    reassign_env(:mobile_app_backend, MBTAV3API.Stream.Consumer, default_throttle_ms: 20)
 
     {:ok, socket} = connect(MobileAppBackendWeb.UserSocket, %{})
 

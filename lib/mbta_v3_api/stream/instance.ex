@@ -8,6 +8,8 @@ defmodule MBTAV3API.Stream.Instance do
           | {:headers, [{String.t(), String.t()}]}
           | {:destination, pid() | Phoenix.PubSub.topic()}
           | {:type, module()}
+          | {:name, term()}
+          | {:throttle_ms, non_neg_integer()}
   @type opts :: [opt()]
 
   @spec start_link(opts()) :: {:ok, t()} | :ignore | {:error, {:already_started, t()} | term()}
@@ -24,20 +26,13 @@ defmodule MBTAV3API.Stream.Instance do
   def init(opts) do
     ref = make_ref()
 
-    url = Keyword.fetch!(opts, :url)
-    headers = Keyword.fetch!(opts, :headers)
-    type = Keyword.fetch!(opts, :type)
-    destination = Keyword.fetch!(opts, :destination)
-    name = Keyword.get(opts, :name)
+    sse_opts = Keyword.take(opts, [:url, :headers])
+    consumer_opts = Keyword.take(opts, [:destination, :type, :name, :throttle_ms])
 
     children = [
-      {MobileAppBackend.SSE,
-       name: MBTAV3API.Stream.Registry.via_name(ref), url: url, headers: headers},
+      {MobileAppBackend.SSE, [name: MBTAV3API.Stream.Registry.via_name(ref)] ++ sse_opts},
       {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
-       destination: destination,
-       type: type,
-       name: name}
+       [subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}]] ++ consumer_opts}
     ]
 
     Supervisor.init(children, strategy: :rest_for_one)
