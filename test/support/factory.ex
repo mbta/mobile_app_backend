@@ -24,6 +24,23 @@ defmodule MobileAppBackend.Factory do
     }
   end
 
+  def prediction_factory do
+    %MBTAV3API.Prediction{
+      id: "prediction-ADDED-1591593214-70206-20",
+      arrival_time: nil,
+      departure_time: ~B[2024-03-20 16:41:01],
+      direction_id: 0,
+      revenue: true,
+      schedule_relationship: :added,
+      status: nil,
+      stop_sequence: 20,
+      route_id: "Green-D",
+      stop_id: "70206",
+      trip_id: "ADDED-1591593214",
+      vehicle_id: "G-10270"
+    }
+  end
+
   def route_pattern_factory do
     %MBTAV3API.RoutePattern{
       id: "66-6-0",
@@ -69,6 +86,15 @@ defmodule MobileAppBackend.Factory do
     %MBTAV3API.Trip{
       id: "60168428",
       headsign: "Harvard via Allston"
+    }
+  end
+
+  def vehicle_factory do
+    %MBTAV3API.Vehicle{
+      id: "y1919",
+      current_status: :in_transit_to,
+      stop_id: "7670",
+      trip_id: "60169926"
     }
   end
 end
