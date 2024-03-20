@@ -1,7 +1,6 @@
 defmodule MobileAppBackendWeb.NearbyControllerTest do
   use HttpStub.Case
   use MobileAppBackendWeb.ConnCase
-  import Test.Support.Sigils
   import Mox
   import Test.Support.Helpers
   import MobileAppBackend.Factory
@@ -52,9 +51,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       |> expect(:route_patterns, fn _params, _opts ->
         ok_response([rp1, rp2], [t1, t2])
       end)
-
-      RepositoryMock
-      |> expect(:alerts, fn _params, _opts -> ok_response([]) end)
 
       conn =
         get(conn, "/api/nearby", %{
@@ -286,36 +282,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                }
              } =
                json_response(conn, 200)
-    end
-
-    test "includes alerts", %{conn: conn} do
-      conn =
-        get(conn, "/api/nearby", %{
-          latitude: 42.388400,
-          longitude: -71.119149,
-          radius: 0.01,
-          now: ~B[2024-02-09 16:00:00] |> DateTime.to_iso8601()
-        })
-
-      assert %{"stops" => stops, "alerts" => alerts} = json_response(conn, :ok)
-
-      assert Enum.all?(
-               stops,
-               &(&1["id"] == "place-portr" or &1["parent_station_id"] == "place-portr")
-             )
-
-      assert [
-               %{
-                 "active_period" => _,
-                 "effect" => "shuttle",
-                 "effect_name" => nil,
-                 "id" => "553081",
-                 "informed_entity" => informed_entities,
-                 "lifecycle" => "new"
-               }
-             ] = Enum.sort_by(alerts, & &1["id"])
-
-      assert Enum.find(informed_entities, &(&1["stop"] == "place-portr"))
     end
   end
 end
