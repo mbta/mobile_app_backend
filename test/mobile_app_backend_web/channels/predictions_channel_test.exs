@@ -11,6 +11,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
   alias MBTAV3API.Stream
   alias MBTAV3API.Trip
   alias MBTAV3API.Vehicle
+  alias MobileAppBackendWeb.PredictionsChannel
   alias Test.Support.FakeStaticInstance
 
   setup do
@@ -235,6 +236,27 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  vehicle_r_547a83f7(),
                  prediction_60392455()
                ])
+    end
+  end
+
+  describe "filter_data/2" do
+    test "properly divides predictions and associated objects" do
+      [trip1, trip2] = build_list(2, :trip)
+      [vehicle1, vehicle2] = build_list(2, :vehicle)
+
+      prediction1 =
+        build(:prediction, stop_id: "12345", trip_id: trip1.id, vehicle_id: vehicle1.id)
+
+      prediction2 =
+        build(:prediction, stop_id: "67890", trip_id: trip2.id, vehicle_id: vehicle2.id)
+
+      assert PredictionsChannel.filter_data(
+               to_full_map([prediction1, prediction2, trip1, trip2, vehicle1, vehicle2]),
+               [
+                 "12345",
+                 "somewhere-else"
+               ]
+             ) == to_full_map([prediction1, trip1, vehicle1])
     end
   end
 end

@@ -43,8 +43,11 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
     {:noreply, socket}
   end
 
+  @doc """
+  Filters the given data to predictions that are at one of the listed stops and the associated trips and vehicles.
+  """
   @spec filter_data(JsonApi.Object.full_map(), [String.t()]) :: JsonApi.Object.full_map()
-  defp filter_data(route_data, stop_ids) do
+  def filter_data(route_data, stop_ids) do
     %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} =
       for {_, %Prediction{} = prediction} <- route_data.predictions,
           reduce: %{predictions: %{}, trip_ids: [], vehicle_ids: []} do
