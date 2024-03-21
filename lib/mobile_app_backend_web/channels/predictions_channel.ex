@@ -1,6 +1,7 @@
 defmodule MobileAppBackendWeb.PredictionsChannel do
   use MobileAppBackendWeb, :channel
 
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
 
   @impl true
@@ -24,10 +25,10 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
             {:ok, data} =
               MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
 
-            {route_id, data}
+            {route_id, filter_data(data, stop_ids)}
           end)
 
-        {:ok, filter_data(data, stop_ids), assign(socket, data: data, stop_ids: stop_ids)}
+        {:ok, merge_data(data), assign(socket, data: data, stop_ids: stop_ids)}
 
       :error ->
         {:error, %{code: :no_stop_ids}}
@@ -36,38 +37,41 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
 
   @impl true
   def handle_info({:stream_data, "predictions:route:" <> route_id, data}, socket) do
-    data = put_in(socket.assigns.data, [route_id], data)
+    data = put_in(socket.assigns.data, [route_id], filter_data(data, socket.assigns.stop_ids))
     socket = assign(socket, data: data)
-    :ok = push(socket, "stream_data", filter_data(data, socket.assigns.stop_ids))
+    :ok = push(socket, "stream_data", merge_data(data))
     {:noreply, socket}
   end
 
-  defp filter_data(data, stop_ids) do
-    data
-    |> Enum.map(fn {_route_id, route_data} ->
-      %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} =
-        for {_, %Prediction{} = prediction} <- route_data.predictions,
-            reduce: %{predictions: %{}, trip_ids: [], vehicle_ids: []} do
-          %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} ->
-            if prediction.stop_id in stop_ids do
-              %{
-                predictions: Map.put(predictions, prediction.id, prediction),
-                trip_ids: [prediction.trip_id | trip_ids],
-                vehicle_ids: [prediction.vehicle_id | vehicle_ids]
-              }
-            else
-              %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids}
-            end
-        end
+  @spec filter_data(JsonApi.Object.full_map(), [String.t()]) :: JsonApi.Object.full_map()
+  defp filter_data(route_data, stop_ids) do
+    %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} =
+      for {_, %Prediction{} = prediction} <- route_data.predictions,
+          reduce: %{predictions: %{}, trip_ids: [], vehicle_ids: []} do
+        %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} ->
+          if prediction.stop_id in stop_ids do
+            %{
+              predictions: Map.put(predictions, prediction.id, prediction),
+              trip_ids: [prediction.trip_id | trip_ids],
+              vehicle_ids: [prediction.vehicle_id | vehicle_ids]
+            }
+          else
+            %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids}
+          end
+      end
 
-      %{
-        predictions: predictions,
+    %{
+      JsonApi.Object.to_full_map([])
+      | predictions: predictions,
         trips: Map.take(route_data.trips, trip_ids),
         vehicles: Map.take(route_data.vehicles, vehicle_ids)
-      }
-    end)
-    |> Enum.reduce(%{predictions: %{}, trips: %{}, vehicles: %{}}, fn data1, data2 ->
-      Map.merge(data1, data2, fn _type, objs1, objs2 -> Map.merge(objs1, objs2) end)
-    end)
+    }
+  end
+
+  @spec merge_data(%{String.t() => JsonApi.Object.full_map()}) :: JsonApi.Object.full_map()
+  defp merge_data(data) do
+    data
+    |> Map.values()
+    |> Enum.reduce(JsonApi.Object.to_full_map([]), &JsonApi.Object.merge_full_map/2)
   end
 end

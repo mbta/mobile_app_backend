@@ -40,7 +40,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
     {:ok, reply, _socket} =
       subscribe_and_join(socket, "predictions:stops", %{"stop_ids" => ["12345", "67890"]})
 
-    assert reply == %{predictions: %{prediction.id => prediction}, trips: %{}, vehicles: %{}}
+    assert reply == to_full_map([prediction])
   end
 
   describe "message handling" do
@@ -67,7 +67,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       {:ok, reply, _socket} =
         subscribe_and_join(socket, "predictions:stops", %{"stop_ids" => ["place-jfk"]})
 
-      assert reply == %{predictions: %{}, trips: %{}, vehicles: %{}}
+      assert reply == to_full_map([])
 
       Stream.PubSub.broadcast!(
         "predictions:route:Red",
@@ -155,7 +155,6 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  prediction_60392455(),
                  prediction_60392515()
                ])
-               |> Map.take([:predictions, :trips, :vehicles])
     end
 
     test "integrates new data" do
@@ -185,7 +184,6 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  prediction_60392515(),
                  bonus_prediction
                ])
-               |> Map.take([:predictions, :trips, :vehicles])
     end
 
     test "replaces old data" do
@@ -203,7 +201,6 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  vehicle_r_547a83f7(),
                  prediction_60392455()
                ])
-               |> Map.take([:predictions, :trips, :vehicles])
     end
 
     test "ignores irrelevant data" do
@@ -238,7 +235,6 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                  vehicle_r_547a83f7(),
                  prediction_60392455()
                ])
-               |> Map.take([:predictions, :trips, :vehicles])
     end
   end
 end
