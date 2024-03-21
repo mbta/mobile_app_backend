@@ -10,7 +10,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   end
 
   @impl true
-  def handle_info({:stream_data, data}, socket) do
+  def handle_info({:stream_data, "alerts", data}, socket) do
     :ok = push(socket, "stream_data", data)
     {:noreply, socket}
   end

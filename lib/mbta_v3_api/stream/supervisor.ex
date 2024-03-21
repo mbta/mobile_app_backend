@@ -16,6 +16,11 @@ defmodule MBTAV3API.Stream.Supervisor do
     DynamicSupervisor.start_child(__MODULE__, {MBTAV3API.Stream.Instance, args})
   end
 
+  @spec start_static_instance(Instance.opts()) :: on_start_instance()
+  def start_static_instance(args) do
+    DynamicSupervisor.start_child(__MODULE__, MBTAV3API.Stream.StaticInstance.child_spec(args))
+  end
+
   @impl true
   def init(_) do
     DynamicSupervisor.init(strategy: :one_for_one)

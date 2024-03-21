@@ -1,6 +1,7 @@
 defmodule MBTAV3API.Stream.StaticInstanceTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   alias MBTAV3API.Stream
+  alias Test.Support.FakeStaticInstance
 
   describe "child_spec/1" do
     test "correctly builds child spec with good options" do
@@ -48,31 +49,27 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
 
   describe "subscribe/1" do
     test "subscribes and fetches current data" do
-      defmodule FakeConsumer do
-        use GenServer
-
-        def start_link(opts) do
-          GenServer.start_link(__MODULE__, nil, opts)
-        end
-
-        @impl true
-        def init(_) do
-          {:ok, nil}
-        end
-
-        @impl true
-        def handle_call(:get_data, _from, _state) do
-          {:reply, :existing_data, nil}
-        end
-      end
-
-      _ = start_link_supervised!({FakeConsumer, name: Stream.Registry.via_name("test:topic")})
+      start_link_supervised!({FakeStaticInstance, topic: "test:topic", data: :existing_data})
 
       assert {:ok, :existing_data} == Stream.StaticInstance.subscribe("test:topic")
 
       Stream.PubSub.broadcast!("test:topic", :new_data)
 
       assert_receive :new_data
+    end
+
+    @tag skip: "has a really annoying race condition with other alerts-stream-based tests"
+    test "launches new instance if not already running" do
+      assert [] = Supervisor.which_children(Stream.Supervisor)
+
+      refute Stream.Registry.find_pid("alerts")
+      assert {:ok, _} = Stream.StaticInstance.subscribe("alerts")
+      assert Stream.Registry.find_pid("alerts")
+
+      assert [{_, pid, _, [Stream.Instance]}] = Supervisor.which_children(Stream.Supervisor)
+      ref = Process.monitor(pid)
+      Stream.Instance.shutdown(pid)
+      assert_receive {:DOWN, ^ref, :process, ^pid, _}
     end
   end
 end
