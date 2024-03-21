@@ -187,6 +187,22 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
                ])
     end
 
+    test "ignores new irrelevant data" do
+      bonus_trip = build(:trip)
+      bonus_vehicle = build(:vehicle)
+
+      bonus_prediction =
+        build(:prediction, stop_id: "1785", trip_id: bonus_trip.id, vehicle_id: bonus_vehicle.id)
+
+      Stream.PubSub.broadcast!(
+        "predictions:route:8",
+        {:stream_data, "predictions:route:8",
+         to_full_map([bonus_trip, bonus_vehicle, bonus_prediction])}
+      )
+
+      refute_push "stream_data", _
+    end
+
     test "replaces old data" do
       Stream.PubSub.broadcast!(
         "predictions:route:Red",

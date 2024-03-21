@@ -37,9 +37,14 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
 
   @impl true
   def handle_info({:stream_data, "predictions:route:" <> route_id, data}, socket) do
-    data = put_in(socket.assigns.data, [route_id], filter_data(data, socket.assigns.stop_ids))
-    socket = assign(socket, data: data)
-    :ok = push(socket, "stream_data", merge_data(data))
+    old_data = socket.assigns.data
+    new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
+
+    if old_data != new_data do
+      :ok = push(socket, "stream_data", merge_data(new_data))
+    end
+
+    socket = assign(socket, data: new_data)
     {:noreply, socket}
   end
 
