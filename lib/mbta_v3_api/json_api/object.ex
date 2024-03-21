@@ -126,6 +126,11 @@ defmodule MBTAV3API.JsonApi.Object do
     end)
   end
 
+  @spec merge_full_map(full_map(), full_map()) :: full_map()
+  def merge_full_map(objects1, objects2) do
+    Map.merge(objects1, objects2, fn _type, map1, map2 -> Map.merge(map1, map2) end)
+  end
+
   modules_guard =
     modules
     |> Enum.map(fn module ->
