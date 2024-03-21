@@ -104,7 +104,7 @@ defmodule MBTAV3API.JsonApi.Object do
 
       {:%{}, _, [map_element]} =
         quote do
-          %{required(unquote(type)) => unquote(map_type)}
+          %{required(unquote(@plural_types[type])) => unquote(map_type)}
         end
 
       map_element
