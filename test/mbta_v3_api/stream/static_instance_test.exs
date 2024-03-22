@@ -58,18 +58,11 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
       assert_receive :new_data
     end
 
-    @tag skip: "has a really annoying race condition with other alerts-stream-based tests"
     test "launches new instance if not already running" do
-      assert [] = Supervisor.which_children(Stream.Supervisor)
-
-      refute Stream.Registry.find_pid("alerts")
-      assert {:ok, _} = Stream.StaticInstance.subscribe("alerts")
-      assert Stream.Registry.find_pid("alerts")
-
-      assert [{_, pid, _, [Stream.Instance]}] = Supervisor.which_children(Stream.Supervisor)
-      ref = Process.monitor(pid)
-      Stream.Instance.shutdown(pid)
-      assert_receive {:DOWN, ^ref, :process, ^pid, _}
+      topic = "predictions:route:fake-route-that-won't-already-exist"
+      refute Stream.Registry.find_pid(topic)
+      assert {:ok, _} = Stream.StaticInstance.subscribe(topic)
+      assert Stream.Registry.find_pid(topic)
     end
   end
 end

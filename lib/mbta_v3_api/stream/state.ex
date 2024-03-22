@@ -24,10 +24,10 @@ defmodule MBTAV3API.Stream.State do
             JsonApi.Object.to_full_map(data)
 
           "add" ->
-            merge(state, JsonApi.Object.to_full_map(data))
+            JsonApi.Object.merge_full_map(state, JsonApi.Object.to_full_map(data))
 
           "update" ->
-            merge(state, JsonApi.Object.to_full_map(data))
+            JsonApi.Object.merge_full_map(state, JsonApi.Object.to_full_map(data))
 
           "remove" ->
             [%JsonApi.Reference{type: type, id: id}] = raw_data
@@ -36,12 +36,5 @@ defmodule MBTAV3API.Stream.State do
             state
         end
     end
-  end
-
-  @spec merge(t(), t()) :: t()
-  defp merge(old_data, new_data) do
-    Map.merge(old_data, new_data, fn _type, old_items, new_items ->
-      Map.merge(old_items, new_items)
-    end)
   end
 end

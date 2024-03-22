@@ -34,4 +34,14 @@ defmodule MBTAV3API.Stream.StaticInstance do
   defp args_for_topic("alerts") do
     [type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"]
   end
+
+  defp args_for_topic("predictions:route:" <> route_id) do
+    [
+      type: MBTAV3API.Prediction,
+      url: "/predictions",
+      filter: [route: route_id],
+      include: [:trip, :vehicle],
+      topic: "predictions:route:#{route_id}"
+    ]
+  end
 end

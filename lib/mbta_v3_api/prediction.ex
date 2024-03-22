@@ -61,15 +61,6 @@ defmodule MBTAV3API.Prediction do
     }
   end
 
-  @spec stream_all(JsonApi.Params.t(), Keyword.t()) ::
-          MBTAV3API.Stream.Supervisor.on_start_instance()
-  def stream_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, __MODULE__)
-    opts = Keyword.put(opts, :type, __MODULE__)
-
-    MBTAV3API.start_stream("/predictions", params, opts)
-  end
-
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
