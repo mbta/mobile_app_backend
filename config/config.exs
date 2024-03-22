@@ -33,8 +33,6 @@ config :mobile_app_backend, :logger, [
    }}
 ]
 
-config :mobile_app_backend, MBTAV3API.Stream.Consumer, default_throttle_ms: 1000
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

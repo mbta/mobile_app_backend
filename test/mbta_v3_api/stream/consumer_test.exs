@@ -69,10 +69,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
 
       _consumer =
         start_link_supervised!(
-          {Stream.Consumer,
-           subscribe_to: [{producer, [cancel: :temporary]}],
-           destination: self(),
-           type: RoutePattern},
+          {Stream.Consumer, subscribe_to: [producer], destination: self(), type: RoutePattern},
           restart: :transient
         )
 
@@ -89,10 +86,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
 
       _consumer =
         start_link_supervised!(
-          {Stream.Consumer,
-           subscribe_to: [{producer, [cancel: :temporary]}],
-           destination: topic,
-           type: RoutePattern},
+          {Stream.Consumer, subscribe_to: [producer], destination: topic, type: RoutePattern},
           restart: :transient
         )
 
