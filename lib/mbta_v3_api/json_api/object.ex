@@ -104,7 +104,7 @@ defmodule MBTAV3API.JsonApi.Object do
 
       {:%{}, _, [map_element]} =
         quote do
-          %{required(unquote(type)) => unquote(map_type)}
+          %{required(unquote(@plural_types[type])) => unquote(map_type)}
         end
 
       map_element
@@ -124,6 +124,11 @@ defmodule MBTAV3API.JsonApi.Object do
     Enum.reduce(objects, @empty_full_map, fn %module{id: id} = item, map ->
       put_in(map, [plural_type(module.jsonapi_type()), id], item)
     end)
+  end
+
+  @spec merge_full_map(full_map(), full_map()) :: full_map()
+  def merge_full_map(objects1, objects2) do
+    Map.merge(objects1, objects2, fn _type, map1, map2 -> Map.merge(map1, map2) end)
   end
 
   modules_guard =

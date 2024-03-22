@@ -90,7 +90,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
           restart: :transient
         )
 
-      assert_receive {:stream_data, data}
+      assert_receive {:stream_data, ^topic, data}
 
       assert data == expected_data()
     end
