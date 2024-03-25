@@ -4,10 +4,19 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
 
+  @throttle_ms 500
+
   @impl true
   def join("predictions:stops", payload, socket) do
     case Map.fetch(payload, "stop_ids") do
       {:ok, stop_ids} ->
+        {:ok, throttler} =
+          MobileAppBackend.Throttler.start_link(
+            target: self(),
+            cast: :send_data,
+            ms: @throttle_ms
+          )
+
         {:ok, %{included: %{stops: extra_stops}}} =
           MBTAV3API.Repository.stops(filter: [id: stop_ids], include: :child_stops)
 
@@ -28,7 +37,8 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
             {route_id, filter_data(data, stop_ids)}
           end)
 
-        {:ok, merge_data(data), assign(socket, data: data, stop_ids: stop_ids)}
+        {:ok, merge_data(data),
+         assign(socket, data: data, stop_ids: stop_ids, throttler: throttler)}
 
       :error ->
         {:error, %{code: :no_stop_ids}}
@@ -41,10 +51,16 @@ defmodule MobileAppBackendWeb.PredictionsChannel do
     new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
 
     if old_data != new_data do
-      :ok = push(socket, "stream_data", merge_data(new_data))
+      MobileAppBackend.Throttler.request(socket.assigns.throttler)
     end
 
     socket = assign(socket, data: new_data)
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_cast(:send_data, socket) do
+    :ok = push(socket, "stream_data", merge_data(socket.assigns.data))
     {:noreply, socket}
   end
 
