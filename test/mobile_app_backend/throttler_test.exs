@@ -5,46 +5,44 @@ defmodule MobileAppBackend.ThrottlerTest do
 
   @timeout 10
 
-  test "casts instantly on first run" do
+  setup ctx do
     throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
 
+    if last_cast_ms_ago = ctx[:last_cast_ms_ago] do
+      :sys.replace_state(throttler, fn state ->
+        %Throttler.State{
+          state
+          | last_cast: System.monotonic_time(:millisecond) - last_cast_ms_ago
+        }
+      end)
+    end
+
+    [throttler: throttler]
+  end
+
+  test "casts instantly on first run", %{throttler: throttler} do
     Throttler.request(throttler)
 
     assert_receive {:"$gen_cast", :message}, 1
   end
 
-  test "casts instantly if last cast was old" do
-    throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
-
-    :sys.replace_state(throttler, fn state ->
-      %Throttler.State{state | last_cast: System.monotonic_time(:millisecond) - (@timeout + 1)}
-    end)
-
+  @tag last_cast_ms_ago: @timeout + 1
+  test "casts instantly if last cast was old", %{throttler: throttler} do
     Throttler.request(throttler)
 
     assert_receive {:"$gen_cast", :message}, 1
   end
 
-  test "casts later if last cast was recent" do
-    throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
-
-    :sys.replace_state(throttler, fn state ->
-      %Throttler.State{state | last_cast: System.monotonic_time(:millisecond)}
-    end)
-
+  @tag last_cast_ms_ago: 0
+  test "casts later if last cast was recent", %{throttler: throttler} do
     Throttler.request(throttler)
 
     refute_receive {:"$gen_cast", :message}, @timeout - 1
     assert_receive {:"$gen_cast", :message}, 2
   end
 
-  test "only casts once" do
-    throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
-
-    :sys.replace_state(throttler, fn state ->
-      %Throttler.State{state | last_cast: System.monotonic_time(:millisecond)}
-    end)
-
+  @tag last_cast_ms_ago: 0
+  test "only casts once", %{throttler: throttler} do
     for _ <- 0..50 do
       Throttler.request(throttler)
     end
