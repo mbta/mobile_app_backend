@@ -23,7 +23,7 @@ defmodule MobileAppBackendWeb.ShapesController do
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
         ],
-        include: [route_patterns: [representative_trip: :shape]]
+        include: [route_patterns: [representative_trip: [:shape, :stops]]]
       )
 
     %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips}
