@@ -31,6 +31,7 @@ defmodule MBTAV3API.RoutePattern do
   @derive Jason.Encoder
   defstruct [
     :id,
+    :canonical,
     :direction_id,
     :name,
     :sort_order,
@@ -40,7 +41,7 @@ defmodule MBTAV3API.RoutePattern do
   ]
 
   @impl JsonApi.Object
-  def fields, do: [:direction_id, :name, :sort_order, :typicality]
+  def fields, do: [:canonical, :direction_id, :name, :sort_order, :typicality]
 
   @impl JsonApi.Object
   def includes, do: %{representative_trip: MBTAV3API.Trip, route: MBTAV3API.Route}
@@ -49,6 +50,7 @@ defmodule MBTAV3API.RoutePattern do
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
+      canonical: item.attributes["canonical"],
       direction_id: item.attributes["direction_id"],
       name: item.attributes["name"],
       sort_order: item.attributes["sort_order"],

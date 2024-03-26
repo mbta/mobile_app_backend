@@ -24,7 +24,10 @@
           }
         },
         "zone": {
-          "data": null
+          "data": {
+            "id": "LocalBus",
+            "type": "zone"
+          }
         }
       },
       "type": "stop"
@@ -53,7 +56,10 @@
           }
         },
         "zone": {
-          "data": null
+          "data": {
+            "id": "LocalBus",
+            "type": "zone"
+          }
         }
       },
       "type": "stop"
