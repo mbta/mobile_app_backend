@@ -9,6 +9,8 @@ defmodule MBTAV3API.Trip do
           stop_ids: [String.t()] | nil
         }
 
+  @type id :: String.t()
+
   @derive Jason.Encoder
   defstruct [:id, :headsign, :route_pattern_id, :shape_id, :stop_ids]
 

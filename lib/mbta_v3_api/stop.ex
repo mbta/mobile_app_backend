@@ -12,6 +12,8 @@ defmodule MBTAV3API.Stop do
           parent_station_id: String.t() | nil
         }
 
+  @type id :: String.t()
+
   Util.declare_enum(
     :location_type,
     Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
@@ -38,6 +40,26 @@ defmodule MBTAV3API.Stop do
 
   def parent_id(%__MODULE__{parent_station_id: nil} = stop), do: stop.id
   def parent_id(%__MODULE__{parent_station_id: parent_id}), do: parent_id
+
+  @spec parent_if_exists(t(), %{id() => t()}) :: t()
+  @doc """
+  If the stop has a parent station and that parent is present in the map of stops, return the parent.
+  Otherwise, returns the stop as-is.
+  """
+  def parent_if_exists(%__MODULE__{parent_station_id: nil} = child_stop, _stops_by_id) do
+    child_stop
+  end
+
+  def parent_if_exists(
+        %__MODULE__{parent_station_id: parent_station_id} = child_stop,
+        stops_by_id
+      ) do
+    Map.get(stops_by_id, parent_station_id, child_stop)
+  end
+
+  def parent_if_exists(stop, _stops_by_id) do
+    stop
+  end
 
   @impl JsonApi.Object
   def fields, do: [:latitude, :longitude, :name, :location_type]
