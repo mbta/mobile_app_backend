@@ -39,7 +39,7 @@ defmodule MBTAV3API.Stream.Consumer do
         send(pid, {:stream_data, data})
 
       topic when is_binary(topic) ->
-        MBTAV3API.Stream.PubSub.broadcast!(topic, {:stream_data, topic, data})
+        Stream.PubSub.broadcast!(topic, {:stream_data, topic, data})
     end
 
     {:noreply, [], %{state | data: data}}

@@ -65,7 +65,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
         ])
       end)
 
-      {:ok, reply, _socket} =
+      {:ok, reply, socket} =
         subscribe_and_join(socket, "predictions:stops", %{"stop_ids" => ["place-jfk"]})
 
       assert reply == to_full_map([])
@@ -84,6 +84,8 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       )
 
       assert_push "stream_data", initial_data
+
+      socket.assigns.throttler |> :sys.replace_state(&put_in(&1.last_cast, nil))
 
       {:ok, %{initial_data: initial_data}}
     end

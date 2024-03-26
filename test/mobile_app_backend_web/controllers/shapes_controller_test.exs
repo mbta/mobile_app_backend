@@ -108,6 +108,8 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
         shape = shapes[shape_id]
         polyline = shape["polyline"]
         assert length(Polyline.decode(polyline)) > 0
+        stop_ids = trip["stop_ids"]
+        assert length(stop_ids) > 0
       end)
 
       assert Enum.any?(route_patterns, &(&1["typicality"] == "typical"))
