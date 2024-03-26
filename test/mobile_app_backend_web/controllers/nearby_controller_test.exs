@@ -154,27 +154,31 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
     end
 
     test "includes out of range sibling stops for any stops in range", %{conn: conn} do
-      parentStopId = "parent"
-      inRangeStopId = "inRangeSibling"
-      outOfRangeStopId = "outOfRangeSibling"
+      parent_stop_id = "parent"
+      in_range_stop_id = "in_range_sibling"
+      out_of_range_stop_id = "out_of_range_sibling"
 
       parent =
         build(:stop, %{
-          id: parentStopId,
+          id: parent_stop_id,
           name: "Stop 1",
           location_type: :station,
-          child_stop_ids: [inRangeStopId, outOfRangeStopId]
+          child_stop_ids: [in_range_stop_id, out_of_range_stop_id]
         })
 
-      inRangeSibling =
-        build(:stop, %{id: inRangeStopId, name: "Stop 1", parent_station_id: parentStopId})
+      in_range_sibling =
+        build(:stop, %{id: in_range_stop_id, name: "Stop 1", parent_station_id: parent_stop_id})
 
-      outOfRangeSibling =
-        build(:stop, %{id: outOfRangeStopId, name: "Stop 2", parent_station_id: parentStopId})
+      out_of_range_sibling =
+        build(:stop, %{
+          id: out_of_range_stop_id,
+          name: "Stop 2",
+          parent_station_id: parent_stop_id
+        })
 
       route = build(:route, %{id: "66"})
 
-      t1 = build(:trip, id: "t1", stop_ids: [inRangeSibling.id], headsign: "Headsign 1")
+      t1 = build(:trip, id: "t1", stop_ids: [in_range_sibling.id], headsign: "Headsign 1")
 
       rp1 =
         build(:route_pattern, %{
@@ -183,7 +187,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
           representative_trip_id: t1.id
         })
 
-      t2 = build(:trip, %{id: "t2", stop_ids: [outOfRangeSibling.id], headsign: "Headsign 2"})
+      t2 = build(:trip, %{id: "t2", stop_ids: [out_of_range_sibling.id], headsign: "Headsign 2"})
 
       rp2 =
         build(:route_pattern, %{
@@ -198,7 +202,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:route_type) do
           [:light_rail, :heavy_rail, :bus, :ferry] ->
-            ok_response([inRangeSibling], [parent, outOfRangeSibling])
+            ok_response([in_range_sibling], [parent, out_of_range_sibling])
 
           _ ->
             ok_response([])
@@ -218,8 +222,8 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
       } =
         json_response(conn, 200)
 
-      assert [%{"id" => ^inRangeStopId}, %{"id" => ^outOfRangeStopId}] = stops
-      assert %{^parentStopId => %{"id" => ^parentStopId}} = parent_stops
+      assert [%{"id" => ^in_range_stop_id}, %{"id" => ^out_of_range_stop_id}] = stops
+      assert %{^parent_stop_id => %{"id" => ^parent_stop_id}} = parent_stops
     end
   end
 
