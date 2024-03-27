@@ -11,30 +11,14 @@ defmodule MobileAppBackendWeb.NearbyController do
     {stops, included_stops} = fetch_nearby_stops(latitude, longitude, radius)
     stops = MBTAV3API.Stop.include_missing_siblings(stops, included_stops)
 
-    parent_stops =
-      Map.filter(included_stops, fn {_, stop} ->
-        not is_nil(stop.child_stop_ids) and length(stop.child_stop_ids) > 0
-      end)
-
-    %{
-      routes: routes,
-      route_patterns: route_patterns,
-      trips: trips,
-      pattern_ids_by_stop: pattern_ids_by_stop
-    } = fetch_route_patterns(stops)
-
     json(conn, %{
-      pattern_ids_by_stop: pattern_ids_by_stop,
-      parent_stops: parent_stops,
-      routes: routes,
-      route_patterns: route_patterns,
-      stops:
+      stop_ids:
         stops
         |> Map.values()
         |> Enum.sort_by(
           &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
-        ),
-      trips: trips
+        )
+        |> Enum.map(& &1.id)
     })
   end
 
@@ -74,40 +58,6 @@ defmodule MobileAppBackendWeb.NearbyController do
 
     {Map.new(cr_stops ++ other_stops, &{&1.id, &1}),
      Map.merge(cr_included_stops, other_included_stops)}
-  end
-
-  @spec fetch_route_patterns(JsonApi.Object.stop_map()) :: %{
-          routes: JsonApi.Object.route_map(),
-          route_patterns: JsonApi.Object.route_pattern_map(),
-          trips: JsonApi.Object.trip_map(),
-          pattern_ids_by_stop: %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}
-        }
-  defp fetch_route_patterns(stops) do
-    {:ok, %{data: route_patterns, included: %{routes: routes, trips: trips}}} =
-      Repository.route_patterns(
-        filter: [stop: Enum.join(Map.keys(stops), ",")],
-        include: [:route, representative_trip: :stops],
-        fields: [stop: []]
-      )
-
-    pattern_ids_by_stop =
-      MBTAV3API.RoutePattern.get_pattern_ids_by_stop(
-        route_patterns,
-        trips,
-        MapSet.new(Map.keys(stops))
-      )
-
-    trips =
-      Map.new(trips, fn {trip_id, trip} -> {trip_id, %MBTAV3API.Trip{trip | stop_ids: nil}} end)
-
-    route_patterns = Map.new(route_patterns, &{&1.id, &1})
-
-    %{
-      routes: routes,
-      route_patterns: route_patterns,
-      trips: trips,
-      pattern_ids_by_stop: pattern_ids_by_stop
-    }
   end
 
   @spec distance_in_degrees(float(), float(), float(), float()) :: float()

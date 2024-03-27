@@ -6,8 +6,6 @@
   },
   "V3_API": {
     "/route_patterns": {
-      "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=headsign&filter%5Bstop%5D=10820%2C10821%2C10830%2C120%2C129%2C137%2C67120%2C833%2C834%2C8392%2C8393%2C8394%2C853%2C85563%2C85564%2C85565%2C85566%2C85567%2CNB-0080-B0%2CNB-0080-B1%2CNB-0080-S&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b28-ffd1-7b51-88fa-6b9201c5c135",
-      "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=headsign&filter%5Bstop%5D=GB-0198%2CGB-0198-01%2CGB-0198-02%2CGB-0198-B2%2CGB-0198-B3&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b28-ff36-736a-af8c-a59ee67f21ec",
       "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=headsign&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
     },
     "/routes": {
