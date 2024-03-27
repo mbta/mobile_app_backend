@@ -99,6 +99,59 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
       assert %{"stop1" => ["rp1", "rp2"], "stop2" => ["rp2"]} = pattern_ids_by_stop
     end
+
+    test "includes both physical and logical platforms at stops with both", %{conn: conn} do
+      parent_station =
+        build(:stop, id: "place-forhl", child_stop_ids: ["70001", "Forest Hills-01"])
+
+      logical_platform = build(:stop, id: "70001", parent_station_id: "place-forhl")
+      physical_platform = build(:stop, id: "Forest Hills-01", parent_station_id: "place-forhl")
+
+      RepositoryMock
+      |> expect(:stops, 2, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:route_type) do
+          [:light_rail, :heavy_rail, :bus, :ferry] ->
+            ok_response([logical_platform, physical_platform], [parent_station])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      trip =
+        build(:trip,
+          id: "canonical-Orange-C1-1",
+          stop_ids: [logical_platform.id],
+          headsign: "Oak Grove"
+        )
+
+      pattern =
+        build(:route_pattern, %{
+          route_id: "Orange",
+          id: "Orange-3-1",
+          representative_trip_id: trip.id
+        })
+
+      RepositoryMock
+      |> expect(:route_patterns, fn _params, _opts ->
+        ok_response([pattern], [trip])
+      end)
+
+      conn =
+        get(conn, "/api/nearby", %{
+          latitude: 1.2,
+          longitude: -3.4
+        })
+
+      %{"stops" => stops} = json_response(conn, 200)
+
+      assert [
+               %{"id" => "70001"},
+               %{"id" => "Forest Hills-01"}
+             ] = stops
+    end
   end
 
   describe "GET /api/nearby integration tests" do
@@ -181,6 +234,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  }
                },
                "stops" => [
+                 %{"id" => "GB-0198", "parent_station_id" => "place-GB-0198"},
                  %{"id" => "GB-0198-01", "parent_station_id" => "place-GB-0198"},
                  %{"id" => "GB-0198-02", "parent_station_id" => "place-GB-0198"},
                  %{"id" => "GB-0198-B3", "parent_station_id" => "place-GB-0198"},
@@ -203,6 +257,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
       assert %{
                "stops" => [
+                 %{"id" => "MM-0186", "parent_station_id" => "place-MM-0186"},
                  %{
                    "id" => "MM-0186-CS",
                    "latitude" => 42.106555,
@@ -212,6 +267,7 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                  },
                  %{"id" => "MM-0186-S", "name" => "Montello"},
                  %{"id" => "39870", "name" => "Montello"},
+                 %{"id" => "MM-0200", "name" => "Brockton"},
                  %{"id" => "MM-0200-CS", "name" => "Brockton"},
                  %{"id" => "MM-0200-S", "name" => "Brockton"}
                ],
