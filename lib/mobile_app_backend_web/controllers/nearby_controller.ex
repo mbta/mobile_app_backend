@@ -31,7 +31,6 @@ defmodule MobileAppBackendWeb.NearbyController do
       stops:
         stops
         |> Map.values()
-        |> Enum.filter(&Map.has_key?(pattern_ids_by_stop, &1.id))
         |> Enum.sort_by(
           &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
         ),
