@@ -12,8 +12,6 @@ defmodule MBTAV3API.Stop do
           parent_station_id: String.t() | nil
         }
 
-  @type id :: String.t()
-
   Util.declare_enum(
     :location_type,
     Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
