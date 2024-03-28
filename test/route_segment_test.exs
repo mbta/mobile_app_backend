@@ -52,19 +52,19 @@ defmodule MobileAppBackend.RouteSegmentTest do
         RouteSegment.non_overlapping_segments([ashmont_rp, braintree_rp], stop_map, trip_map)
 
       assert [
-               %{
+               %RouteSegment{
                  id: "andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
-                 stops: [^andrew, ^jfk, ^savin, ^fields_corner]
+                 stops: [andrew, jfk, savin, fields_corner]
                },
-               %{
+               %RouteSegment{
                  id: "jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
-                 stops: [^jfk, ^north_quincy, ^wollaston]
+                 stops: [jfk, north_quincy, wollaston]
                }
-             ] = route_segments
+             ] == route_segments
     end
 
     test "when overlapping segments are on different routes, both route patterns contain full segments" do
@@ -201,19 +201,19 @@ defmodule MobileAppBackend.RouteSegmentTest do
       route_segments = RouteSegment.non_overlapping_segments([rp_ashmont, rp_braintree])
 
       assert [
-               %{
+               %RouteSegment{
                  id: "andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
-                 stops: [^andrew, ^jfk, ^savin, ^fields_corner]
+                 stops: [andrew, jfk, savin, fields_corner]
                },
-               %{
+               %RouteSegment{
                  id: "jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
-                 stops: [^jfk, ^north_quincy, ^wollaston]
+                 stops: [jfk, north_quincy, wollaston]
                }
-             ] = route_segments
+             ] == route_segments
     end
   end
 
