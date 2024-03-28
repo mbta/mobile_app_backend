@@ -58,6 +58,8 @@ defmodule MBTAV3API.JsonApi.Object do
 
       Module.put_attribute(__MODULE__, :jsonapi_object_renames, unquote(renames))
 
+      @type id :: String.t()
+
       @impl JsonApi.Object
       def jsonapi_type, do: unquote(jsonapi_type)
 

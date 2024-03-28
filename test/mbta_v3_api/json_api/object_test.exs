@@ -96,6 +96,8 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
 
         Module.put_attribute(__MODULE__, :jsonapi_object_renames, %{a_raw: :a})
 
+        @type id :: String.t()
+
         @impl JsonApi.Object
         def jsonapi_type, do: :object_test
 

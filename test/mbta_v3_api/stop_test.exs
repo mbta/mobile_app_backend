@@ -3,6 +3,7 @@ defmodule MBTAV3API.StopTest do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Stop
+  import MobileAppBackend.Factory
 
   test "parse/1" do
     assert Stop.parse(%JsonApi.Item{
@@ -58,6 +59,24 @@ defmodule MBTAV3API.StopTest do
 
     test "works on a non-child stop" do
       assert Stop.parent_id(%Stop{id: "stop", parent_station_id: nil}) == "stop"
+    end
+  end
+
+  describe "parent_if_exists/2" do
+    test "when a child stop and parent is in the map then return the parent" do
+      child = build(:stop, parent_station_id: "parentId")
+      parent = build(:stop, id: child.parent_station_id, location_type: :station)
+      assert parent == Stop.parent_if_exists(child, %{parent.id => parent, child.id => child})
+    end
+
+    test "when a child stop and parent is in not in the map then return the child" do
+      child = build(:stop, parent_station_id: "parentId")
+      assert child == Stop.parent_if_exists(child, %{child.id => child})
+    end
+
+    test "when a child stop and no parent then return the child" do
+      child = build(:stop, parent_station_id: nil)
+      assert child == Stop.parent_if_exists(child, %{child.id => child})
     end
   end
 
