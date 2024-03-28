@@ -152,6 +152,79 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                %{"id" => "Forest Hills-01"}
              ] = stops
     end
+
+    test "includes out of range sibling stops for any stops in range", %{conn: conn} do
+      parent_stop_id = "parent"
+      in_range_stop_id = "in_range_sibling"
+      out_of_range_stop_id = "out_of_range_sibling"
+
+      parent =
+        build(:stop, %{
+          id: parent_stop_id,
+          name: "Stop 1",
+          location_type: :station,
+          child_stop_ids: [in_range_stop_id, out_of_range_stop_id]
+        })
+
+      in_range_sibling =
+        build(:stop, %{id: in_range_stop_id, name: "Stop 1", parent_station_id: parent_stop_id})
+
+      out_of_range_sibling =
+        build(:stop, %{
+          id: out_of_range_stop_id,
+          name: "Stop 2",
+          parent_station_id: parent_stop_id
+        })
+
+      route = build(:route, %{id: "66"})
+
+      t1 = build(:trip, id: "t1", stop_ids: [in_range_sibling.id], headsign: "Headsign 1")
+
+      rp1 =
+        build(:route_pattern, %{
+          route_id: route.id,
+          id: "rp1",
+          representative_trip_id: t1.id
+        })
+
+      t2 = build(:trip, %{id: "t2", stop_ids: [out_of_range_sibling.id], headsign: "Headsign 2"})
+
+      rp2 =
+        build(:route_pattern, %{
+          route_id: route.id,
+          id: "rp2",
+          representative_trip_id: t2.id
+        })
+
+      RepositoryMock
+      |> expect(:stops, 2, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:route_type) do
+          [:light_rail, :heavy_rail, :bus, :ferry] ->
+            ok_response([in_range_sibling], [parent, out_of_range_sibling])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      RepositoryMock
+      |> expect(:route_patterns, fn _params, _opts ->
+        ok_response([rp1, rp2], [t1, t2, route])
+      end)
+
+      conn = get(conn, "/api/nearby", %{latitude: 42.095734, longitude: -71.019708})
+
+      %{
+        "stops" => stops,
+        "parent_stops" => parent_stops
+      } =
+        json_response(conn, 200)
+
+      assert [%{"id" => ^in_range_stop_id}, %{"id" => ^out_of_range_stop_id}] = stops
+      assert %{^parent_stop_id => %{"id" => ^parent_stop_id}} = parent_stops
+    end
   end
 
   describe "GET /api/nearby integration tests" do
@@ -250,94 +323,6 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
                "GB-0198-B2",
                "GB-0198-B3"
              ]
-    end
-
-    test "includes out of range sibling stops for any stops in range", %{conn: conn} do
-      conn = get(conn, "/api/nearby", %{latitude: 42.095734, longitude: -71.019708})
-
-      assert %{
-               "stops" => [
-                 %{"id" => "MM-0186", "parent_station_id" => "place-MM-0186"},
-                 %{
-                   "id" => "MM-0186-CS",
-                   "latitude" => 42.106555,
-                   "longitude" => -71.022001,
-                   "name" => "Montello",
-                   "parent_station_id" => "place-MM-0186"
-                 },
-                 %{"id" => "MM-0186-S", "name" => "Montello"},
-                 %{"id" => "39870", "name" => "Montello"},
-                 %{"id" => "MM-0200", "name" => "Brockton"},
-                 %{"id" => "MM-0200-CS", "name" => "Brockton"},
-                 %{"id" => "MM-0200-S", "name" => "Brockton"}
-               ],
-               "route_patterns" => %{
-                 "230-3-0" => %{
-                   "direction_id" => 0,
-                   "id" => "230-3-0",
-                   "name" => "Quincy Center Station - Montello Station",
-                   "route_id" => "230",
-                   "sort_order" => 523_000_000
-                 },
-                 "230-3-1" => %{
-                   "direction_id" => 1,
-                   "id" => "230-3-1",
-                   "name" => "Montello Station - Quincy Center Station",
-                   "route_id" => "230",
-                   "sort_order" => 523_001_000
-                 },
-                 "230-5-0" => %{
-                   "direction_id" => 0,
-                   "id" => "230-5-0",
-                   "name" => "Quincy Center Station - Montello Station via Holbrook Ct",
-                   "route_id" => "230",
-                   "sort_order" => 523_000_040
-                 },
-                 "230-5-1" => %{
-                   "direction_id" => 1,
-                   "id" => "230-5-1",
-                   "name" => "Montello Station - Quincy Center Station via Holbrook Ct",
-                   "route_id" => "230",
-                   "sort_order" => 523_001_040
-                 },
-                 "CR-Middleborough-52b80476-0" => %{
-                   "name" => "South Station - Middleborough/Lakeville"
-                 },
-                 "CR-Middleborough-75bed2bb-1" => %{
-                   "name" => "Middleborough/Lakeville - South Station"
-                 },
-                 "CapeFlyer-C1-0" => %{"name" => "South Station - Hyannis"},
-                 "CapeFlyer-C1-1" => %{"name" => "Hyannis - South Station"}
-               },
-               "pattern_ids_by_stop" => %{
-                 "39870" => [
-                   "230-3-0",
-                   "230-5-0",
-                   "230-3-1",
-                   "230-5-1"
-                 ],
-                 "MM-0186-CS" => ["CR-Middleborough-75bed2bb-1"],
-                 "MM-0186-S" => ["CR-Middleborough-52b80476-0"],
-                 "MM-0200-CS" => ["CR-Middleborough-75bed2bb-1", "CapeFlyer-C1-1"],
-                 "MM-0200-S" => ["CR-Middleborough-52b80476-0", "CapeFlyer-C1-0"]
-               },
-               "routes" => %{
-                 "230" => %{
-                   "color" => "FFC72C",
-                   "direction_destinations" => [
-                     "Montello Station",
-                     "Quincy Center Station"
-                   ],
-                   "direction_names" => ["Outbound", "Inbound"],
-                   "id" => "230",
-                   "long_name" => "Montello Station - Quincy Center Station",
-                   "short_name" => "230",
-                   "sort_order" => 52_300,
-                   "text_color" => "000000"
-                 }
-               }
-             } =
-               json_response(conn, 200)
     end
   end
 end
