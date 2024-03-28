@@ -29,7 +29,7 @@ defmodule MBTAV3API.JsonApi.Params do
       %{
         "sort" => "name",
         "fields[route]" => "color,short_name",
-        "fields[route_pattern]" => "direction_id,name,sort_order,typicality",
+        "fields[route_pattern]" => "canonical,direction_id,name,sort_order,typicality",
         "include" => "route",
         "filter[route]" => "Green-B,Red",
         "filter[canonical]" => "true"
