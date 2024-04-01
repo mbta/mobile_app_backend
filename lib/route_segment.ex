@@ -36,13 +36,17 @@ defmodule MobileAppBackend.RouteSegment do
           Trip.id() => Trip.t()
         }) :: [t()]
   @doc """
-  Get a list of non-overlapping RouteSegments for the list of route patterns. This will use parent stops wherever
-  possible to detect when route patterns serve an overlapping set of stops.
+  Get a list of non-overlapping RouteSegments for the list of route patterns.
+  This will use parent stops wherever possible to detect when route patterns serve an overlapping set of stops.
   """
   def non_overlapping_segments(route_patterns, stops_by_id, trips_by_id) do
     route_patterns
     |> route_patterns_with_parent_stops(stops_by_id, trips_by_id)
-    |> non_overlapping_segments()
+    |> Enum.group_by(& &1.route_id)
+    |> Enum.flat_map(fn {_route_id, route_patterns} ->
+      non_overlapping_segments(route_patterns)
+    end)
+    |> Enum.sort_by(& &1.source_route_pattern_id)
   end
 
   @spec non_overlapping_segments([route_pattern_with_stops()]) :: [t()]
@@ -227,9 +231,7 @@ defmodule MobileAppBackend.RouteSegment do
     route_patterns
     |> Enum.map(fn route_pattern ->
       representative_trip = Map.fetch!(trips_by_id, route_pattern.representative_trip_id)
-
       stops = parents_if_exist(representative_trip.stop_ids, stops_by_id)
-
       %{id: route_pattern.id, route_id: route_pattern.route_id, stops: stops}
     end)
   end
