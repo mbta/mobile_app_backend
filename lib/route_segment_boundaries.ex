@@ -5,6 +5,7 @@ defmodule MobileAppBackend.RouteSegmentBoundaries do
   Unlike `MobileAppBackend.RouteSegment`, this stores only the first & last stop
   of the segment.
   """
+  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
 
