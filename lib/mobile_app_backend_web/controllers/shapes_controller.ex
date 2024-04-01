@@ -1,9 +1,9 @@
 defmodule MobileAppBackendWeb.ShapesController do
-  alias MobileAppBackend.MapFriendlyRouteShape
-  alias MobileAppBackend.RouteSegment
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
+  alias MobileAppBackend.MapFriendlyRouteShape
+  alias MobileAppBackend.RouteSegment
   use MobileAppBackendWeb, :controller
 
   def rail(conn, _params) do
@@ -68,8 +68,7 @@ defmodule MobileAppBackendWeb.ShapesController do
     {:ok, %{data: routes, included: %{route_patterns: route_patterns_by_id}}} =
       Repository.routes(
         filter: [
-          type: [:light_rail, :heavy_rail, :commuter_rail],
-          direction_id: 0
+          type: [:light_rail, :heavy_rail, :commuter_rail]
         ],
         include: [
           route_patterns: [representative_trip: [:shape, :stops, [stops: :parent_station]]]
@@ -77,7 +76,10 @@ defmodule MobileAppBackendWeb.ShapesController do
       )
 
     map_friendly_patterns =
-      RoutePattern.most_canonical_or_typical_per_route(Map.values(route_patterns_by_id))
+      route_patterns_by_id
+      |> Map.values()
+      |> Enum.filter(&(&1.direction_id == 0))
+      |> RoutePattern.most_canonical_or_typical_per_route()
 
     trip_ids =
       map_friendly_patterns

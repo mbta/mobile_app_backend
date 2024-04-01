@@ -4,11 +4,11 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
   and the segments of that route pattern that can be safely rendered without overlapping
   other route shapes on the map.
   """
-  alias MobileAppBackend.RouteSegmentBoundaries
+  alias MBTAV3API.RoutePattern
   alias MBTAV3API.Shape
   alias MBTAV3API.Trip
-  alias MBTAV3API.RoutePattern
   alias MobileAppBackend.RouteSegment
+  alias MobileAppBackend.RouteSegmentBoundaries
 
   @type t :: %__MODULE__{
           route_pattern_id: String.t(),

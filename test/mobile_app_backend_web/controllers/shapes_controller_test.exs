@@ -90,7 +90,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
-    test "returns route segments for the most canonical route patterns with the associated shape",
+    test "returns route segments for the most canonical direction 0 route patterns with the associated shape",
          %{conn: conn} do
       red_route = build(:route, id: "Red", color: "red_color")
       andrew = build(:stop, id: "andrew", location_type: :station)
@@ -148,13 +148,27 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
           canonical: false
         )
 
+      rl_canonical_direction_1 =
+        build(:route_pattern,
+          id: "rl_diversion",
+          route_id: "Red",
+          typicality: :typical,
+          canonical: true,
+          direction_id: 1
+        )
+
       RepositoryMock
       |> expect(:routes, 1, fn params, _opts ->
         case params
              |> Keyword.get(:filter)
              |> Keyword.get(:type) do
           [:light_rail, :heavy_rail, :commuter_rail] ->
-            ok_response([red_route], [ashmont_rp, braintree_rp, rl_diversion_rp])
+            ok_response([red_route], [
+              ashmont_rp,
+              braintree_rp,
+              rl_diversion_rp,
+              rl_canonical_direction_1
+            ])
         end
       end)
 
