@@ -119,6 +119,62 @@ defmodule MobileAppBackend.RouteSegmentTest do
                }
              ] = route_segments
     end
+
+    test "when overlapping segments are on different routes but should be grouped, breaks into non-overlapping route segments as if they were on the same route" do
+      arlington = build(:stop, id: "arlington", location_type: :station)
+      copley = build(:stop, id: "copley", location_type: :station)
+      prudential = build(:stop, id: "prudential", location_type: :station)
+      hynes = build(:stop, id: "hynes", location_type: :station)
+
+      stop_map =
+        Map.new(
+          [arlington, copley, prudential, hynes],
+          &{&1.id, &1}
+        )
+
+      green_d_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, hynes.id])
+
+      green_e_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, prudential.id])
+
+      trip_map = %{green_d_trip.id => green_d_trip, green_e_trip.id => green_e_trip}
+
+      green_d_rp =
+        build(:route_pattern,
+          id: "green_d_rp",
+          representative_trip_id: green_d_trip.id,
+          route_id: "Green-D"
+        )
+
+      green_e_rp =
+        build(:route_pattern,
+          id: "green_e_rp",
+          representative_trip_id: green_e_trip.id,
+          route_id: "Green-E"
+        )
+
+      route_segments =
+        RouteSegment.non_overlapping_segments([green_d_rp, green_e_rp], stop_map, trip_map, %{
+          "Green-D" => "Green",
+          "Green-E" => "Green"
+        })
+
+      assert [
+               %{
+                 id: "arlington-hynes",
+                 source_route_pattern_id: "green_d_rp",
+                 route_id: "Green-D",
+                 stops: [^arlington, ^copley, ^hynes]
+               },
+               %{
+                 id: "copley-prudential",
+                 source_route_pattern_id: "green_e_rp",
+                 route_id: "Green-E",
+                 stops: [^copley, ^prudential]
+               }
+             ] = route_segments
+    end
   end
 
   describe "non_overlapping_segments/1" do
