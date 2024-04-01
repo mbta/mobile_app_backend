@@ -92,7 +92,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
 
     test "returns route segments for the most canonical route patterns with the associated shape",
          %{conn: conn} do
-      red_route = build(:route, id: "Red")
+      red_route = build(:route, id: "Red", color: "red_color")
       andrew = build(:stop, id: "andrew", location_type: :station)
       jfk = build(:stop, id: "jfk/umass", location_type: :station)
 
@@ -193,6 +193,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "last_stop" => %{"id" => "savin_hill"}
                    }
                  ],
+                 "color" => "red_color",
                  "shape" => %{"id" => "ashmont_shape", "polyline" => "ashmont_shape_polyline"}
                },
                %{
@@ -206,6 +207,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "last_stop" => %{"id" => "north_quincy"}
                    }
                  ],
+                 "color" => "red_color",
                  "shape" => %{"id" => "braintree_shape", "polyline" => "braintree_shape_polyline"}
                }
              ] =

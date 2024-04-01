@@ -7,6 +7,9 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
 
   describe "non_overlapping_segments/3" do
     test "groups route segments by route_pattern id and associates with shape" do
+      rl = build(:route, id: "RL", color: "red_color")
+      ol = build(:route, id: "OL", color: "orange_color")
+
       rp1_segment1 = %RouteSegment{
         id: "rp1s1",
         source_route_pattern_id: "rp1",
@@ -41,6 +44,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                %MapFriendlyRouteShape{
                  route_pattern_id: "rp1",
                  shape: ^rp1_shape,
+                 color: "red_color",
                  route_segments: [
                    %{
                      first_stop: %{id: "rp1_segment1_stop1"},
@@ -55,6 +59,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                %MapFriendlyRouteShape{
                  route_pattern_id: "rp2",
                  shape: ^rp2_shape,
+                 color: "orange_color",
                  route_segments: [
                    %{
                      first_stop: %{id: "rp2_segment1_stop1"},
@@ -69,6 +74,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                    rp1.id => rp1,
                    rp2.id => rp2
                  },
+                 %{rl.id => rl, ol.id => ol},
                  %{
                    rp1_trip.id => rp1_trip,
                    rp2_trip.id => rp2_trip
