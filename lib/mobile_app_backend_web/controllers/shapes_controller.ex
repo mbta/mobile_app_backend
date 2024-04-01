@@ -46,7 +46,8 @@ defmodule MobileAppBackendWeb.ShapesController do
       RouteSegment.non_overlapping_segments(
         route_patterns,
         stops_by_id,
-        trips_by_id
+        trips_by_id,
+        %{"Green-B" => "Green", "Green-C" => "Green", "Green-D" => "Green", "Green-E" => "Green"}
       )
 
     map_friendly_route_shapes =
@@ -71,7 +72,7 @@ defmodule MobileAppBackendWeb.ShapesController do
           type: [:light_rail, :heavy_rail, :commuter_rail]
         ],
         include: [
-          route_patterns: [representative_trip: [:shape, :stops, [stops: :parent_station]]]
+          route_patterns: [:representative_trip]
         ]
       )
 
@@ -91,7 +92,7 @@ defmodule MobileAppBackendWeb.ShapesController do
         filter: [
           id: trip_ids
         ],
-        include: [:shape, :stops]
+        include: [:shape, [stops: :parent_station]]
       )
 
     %{
