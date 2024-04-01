@@ -36,9 +36,7 @@ defmodule MobileAppBackend.RouteSegment do
   @spec non_overlapping_segments(
           [RoutePattern.t()],
           %{Stop.id() => Stop.t()},
-          %{
-            Trip.id() => Trip.t()
-          },
+          %{Trip.id() => Trip.t()},
           %{Route.id() => String.t()}
         ) :: [t()]
   @doc """
