@@ -66,6 +66,115 @@ defmodule MobileAppBackend.RouteSegmentTest do
                }
              ] = route_segments
     end
+
+    test "when overlapping segments are on different routes, both route patterns contain full segments" do
+      oak_grove = build(:stop, id: "oak_grove", location_type: :station)
+      malden_center = build(:stop, id: "malden", location_type: :station)
+      wellington = build(:stop, id: "wellington", location_type: :station)
+      north_station = build(:stop, id: "north_station", location_type: :station)
+
+      stop_map =
+        Map.new(
+          [oak_grove, malden_center, wellington, north_station],
+          &{&1.id, &1}
+        )
+
+      ol_trip =
+        build(:trip, stop_ids: [oak_grove.id, malden_center.id, wellington.id])
+
+      haverhill_trip =
+        build(:trip, stop_ids: [oak_grove.id, malden_center.id, north_station.id])
+
+      trip_map = %{ol_trip.id => ol_trip, haverhill_trip.id => haverhill_trip}
+
+      ol_rp =
+        build(:route_pattern,
+          id: "ol-rp",
+          representative_trip_id: ol_trip.id,
+          route_id: "Orange"
+        )
+
+      harverhill_rp =
+        build(:route_pattern,
+          id: "haverhill-rp",
+          representative_trip_id: haverhill_trip.id,
+          route_id: "CR-Haverhill"
+        )
+
+      route_segments =
+        RouteSegment.non_overlapping_segments([ol_rp, harverhill_rp], stop_map, trip_map)
+
+      assert [
+               %{
+                 id: "oak_grove-north_station",
+                 source_route_pattern_id: "haverhill-rp",
+                 route_id: "CR-Haverhill",
+                 stops: [^oak_grove, ^malden_center, ^north_station]
+               },
+               %{
+                 id: "oak_grove-wellington",
+                 source_route_pattern_id: "ol-rp",
+                 route_id: "Orange",
+                 stops: [^oak_grove, ^malden_center, ^wellington]
+               }
+             ] = route_segments
+    end
+
+    test "when overlapping segments are on different routes but should be grouped, breaks into non-overlapping route segments as if they were on the same route" do
+      arlington = build(:stop, id: "arlington", location_type: :station)
+      copley = build(:stop, id: "copley", location_type: :station)
+      prudential = build(:stop, id: "prudential", location_type: :station)
+      hynes = build(:stop, id: "hynes", location_type: :station)
+
+      stop_map =
+        Map.new(
+          [arlington, copley, prudential, hynes],
+          &{&1.id, &1}
+        )
+
+      green_d_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, hynes.id])
+
+      green_e_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, prudential.id])
+
+      trip_map = %{green_d_trip.id => green_d_trip, green_e_trip.id => green_e_trip}
+
+      green_d_rp =
+        build(:route_pattern,
+          id: "green_d_rp",
+          representative_trip_id: green_d_trip.id,
+          route_id: "Green-D"
+        )
+
+      green_e_rp =
+        build(:route_pattern,
+          id: "green_e_rp",
+          representative_trip_id: green_e_trip.id,
+          route_id: "Green-E"
+        )
+
+      route_segments =
+        RouteSegment.non_overlapping_segments([green_d_rp, green_e_rp], stop_map, trip_map, %{
+          "Green-D" => "Green",
+          "Green-E" => "Green"
+        })
+
+      assert [
+               %{
+                 id: "arlington-hynes",
+                 source_route_pattern_id: "green_d_rp",
+                 route_id: "Green-D",
+                 stops: [^arlington, ^copley, ^hynes]
+               },
+               %{
+                 id: "copley-prudential",
+                 source_route_pattern_id: "green_e_rp",
+                 route_id: "Green-E",
+                 stops: [^copley, ^prudential]
+               }
+             ] = route_segments
+    end
   end
 
   describe "non_overlapping_segments/1" do

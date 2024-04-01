@@ -13,6 +13,7 @@ defmodule MobileAppBackend.RouteSegment do
   * JFK/UMass - Braintree
   Note the 'boundary stop' of JFK/UMass where these segments intersect is included in each segment.
   """
+  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
@@ -32,17 +33,31 @@ defmodule MobileAppBackend.RouteSegment do
 
   defstruct [:id, :source_route_pattern_id, :route_id, :stops, :route_patterns_by_stop]
 
-  @spec non_overlapping_segments([RoutePattern.t()], %{Stop.id() => Stop.t()}, %{
-          Trip.id() => Trip.t()
-        }) :: [t()]
+  @spec non_overlapping_segments(
+          [RoutePattern.t()],
+          %{Stop.id() => Stop.t()},
+          %{Trip.id() => Trip.t()},
+          %{Route.id() => String.t()}
+        ) :: [t()]
   @doc """
-  Get a list of non-overlapping RouteSegments for the list of route patterns. This will use parent stops wherever
-  possible to detect when route patterns serve an overlapping set of stops.
+  Get a list of non-overlapping RouteSegments within a route for the list of route patterns.
+  Uses a route pattern's route_id by default to group related route patterns, or an override if present
+  in the `route_id_to_grouping_id` map.
+  This will use parent stops wherever possible to detect when route patterns serve an overlapping set of stops.
   """
-  def non_overlapping_segments(route_patterns, stops_by_id, trips_by_id) do
+  def non_overlapping_segments(
+        route_patterns,
+        stops_by_id,
+        trips_by_id,
+        route_id_to_grouping_id \\ %{}
+      ) do
     route_patterns
     |> route_patterns_with_parent_stops(stops_by_id, trips_by_id)
-    |> non_overlapping_segments()
+    |> Enum.group_by(&Map.get(route_id_to_grouping_id, &1.route_id, &1.route_id))
+    |> Enum.flat_map(fn {_route_id, route_patterns} ->
+      non_overlapping_segments(route_patterns)
+    end)
+    |> Enum.sort_by(& &1.source_route_pattern_id)
   end
 
   @spec non_overlapping_segments([route_pattern_with_stops()]) :: [t()]
@@ -227,9 +242,7 @@ defmodule MobileAppBackend.RouteSegment do
     route_patterns
     |> Enum.map(fn route_pattern ->
       representative_trip = Map.fetch!(trips_by_id, route_pattern.representative_trip_id)
-
       stops = parents_if_exist(representative_trip.stop_ids, stops_by_id)
-
       %{id: route_pattern.id, route_id: route_pattern.route_id, stops: stops}
     end)
   end
