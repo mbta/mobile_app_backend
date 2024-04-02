@@ -31,18 +31,7 @@ defmodule MobileAppBackendWeb.GlobalController do
         include: [:child_stops, :parent_station]
       )
 
-    Map.new(
-      stops,
-      &{&1.id,
-       %MBTAV3API.Stop{
-         &1
-         | child_stop_ids:
-             if(Enum.empty?(&1.child_stop_ids),
-               do: nil,
-               else: &1.child_stop_ids
-             )
-       }}
-    )
+    Map.new(stops, &{&1.id, &1})
   end
 
   @spec fetch_route_patterns() :: %{
