@@ -22,7 +22,8 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "name" => "Park Street",
                "location_type" => "station",
                "latitude" => 42.356395,
-               "longitude" => -71.062424
+               "longitude" => -71.062424,
+               "child_stop_ids" => child_ids
              } = park_st_station
 
       park_st_rl_platform = stops["70076"]
@@ -33,6 +34,8 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "location_type" => "stop",
                "parent_station_id" => "place-pktrm"
              } = park_st_rl_platform
+
+      assert child_ids |> Enum.member?("70076")
 
       park_st_rl_patterns = Map.get(pattern_ids, Map.get(park_st_rl_platform, "id"))
 

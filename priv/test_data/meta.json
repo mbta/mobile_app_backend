@@ -16,7 +16,7 @@
       "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-342a-761d-913b-87082d542559",
       "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-3651-7503-9c70-29e986c827e8",
       "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-3612-7b7a-bde8-ed56c59e2346",
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blocation_type%5D=0%2C1&include=parent_station": "018da8f8-4962-766c-8b7d-813153aed005"
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blocation_type%5D=0%2C1&include=child_stops%2Cparent_station": "018e9f39-1c96-7c31-a212-5537f94cd63f"
     }
   }
 }
