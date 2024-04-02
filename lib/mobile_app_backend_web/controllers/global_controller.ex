@@ -21,7 +21,7 @@ defmodule MobileAppBackendWeb.GlobalController do
     })
   end
 
-  @spec fetch_stops() :: [MBTAV3API.Stop.t()]
+  @spec fetch_stops() :: JsonApi.Object.stop_map()
   defp fetch_stops do
     {:ok, %{data: stops}} =
       Repository.stops(
@@ -31,7 +31,7 @@ defmodule MobileAppBackendWeb.GlobalController do
         include: [:parent_station]
       )
 
-    stops
+    Map.new(stops, &{&1.id, &1})
   end
 
   @spec fetch_route_patterns() :: %{

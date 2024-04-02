@@ -214,7 +214,7 @@ defmodule Test.Support.Data do
     unless state.updating_test_data? do
       for {req, resp} <- state.data do
         unless resp.touched do
-          Logger.warning("Unused test data for #{req}")
+          Logger.warning("Unused test data #{resp.id} for #{req}")
         end
       end
     end
