@@ -19,6 +19,9 @@ defmodule MBTAV3API.Repository do
   @callback stops(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Stop.t())} | {:error, term()}
 
+  @callback trips(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, JsonApi.Response.t(MBTAV3API.Trip.t())} | {:error, term()}
+
   def alerts(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
       params,
@@ -53,6 +56,13 @@ defmodule MBTAV3API.Repository do
       opts
     )
   end
+
+  def trips(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).trips(
+      params,
+      opts
+    )
+  end
 end
 
 defmodule MBTAV3API.Repository.Impl do
@@ -73,6 +83,9 @@ defmodule MBTAV3API.Repository.Impl do
 
   @impl true
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
+
+  @impl true
+  def trips(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
 
   @spec all(module(), JsonApi.Params.t(), Keyword.t()) ::
           {:ok, JsonApi.Response.t(JsonApi.Object.t())} | {:error, term()}

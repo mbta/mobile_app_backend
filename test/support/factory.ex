@@ -48,7 +48,8 @@ defmodule MobileAppBackend.Factory do
       direction_id: 0,
       sort_order: 506_600_000,
       representative_trip_id: "60168428",
-      route_id: "66"
+      route_id: "66",
+      canonical: false
     }
   end
 
