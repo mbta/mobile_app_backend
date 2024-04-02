@@ -56,13 +56,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  id: "andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
-                 stops: [andrew, jfk, savin, fields_corner]
+                 stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id]
                },
                %RouteSegment{
                  id: "jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
-                 stops: [jfk, north_quincy, wollaston]
+                 stop_ids: [jfk.id, north_quincy.id, wollaston.id]
                }
              ] == route_segments
     end
@@ -105,19 +105,19 @@ defmodule MobileAppBackend.RouteSegmentTest do
         RouteSegment.non_overlapping_segments([ol_rp, harverhill_rp], stop_map, trip_map)
 
       assert [
-               %{
+               %RouteSegment{
                  id: "oak_grove-north_station",
                  source_route_pattern_id: "haverhill-rp",
                  route_id: "CR-Haverhill",
-                 stops: [^oak_grove, ^malden_center, ^north_station]
+                 stop_ids: [oak_grove.id, malden_center.id, north_station.id]
                },
-               %{
+               %RouteSegment{
                  id: "oak_grove-wellington",
                  source_route_pattern_id: "ol-rp",
                  route_id: "Orange",
-                 stops: [^oak_grove, ^malden_center, ^wellington]
+                 stop_ids: [oak_grove.id, malden_center.id, wellington.id]
                }
-             ] = route_segments
+             ] == route_segments
     end
 
     test "when overlapping segments are on different routes but should be grouped, breaks into non-overlapping route segments as if they were on the same route" do
@@ -161,19 +161,19 @@ defmodule MobileAppBackend.RouteSegmentTest do
         })
 
       assert [
-               %{
+               %RouteSegment{
                  id: "arlington-hynes",
                  source_route_pattern_id: "green_d_rp",
                  route_id: "Green-D",
-                 stops: [^arlington, ^copley, ^hynes]
+                 stop_ids: [arlington.id, copley.id, hynes.id]
                },
-               %{
+               %RouteSegment{
                  id: "copley-prudential",
                  source_route_pattern_id: "green_e_rp",
                  route_id: "Green-E",
-                 stops: [^copley, ^prudential]
+                 stop_ids: [copley.id, prudential.id]
                }
-             ] = route_segments
+             ] == route_segments
     end
   end
 
@@ -205,13 +205,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  id: "andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
-                 stops: [andrew, jfk, savin, fields_corner]
+                 stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id]
                },
                %RouteSegment{
                  id: "jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
-                 stops: [jfk, north_quincy, wollaston]
+                 stop_ids: [jfk.id, north_quincy.id, wollaston.id]
                }
              ] == route_segments
     end

@@ -10,26 +10,29 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
       rl = build(:route, id: "RL", color: "red_color")
       ol = build(:route, id: "OL", color: "orange_color")
 
-      rp1_segment1 = %RouteSegment{
-        id: "rp1s1",
-        source_route_pattern_id: "rp1",
-        route_id: "RL",
-        stops: [build(:stop, id: "rp1_segment1_stop1"), build(:stop, id: "rp1_segment1_stop2")]
-      }
+      %{stop_ids: rp1_segment1_stop_ids} =
+        rp1_segment1 = %RouteSegment{
+          id: "rp1s1",
+          source_route_pattern_id: "rp1",
+          route_id: "RL",
+          stop_ids: ["rp1_segment1_stop1", "rp1_segment1_stop2"]
+        }
 
-      rp1_segment2 = %RouteSegment{
-        id: "rp1s2",
-        source_route_pattern_id: "rp1",
-        route_id: "RL",
-        stops: [build(:stop, id: "rp1_segment2_stop1"), build(:stop, id: "rp1_segment2_stop2")]
-      }
+      %{stop_ids: rp1_segment2_stop_ids} =
+        rp1_segment2 = %RouteSegment{
+          id: "rp1s2",
+          source_route_pattern_id: "rp1",
+          route_id: "RL",
+          stop_ids: ["rp1_segment2_stop1", "rp1_segment2_stop2"]
+        }
 
-      rp2_segment1 = %RouteSegment{
-        id: "rp2s1",
-        source_route_pattern_id: "rp2",
-        route_id: "OL",
-        stops: [build(:stop, id: "rp2_segment1_stop1"), build(:stop, id: "rp2_segment1_stop2")]
-      }
+      %{stop_ids: rp2_segment1_stop_ids} =
+        rp2_segment1 = %RouteSegment{
+          id: "rp2s1",
+          source_route_pattern_id: "rp2",
+          route_id: "OL",
+          stop_ids: ["rp2_segment1_stop1", "rp2_segment1_stop2"]
+        }
 
       rp1 = build(:route_pattern, %{id: "rp1", representative_trip_id: "rp1_trip"})
       rp2 = build(:route_pattern, %{id: "rp2", representative_trip_id: "rp2_trip"})
@@ -47,12 +50,10 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                  color: "red_color",
                  route_segments: [
                    %{
-                     first_stop: %{id: "rp1_segment1_stop1"},
-                     last_stop: %{id: "rp1_segment1_stop2"}
+                     stop_ids: ^rp1_segment1_stop_ids
                    },
                    %{
-                     first_stop: %{id: "rp1_segment2_stop1"},
-                     last_stop: %{id: "rp1_segment2_stop2"}
+                     stop_ids: ^rp1_segment2_stop_ids
                    }
                  ]
                },
@@ -62,8 +63,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                  color: "orange_color",
                  route_segments: [
                    %{
-                     first_stop: %{id: "rp2_segment1_stop1"},
-                     last_stop: %{id: "rp2_segment1_stop2"}
+                     stop_ids: ^rp2_segment1_stop_ids
                    }
                  ]
                }

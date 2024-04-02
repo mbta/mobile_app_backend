@@ -9,11 +9,10 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
   alias MBTAV3API.Shape
   alias MBTAV3API.Trip
   alias MobileAppBackend.RouteSegment
-  alias MobileAppBackend.RouteSegmentBoundaries
 
   @type t :: %__MODULE__{
           route_pattern_id: String.t(),
-          route_segments: [RouteSegmentBoundaries.t()],
+          route_segments: [RouteSegment.t()],
           color: String.t(),
           shape: Shape.t()
         }
@@ -42,17 +41,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
 
       %__MODULE__{
         route_pattern_id: route_pattern_id,
-        route_segments:
-          Enum.map(
-            route_segments,
-            &%RouteSegmentBoundaries{
-              id: &1.id,
-              source_route_pattern_id: &1.source_route_pattern_id,
-              route_id: &1.route_id,
-              first_stop: List.first(&1.stops),
-              last_stop: List.last(&1.stops)
-            }
-          ),
+        route_segments: route_segments,
         color: Map.fetch!(routes_by_id, route_id).color,
         shape: shape
       }

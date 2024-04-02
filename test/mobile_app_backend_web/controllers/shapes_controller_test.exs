@@ -201,10 +201,8 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                  "route_segments" => [
                    %{
                      "id" => "andrew-savin_hill",
-                     "route_id" => "Red",
                      "source_route_pattern_id" => "red-ashmont",
-                     "first_stop" => %{"id" => "andrew"},
-                     "last_stop" => %{"id" => "savin_hill"}
+                     "stop_ids" => ["andrew", "jfk/umass", "savin_hill"]
                    }
                  ],
                  "color" => "red_color",
@@ -217,8 +215,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "id" => "jfk/umass-north_quincy",
                      "route_id" => "Red",
                      "source_route_pattern_id" => "red-braintree",
-                     "first_stop" => %{"id" => "jfk/umass"},
-                     "last_stop" => %{"id" => "north_quincy"}
+                     "stop_ids" => ["jfk/umass", "north_quincy"]
                    }
                  ],
                  "color" => "red_color",
