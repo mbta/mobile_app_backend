@@ -53,13 +53,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
 
       assert [
                %RouteSegment{
-                 id: "andrew-fields_corner",
+                 id: "red-ashmont-andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
                  stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id]
                },
                %RouteSegment{
-                 id: "jfk/umass-wollaston",
+                 id: "red-braintree-jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id]
@@ -106,13 +106,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
 
       assert [
                %RouteSegment{
-                 id: "oak_grove-north_station",
+                 id: "haverhill-rp-oak_grove-north_station",
                  source_route_pattern_id: "haverhill-rp",
                  route_id: "CR-Haverhill",
                  stop_ids: [oak_grove.id, malden_center.id, north_station.id]
                },
                %RouteSegment{
-                 id: "oak_grove-wellington",
+                 id: "ol-rp-oak_grove-wellington",
                  source_route_pattern_id: "ol-rp",
                  route_id: "Orange",
                  stop_ids: [oak_grove.id, malden_center.id, wellington.id]
@@ -162,13 +162,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
 
       assert [
                %RouteSegment{
-                 id: "arlington-hynes",
+                 id: "green_d_rp-arlington-hynes",
                  source_route_pattern_id: "green_d_rp",
                  route_id: "Green-D",
                  stop_ids: [arlington.id, copley.id, hynes.id]
                },
                %RouteSegment{
-                 id: "copley-prudential",
+                 id: "green_e_rp-copley-prudential",
                  source_route_pattern_id: "green_e_rp",
                  route_id: "Green-E",
                  stop_ids: [copley.id, prudential.id]
@@ -202,13 +202,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
 
       assert [
                %RouteSegment{
-                 id: "andrew-fields_corner",
+                 id: "red-ashmont-andrew-fields_corner",
                  source_route_pattern_id: "red-ashmont",
                  route_id: "Red",
                  stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id]
                },
                %RouteSegment{
-                 id: "jfk/umass-wollaston",
+                 id: "red-braintree-jfk/umass-wollaston",
                  source_route_pattern_id: "red-braintree",
                  route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id]
@@ -270,6 +270,191 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  %{id: "rp1", route_id: "66", stops: all_stops},
                  new_stops
                )
+    end
+  end
+
+  describe "split_alerting_segments/2" do
+    test "when there is an alert for a stop but on a different route, returns single non-alerting segment" do
+      original_segment = %RouteSegment{
+        id: "rp1-aa-ff",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"]
+      }
+
+      alerts_by_route_and_stop = %{"2" => %{"aa" => build_list(2, :alert)}}
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aa-ff",
+                 source_route_pattern_id: "rp1",
+                 route_id: "1",
+                 stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"],
+                 properties: %{has_alert: false}
+               }
+             ] = RouteSegment.split_alerting_segments(original_segment, alerts_by_route_and_stop)
+    end
+
+    test "when alert covers entire segment, returns a single segment" do
+      original_segment = %RouteSegment{
+        id: "rp1-aa-cc",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aa", "bb", "cc"]
+      }
+
+      alerts_by_route_and_stop = %{
+        "1" => %{"aa" => build(:alert), "bb" => build(:alert), "cc" => build(:alert)}
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aa-cc",
+                 source_route_pattern_id: "rp1",
+                 route_id: "1",
+                 stop_ids: ["aa", "bb", "cc"],
+                 properties: %{has_alert: true}
+               }
+             ] = RouteSegment.split_alerting_segments(original_segment, alerts_by_route_and_stop)
+    end
+
+    test "when alerts cover subsets of the segment, splits the segment into alerting / non-alerting" do
+      original_segment = %RouteSegment{
+        id: "rp1-aa-cc",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aa", "bb", "cc", "dd", "ee"]
+      }
+
+      alerts_by_route_and_stop = %{
+        "1" => %{"bb" => build(:alert), "cc" => build(:alert)}
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aa-bb",
+                 source_route_pattern_id: "rp1",
+                 route_id: "1",
+                 stop_ids: ["aa", "bb"],
+                 properties: %{has_alert: false}
+               },
+               %RouteSegment{
+                 id: "rp1-bb-cc",
+                 source_route_pattern_id: "rp1",
+                 route_id: "1",
+                 stop_ids: ["bb", "cc"],
+                 properties: %{has_alert: true}
+               },
+               %RouteSegment{
+                 id: "rp1-cc-ee",
+                 source_route_pattern_id: "rp1",
+                 route_id: "1",
+                 stop_ids: ["cc", "dd", "ee"],
+                 properties: %{has_alert: false}
+               }
+             ] = RouteSegment.split_alerting_segments(original_segment, alerts_by_route_and_stop)
+    end
+  end
+
+  describe "split_route_segment/2" do
+    test "when true for all stops, returns a single segment" do
+      original_segment = %RouteSegment{
+        id: "rp1-aa-ff",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"]
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aa-ff",
+                 stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"],
+                 properties: %{len_2: true}
+               }
+             ] =
+               RouteSegment.split_route_segment(original_segment, :len_2, fn stop_id ->
+                 String.length(stop_id) == 2
+               end)
+    end
+
+    test "when false for all stops, returns a single segment" do
+      original_segment = %RouteSegment{
+        id: "aa-cc",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"]
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aa-ff",
+                 stop_ids: ["aa", "bb", "cc", "dd", "ee", "ff"],
+                 properties: %{len_3: false}
+               }
+             ] =
+               RouteSegment.split_route_segment(original_segment, :len_3, fn stop_id ->
+                 String.length(stop_id) == 3
+               end)
+    end
+
+    test "when true for a segment in the middle, returns split segments" do
+      original_segment = %RouteSegment{
+        id: "aa-cc",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aaa", "bbb", "cc", "dd", "eee", "fff"]
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aaa-cc",
+                 stop_ids: ["aaa", "bbb", "cc"],
+                 properties: %{len_2: false}
+               },
+               %RouteSegment{
+                 id: "rp1-cc-dd",
+                 stop_ids: ["cc", "dd"],
+                 properties: %{len_2: true}
+               },
+               %RouteSegment{
+                 id: "rp1-dd-fff",
+                 stop_ids: ["dd", "eee", "fff"],
+                 properties: %{len_2: false}
+               }
+             ] =
+               RouteSegment.split_route_segment(original_segment, :len_2, fn stop_id ->
+                 String.length(stop_id) == 2
+               end)
+    end
+
+    test "when false for a segment in the middle, returns split segments" do
+      original_segment = %RouteSegment{
+        id: "aa-cc",
+        source_route_pattern_id: "rp1",
+        route_id: "1",
+        stop_ids: ["aaa", "bbb", "cc", "dd", "eee", "fff"]
+      }
+
+      assert [
+               %RouteSegment{
+                 id: "rp1-aaa-bbb",
+                 stop_ids: ["aaa", "bbb"],
+                 properties: %{len_3: true}
+               },
+               %RouteSegment{
+                 id: "rp1-bbb-eee",
+                 stop_ids: ["bbb", "cc", "dd", "eee"],
+                 properties: %{len_3: false}
+               },
+               %RouteSegment{
+                 id: "rp1-eee-fff",
+                 stop_ids: ["eee", "fff"],
+                 properties: %{len_3: true}
+               }
+             ] =
+               RouteSegment.split_route_segment(original_segment, :len_3, fn stop_id ->
+                 String.length(stop_id) == 3
+               end)
     end
   end
 

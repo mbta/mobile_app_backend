@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Alert do
+  alias MBTAV3API.Route
   use MBTAV3API.JsonApi.Object
   require Util
   alias MBTAV3API.Alert.ActivePeriod
@@ -68,6 +69,7 @@ defmodule MBTAV3API.Alert do
   @impl JsonApi.Object
   def serialize_filter_value(:activity, value), do: InformedEntity.serialize_activity(value)
   def serialize_filter_value(:lifecycle, value), do: serialize_lifecycle(value)
+  def serialize_filter_value(:route_type, value), do: Route.serialize_type(value)
   def serialize_filter_value(_field, value), do: value
 
   @spec active?(t(), DateTime.t()) :: boolean()
@@ -79,6 +81,24 @@ defmodule MBTAV3API.Alert do
         DateTime.compare(now, ap_end) == :gt -> false
         true -> true
       end
+    end)
+  end
+
+  @spec by_route_and_stop([t()]) :: %{Route.id() => %{Stop.id() => [t()]}}
+  @doc """
+  A nested map of alerts by route_id an stop_id.
+  """
+  def by_route_and_stop(alerts) do
+    alerts
+    |> Enum.flat_map(fn alert ->
+      Enum.map(alert.informed_entity, &{&1.route, &1.stop, alert})
+    end)
+    |> Enum.group_by(fn {route_id, _stop_id, _alert} -> route_id end, fn {_route_id, stop_id,
+                                                                          alert} ->
+      {stop_id, alert}
+    end)
+    |> Map.new(fn {route_id, stop_alerts} ->
+      {route_id, Enum.group_by(stop_alerts, &elem(&1, 0), &elem(&1, 1))}
     end)
   end
 

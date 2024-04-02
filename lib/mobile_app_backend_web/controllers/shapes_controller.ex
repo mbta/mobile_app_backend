@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.ShapesController do
+  alias MBTAV3API.Alert
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
@@ -42,13 +43,17 @@ defmodule MobileAppBackendWeb.ShapesController do
     } =
       fetch_rail_data_for_map()
 
+    %{alerts: alerts} = fetch_rail_alerts()
+    alerts_by_route_and_stop = Alert.by_route_and_stop(alerts)
+
     route_segments =
-      RouteSegment.non_overlapping_segments(
-        route_patterns,
+      route_patterns
+      |> RouteSegment.non_overlapping_segments(
         stops_by_id,
         trips_by_id,
         %{"Green-B" => "Green", "Green-C" => "Green", "Green-D" => "Green", "Green-E" => "Green"}
       )
+      |> Enum.flat_map(&RouteSegment.split_alerting_segments(&1, alerts_by_route_and_stop))
 
     map_friendly_route_shapes =
       MapFriendlyRouteShape.from_segments(
@@ -70,7 +75,8 @@ defmodule MobileAppBackendWeb.ShapesController do
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
-        ]
+        ],
+        include: [:route_patterns]
       )
 
     map_friendly_patterns =
@@ -99,5 +105,15 @@ defmodule MobileAppBackendWeb.ShapesController do
       shapes_by_id: shapes_by_id,
       stops_by_id: stops_by_id
     }
+  end
+
+  defp fetch_rail_alerts do
+    {:ok, %{data: all_rail_alerts}} =
+      Repository.alerts(
+        filter: [route_type: [:light_rail, :heavy_rail, :commuter_rail], datetime: "NOW"]
+      )
+
+    map_impact_effects = MapSet.new([:suspension, :shuttle])
+    %{alerts: Enum.filter(all_rail_alerts, &MapSet.member?(map_impact_effects, &1.effect))}
   end
 end

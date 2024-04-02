@@ -191,6 +191,11 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
         end
       end)
 
+      RepositoryMock
+      |> expect(:alerts, 1, fn _params, _opts ->
+        ok_response([])
+      end)
+
       conn = get(conn, "/api/shapes/map-friendly/rail")
 
       %{"map_friendly_route_shapes" => map_friendly_route_shapes} = json_response(conn, 200)
@@ -200,7 +205,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                  "route_pattern_id" => "red-ashmont",
                  "route_segments" => [
                    %{
-                     "id" => "andrew-savin_hill",
+                     "id" => "red-ashmont-andrew-savin_hill",
                      "source_route_pattern_id" => "red-ashmont",
                      "stop_ids" => ["andrew", "jfk/umass", "savin_hill"]
                    }
@@ -212,7 +217,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                  "route_pattern_id" => "red-braintree",
                  "route_segments" => [
                    %{
-                     "id" => "jfk/umass-north_quincy",
+                     "id" => "red-braintree-jfk/umass-north_quincy",
                      "route_id" => "Red",
                      "source_route_pattern_id" => "red-braintree",
                      "stop_ids" => ["jfk/umass", "north_quincy"]
@@ -220,6 +225,105 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                  ],
                  "color" => "red_color",
                  "shape" => %{"id" => "braintree_shape", "polyline" => "braintree_shape_polyline"}
+               }
+             ] =
+               map_friendly_route_shapes
+    end
+
+    test "returns route segments split into alerting/non-alerting segments",
+         %{conn: conn} do
+      red_route = build(:route, id: "Red", color: "red_color")
+      andrew = build(:stop, id: "andrew", location_type: :station)
+      jfk = build(:stop, id: "jfk/umass", location_type: :station)
+      savin = build(:stop, id: "savin_hill", location_type: :station)
+
+      ashmont_shape = build(:shape, id: "ashmont_shape", polyline: "ashmont_shape_polyline")
+
+      ashmont_trip =
+        build(:trip,
+          id: "ashmont_trip",
+          stop_ids: [andrew.id, jfk.id, savin.id],
+          shape_id: "ashmont_shape"
+        )
+
+      ashmont_rp =
+        build(:route_pattern,
+          id: "red-ashmont",
+          representative_trip_id: ashmont_trip.id,
+          route_id: "Red",
+          canonical: true,
+          typicality: :typical
+        )
+
+      RepositoryMock
+      |> expect(:routes, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:type) do
+          [:light_rail, :heavy_rail, :commuter_rail] ->
+            ok_response([red_route], [
+              ashmont_rp
+            ])
+        end
+      end)
+
+      RepositoryMock
+      |> expect(:trips, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:id) do
+          ["ashmont_trip"] ->
+            ok_response([ashmont_trip], [
+              ashmont_shape,
+              andrew,
+              jfk,
+              savin
+            ])
+        end
+      end)
+
+      RepositoryMock
+      |> expect(:alerts, 1, fn _params, _opts ->
+        ok_response([
+          build(:alert,
+            effect: :shuttle,
+            informed_entity: [
+              %MBTAV3API.Alert.InformedEntity{
+                route: "Red",
+                stop: "jfk/umass"
+              },
+              %MBTAV3API.Alert.InformedEntity{
+                route: "Red",
+                stop: "savin_hill"
+              }
+            ]
+          )
+        ])
+      end)
+
+      conn = get(conn, "/api/shapes/map-friendly/rail")
+
+      %{"map_friendly_route_shapes" => map_friendly_route_shapes} = json_response(conn, 200)
+
+      assert [
+               %{
+                 "route_pattern_id" => "red-ashmont",
+                 "route_segments" => [
+                   %{
+                     "id" => "red-ashmont-andrew-jfk/umass",
+                     "source_route_pattern_id" => "red-ashmont",
+                     "stop_ids" => ["andrew", "jfk/umass"],
+                     "properties" => %{"has_alert" => false}
+                   },
+                   %{
+                     "id" => "red-ashmont-jfk/umass-savin_hill",
+                     "source_route_pattern_id" => "red-ashmont",
+                     "stop_ids" => ["jfk/umass", "savin_hill"],
+                     "properties" => %{"has_alert" => true}
+                   }
+                 ],
+                 "color" => "red_color",
+                 "shape" => %{"id" => "ashmont_shape", "polyline" => "ashmont_shape_polyline"}
                }
              ] =
                map_friendly_route_shapes

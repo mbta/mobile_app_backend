@@ -1,9 +1,9 @@
 defmodule MBTAV3API.AlertTest do
   use ExUnit.Case
 
-  import Mox
-
   alias MBTAV3API.{Alert, JsonApi, Repository}
+  import MobileAppBackend.Factory
+  import Mox
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -184,6 +184,65 @@ defmodule MBTAV3API.AlertTest do
                },
                ~B[2024-02-12 10:20:30]
              )
+    end
+  end
+
+  describe "by_route_and_stop" do
+    test "maps alerts by route and stop" do
+      ol_alert_1 =
+        build(:alert,
+          informed_entity: [
+            %MBTAV3API.Alert.InformedEntity{
+              route: "ol",
+              stop: "north_station"
+            },
+            %MBTAV3API.Alert.InformedEntity{
+              route: "ol",
+              stop: "haymarket"
+            }
+          ]
+        )
+
+      ol_alert_2 =
+        build(:alert,
+          informed_entity: [
+            %MBTAV3API.Alert.InformedEntity{
+              route: "ol",
+              stop: "north_station"
+            }
+          ]
+        )
+
+      gl_alert =
+        build(:alert,
+          informed_entity: [
+            %MBTAV3API.Alert.InformedEntity{
+              route: "gl-d",
+              stop: "north_station"
+            },
+            %MBTAV3API.Alert.InformedEntity{
+              route: "gl-d",
+              stop: "haymarket"
+            },
+            %MBTAV3API.Alert.InformedEntity{
+              route: "gl-d",
+              stop: "gov_center"
+            }
+          ]
+        )
+
+      assert %{
+               "ol" => %{
+                 "north_station" => [^ol_alert_1, ^ol_alert_2],
+                 "haymarket" => [^ol_alert_1]
+               },
+               "gl-d" => %{
+                 "north_station" => [^gl_alert],
+                 "haymarket" => [^gl_alert],
+                 "gov_center" => [^gl_alert]
+               }
+             } =
+               Alert.by_route_and_stop([ol_alert_1, ol_alert_2, gl_alert])
     end
   end
 

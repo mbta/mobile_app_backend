@@ -22,7 +22,16 @@ defmodule MobileAppBackend.RouteSegment do
           id: String.t(),
           source_route_pattern_id: RoutePattern.id(),
           route_id: Route.id(),
-          stop_ids: [Stop.id()]
+          stop_ids: [Stop.id()],
+          properties: %{atom() => any()}
+        }
+
+  @type t(properties) :: %__MODULE__{
+          id: String.t(),
+          source_route_pattern_id: RoutePattern.id(),
+          route_id: Route.id(),
+          stop_ids: [Stop.id()],
+          properties: properties
         }
 
   @typep route_pattern_with_stops :: %{
@@ -32,7 +41,7 @@ defmodule MobileAppBackend.RouteSegment do
          }
 
   @derive Jason.Encoder
-  defstruct [:id, :source_route_pattern_id, :route_id, :stop_ids]
+  defstruct [:id, :source_route_pattern_id, :route_id, :stop_ids, properties: %{}]
 
   @spec non_overlapping_segments(
           [RoutePattern.t()],
@@ -108,12 +117,18 @@ defmodule MobileAppBackend.RouteSegment do
 
   @spec stop_segment_to_route_segment(route_pattern_with_stops(), [Stop.t()]) :: t()
   defp stop_segment_to_route_segment(route_pattern, stop_segment) do
+    stop_ids = Enum.map(stop_segment, & &1.id)
+
     %__MODULE__{
-      id: "#{List.first(stop_segment).id}-#{List.last(stop_segment).id}",
+      id: id(route_pattern.id, stop_ids),
       source_route_pattern_id: route_pattern.id,
       route_id: route_pattern.route_id,
-      stop_ids: Enum.map(stop_segment, & &1.id)
+      stop_ids: stop_ids
     }
+  end
+
+  defp id(route_pattern_id, stop_ids) do
+    "#{route_pattern_id}-#{List.first(stop_ids)}-#{List.last(stop_ids)}"
   end
 
   @spec unseen_stop_segments(route_pattern_with_stops(), MapSet.t(Stop.id())) :: [
@@ -136,6 +151,38 @@ defmodule MobileAppBackend.RouteSegment do
       |> Enum.map(fn {_is_overlapping_segment, stops} -> stops end)
 
     new_segments
+  end
+
+  @spec split_alerting_segments(t(), %{Route.id() => %{Stop.id() => [Alert.t()]}}) :: [
+          t(%{has_alert: boolean()})
+        ]
+  @doc """
+  Split a route segment into smaller alerting / non-alerting segments. Alerting segments
+  are determined the presence of alerts for the segment's  route at each stop in the segment.
+  """
+  def split_alerting_segments(segment, alerts_by_route_and_stop) do
+    alerts_by_stop = Map.get(alerts_by_route_and_stop, segment.route_id, %{})
+
+    split_route_segment(segment, :has_alert, fn stop_id ->
+      Map.has_key?(alerts_by_stop, stop_id)
+    end)
+  end
+
+  @spec split_route_segment(t(), atom(), (String.t() -> any())) :: [t()]
+  @doc """
+  Split a route segment into multiple segments based on the evaluation of the `condition_eval_fn`.
+  """
+  def split_route_segment(segment, property_name, condition_eval_fn) do
+    stop_id_segments = segment_stops_including_boundary(segment.stop_ids, condition_eval_fn)
+
+    Enum.map(stop_id_segments, fn {condition, stop_ids} ->
+      %__MODULE__{
+        segment
+        | id: id(segment.source_route_pattern_id, stop_ids),
+          stop_ids: stop_ids,
+          properties: Map.put(segment.properties, property_name, condition)
+      }
+    end)
   end
 
   @spec segment_stops_including_boundary([Stop.t()], (Stop.t() -> any())) :: [
