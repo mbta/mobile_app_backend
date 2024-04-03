@@ -25,7 +25,7 @@ defmodule MobileAppBackend.RouteSegment do
           source_route_pattern_id: RoutePattern.id(),
           source_route_id: Route.id(),
           stop_ids: [Stop.id()],
-          stop_id_to_route_patterns: %{Stop.id() => route_pattern_key()}
+          other_patterns_by_stop_id: %{Stop.id() => route_pattern_key()}
         }
 
   @typep route_pattern_with_stops :: %{
@@ -40,7 +40,7 @@ defmodule MobileAppBackend.RouteSegment do
     :source_route_pattern_id,
     :source_route_id,
     :stop_ids,
-    :stop_id_to_route_patterns
+    other_patterns_by_stop_id: %{}
   ]
 
   @spec non_overlapping_segments(
@@ -133,12 +133,28 @@ defmodule MobileAppBackend.RouteSegment do
           Stop.id() => route_pattern_key()
         }) :: t()
   defp stop_segment_to_route_segment(route_pattern, stop_segment, stop_id_to_route_patterns) do
+    source_route_pattern_id = route_pattern.id
+    source_route_id = route_pattern.route_id
+
+    other_patterns_by_stop_id =
+      stop_id_to_route_patterns
+      |> Enum.map(fn {stop_id, rp_keys} ->
+        {stop_id,
+         Enum.filter(
+           rp_keys,
+           &(&1.route_pattern_id != source_route_pattern_id &&
+               &1.route_id != source_route_pattern_id)
+         )}
+      end)
+      |> Enum.reject(fn {_stop_id, rp_keys} -> rp_keys == [] end)
+      |> Map.new()
+
     %__MODULE__{
       id: "#{List.first(stop_segment).id}-#{List.last(stop_segment).id}",
-      source_route_pattern_id: route_pattern.id,
-      source_route_id: route_pattern.route_id,
+      source_route_pattern_id: source_route_pattern_id,
+      source_route_id: source_route_id,
       stop_ids: Enum.map(stop_segment, & &1.id),
-      stop_id_to_route_patterns: stop_id_to_route_patterns
+      other_patterns_by_stop_id: other_patterns_by_stop_id
     }
   end
 

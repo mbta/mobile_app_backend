@@ -57,17 +57,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-ashmont",
                  source_route_id: "Red",
                  stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id],
-                 stop_id_to_route_patterns: %{
+                 other_patterns_by_stop_id: %{
                    "andrew" => [
-                     %{route_id: "Red", route_pattern_id: "red-ashmont"},
                      %{route_id: "Red", route_pattern_id: "red-braintree"}
                    ],
-                   "fields_corner" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}],
                    "jfk/umass" => [
-                     %{route_id: "Red", route_pattern_id: "red-ashmont"},
                      %{route_id: "Red", route_pattern_id: "red-braintree"}
-                   ],
-                   "savin_hill" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}]
+                   ]
                  }
                },
                %RouteSegment{
@@ -75,10 +71,7 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-braintree",
                  source_route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id],
-                 stop_id_to_route_patterns: %{
-                   "north_quincy" => [%{route_id: "Red", route_pattern_id: "red-braintree"}],
-                   "wollaston" => [%{route_id: "Red", route_pattern_id: "red-braintree"}]
-                 }
+                 other_patterns_by_stop_id: %{}
                }
              ] == route_segments
     end
@@ -126,24 +119,14 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "haverhill-rp",
                  source_route_id: "CR-Haverhill",
                  stop_ids: [oak_grove.id, malden_center.id, north_station.id],
-                 stop_id_to_route_patterns: %{
-                   "malden" => [%{route_id: "CR-Haverhill", route_pattern_id: "haverhill-rp"}],
-                   "north_station" => [
-                     %{route_id: "CR-Haverhill", route_pattern_id: "haverhill-rp"}
-                   ],
-                   "oak_grove" => [%{route_id: "CR-Haverhill", route_pattern_id: "haverhill-rp"}]
-                 }
+                 other_patterns_by_stop_id: %{}
                },
                %RouteSegment{
                  id: "oak_grove-wellington",
                  source_route_pattern_id: "ol-rp",
                  source_route_id: "Orange",
                  stop_ids: [oak_grove.id, malden_center.id, wellington.id],
-                 stop_id_to_route_patterns: %{
-                   "malden" => [%{route_id: "Orange", route_pattern_id: "ol-rp"}],
-                   "oak_grove" => [%{route_id: "Orange", route_pattern_id: "ol-rp"}],
-                   "wellington" => [%{route_id: "Orange", route_pattern_id: "ol-rp"}]
-                 }
+                 other_patterns_by_stop_id: %{}
                }
              ] == route_segments
     end
@@ -194,16 +177,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "green_d_rp",
                  source_route_id: "Green-D",
                  stop_ids: [arlington.id, copley.id, hynes.id],
-                 stop_id_to_route_patterns: %{
+                 other_patterns_by_stop_id: %{
                    "arlington" => [
-                     %{route_id: "Green-D", route_pattern_id: "green_d_rp"},
                      %{route_id: "Green-E", route_pattern_id: "green_e_rp"}
                    ],
                    "copley" => [
-                     %{route_id: "Green-D", route_pattern_id: "green_d_rp"},
                      %{route_id: "Green-E", route_pattern_id: "green_e_rp"}
-                   ],
-                   "hynes" => [%{route_id: "Green-D", route_pattern_id: "green_d_rp"}]
+                   ]
                  }
                },
                %RouteSegment{
@@ -211,9 +191,7 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "green_e_rp",
                  source_route_id: "Green-E",
                  stop_ids: [copley.id, prudential.id],
-                 stop_id_to_route_patterns: %{
-                   "prudential" => [%{route_id: "Green-E", route_pattern_id: "green_e_rp"}]
-                 }
+                 other_patterns_by_stop_id: %{}
                }
              ] == route_segments
     end
@@ -248,17 +226,13 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-ashmont",
                  source_route_id: "Red",
                  stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id],
-                 stop_id_to_route_patterns: %{
+                 other_patterns_by_stop_id: %{
                    "andrew" => [
-                     %{route_id: "Red", route_pattern_id: "red-ashmont"},
                      %{route_id: "Red", route_pattern_id: "red-braintree"}
                    ],
-                   "fields_corner" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}],
                    "jfk/umass" => [
-                     %{route_id: "Red", route_pattern_id: "red-ashmont"},
                      %{route_id: "Red", route_pattern_id: "red-braintree"}
-                   ],
-                   "savin_hill" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}]
+                   ]
                  }
                },
                %RouteSegment{
@@ -266,10 +240,7 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-braintree",
                  source_route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id],
-                 stop_id_to_route_patterns: %{
-                   "north_quincy" => [%{route_id: "Red", route_pattern_id: "red-braintree"}],
-                   "wollaston" => [%{route_id: "Red", route_pattern_id: "red-braintree"}]
-                 }
+                 other_patterns_by_stop_id: %{}
                }
              ] == route_segments
     end

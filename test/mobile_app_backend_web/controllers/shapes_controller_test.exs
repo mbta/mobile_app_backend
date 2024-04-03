@@ -204,17 +204,12 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "id" => "andrew-savin_hill",
                      "source_route_pattern_id" => "red-ashmont",
                      "stop_ids" => ["andrew", "jfk/umass", "savin_hill"],
-                     "stop_id_to_route_patterns" => %{
+                     "other_patterns_by_stop_id" => %{
                        "andrew" => [
-                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"},
                          %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
                        ],
                        "jfk/umass" => [
-                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"},
                          %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
-                       ],
-                       "savin_hill" => [
-                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"}
                        ]
                      }
                    }
@@ -230,11 +225,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "source_route_id" => "Red",
                      "source_route_pattern_id" => "red-braintree",
                      "stop_ids" => ["jfk/umass", "north_quincy"],
-                     "stop_id_to_route_patterns" => %{
-                       "north_quincy" => [
-                         %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
-                       ]
-                     }
+                     "other_patterns_by_stop_id" => %{}
                    }
                  ],
                  "shape" => %{"id" => "braintree_shape", "polyline" => "braintree_shape_polyline"}
