@@ -92,7 +92,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
 
     test "returns route segments for the most canonical direction 0 route patterns with the associated shape",
          %{conn: conn} do
-      red_route = build(:route, id: "Red", color: "red_color")
+      red_route = build(:route, id: "Red")
       andrew = build(:stop, id: "andrew", location_type: :station)
       jfk = build(:stop, id: "jfk/umass", location_type: :station)
 
@@ -197,7 +197,8 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
 
       assert [
                %{
-                 "route_pattern_id" => "red-ashmont",
+                 "source_route_pattern_id" => "red-ashmont",
+                 "source_route_id" => "Red",
                  "route_segments" => [
                    %{
                      "id" => "andrew-savin_hill",
@@ -218,15 +219,15 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      }
                    }
                  ],
-                 "color" => "red_color",
                  "shape" => %{"id" => "ashmont_shape", "polyline" => "ashmont_shape_polyline"}
                },
                %{
-                 "route_pattern_id" => "red-braintree",
+                 "source_route_pattern_id" => "red-braintree",
+                 "source_route_id" => "Red",
                  "route_segments" => [
                    %{
                      "id" => "jfk/umass-north_quincy",
-                     "route_id" => "Red",
+                     "source_route_id" => "Red",
                      "source_route_pattern_id" => "red-braintree",
                      "stop_ids" => ["jfk/umass", "north_quincy"],
                      "stop_id_to_route_patterns" => %{
@@ -236,7 +237,6 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      }
                    }
                  ],
-                 "color" => "red_color",
                  "shape" => %{"id" => "braintree_shape", "polyline" => "braintree_shape_polyline"}
                }
              ] =

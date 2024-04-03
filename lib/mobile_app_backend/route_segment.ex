@@ -23,7 +23,7 @@ defmodule MobileAppBackend.RouteSegment do
   @type t :: %__MODULE__{
           id: String.t(),
           source_route_pattern_id: RoutePattern.id(),
-          route_id: Route.id(),
+          source_route_id: Route.id(),
           stop_ids: [Stop.id()],
           stop_id_to_route_patterns: %{Stop.id() => route_pattern_key()}
         }
@@ -35,7 +35,13 @@ defmodule MobileAppBackend.RouteSegment do
          }
 
   @derive Jason.Encoder
-  defstruct [:id, :source_route_pattern_id, :route_id, :stop_ids, :stop_id_to_route_patterns]
+  defstruct [
+    :id,
+    :source_route_pattern_id,
+    :source_route_id,
+    :stop_ids,
+    :stop_id_to_route_patterns
+  ]
 
   @spec non_overlapping_segments(
           [RoutePattern.t()],
@@ -130,7 +136,7 @@ defmodule MobileAppBackend.RouteSegment do
     %__MODULE__{
       id: "#{List.first(stop_segment).id}-#{List.last(stop_segment).id}",
       source_route_pattern_id: route_pattern.id,
-      route_id: route_pattern.route_id,
+      source_route_id: route_pattern.route_id,
       stop_ids: Enum.map(stop_segment, & &1.id),
       stop_id_to_route_patterns: stop_id_to_route_patterns
     }
