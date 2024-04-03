@@ -202,7 +202,20 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                    %{
                      "id" => "andrew-savin_hill",
                      "source_route_pattern_id" => "red-ashmont",
-                     "stop_ids" => ["andrew", "jfk/umass", "savin_hill"]
+                     "stop_ids" => ["andrew", "jfk/umass", "savin_hill"],
+                     "stop_id_to_route_patterns" => %{
+                       "andrew" => [
+                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"},
+                         %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
+                       ],
+                       "jfk/umass" => [
+                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"},
+                         %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
+                       ],
+                       "savin_hill" => [
+                         %{"route_id" => "Red", "route_pattern_id" => "red-ashmont"}
+                       ]
+                     }
                    }
                  ],
                  "color" => "red_color",
@@ -215,7 +228,12 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                      "id" => "jfk/umass-north_quincy",
                      "route_id" => "Red",
                      "source_route_pattern_id" => "red-braintree",
-                     "stop_ids" => ["jfk/umass", "north_quincy"]
+                     "stop_ids" => ["jfk/umass", "north_quincy"],
+                     "stop_id_to_route_patterns" => %{
+                       "north_quincy" => [
+                         %{"route_id" => "Red", "route_pattern_id" => "red-braintree"}
+                       ]
+                     }
                    }
                  ],
                  "color" => "red_color",
