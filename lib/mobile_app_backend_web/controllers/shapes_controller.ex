@@ -70,7 +70,8 @@ defmodule MobileAppBackendWeb.ShapesController do
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
-        ]
+        ],
+  include: [:route_patterns]
       )
 
     map_friendly_patterns =
