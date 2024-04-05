@@ -35,6 +35,7 @@ defmodule MobileAppBackendWeb.ShapesController do
   def rail_for_map(conn, _params) do
     %{
       route_patterns: route_patterns,
+      routes_by_id: routes_by_id,
       trips_by_id: trips_by_id,
       shapes_by_id: shapes_by_id,
       stops_by_id: stops_by_id
@@ -50,12 +51,17 @@ defmodule MobileAppBackendWeb.ShapesController do
       )
 
     map_friendly_route_shapes =
-      MapFriendlyRouteShape.from_segments(
-        route_segments,
+      route_segments
+      |> MapFriendlyRouteShape.from_segments(
         Map.new(route_patterns, &{&1.id, &1}),
         trips_by_id,
         shapes_by_id
       )
+      |> Enum.group_by(& &1.source_route_id)
+      |> Enum.map(fn {route_id, route_shapes} ->
+        %{route_id: route_id, route_shapes: route_shapes}
+      end)
+      |> Enum.sort_by(&Map.fetch!(routes_by_id, &1.route_id).sort_order)
 
     json(conn, %{
       map_friendly_route_shapes: map_friendly_route_shapes
@@ -64,7 +70,7 @@ defmodule MobileAppBackendWeb.ShapesController do
 
   # Get the rail patterns & shapes most relevant for display on a map in a single direction
   defp fetch_rail_data_for_map do
-    {:ok, %{included: %{route_patterns: route_patterns_by_id}}} =
+    {:ok, %{data: routes, included: %{route_patterns: route_patterns_by_id}}} =
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
@@ -93,6 +99,7 @@ defmodule MobileAppBackendWeb.ShapesController do
 
     %{
       route_patterns: map_friendly_patterns,
+      routes_by_id: Map.new(routes, &{&1.id, &1}),
       trips_by_id: Map.new(trips, &{&1.id, &1}),
       shapes_by_id: shapes_by_id,
       stops_by_id: stops_by_id
