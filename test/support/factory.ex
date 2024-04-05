@@ -86,6 +86,7 @@ defmodule MobileAppBackend.Factory do
   def trip_factory do
     %MBTAV3API.Trip{
       id: Uniq.UUID.uuid7(),
+      direction_id: 0,
       headsign: "Harvard via Allston"
     }
   end
