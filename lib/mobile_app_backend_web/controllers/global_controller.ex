@@ -28,7 +28,7 @@ defmodule MobileAppBackendWeb.GlobalController do
         filter: [
           location_type: [:stop, :station]
         ],
-        include: [:parent_station]
+        include: [:child_stops, :parent_station]
       )
 
     Map.new(stops, &{&1.id, &1})
