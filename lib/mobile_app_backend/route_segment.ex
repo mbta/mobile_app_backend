@@ -25,7 +25,7 @@ defmodule MobileAppBackend.RouteSegment do
           source_route_pattern_id: RoutePattern.id(),
           source_route_id: Route.id(),
           stop_ids: [Stop.id()],
-          other_patterns_by_stop_id: %{Stop.id() => route_pattern_key()}
+          other_patterns_by_stop_id: %{Stop.id() => [route_pattern_key()]}
         }
 
   @typep route_pattern_with_stops :: %{

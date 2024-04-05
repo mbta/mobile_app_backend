@@ -64,7 +64,7 @@ defmodule MobileAppBackendWeb.ShapesController do
 
   # Get the rail patterns & shapes most relevant for display on a map in a single direction
   defp fetch_rail_data_for_map do
-    {:ok, %{data: _routes, included: %{route_patterns: route_patterns_by_id}}} =
+    {:ok, %{included: %{route_patterns: route_patterns_by_id}}} =
       Repository.routes(
         filter: [
           type: [:light_rail, :heavy_rail, :commuter_rail]
