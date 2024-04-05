@@ -28,11 +28,14 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
         ) :: [t()]
   @doc """
   Group a list of route segments by their source route pattern and include the associated
-  route shape
+  route shape. Returned in ascending route pattern sort order.
   """
   def from_segments(all_segments, route_patterns_by_id, trips_by_id, shapes_by_id) do
     all_segments
     |> Enum.group_by(&{&1.source_route_pattern_id, &1.source_route_id})
+    |> Enum.sort_by(fn {{source_route_pattern_id, _route_id}, _segments} ->
+      Map.fetch!(route_patterns_by_id, source_route_pattern_id).sort_order
+    end)
     |> Enum.map(fn {{source_route_pattern_id, source_route_id}, route_segments} ->
       trip_id = Map.fetch!(route_patterns_by_id, source_route_pattern_id).representative_trip_id
       shape_id = Map.fetch!(trips_by_id, trip_id).shape_id
