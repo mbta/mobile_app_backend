@@ -7,14 +7,11 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
 
   describe "non_overlapping_segments/3" do
     test "groups route segments by route_pattern id and associates with shape" do
-      rl = build(:route, id: "RL", color: "red_color")
-      ol = build(:route, id: "OL", color: "orange_color")
-
       %{stop_ids: rp1_segment1_stop_ids} =
         rp1_segment1 = %RouteSegment{
           id: "rp1s1",
           source_route_pattern_id: "rp1",
-          route_id: "RL",
+          source_route_id: "RL",
           stop_ids: ["rp1_segment1_stop1", "rp1_segment1_stop2"]
         }
 
@@ -22,7 +19,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
         rp1_segment2 = %RouteSegment{
           id: "rp1s2",
           source_route_pattern_id: "rp1",
-          route_id: "RL",
+          source_route_id: "RL",
           stop_ids: ["rp1_segment2_stop1", "rp1_segment2_stop2"]
         }
 
@@ -30,12 +27,12 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
         rp2_segment1 = %RouteSegment{
           id: "rp2s1",
           source_route_pattern_id: "rp2",
-          route_id: "OL",
+          source_route_id: "OL",
           stop_ids: ["rp2_segment1_stop1", "rp2_segment1_stop2"]
         }
 
-      rp1 = build(:route_pattern, %{id: "rp1", representative_trip_id: "rp1_trip"})
-      rp2 = build(:route_pattern, %{id: "rp2", representative_trip_id: "rp2_trip"})
+      rp1 = build(:route_pattern, %{id: "rp1", representative_trip_id: "rp1_trip", sort_order: 2})
+      rp2 = build(:route_pattern, %{id: "rp2", representative_trip_id: "rp2_trip", sort_order: 1})
 
       rp1_trip = build(:trip, %{id: "rp1_trip", shape_id: "rp1_shape"})
       rp2_trip = build(:trip, %{id: "rp2_trip", shape_id: "rp2_shape"})
@@ -45,25 +42,25 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
 
       assert [
                %MapFriendlyRouteShape{
-                 route_pattern_id: "rp1",
+                 source_route_pattern_id: "rp2",
+                 source_route_id: "OL",
+                 shape: ^rp2_shape,
+                 route_segments: [
+                   %{
+                     stop_ids: ^rp2_segment1_stop_ids
+                   }
+                 ]
+               },
+               %MapFriendlyRouteShape{
+                 source_route_pattern_id: "rp1",
+                 source_route_id: "RL",
                  shape: ^rp1_shape,
-                 color: "red_color",
                  route_segments: [
                    %{
                      stop_ids: ^rp1_segment1_stop_ids
                    },
                    %{
                      stop_ids: ^rp1_segment2_stop_ids
-                   }
-                 ]
-               },
-               %MapFriendlyRouteShape{
-                 route_pattern_id: "rp2",
-                 shape: ^rp2_shape,
-                 color: "orange_color",
-                 route_segments: [
-                   %{
-                     stop_ids: ^rp2_segment1_stop_ids
                    }
                  ]
                }
@@ -74,7 +71,6 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                    rp1.id => rp1,
                    rp2.id => rp2
                  },
-                 %{rl.id => rl, ol.id => ol},
                  %{
                    rp1_trip.id => rp1_trip,
                    rp2_trip.id => rp2_trip
