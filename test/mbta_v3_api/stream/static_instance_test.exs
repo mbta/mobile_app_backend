@@ -21,7 +21,7 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
                   [
                     [
                       url:
-                        "http://example.net/trips?fields%5Bshape%5D=polyline&fields%5Btrip%5D=headsign&filter%5Bdate%5D=2024-03-14&include=shape",
+                        "http://example.net/trips?fields%5Bshape%5D=polyline&fields%5Btrip%5D=direction_id%2Cheadsign&filter%5Bdate%5D=2024-03-14&include=shape",
                       headers: [{"x-api-key", "931"}],
                       destination: "some:topic",
                       type: MBTAV3API.Trip,

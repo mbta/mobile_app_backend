@@ -7,6 +7,7 @@ defmodule MBTAV3API.TripTest do
   test "parse/1" do
     assert %Trip{
              id: "60451275",
+             direction_id: 0,
              headsign: "Wakefield Ave",
              route_pattern_id: "24-2-0",
              stop_ids: ["334", "536"]
@@ -14,6 +15,7 @@ defmodule MBTAV3API.TripTest do
              Trip.parse(%JsonApi.Item{
                id: "60451275",
                attributes: %{
+                 "direction_id" => 0,
                  "headsign" => "Wakefield Ave"
                },
                relationships: %{

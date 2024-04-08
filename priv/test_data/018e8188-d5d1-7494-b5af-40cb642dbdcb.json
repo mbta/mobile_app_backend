@@ -137,27 +137,11 @@
         "route_patterns": {
           "data": [
             {
-              "id": "Orange-2-0",
-              "type": "route_pattern"
-            },
-            {
-              "id": "Orange-2-1",
-              "type": "route_pattern"
-            },
-            {
               "id": "Orange-3-0",
               "type": "route_pattern"
             },
             {
               "id": "Orange-3-1",
-              "type": "route_pattern"
-            },
-            {
-              "id": "Orange-7-0",
-              "type": "route_pattern"
-            },
-            {
-              "id": "Orange-7-1",
               "type": "route_pattern"
             },
             {
@@ -1489,6 +1473,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Fairmount-C1-1",
@@ -1693,34 +1678,6 @@
     },
     {
       "attributes": {
-        "canonical": false,
-        "direction_id": 1,
-        "name": "Forest Hills - Jackson Square",
-        "sort_order": 100201050,
-        "typicality": 3
-      },
-      "id": "Orange-2-1",
-      "links": {
-        "self": "/route_patterns/Orange-2-1"
-      },
-      "relationships": {
-        "representative_trip": {
-          "data": {
-            "id": "61209248",
-            "type": "trip"
-          }
-        },
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        }
-      },
-      "type": "route_pattern"
-    },
-    {
-      "attributes": {
         "latitude": 41.897943,
         "location_type": 0,
         "longitude": -71.354621,
@@ -1877,6 +1834,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Rockport"
       },
       "id": "RDGFX655062-1101-NorthSwampscottExtendDynamic",
@@ -1981,6 +1939,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Wonderland"
       },
       "id": "canonical-Blue-C1-1",
@@ -2069,6 +2028,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Needham Heights"
       },
       "id": "AMTKSchCh651156-635",
@@ -2237,6 +2197,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Alewife"
       },
       "id": "canonical-Red-C2-1",
@@ -2437,6 +2398,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628005-534-1",
@@ -2581,6 +2543,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "AMTKSchCh651121-749",
@@ -2725,6 +2688,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wachusett"
       },
       "id": "CR-627743-423",
@@ -2871,6 +2835,76 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
+        "headsign": "Middleborough/Lakeville"
+      },
+      "id": "OCEA656292-027-18:00-19:00-19:30-MDLBrainSouthDynamicMDLBrainSouthDynamic2",
+      "links": {
+        "self": "/trips/OCEA656292-027-18%3A00-19%3A00-19%3A30-MDLBrainSouthDynamicMDLBrainSouthDynamic2"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Middleborough",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Middleborough-92c25d3b-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FLL 23-S-Wdy-20-5f2aa7f7",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9800002",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "MM-0109-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0150-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0186-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0200-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0219-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0277-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0356-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651141-723",
@@ -2975,6 +3009,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Reservoir"
       },
       "id": "61805109",
@@ -3189,62 +3224,6 @@
     },
     {
       "attributes": {
-        "headsign": "Jackson Square"
-      },
-      "id": "61209248",
-      "links": {
-        "self": "/trips/61209248"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "Orange-2-1",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "RTL12024-hmo14nj1-Weekday-01",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "56590001",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "70001",
-              "type": "stop"
-            },
-            {
-              "id": "70003",
-              "type": "stop"
-            },
-            {
-              "id": "70005",
-              "type": "stop"
-            },
-            {
-              "id": "70007",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
         "latitude": 42.346007,
         "location_type": 0,
         "longitude": -71.107166,
@@ -3309,6 +3288,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651132-733",
@@ -3565,6 +3545,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "AMTKSchCh651123-747",
@@ -3653,6 +3634,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651116-754",
@@ -3899,6 +3881,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Cleveland Circle"
       },
       "id": "60564111",
@@ -4157,6 +4140,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wickford Junction"
       },
       "id": "AMTKSchCh651479-837",
@@ -4249,6 +4233,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Stoughton"
       },
       "id": "AMTKSchCh651054-875",
@@ -4539,6 +4524,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-628006-533-1",
@@ -4855,6 +4841,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Medford/Tufts"
       },
       "id": "canonical-Green-E-C1-1",
@@ -5023,6 +5010,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Ashmont"
       },
       "id": "canonical-Red-C2-0",
@@ -5163,6 +5151,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Riverside"
       },
       "id": "60564601",
@@ -5411,6 +5400,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Alewife"
       },
       "id": "canonical-Red-C1-1",
@@ -5786,7 +5776,7 @@
       "relationships": {
         "representative_trip": {
           "data": {
-            "id": "OCEA656295-028-19:30-MDLBrainSouthDynamic0",
+            "id": "OCEA656295-028-18:00-19:00-19:30-MDLBrainSouthDynamicMDLBrainSouthDynamic0",
             "type": "trip"
           }
         },
@@ -5865,6 +5855,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628011-528-1",
@@ -6129,6 +6120,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wickford Junction"
       },
       "id": "canonical-CR-Providence-C1-0",
@@ -6303,74 +6295,6 @@
     },
     {
       "attributes": {
-        "headsign": "Middleborough/Lakeville"
-      },
-      "id": "OCEA656292-027-19:30-MDLBrainSouthDynamic2",
-      "links": {
-        "self": "/trips/OCEA656292-027-19%3A30-MDLBrainSouthDynamic2"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "CR-Middleborough",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "CR-Middleborough-92c25d3b-0",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "Fall/WinterWeekday",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "9800002",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "MM-0109-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0150-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0186-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0200-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0219-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0277-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0356-S",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
         "latitude": 42.209964,
         "location_type": 0,
         "longitude": -71.001088,
@@ -6477,6 +6401,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "NHMLConstruction657776-300",
@@ -6609,6 +6534,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "AMTKSchCh651117-753",
@@ -6739,6 +6665,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628017-522-1",
@@ -6839,6 +6766,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Needham Heights"
       },
       "id": "AMTKSchCh651159-631",
@@ -6987,6 +6915,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651130-735",
@@ -7263,6 +7192,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "AMTKSchCh651111-759",
@@ -7395,6 +7325,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wickford Junction"
       },
       "id": "AMTKSchCh651076-833",
@@ -7515,6 +7446,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-627999-541-1",
@@ -7691,6 +7623,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Franklin-C2-1",
@@ -7903,6 +7836,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651135-730",
@@ -8069,6 +8003,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wachusett"
       },
       "id": "canonical-CR-Fitchburg-C1-0",
@@ -8517,6 +8452,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Needham Heights"
       },
       "id": "AMTKSchCh651179-611",
@@ -8693,6 +8629,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-627756-482",
@@ -8813,6 +8750,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Rockport"
       },
       "id": "CR-649341-103",
@@ -8949,6 +8887,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Framingham"
       },
       "id": "CR-627988-595-1",
@@ -9041,6 +8980,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-627663-280",
@@ -9391,6 +9331,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Swampscott"
       },
       "id": "RDGFX655064-1150-NorthSwampscottExtendDynamic",
@@ -9619,74 +9560,6 @@
     },
     {
       "attributes": {
-        "headsign": "Kingston"
-      },
-      "id": "CR-628066-067",
-      "links": {
-        "self": "/trips/CR-628066-067"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "CR-Kingston",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "CR-Kingston-7014db43-0",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "FALL 2023-SOUTHWKD-Weekday-1-Sc9a3b080",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "9790002",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "MM-0109-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0158-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0194-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0212-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0245-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0281-S",
-              "type": "stop"
-            },
-            {
-              "id": "KB-0351-S",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
         "latitude": 42.340053,
         "location_type": 0,
         "longitude": -71.128869,
@@ -9796,7 +9669,7 @@
       "relationships": {
         "representative_trip": {
           "data": {
-            "id": "CR-628067-066",
+            "id": "OCEA656291-060-19:30-KNGBrainSouthDynamic",
             "type": "trip"
           }
         },
@@ -9941,6 +9814,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Providence"
       },
       "id": "AMTKSchCh651074-835",
@@ -10021,6 +9895,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651166-624",
@@ -10141,6 +10016,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651136-729",
@@ -10397,6 +10273,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Cleveland Circle"
       },
       "id": "canonical-Green-C-C1-0",
@@ -10645,16 +10522,6 @@
     },
     {
       "attributes": {
-        "polyline": "an_bG|_xpLpBPrCZXBTBP@P@~Dd@dANlATjBd@tDhALDNDhA\\pIbClGjBz@ZhA\\xA`@XJpBl@??ZHpBn@HBfHvBfF~AhDbApA\\bAVND`Er@nALvCVfBLfFDb@?dBAjCEfB?pFDrHF~HFfB?vAC~FFpQJpB?|C@P?`B?V?X?vAHfEFL@f@BpCDH???nDFfABfA?lCBdB@fABnC@|C@tO@`ECfCI??|@ElESdCGdCAzA@pEEdBCnBItAAdBA^AT@nAAd@@`A?VAbC?fABzAD??nBDR?Z@v@@`DKtFCn@AZC`@Gr@Q\\MHEb@MzA{@zJeIlBaBhBoBzA}BlAoBrB_EVw@r@oBvAiE??DId@cBxCkGpGmK@Cda@o_@PO"
-      },
-      "id": "40460002",
-      "links": {
-        "self": "/shapes/40460002"
-      },
-      "type": "shape"
-    },
-    {
-      "attributes": {
         "latitude": 42.084659,
         "location_type": 0,
         "longitude": -71.016534,
@@ -10710,7 +10577,7 @@
       "relationships": {
         "representative_trip": {
           "data": {
-            "id": "CR-628066-067",
+            "id": "OCEA656293-063-19:30-KNGBrainSouthDynamic2",
             "type": "trip"
           }
         },
@@ -10725,6 +10592,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Rockport"
       },
       "id": "CR-649284-123",
@@ -10937,6 +10805,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Littleton/Route 495"
       },
       "id": "CR-627755-481",
@@ -11054,74 +10923,6 @@
         }
       },
       "type": "stop"
-    },
-    {
-      "attributes": {
-        "headsign": "Oak Grove"
-      },
-      "id": "61746558",
-      "links": {
-        "self": "/trips/61746558"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "Orange-7-1",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "RTL12024-hmo14nj1-Weekday-01",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "40460001",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "70027",
-              "type": "stop"
-            },
-            {
-              "id": "70029",
-              "type": "stop"
-            },
-            {
-              "id": "70031",
-              "type": "stop"
-            },
-            {
-              "id": "70279",
-              "type": "stop"
-            },
-            {
-              "id": "70033",
-              "type": "stop"
-            },
-            {
-              "id": "70035",
-              "type": "stop"
-            },
-            {
-              "id": "70036",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
     },
     {
       "attributes": {
@@ -11291,6 +11092,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forest Hills"
       },
       "id": "canonical-Orange-C1-0",
@@ -11503,6 +11305,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651071-838",
@@ -11687,6 +11490,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Reading"
       },
       "id": "CR-627664-281",
@@ -11763,6 +11567,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Haverhill"
       },
       "id": "RDGFX655448-1201-HaverWoburnReadingDyn",
@@ -11933,6 +11738,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Stoughton"
       },
       "id": "canonical-CR-Providence-C2-0",
@@ -12009,16 +11815,6 @@
     },
     {
       "attributes": {
-        "polyline": "{pqaGz~upLQLea@n_@ABqGlKyCjGe@bBCD??yAlEs@nBWv@sB~DmAnB{A|BiBnBmB`B{JdI{Az@c@LID]Ls@Pa@F[Bo@@uFBaDJw@A[AS?qBE??yAEgACcC?W@aA?e@AoA@UA_@@eB@uA@oBHeBBqED{AAeC@eCFmER}@D??gCHaEBuOA}CAoCAgACeBAmCCgA?gACoDG??I?qCEg@CMAgEGwAIY?W?aB?Q?}CAqB?qQK_GGwABgB?_IGsHGqFEgB?kCDeB@c@?gFEgBMwCWoAMaEs@OEcAWqA]iDcAgF_BgHwBICqBo@[I??qBm@YKyAa@iA]{@[mGkBqIcCiA]OEMEuDiAkBe@mAUeAO_Ee@QAQAUCYCsC[qBQ"
-      },
-      "id": "40460001",
-      "links": {
-        "self": "/shapes/40460001"
-      },
-      "type": "shape"
-    },
-    {
-      "attributes": {
         "canonical": false,
         "direction_id": 1,
         "name": "Ruggles - Oak Grove",
@@ -12047,6 +11843,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Government Center"
       },
       "id": "canonical-Green-C-C1-1",
@@ -12195,6 +11992,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651120-750",
@@ -12279,6 +12077,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Providence"
       },
       "id": "AMTKSchCh651478-813",
@@ -12465,6 +12264,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651077-832",
@@ -12587,6 +12387,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "canonical-CR-Lowell-C1-1",
@@ -12659,6 +12460,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Franklin-C1-1",
@@ -12763,6 +12565,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Medford/Tufts"
       },
       "id": "60564597",
@@ -13311,6 +13114,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Braintree"
       },
       "id": "61855115",
@@ -13403,6 +13207,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Stoughton"
       },
       "id": "AMTKSchCh651044-885",
@@ -13535,6 +13340,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Medford/Tufts"
       },
       "id": "60564112",
@@ -13719,6 +13525,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628031-508-1",
@@ -13835,6 +13642,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Newburyport"
       },
       "id": "CR-649275-165",
@@ -14035,6 +13843,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Stoughton"
       },
       "id": "AMTKSchCh651037-893",
@@ -14313,6 +14122,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Providence-C1-1",
@@ -14445,74 +14255,7 @@
     },
     {
       "attributes": {
-        "headsign": "North Station"
-      },
-      "id": "61746428",
-      "links": {
-        "self": "/trips/61746428"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "Orange-7-0",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "RTL12024-hmo14nj1-Weekday-01",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "40460002",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "70036",
-              "type": "stop"
-            },
-            {
-              "id": "70034",
-              "type": "stop"
-            },
-            {
-              "id": "70032",
-              "type": "stop"
-            },
-            {
-              "id": "70278",
-              "type": "stop"
-            },
-            {
-              "id": "70030",
-              "type": "stop"
-            },
-            {
-              "id": "70028",
-              "type": "stop"
-            },
-            {
-              "id": "70026",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "canonical-CR-Haverhill-C1-1",
@@ -14613,6 +14356,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Kingston-C1-1",
@@ -14891,6 +14635,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-628032-507-1",
@@ -15013,6 +14758,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "canonical-CR-Worcester-C1-0",
@@ -15145,34 +14891,6 @@
         "route": {
           "data": {
             "id": "CR-Worcester",
-            "type": "route"
-          }
-        }
-      },
-      "type": "route_pattern"
-    },
-    {
-      "attributes": {
-        "canonical": false,
-        "direction_id": 0,
-        "name": "Jackson Square - Forest Hills",
-        "sort_order": 100200050,
-        "typicality": 3
-      },
-      "id": "Orange-2-0",
-      "links": {
-        "self": "/route_patterns/Orange-2-0"
-      },
-      "relationships": {
-        "representative_trip": {
-          "data": {
-            "id": "61209249",
-            "type": "trip"
-          }
-        },
-        "route": {
-          "data": {
-            "id": "Orange",
             "type": "route"
           }
         }
@@ -15433,6 +15151,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Kingston"
       },
       "id": "canonical-CR-Kingston-C1-0",
@@ -15545,6 +15264,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wickford Junction"
       },
       "id": "AMTKSchCh651100-809",
@@ -15669,6 +15389,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628015-524-1",
@@ -15813,62 +15534,6 @@
     },
     {
       "attributes": {
-        "headsign": "Forest Hills"
-      },
-      "id": "61209249",
-      "links": {
-        "self": "/trips/61209249"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "Orange-2-0",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "RTL12024-hmo14nj1-Weekday-01",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "56590002",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "70006",
-              "type": "stop"
-            },
-            {
-              "id": "70004",
-              "type": "stop"
-            },
-            {
-              "id": "70002",
-              "type": "stop"
-            },
-            {
-              "id": "70001",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
         "latitude": 42.392331,
         "location_type": 0,
         "longitude": -71.077262,
@@ -15901,6 +15566,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651110-760",
@@ -16049,6 +15715,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Union Square"
       },
       "id": "61804876",
@@ -16221,6 +15888,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651140-725",
@@ -16491,6 +16159,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Readville"
       },
       "id": "canonical-CR-Fairmount-C1-0",
@@ -16691,6 +16360,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651085-824",
@@ -16999,6 +16669,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Lowell"
       },
       "id": "NHMLConstruction657881-345",
@@ -17197,74 +16868,7 @@
     },
     {
       "attributes": {
-        "headsign": "Braintree"
-      },
-      "id": "CR-628067-066",
-      "links": {
-        "self": "/trips/CR-628067-066"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "CR-Kingston",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "CR-Kingston-35bb26b3-1",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "FALL 2023-SOUTHWKD-Weekday-1-Sc9a3b080",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "9790001",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "KB-0351-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0281-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0245-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0212-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0194-S",
-              "type": "stop"
-            },
-            {
-              "id": "PB-0158-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0109-S",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
-    },
-    {
-      "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651073-836",
@@ -17353,6 +16957,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651114-756",
@@ -17497,6 +17102,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Oak Grove"
       },
       "id": "canonical-Orange-C1-1",
@@ -17617,6 +17223,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651128-742",
@@ -17985,6 +17592,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-649277-154",
@@ -18185,6 +17793,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Braintree"
       },
       "id": "canonical-Red-C1-0",
@@ -18395,6 +18004,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Greenbush"
       },
       "id": "OCEA656299-093-19:30-GRBBrainSouthDynamic-12",
@@ -18416,7 +18026,7 @@
         },
         "service": {
           "data": {
-            "id": "Fall/WinterWeekday",
+            "id": "FLL 23-S-Wdy-20-Sb7371956-GRBBrnSthDnc",
             "type": "service"
           }
         },
@@ -18467,6 +18077,75 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
+        "headsign": "Braintree"
+      },
+      "id": "OCEA656291-060-19:30-KNGBrainSouthDynamic",
+      "links": {
+        "self": "/trips/OCEA656291-060-19%3A30-KNGBrainSouthDynamic"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Kingston",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Kingston-35bb26b3-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FLL 23-S-Wdy-20-Sc9a3b080-KNGBrnSthDnc",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9790001",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "KB-0351-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0281-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0245-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0212-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0194-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0158-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0109-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {
         "latitude": 42.329552,
         "location_type": 0,
         "longitude": -71.192024,
@@ -18499,6 +18178,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-643509-584-1",
@@ -18623,6 +18303,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-627665-282",
@@ -18961,6 +18642,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Bowdoin"
       },
       "id": "59736724",
@@ -19141,6 +18823,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Oak Grove"
       },
       "id": "60965260",
@@ -19241,6 +18924,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-627991-592-1",
@@ -19353,6 +19037,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Bowdoin"
       },
       "id": "canonical-Blue-C1-0",
@@ -19441,6 +19126,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Framingham"
       },
       "id": "CR-643508-583-1",
@@ -19533,6 +19219,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Quincy"
       },
       "id": "61826625",
@@ -19593,6 +19280,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Lowell"
       },
       "id": "canonical-CR-Lowell-C1-0",
@@ -20049,6 +19737,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Forest Hills"
       },
       "id": "AMTKSchCh651158-632",
@@ -20125,6 +19814,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "canonical-CR-Franklin-C2-0",
@@ -20249,6 +19939,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Boston College"
       },
       "id": "canonical-Green-B-C1-0",
@@ -20487,6 +20178,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Newburyport"
       },
       "id": "canonical-CR-Newburyport-C1-0",
@@ -20709,6 +20401,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Framingham"
       },
       "id": "CR-643510-585-1",
@@ -20817,6 +20510,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Heath Street"
       },
       "id": "60564702",
@@ -20941,6 +20635,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-627642-204",
@@ -21033,6 +20728,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Foxboro"
       },
       "id": "canonical-CR-Foxboro-C2-1",
@@ -21093,6 +20789,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Providence"
       },
       "id": "canonical-CR-Foxboro-C2-0",
@@ -21341,6 +21038,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-649255-198",
@@ -21533,6 +21231,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "canonical-CR-Newburyport-C1-1",
@@ -21621,6 +21320,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Providence-C2-1",
@@ -21927,16 +21627,7 @@
     },
     {
       "attributes": {
-        "polyline": "qzdaGbn`qLiAs@oDwBOKOIm@e@MKiBiAsA_A}CkBwA_A_CsAwCaBeAo@oFwCIEgDiBw@i@i@[}@i@_DeBeAk@QK??a@UYOyCaBwDgB{Ai@_DgA??qA]iBm@eA[wDaASGiA_@uB{@e@UKE??WMmAk@wAu@w@c@iCcBoA}@gDqCwCcC}AiAmA_AwA}@QKg@]SMMG"
-      },
-      "id": "56590001",
-      "links": {
-        "self": "/shapes/56590001"
-      },
-      "type": "shape"
-    },
-    {
-      "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651145-717",
@@ -22538,74 +22229,6 @@
         }
       },
       "type": "stop"
-    },
-    {
-      "attributes": {
-        "headsign": "Braintree"
-      },
-      "id": "OCEA656295-028-19:30-MDLBrainSouthDynamic0",
-      "links": {
-        "self": "/trips/OCEA656295-028-19%3A30-MDLBrainSouthDynamic0"
-      },
-      "relationships": {
-        "route": {
-          "data": {
-            "id": "CR-Middleborough",
-            "type": "route"
-          }
-        },
-        "route_pattern": {
-          "data": {
-            "id": "CR-Middleborough-bb403e6b-1",
-            "type": "route_pattern"
-          }
-        },
-        "service": {
-          "data": {
-            "id": "Fall/WinterWeekday",
-            "type": "service"
-          }
-        },
-        "shape": {
-          "data": {
-            "id": "9800001",
-            "type": "shape"
-          }
-        },
-        "stops": {
-          "data": [
-            {
-              "id": "MM-0356-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0277-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0219-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0200-CS",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0186-CS",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0150-S",
-              "type": "stop"
-            },
-            {
-              "id": "MM-0109-S",
-              "type": "stop"
-            }
-          ]
-        }
-      },
-      "type": "trip"
     },
     {
       "attributes": {
@@ -23365,6 +22988,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651103-806",
@@ -23565,6 +23189,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Stoughton"
       },
       "id": "AMTKSchCh651039-891",
@@ -23791,6 +23416,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Worcester-C1-1",
@@ -23973,34 +23599,7 @@
     },
     {
       "attributes": {
-        "canonical": false,
         "direction_id": 1,
-        "name": "North Station - Oak Grove",
-        "sort_order": 100201060,
-        "typicality": 3
-      },
-      "id": "Orange-7-1",
-      "links": {
-        "self": "/route_patterns/Orange-7-1"
-      },
-      "relationships": {
-        "representative_trip": {
-          "data": {
-            "id": "61746558",
-            "type": "trip"
-          }
-        },
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        }
-      },
-      "type": "route_pattern"
-    },
-    {
-      "attributes": {
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651139-726",
@@ -24097,6 +23696,75 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
+        "headsign": "Braintree"
+      },
+      "id": "OCEA656295-028-18:00-19:00-19:30-MDLBrainSouthDynamicMDLBrainSouthDynamic0",
+      "links": {
+        "self": "/trips/OCEA656295-028-18%3A00-19%3A00-19%3A30-MDLBrainSouthDynamicMDLBrainSouthDynamic0"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Middleborough",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Middleborough-bb403e6b-1",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FLL 23-S-Wdy-20-5f2aa7f7",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9800001",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "MM-0356-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0277-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0219-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0200-CS",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0186-CS",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0150-S",
+              "type": "stop"
+            },
+            {
+              "id": "MM-0109-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
+    },
+    {
+      "attributes": {
         "latitude": 42.339897,
         "location_type": 0,
         "longitude": -71.09021,
@@ -24129,6 +23797,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Haverhill"
       },
       "id": "CR-627655-217",
@@ -24267,6 +23936,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "AMTKSchCh651115-755",
@@ -24483,6 +24153,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651137-728",
@@ -24595,6 +24266,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Heath Street"
       },
       "id": "canonical-Green-E-C1-0",
@@ -24831,6 +24503,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Ashmont"
       },
       "id": "canonical-Mattapan-C1-1",
@@ -25055,6 +24728,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651075-834",
@@ -25893,6 +25567,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-628008-531-1",
@@ -25987,6 +25662,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651143-721",
@@ -26091,6 +25767,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Newburyport"
       },
       "id": "CR-649306-167",
@@ -26743,6 +26420,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628009-530-1",
@@ -26853,6 +26531,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Wickford Junction"
       },
       "id": "AMTKSchCh651086-823",
@@ -27021,6 +26700,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Providence"
       },
       "id": "AMTKSchCh651068-841",
@@ -27161,6 +26841,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651041-888",
@@ -27233,6 +26914,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Middleborough/Lakeville"
       },
       "id": "canonical-CR-Middleborough-C1-0",
@@ -27663,6 +27345,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Rockport"
       },
       "id": "canonical-CR-Newburyport-C2-0",
@@ -27787,6 +27470,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-628010-529-1",
@@ -27931,6 +27615,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "RDGFX655443-1214-HaverWoburnReadingDyn",
@@ -28084,6 +27769,75 @@
         }
       },
       "type": "route_pattern"
+    },
+    {
+      "attributes": {
+        "direction_id": 0,
+        "headsign": "Kingston"
+      },
+      "id": "OCEA656293-063-19:30-KNGBrainSouthDynamic2",
+      "links": {
+        "self": "/trips/OCEA656293-063-19%3A30-KNGBrainSouthDynamic2"
+      },
+      "relationships": {
+        "route": {
+          "data": {
+            "id": "CR-Kingston",
+            "type": "route"
+          }
+        },
+        "route_pattern": {
+          "data": {
+            "id": "CR-Kingston-7014db43-0",
+            "type": "route_pattern"
+          }
+        },
+        "service": {
+          "data": {
+            "id": "FLL 23-S-Wdy-20-Sc9a3b080-KNGBrnSthDnc",
+            "type": "service"
+          }
+        },
+        "shape": {
+          "data": {
+            "id": "9790002",
+            "type": "shape"
+          }
+        },
+        "stops": {
+          "data": [
+            {
+              "id": "MM-0109-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0158-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0194-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0212-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0245-S",
+              "type": "stop"
+            },
+            {
+              "id": "PB-0281-S",
+              "type": "stop"
+            },
+            {
+              "id": "KB-0351-S",
+              "type": "stop"
+            }
+          ]
+        }
+      },
+      "type": "trip"
     },
     {
       "attributes": {
@@ -28457,6 +28211,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Broadway"
       },
       "id": "61825855",
@@ -29199,6 +28954,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Needham Heights"
       },
       "id": "canonical-CR-Needham-C1-0",
@@ -29287,6 +29043,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Riverside"
       },
       "id": "canonical-Green-D-C1-0",
@@ -29561,6 +29318,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Boston College"
       },
       "id": "60564128",
@@ -29821,6 +29579,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651133-732",
@@ -29969,6 +29728,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-627997-582-1",
@@ -30157,6 +29917,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628003-536-1",
@@ -30393,6 +30154,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651112-758",
@@ -30861,6 +30623,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Worcester"
       },
       "id": "CR-628020-519-1",
@@ -30989,6 +30752,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "canonical-CR-Fitchburg-C1-1",
@@ -31157,6 +30921,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Medford/Tufts"
       },
       "id": "60564714",
@@ -31269,6 +31034,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-627730-404",
@@ -31373,6 +31139,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Middleborough-C1-1",
@@ -31541,6 +31308,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Foxboro-C1-1",
@@ -31625,6 +31393,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "canonical-CR-Newburyport-C2-1",
@@ -31915,6 +31684,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Framingham"
       },
       "id": "CR-627987-597-1",
@@ -32049,6 +31819,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Haverhill"
       },
       "id": "canonical-CR-Haverhill-C1-0",
@@ -32241,6 +32012,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Mattapan"
       },
       "id": "canonical-Mattapan-C1-0",
@@ -32313,6 +32085,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651091-818",
@@ -32461,6 +32234,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Newburyport"
       },
       "id": "RDGFX655066-1153-NorthSwampscottExtendDynamic",
@@ -33173,6 +32947,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651038-892",
@@ -33309,6 +33084,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Swampscott"
       },
       "id": "RDGFX655060-1100-NorthSwampscottExtendDynamic",
@@ -33385,6 +33161,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Greenbush-C1-1",
@@ -33517,6 +33294,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651160-630",
@@ -33666,16 +33444,6 @@
         }
       },
       "type": "stop"
-    },
-    {
-      "attributes": {
-        "polyline": "meiaG|u}pLLFRLf@\\PJvA|@lA~@|AhAvCbCfDpCnA|@hCbBv@b@vAt@lAj@VL??JDd@TtBz@hA^RFvD`AdAZhBl@pA\\??~CfAzAh@vDfBxC`BXNb@T??NJdAj@~CdB|@h@h@Zv@h@fDhBHDnFvCdAn@vC`B~BrAvA~@|CjBrA~@hBhALJl@d@NHNJnDvBhAr@"
-      },
-      "id": "56590002",
-      "links": {
-        "self": "/shapes/56590002"
-      },
-      "type": "shape"
     },
     {
       "attributes": {
@@ -33835,6 +33603,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Ruggles"
       },
       "id": "60965143",
@@ -33967,6 +33736,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Union Square"
       },
       "id": "canonical-Green-D-C1-1",
@@ -35341,6 +35111,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Braintree"
       },
       "id": "OCEA656300-094-19:30-GRBBrainSouthDynamic-10",
@@ -35362,7 +35133,7 @@
         },
         "service": {
           "data": {
-            "id": "Fall/WinterWeekday",
+            "id": "FLL 23-S-Wdy-20-Sb7371956-GRBBrnSthDnc",
             "type": "service"
           }
         },
@@ -35592,7 +35363,7 @@
       "relationships": {
         "representative_trip": {
           "data": {
-            "id": "OCEA656292-027-19:30-MDLBrainSouthDynamic2",
+            "id": "OCEA656292-027-18:00-19:00-19:30-MDLBrainSouthDynamicMDLBrainSouthDynamic2",
             "type": "trip"
           }
         },
@@ -35869,6 +35640,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Beverly"
       },
       "id": "CR-649259-197",
@@ -35933,6 +35705,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "canonical-CR-Franklin-C1-0",
@@ -36069,6 +35842,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Greenbush"
       },
       "id": "canonical-CR-Greenbush-C1-0",
@@ -36209,6 +35983,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651148-710",
@@ -36383,6 +36158,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "AMTKSchCh651131-734",
@@ -36981,6 +36757,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-649271-106",
@@ -37197,6 +36974,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Foxboro"
       },
       "id": "canonical-CR-Foxboro-C1-0",
@@ -37285,6 +37063,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-628007-532-1",
@@ -37483,6 +37262,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Medford/Tufts"
       },
       "id": "60564040",
@@ -38047,6 +37827,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "North Station"
       },
       "id": "CR-649307-192",
@@ -38195,6 +37976,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "canonical-CR-Needham-C1-1",
@@ -38293,6 +38075,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "South Station"
       },
       "id": "CR-627986-598-1",
@@ -38424,34 +38207,6 @@
         "self": "/shapes/canonical-9820001"
       },
       "type": "shape"
-    },
-    {
-      "attributes": {
-        "canonical": false,
-        "direction_id": 0,
-        "name": "Oak Grove - North Station",
-        "sort_order": 100200060,
-        "typicality": 3
-      },
-      "id": "Orange-7-0",
-      "links": {
-        "self": "/route_patterns/Orange-7-0"
-      },
-      "relationships": {
-        "representative_trip": {
-          "data": {
-            "id": "61746428",
-            "type": "trip"
-          }
-        },
-        "route": {
-          "data": {
-            "id": "Orange",
-            "type": "route"
-          }
-        }
-      },
-      "type": "route_pattern"
     },
     {
       "attributes": {
@@ -38635,6 +38390,7 @@
     },
     {
       "attributes": {
+        "direction_id": 0,
         "headsign": "Forge Park/495"
       },
       "id": "AMTKSchCh651138-727",
@@ -38905,6 +38661,7 @@
     },
     {
       "attributes": {
+        "direction_id": 1,
         "headsign": "Government Center"
       },
       "id": "canonical-Green-B-C1-1",
