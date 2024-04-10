@@ -49,9 +49,6 @@ defmodule MobileAppBackend.RouteSegment do
           %{Trip.id() => Trip.t()},
           %{Route.id() => String.t()}
         ) :: [t()]
-  @spec non_overlapping_segments([MBTAV3API.RoutePattern.t()], %{}, %{}) :: [
-          MobileAppBackend.RouteSegment.t()
-        ]
   @doc """
   Get a list of non-overlapping RouteSegments within a route for the list of route patterns.
   Uses a route pattern's route_id by default to group related route patterns, or an override if present
