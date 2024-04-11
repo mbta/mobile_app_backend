@@ -54,6 +54,7 @@ defmodule OpenTripPlannerClient.Nearby do
     end
   end
 
+  @dialyzer {:no_match, [parse_edges: 1]}
   @spec parse_edges(list(map())) :: {:ok, list(MBTAV3API.Stop.t())} | {:error, term()}
   defp parse_edges(edges) do
     edges
@@ -84,6 +85,7 @@ defmodule OpenTripPlannerClient.Nearby do
     end
   end
 
+  @dialyzer {:no_match, [parse_stop: 1]}
   @spec parse_stop(map()) :: {:ok, MBTAV3API.Stop.t()} | :ignore | {:error, term()}
   defp parse_stop(place) do
     case place do
@@ -94,6 +96,8 @@ defmodule OpenTripPlannerClient.Nearby do
            latitude: latitude,
            longitude: longitude,
            name: name,
+           location_type: :stop,
+           vehicle_type: :subway,
            parent_station_id:
              with {:ok, parent_station} when not is_nil(parent_station) <-
                     Map.fetch(place, "parentStation"),
@@ -102,7 +106,6 @@ defmodule OpenTripPlannerClient.Nearby do
              else
                _ -> nil
              end,
-           location_type: :stop,
            child_stop_ids: nil
          }}
 
