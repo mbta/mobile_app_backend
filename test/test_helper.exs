@@ -7,7 +7,7 @@ case Test.Support.Data.start_link() do
   {:error, {:already_started, _}} -> :ok
 end
 
-ExUnit.start()
+ExUnit.start(exclude: [:skip])
 {:ok, _} = Application.ensure_all_started(:ex_machina)
 
 unless System.argv() != ["test"] do

@@ -1,22 +1,20 @@
 {
   "OPEN_TRIP_PLANNER": {
-    "/otp/routers/default/index/graphql": {
-      "{\"variables\":{\"latitude\":42.37434840767488,\"longitude\":-71.03021663692962,\"radius\":100},\"query\":\"query NearbyQuery($latitude: Float!, $longitude: Float!, $radius: Int!) {\\n  nearest(lat: $latitude, lon: $longitude, maxDistance: $radius, filterByPlaceTypes: [STOP]) {\\n    edges {\\n      node {\\n        place {\\n          ... on Stop {\\n            ...stopDetails\\n            parentStation {\\n              ...stopDetails\\n            }\\n          }\\n        }\\n        distance\\n      }\\n    }\\n  }\\n}\\n\\nfragment stopDetails on Stop {\\n  gtfsId\\n  lat\\n  lon\\n  name\\n}\\n\"}": "018d3d24-3bc2-75e8-afce-e2831dd4eb03"
-    }
+    "/otp/routers/default/index/graphql": {}
   },
   "V3_API": {
     "/route_patterns": {
       "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
     },
     "/routes": {
-      "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bshape%5D=polyline&fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&fields%5Btrip%5D=direction_id%2Cheadsign&filter%5Btype%5D=0%2C1%2C2&include=route_patterns%2Croute_patterns.representative_trip%2Croute_patterns.representative_trip.shape%2Croute_patterns.representative_trip.stops": "018e8188-d5d1-7494-b5af-40cb642dbdcb"
+      "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bshape%5D=polyline&fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&fields%5Btrip%5D=direction_id%2Cheadsign&filter%5Btype%5D=0%2C1%2C2&include=route_patterns%2Croute_patterns.representative_trip%2Croute_patterns.representative_trip.shape%2Croute_patterns.representative_trip.stops": "018ecdb6-3aa7-7f6a-a7a7-78797572659f"
     },
     "/stops": {
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-346a-72e0-a371-334d4815e5e8",
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-342a-761d-913b-87082d542559",
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-3651-7503-9c70-29e986c827e8",
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018d895b-3612-7b7a-bde8-ed56c59e2346",
-      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type&filter%5Blocation_type%5D=0%2C1&include=child_stops%2Cparent_station": "018e9f39-1c96-7c31-a212-5537f94cd63f"
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018ecdc4-5cbe-780d-97a4-35bbde8b6ae3",
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018ecdc4-5c71-79d5-b464-251c65a70e61",
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018ecdc4-5d50-7039-b759-248c7a790b76",
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&filter%5Blatitude%5D=42.562535&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-70.869116&filter%5Bradius%5D=0.01664&filter%5Broute_type%5D=2&include=parent_station%2Cparent_station.child_stops&sort=distance": "018ecdc4-5d0b-73e5-85af-16f545f84dbe",
+      "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type&filter%5Blocation_type%5D=0%2C1&include=child_stops%2Cparent_station": "018ecdb6-bd2a-710a-b816-ade382c05b2f"
     }
   }
 }
