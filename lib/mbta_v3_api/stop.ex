@@ -8,7 +8,7 @@ defmodule MBTAV3API.Stop do
           longitude: float(),
           name: String.t(),
           location_type: location_type(),
-          vehicle_type: MBTAV3API.Route.type(),
+          vehicle_type: MBTAV3API.Route.type() | nil,
           child_stop_ids: [String.t()] | nil,
           parent_station_id: String.t() | nil
         }

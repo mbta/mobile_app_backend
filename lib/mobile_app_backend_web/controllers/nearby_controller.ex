@@ -43,13 +43,11 @@ defmodule MobileAppBackendWeb.NearbyController do
       )
 
     cr_stop_map =
-      :maps.filter(
-        fn _, v -> v.vehicle_type == :commuter_rail end,
-        MBTAV3API.Stop.include_missing_siblings(
-          Map.new(cr_stops, &{&1.id, &1}),
-          cr_included_stops
-        )
+      MBTAV3API.Stop.include_missing_siblings(
+        Map.new(cr_stops, &{&1.id, &1}),
+        cr_included_stops
       )
+      |> Map.filter(fn {_key, val} -> val.vehicle_type == :commuter_rail end)
 
     {:ok, %{data: other_stops, included: %{stops: other_included_stops}}} =
       Repository.stops(
