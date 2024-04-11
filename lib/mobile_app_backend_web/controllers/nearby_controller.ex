@@ -8,8 +8,7 @@ defmodule MobileAppBackendWeb.NearbyController do
     longitude = String.to_float(Map.fetch!(params, "longitude"))
     radius = String.to_float(Map.fetch!(params, "radius"))
 
-    {stops, included_stops} = fetch_nearby_stops(latitude, longitude, radius)
-    stops = MBTAV3API.Stop.include_missing_siblings(stops, included_stops)
+    stops = fetch_nearby_stops(latitude, longitude, radius)
 
     json(conn, %{
       stop_ids:
@@ -26,7 +25,7 @@ defmodule MobileAppBackendWeb.NearbyController do
           latitude :: float(),
           longitude :: float(),
           radius :: float()
-        ) :: {primary :: JsonApi.Object.stop_map(), included :: JsonApi.Object.stop_map()}
+        ) :: primary :: JsonApi.Object.stop_map()
   defp fetch_nearby_stops(latitude, longitude, radius) do
     degree_radius = miles_to_degrees(radius)
 
@@ -43,6 +42,15 @@ defmodule MobileAppBackendWeb.NearbyController do
         sort: {:distance, :asc}
       )
 
+    cr_stop_map =
+      :maps.filter(
+        fn _, v -> v.vehicle_type == :commuter_rail end,
+        MBTAV3API.Stop.include_missing_siblings(
+          Map.new(cr_stops, &{&1.id, &1}),
+          cr_included_stops
+        )
+      )
+
     {:ok, %{data: other_stops, included: %{stops: other_included_stops}}} =
       Repository.stops(
         filter: [
@@ -56,8 +64,13 @@ defmodule MobileAppBackendWeb.NearbyController do
         sort: {:distance, :asc}
       )
 
-    {Map.new(cr_stops ++ other_stops, &{&1.id, &1}),
-     Map.merge(cr_included_stops, other_included_stops)}
+    other_stop_map =
+      MBTAV3API.Stop.include_missing_siblings(
+        Map.new(other_stops, &{&1.id, &1}),
+        other_included_stops
+      )
+
+    Map.merge(cr_stop_map, other_stop_map)
   end
 
   @spec distance_in_degrees(float(), float(), float(), float()) :: float()

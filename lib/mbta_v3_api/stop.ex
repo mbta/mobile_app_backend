@@ -8,6 +8,7 @@ defmodule MBTAV3API.Stop do
           longitude: float(),
           name: String.t(),
           location_type: location_type(),
+          vehicle_type: MBTAV3API.Route.type(),
           child_stop_ids: [String.t()] | nil,
           parent_station_id: String.t() | nil
         }
@@ -23,6 +24,7 @@ defmodule MBTAV3API.Stop do
     :longitude,
     :name,
     :location_type,
+    :vehicle_type,
     :child_stop_ids,
     :parent_station_id
   ]
@@ -60,7 +62,7 @@ defmodule MBTAV3API.Stop do
   end
 
   @impl JsonApi.Object
-  def fields, do: [:latitude, :longitude, :name, :location_type]
+  def fields, do: [:latitude, :longitude, :name, :location_type, :vehicle_type]
 
   @impl JsonApi.Object
   def includes,
@@ -90,6 +92,10 @@ defmodule MBTAV3API.Stop do
       location_type:
         if location_type = item.attributes["location_type"] do
           parse_location_type(location_type)
+        end,
+      vehicle_type:
+        if vehicle_type = item.attributes["vehicle_type"] do
+          MBTAV3API.Route.parse_type(vehicle_type)
         end,
       parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"]),
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"])

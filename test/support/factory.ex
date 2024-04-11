@@ -79,7 +79,8 @@ defmodule MobileAppBackend.Factory do
       name: "Harvard Sq @ Garden St - Dawes Island",
       latitude: 42.375302,
       longitude: -71.119237,
-      location_type: :stop
+      location_type: :stop,
+      vehicle_type: :bus
     }
   end
 
