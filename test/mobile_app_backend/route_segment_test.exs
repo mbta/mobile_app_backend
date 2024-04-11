@@ -71,7 +71,9 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-braintree",
                  source_route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id],
-                 other_patterns_by_stop_id: %{}
+                 other_patterns_by_stop_id: %{
+                   "jfk/umass" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}]
+                 }
                }
              ] == route_segments
     end
@@ -191,7 +193,9 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "green_e_rp",
                  source_route_id: "Green-E",
                  stop_ids: [copley.id, prudential.id],
-                 other_patterns_by_stop_id: %{}
+                 other_patterns_by_stop_id: %{
+                   "copley" => [%{route_id: "Green-D", route_pattern_id: "green_d_rp"}]
+                 }
                }
              ] == route_segments
     end
@@ -240,7 +244,9 @@ defmodule MobileAppBackend.RouteSegmentTest do
                  source_route_pattern_id: "red-braintree",
                  source_route_id: "Red",
                  stop_ids: [jfk.id, north_quincy.id, wollaston.id],
-                 other_patterns_by_stop_id: %{}
+                 other_patterns_by_stop_id: %{
+                   "jfk/umass" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}]
+                 }
                }
              ] == route_segments
     end

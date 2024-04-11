@@ -77,7 +77,12 @@ defmodule MobileAppBackend.RouteSegment do
   def non_overlapping_segments(route_patterns_with_stops) do
     stop_id_to_route_patterns = stop_id_to_route_patterns(route_patterns_with_stops)
 
-    build_non_overlapping_segments(route_patterns_with_stops, stop_id_to_route_patterns, [])
+    build_non_overlapping_segments(
+      route_patterns_with_stops,
+      MapSet.new(),
+      stop_id_to_route_patterns,
+      []
+    )
   end
 
   @spec stop_id_to_route_patterns([route_pattern_with_stops()]) :: %{
@@ -96,6 +101,7 @@ defmodule MobileAppBackend.RouteSegment do
 
   @spec build_non_overlapping_segments(
           [route_pattern_with_stops()],
+          MapSet.t(Stop.id()),
           %{Stop.id() => [%{route_id: Route.id(), route_pattern_id: RoutePattern.id()}]},
           [t()]
         ) ::
@@ -104,28 +110,38 @@ defmodule MobileAppBackend.RouteSegment do
   # Which have not been included on an earlier RouteSegment.
   defp build_non_overlapping_segments(
          [route_pattern | rest],
-         remaining_stop_id_to_route_patterns,
+         seen_stop_ids,
+         stop_id_to_route_patterns,
          acc_segments
        ) do
     all_stop_ids_for_rp = Enum.map(route_pattern.stops, & &1.id)
-    unseen_stop_id_to_rps = Map.take(remaining_stop_id_to_route_patterns, all_stop_ids_for_rp)
-    unseen_stop_ids = MapSet.new(Map.keys(unseen_stop_id_to_rps))
+
+    unseen_stop_ids =
+      all_stop_ids_for_rp
+      |> MapSet.new()
+      |> MapSet.difference(seen_stop_ids)
 
     new_segments =
       route_pattern
       |> unseen_stop_segments(unseen_stop_ids)
       |> Enum.map(fn stops ->
-        stop_segment_to_route_segment(route_pattern, stops, unseen_stop_id_to_rps)
+        stop_segment_to_route_segment(route_pattern, stops, stop_id_to_route_patterns)
       end)
 
     build_non_overlapping_segments(
       rest,
-      Map.drop(remaining_stop_id_to_route_patterns, Map.keys(unseen_stop_id_to_rps)),
+      MapSet.union(seen_stop_ids, unseen_stop_ids),
+      stop_id_to_route_patterns,
       new_segments ++ acc_segments
     )
   end
 
-  defp build_non_overlapping_segments([], _remaining_unseen_stops, acc_segments) do
+  defp build_non_overlapping_segments(
+         [],
+         _seen_stop_ids,
+         _stop_ids_to_route_patterns,
+         acc_segments
+       ) do
     Enum.reverse(acc_segments)
   end
 
@@ -138,6 +154,7 @@ defmodule MobileAppBackend.RouteSegment do
 
     other_patterns_by_stop_id =
       stop_id_to_route_patterns
+      |> Map.take(Enum.map(stop_segment, & &1.id))
       |> Enum.map(fn {stop_id, rp_keys} ->
         {stop_id,
          Enum.filter(
