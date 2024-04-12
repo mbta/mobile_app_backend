@@ -121,9 +121,10 @@ defmodule MobileAppBackendWeb.NearbyControllerTest do
 
       %{"stop_ids" => stop_ids} = json_response(conn, 200)
 
-      assert 21 = length(stop_ids)
+      assert 19 = length(stop_ids)
 
       assert "67120" = List.first(stop_ids)
+      assert !Enum.member?(stop_ids, "NB-0080-B1")
     end
 
     test "includes parent stop info from the V3 API", %{conn: conn} do

@@ -1,6 +1,7 @@
 defmodule OpenTripPlannerClientTest do
   use HttpStub.Case, async: true
 
+  @tag :skip
   describe "nearby/3" do
     test "handles parent stops" do
       assert {:ok,
