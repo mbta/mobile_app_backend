@@ -10,7 +10,8 @@ defmodule MBTAV3API.Supervisor do
     children = [
       MBTAV3API.Stream.Registry,
       MBTAV3API.Stream.PubSub,
-      MBTAV3API.Stream.Supervisor
+      MBTAV3API.Stream.Supervisor,
+      MBTAV3API.Stream.Health
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

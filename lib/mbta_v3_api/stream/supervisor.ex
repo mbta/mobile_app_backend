@@ -1,6 +1,7 @@
 defmodule MBTAV3API.Stream.Supervisor do
   use DynamicSupervisor
 
+  require Logger
   alias MBTAV3API.Stream.Instance
 
   def start_link(_) do
@@ -24,5 +25,15 @@ defmodule MBTAV3API.Stream.Supervisor do
   @impl true
   def init(_) do
     DynamicSupervisor.init(strategy: :one_for_one)
+  end
+
+  def log_health do
+    instances = DynamicSupervisor.which_children(__MODULE__)
+
+    for {_, instance, _, _} <- instances do
+      MBTAV3API.Stream.Instance.check_health(instance)
+    end
+
+    :ok
   end
 end
