@@ -32,7 +32,10 @@ defmodule MBTAV3API.Stream.Instance do
 
     children = [
       {MobileAppBackend.SSE,
-       name: MBTAV3API.Stream.Registry.via_name(ref), url: url, headers: headers},
+       name: MBTAV3API.Stream.Registry.via_name(ref),
+       url: url,
+       headers: headers,
+       idle_timeout: :timer.seconds(45)},
       {MBTAV3API.Stream.Consumer,
        subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
        destination: destination,
