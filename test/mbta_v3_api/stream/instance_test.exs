@@ -12,7 +12,12 @@ defmodule MBTAV3API.Stream.InstanceTest do
       )
 
     sse_stage = SSEStub.get_from_instance(instance)
-    assert SSEStub.get_args(sse_stage) == [url: "https://example.com", headers: [{"a", "b"}]]
+
+    assert SSEStub.get_args(sse_stage) == [
+             url: "https://example.com",
+             headers: [{"a", "b"}],
+             idle_timeout: :timer.seconds(45)
+           ]
 
     refute_receive _
 
