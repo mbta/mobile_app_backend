@@ -60,20 +60,46 @@ defmodule MBTAV3API.Stream.Instance do
         module == MBTAV3API.Stream.Consumer
       end)
 
-    stage_alive = not is_nil(sses) and Process.alive?(sses)
-    consumer_alive = not is_nil(consumer) and Process.alive?(consumer)
+    {stage_healthy, stage_info} = stage_health(sses)
+    {consumer_healthy, consumer_info} = consumer_health(consumer)
+
+    health_state =
+      (stage_info ++ consumer_info)
+      |> Enum.map_join(" ", fn {name, value} -> "#{name}=#{value}" end)
+
+    if stage_healthy and consumer_healthy do
+      Logger.info("#{__MODULE__} #{health_state}")
+    else
+      Logger.warning("#{__MODULE__} #{health_state}")
+    end
+  end
+
+  defp stage_health(sses_pid) do
+    stage_alive = not is_nil(sses_pid) and Process.alive?(sses_pid)
 
     stage_open =
       if stage_alive do
-        %GenStage{state: %ServerSentEventStage{conn: conn}} = :sys.get_state(sses)
+        %GenStage{state: %ServerSentEventStage{conn: conn}} = :sys.get_state(sses_pid)
 
         conn != nil and Mint.HTTP.open?(conn)
+      else
+        false
       end
+
+    healthy = stage_alive and stage_open
+
+    info = [stage_alive: stage_alive, stage_open: stage_open]
+
+    {healthy, info}
+  end
+
+  defp consumer_health(consumer_pid) do
+    consumer_alive = not is_nil(consumer_pid) and Process.alive?(consumer_pid)
 
     consumer_dest =
       if consumer_alive do
         %GenStage{state: %MBTAV3API.Stream.Consumer.State{destination: destination}} =
-          :sys.get_state(consumer)
+          :sys.get_state(consumer_pid)
 
         case destination do
           topic when is_binary(topic) -> topic
@@ -86,20 +112,15 @@ defmodule MBTAV3API.Stream.Instance do
         Registry.count_match(MBTAV3API.Stream.PubSub, consumer_dest, :_)
       end
 
-    health_state =
+    healthy = consumer_alive
+
+    info =
       [
-        stage_alive: stage_alive,
         consumer_alive: consumer_alive,
-        stage_open: stage_open,
         consumer_dest: consumer_dest,
         consumer_subscribers: consumer_subscribers
       ]
-      |> Enum.map_join(" ", fn {name, value} -> "#{name}=#{value}" end)
 
-    if stage_alive and consumer_alive and stage_open do
-      Logger.info("#{__MODULE__} #{health_state}")
-    else
-      Logger.warning("#{__MODULE__} #{health_state}")
-    end
+    {healthy, info}
   end
 end
