@@ -50,18 +50,18 @@ defmodule MBTAV3API.Stream.Instance do
   def check_health(pid) do
     children = Supervisor.which_children(pid)
 
-    {_, sses, _, _} =
+    {_, sses_pid, _, _} =
       Enum.find(children, {nil, nil, nil, nil}, fn {_, _, _, [module]} ->
         module == ServerSentEventStage
       end)
 
-    {_, consumer, _, _} =
+    {_, consumer_pid, _, _} =
       Enum.find(children, {nil, nil, nil, nil}, fn {_, _, _, [module]} ->
         module == MBTAV3API.Stream.Consumer
       end)
 
-    {stage_healthy, stage_info} = stage_health(sses)
-    {consumer_healthy, consumer_info} = consumer_health(consumer)
+    {stage_healthy, stage_info} = stage_health(sses_pid)
+    {consumer_healthy, consumer_info} = consumer_health(consumer_pid)
 
     health_state =
       (stage_info ++ consumer_info)
