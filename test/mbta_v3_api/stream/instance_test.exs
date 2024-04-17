@@ -46,5 +46,8 @@ defmodule MBTAV3API.Stream.InstanceTest do
     # since the SSEStub is not a ServerSentEventStage, it reports as missing
     assert log =~ "[warning]"
     assert log =~ "stage_alive=false"
+    assert log =~ "consumer_alive=true"
+    assert log =~ "consumer_dest=#PID<"
+    assert log =~ "consumer_subscribers=0"
   end
 end
