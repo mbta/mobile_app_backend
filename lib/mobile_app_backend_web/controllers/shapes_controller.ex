@@ -47,7 +47,20 @@ defmodule MobileAppBackendWeb.ShapesController do
         route_patterns,
         stops_by_id,
         trips_by_id,
-        %{"Green-B" => "Green", "Green-C" => "Green", "Green-D" => "Green", "Green-E" => "Green"}
+        %{
+          "Green-B" => "Green",
+          "Green-C" => "Green",
+          "Green-D" => "Green",
+          "Green-E" => "Green",
+          "CR-Worcester" => "CR-SW",
+          "CR-Needham" => "CR-SW",
+          "CR-Fairmount" => "CR-SW",
+          "CR-Franklin" => "CR-SW",
+          "CR-Providence" => "CR-SW",
+          "CR-Middleborough" => "CR-SE",
+          "CR-Kingston" => "CR-SE",
+          "CR-Greenbush" => "CR-SE"
+        }
       )
 
     map_friendly_route_shapes =
