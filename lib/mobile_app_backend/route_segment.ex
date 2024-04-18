@@ -130,7 +130,8 @@ defmodule MobileAppBackend.RouteSegment do
 
     build_non_overlapping_segments(
       rest,
-      MapSet.union(seen_stop_ids, unseen_stop_ids),
+      MapSet.new(),
+     # MapSet.union(seen_stop_ids, unseen_stop_ids),
       stop_id_to_route_patterns,
       new_segments ++ acc_segments
     )
