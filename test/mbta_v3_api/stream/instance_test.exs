@@ -30,4 +30,24 @@ defmodule MBTAV3API.Stream.InstanceTest do
 
     assert_receive {:stream_data, %{routes: %{"1723" => %Route{id: "1723"}}}}
   end
+
+  test "logs health" do
+    instance =
+      start_link_supervised!(
+        {MBTAV3API.Stream.Instance,
+         url: "https://example.com", headers: [{"a", "b"}], destination: self(), type: Route}
+      )
+
+    {_, log} =
+      ExUnit.CaptureLog.with_log(fn ->
+        MBTAV3API.Stream.Instance.check_health(instance)
+      end)
+
+    # since the SSEStub is not a ServerSentEventStage, it reports as missing
+    assert log =~ "[warning]"
+    assert log =~ "stage_alive=false"
+    assert log =~ "consumer_alive=true"
+    assert log =~ "consumer_dest=#PID<"
+    assert log =~ "consumer_subscribers=0"
+  end
 end
