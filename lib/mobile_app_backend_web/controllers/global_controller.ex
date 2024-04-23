@@ -49,8 +49,7 @@ defmodule MobileAppBackendWeb.GlobalController do
 
     pattern_ids_by_stop = MBTAV3API.RoutePattern.get_pattern_ids_by_stop(route_patterns, trips)
 
-    trips =
-      Map.new(trips, fn {trip_id, trip} -> {trip_id, %MBTAV3API.Trip{trip | stop_ids: nil}} end)
+    trips = Map.new(trips, fn {trip_id, trip} -> {trip_id, trip} end)
 
     route_patterns = Map.new(route_patterns, &{&1.id, &1})
 
