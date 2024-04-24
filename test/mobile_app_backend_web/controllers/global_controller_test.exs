@@ -53,7 +53,10 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                "sort_order" => 100_101_001
              } = red_line_pattern
 
-      assert %{"headsign" => "Alewife"} = trips[red_line_trip_id]
+      assert %{"headsign" => "Alewife", "stop_ids" => trip_stop_ids} = trips[red_line_trip_id]
+
+      assert Enum.count(trip_stop_ids) == 17
+      assert trip_stop_ids |> Enum.member?("70070")
 
       assert %{
                "Red" => %{
