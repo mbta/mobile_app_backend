@@ -32,7 +32,10 @@ defmodule MobileAppBackendWeb.ShapesController do
     %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips}
   end
 
-  def rail_for_map(conn, _params) do
+  def rail_for_map(conn, params) do
+    should_separate_overlapping_segments =
+      Map.get(params, "separate_overlapping_segments", "false")
+
     %{
       route_patterns: route_patterns,
       routes_by_id: routes_by_id,
@@ -42,8 +45,14 @@ defmodule MobileAppBackendWeb.ShapesController do
     } =
       fetch_rail_data_for_map()
 
+    segment_fn =
+      case should_separate_overlapping_segments do
+        "true" -> &RouteSegment.non_overlapping_segments/4
+        _ -> &RouteSegment.segment_per_pattern/4
+      end
+
     route_segments =
-      RouteSegment.non_overlapping_segments(
+      segment_fn.(
         route_patterns,
         stops_by_id,
         trips_by_id,
