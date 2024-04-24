@@ -4,6 +4,154 @@ defmodule MobileAppBackend.RouteSegmentTest do
 
   import MobileAppBackend.Factory
 
+  describe "segment_per_pattern/4" do
+    test "returns a single segment for each route pattern including the other route patterns that serve each stop" do
+      andrew = build(:stop, id: "andrew", location_type: :station)
+      jfk = build(:stop, id: "jfk/umass", location_type: :station)
+
+      jfk_child_1 =
+        build(:stop, id: "jfk/umass-1", location_type: :stop, parent_station_id: jfk.id)
+
+      jfk_child_2 =
+        build(:stop, id: "jfk/umass-2", location_type: :stop, parent_station_id: jfk.id)
+
+      savin = build(:stop, id: "savin_hill", location_type: :station)
+      fields_corner = build(:stop, id: "fields_corner", location_type: :station)
+      north_quincy = build(:stop, id: "north_quincy", location_type: :station)
+      wollaston = build(:stop, id: "wollaston", location_type: :station)
+
+      stop_map =
+        Map.new(
+          [andrew, jfk, jfk_child_1, jfk_child_2, savin, fields_corner, north_quincy, wollaston],
+          &{&1.id, &1}
+        )
+
+      ashmont_trip =
+        build(:trip, stop_ids: [andrew.id, jfk_child_1.id, savin.id, fields_corner.id])
+
+      braintree_trip =
+        build(:trip, stop_ids: [andrew.id, jfk_child_2.id, north_quincy.id, wollaston.id])
+
+      trip_map = %{ashmont_trip.id => ashmont_trip, braintree_trip.id => braintree_trip}
+
+      ashmont_rp =
+        build(:route_pattern,
+          id: "red-ashmont",
+          representative_trip_id: ashmont_trip.id,
+          route_id: "Red"
+        )
+
+      braintree_rp =
+        build(:route_pattern,
+          id: "red-braintree",
+          representative_trip_id: braintree_trip.id,
+          route_id: "Red"
+        )
+
+      route_segments =
+        RouteSegment.segment_per_pattern([ashmont_rp, braintree_rp], stop_map, trip_map)
+
+      assert [
+               %RouteSegment{
+                 id: "andrew-fields_corner",
+                 source_route_pattern_id: "red-ashmont",
+                 source_route_id: "Red",
+                 stop_ids: [andrew.id, jfk.id, savin.id, fields_corner.id],
+                 other_patterns_by_stop_id: %{
+                   "andrew" => [
+                     %{route_id: "Red", route_pattern_id: "red-braintree"}
+                   ],
+                   "jfk/umass" => [
+                     %{route_id: "Red", route_pattern_id: "red-braintree"}
+                   ]
+                 }
+               },
+               %RouteSegment{
+                 id: "andrew-wollaston",
+                 source_route_pattern_id: "red-braintree",
+                 source_route_id: "Red",
+                 stop_ids: [andrew.id, jfk.id, north_quincy.id, wollaston.id],
+                 other_patterns_by_stop_id: %{
+                   "andrew" => [
+                     %{route_id: "Red", route_pattern_id: "red-ashmont"}
+                   ],
+                   "jfk/umass" => [%{route_id: "Red", route_pattern_id: "red-ashmont"}]
+                 }
+               }
+             ] == route_segments
+    end
+
+    test "when segments are on different routes but should be grouped, includes all grouped routes in other_patterns_by_stop_id" do
+      arlington = build(:stop, id: "arlington", location_type: :station)
+      copley = build(:stop, id: "copley", location_type: :station)
+      prudential = build(:stop, id: "prudential", location_type: :station)
+      hynes = build(:stop, id: "hynes", location_type: :station)
+
+      stop_map =
+        Map.new(
+          [arlington, copley, prudential, hynes],
+          &{&1.id, &1}
+        )
+
+      green_d_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, hynes.id])
+
+      green_e_trip =
+        build(:trip, stop_ids: [arlington.id, copley.id, prudential.id])
+
+      trip_map = %{green_d_trip.id => green_d_trip, green_e_trip.id => green_e_trip}
+
+      green_d_rp =
+        build(:route_pattern,
+          id: "green_d_rp",
+          representative_trip_id: green_d_trip.id,
+          route_id: "Green-D"
+        )
+
+      green_e_rp =
+        build(:route_pattern,
+          id: "green_e_rp",
+          representative_trip_id: green_e_trip.id,
+          route_id: "Green-E"
+        )
+
+      route_segments =
+        RouteSegment.segment_per_pattern([green_d_rp, green_e_rp], stop_map, trip_map, %{
+          "Green-D" => "Green",
+          "Green-E" => "Green"
+        })
+
+      assert [
+               %RouteSegment{
+                 id: "arlington-hynes",
+                 source_route_pattern_id: "green_d_rp",
+                 source_route_id: "Green-D",
+                 stop_ids: [arlington.id, copley.id, hynes.id],
+                 other_patterns_by_stop_id: %{
+                   "arlington" => [
+                     %{route_id: "Green-E", route_pattern_id: "green_e_rp"}
+                   ],
+                   "copley" => [
+                     %{route_id: "Green-E", route_pattern_id: "green_e_rp"}
+                   ]
+                 }
+               },
+               %RouteSegment{
+                 id: "arlington-prudential",
+                 source_route_pattern_id: "green_e_rp",
+                 source_route_id: "Green-E",
+                 stop_ids: [arlington.id, copley.id, prudential.id],
+                 other_patterns_by_stop_id: %{
+                   "arlington" => [
+                     %{route_id: "Green-D", route_pattern_id: "green_d_rp"}
+                   ],
+                   "copley" => [%{route_id: "Green-D", route_pattern_id: "green_d_rp"}]
+                 }
+               }
+             ] == route_segments
+    end
+  end
+
   describe "non_overlapping_segments/3" do
     test "splits branching route patterns into non-overlapping segments" do
       andrew = build(:stop, id: "andrew", location_type: :station)

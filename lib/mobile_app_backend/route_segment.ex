@@ -1,7 +1,7 @@
 defmodule MobileAppBackend.RouteSegment do
   @doc """
   A route segment is a conceptual chunk of a route between a set of stops.
-  It is a way to break overlapping route patterns into non-overlapping segments.
+  It can be used to break overlapping route patterns into non-overlapping segments.
   For example, the two southbound Red Line route patterns have representative trips
   with the following stops:
   * Alewife - Ashmont
@@ -42,6 +42,55 @@ defmodule MobileAppBackend.RouteSegment do
     :stop_ids,
     other_patterns_by_stop_id: %{}
   ]
+
+  @spec segment_per_pattern(
+          [RoutePattern.t()],
+          %{Stop.id() => Stop.t()},
+          %{Trip.id() => Trip.t()},
+          %{Route.id() => String.t()}
+        ) :: [t()]
+  @doc """
+  Returns a single RouteSegment per RoutePattern containing all stops served by that pattern.
+  Uses a route pattern's route_id by default to group related route patterns, or an override
+  if present in the `route_id_to_grouping_id` map. This will use parent stops wherever possible
+  to detect which other route patterns serve that stop.
+  """
+  def segment_per_pattern(
+        route_patterns,
+        stops_by_id,
+        trips_by_id,
+        route_id_to_grouping_id \\ %{}
+      ) do
+    route_patterns
+    |> route_patterns_with_parent_stops(stops_by_id, trips_by_id)
+    |> Enum.group_by(&Map.get(route_id_to_grouping_id, &1.route_id, &1.route_id))
+    |> Enum.flat_map(fn {_route_id, route_patterns} ->
+      segment_per_pattern(route_patterns)
+    end)
+    |> Enum.sort_by(& &1.source_route_pattern_id)
+  end
+
+  defp segment_per_pattern(rps_with_stops) do
+    stop_id_to_rps =
+      rps_with_stops
+      |> Enum.flat_map(
+        &Enum.map(&1.stops, fn stop ->
+          {stop.id, %{route_id: &1.route_id, route_pattern_id: &1.id}}
+        end)
+      )
+      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+
+    Enum.map(
+      rps_with_stops,
+      &%__MODULE__{
+        id: "#{List.first(&1.stops).id}-#{List.last(&1.stops).id}",
+        source_route_pattern_id: &1.id,
+        source_route_id: &1.route_id,
+        stop_ids: Enum.map(&1.stops, fn stop -> stop.id end),
+        other_patterns_by_stop_id: other_patterns_by_stop_id(&1.id, &1.stops, stop_id_to_rps)
+      }
+    )
+  end
 
   @spec non_overlapping_segments(
           [RoutePattern.t()],
@@ -153,18 +202,7 @@ defmodule MobileAppBackend.RouteSegment do
     source_route_id = route_pattern.route_id
 
     other_patterns_by_stop_id =
-      stop_id_to_route_patterns
-      |> Map.take(Enum.map(stop_segment, & &1.id))
-      |> Enum.map(fn {stop_id, rp_keys} ->
-        {stop_id,
-         Enum.filter(
-           rp_keys,
-           &(&1.route_pattern_id != source_route_pattern_id &&
-               &1.route_id != source_route_pattern_id)
-         )}
-      end)
-      |> Enum.reject(fn {_stop_id, rp_keys} -> rp_keys == [] end)
-      |> Map.new()
+      other_patterns_by_stop_id(route_pattern.id, stop_segment, stop_id_to_route_patterns)
 
     %__MODULE__{
       id: "#{List.first(stop_segment).id}-#{List.last(stop_segment).id}",
@@ -173,6 +211,24 @@ defmodule MobileAppBackend.RouteSegment do
       stop_ids: Enum.map(stop_segment, & &1.id),
       other_patterns_by_stop_id: other_patterns_by_stop_id
     }
+  end
+
+  @spec other_patterns_by_stop_id(RoutePattern.id(), [Stop.id()], %{
+          Stop.id() => [route_pattern_key()]
+        }) :: %{Stop.id() => [route_pattern_key()]}
+  defp other_patterns_by_stop_id(route_pattern_id, stops, all_patterns_by_stop_id) do
+    all_patterns_by_stop_id
+    |> Map.take(Enum.map(stops, & &1.id))
+    |> Enum.map(fn {stop_id, rp_keys} ->
+      {stop_id,
+       Enum.filter(
+         rp_keys,
+         &(&1.route_pattern_id != route_pattern_id &&
+             &1.route_id != route_pattern_id)
+       )}
+    end)
+    |> Enum.reject(fn {_stop_id, rp_keys} -> rp_keys == [] end)
+    |> Map.new()
   end
 
   @spec unseen_stop_segments(route_pattern_with_stops(), MapSet.t(Stop.id())) :: [
