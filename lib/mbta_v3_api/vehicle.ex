@@ -4,7 +4,7 @@ defmodule MBTAV3API.Vehicle do
 
   @type t :: %__MODULE__{
           id: String.t(),
-          bearing: number(),
+          bearing: number() | nil,
           current_status: current_status(),
           direction_id: 0 | 1,
           latitude: float(),
