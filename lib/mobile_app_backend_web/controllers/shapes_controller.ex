@@ -1,42 +1,17 @@
 defmodule MobileAppBackendWeb.ShapesController do
-  alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
   alias MobileAppBackend.MapFriendlyRouteShape
   alias MobileAppBackend.RouteSegment
   use MobileAppBackendWeb, :controller
 
-  def rail(conn, _params) do
-    %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips} =
-      fetch_all_rail_route_data()
-
-    json(conn, %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips})
-  end
-
-  @spec fetch_all_rail_route_data() :: %{
-          routes: [MBTAV3API.Route.t()],
-          route_patterns: JsonApi.Object.route_pattern_map(),
-          shapes: JsonApi.Object.shape_map(),
-          trips: JsonApi.Object.trip_map()
-        }
-  defp fetch_all_rail_route_data do
-    {:ok,
-     %{data: routes, included: %{route_patterns: route_patterns, shapes: shapes, trips: trips}}} =
-      Repository.routes(
-        filter: [
-          type: [:light_rail, :heavy_rail, :commuter_rail]
-        ],
-        include: [route_patterns: [representative_trip: [:shape, :stops]]]
-      )
-
-    %{routes: routes, route_patterns: route_patterns, shapes: shapes, trips: trips}
-  end
-
-  def for_map(conn, %{"stop_id" => stop_id} = params) do
+  def rail(conn, params) do
     should_separate_overlapping_segments =
       Map.get(params, "separate_overlapping_segments", "false")
 
-    routes_filter = [stop: [stop_id]]
+    routes_filter = [
+      type: [:light_rail, :heavy_rail, :commuter_rail]
+    ]
 
     map_friendly_route_shapes =
       routes_filter
@@ -48,13 +23,11 @@ defmodule MobileAppBackendWeb.ShapesController do
     })
   end
 
-  def rail_for_map(conn, params) do
+  def shapes(conn, %{"stop_id" => stop_id} = params) do
     should_separate_overlapping_segments =
       Map.get(params, "separate_overlapping_segments", "false")
 
-    routes_filter = [
-      type: [:light_rail, :heavy_rail, :commuter_rail]
-    ]
+    routes_filter = [stop: [stop_id]]
 
     map_friendly_route_shapes =
       routes_filter
