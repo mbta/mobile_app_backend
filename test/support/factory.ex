@@ -96,6 +96,11 @@ defmodule MobileAppBackend.Factory do
     %MBTAV3API.Vehicle{
       id: Uniq.UUID.uuid7(),
       current_status: :in_transit_to,
+      bearing: 345,
+      direction_id: 1,
+      latitude: 42.314917199,
+      longitude: -71.06581559,
+      route_id: "Green-D",
       stop_id: "7670",
       trip_id: "60169926"
     }
