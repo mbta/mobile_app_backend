@@ -32,7 +32,7 @@ defmodule MobileAppBackendWeb.Router do
     get("/search/query", SearchController, :query)
     get("/shapes/rail", ShapesController, :rail)
     get("/shapes/map-friendly/rail", ShapesController, :rail)
-    get("/shapes", ShapesController, :shapes)
+    get("/stop/map", StopController, :map)
 
     get("/schedules", ScheduleController, :schedules)
   end
