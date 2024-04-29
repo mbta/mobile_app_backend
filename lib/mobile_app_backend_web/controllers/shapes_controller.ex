@@ -13,30 +13,15 @@ defmodule MobileAppBackendWeb.ShapesController do
       type: [:light_rail, :heavy_rail, :commuter_rail]
     ]
 
-    map_friendly_route_shapes =
-      routes_filter
-      |> fetch_shape_data_for_map()
-      |> map_friendly_route_shapes(should_separate_overlapping_segments)
-
     json(conn, %{
-      map_friendly_route_shapes: map_friendly_route_shapes
+      map_friendly_route_shapes: filtered_map_shapes(routes_filter, should_separate_overlapping_segments)
     })
   end
 
-  def shapes(conn, %{"stop_id" => stop_id} = params) do
-    should_separate_overlapping_segments =
-      Map.get(params, "separate_overlapping_segments", "false")
-
-    routes_filter = [stop: [stop_id]]
-
-    map_friendly_route_shapes =
-      routes_filter
+  def filtered_map_shapes(routes_filter, should_separate_overlapping_segments) do
+    routes_filter
       |> fetch_shape_data_for_map()
       |> map_friendly_route_shapes(should_separate_overlapping_segments)
-
-    json(conn, %{
-      map_friendly_route_shapes: map_friendly_route_shapes
-    })
   end
 
   defp map_friendly_route_shapes(
