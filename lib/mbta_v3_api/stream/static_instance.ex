@@ -44,4 +44,8 @@ defmodule MBTAV3API.Stream.StaticInstance do
       topic: "predictions:route:#{route_id}"
     ]
   end
+
+  defp args_for_topic("vehicles") do
+    [type: MBTAV3API.Vehicle, url: "/vehicles", topic: "vehicles"]
+  end
 end
