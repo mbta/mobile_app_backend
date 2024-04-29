@@ -14,14 +14,15 @@ defmodule MobileAppBackendWeb.ShapesController do
     ]
 
     json(conn, %{
-      map_friendly_route_shapes: filtered_map_shapes(routes_filter, should_separate_overlapping_segments)
+      map_friendly_route_shapes:
+        filtered_map_shapes(routes_filter, should_separate_overlapping_segments)
     })
   end
 
   def filtered_map_shapes(routes_filter, should_separate_overlapping_segments) do
     routes_filter
-      |> fetch_shape_data_for_map()
-      |> map_friendly_route_shapes(should_separate_overlapping_segments)
+    |> fetch_shape_data_for_map()
+    |> map_friendly_route_shapes(should_separate_overlapping_segments)
   end
 
   defp map_friendly_route_shapes(
