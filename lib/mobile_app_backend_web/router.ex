@@ -28,7 +28,13 @@ defmodule MobileAppBackendWeb.Router do
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
     get("/nearby", NearbyController, :show)
+    get("/global", GlobalController, :show)
     get("/search/query", SearchController, :query)
+    get("/shapes/rail", ShapesController, :rail)
+    get("/shapes/map-friendly/rail", ShapesController, :rail)
+    get("/stop/map", StopController, :map)
+
+    get("/schedules", ScheduleController, :schedules)
   end
 
   # Enable LiveDashboard in development

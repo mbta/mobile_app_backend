@@ -29,7 +29,7 @@ jobs:
           echo "mix-restore=cache-mix-" >> $GITHUB_OUTPUT
           echo "mix=cache-mix-${{ hashFiles('**/mix.lock', '.tool-versions') }}" >> $GITHUB_OUTPUT
       - name: asdf cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.asdf
           key: ${{ steps.cache-keys.outputs.asdf }}
@@ -46,7 +46,7 @@ jobs:
         if: steps.asdf-cache.outputs.cache-hit != 'true'
       - name: Mix cache
         id: deps-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             deps
@@ -67,7 +67,7 @@ jobs:
     needs: setup
     steps:
       - name: asdf cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ~/.asdf
           key: ${{ needs.setup.outputs.cache-key-asdf }}
@@ -75,7 +75,7 @@ jobs:
         uses: mbta/actions/reshim-asdf@v2
       - uses: actions/checkout@v4
       - name: Restore Mix cache
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: |
             deps

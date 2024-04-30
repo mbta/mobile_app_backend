@@ -1,6 +1,5 @@
 defmodule MBTAV3API.JsonApi.Params do
   alias MBTAV3API.JsonApi.FilterValue
-  alias MBTAV3API.JsonApi.Object
 
   @type sort_param :: {atom(), :asc | :desc}
   @type fields_param :: {atom(), list(atom())}
@@ -25,26 +24,26 @@ defmodule MBTAV3API.JsonApi.Params do
       ...>     include: :route,
       ...>     filter: [route: ["Green-B", "Red"], canonical: true]
       ...>   ],
-      ...>   :route_pattern
+      ...>   MBTAV3API.RoutePattern
       ...> )
       %{
         "sort" => "name",
         "fields[route]" => "color,short_name",
-        "fields[route_pattern]" => "direction_id,name,sort_order",
+        "fields[route_pattern]" => "canonical,direction_id,name,sort_order,typicality",
         "include" => "route",
         "filter[route]" => "Green-B,Red",
         "filter[canonical]" => "true"
       }
 
   """
-  @spec flatten_params(t(), atom()) :: %{String.t() => String.t()}
-  def flatten_params(params, root_type) do
+  @spec flatten_params(t(), module()) :: %{String.t() => String.t()}
+  def flatten_params(params, root_module) do
     Map.merge(
       Map.merge(
         sort(params[:sort]),
-        fields(root_type, params[:include], Keyword.get(params, :fields, []))
+        fields(root_module, params[:include], Keyword.get(params, :fields, []))
       ),
-      Map.merge(include(params[:include]), filter(params[:filter]))
+      Map.merge(include(params[:include]), filter(root_module, params[:filter]))
     )
   end
 
@@ -61,28 +60,28 @@ defmodule MBTAV3API.JsonApi.Params do
     }
   end
 
-  @spec fields(atom(), nil | include_param(), [fields_param()]) :: %{String.t() => String.t()}
-  defp fields(root_type, include, overrides) do
-    included_types(root_type, include)
+  @spec fields(module(), nil | include_param(), [fields_param()]) :: %{String.t() => String.t()}
+  defp fields(root_module, include, overrides) do
+    included_modules(root_module, include)
     |> Enum.uniq()
-    |> Enum.map(&{&1, Object.module_for(&1).fields()})
+    |> Enum.map(&{&1.jsonapi_type(), &1.fields()})
     |> Keyword.merge(overrides)
     |> Map.new(fn {type, fields} -> {"fields[#{type}]", Enum.join(fields, ",")} end)
   end
 
-  defp included_types(root_type, nil), do: [root_type]
+  defp included_modules(root_module, nil), do: [root_module]
 
-  defp included_types(root_type, include) when is_atom(include) do
-    [root_type, Map.fetch!(Object.module_for(root_type).includes(), include)]
+  defp included_modules(root_module, include) when is_atom(include) do
+    [root_module, Map.fetch!(root_module.includes(), include)]
   end
 
-  defp included_types(root_type, {include, sub_include}) do
-    [^root_type, included] = included_types(root_type, include)
-    [root_type, included] ++ included_types(included, sub_include)
+  defp included_modules(root_module, {include, sub_include}) do
+    [^root_module, included] = included_modules(root_module, include)
+    [root_module, included] ++ included_modules(included, sub_include)
   end
 
-  defp included_types(root_type, includes) when is_list(includes) do
-    Enum.flat_map(includes, &included_types(root_type, &1))
+  defp included_modules(root_module, includes) when is_list(includes) do
+    Enum.flat_map(includes, &included_modules(root_module, &1))
   end
 
   @spec include(nil | include_param()) :: %{String.t() => String.t()}
@@ -105,12 +104,20 @@ defmodule MBTAV3API.JsonApi.Params do
     Stream.flat_map(includes, &flat_include/1)
   end
 
-  @spec filter(nil | [filter_param()]) :: %{String.t() => String.t()}
-  defp filter(nil), do: %{}
+  @spec filter(atom(), nil | [filter_param()]) :: %{String.t() => String.t()}
+  defp filter(_, nil), do: %{}
 
-  defp filter(filters) do
+  defp filter(module, filters) do
+    has_serialize? = function_exported?(module, :serialize_filter_value, 2)
+
     Map.new(filters, fn {field, value} ->
-      {"filter[#{field}]", FilterValue.filter_value_string(value)}
+      {"filter[#{field}]",
+       FilterValue.filter_value_string(
+         value,
+         if has_serialize? do
+           &module.serialize_filter_value(field, &1)
+         end
+       )}
     end)
   end
 end

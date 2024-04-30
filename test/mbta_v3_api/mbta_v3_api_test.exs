@@ -127,12 +127,48 @@ defmodule MBTAV3APITest do
 
       assert SSEStub.get_args(sse_stub) == [
                url: "http://example.com/ok?a=b&c=d",
-               headers: [{"x-api-key", "efg"}]
+               headers: [{"x-api-key", "efg"}],
+               idle_timeout: :timer.seconds(45)
              ]
 
       SSEStub.push_events(sse_stub, [%ServerSentEventStage.Event{event: "reset", data: "[]"}])
 
-      assert_receive {:stream_data, []}
+      assert_receive {:stream_data, %{}}
+    end
+  end
+
+  describe "stream_args/3" do
+    test "defaults to sending to self" do
+      args =
+        MBTAV3API.stream_args("/ok", %{"a" => "b", "c" => "d"},
+          base_url: "http://example.com",
+          api_key: "efg",
+          type: MBTAV3API.Stop
+        )
+
+      assert args == [
+               url: "http://example.com/ok?a=b&c=d",
+               headers: [{"x-api-key", "efg"}],
+               destination: self(),
+               type: MBTAV3API.Stop
+             ]
+    end
+
+    test "preserves topic if provided" do
+      args =
+        MBTAV3API.stream_args("/ok", %{"a" => "b", "c" => "d"},
+          base_url: "http://example.com",
+          api_key: "efg",
+          destination: "some:topic",
+          type: MBTAV3API.Trip
+        )
+
+      assert args == [
+               url: "http://example.com/ok?a=b&c=d",
+               headers: [{"x-api-key", "efg"}],
+               destination: "some:topic",
+               type: MBTAV3API.Trip
+             ]
     end
   end
 end

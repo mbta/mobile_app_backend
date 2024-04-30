@@ -7,8 +7,16 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
   doctest MBTAV3API.JsonApi.Object
 
   test "t/0" do
-    {:ok, [type: t]} = Code.Typespec.fetch_types(MBTAV3API.JsonApi.Object)
-    type_src = t |> Code.Typespec.type_to_quoted() |> Macro.to_string()
+    {:ok, types} = Code.Typespec.fetch_types(MBTAV3API.JsonApi.Object)
+
+    type_src =
+      types
+      |> Enum.find_value(fn
+        {:type, {:t, _, _} = type} -> type
+        _ -> nil
+      end)
+      |> Code.Typespec.type_to_quoted()
+      |> Macro.to_string()
 
     clauses =
       type_src
@@ -50,46 +58,106 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
     end
   end
 
-  describe "parse_one_related/1" do
+  describe "get_one_id/1" do
     test "handles nil" do
-      assert is_nil(parse_one_related(nil))
-    end
-
-    test "handles empty list" do
-      assert is_nil(parse_one_related([]))
-    end
-
-    test "handles single item" do
-      assert %MBTAV3API.Route{} = parse_one_related([%JsonApi.Item{type: "route"}])
+      assert is_nil(get_one_id(nil))
     end
 
     test "handles single reference" do
-      assert %JsonApi.Reference{} = parse_one_related([%JsonApi.Reference{}])
-    end
-
-    test "throws on multiple elements" do
-      assert_raise RuntimeError, fn ->
-        parse_one_related([:a, :b])
-      end
+      assert "123456" = get_one_id(%JsonApi.Reference{id: "123456"})
     end
   end
 
-  describe "parse_many_related/1" do
+  describe "get_many_ids/1" do
     test "handles nil" do
-      assert is_nil(parse_many_related(nil))
+      assert is_nil(get_many_ids(nil))
     end
 
     test "handles empty list" do
-      assert [] = parse_many_related([])
+      assert [] = get_many_ids([])
     end
 
     test "handles non-empty list" do
-      assert [%MBTAV3API.Route{}, %JsonApi.Reference{}, %MBTAV3API.Trip{}] =
-               parse_many_related([
-                 %JsonApi.Item{type: "route"},
-                 %JsonApi.Reference{},
-                 %JsonApi.Item{type: "trip"}
+      assert ["a", "b", "c"] =
+               get_many_ids([
+                 %JsonApi.Reference{id: "a"},
+                 %JsonApi.Reference{id: "b"},
+                 %JsonApi.Reference{id: "c"}
                ])
+    end
+  end
+
+  test "__using__/1" do
+    expected =
+      quote do
+        alias MBTAV3API.JsonApi
+
+        @behaviour JsonApi.Object
+
+        Module.put_attribute(__MODULE__, :jsonapi_object_renames, %{a_raw: :a})
+
+        @type id :: String.t()
+
+        @impl JsonApi.Object
+        def jsonapi_type, do: :object_test
+
+        @after_compile JsonApi.Object
+      end
+      |> Macro.to_string()
+
+    renames_arg = Macro.escape(%{a_raw: :a})
+
+    actual =
+      quote do
+        MBTAV3API.JsonApi.Object.__using__(renames: unquote(renames_arg))
+      end
+      |> Macro.expand_once(__ENV__)
+      |> Macro.to_string()
+
+    assert expected == actual
+  end
+
+  describe "__after_compile__/2" do
+    test "correctly raises errors" do
+      bad_module =
+        quote do
+          defmodule BadModule do
+            use MBTAV3API.JsonApi.Object
+
+            defstruct [:id, :f1, :f2, :f3, :r2_id, :r3_id]
+
+            @impl true
+            def fields, do: [:f1, :f2, :f3, :f4]
+
+            @impl true
+            def includes, do: %{r1: MBTAV3API.Stop, r2: MBTAV3API.Trip, r3: MBTAV3API.Alert}
+          end
+        end
+
+      assert_raise RuntimeError,
+                   "Bad object struct BadModule: struct keys [..., :f3, :r2_id, ...] don't match JsonApi.Object `fields() ++ includes()` [..., :f3, :f4, :r1_id, :r2_id, ...]",
+                   fn ->
+                     Code.compile_quoted(bad_module)
+                   end
+    end
+
+    test "accepts renames" do
+      good_module =
+        quote do
+          defmodule GoodModule do
+            use MBTAV3API.JsonApi.Object, renames: %{field_raw: :field, related_raw: :related}
+
+            defstruct [:id, :field, :related_id]
+
+            @impl true
+            def fields, do: [:field_raw]
+
+            @impl true
+            def includes, do: %{related_raw: MBTAV3API.Stop}
+          end
+        end
+
+      assert [{GoodModule, _}] = Code.compile_quoted(good_module)
     end
   end
 end

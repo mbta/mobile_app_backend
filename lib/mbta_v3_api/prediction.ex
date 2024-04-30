@@ -1,7 +1,6 @@
 defmodule MBTAV3API.Prediction do
-  alias MBTAV3API.JsonApi
-
-  @behaviour JsonApi.Object
+  use MBTAV3API.JsonApi.Object, renames: %{revenue_status: :revenue}
+  require Util
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -12,10 +11,18 @@ defmodule MBTAV3API.Prediction do
           schedule_relationship: schedule_relationship(),
           status: String.t(),
           stop_sequence: integer() | nil,
-          trip: MBTAV3API.Trip.t() | JsonApi.Reference.t() | nil
+          route_id: String.t(),
+          stop_id: String.t(),
+          trip_id: String.t(),
+          vehicle_id: String.t() | nil
         }
-  @type schedule_relationship ::
-          :added | :cancelled | :no_data | :skipped | :unscheduled | :scheduled
+  Util.declare_enum(
+    :schedule_relationship,
+    Util.enum_values(
+      :uppercase_string,
+      [:added, :cancelled, :no_data, :skipped, :unscheduled]
+    ) ++ [scheduled: nil]
+  )
 
   @derive Jason.Encoder
   defstruct [
@@ -27,7 +34,10 @@ defmodule MBTAV3API.Prediction do
     :schedule_relationship,
     :status,
     :stop_sequence,
-    :trip
+    :route_id,
+    :stop_id,
+    :trip_id,
+    :vehicle_id
   ]
 
   def fields do
@@ -42,30 +52,31 @@ defmodule MBTAV3API.Prediction do
     ]
   end
 
-  def includes, do: %{trip: :trip}
-
-  @spec stream_all(JsonApi.Params.t(), Keyword.t()) ::
-          MBTAV3API.Stream.Supervisor.on_start_instance()
-  def stream_all(params, opts \\ []) do
-    params = JsonApi.Params.flatten_params(params, :prediction)
-    opts = Keyword.put(opts, :type, __MODULE__)
-
-    MBTAV3API.start_stream("/predictions", params, opts)
+  def includes do
+    %{
+      route: MBTAV3API.Route,
+      stop: MBTAV3API.Stop,
+      trip: MBTAV3API.Trip,
+      vehicle: MBTAV3API.Vehicle
+    }
   end
 
   @spec parse(JsonApi.Item.t()) :: t()
   def parse(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      arrival_time: Util.parse_optional_datetime(item.attributes["arrival_time"]),
-      departure_time: Util.parse_optional_datetime(item.attributes["departure_time"]),
+      arrival_time: Util.parse_optional_datetime!(item.attributes["arrival_time"]),
+      departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
       direction_id: item.attributes["direction_id"],
       revenue: parse_revenue_status(item.attributes["revenue_status"]),
       schedule_relationship:
         parse_schedule_relationship(item.attributes["schedule_relationship"]),
       stop_sequence: item.attributes["stop_sequence"],
       status: item.attributes["status"],
-      trip: JsonApi.Object.parse_one_related(item.relationships["trip"])
+      route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
+      stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
+      trip_id: JsonApi.Object.get_one_id(item.relationships["trip"]),
+      vehicle_id: JsonApi.Object.get_one_id(item.relationships["vehicle"])
     }
   end
 
@@ -73,12 +84,4 @@ defmodule MBTAV3API.Prediction do
   defp parse_revenue_status("REVENUE"), do: true
   defp parse_revenue_status("NON_REVENUE"), do: false
   defp parse_revenue_status(nil), do: true
-
-  @spec parse_schedule_relationship(String.t() | nil) :: schedule_relationship()
-  defp parse_schedule_relationship("ADDED"), do: :added
-  defp parse_schedule_relationship("CANCELLED"), do: :cancelled
-  defp parse_schedule_relationship("NO_DATA"), do: :no_data
-  defp parse_schedule_relationship("SKIPPED"), do: :skipped
-  defp parse_schedule_relationship("UNSCHEDULED"), do: :unscheduled
-  defp parse_schedule_relationship(nil), do: :scheduled
 end

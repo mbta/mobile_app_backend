@@ -1,0 +1,19 @@
+# Configuration for the [MBTA v3 API](https://github.com/mbta/api)
+# Used for reading static and realtime GTFS data
+export API_URL=https://api-dev.mbtace.com/
+export API_KEY=
+
+# Configuration for [OpenTripPlanner](https://github.com/mbta/otp-deploy)
+# Used for generating trip plans
+export OTP_URL=
+
+# Configuration for [Alglolia](https://www.algolia.com/doc/rest-api/search/)
+# Used to power search bar
+export ALGOLIA_APP_ID=
+export ALGOLIA_SEARCH_KEY=
+export ALGOLIA_READ_URL=
+
+# Configuration for [Sentry](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
+# Used for error logging
+export SENTRY_DSN=
+export SENTRY_ENV=local

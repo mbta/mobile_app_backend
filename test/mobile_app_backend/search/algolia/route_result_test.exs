@@ -20,7 +20,7 @@ defmodule MobileAppBackend.Search.Algolia.RouteResultTest do
                name: "33Name",
                long_name: "33 Long Name",
                rank: 5,
-               route_type: 3
+               route_type: :bus
              } == RouteResult.parse(response)
     end
   end

@@ -1,6 +1,7 @@
 defmodule MBTAV3API.Stream.StateTest do
   use ExUnit.Case, async: true
 
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
@@ -8,7 +9,7 @@ defmodule MBTAV3API.Stream.StateTest do
   alias ServerSentEventStage.Event
 
   describe "apply_events/2" do
-    test "adds, resolving references" do
+    test "adds" do
       green_b = %Route{
         id: "Green-B",
         color: "00843D",
@@ -20,111 +21,107 @@ defmodule MBTAV3API.Stream.StateTest do
         text_color: "FFFFFF"
       }
 
-      state =
-        State.new()
-        |> put_in([Route, "Green-B"], green_b)
+      state = JsonApi.Object.to_full_map([green_b])
 
       assert State.apply_events(state, [
                %Event{
                  event: "add",
                  data:
-                   ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
+                   ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
                }
-             ]) == %State{
-               data: %{
-                 Route => %{"Green-B" => green_b},
-                 RoutePattern => %{
-                   "Green-B-812-0" => %RoutePattern{
-                     id: "Green-B-812-0",
-                     direction_id: 0,
-                     name: "Government Center - Boston College",
-                     sort_order: 100_320_000,
-                     representative_trip: nil,
-                     route: green_b
-                   }
+             ]) ==
+               JsonApi.Object.to_full_map([
+                 green_b,
+                 %RoutePattern{
+                   id: "Green-B-812-0",
+                   direction_id: 0,
+                   name: "Government Center - Boston College",
+                   sort_order: 100_320_000,
+                   typicality: :typical,
+                   representative_trip_id: nil,
+                   route_id: "Green-B"
                  }
-               }
-             }
+               ])
     end
 
     test "removes" do
       state =
-        State.new()
-        |> put_in([Stop, "place-boyls"], %Stop{
-          id: "place-boyls",
-          latitude: 42.35302,
-          longitude: -71.06459,
-          name: "Boylston",
-          parent_station: nil
-        })
+        JsonApi.Object.to_full_map([
+          %Stop{
+            id: "place-boyls",
+            latitude: 42.35302,
+            longitude: -71.06459,
+            name: "Boylston",
+            parent_station_id: nil
+          }
+        ])
 
       assert State.apply_events(state, [
                %Event{event: "remove", data: ~s({"id":"place-boyls","type":"stop"})}
-             ]) == %State{data: %{Stop => %{}}}
+             ]) == JsonApi.Object.to_full_map([])
     end
 
     test "updates" do
       state =
-        State.new()
-        |> put_in([Stop, "place-boyls"], %Stop{
-          id: "place-boyls",
-          latitude: 42.35302,
-          longitude: -71.06459,
-          name: "Boylston",
-          parent_station: nil
-        })
+        JsonApi.Object.to_full_map([
+          %Stop{
+            id: "place-boyls",
+            latitude: 42.35302,
+            longitude: -71.06459,
+            name: "Boylston",
+            parent_station_id: nil
+          }
+        ])
 
       assert State.apply_events(state, [
                %Event{
                  event: "update",
                  data:
-                   ~s({"attributes":{"latitude":-42.35302,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
+                   ~s({"attributes":{"latitude":-42.35302,"location_type":3,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
                }
-             ]) == %State{
-               data: %{
-                 Stop => %{
-                   "place-boyls" => %Stop{
-                     id: "place-boyls",
-                     latitude: -42.35302,
-                     longitude: 71.06459,
-                     name: "Not Boylston",
-                     parent_station: nil
-                   }
+             ]) ==
+               JsonApi.Object.to_full_map([
+                 %Stop{
+                   id: "place-boyls",
+                   latitude: -42.35302,
+                   longitude: 71.06459,
+                   name: "Not Boylston",
+                   location_type: :generic_node,
+                   parent_station_id: nil
                  }
-               }
-             }
+               ])
     end
 
     test "resets" do
       state =
-        State.new()
-        |> put_in([Stop, "place-boyls"], %Stop{
-          id: "place-boyls",
-          latitude: 42.35302,
-          longitude: -71.06459,
-          name: "Boylston",
-          parent_station: nil
-        })
+        JsonApi.Object.to_full_map([
+          %Stop{
+            id: "place-boyls",
+            latitude: 42.35302,
+            location_type: :station,
+            longitude: -71.06459,
+            name: "Boylston",
+            parent_station_id: nil
+          }
+        ])
 
       assert State.apply_events(state, [
                %Event{
                  event: "reset",
                  data:
-                   ~s([{"attributes":{"latitude":42.377359,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
+                   ~s([{"attributes":{"latitude":42.377359,"location_type":1,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
                }
-             ]) == %State{
-               data: %{
-                 Stop => %{
-                   "place-unsqu" => %Stop{
-                     id: "place-unsqu",
-                     latitude: 42.377359,
-                     longitude: -71.094761,
-                     name: "Union Square",
-                     parent_station: nil
-                   }
+             ]) ==
+               JsonApi.Object.to_full_map([
+                 %Stop{
+                   id: "place-unsqu",
+                   latitude: 42.377359,
+                   longitude: -71.094761,
+                   name: "Union Square",
+                   location_type: :station,
+                   parent_station_id: nil
                  }
-               }
-             }
+               ])
     end
   end
 end

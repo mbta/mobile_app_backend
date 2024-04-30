@@ -58,7 +58,7 @@ defmodule MobileAppBackend.MixProject do
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
@@ -66,6 +66,7 @@ defmodule MobileAppBackend.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:ex_machina, "~> 2.7.0", only: :test},
       {:mox, "~> 1.0", only: :test},
       {:uniq, "~> 0.6", only: :test},
       {:req, "~> 0.3"},
@@ -73,7 +74,8 @@ defmodule MobileAppBackend.MixProject do
       {:timex, "~> 3.7"},
       {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
       {:absinthe_client, "~> 0.1.0"},
-      {:server_sent_event_stage, "~> 1.1"}
+      {:server_sent_event_stage, "~> 1.2"},
+      {:polyline, "~> 1.4", only: :test}
     ]
   end
 

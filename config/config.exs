@@ -13,6 +13,7 @@ config :mobile_app_backend,
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],
+  http: [compress: true],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
     formats: [html: MobileAppBackendWeb.ErrorHTML, json: MobileAppBackendWeb.ErrorJSON],
@@ -24,6 +25,13 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   route_index: "routes_test",
   stop_index: "stops_test"
+
+config :mobile_app_backend, :logger, [
+  {:handler, :sentry_handler, Sentry.LoggerHandler,
+   %{
+     config: %{metadata: :all}
+   }}
+]
 
 # Configure esbuild (the version is required)
 config :esbuild,
