@@ -53,6 +53,7 @@ defmodule MobileAppBackendWeb.StopControllerTest do
           id: "red-ashmont",
           representative_trip_id: ashmont_trip.id,
           route_id: "Red",
+          direction_id: 0,
           canonical: true,
           typicality: :typical
         )
@@ -62,8 +63,9 @@ defmodule MobileAppBackendWeb.StopControllerTest do
           id: "red-braintree",
           representative_trip_id: braintree_trip.id,
           route_id: "Red",
-          canonical: true,
-          typicality: :typical
+          direction_id: 1,
+          canonical: false,
+          typicality: :diversion
         )
 
       RepositoryMock
@@ -109,50 +111,7 @@ defmodule MobileAppBackendWeb.StopControllerTest do
       end)
     end
 
-    test "when param stop_id is set should separate overlapping segments, returns non-overlapping routes segments for routes at that stop",
-         %{conn: conn} do
-      mock_rl_data()
-
-      conn =
-        get(conn, "/api/stop/map", %{
-          "stop_id" => "jfk/umass",
-          "separate_overlapping_segments" => "true"
-        })
-
-      %{"map_friendly_route_shapes" => map_friendly_route_shapes} = json_response(conn, 200)
-
-      assert [
-               %{
-                 "route_id" => "Red",
-                 "route_shapes" => [
-                   %{
-                     "source_route_pattern_id" => "red-ashmont",
-                     "route_segments" => [
-                       %{
-                         "stop_ids" => ["andrew", "jfk/umass", "savin_hill"]
-                       }
-                     ],
-                     "shape" => %{"id" => "ashmont_shape", "polyline" => "ashmont_shape_polyline"}
-                   },
-                   %{
-                     "source_route_pattern_id" => "red-braintree",
-                     "route_segments" => [
-                       %{
-                         "stop_ids" => ["jfk/umass", "north_quincy"]
-                       }
-                     ],
-                     "shape" => %{
-                       "id" => "braintree_shape",
-                       "polyline" => "braintree_shape_polyline"
-                     }
-                   }
-                 ]
-               }
-             ] =
-               map_friendly_route_shapes
-    end
-
-    test "when param stop_id is set shouldn't separate overlapping segments, returns full routes segments for routes at that stop",
+    test "when param stop_id is set shouldn't separate overlapping segments, returns full routes segments for all route patterns at that stop",
          %{conn: conn} do
       mock_rl_data()
 

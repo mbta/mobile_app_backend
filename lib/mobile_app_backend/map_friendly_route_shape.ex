@@ -13,12 +13,13 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
   @type t :: %__MODULE__{
           source_route_pattern_id: RoutePattern.id(),
           source_route_id: Route.id(),
+          direction_id: 0 | 1,
           route_segments: [RouteSegment.t()],
           shape: Shape.t()
         }
 
   @derive Jason.Encoder
-  defstruct [:source_route_pattern_id, :source_route_id, :route_segments, :shape]
+  defstruct [:source_route_pattern_id, :source_route_id, :direction_id, :route_segments, :shape]
 
   @spec from_segments(
           [RouteSegment.t()],
@@ -37,6 +38,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
       Map.fetch!(route_patterns_by_id, source_route_pattern_id).sort_order
     end)
     |> Enum.map(fn {{source_route_pattern_id, source_route_id}, route_segments} ->
+      direction_id = Map.fetch!(route_patterns_by_id, source_route_pattern_id).direction_id
       trip_id = Map.fetch!(route_patterns_by_id, source_route_pattern_id).representative_trip_id
       shape_id = Map.fetch!(trips_by_id, trip_id).shape_id
       shape = Map.fetch!(shapes_by_id, shape_id)
@@ -44,6 +46,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShape do
       %__MODULE__{
         source_route_pattern_id: source_route_pattern_id,
         source_route_id: source_route_id,
+        direction_id: direction_id,
         route_segments: route_segments,
         shape: shape
       }
