@@ -1,0 +1,156 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "description": "West Roxbury - Commuter Rail - Track 1 (All Trains)",
+        "latitude": 42.281358,
+        "location_type": 0,
+        "longitude": -71.160065,
+        "name": "West Roxbury",
+        "platform_name": "Track 1 (All Trains)",
+        "vehicle_type": 2
+      },
+      "id": "NB-0080-S",
+      "links": {
+        "self": "/stops/NB-0080-S"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=NB-0080-S"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-NB-0080",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    }
+  ],
+  "included": [
+    {
+      "attributes": {
+        "description": "West Roxbury - Commuter Rail Outbound Shuttle",
+        "latitude": 42.281487,
+        "location_type": 0,
+        "longitude": -71.159678,
+        "name": "West Roxbury",
+        "platform_name": "Outbound Shuttle",
+        "vehicle_type": 3
+      },
+      "id": "NB-0080-B0",
+      "links": {
+        "self": "/stops/NB-0080-B0"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=NB-0080-B0"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-NB-0080",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "description": "West Roxbury - Commuter Rail Boston Shuttle",
+        "latitude": 42.281377,
+        "location_type": 0,
+        "longitude": -71.159686,
+        "name": "West Roxbury",
+        "platform_name": "Boston Shuttle",
+        "vehicle_type": 3
+      },
+      "id": "NB-0080-B1",
+      "links": {
+        "self": "/stops/NB-0080-B1"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=NB-0080-B1"
+          }
+        },
+        "parent_station": {
+          "data": {
+            "id": "place-NB-0080",
+            "type": "stop"
+          }
+        },
+        "zone": {
+          "data": null
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "description": null,
+        "latitude": 42.281358,
+        "location_type": 1,
+        "longitude": -71.160065,
+        "name": "West Roxbury",
+        "platform_name": null,
+        "vehicle_type": null
+      },
+      "id": "place-NB-0080",
+      "links": {
+        "self": "/stops/place-NB-0080"
+      },
+      "relationships": {
+        "child_stops": {
+          "data": [
+            {
+              "id": "NB-0080-B0",
+              "type": "stop"
+            },
+            {
+              "id": "NB-0080-B1",
+              "type": "stop"
+            },
+            {
+              "id": "NB-0080-S",
+              "type": "stop"
+            }
+          ]
+        },
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NB-0080"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    }
+  ],
+  "jsonapi": {
+    "version": "1.0"
+  }
+}

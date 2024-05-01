@@ -22,6 +22,12 @@ defmodule MobileAppBackendWeb.StopControllerTest do
       jfk_child_2 =
         build(:stop, id: "jfk/umass-2", location_type: :stop, parent_station_id: jfk.id)
 
+      jfk_child_3 =
+        build(:stop, id: "jfk/umass-3", location_type: :generic_node, parent_station_id: jfk.id)
+
+      jfk_child_4 =
+        build(:stop, id: "jfk/umass-4", location_type: :entrance_exit, parent_station_id: jfk.id)
+
       savin = build(:stop, id: "savin_hill", location_type: :station)
       north_quincy = build(:stop, id: "north_quincy", location_type: :station)
 
@@ -100,7 +106,7 @@ defmodule MobileAppBackendWeb.StopControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:id) do
           "jfk/umass" ->
-            ok_response([], [jfk_child_1, jfk_child_2])
+            ok_response([], [jfk_child_1, jfk_child_2, jfk_child_3, jfk_child_4])
         end
       end)
     end
@@ -155,7 +161,8 @@ defmodule MobileAppBackendWeb.StopControllerTest do
 
       assert %{
                "jfk/umass-1" => %{"id" => "jfk/umass-1"},
-               "jfk/umass-2" => %{"id" => "jfk/umass-2"}
+               "jfk/umass-2" => %{"id" => "jfk/umass-2"},
+               "jfk/umass-4" => %{"id" => "jfk/umass-4"}
              } = child_stops
     end
   end
