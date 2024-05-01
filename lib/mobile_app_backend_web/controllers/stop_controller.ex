@@ -3,15 +3,11 @@ defmodule MobileAppBackendWeb.StopController do
   alias MobileAppBackendWeb.ShapesController
   use MobileAppBackendWeb, :controller
 
-  def map(conn, %{"stop_id" => stop_id} = params) do
-    should_separate_overlapping_segments =
-      Map.get(params, "separate_overlapping_segments", "false")
-
+  def map(conn, %{"stop_id" => stop_id}) do
     routes_filter = [stop: [stop_id]]
 
     json(conn, %{
-      map_friendly_route_shapes:
-        ShapesController.filtered_map_shapes(routes_filter, should_separate_overlapping_segments),
+      map_friendly_route_shapes: ShapesController.filtered_map_shapes(routes_filter),
       child_stops: fetch_all_child_stops(stop_id)
     })
   end
