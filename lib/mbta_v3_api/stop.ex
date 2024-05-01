@@ -9,6 +9,8 @@ defmodule MBTAV3API.Stop do
           name: String.t(),
           location_type: location_type(),
           vehicle_type: MBTAV3API.Route.type() | nil,
+          description: String.t() | nil,
+          platform_name: String.t() | nil,
           child_stop_ids: [String.t()] | nil,
           parent_station_id: String.t() | nil
         }
@@ -25,9 +27,30 @@ defmodule MBTAV3API.Stop do
     :name,
     :location_type,
     :vehicle_type,
+    :description,
+    :platform_name,
     :child_stop_ids,
     :parent_station_id
   ]
+
+  @impl JsonApi.Object
+  def fields,
+    do: [
+      :latitude,
+      :longitude,
+      :name,
+      :location_type,
+      :vehicle_type,
+      :description,
+      :platform_name
+    ]
+
+  @impl JsonApi.Object
+  def includes,
+    do: %{
+      child_stops: __MODULE__,
+      parent_station: __MODULE__
+    }
 
   defimpl Jason.Encoder do
     def encode(value, opts) do
@@ -62,16 +85,6 @@ defmodule MBTAV3API.Stop do
   end
 
   @impl JsonApi.Object
-  def fields, do: [:latitude, :longitude, :name, :location_type, :vehicle_type]
-
-  @impl JsonApi.Object
-  def includes,
-    do: %{
-      child_stops: __MODULE__,
-      parent_station: __MODULE__
-    }
-
-  @impl JsonApi.Object
   def serialize_filter_value(:route_type, route_type) do
     MBTAV3API.Route.serialize_type(route_type)
   end
@@ -97,6 +110,8 @@ defmodule MBTAV3API.Stop do
         if vehicle_type = item.attributes["vehicle_type"] do
           MBTAV3API.Route.parse_type(vehicle_type)
         end,
+      description: item.attributes["description"],
+      platform_name: item.attributes["platform_name"],
       parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"]),
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"])
     }
