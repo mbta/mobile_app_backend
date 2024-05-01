@@ -31,8 +31,21 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
           stop_ids: ["rp2_segment1_stop1", "rp2_segment1_stop2"]
         }
 
-      rp1 = build(:route_pattern, %{id: "rp1", representative_trip_id: "rp1_trip", sort_order: 2})
-      rp2 = build(:route_pattern, %{id: "rp2", representative_trip_id: "rp2_trip", sort_order: 1})
+      rp1 =
+        build(:route_pattern, %{
+          id: "rp1",
+          representative_trip_id: "rp1_trip",
+          sort_order: 2,
+          direction_id: 0
+        })
+
+      rp2 =
+        build(:route_pattern, %{
+          id: "rp2",
+          representative_trip_id: "rp2_trip",
+          sort_order: 1,
+          direction_id: 1
+        })
 
       rp1_trip = build(:trip, %{id: "rp1_trip", shape_id: "rp1_shape"})
       rp2_trip = build(:trip, %{id: "rp2_trip", shape_id: "rp2_shape"})
@@ -44,6 +57,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                %MapFriendlyRouteShape{
                  source_route_pattern_id: "rp2",
                  source_route_id: "OL",
+                 direction_id: 1,
                  shape: ^rp2_shape,
                  route_segments: [
                    %{
@@ -54,6 +68,7 @@ defmodule MobileAppBackend.MapFriendlyRouteShapeTest do
                %MapFriendlyRouteShape{
                  source_route_pattern_id: "rp1",
                  source_route_id: "RL",
+                 direction_id: 0,
                  shape: ^rp1_shape,
                  route_segments: [
                    %{
