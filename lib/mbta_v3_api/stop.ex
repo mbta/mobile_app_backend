@@ -34,8 +34,8 @@ defmodule MBTAV3API.Stop do
   ]
 
   @impl JsonApi.Object
-  def fields,
-    do: [
+  def fields do
+    [
       :latitude,
       :longitude,
       :name,
@@ -44,13 +44,10 @@ defmodule MBTAV3API.Stop do
       :description,
       :platform_name
     ]
+  end
 
   @impl JsonApi.Object
-  def includes,
-    do: %{
-      child_stops: __MODULE__,
-      parent_station: __MODULE__
-    }
+  def includes, do: %{child_stops: __MODULE__, parent_station: __MODULE__}
 
   defimpl Jason.Encoder do
     def encode(value, opts) do
