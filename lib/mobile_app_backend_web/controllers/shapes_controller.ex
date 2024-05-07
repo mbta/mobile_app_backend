@@ -9,36 +9,34 @@ defmodule MobileAppBackendWeb.ShapesController do
     should_separate_overlapping_segments =
       Map.get(params, "separate_overlapping_segments", "false")
 
-    routes_filter = [
-      type: [:light_rail, :heavy_rail, :commuter_rail]
-    ]
+    data =
+      [type: [:light_rail, :heavy_rail, :commuter_rail]]
+      |> fetch_shape_data_for_map()
+      |> map_friendly_route_shapes(should_separate_overlapping_segments == "true")
 
-    json(conn, %{
-      map_friendly_route_shapes:
-        filtered_map_shapes(routes_filter, should_separate_overlapping_segments)
-    })
+    json(conn, %{map_friendly_route_shapes: data})
   end
 
-  def filtered_map_shapes(routes_filter, should_separate_overlapping_segments) do
-    routes_filter
-    |> fetch_shape_data_for_map()
-    |> map_friendly_route_shapes(should_separate_overlapping_segments)
-  end
+  @doc """
+  Build a list of map-friendly shapes. Groups GL and subsets of CR routes in the detection of what route patterns overlap.
 
-  defp map_friendly_route_shapes(
-         %{
-           route_patterns: route_patterns,
-           routes_by_id: routes_by_id,
-           trips_by_id: trips_by_id,
-           shapes_by_id: shapes_by_id,
-           stops_by_id: stops_by_id
-         },
-         should_separate_overlapping_segments
-       ) do
+  * `should_separate_overlapping_segments` : Whether to break down overlapping route patterns into separate non-overlapping segments. Defaults to false
+  """
+  def map_friendly_route_shapes(
+        %{
+          route_patterns: route_patterns,
+          routes_by_id: routes_by_id,
+          trips_by_id: trips_by_id,
+          shapes_by_id: shapes_by_id,
+          stops_by_id: stops_by_id
+        },
+        should_separate_overlapping_segments \\ false
+      ) do
     segment_fn =
-      case should_separate_overlapping_segments do
-        "true" -> &RouteSegment.non_overlapping_segments/4
-        _ -> &RouteSegment.segment_per_pattern/4
+      if should_separate_overlapping_segments do
+        &RouteSegment.non_overlapping_segments/4
+      else
+        &RouteSegment.segment_per_pattern/4
       end
 
     route_segments =
@@ -83,14 +81,14 @@ defmodule MobileAppBackendWeb.ShapesController do
         include: [:route_patterns]
       )
 
-    map_friendly_patterns =
+    patterns =
       route_patterns_by_id
       |> Map.values()
       |> Enum.filter(&(&1.direction_id == 0))
       |> RoutePattern.most_canonical_or_typical_per_route()
 
     trip_ids =
-      map_friendly_patterns
+      patterns
       |> Enum.reject(&is_nil(&1.representative_trip_id))
       |> Enum.map(& &1.representative_trip_id)
 
@@ -103,7 +101,7 @@ defmodule MobileAppBackendWeb.ShapesController do
       )
 
     %{
-      route_patterns: map_friendly_patterns,
+      route_patterns: patterns,
       routes_by_id: Map.new(routes, &{&1.id, &1}),
       trips_by_id: Map.new(trips, &{&1.id, &1}),
       shapes_by_id: shapes_by_id,

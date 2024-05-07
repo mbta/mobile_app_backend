@@ -22,6 +22,12 @@ defmodule MobileAppBackendWeb.StopControllerTest do
       jfk_child_2 =
         build(:stop, id: "jfk/umass-2", location_type: :stop, parent_station_id: jfk.id)
 
+      jfk_child_3 =
+        build(:stop, id: "jfk/umass-3", location_type: :generic_node, parent_station_id: jfk.id)
+
+      jfk_child_4 =
+        build(:stop, id: "jfk/umass-4", location_type: :entrance_exit, parent_station_id: jfk.id)
+
       savin = build(:stop, id: "savin_hill", location_type: :station)
       north_quincy = build(:stop, id: "north_quincy", location_type: :station)
 
@@ -47,6 +53,7 @@ defmodule MobileAppBackendWeb.StopControllerTest do
           id: "red-ashmont",
           representative_trip_id: ashmont_trip.id,
           route_id: "Red",
+          direction_id: 0,
           canonical: true,
           typicality: :typical
         )
@@ -56,32 +63,23 @@ defmodule MobileAppBackendWeb.StopControllerTest do
           id: "red-braintree",
           representative_trip_id: braintree_trip.id,
           route_id: "Red",
-          canonical: true,
-          typicality: :typical
+          direction_id: 1,
+          canonical: false,
+          typicality: :diversion
         )
 
       RepositoryMock
-      |> expect(:routes, 1, fn params, _opts ->
+      |> expect(:route_patterns, 1, fn params, _opts ->
         case params
              |> Keyword.get(:filter)
              |> Keyword.get(:stop) do
           ["jfk/umass"] ->
-            ok_response([red_route], [
-              ashmont_rp,
-              braintree_rp
-            ])
-        end
-      end)
-
-      RepositoryMock
-      |> expect(:trips, 1, fn params, _opts ->
-        case params
-             |> Keyword.get(:filter)
-             |> Keyword.get(:id) do
-          ["ashmont_trip", "braintree_trip"] ->
-            ok_response([ashmont_trip, braintree_trip], [
+            ok_response([ashmont_rp, braintree_rp], [
+              red_route,
               ashmont_shape,
               braintree_shape,
+              ashmont_trip,
+              braintree_trip,
               andrew,
               jfk,
               jfk_child_1,
@@ -98,55 +96,12 @@ defmodule MobileAppBackendWeb.StopControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:id) do
           "jfk/umass" ->
-            ok_response([], [jfk_child_1, jfk_child_2])
+            ok_response([], [jfk_child_1, jfk_child_2, jfk_child_3, jfk_child_4])
         end
       end)
     end
 
-    test "when param stop_id is set should separate overlapping segments, returns non-overlapping routes segments for routes at that stop",
-         %{conn: conn} do
-      mock_rl_data()
-
-      conn =
-        get(conn, "/api/stop/map", %{
-          "stop_id" => "jfk/umass",
-          "separate_overlapping_segments" => "true"
-        })
-
-      %{"map_friendly_route_shapes" => map_friendly_route_shapes} = json_response(conn, 200)
-
-      assert [
-               %{
-                 "route_id" => "Red",
-                 "route_shapes" => [
-                   %{
-                     "source_route_pattern_id" => "red-ashmont",
-                     "route_segments" => [
-                       %{
-                         "stop_ids" => ["andrew", "jfk/umass", "savin_hill"]
-                       }
-                     ],
-                     "shape" => %{"id" => "ashmont_shape", "polyline" => "ashmont_shape_polyline"}
-                   },
-                   %{
-                     "source_route_pattern_id" => "red-braintree",
-                     "route_segments" => [
-                       %{
-                         "stop_ids" => ["jfk/umass", "north_quincy"]
-                       }
-                     ],
-                     "shape" => %{
-                       "id" => "braintree_shape",
-                       "polyline" => "braintree_shape_polyline"
-                     }
-                   }
-                 ]
-               }
-             ] =
-               map_friendly_route_shapes
-    end
-
-    test "when param stop_id is set shouldn't separate overlapping segments, returns full routes segments for routes at that stop",
+    test "when param stop_id is set shouldn't separate overlapping segments, returns full routes segments for all route patterns at that stop",
          %{conn: conn} do
       mock_rl_data()
 
@@ -196,7 +151,8 @@ defmodule MobileAppBackendWeb.StopControllerTest do
 
       assert %{
                "jfk/umass-1" => %{"id" => "jfk/umass-1"},
-               "jfk/umass-2" => %{"id" => "jfk/umass-2"}
+               "jfk/umass-2" => %{"id" => "jfk/umass-2"},
+               "jfk/umass-4" => %{"id" => "jfk/umass-4"}
              } = child_stops
     end
   end
