@@ -93,4 +93,158 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
              }
            } = json_response(conn, 200)
   end
+
+  test "finds individual trip schedules if available", %{conn: conn} do
+    trip = %MBTAV3API.Trip{
+      id: "61723264",
+      direction_id: 1,
+      headsign: "Ashmont",
+      route_pattern_id: "Mattapan-_-1",
+      shape_id: "899_0008",
+      stop_ids: nil
+    }
+
+    trip_id = trip.id
+
+    s1 = %MBTAV3API.Schedule{
+      id: "schedule-61723264-70276-1",
+      arrival_time: nil,
+      departure_time: ~B[2024-05-07 12:30:00],
+      drop_off_type: :unavailable,
+      pick_up_type: :regular,
+      stop_sequence: 1,
+      route_id: "Mattapan",
+      stop_id: "70276",
+      trip_id: trip_id
+    }
+
+    s2 = %MBTAV3API.Schedule{
+      id: "schedule-61723264-70274-2",
+      arrival_time: ~B[2024-05-07 12:31:00],
+      departure_time: ~B[2024-05-07 12:31:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 2,
+      route_id: "Mattapan",
+      stop_id: "70274",
+      trip_id: trip_id
+    }
+
+    RepositoryMock
+    |> expect(:schedules, fn params, _opts ->
+      assert [
+               filter: [trip: ^trip_id],
+               sort: {:stop_sequence, :asc}
+             ] = params
+
+      ok_response([s1, s2])
+    end)
+
+    conn =
+      get(conn, "/api/schedules", %{trip_id: trip_id})
+
+    assert %{
+             "type" => "schedules",
+             "schedules" => [
+               %{
+                 "arrival_time" => nil,
+                 "departure_time" => "2024-05-07T12:30:00-04:00",
+                 "drop_off_type" => "unavailable",
+                 "id" => "schedule-61723264-70276-1",
+                 "pick_up_type" => "regular",
+                 "route_id" => "Mattapan",
+                 "stop_id" => "70276",
+                 "stop_sequence" => 1,
+                 "trip_id" => "61723264"
+               },
+               %{
+                 "arrival_time" => "2024-05-07T12:31:00-04:00",
+                 "departure_time" => "2024-05-07T12:31:00-04:00",
+                 "drop_off_type" => "regular",
+                 "id" => "schedule-61723264-70274-2",
+                 "pick_up_type" => "regular",
+                 "route_id" => "Mattapan",
+                 "stop_id" => "70274",
+                 "stop_sequence" => 2,
+                 "trip_id" => "61723264"
+               }
+             ]
+           } = json_response(conn, 200)
+  end
+
+  test "falls back to route pattern stop_ids for added trips", %{conn: conn} do
+    added_trip = %MBTAV3API.Trip{
+      id: "ADDED-1591579641",
+      direction_id: 0,
+      headsign: "Mattapan",
+      route_pattern_id: "Mattapan-_-0",
+      shape_id: "canonical-899_0005",
+      stop_ids: nil
+    }
+
+    added_trip_id = added_trip.id
+
+    route_pattern = %MBTAV3API.RoutePattern{
+      id: "Mattapan-_-0",
+      canonical: true,
+      direction_id: 0,
+      name: "Ashmont - Mattapan",
+      sort_order: 100_110_000,
+      typicality: :typical,
+      representative_trip_id: "canonical-Mattapan-C1-0",
+      route_id: "Mattapan"
+    }
+
+    canonical_trip = %MBTAV3API.Trip{
+      id: "canonical-Mattapan-C1-0",
+      direction_id: 0,
+      headsign: "Mattapan",
+      route_pattern_id: "Mattapan-_-0",
+      shape_id: "canonical-899_0005",
+      stop_ids: ["70261", "70263", "70265", "70267", "70269", "70271", "70273", "70275"]
+    }
+
+    RepositoryMock
+    |> expect(:schedules, fn [filter: [trip: ^added_trip_id], sort: _], _ -> ok_response([]) end)
+    |> expect(:trips, fn [filter: [id: ^added_trip_id], include: _, fields: _], _ ->
+      ok_response([added_trip], [route_pattern, canonical_trip])
+    end)
+
+    conn = get(conn, "/api/schedules", %{trip_id: added_trip.id})
+
+    assert %{
+             "type" => "stop_ids",
+             "stop_ids" => [
+               "70261",
+               "70263",
+               "70265",
+               "70267",
+               "70269",
+               "70271",
+               "70273",
+               "70275"
+             ]
+           } = json_response(conn, 200)
+  end
+
+  test "does not crash if added trip has no route pattern", %{conn: conn} do
+    added_trip = %MBTAV3API.Trip{
+      id: "ADDED-1591579641",
+      direction_id: 0,
+      headsign: "Mattapan",
+      route_pattern_id: nil,
+      shape_id: "canonical-899_0005",
+      stop_ids: nil
+    }
+
+    RepositoryMock
+    |> expect(:schedules, fn [filter: [trip: _], sort: _], _ -> ok_response([]) end)
+    |> expect(:trips, fn [filter: [id: _], include: _, fields: _], _ ->
+      ok_response([added_trip])
+    end)
+
+    conn = get(conn, "/api/schedules", %{trip_id: added_trip.id})
+
+    assert %{"type" => "unknown"} = json_response(conn, 200)
+  end
 end

@@ -11,6 +11,30 @@ defmodule MobileAppBackendWeb.ScheduleController do
     json(conn, data)
   end
 
+  def schedules(conn, %{"trip_id" => trip_id}) do
+    {:ok, %{data: schedules}} =
+      Repository.schedules(filter: [trip: trip_id], sort: {:stop_sequence, :asc})
+
+    response =
+      if schedules == [] do
+        {:ok, %{included: %{trips: trips}}} =
+          Repository.trips(
+            filter: [id: trip_id],
+            include: [route_pattern: [representative_trip: :stops]],
+            fields: [stop: []]
+          )
+
+        case Map.values(trips) do
+          [] -> %{type: :unknown}
+          [%MBTAV3API.Trip{stop_ids: stop_ids}] -> %{type: :stop_ids, stop_ids: stop_ids}
+        end
+      else
+        %{type: :schedules, schedules: schedules}
+      end
+
+    json(conn, response)
+  end
+
   @spec get_filter(String.t(), String.t()) :: [JsonApi.Params.filter_param()]
   defp get_filter(stop_ids, date_time) do
     date_time = Util.parse_datetime!(date_time)
