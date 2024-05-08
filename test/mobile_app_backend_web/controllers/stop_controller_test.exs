@@ -69,27 +69,17 @@ defmodule MobileAppBackendWeb.StopControllerTest do
         )
 
       RepositoryMock
-      |> expect(:routes, 1, fn params, _opts ->
+      |> expect(:route_patterns, 1, fn params, _opts ->
         case params
              |> Keyword.get(:filter)
              |> Keyword.get(:stop) do
           ["jfk/umass"] ->
-            ok_response([red_route], [
-              ashmont_rp,
-              braintree_rp
-            ])
-        end
-      end)
-
-      RepositoryMock
-      |> expect(:trips, 1, fn params, _opts ->
-        case params
-             |> Keyword.get(:filter)
-             |> Keyword.get(:id) do
-          ["ashmont_trip", "braintree_trip"] ->
-            ok_response([ashmont_trip, braintree_trip], [
+            ok_response([ashmont_rp, braintree_rp], [
+              red_route,
               ashmont_shape,
               braintree_shape,
+              ashmont_trip,
+              braintree_trip,
               andrew,
               jfk,
               jfk_child_1,
