@@ -17,21 +17,16 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
     response =
       if schedules == [] do
-        {:ok, %{data: [trip]}} = Repository.trips(filter: [id: trip_id])
+        {:ok, %{included: %{trips: trips}}} =
+          Repository.trips(
+            filter: [id: trip_id],
+            include: [route_pattern: [representative_trip: :stops]],
+            fields: [stop: []]
+          )
 
-        if is_nil(trip.route_pattern_id) do
-          %{type: :unknown}
-        else
-          {:ok, %{included: %{trips: trips}}} =
-            Repository.route_patterns(
-              filter: [id: trip.route_pattern_id],
-              include: [representative_trip: :stops],
-              fields: [stop: []]
-            )
-
-          [representative_trip] = Map.values(trips)
-
-          %{type: :stop_ids, stop_ids: representative_trip.stop_ids}
+        case Map.values(trips) do
+          [] -> %{type: :unknown}
+          [%MBTAV3API.Trip{stop_ids: stop_ids}] -> %{type: :stop_ids, stop_ids: stop_ids}
         end
       else
         %{type: :schedules, schedules: schedules}

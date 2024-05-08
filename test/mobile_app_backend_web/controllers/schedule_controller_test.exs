@@ -206,11 +206,8 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
 
     RepositoryMock
     |> expect(:schedules, fn [filter: [trip: ^added_trip_id], sort: _], _ -> ok_response([]) end)
-    |> expect(:trips, fn [filter: [id: ^added_trip_id]], _ -> ok_response([added_trip]) end)
-    |> expect(:route_patterns, fn
-      [filter: [id: "Mattapan-_-0"], include: [representative_trip: :stops], fields: [stop: []]],
-      _ ->
-        ok_response([route_pattern], [canonical_trip])
+    |> expect(:trips, fn [filter: [id: ^added_trip_id], include: _, fields: _], _ ->
+      ok_response([added_trip], [route_pattern, canonical_trip])
     end)
 
     conn = get(conn, "/api/schedules", %{trip_id: added_trip.id})
@@ -242,7 +239,9 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
 
     RepositoryMock
     |> expect(:schedules, fn [filter: [trip: _], sort: _], _ -> ok_response([]) end)
-    |> expect(:trips, fn [filter: [id: _]], _ -> ok_response([added_trip]) end)
+    |> expect(:trips, fn [filter: [id: _], include: _, fields: _], _ ->
+      ok_response([added_trip])
+    end)
 
     conn = get(conn, "/api/schedules", %{trip_id: added_trip.id})
 
