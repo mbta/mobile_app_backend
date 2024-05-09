@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.PredictionsChannelTest do
+defmodule MobileAppBackendWeb.PredictionsForStopsChannelTest do
   use MobileAppBackendWeb.ChannelCase
 
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
@@ -11,7 +11,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
   alias MBTAV3API.Stream
   alias MBTAV3API.Trip
   alias MBTAV3API.Vehicle
-  alias MobileAppBackendWeb.PredictionsChannel
+  alias MobileAppBackendWeb.PredictionsForStopsChannel
   alias Test.Support.FakeStaticInstance
 
   setup do
@@ -268,7 +268,7 @@ defmodule MobileAppBackendWeb.PredictionsChannelTest do
       prediction2 =
         build(:prediction, stop_id: "67890", trip_id: trip2.id, vehicle_id: vehicle2.id)
 
-      assert PredictionsChannel.filter_data(
+      assert PredictionsForStopsChannel.filter_data(
                to_full_map([prediction1, prediction2, trip1, trip2, vehicle1, vehicle2]),
                [
                  "12345",
