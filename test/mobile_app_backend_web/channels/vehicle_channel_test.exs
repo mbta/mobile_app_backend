@@ -13,77 +13,57 @@ defmodule MobileAppBackendWeb.VehicleChannelTest do
   end
 
   test "returns vehicle data on join", %{socket: socket} do
-    target_vehicle = build(:vehicle)
-    other_vehicle = build(:vehicle)
+    target = build(:vehicle)
+    other = build(:vehicle)
 
     start_link_supervised!(
-      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target_vehicle, other_vehicle])}
+      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target, other])}
     )
 
-    {:ok, reply, _socket} =
-      subscribe_and_join(socket, "vehicle:id:#{target_vehicle.id}")
+    {:ok, reply, _socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
 
-    assert reply == %{vehicle: target_vehicle}
+    assert reply == %{vehicle: target}
   end
 
-  test "returns nil when there is no longer data for the vehicle", %{socket: socket} do
-    target_vehicle = build(:vehicle)
-    other_vehicle = build(:vehicle)
+  describe "handles incoming vehicles messages" do
+    setup %{socket: socket} do
+      target = build(:vehicle)
+      other = build(:vehicle)
 
-    start_link_supervised!(
-      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target_vehicle, other_vehicle])}
-    )
+      start_link_supervised!(
+        {FakeStaticInstance, topic: "vehicles", data: to_full_map([target, other])}
+      )
 
-    {:ok, _reply, _socket} =
-      subscribe_and_join(socket, "vehicle:id:#{target_vehicle.id}")
+      {:ok, _reply, _socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
+      {:ok, %{target: target, other: other}}
+    end
 
-    Stream.PubSub.broadcast!(
-      "vehicles",
-      {:stream_data, "vehicles", to_full_map([other_vehicle])}
-    )
+    test "returns nil when there is no longer data for the vehicle", %{
+      other: other
+    } do
+      broadcast_vehicles([other])
 
-    assert_push "stream_data", data
-    assert %{vehicle: nil} = data
-  end
+      assert_push "stream_data", data
+      assert %{vehicle: nil} = data
+    end
 
-  test "returns updated vehicle", %{socket: socket} do
-    target_vehicle = build(:vehicle, current_status: :stopped_at)
-    other_vehicle = build(:vehicle)
+    test "returns updated vehicle", %{target: target, other: other} do
+      updated_target = %{target | current_status: :stopped_at}
 
-    start_link_supervised!(
-      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target_vehicle, other_vehicle])}
-    )
+      broadcast_vehicles([updated_target, other])
 
-    {:ok, _reply, _socket} =
-      subscribe_and_join(socket, "vehicle:id:#{target_vehicle.id}")
+      assert_push "stream_data", data
+      assert %{vehicle: ^updated_target} = data
+    end
 
-    updated_vehicle = %{target_vehicle | current_status: :in_transit_to}
+    test "when vehicle data hasn't changed, doesn't push", %{target: target} do
+      broadcast_vehicles([target])
 
-    Stream.PubSub.broadcast!(
-      "vehicles",
-      {:stream_data, "vehicles", to_full_map([updated_vehicle, other_vehicle])}
-    )
+      refute_push "stream_data", _
+    end
 
-    assert_push "stream_data", data
-    assert %{vehicle: ^updated_vehicle} = data
-  end
-
-  test "when vehicle data hasn't changed, doesn't push", %{socket: socket} do
-    target_vehicle = build(:vehicle)
-    other_vehicle = build(:vehicle)
-
-    start_link_supervised!(
-      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target_vehicle, other_vehicle])}
-    )
-
-    {:ok, _reply, _socket} =
-      subscribe_and_join(socket, "vehicle:id:#{target_vehicle.id}")
-
-    Stream.PubSub.broadcast!(
-      "vehicles",
-      {:stream_data, "vehicles", to_full_map([target_vehicle])}
-    )
-
-    refute_push "stream_data", _
+    defp broadcast_vehicles(vehicles) do
+      Stream.PubSub.broadcast!("vehicles", {:stream_data, "vehicles", to_full_map(vehicles)})
+    end
   end
 end
