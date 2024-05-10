@@ -42,7 +42,7 @@ defmodule MobileAppBackendWeb.VehicleChannel do
     {:noreply, socket}
   end
 
-  @spec filter_data(JsonApi.Object.full_map(), String.t()) :: Vehicle
+  @spec filter_data(JsonApi.Object.full_map(), String.t()) :: %{vehicle: Vehicle.t() | nil}
   defp filter_data(all_vehicles_data, vehicle_id) do
     %{vehicle: Map.get(all_vehicles_data.vehicles, vehicle_id)}
   end
