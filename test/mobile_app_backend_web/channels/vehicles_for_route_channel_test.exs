@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.VehiclesChannelTest do
+defmodule MobileAppBackendWeb.VehiclesForRouteChannelTest do
   use MobileAppBackendWeb.ChannelCase
 
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]

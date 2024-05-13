@@ -100,6 +100,8 @@ defmodule MobileAppBackend.Factory do
       direction_id: 1,
       latitude: 42.314917199,
       longitude: -71.06581559,
+      occupancy_status: :many_seats_available,
+      updated_at: ~B[2024-03-20 16:41:01],
       route_id: "Green-D",
       stop_id: "7670",
       trip_id: "60169926"

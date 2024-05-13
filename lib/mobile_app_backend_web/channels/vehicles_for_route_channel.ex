@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.VehiclesChannel do
+defmodule MobileAppBackendWeb.VehiclesForRouteChannel do
   use MobileAppBackendWeb, :channel
 
   alias MBTAV3API.JsonApi
