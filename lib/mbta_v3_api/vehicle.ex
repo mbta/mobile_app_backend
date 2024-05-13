@@ -49,8 +49,8 @@ defmodule MBTAV3API.Vehicle do
   ]
 
   @impl JsonApi.Object
-  def fields,
-    do: [
+  def fields do
+    [
       :bearing,
       :current_status,
       :direction_id,
@@ -59,6 +59,7 @@ defmodule MBTAV3API.Vehicle do
       :occupancy_status,
       :updated_at
     ]
+  end
 
   @impl JsonApi.Object
   def includes, do: %{route: MBTAV3API.Route, stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
