@@ -11,8 +11,7 @@ defmodule MobileAppBackendWeb.UserSocket do
   channel "predictions:stops", MobileAppBackendWeb.PredictionsForStopsChannel
   channel "predictions:trip:*", MobileAppBackendWeb.PredictionsForTripChannel
   channel "alerts", MobileAppBackendWeb.AlertsChannel
-  channel "vehicles:*", MobileAppBackendWeb.VehiclesForRouteChannel
-  channel "vehicle:id:*", MobileAppBackendWeb.VehicleChannel
+  channel "vehicles:*", MobileAppBackendWeb.VehiclesChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
