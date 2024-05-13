@@ -73,11 +73,16 @@ defmodule MBTAV3API.Vehicle do
       direction_id: item.attributes["direction_id"],
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
-      occupancy_status: parse_occupancy_status(item.attributes["occupancy_status"]),
+      occupancy_status: parse_optional_occupancy(item.attributes["occupancy_status"]),
       updated_at: Util.parse_datetime!(item.attributes["updated_at"]),
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"])
     }
   end
+
+  @spec parse_optional_occupancy(String.t() | nil) :: occupancy_status()
+  defp parse_optional_occupancy(occupancy_status)
+  defp parse_optional_occupancy(nil), do: :no_data_available
+  defp parse_optional_occupancy(status), do: parse_occupancy_status(status)
 end
