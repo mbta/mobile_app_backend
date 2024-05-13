@@ -1,4 +1,4 @@
-defmodule MobileAppBackendWeb.PredictionsChannel do
+defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
   use MobileAppBackendWeb, :channel
 
   alias MBTAV3API.JsonApi
