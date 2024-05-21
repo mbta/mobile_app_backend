@@ -124,3 +124,23 @@ jobs:
       - name: show docker container logs
         run: docker compose logs mobile-app-backend
         if: ${{ !cancelled() }}
+
+  load_test:
+    name: Check Python load tests for basic validity
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read asdf versions
+        id: asdf
+        run: cat load_testing/.tool-versions | sed 's/ /=/' | tee -a "$GITHUB_OUTPUT"
+      - name: Install poetry
+        run: pipx install poetry==${{steps.asdf.outputs.poetry}}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{steps.asdf.outputs.python}}
+          cache: poetry
+          cache-dependency-path: load_testing/poetry.lock
+      - run: cd load_testing && poetry install
+      - run: cd load_testing && poetry run ruff check
+      - run: cd load_testing && poetry run mypy locustfile.py
