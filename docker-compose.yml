@@ -4,7 +4,7 @@ services:
     build: .
     environment:
       - SECRET_KEY_BASE=/insecure/insecure/insecure/insecure/insecure/insecure/insecure/
-      - PHX_HOST=mobile-app-backend
+      - PHX_HOST=localhost
       # inherit V3 API endpoints from shell environment, if available
       - API_KEY
       - API_URL
