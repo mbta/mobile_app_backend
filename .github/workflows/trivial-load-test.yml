@@ -47,3 +47,6 @@ jobs:
           cd load_testing
           container_port=$(docker compose port mobile-app-backend 4000 | cut -f2 -d:)
           poetry run locust -H http://localhost:$container_port -u 1 -t 1m --headless
+      - name: show docker container logs
+        run: docker compose logs mobile-app-backend
+        if: ${{ failure() }}
