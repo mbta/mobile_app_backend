@@ -1,9 +1,7 @@
 name: Low-intensity load test
 
 on:
-  push:
-    branches:
-      - mth-load-testing
+  workflow_dispatch:
   schedule:
     - cron: "29 14 */3 * *"
 
