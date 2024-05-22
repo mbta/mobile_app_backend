@@ -1,0 +1,49 @@
+name: Low-intensity load test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 14 */3 * *"
+
+jobs:
+  load_test:
+    name: Run low-intensity load test against Docker container
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: docker build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          load: true
+          cache-from: type=gha
+      - name: docker compose build
+        run: docker compose build
+      - name: docker compose up
+        run: docker compose up --wait
+        env:
+          API_KEY: ${{secrets.API_KEY}}
+          API_URL: ${{secrets.API_URL}}
+      - name: Read asdf versions
+        id: asdf
+        run: cat load_testing/.tool-versions | sed 's/ /=/' | tee -a "$GITHUB_OUTPUT"
+      - name: Install poetry
+        run: pipx install poetry==${{steps.asdf.outputs.poetry}}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{steps.asdf.outputs.python}}
+          cache: poetry
+          cache-dependency-path: load_testing/poetry.lock
+      - run: cd load_testing && poetry install
+      - name: run load test
+        run: |
+          cd load_testing
+          container_port=$(docker compose port mobile-app-backend 4000 | cut -f2 -d:)
+          poetry run locust -H http://localhost:$container_port -u 1 -t 1m --headless
+      - name: show docker container logs
+        run: docker compose logs mobile-app-backend
+        if: ${{ failure() }}
