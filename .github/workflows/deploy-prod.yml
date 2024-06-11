@@ -1,0 +1,14 @@
+name: Deploy to Prod
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Deploy {0} {1} to Prod', github.ref_type, github.ref_name) || '' }}
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Staging
+    uses: ./.github/workflows/deploy.yml
+    with:
+      env: prod
+      deploy-desc: ${{ github.ref_type }} ${{ github.ref_name }}
+    secrets: inherit
