@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Staging
+    name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Prod
     uses: ./.github/workflows/deploy.yml
     with:
       env: prod
