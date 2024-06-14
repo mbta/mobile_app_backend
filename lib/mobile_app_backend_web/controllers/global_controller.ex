@@ -6,6 +6,7 @@ defmodule MobileAppBackendWeb.GlobalController do
     stops = fetch_stops()
 
     %{
+      lines: lines,
       routes: routes,
       route_patterns: route_patterns,
       trips: trips,
@@ -13,6 +14,7 @@ defmodule MobileAppBackendWeb.GlobalController do
     } = fetch_route_patterns()
 
     json(conn, %{
+      lines: lines,
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
       route_patterns: route_patterns,
@@ -35,15 +37,16 @@ defmodule MobileAppBackendWeb.GlobalController do
   end
 
   @spec fetch_route_patterns() :: %{
+          lines: JsonApi.Object.line_map(),
           routes: JsonApi.Object.route_map(),
           route_patterns: JsonApi.Object.route_pattern_map(),
           trips: JsonApi.Object.trip_map(),
           pattern_ids_by_stop: %{(stop_id :: String.t()) => route_pattern_ids :: [String.t()]}
         }
   defp fetch_route_patterns do
-    {:ok, %{data: route_patterns, included: %{routes: routes, trips: trips}}} =
+    {:ok, %{data: route_patterns, included: %{lines: lines, routes: routes, trips: trips}}} =
       Repository.route_patterns(
-        include: [:route, representative_trip: :stops],
+        include: [route: :line, representative_trip: :stops],
         fields: [stop: []]
       )
 
@@ -54,6 +57,7 @@ defmodule MobileAppBackendWeb.GlobalController do
     route_patterns = Map.new(route_patterns, &{&1.id, &1})
 
     %{
+      lines: lines,
       routes: routes,
       route_patterns: route_patterns,
       trips: trips,
