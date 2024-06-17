@@ -12,6 +12,7 @@ defmodule MBTAV3API.Route do
           short_name: String.t(),
           sort_order: String.t(),
           text_color: String.t(),
+          line_id: String.t() | nil,
           route_pattern_ids: [String.t()]
         }
 
@@ -31,6 +32,7 @@ defmodule MBTAV3API.Route do
     :short_name,
     :sort_order,
     :text_color,
+    :line_id,
     :route_pattern_ids
   ]
 
@@ -48,7 +50,7 @@ defmodule MBTAV3API.Route do
     ]
 
   @impl JsonApi.Object
-  def includes, do: %{route_patterns: MBTAV3API.RoutePattern}
+  def includes, do: %{line: MBTAV3API.Line, route_patterns: MBTAV3API.RoutePattern}
 
   @impl JsonApi.Object
   def serialize_filter_value(:type, type), do: serialize_type(type)
@@ -69,6 +71,7 @@ defmodule MBTAV3API.Route do
       short_name: item.attributes["short_name"],
       sort_order: item.attributes["sort_order"],
       text_color: item.attributes["text_color"],
+      line_id: JsonApi.Object.get_one_id(item.relationships["line"]),
       route_pattern_ids: JsonApi.Object.get_many_ids(item.relationships["route_patterns"])
     }
   end
