@@ -8,6 +8,7 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
       stop_response = json_response(conn, 200)
 
       assert %{
+               "lines" => lines,
                "pattern_ids_by_stop" => pattern_ids,
                "routes" => routes,
                "route_patterns" => route_patterns,
@@ -66,10 +67,22 @@ defmodule MobileAppBackendWeb.GlobalControllerTest do
                  "direction_destinations" => ["Ashmont/Braintree", "Alewife"],
                  "direction_names" => ["South", "North"],
                  "id" => "Red",
+                 "line_id" => "line-Red",
                  "long_name" => "Red Line",
                  "type" => "heavy_rail"
                }
              } = routes
+
+      assert %{
+               "line-Red" => %{
+                 "color" => "DA291C",
+                 "id" => "line-Red",
+                 "long_name" => "Red Line",
+                 "short_name" => "",
+                 "sort_order" => 10_010,
+                 "text_color" => "FFFFFF"
+               }
+             } = lines
     end
   end
 end

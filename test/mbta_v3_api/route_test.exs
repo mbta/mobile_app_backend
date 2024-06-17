@@ -16,6 +16,9 @@ defmodule MBTAV3API.RouteTest do
                "sort_order" => 10_033,
                "text_color" => "FFFFFF",
                "type" => 0
+             },
+             relationships: %{
+               "line" => %JsonApi.Reference{type: "line", id: "line-Green"}
              }
            }) == %Route{
              id: "Green-C",
@@ -26,7 +29,8 @@ defmodule MBTAV3API.RouteTest do
              short_name: "C",
              sort_order: 10_033,
              text_color: "FFFFFF",
-             type: :light_rail
+             type: :light_rail,
+             line_id: "line-Green"
            }
   end
 end

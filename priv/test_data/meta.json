@@ -1,7 +1,7 @@
 {
   "V3_API": {
     "/route_patterns": {
-      "fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
+      "fields%5Bline%5D=color%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Croute.line%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
     },
     "/stops": {
       "fields%5Bstop%5D=latitude%2Clongitude%2Cname%2Clocation_type%2Cvehicle_type%2Cdescription%2Cplatform_name&filter%5Blatitude%5D=42.281219333648&filter%5Blocation_type%5D=0%2C1&filter%5Blongitude%5D=-71.17594685509955&filter%5Bradius%5D=0.00832&filter%5Broute_type%5D=0%2C1%2C3%2C4&include=parent_station%2Cparent_station.child_stops&sort=distance": "018f3488-ccd3-7cb7-bee5-91074f8993f0",
