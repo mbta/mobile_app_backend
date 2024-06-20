@@ -90,7 +90,7 @@ jobs:
       - name: Run tests
         run: mix test --cover
       - name: Report test coverage
-        uses: mbta/github-actions-report-lcov@v1
+        uses: mbta/github-actions-report-lcov@v4
         with:
           coverage-files: cover/lcov.info
           artifact-name: code-coverage-report
