@@ -69,4 +69,6 @@ Merging to main will automatically kick off deploys to the staging environment. 
 
 ### Prod Deploys
 
-todo
+Create a GitHub release with a tag based on the current date, with a suffix counting the number of deploys on this day. For example, the first prod deploy of the day on June 20, 2024 would be `2024-06-20-1`, a second deploy that day would be `2024-06-20-2`, and a deploy the next day would be `2024-06-21-1`.
+
+Prod deploys are set to require manual approval in GitHub.
