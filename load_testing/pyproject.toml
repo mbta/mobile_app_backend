@@ -5,6 +5,7 @@ package-mode = false
 python = "^3.12"
 locust = "^2.27.0"
 websocket-client = "^1.8.0"
+rel = "^0.4.9.19"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.4.4"

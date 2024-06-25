@@ -15,7 +15,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     wait_time = between(1, 5)
     socket_path = "/socket"
 
-    prob_reset_map_data = 0.3
+    prob_reset_map_data = 0.02
     prob_reset_location = 0.3
     prob_reset_nearby_stops = 0.3
 
@@ -48,6 +48,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.stops_channel is not None
             and random.random() < self.prob_reset_nearby_stops
         ):
+            print("Leaving")
             self.stops_channel.leave()
             self.stops_channel = None
         if self.stops_channel is None:

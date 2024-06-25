@@ -1,12 +1,14 @@
 # derived from https://github.com/SvenskaSpel/locust-plugins/blob/4.4.3/locust_plugins/users/socketio.py
 import json
 import logging
+import threading
 import time
 import urllib
 import urllib.parse
 from typing import Any
 
 import gevent
+import rel
 import websocket
 from gevent.event import AsyncResult
 from locust import User
@@ -27,12 +29,26 @@ class PhoenixSocket:
         self, environment: Environment, url: str, headers: dict | list
     ) -> None:
         self.environment = environment
-        self.ws = websocket.create_connection(
-            f"{url}/websocket?vsn=2.0.0", header=headers
-        )
-        self.ws_greenlet = gevent.spawn(self.receive_loop)
+        self.ws = websocket.WebSocketApp( f"{url}/websocket?vsn=2.0.0",
+                              on_open=self.on_open,
+                              on_message=self.on_socket_message,
+                              on_error=self.on_error,
+                              on_close=self.on_close)
+
+
+        # run_forever is blocking
+        # https://github.com/websocket-client/websocket-client/issues/980#issuecomment-2065628852
+        daemon = threading.Thread(target=self.run_forever)
+        daemon.daemon = True
+        daemon.start()
+
         self._next_ref = 0
         self.open_pushes: dict[str, PhoenixPush] = dict()
+
+    def run_forever(self):
+        self.ws.run_forever(dispatcher=rel, reconnect=2, ping_interval=60)
+        rel.signal(2, rel.abort)  # Keyboard Interrupt
+        rel.dispatch()
 
     def channel(self, topic: str, payload: dict[str, Any] | None = None):
         if payload is None:
@@ -43,16 +59,25 @@ class PhoenixSocket:
         self.closing = True
         self.ws.close()
 
-    def receive_loop(self):
-        while self.ws.connected:
-            try:
-                message = self.ws.recv()
-                logging.debug(ellipsize_string(f"WSR: {message}", 256))
-                if message != "":
-                    self.on_message(message)
-            except Exception:
-                if not self.closing:
-                    raise
+    def on_socket_message(self, ws, message):
+        try:
+               
+            logging.debug(ellipsize_string(f"WSR: {message}", 256))
+            if message != "":
+                self.on_message(message)
+        except Exception:
+            if not self.closing:
+                raise
+
+    def on_error(self, ws, error):
+        print(f"Socket error: {error}")
+
+    def on_close(self, ws, close_status_code, close_msg):
+        print(f"Socket closed: {close_status_code} {close_msg}")
+
+    def on_open(self, ws):
+        print("Socket opened")
+
 
     def on_message(self, message):
         [join_ref, ref, topic, event, payload] = json.loads(message)
@@ -100,21 +125,36 @@ class PhoenixChannel:
         if payload is None:
             payload = dict()
         self.join_ref = socket.next_ref()
+        self.sleep_ref = 1
+
+        
         self.topic = topic
         self.join_push = PhoenixPush(
             socket, self.join_ref, self.join_ref, topic, "phx_join", payload
         )
+   
 
     def join(self):
+        print("Joining topic")
         self.join_push.send()
+        self.sleep_with_heartbeat(60)
         return self.join_push.get_reply()
 
     def leave(self):
         leave_push = PhoenixPush(
-            self.socket, self.join_ref, self.socket.next_ref(), self.topic, "phx_leave"
+            self.socket, self.join_ref, self.socket.next_ref(), self.topic, "phx_leave", {}
         )
         leave_push.send()
         return leave_push.get_reply()
+
+    def sleep_with_heartbeat(self, seconds):
+        while seconds >= 0:
+            gevent.sleep(min(15, seconds))
+            seconds -= 15
+            self.sleep_ref += 1
+            # [null,"2","phoenix","heartbeat",{}]
+            heartbeat_push = PhoenixPush(self.socket, None, self.sleep_ref, "phoenix", "heartbeat", {})
+            heartbeat_push.send()
 
 
 class PhoenixPush:
