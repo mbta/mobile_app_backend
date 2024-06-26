@@ -45,7 +45,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
                 )
             try:
                 self.nearby_stop_ids = nearby_result.json()["stop_ids"]
-            except Exception as e:
+            except Exception:
                 print(f"nearby_result: {nearby_result}")
                 raise
         if (
