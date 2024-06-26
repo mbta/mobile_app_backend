@@ -1,14 +1,12 @@
 # derived from https://github.com/SvenskaSpel/locust-plugins/blob/4.4.3/locust_plugins/users/socketio.py
 import json
 import logging
-import threading
 import time
 import urllib
 import urllib.parse
 from typing import Any
 
 import gevent
-import rel # type: ignore
 import websockets.sync.client as websockets
 from gevent.event import AsyncResult
 from locust import User
