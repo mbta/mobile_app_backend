@@ -7,7 +7,7 @@ import urllib.parse
 from typing import Any
 
 import gevent
-import websocket
+import websockets.sync.client as websockets
 from gevent.event import AsyncResult
 from locust import User
 from locust.env import Environment
@@ -27,12 +27,26 @@ class PhoenixSocket:
         self, environment: Environment, url: str, headers: dict | list
     ) -> None:
         self.environment = environment
-        self.ws = websocket.create_connection(
-            f"{url}/websocket?vsn=2.0.0", header=headers
-        )
+        self.url = f"{url}/websocket?vsn=2.0.0"
+        self.ws = websockets.connect(f"{url}/websocket?vsn=2.0.0") 
         self.ws_greenlet = gevent.spawn(self.receive_loop)
         self._next_ref = 0
         self.open_pushes: dict[str, PhoenixPush] = dict()
+        gevent.spawn(self.sleep_with_heartbeat)
+
+    def receive_loop(self):
+        for message in self.ws:
+            logging.debug(ellipsize_string(f"WSR: {message}", 256))
+            if message != "":
+                self.on_message(message)
+
+    def sleep_with_heartbeat(self):
+        while True:
+            gevent.sleep(15)
+            # [null,"2","phoenix","heartbeat",{}]
+            heartbeat_push = PhoenixPush(self, None, self.next_ref(), "phoenix", "heartbeat", {})
+            heartbeat_push.send()
+        
 
     def channel(self, topic: str, payload: dict[str, Any] | None = None):
         if payload is None:
@@ -43,22 +57,13 @@ class PhoenixSocket:
         self.closing = True
         self.ws.close()
 
-    def receive_loop(self):
-        while self.ws.connected:
-            try:
-                message = self.ws.recv()
-                logging.debug(ellipsize_string(f"WSR: {message}", 256))
-                if message != "":
-                    self.on_message(message)
-            except Exception:
-                if not self.closing:
-                    raise
 
     def on_message(self, message):
         [join_ref, ref, topic, event, payload] = json.loads(message)
         self.on_phoenix_message(join_ref, ref, topic, event, payload, len(message))
 
     def on_phoenix_message(self, join_ref, ref, topic, event, payload, response_length):
+       # print(f"Ref: {ref} event:  {event} all_open_pushes: {self.open_pushes} ")
         if (
             event == "phx_reply"
             and (push := self.open_pushes.pop(ref, None)) is not None
@@ -76,6 +81,13 @@ class PhoenixSocket:
             )
             if exception is None:
                 push.reply.set(payload["response"])
+                
+                self.environment.events.request.fire(
+                request_type=f"WS:RECV {event}",
+                name=topic,
+                response_time=None,
+                response_length=response_length,
+            )
             else:
                 push.reply.set_exception(exception)
         else:
@@ -100,22 +112,24 @@ class PhoenixChannel:
         if payload is None:
             payload = dict()
         self.join_ref = socket.next_ref()
+        
         self.topic = topic
         self.join_push = PhoenixPush(
             socket, self.join_ref, self.join_ref, topic, "phx_join", payload
         )
+   
 
     def join(self):
         self.join_push.send()
+    
         return self.join_push.get_reply()
 
     def leave(self):
         leave_push = PhoenixPush(
-            self.socket, self.join_ref, self.socket.next_ref(), self.topic, "phx_leave"
+            self.socket, self.join_ref, self.socket.next_ref(), self.topic, "phx_leave", {}
         )
         leave_push.send()
         return leave_push.get_reply()
-
 
 class PhoenixPush:
     def __init__(
@@ -149,7 +163,7 @@ class PhoenixPush:
         self.socket.ws.send(body)
 
     def get_reply(self):
-        return self.reply.get()
+        return self.reply.get(5)
 
 
 class PhoenixChannelUser(User):
