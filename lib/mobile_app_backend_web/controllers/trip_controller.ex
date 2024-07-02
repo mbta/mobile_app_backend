@@ -19,11 +19,13 @@ defmodule MobileAppBackendWeb.TripController do
 
       json(conn, %{
         type: "single_shape",
-        route_id: trip.route_id,
-        route_pattern_id: trip.route_pattern_id,
-        direction_id: trip.direction_id,
-        stop_ids: trip.stop_ids,
-        shape: Map.get(shapes, trip.shape_id)
+        shape_with_stops: %{
+          route_id: trip.route_id,
+          route_pattern_id: trip.route_pattern_id,
+          direction_id: trip.direction_id,
+          stop_ids: trip.stop_ids,
+          shape: Map.get(shapes, trip.shape_id)
+        }
       })
     end
   end

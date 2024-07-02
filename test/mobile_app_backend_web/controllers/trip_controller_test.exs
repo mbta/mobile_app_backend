@@ -51,11 +51,13 @@ defmodule MobileAppBackendWeb.TripControllerTest do
 
       assert %{
                "type" => "single_shape",
-               "direction_id" => "1",
-               "route_id" => "66",
-               "route_pattern_id" => "66-0-1",
-               "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
-               "stop_ids" => ["Harvard", "Nubian"]
+               "shape_with_stops" => %{
+                 "direction_id" => "1",
+                 "route_id" => "66",
+                 "route_pattern_id" => "66-0-1",
+                 "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
+                 "stop_ids" => ["Harvard", "Nubian"]
+               }
              } =
                response
     end
