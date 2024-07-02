@@ -50,6 +50,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
       response = json_response(conn, 200)
 
       assert %{
+               "type" => "single_shape",
                "direction_id" => "1",
                "route_id" => "66",
                "route_pattern_id" => "66-0-1",
@@ -69,7 +70,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
 
       response = json_response(conn, 404)
 
-      assert %{"message" => "Trip not found: unknown_trip_id"} =
+      assert %{"type" => "unknown", "message" => "Trip not found: unknown_trip_id"} =
                response
     end
   end

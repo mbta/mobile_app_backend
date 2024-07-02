@@ -13,11 +13,12 @@ defmodule MobileAppBackendWeb.TripController do
     if Enum.empty?(trips) do
       conn
       |> put_status(:not_found)
-      |> json(%{message: "Trip not found: #{trip_id}"})
+      |> json(%{type: :unknown, message: "Trip not found: #{trip_id}"})
     else
       [trip] = trips
 
       json(conn, %{
+        type: "single_shape",
         route_id: trip.route_id,
         route_pattern_id: trip.route_pattern_id,
         direction_id: trip.direction_id,
