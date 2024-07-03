@@ -44,7 +44,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
     #   :error ->
     #     {:error, %{code: :no_stop_ids}}
     # end
-    {:ok, %{data: "TEST"}}
+    {:ok, socket}
   end
 
   @impl true
