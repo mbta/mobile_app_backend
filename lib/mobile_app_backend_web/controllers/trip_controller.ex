@@ -18,7 +18,7 @@ defmodule MobileAppBackendWeb.TripController do
 
       stop_ids =
         if Enum.empty?(trip.stop_ids) do
-          # Fall back to route pattern stops for added  trips
+          # Fall back to route pattern stops for added trips
           Map.keys(stops_by_id)
         else
           trip.stop_ids
