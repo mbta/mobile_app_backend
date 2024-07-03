@@ -8,41 +8,43 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
 
   @impl true
   def join("predictions:stops", payload, socket) do
-    case Map.fetch(payload, "stop_ids") do
-      {:ok, stop_ids} ->
-        {:ok, throttler} =
-          MobileAppBackend.Throttler.start_link(
-            target: self(),
-            cast: :send_data,
-            ms: @throttle_ms
-          )
 
-        {:ok, %{included: %{stops: extra_stops}}} =
-          MBTAV3API.Repository.stops(filter: [id: stop_ids], include: :child_stops)
+    # case Map.fetch(payload, "stop_ids") do
+    #   {:ok, stop_ids} ->
+    #     {:ok, throttler} =
+    #       MobileAppBackend.Throttler.start_link(
+    #         target: self(),
+    #         cast: :send_data,
+    #         ms: @throttle_ms
+    #       )
 
-        child_stop_ids =
-          Map.values(extra_stops)
-          |> Enum.filter(&(&1.location_type == :stop))
-          |> Enum.map(& &1.id)
+    #     {:ok, %{included: %{stops: extra_stops}}} =
+    #       MBTAV3API.Repository.stops(filter: [id: stop_ids], include: :child_stops)
 
-        stop_ids = Enum.uniq(stop_ids ++ child_stop_ids)
+    #     child_stop_ids =
+    #       Map.values(extra_stops)
+    #       |> Enum.filter(&(&1.location_type == :stop))
+    #       |> Enum.map(& &1.id)
 
-        {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
+    #     stop_ids = Enum.uniq(stop_ids ++ child_stop_ids)
 
-        data =
-          Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->
-            {:ok, data} =
-              MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
+    #     {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
 
-            {route_id, filter_data(data, stop_ids)}
-          end)
+    #     data =
+    #       Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->
+    #         {:ok, data} =
+    #           MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
 
-        {:ok, merge_data(data),
-         assign(socket, data: data, stop_ids: stop_ids, throttler: throttler)}
+    #         {route_id, filter_data(data, stop_ids)}
+    #       end)
 
-      :error ->
-        {:error, %{code: :no_stop_ids}}
-    end
+    #     {:ok, merge_data(data),
+    #      assign(socket, data: data, stop_ids: stop_ids, throttler: throttler)}
+
+    #   :error ->
+    #     {:error, %{code: :no_stop_ids}}
+    # end
+    {:ok, []}
   end
 
   @impl true

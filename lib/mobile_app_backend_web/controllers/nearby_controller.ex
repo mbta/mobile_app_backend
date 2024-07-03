@@ -3,22 +3,23 @@ defmodule MobileAppBackendWeb.NearbyController do
   use MobileAppBackendWeb, :controller
 
   def show(conn, params) do
-    params = Map.merge(%{"radius" => "1.0"}, params)
-    latitude = String.to_float(Map.fetch!(params, "latitude"))
-    longitude = String.to_float(Map.fetch!(params, "longitude"))
-    radius = String.to_float(Map.fetch!(params, "radius"))
+    # params = Map.merge(%{"radius" => "1.0"}, params)
+    # latitude = String.to_float(Map.fetch!(params, "latitude"))
+    # longitude = String.to_float(Map.fetch!(params, "longitude"))
+    # radius = String.to_float(Map.fetch!(params, "radius"))
 
-    stops = fetch_nearby_stops(latitude, longitude, radius)
+    # stops = fetch_nearby_stops(latitude, longitude, radius)
 
-    json(conn, %{
-      stop_ids:
-        stops
-        |> Map.values()
-        |> Enum.sort_by(
-          &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
-        )
-        |> Enum.map(& &1.id)
-    })
+    # json(conn, %{
+    #   stop_ids:
+    #     stops
+    #     |> Map.values()
+    #     |> Enum.sort_by(
+    #       &distance_in_degrees(&1.latitude || 0, &1.longitude || 0, latitude, longitude)
+    #     )
+    #     |> Enum.map(& &1.id)
+    # })
+        json(conn, %{})
   end
 
   @spec fetch_nearby_stops(

@@ -3,24 +3,27 @@ defmodule MobileAppBackendWeb.GlobalController do
   use MobileAppBackendWeb, :controller
 
   def show(conn, _params) do
-    stops = fetch_stops()
 
-    %{
-      lines: lines,
-      routes: routes,
-      route_patterns: route_patterns,
-      trips: trips,
-      pattern_ids_by_stop: pattern_ids_by_stop
-    } = fetch_route_patterns()
+    # stops = fetch_stops()
 
-    json(conn, %{
-      lines: lines,
-      pattern_ids_by_stop: pattern_ids_by_stop,
-      routes: routes,
-      route_patterns: route_patterns,
-      stops: stops,
-      trips: trips
-    })
+    # %{
+    #   lines: lines,
+    #   routes: routes,
+    #   route_patterns: route_patterns,
+    #   trips: trips,
+    #   pattern_ids_by_stop: pattern_ids_by_stop
+    # } = fetch_route_patterns()
+
+    # json(conn, %{
+    #   lines: lines,
+    #   pattern_ids_by_stop: pattern_ids_by_stop,
+    #   routes: routes,
+    #   route_patterns: route_patterns,
+    #   stops: stops,
+    #   trips: trips
+    # })
+
+    json(conn, %{})
   end
 
   @spec fetch_stops() :: JsonApi.Object.stop_map()
