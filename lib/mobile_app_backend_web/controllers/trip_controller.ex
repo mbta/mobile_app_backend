@@ -49,7 +49,7 @@ defmodule MobileAppBackendWeb.TripController do
     route_pattern = Map.fetch!(route_patterns, route_pattern_id)
 
     representative_trip = Map.get(included_trips, route_pattern.representative_trip_id)
-    if !is_nil(representative_trip), do: representative_trip.stop_ids, else: []
+    if is_nil(representative_trip), do: [], else: representative_trip.stop_ids
   end
 
   defp resolve_representative_trip_stops(_trip, _route_patterns, _included_trips) do
