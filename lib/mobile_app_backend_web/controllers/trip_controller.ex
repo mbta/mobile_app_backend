@@ -10,7 +10,7 @@ defmodule MobileAppBackendWeb.TripController do
      }} =
       Repository.trips(
         filter: [id: trip_id],
-        include: [:shape, :stops, [route_pattern: [:representative_trip]]],
+        include: [:shape, :stops, [route_pattern: [representative_trip: :stops]]],
         fields: [stop: []]
       )
 
