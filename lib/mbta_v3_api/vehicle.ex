@@ -6,7 +6,7 @@ defmodule MBTAV3API.Vehicle do
           id: String.t(),
           bearing: number() | nil,
           current_status: current_status(),
-          current_stop_sequence: integer(),
+          current_stop_sequence: integer() | nil,
           direction_id: 0 | 1,
           latitude: float(),
           longitude: float(),
