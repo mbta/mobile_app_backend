@@ -10,6 +10,7 @@ defmodule MBTAV3API.VehicleTest do
              id: "y1886",
              bearing: 315,
              current_status: :in_transit_to,
+             current_stop_sequence: 30,
              direction_id: 0,
              latitude: 42.359901428222656,
              longitude: -71.09449005126953,
@@ -25,6 +26,7 @@ defmodule MBTAV3API.VehicleTest do
                attributes: %{
                  "bearing" => 315,
                  "current_status" => "IN_TRANSIT_TO",
+                 "current_stop_sequence" => 30,
                  "occupancy_status" => "MANY_SEATS_AVAILABLE",
                  "direction_id" => 0,
                  "latitude" => 42.359901428222656,
@@ -44,6 +46,7 @@ defmodule MBTAV3API.VehicleTest do
              id: "y1886",
              bearing: 315,
              current_status: :in_transit_to,
+             current_stop_sequence: 99,
              direction_id: 0,
              latitude: 42.359901428222656,
              longitude: -71.09449005126953,
@@ -59,6 +62,7 @@ defmodule MBTAV3API.VehicleTest do
                attributes: %{
                  "bearing" => 315,
                  "current_status" => "IN_TRANSIT_TO",
+                 "current_stop_sequence" => 99,
                  "occupancy_status" => nil,
                  "direction_id" => 0,
                  "latitude" => 42.359901428222656,
