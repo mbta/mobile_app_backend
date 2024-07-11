@@ -3,7 +3,11 @@ defmodule MobileAppBackendWeb.TripController do
   use MobileAppBackendWeb, :controller
 
   def map(conn, %{"trip_id" => trip_id}) do
-    {:ok, %{data: trips, included: %{shapes: shapes_by_id, stops: stops_by_id}}} =
+    {:ok,
+     %{
+       data: trips,
+       included: %{shapes: shapes_by_id, route_patterns: route_patterns, trips: included_trips}
+     }} =
       Repository.trips(
         filter: [id: trip_id],
         include: [:shape, :stops, [route_pattern: [representative_trip: :stops]]],
@@ -18,8 +22,8 @@ defmodule MobileAppBackendWeb.TripController do
 
       stop_ids =
         if Enum.empty?(trip.stop_ids) do
-          # Fall back to route pattern stops for added trips
-          Map.keys(stops_by_id)
+          # Fall back to stops on the representative trip
+          resolve_representative_trip_stops(trip, route_patterns, included_trips)
         else
           trip.stop_ids
         end
@@ -34,5 +38,21 @@ defmodule MobileAppBackendWeb.TripController do
         }
       })
     end
+  end
+
+  defp resolve_representative_trip_stops(
+         %{route_pattern_id: route_pattern_id} = _trip,
+         route_patterns,
+         included_trips
+       )
+       when is_map_key(route_patterns, route_pattern_id) do
+    route_pattern = Map.fetch!(route_patterns, route_pattern_id)
+
+    representative_trip = Map.get(included_trips, route_pattern.representative_trip_id)
+    if is_nil(representative_trip), do: [], else: representative_trip.stop_ids
+  end
+
+  defp resolve_representative_trip_stops(_trip, _route_patterns, _included_trips) do
+    []
   end
 end

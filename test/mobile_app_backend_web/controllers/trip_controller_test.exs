@@ -23,8 +23,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
           stop_ids: ["Harvard", "Nubian"]
         )
 
-      harvard = build(:stop, id: "Harvard")
-      nubian = build(:stop, id: "Nubian")
+      route_pattern = build(:route_pattern, %{id: "66-0-1"})
 
       shape = build(:shape, id: trip.shape_id, polyline: "66_shape_polyline")
 
@@ -34,7 +33,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:id) do
           "trip_id" ->
-            ok_response([trip], [shape, harvard, nubian])
+            ok_response([trip], [shape, route_pattern])
 
           _ ->
             ok_response([])
@@ -60,6 +59,9 @@ defmodule MobileAppBackendWeb.TripControllerTest do
 
     test "when trip found without related stops, falls back to route pattern stops",
          %{conn: conn} do
+      route_pattern =
+        build(:route_pattern, %{id: "66-0-1", representative_trip_id: "rep_trip"})
+
       trip =
         build(:trip,
           id: "trip_id",
@@ -70,8 +72,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
           stop_ids: []
         )
 
-      harvard = build(:stop, id: "Harvard")
-      nubian = build(:stop, id: "Nubian")
+      rep_trip = build(:trip, %{id: "rep_trip", stop_ids: ["Harvard", "Nubian"]})
 
       shape = build(:shape, id: trip.shape_id, polyline: "66_shape_polyline")
 
@@ -81,7 +82,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
              |> Keyword.get(:filter)
              |> Keyword.get(:id) do
           "trip_id" ->
-            ok_response([trip], [shape, harvard, nubian])
+            ok_response([trip], [shape, route_pattern, rep_trip])
 
           _ ->
             ok_response([])
@@ -100,6 +101,50 @@ defmodule MobileAppBackendWeb.TripControllerTest do
                  "route_pattern_id" => "66-0-1",
                  "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
                  "stop_ids" => ["Harvard", "Nubian"]
+               }
+             } =
+               response
+    end
+
+    test "when trip found without related stops but route pattern doesn't resolve, returns empty list",
+         %{conn: conn} do
+      trip =
+        build(:trip,
+          id: "trip_id",
+          route_id: "66",
+          route_pattern_id: "66-0-1",
+          direction_id: "1",
+          shape_id: "66_shape",
+          stop_ids: []
+        )
+
+      shape = build(:shape, id: trip.shape_id, polyline: "66_shape_polyline")
+
+      RepositoryMock
+      |> expect(:trips, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:id) do
+          "trip_id" ->
+            ok_response([trip], [shape])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      conn =
+        get(conn, "/api/trip/map", %{"trip_id" => trip.id})
+
+      response = json_response(conn, 200)
+
+      assert %{
+               "shape_with_stops" => %{
+                 "direction_id" => "1",
+                 "route_id" => "66",
+                 "route_pattern_id" => "66-0-1",
+                 "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
+                 "stop_ids" => []
                }
              } =
                response
