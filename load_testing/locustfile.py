@@ -10,12 +10,11 @@ all_stops: list[dict] = requests.get(
     {"fields[stop]": "latitude,longitude", "filter[location_type]": "0"},
 ).json()["data"]
 
-
 class MobileAppUser(HttpUser, PhoenixChannelUser):
     wait_time = between(1, 5)
     socket_path = "/socket"
 
-    prob_reset_map_data = 0.3
+    prob_reset_map_data = 0.02
     prob_reset_location = 0.3
     prob_reset_nearby_stops = 0.3
 
@@ -37,13 +36,18 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.location = random.choice(all_stops)["attributes"]
         assert self.location is not None
         with self.client.rename_request("/api/nearby"):
-            self.nearby_stop_ids = self.client.get(
-                "/api/nearby",
-                params={
-                    "latitude": self.location["latitude"],
-                    "longitude": self.location["longitude"],
-                },
-            ).json()["stop_ids"]
+            nearby_result =  self.client.get(
+                    "/api/nearby",
+                    params={
+                        "latitude": self.location["latitude"],
+                        "longitude": self.location["longitude"],
+                    },
+                )
+            try:
+                self.nearby_stop_ids = nearby_result.json()["stop_ids"]
+            except Exception:
+                print(f"nearby_result: {nearby_result}")
+                raise
         if (
             self.stops_channel is not None
             and random.random() < self.prob_reset_nearby_stops
