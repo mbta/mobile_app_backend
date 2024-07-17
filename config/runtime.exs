@@ -15,7 +15,7 @@ config :sentry,
 config :mobile_app_backend, MobileAppBackend.AppCheck,
   issuer: System.get_env("APP_CHECK_ISSUER"),
   project: System.get_env("APP_CHECK_PROJECT"),
-  subjects: String.split(System.get_env("APP_CHECK_APP_IDS"), ",")
+  subjects: String.split(System.get_env("APP_CHECK_APP_IDS", ""), ",")
 
 config :mobile_app_backend, MobileAppBackend.ClientConfig,
   mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
