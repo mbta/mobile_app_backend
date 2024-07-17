@@ -4,6 +4,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
   https://firebase.google.com/docs/app-check
   """
   use MobileAppBackendWeb, :controller
+  alias MobileAppBackend.AppCheck
 
   import Plug.Conn
   require Logger
@@ -29,32 +30,28 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
     end
   end
 
-  @spec verify(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
-  defp verify(conn, token) do
+  @spec verify(Plug.Conn.t(), String.t(), integer()) :: Plug.Conn.t()
+  defp verify(conn, token, current_timestamp \\ DateTime.to_unix(DateTime.utc_now())) do
     # Perform verification steps defined at https://firebase.google.com/docs/app-check/custom-resource-backend
 
-    peek_headers_fn =
-      Application.get_env(:mobile_app_backend, :peek_headers, &JOSE.JWT.peek_protected/1)
-
     # 1. Obtain the Firebase App Check Public Keys
-    with {:ok, jwks} <- MobileAppBackend.AppCheck.JwksApi.read_jwks(),
+    with {:ok, jwks} <- AppCheck.JwksApi.read_jwks(),
          %JOSE.JWS{fields: %{"kid" => target_kid} = header_fields} <-
-           peek_headers_fn.(token),
-         {:ok, secret} <- parse_target_secret(jwks, target_kid),
+           AppCheck.Token.peek_headers(token),
+         {:ok, jwk} <- parse_target_jwk(jwks, target_kid),
          # 2. Verify the signature on the App Check token
          # 3. Ensure the token's header uses the algorithm RS256
-         {:ok, %{"iss" => issuer, "aud" => projects, "sub" => subject}} <-
-           Application.get_env(:mobile_app_backend, MobileAppBackend.AppCheck)[:guardian_module].decode_and_verify(
-             token,
-             %{},
-             secret: secret,
-             allowed_algos: ["RS256"]
-           ),
+         %JOSE.JWK{} = jose_jwk <- JOSE.JWK.from_map(jwk),
+         {true,
+          %JOSE.JWT{
+            fields: %{"iss" => issuer, "aud" => projects, "sub" => subject, "exp" => exp}
+          }, _header} <- AppCheck.Token.verify_strict(jose_jwk, ["RS256"], token),
          # 4. Ensure the token's header has type JWT
          %{"typ" => "JWT"} <- header_fields,
          # 5. Ensure the token is issued by App Check
          :ok <- validate_issuer(issuer),
-         # 6. Ensure the token is not expired (done by decode_and_verify)
+         # 6. Ensure the token is not expired
+         :ok <- validate_exp(current_timestamp, exp),
          # 7. Ensure the token's audience matches your project
          :ok <- validate_project(projects),
          # 8. The token's subject will be the app ID, you may optionally filter against an allow list
@@ -71,13 +68,24 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
     end
   end
 
-  defp parse_target_secret(jwks, target_kid) do
+  defp parse_target_jwk(jwks, target_kid) do
     case Enum.find(jwks, nil, fn jwk -> Map.get(jwk, "kid") == target_kid end) do
       nil ->
         {:error, :target_kid_not_found}
 
-      secret_key ->
-        {:ok, secret_key}
+      target_jwk ->
+        {:ok, target_jwk}
+    end
+  end
+
+  @spec validate_exp(integer(), integer()) :: :ok | {:error, :expired}
+  defp validate_exp(current_timestamp, exp_timestamp) do
+    require Logger
+
+    if current_timestamp <= exp_timestamp do
+      :ok
+    else
+      {:error, :expired}
     end
   end
 

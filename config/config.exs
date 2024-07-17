@@ -11,7 +11,6 @@ config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
 config :mobile_app_backend, MobileAppBackend.AppCheck,
-  guardian_module: MobileAppBackend.AppCheck.Guardian,
   jwks_url: "https://firebaseappcheck.googleapis.com/v1/jwks"
 
 # Configures the endpoint

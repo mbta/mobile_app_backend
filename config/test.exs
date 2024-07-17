@@ -22,8 +22,5 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   search_key: "fake_key",
   base_url: "fake_url"
 
-config :mobile_app_backend, MobileAppBackend.AppCheck,
-  guardian_module: MobileAppBackend.AppCheck.MockGuardian
-
 # Use server-sent events stub instead of real connections
 config :mobile_app_backend, MobileAppBackend.SSE, Test.Support.SSEStub

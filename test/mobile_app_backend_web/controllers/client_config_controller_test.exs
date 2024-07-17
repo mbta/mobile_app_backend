@@ -14,21 +14,32 @@ defmodule MobileAppBackendWeb.ClientControllerTest do
 
       reassign_env(:mobile_app_backend, MobileAppBackend.AppCheck.JwksApi, JwksApiMock)
 
-      # Correspond to valid claims in MobileAppBackend.AppCheck.MockGuardian
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.AppCheck.Token,
+        MobileAppBackend.AppCheck.TokenMock
+      )
+
+      # Correspond to valid claims in MobileAppBackend.AppCheck.TokenMock
       reassign_env(:mobile_app_backend, MobileAppBackend.AppCheck,
-        guardian_module: MobileAppBackend.AppCheck.MockGuardian,
         issuer: "valid_issuer",
         project: "valid_project",
         subjects: ["valid_subject", "other_valid_subject"]
       )
 
-      reassign_env(:mobile_app_backend, :peek_headers, fn _token ->
-        %JOSE.JWS{fields: %{"kid" => "target_kid", "typ" => "JWT"}}
-      end)
-
       JwksApiMock
       |> expect(:read_jwks, 1, fn ->
-        {:ok, [%{"kid" => "target_kid"}]}
+        {:ok,
+         [
+           %{
+             "kty" => "RSA",
+             "use" => "sig",
+             "alg" => "RS256",
+             "kid" => "target_kid",
+             "n" => "n_value",
+             "e" => "e_value"
+           }
+         ]}
       end)
 
       :ok

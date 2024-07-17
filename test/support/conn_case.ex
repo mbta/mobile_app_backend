@@ -69,6 +69,13 @@ defmodule MobileAppBackendWeb.ConnCase do
             "invalid_subject"
           )
 
+        tags[:firebase_expired_token] ->
+          Plug.Conn.put_req_header(
+            Phoenix.ConnTest.build_conn(),
+            "http_x_firebase_appcheck",
+            "expired_token"
+          )
+
         true ->
           Phoenix.ConnTest.build_conn()
       end
