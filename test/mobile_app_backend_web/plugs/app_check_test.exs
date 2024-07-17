@@ -1,6 +1,5 @@
 defmodule MobileAppBackendWeb.Plugs.AppCheckTest do
   use MobileAppBackendWeb.ConnCase
-  alias MobileAppBackend.AppCheck.MockGuardian
   alias MobileAppBackendWeb.Plugs.AppCheck
   import Mox
   import Test.Support.Helpers

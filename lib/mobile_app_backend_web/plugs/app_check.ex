@@ -1,22 +1,27 @@
 defmodule MobileAppBackendWeb.Plugs.AppCheck do
   @moduledoc """
-  Plug for verifying request came from a valid app using Firebase App Check https://firebase.google.com/docs/app-check
+  Plug for verifying request came from a valid app using Firebase App Check
+  https://firebase.google.com/docs/app-check
   """
-  @behaviour Plug
+  use MobileAppBackendWeb, :controller
+
   import Plug.Conn
   require Logger
 
+  @impl Plug
   def init(opts) do
     opts
   end
 
+  @impl Plug
   def call(conn, _opts) do
     token = List.first(get_req_header(conn, "http_x_firebase_appcheck"))
 
     case token do
       nil ->
         conn
-        |> send_resp(:unauthorized, "missing_app_check_header")
+        |> put_status(:unauthorized)
+        |> json("missing_app_check_header")
         |> halt()
 
       token ->
@@ -24,6 +29,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
     end
   end
 
+  @spec verify(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
   defp verify(conn, token) do
     # Perform verification steps defined at https://firebase.google.com/docs/app-check/custom-resource-backend
     # 1. Obtain the Firebase App Check Public Keys
@@ -65,7 +71,8 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
         Logger.warning("#{__MODULE__} app_check_failed: #{inspect(error)}")
 
         conn
-        |> send_resp(:unauthorized, "invalid_token")
+        |> put_status(:unauthorized)
+        |> json("invalid_token")
         |> halt()
     end
   end
