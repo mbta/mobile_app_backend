@@ -1,8 +1,8 @@
 defmodule MobielAppBackend.ClientConfig do
   @type t :: %__MODULE__{
-          mapbox_token: String.t()
+          mapbox_public_token: String.t()
         }
 
   @derive Jason.Encoder
-  defstruct [:mapbox_token]
+  defstruct [:mapbox_public_token]
 end

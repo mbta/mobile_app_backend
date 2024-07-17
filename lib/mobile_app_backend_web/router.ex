@@ -14,6 +14,10 @@ defmodule MobileAppBackendWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :app_check do
+    plug(MobileAppBackendWeb.Plugs.AppCheck)
+  end
+
   scope "/", MobileAppBackendWeb do
     pipe_through :browser
 
@@ -22,6 +26,11 @@ defmodule MobileAppBackendWeb.Router do
 
   scope "/", MobileAppBackendWeb do
     get("/_health", HealthController, :index)
+  end
+
+  scope "/api/protected", MobileAppBackendWeb do
+    pipe_through([:api, :app_check])
+    get("/config", ClientConfigController, :config)
   end
 
   # Other scopes may use custom stacks.
@@ -35,7 +44,6 @@ defmodule MobileAppBackendWeb.Router do
     get("/stop/map", StopController, :map)
     get("/trip/map", TripController, :map)
     get("/schedules", ScheduleController, :schedules)
-    get("/config", ClientConfigController, :config)
   end
 
   # Enable LiveDashboard in development

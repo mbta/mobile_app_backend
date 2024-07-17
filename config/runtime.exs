@@ -18,7 +18,7 @@ config :mobile_app_backend, MobileAppBackend.AppCheck,
   subjects: String.split(System.get_env("APP_CHECK_APP_IDS"), ",")
 
 config :mobile_app_backend, MobileAppBackend.ClientConfig,
-  mapbox_token: System.get_env("MAPBOX_TOKEN")
+  mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
 
 if config_env() != :test do
   # mbta_v3_api configuration in disguise
