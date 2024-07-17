@@ -35,6 +35,7 @@ defmodule MobileAppBackendWeb.Router do
     get("/stop/map", StopController, :map)
     get("/trip/map", TripController, :map)
     get("/schedules", ScheduleController, :schedules)
+    get("/config", ConfigController, :config)
   end
 
   # Enable LiveDashboard in development
