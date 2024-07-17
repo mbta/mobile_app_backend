@@ -32,18 +32,12 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
   @spec verify(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
   defp verify(conn, token) do
     # Perform verification steps defined at https://firebase.google.com/docs/app-check/custom-resource-backend
-    # 1. Obtain the Firebase App Check Public Keys
-    jwks_api =
-      Application.get_env(
-        :mobile_app_backend,
-        MobileAppBackend.AppCheck.JwksApi,
-        MobileAppBackend.AppCheck.JwksApi
-      )
 
     peek_headers_fn =
       Application.get_env(:mobile_app_backend, :peek_headers, &JOSE.JWT.peek_protected/1)
 
-    with {:ok, jwks} <- jwks_api.read_jwks(),
+    # 1. Obtain the Firebase App Check Public Keys
+    with {:ok, jwks} <- MobileAppBackend.AppCheck.JwksApi.read_jwks(),
          %JOSE.JWS{fields: %{"kid" => target_kid} = header_fields} <-
            peek_headers_fn.(token),
          {:ok, secret} <- parse_target_secret(jwks, target_kid),
