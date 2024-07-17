@@ -1,5 +1,9 @@
 defmodule MobileAppBackend.AppCheck.Guardian do
-  # , token_verify_module: MobileAppBackend.CustomTokenVerify
+  @moduledoc """
+  Guardian implementation module for encoding/decoding app check tokens.
+  https://github.com/ueberauth/guardian
+  """
+
   use Guardian, otp_app: :mobile_app_backend, allowed_algos: ["RS256"]
 
   def subject_for_token(%{id: id}, _claims) do

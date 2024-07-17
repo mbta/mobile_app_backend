@@ -1,7 +1,9 @@
 defmodule MobileAppBackendWeb.Plugs.AppCheck do
+  @moduledoc """
+  Plug for verifying request came from a valid app using Firebase App Check https://firebase.google.com/docs/app-check
+  """
   @behaviour Plug
   import Plug.Conn
-  use MobileAppBackendWeb, :controller
   require Logger
 
   def init(opts) do
@@ -14,8 +16,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
     case token do
       nil ->
         conn
-        |> put_status(:unauthorized)
-        |> json("missing_app_check_header")
+        |> send_resp(:unauthorized, "missing_app_check_header")
         |> halt()
 
       token ->
@@ -26,26 +27,32 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
   defp verify(conn, token) do
     # Perform verification steps defined at https://firebase.google.com/docs/app-check/custom-resource-backend
     # 1. Obtain the Firebase App Check Public Keys
-    jwk_response =
-      Req.get(Application.get_env(:mobile_app_backend, MobileAppBackend.AppCheck)[:jwks_url],
-        cache: true
+    jwks_api =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.AppCheck.JwksApi,
+        MobileAppBackend.AppCheck.JwksApi
       )
 
-    with {:ok, %{body: %{"keys" => jwks}}} <- jwk_response,
+    peek_headers_fn =
+      Application.get_env(:mobile_app_backend, :peek_headers, &JOSE.JWT.peek_protected/1)
+
+    with {:ok, jwks} <- jwks_api.read_jwks(),
          %JOSE.JWS{fields: %{"kid" => target_kid} = header_fields} <-
-           JOSE.JWT.peek_protected(token),
+           peek_headers_fn.(token),
          {:ok, secret} <- parse_target_secret(jwks, target_kid),
          # 2. Verify the signature on the App Check token
          # 3. Ensure the token's header uses the algorithm RS256
          {:ok, %{"iss" => issuer, "aud" => projects, "sub" => subject}} <-
-           MobileAppBackend.AppCheck.Guardian.decode_and_verify(token, %{},
+           Application.get_env(:mobile_app_backend, MobileAppBackend.AppCheck)[:guardian_module].decode_and_verify(
+             token,
+             %{},
              secret: secret,
              allowed_algos: ["RS256"]
            ),
          # 4. Ensure the token's header has type JWT
          %{"typ" => "JWT"} <- header_fields,
          # 5. Ensure the token is issued by App Check
-         # TODO
          :ok <- validate_issuer(issuer),
          # 6. Ensure the token is not expired (done by decode_and_verify)
          # 7. Ensure the token's audience matches your project
@@ -58,8 +65,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
         Logger.warning("#{__MODULE__} app_check_failed: #{inspect(error)}")
 
         conn
-        |> put_status(:unauthorized)
-        |> json("invalid_token")
+        |> send_resp(:unauthorized, "invalid_token")
         |> halt()
     end
   end
