@@ -70,6 +70,20 @@ defmodule MobileAppBackendWeb.Plugs.AppCheckTest do
       assert conn == AppCheck.call(conn, [])
     end
 
+    @tag :firebase_valid_token
+    @tag :capture_log
+
+    test "when matching JWK not found for token, halts with 401", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :peek_headers, fn _token ->
+        %JOSE.JWS{fields: %{"kid" => "not_found", "typ" => "JWT"}}
+      end)
+
+      conn = AppCheck.call(conn, [])
+
+      assert conn.status == 401
+      assert conn.halted
+    end
+
     @tag :firebase_invalid_token
     @tag :capture_log
     test "when invalid token halts with 401", %{conn: conn} do

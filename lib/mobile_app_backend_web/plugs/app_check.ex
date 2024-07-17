@@ -73,8 +73,11 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
 
   defp parse_target_secret(jwks, target_kid) do
     case Enum.find(jwks, nil, fn jwk -> Map.get(jwk, "kid") == target_kid end) do
-      nil -> {:error, :target_kid_not_found}
-      secret_key -> {:ok, secret_key}
+      nil ->
+        {:error, :target_kid_not_found}
+
+      secret_key ->
+        {:ok, secret_key}
     end
   end
 
