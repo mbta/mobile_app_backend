@@ -12,6 +12,14 @@ config :sentry,
   enable_source_code_context: true,
   root_source_code_path: File.cwd!()
 
+config :mobile_app_backend, MobileAppBackend.AppCheck,
+  issuer: System.get_env("APP_CHECK_ISSUER"),
+  project: System.get_env("APP_CHECK_PROJECT"),
+  subjects: String.split(System.get_env("APP_CHECK_APP_IDS"), ",")
+
+config :mobile_app_backend, MobileAppBackend.ClientConfig,
+  mapbox_token: System.get_env("MAPBOX_TOKEN")
+
 if config_env() != :test do
   # mbta_v3_api configuration in disguise
   config :mobile_app_backend,

@@ -19,16 +19,3 @@ defmodule MobileAppBackend.AppCheck.Guardian do
     {:error, :reason_for_error}
   end
 end
-
-# Protocol.derive(Jason.Encoder, JOSE.JWK)
-
-defmodule MobileAppBackend.CustomTokenVerify do
-  @behaviour Guardian.Token.Verify
-
-  def verify_claim(mod, claim_key, claims, options) do
-    require Logger
-    Logger.error("HIT")
-    # Logger.error("MOD: #{mod}  CLAIMS: #{claims}, OPTS: #{options}")
-    {:ok, %{}}
-  end
-end
