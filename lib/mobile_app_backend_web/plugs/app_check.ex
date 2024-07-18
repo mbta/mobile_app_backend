@@ -22,7 +22,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
       nil ->
         conn
         |> put_status(:unauthorized)
-        |> json("missing_app_check_header")
+        |> json(%{error: "missing_app_check_header"})
         |> halt()
 
       token ->
@@ -63,7 +63,7 @@ defmodule MobileAppBackendWeb.Plugs.AppCheck do
 
         conn
         |> put_status(:unauthorized)
-        |> json("invalid_token")
+        |> json(%{error: "invalid_token"})
         |> halt()
     end
   end

@@ -55,7 +55,7 @@ defmodule MobileAppBackendWeb.ClientControllerTest do
     @tag :capture_log
     test "when invalid token, returns 401 error", %{conn: conn} do
       conn = get(conn, "/api/protected/config")
-      "invalid_token" = json_response(conn, 401)
+      %{"error" => "invalid_token"} = json_response(conn, 401)
     end
   end
 end
