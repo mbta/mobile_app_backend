@@ -17,3 +17,12 @@ export ALGOLIA_READ_URL=
 # Used for error logging
 export SENTRY_DSN=
 export SENTRY_ENV=local
+
+# Configuration for [AppCheck](https://firebase.google.com/docs/app-check/custom-resource-backend)
+# Used for verifying the authorization of clients
+export APP_CHECK_ISSUER=
+export APP_CHECK_PROJECT=
+export APP_CHECK_APP_IDS=
+
+# Configuration for [Mapbox](https://docs.mapbox.com/help/glossary/access-token/)
+export MAPBOX_PUBLIC_TOKEN=

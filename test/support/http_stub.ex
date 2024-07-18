@@ -15,4 +15,9 @@ defmodule Test.Support.HTTPStub do
   def request(req) do
     Req.request(req, cache: false, plug: &Data.respond/1)
   end
+
+  @impl MobileAppBackend.HTTP
+  def get(req, _opts \\ []) do
+    Req.get(req, cache: false, plug: &Data.respond/1)
+  end
 end

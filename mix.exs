@@ -75,7 +75,8 @@ defmodule MobileAppBackend.MixProject do
       {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
       {:absinthe_client, "~> 0.1.0"},
       {:server_sent_event_stage, "~> 1.2"},
-      {:polyline, "~> 1.4", only: :test}
+      {:polyline, "~> 1.4", only: :test},
+      {:jose, "~> 1.11"}
     ]
   end
 
