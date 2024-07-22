@@ -15,8 +15,9 @@ defmodule MobileAppBackendWeb.TripController do
       )
 
     if Enum.empty?(trips) do
-      conn = put_status(conn, :not_found)
-      json(conn, %{code: conn.status, message: "Trip not found: #{trip_id}"})
+      conn
+      |> put_status(:not_found)
+      |> json(%{code: conn.status, message: "Trip not found: #{trip_id}"})
     else
       [trip] = trips
 
@@ -41,8 +42,9 @@ defmodule MobileAppBackendWeb.TripController do
       )
 
     if Enum.empty?(trips) do
-      conn = put_status(conn, :not_found)
-      json(conn, %{code: conn.status, message: "Trip not found: #{trip_id}"})
+      conn
+      |> put_status(:not_found)
+      |> json(%{code: conn.status, message: "Trip not found: #{trip_id}"})
     else
       [trip] = trips
 
