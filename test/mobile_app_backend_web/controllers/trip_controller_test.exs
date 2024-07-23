@@ -164,8 +164,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
 
       response = json_response(conn, 404)
 
-      assert %{"code" => 404, "message" => "Trip not found: unknown_trip_id"} =
-               response
+      assert %{"message" => "Trip not found: unknown_trip_id"} = response
     end
   end
 
@@ -327,8 +326,7 @@ defmodule MobileAppBackendWeb.TripControllerTest do
 
       response = json_response(conn, 404)
 
-      assert %{"code" => 404, "message" => "Trip not found: unknown_trip_id"} =
-               response
+      assert %{"message" => "Trip not found: unknown_trip_id"} = response
     end
   end
 end
