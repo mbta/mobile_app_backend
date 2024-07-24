@@ -2,6 +2,33 @@ defmodule MobileAppBackendWeb.TripController do
   alias MBTAV3API.Repository
   use MobileAppBackendWeb, :controller
 
+  def trip(conn, %{"trip_id" => trip_id}) do
+    {:ok,
+     %{
+       data: trips,
+       included: %{route_patterns: route_patterns, trips: included_trips}
+     }} =
+      Repository.trips(
+        filter: [id: trip_id],
+        include: [:stops, [route_pattern: [representative_trip: :stops]]],
+        fields: [stop: []]
+      )
+
+    if Enum.empty?(trips) do
+      conn
+      |> put_status(:not_found)
+      |> json(%{message: "Trip not found: #{trip_id}"})
+    else
+      [trip] = trips
+
+      stop_ids = get_stop_ids(trip, route_patterns, included_trips)
+
+      json(conn, %{
+        trip: Map.put(trip, :stop_ids, stop_ids)
+      })
+    end
+  end
+
   def map(conn, %{"trip_id" => trip_id}) do
     {:ok,
      %{
@@ -15,18 +42,13 @@ defmodule MobileAppBackendWeb.TripController do
       )
 
     if Enum.empty?(trips) do
-      conn = put_status(conn, :not_found)
-      json(conn, %{code: conn.status, message: "Trip not found: #{trip_id}"})
+      conn
+      |> put_status(:not_found)
+      |> json(%{message: "Trip not found: #{trip_id}"})
     else
       [trip] = trips
 
-      stop_ids =
-        if Enum.empty?(trip.stop_ids) do
-          # Fall back to stops on the representative trip
-          resolve_representative_trip_stops(trip, route_patterns, included_trips)
-        else
-          trip.stop_ids
-        end
+      stop_ids = get_stop_ids(trip, route_patterns, included_trips)
 
       json(conn, %{
         shape_with_stops: %{
@@ -37,6 +59,15 @@ defmodule MobileAppBackendWeb.TripController do
           shape: Map.get(shapes_by_id, trip.shape_id)
         }
       })
+    end
+  end
+
+  defp get_stop_ids(trip, route_patterns, included_trips) do
+    if Enum.empty?(trip.stop_ids) do
+      # Fall back to stops on the representative trip
+      resolve_representative_trip_stops(trip, route_patterns, included_trips)
+    else
+      trip.stop_ids
     end
   end
 
