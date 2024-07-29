@@ -7,8 +7,10 @@ defmodule MBTAV3API.Alert do
   @type t :: %__MODULE__{
           id: String.t(),
           active_period: [ActivePeriod.t()],
+          description: String.t() | nil,
           effect: effect(),
           effect_name: String.t() | nil,
+          header: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           lifecycle: lifecycle()
         }
@@ -57,10 +59,29 @@ defmodule MBTAV3API.Alert do
   )
 
   @derive Jason.Encoder
-  defstruct [:id, :active_period, :effect, :effect_name, :informed_entity, :lifecycle]
+  defstruct [
+    :id,
+    :active_period,
+    :description,
+    :effect,
+    :effect_name,
+    :header,
+    :informed_entity,
+    :lifecycle
+  ]
 
   @impl JsonApi.Object
-  def fields, do: [:active_period, :effect, :effect_name, :informed_entity, :lifecycle]
+  def fields do
+    [
+      :active_period,
+      :description,
+      :effect,
+      :effect_name,
+      :header,
+      :informed_entity,
+      :lifecycle
+    ]
+  end
 
   @impl JsonApi.Object
   def includes, do: %{}
@@ -87,8 +108,10 @@ defmodule MBTAV3API.Alert do
     %__MODULE__{
       id: item.id,
       active_period: Enum.map(item.attributes["active_period"], &ActivePeriod.parse/1),
+      description: item.attributes["description"],
       effect: parse_effect(item.attributes["effect"]),
       effect_name: item.attributes["effect_name"],
+      header: item.attributes["header"],
       informed_entity: Enum.map(item.attributes["informed_entity"], &InformedEntity.parse/1),
       lifecycle: parse_lifecycle(item.attributes["lifecycle"])
     }
