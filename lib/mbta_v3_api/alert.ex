@@ -71,8 +71,8 @@ defmodule MBTAV3API.Alert do
   ]
 
   @impl JsonApi.Object
-  def fields,
-    do: [
+  def fields do
+    [
       :active_period,
       :description,
       :effect,
@@ -81,6 +81,7 @@ defmodule MBTAV3API.Alert do
       :informed_entity,
       :lifecycle
     ]
+  end
 
   @impl JsonApi.Object
   def includes, do: %{}
