@@ -15,7 +15,7 @@ defmodule MBTAV3API.RepositoryTest do
       fn %Req.Request{url: %URI{path: "/alerts"}, options: %{params: params}} ->
         assert params == %{
                  "fields[alert]" =>
-                   "active_period,description,effect,effect_name,header,informed_entity,lifecycle",
+                   "active_period,cause,description,effect,effect_name,header,informed_entity,lifecycle,updated_at",
                  "filter[lifecycle]" => "NEW,ONGOING,ONGOING_UPCOMING",
                  "filter[stop]" =>
                    "9983,6542,1241,8281,place-boyls,8279,49002,6565,place-tumnl,145,place-pktrm,place-bbsta"
@@ -29,6 +29,7 @@ defmodule MBTAV3API.RepositoryTest do
                  "active_period" => [
                    %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T14:38:00-05:00"}
                  ],
+                 "cause" => "AMTRAK",
                  "description" => "Description 1",
                  "effect" => "DELAY",
                  "header" => "Header 1",
@@ -39,7 +40,8 @@ defmodule MBTAV3API.RepositoryTest do
                      "route_type" => 3
                    }
                  ],
-                 "lifecycle" => "NEW"
+                 "lifecycle" => "NEW",
+                 "updated_at" => "2024-02-08T14:38:00-05:00"
                },
                "id" => "552825",
                "links" => %{"self" => "/alerts/552825"},
@@ -50,6 +52,7 @@ defmodule MBTAV3API.RepositoryTest do
                  "active_period" => [
                    %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T12:55:00-05:00"}
                  ],
+                 "cause" => "HURRICANE",
                  "description" => "Description 2",
                  "effect" => "DELAY",
                  "header" => "Header 2",
@@ -60,7 +63,8 @@ defmodule MBTAV3API.RepositoryTest do
                      "route_type" => 3
                    }
                  ],
-                 "lifecycle" => "NEW"
+                 "lifecycle" => "NEW",
+                 "updated_at" => "2024-02-08T12:55:00-05:00"
                },
                "id" => "552803",
                "links" => %{"self" => "/alerts/552803"},
@@ -98,6 +102,7 @@ defmodule MBTAV3API.RepositoryTest do
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 14:38:00], end: ~B[2024-02-08 19:12:40]}
                ],
+               cause: :amtrak,
                description: "Description 1",
                effect: :delay,
                header: "Header 1",
@@ -108,13 +113,15 @@ defmodule MBTAV3API.RepositoryTest do
                    route_type: :bus
                  }
                ],
-               lifecycle: :new
+               lifecycle: :new,
+               updated_at: ~B[2024-02-08 14:38:00]
              },
              %Alert{
                id: "552803",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 12:55:00], end: ~B[2024-02-08 19:12:40]}
                ],
+               cause: :hurricane,
                description: "Description 2",
                effect: :delay,
                header: "Header 2",
@@ -125,7 +132,8 @@ defmodule MBTAV3API.RepositoryTest do
                    route_type: :bus
                  }
                ],
-               lifecycle: :new
+               lifecycle: :new,
+               updated_at: ~B[2024-02-08 12:55:00]
              }
            ]
   end
