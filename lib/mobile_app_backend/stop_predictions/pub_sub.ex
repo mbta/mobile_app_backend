@@ -18,6 +18,7 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
           all_stop_ids: [Stop.id()]
         }
 
+  @spec start_link(Keyword.t()) :: GenServer.on_start()
   def start_link(args) do
     stop_id = Keyword.fetch!(args, :stop_id)
 
