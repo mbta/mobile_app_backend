@@ -6,12 +6,12 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   """
   use GenServer
   alias MobileAppBackend.StopPredictions
-  alias MBTAV3API.{Prediction, Stop, Trip, Vehicle, JsonApi}
+  alias MBTAV3API.{Prediction, Stop, Trip, Route, Vehicle, JsonApi}
   require Logger
 
   @type t :: %{
           data: %{
-            predictions: %{Prediction.id() => Prediction.t()},
+            predictions_by_route: %{Route.id() => %{Prediction.id() => Prediction.t()}},
             trips: %{Trip.id() => Trip.t()},
             vehicles: %{Vehicle.id() => Vehicle.t()}
           },
@@ -55,8 +55,6 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
       end)
 
     {:ok, %{stop_id: stop_id, all_stop_ids: stop_ids, data: merge_data(data)}}
-
-    # TODO: start timer to periodically read from ETS
   end
 
   def subscribe(stop_id) do
@@ -66,7 +64,8 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
       end
 
       current_data = GenServer.call(StopPredictions.Registry.via_name(stop_id), :get_data)
-      {:ok, merge_data(current_data)}
+
+      {:ok, current_data}
     end
   end
 
@@ -78,11 +77,14 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   @impl true
   def handle_info({:stream_data, "predictions:route:" <> route_id, data}, state) do
     old_data = state.data
-    new_data = put_in(old_data, [route_id], filter_data(data, state.all_stop_ids))
+
+    new_data =
+      put_in(old_data, [:predictions_by_route, route_id], filter_data(data, state.all_stop_ids))
 
     if old_data != new_data do
-      Phoenix.PubSub.broadcast!(__MODULE__, "predictions:stop:instance:#{state.stop_id}", %{
-        new_predictions: %{state.stop_id => merge_data(new_data)}
+      Phoenix.PubSub.broadcast!(__MODULE__, "predictions:stop:instance:#{state.stop_id}", {
+        :new_predictions,
+        %{state.stop_id => merge_data(new_data)}
       })
     end
 
