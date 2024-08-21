@@ -29,15 +29,27 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannelV2Test do
 
     start_link_supervised!(
       {FakeStopPredictions.PubSub,
-       stop_id: "12345", data: %{predictions: %{prediction.id => prediction}}}
+       stop_id: "12345",
+       data: %{
+         by_route: %{
+           prediction.route_id => %{
+             predictions: %{prediction.id => prediction}
+           }
+         }
+       }}
     )
 
-    start_link_supervised!({FakeStopPredictions.PubSub, stop_id: "67890", data: to_full_map([])})
+    start_link_supervised!({FakeStopPredictions.PubSub, stop_id: "67890", data: %{by_route: %{}}})
 
     {:ok, reply, _socket} =
       subscribe_and_join(socket, "predictions:stops:v2:12345,67890")
 
     assert reply == to_full_map([prediction])
+  end
+
+  test "error if missing stop ids in topic", %{socket: socket} do
+    {:error, %{code: :no_stop_ids}} =
+      subscribe_and_join(socket, "predictions:stops:v2:")
   end
 
   test "handles messages", %{socket: socket} do
@@ -51,7 +63,9 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannelV2Test do
     new_prediction = build(:prediction, stop_id: "12345")
 
     start_link_supervised!(
-      {FakeStopPredictions.PubSub, stop_id: "12345", data: %{prediction.id => prediction}}
+      {FakeStopPredictions.PubSub,
+       stop_id: "12345",
+       data: %{by_route: %{prediction.route_id => %{prediction.id => prediction}}}}
     )
 
     {:ok, _reply, _socket} =

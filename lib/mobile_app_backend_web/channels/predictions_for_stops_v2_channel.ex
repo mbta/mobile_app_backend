@@ -6,11 +6,11 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
 
   @impl true
   def join("predictions:stops:v2:" <> stop_id_concat, _payload, socket) do
-    stop_ids = String.split(stop_id_concat, ",")
-
-    if Enum.empty?(stop_ids) do
+    if stop_id_concat == "" do
       {:error, %{code: :no_stop_ids}}
     else
+      stop_ids = String.split(stop_id_concat, ",")
+
       initial_data =
         Map.new(stop_ids, fn stop_id ->
           {:ok, data} = MobileAppBackend.StopPredictions.PubSub.subscribe(stop_id)

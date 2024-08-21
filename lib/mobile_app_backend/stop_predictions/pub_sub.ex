@@ -11,11 +11,16 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
 
   @type t :: %{
           data: %{
-            predictions_by_route: %{Route.id() => %{Prediction.id() => Prediction.t()}},
-            trips: %{Trip.id() => Trip.t()},
-            vehicles: %{Vehicle.id() => Vehicle.t()}
-          },
-          all_stop_ids: [Stop.id()]
+            by_route: %{
+              Route.id() => %{
+                predictions: %{Prediction.id() => Prediction.t()},
+                trips: %{Trip.id() => Trip.t()},
+                vehicles: %{Vehicle.id() => Vehicle.t()}
+              }
+            },
+            all_stop_ids: [Stop.id()],
+            stop_id: Stop.id()
+          }
         }
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
@@ -54,18 +59,18 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
         {route_id, filter_data(data, stop_ids)}
       end)
 
-    {:ok, %{stop_id: stop_id, all_stop_ids: stop_ids, data: merge_data(data)}}
+    {:ok, %{stop_id: stop_id, all_stop_ids: stop_ids, data: %{by_route: data}}}
   end
 
   def subscribe(stop_id) do
-    with :ok <- Phoenix.PubSub.subscribe(__MODULE__, "predictions:stop:instance:#{stop_id}") do
+    with :ok <- Phoenix.PubSub.subscribe(__MODULE__, topic(stop_id)) do
       if is_nil(StopPredictions.Registry.find_pid(stop_id)) do
         StopPredictions.Supervisor.start_instance(stop_id: stop_id, name: stop_id)
       end
 
       current_data = GenServer.call(StopPredictions.Registry.via_name(stop_id), :get_data)
 
-      {:ok, current_data}
+      {:ok, merge_data(current_data.by_route)}
     end
   end
 
@@ -79,16 +84,20 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
     old_data = state.data
 
     new_data =
-      put_in(old_data, [:predictions_by_route, route_id], filter_data(data, state.all_stop_ids))
+      put_in(old_data, [:by_route, route_id], filter_data(data, state.all_stop_ids))
 
     if old_data != new_data do
-      Phoenix.PubSub.broadcast!(__MODULE__, "predictions:stop:instance:#{state.stop_id}", {
+      Phoenix.PubSub.broadcast!(__MODULE__, topic(state.stop_id), {
         :new_predictions,
-        %{state.stop_id => merge_data(new_data)}
+        %{state.stop_id => merge_data(new_data.by_route)}
       })
     end
 
     {:noreply, %{state | data: new_data}}
+  end
+
+  def topic(stop_id) do
+    "predictions:stop:instance:#{stop_id}"
   end
 
   def filter_data(route_data, stop_ids) do
