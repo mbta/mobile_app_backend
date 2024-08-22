@@ -24,6 +24,7 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannelTest do
     %{socket: socket}
   end
 
+
   test "joins and leaves ok", %{socket: socket} do
     trip_id = "81"
     route_id = "92"
@@ -46,12 +47,18 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannelTest do
     assert reply == to_full_map([prediction])
   end
 
+
   describe "message handling" do
     setup %{socket: socket} do
       RepositoryMock
       |> expect(:trips, fn _, _ ->
         ok_response([build(:trip, id: "60392455", route_id: "Red")])
       end)
+
+      start_link_supervised!(
+        {FakeStaticInstance,
+         topic: "predictions:route:Red", data: to_full_map([])}
+      )
 
       {:ok, reply, socket} = subscribe_and_join(socket, "predictions:trip:60392455")
 
