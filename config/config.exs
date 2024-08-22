@@ -25,6 +25,8 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   pubsub_server: MobileAppBackend.PubSub,
   live_view: [signing_salt: "EPNVgKKu"]
 
+config :mobile_app_backend, MobileAppBackend.StopPredictions.PubSub, broadcast_interval_ms: 5000
+
 config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   route_index: "routes_test",
   stop_index: "stops_test"

@@ -9,6 +9,10 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   alias MobileAppBackend.StopPredictions
   require Logger
 
+  @broadcast_interval_ms Application.compile_env!(:mobile_app_backend, __MODULE__)[
+                           :broadcast_interval_ms
+                         ]
+
   @type t :: %{
           data: %{
             by_route: %{
@@ -17,10 +21,11 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
                 trips: %{Trip.id() => Trip.t()},
                 vehicles: %{Vehicle.id() => Vehicle.t()}
               }
-            },
-            all_stop_ids: [Stop.id()],
-            stop_id: Stop.id()
-          }
+            }
+          },
+          all_stop_ids: [Stop.id()],
+          stop_id: Stop.id(),
+          last_broadcast_msg: MBTAV3API.JsonApi.Object.full_map() | nil
         }
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
@@ -54,7 +59,10 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
         {route_id, filter_data(data, stop_ids)}
       end)
 
-    {:ok, %{stop_id: stop_id, all_stop_ids: stop_ids, data: %{by_route: data}}}
+    broadcast_timer()
+
+    {:ok,
+     %{stop_id: stop_id, all_stop_ids: stop_ids, last_broadcast_msg: nil, data: %{by_route: data}}}
   end
 
   def subscribe(stop_id) do
@@ -81,14 +89,45 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
     new_data =
       put_in(old_data, [:by_route, route_id], filter_data(data, state.all_stop_ids))
 
-    if old_data != new_data do
+    new_state = %{state | data: new_data}
+
+    if state.last_broadcast_msg == nil do
+      state_with_broadcast = broadcast(new_state)
+
+      {:noreply, state_with_broadcast}
+    else
+      {:noreply, new_state}
+    end
+  end
+
+  def handle_info(:timed_broadcast, state) do
+    send(self(), :broadcast)
+    broadcast_timer()
+    {:noreply, state, :hibernate}
+  end
+
+  def handle_info(:broadcast, state) do
+    state_after_broadcast = broadcast(state)
+
+    {:noreply, state_after_broadcast, :hibernate}
+  end
+
+  def broadcast(state) do
+    last_broadcast_msg = state.last_broadcast_msg
+    data_to_broadcast = merge_data(state.data.by_route)
+
+    if last_broadcast_msg != data_to_broadcast do
       Phoenix.PubSub.broadcast!(__MODULE__, topic(state.stop_id), {
         :new_predictions,
-        %{state.stop_id => merge_data(new_data.by_route)}
+        %{state.stop_id => data_to_broadcast}
       })
     end
 
-    {:noreply, %{state | data: new_data}}
+    %{state | last_broadcast_msg: data_to_broadcast}
+  end
+
+  defp broadcast_timer(interval \\ @broadcast_interval_ms) do
+    Process.send_after(self(), :timed_broadcast, interval)
   end
 
   def topic(stop_id) do

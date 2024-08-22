@@ -58,9 +58,34 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
               %{
                 stop_id: "place-jfk",
                 all_stop_ids: ["place-jfk", "121", "70085"],
-                data: %{by_route: %{"Red" => to_full_map([prediction, prediction2])}}
+                data: %{by_route: %{"Red" => to_full_map([prediction, prediction2])}},
+                last_broadcast_msg: nil
               }} ==
                StopPredictions.PubSub.init(stop_id: "place-jfk")
+    end
+
+    test "schedules timed broadcast" do
+      RepositoryMock
+      |> expect(:stops, fn _, _ ->
+        ok_response([build(:stop, id: "place-jfk")], [
+          build(:stop, id: "121"),
+          build(:stop, id: "70085")
+        ])
+      end)
+      |> expect(:routes, fn [filter: [stop: ["place-jfk", "121", "70085"]]], _ ->
+        ok_response([
+          build(:route, id: "Red")
+        ])
+      end)
+
+      start_link_supervised!(
+        {FakeStaticInstance, topic: "predictions:route:Red", data: to_full_map([])}
+      )
+
+      assert {:ok, _response} =
+               StopPredictions.PubSub.init(stop_id: "place-jfk")
+
+      assert_receive :timed_broadcast
     end
   end
 
@@ -78,7 +103,44 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
             "66" => to_full_map([prediction_66_1]),
             "19" => to_full_map([prediction_19_1])
           }
-        }
+        },
+        last_broadcast_msg: nil
+      }
+
+      start_link_supervised!(
+        {FakeStopPredictions.PubSub, stop_id: "place-nubn", data: %{by_route: %{}}}
+      )
+
+      assert {:noreply,
+              %{
+                stop_id: "place-nubn",
+                all_stop_ids: ["64000", "64"],
+                data: %{
+                  by_route: %{
+                    "66" => to_full_map([prediction_66_2]),
+                    "19" => to_full_map([prediction_19_1])
+                  }
+                },
+                last_broadcast_msg: to_full_map([prediction_66_2, prediction_19_1])
+              }} ==
+               StopPredictions.PubSub.handle_info(
+                 {:stream_data, "predictions:route:66", to_full_map([prediction_66_2])},
+                 initial_state
+               )
+    end
+
+    test "when new predictions and no previous broadcast, broadcasts on-demand" do
+      prediction_66_1 = build(:prediction, stop_id: "64000", route_id: "66")
+
+      initial_state = %{
+        stop_id: "place-nubn",
+        all_stop_ids: ["64000"],
+        data: %{
+          by_route: %{
+            "66" => to_full_map([])
+          }
+        },
+        last_broadcast_msg: nil
       }
 
       start_link_supervised!(
@@ -91,25 +153,106 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
           StopPredictions.PubSub.topic("place-nubn")
         )
 
+      new_predictions = to_full_map([prediction_66_1])
+
       assert {:noreply,
               %{
-                stop_id: "place-nubn",
-                all_stop_ids: ["64000", "64"],
-                data: %{
-                  by_route: %{
-                    "66" => to_full_map([prediction_66_2]),
-                    "19" => to_full_map([prediction_19_1])
-                  }
-                }
-              }} ==
+                last_broadcast_msg: last_broadcast_msg
+              }} =
                StopPredictions.PubSub.handle_info(
-                 {:stream_data, "predictions:route:66", to_full_map([prediction_66_2])},
+                 {:stream_data, "predictions:route:66", new_predictions},
                  initial_state
                )
 
+      assert last_broadcast_msg == new_predictions
+
+      assert_receive {:new_predictions, new_predictions}
+      assert %{"place-nubn" => to_full_map([prediction_66_1])} == new_predictions
+    end
+
+    test "when new predictions and previous broadcast already, doesn't send immediately" do
+      prediction_66_1 = build(:prediction, stop_id: "64000", route_id: "66")
+      prediction_66_2 = build(:prediction, stop_id: "64000", route_id: "66")
+
+      initial_state = %{
+        stop_id: "place-nubn",
+        all_stop_ids: ["64000"],
+        data: %{
+          by_route: %{
+            "66" => to_full_map([prediction_66_1])
+          }
+        },
+        last_broadcast_msg: to_full_map([prediction_66_1])
+      }
+
+      start_link_supervised!(
+        {FakeStopPredictions.PubSub, stop_id: "place-nubn", data: %{by_route: %{}}}
+      )
+
+      :ok =
+        Phoenix.PubSub.subscribe(
+          StopPredictions.PubSub,
+          StopPredictions.PubSub.topic("place-nubn")
+        )
+
+      new_predictions = to_full_map([prediction_66_2])
+
+      assert {:noreply,
+              %{
+                last_broadcast_msg: last_broadcast_msg
+              }} =
+               StopPredictions.PubSub.handle_info(
+                 {:stream_data, "predictions:route:66", new_predictions},
+                 initial_state
+               )
+
+      assert last_broadcast_msg == initial_state.last_broadcast_msg
+
+      refute_receive {:new_predictions, _new_predictions}, 1000
+    end
+
+    test ":timed_broadcast schedules broadcast" do
+      StopPredictions.PubSub.handle_info(:timed_broadcast, %{})
+
+      assert_receive :broadcast
+    end
+
+    test ":broadcast broadcasts if data has changed" do
+      prediction = build(:prediction)
+
+      :ok =
+        Phoenix.PubSub.subscribe(
+          StopPredictions.PubSub,
+          StopPredictions.PubSub.topic(prediction.stop_id)
+        )
+
+      StopPredictions.PubSub.handle_info(:broadcast, %{
+        stop_id: prediction.stop_id,
+        last_broadcast_msg: nil,
+        data: %{by_route: %{prediction.route_id => to_full_map([prediction])}}
+      })
+
       assert_receive {:new_predictions, new_predictions}
 
-      assert %{"place-nubn" => to_full_map([prediction_66_2, prediction_19_1])} == new_predictions
+      assert new_predictions == %{prediction.stop_id => to_full_map([prediction])}
+    end
+
+    test ":broadcast skips if data hasn't changed" do
+      prediction = build(:prediction)
+
+      :ok =
+        Phoenix.PubSub.subscribe(
+          StopPredictions.PubSub,
+          StopPredictions.PubSub.topic(prediction.stop_id)
+        )
+
+      StopPredictions.PubSub.handle_info(:broadcast, %{
+        stop_id: prediction.stop_id,
+        last_broadcast_msg: to_full_map([prediction]),
+        data: %{by_route: %{prediction.route_id => prediction}}
+      })
+
+      refute_receive :broadcast
     end
   end
 
