@@ -27,12 +27,7 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   def start_link(args) do
     stop_id = Keyword.fetch!(args, :stop_id)
 
-    opts = [
-      name: StopPredictions.Registry.via_name(stop_id),
-      id: {StopPredictions.PubSub, stop_id}
-    ]
-
-    GenServer.start_link(__MODULE__, args, opts)
+    GenServer.start_link(__MODULE__, args, name: StopPredictions.Registry.via_name(stop_id))
   end
 
   @impl GenServer
