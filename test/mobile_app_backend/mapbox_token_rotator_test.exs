@@ -55,7 +55,10 @@ defmodule MobileAppBackend.MapboxTokenRotatorTest do
 
         # use Req.request to still run the JSON decoding step
         Req.request(request,
-          adapter: fn request -> {request, Req.Response.json(%{token: fake_temporary_token})} end
+          adapter: fn request ->
+            {request,
+             Req.Response.new(status: 201) |> Req.Response.json(%{token: fake_temporary_token})}
+          end
         )
       end
     )
@@ -89,7 +92,9 @@ defmodule MobileAppBackend.MapboxTokenRotatorTest do
         send(test_pid, :request_made)
 
         Req.request(request,
-          adapter: fn request -> {request, Req.Response.json(%{token: "tk.token1"})} end
+          adapter: fn request ->
+            {request, Req.Response.new(status: 201) |> Req.Response.json(%{token: "tk.token1"})}
+          end
         )
       end
     )
@@ -99,7 +104,9 @@ defmodule MobileAppBackend.MapboxTokenRotatorTest do
         send(test_pid, :request_made)
 
         Req.request(request,
-          adapter: fn request -> {request, Req.Response.json(%{token: "tk.token2"})} end
+          adapter: fn request ->
+            {request, Req.Response.new(status: 201) |> Req.Response.json(%{token: "tk.token2"})}
+          end
         )
       end
     )
