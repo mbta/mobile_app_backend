@@ -1,4 +1,4 @@
-defmodule MobielAppBackend.ClientConfig do
+defmodule MobileAppBackend.ClientConfig do
   @type t :: %__MODULE__{
           mapbox_public_token: String.t()
         }
