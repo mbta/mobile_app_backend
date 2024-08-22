@@ -2,8 +2,15 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
   use ExUnit.Case
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
   import MobileAppBackend.Factory
+  import Mox
+  import Test.Support.Helpers
   alias MobileAppBackend.StopPredictions
+  alias Test.Support.FakeStaticInstance
   alias Test.Support.FakeStopPredictions
+
+  setup do
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+  end
 
   describe "subscribe/1" do
     test "returns current state" do
@@ -25,21 +32,35 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
   end
 
   describe "init/1" do
-    test "returns current state" do
-      prediction = build(:prediction, stop_id: "12345", route_id: "66")
-      prediction2 = build(:prediction, stop_id: "12345", route_id: "39")
+    test "returns current state of route predictions" do
+      prediction = build(:prediction, stop_id: "121", route_id: "Red")
+      prediction2 = build(:prediction, stop_id: "70085", route_id: "Red")
 
-      init_state = %{
-        by_route: %{
-          "66" => %{predictions: %{prediction.id => prediction}},
-          "39" => %{predictions: %{prediction2.id => prediction2}}
-        }
-      }
+      RepositoryMock
+      |> expect(:stops, fn _, _ ->
+        ok_response([build(:stop, id: "place-jfk")], [
+          build(:stop, id: "121"),
+          build(:stop, id: "70085")
+        ])
+      end)
+      |> expect(:routes, fn [filter: [stop: ["place-jfk", "121", "70085"]]], _ ->
+        ok_response([
+          build(:route, id: "Red")
+        ])
+      end)
 
-      start_link_supervised!({FakeStopPredictions.PubSub, stop_id: "12345", data: init_state})
+      start_link_supervised!(
+        {FakeStaticInstance,
+         topic: "predictions:route:Red", data: to_full_map([prediction, prediction2])}
+      )
 
-      assert {:ok, to_full_map([prediction, prediction2])} ==
-               StopPredictions.PubSub.subscribe("12345")
+      assert {:ok,
+              %{
+                stop_id: "place-jfk",
+                all_stop_ids: ["place-jfk", "121", "70085"],
+                data: %{by_route: %{"Red" => to_full_map([prediction, prediction2])}}
+              }} ==
+               StopPredictions.PubSub.init(stop_id: "place-jfk")
     end
   end
 
