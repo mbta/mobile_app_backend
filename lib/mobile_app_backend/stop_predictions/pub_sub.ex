@@ -5,8 +5,8 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   when the stop's predictions have changed.
   """
   use GenServer
+  alias MBTAV3API.{JsonApi, Prediction, Route, Stop, Trip, Vehicle}
   alias MobileAppBackend.StopPredictions
-  alias MBTAV3API.{Prediction, Stop, Trip, Route, Vehicle, JsonApi}
   require Logger
 
   @type t :: %{
