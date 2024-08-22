@@ -24,7 +24,6 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannelTest do
     %{socket: socket}
   end
 
-
   test "joins and leaves ok", %{socket: socket} do
     trip_id = "81"
     route_id = "92"
@@ -46,7 +45,6 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannelTest do
 
     assert reply == to_full_map([prediction])
   end
-
 
   describe "message handling" do
     setup %{socket: socket} do
