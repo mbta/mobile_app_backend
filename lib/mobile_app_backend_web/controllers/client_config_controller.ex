@@ -1,14 +1,13 @@
 defmodule MobileAppBackendWeb.ClientConfigController do
-  alias MobileAppBackend.ClientConfig
   use MobileAppBackendWeb, :controller
+
+  alias MobileAppBackend.ClientConfig
+  alias MobileAppBackend.MapboxTokenRotator
 
   @spec config(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def config(conn, _params) do
     client_config = %ClientConfig{
-      mapbox_public_token:
-        Application.get_env(:mobile_app_backend, MobileAppBackend.ClientConfig)[
-          :mapbox_public_token
-        ]
+      mapbox_public_token: MapboxTokenRotator.get_public_token()
     }
 
     json(conn, client_config)

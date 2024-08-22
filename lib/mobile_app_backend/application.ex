@@ -15,6 +15,7 @@ defmodule MobileAppBackend.Application do
        query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: MobileAppBackend.PubSub},
       MBTAV3API.Supervisor,
+      MobileAppBackend.MapboxTokenRotator,
       # Start to serve requests, typically the last entry
       MobileAppBackendWeb.Endpoint
     ]
