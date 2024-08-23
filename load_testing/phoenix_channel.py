@@ -71,9 +71,11 @@ class PhoenixSocket:
             exception = None
             if payload["status"] == "error":
                 exception = ValueError(payload["response"])
+
+            name = "predictions:stops:v2" if "predictions:stops:v2" in topic else topic
             self.environment.events.request.fire(
                 request_type=f"WS:SEND {push.event}",
-                name=push.topic,
+                name=name,
                 response_time=(time.monotonic() - push.send_time) * 1000,
                 response_length=response_length,
                 response=payload,
@@ -84,7 +86,7 @@ class PhoenixSocket:
                 
                 self.environment.events.request.fire(
                 request_type=f"WS:RECV {event}",
-                name=topic,
+                name=name,
                 response_time=None,
                 response_length=response_length,
             )
@@ -93,7 +95,7 @@ class PhoenixSocket:
         else:
             self.environment.events.request.fire(
                 request_type=f"WS:RECV {event}",
-                name=topic,
+                name=name,
                 response_time=None,
                 response_length=response_length,
             )
