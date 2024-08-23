@@ -53,6 +53,10 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannelTest do
         ok_response([build(:trip, id: "60392455", route_id: "Red")])
       end)
 
+      start_link_supervised!(
+        {FakeStaticInstance, topic: "predictions:route:Red", data: to_full_map([])}
+      )
+
       {:ok, reply, socket} = subscribe_and_join(socket, "predictions:trip:60392455")
 
       assert reply == to_full_map([])
