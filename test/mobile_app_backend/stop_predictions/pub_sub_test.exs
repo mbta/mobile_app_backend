@@ -12,6 +12,10 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
   end
 
+  setup do
+    reassign_env(:mobile_app_backend, StopPredictions.Store, PredictionsStoreMock)
+  end
+
   describe "subscribe/1" do
     test "returns current state" do
       prediction = build(:prediction, stop_id: "12345", route_id: "66")
@@ -90,6 +94,10 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
   end
 
   describe "handle_info/2" do
+    setup do
+      reassign_env(:mobile_app_backend, StopPredictions.Store, PredictionsStoreMock)
+    end
+
     test "when new predictions for a route, updates state" do
       prediction_66_1 = build(:prediction, stop_id: "64000", route_id: "66")
       prediction_66_2 = build(:prediction, stop_id: "64000", route_id: "66")
@@ -98,12 +106,7 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
       initial_state = %{
         stop_id: "place-nubn",
         all_stop_ids: ["64000", "64"],
-        data: %{
-          by_route: %{
-            "66" => to_full_map([prediction_66_1]),
-            "19" => to_full_map([prediction_19_1])
-          }
-        },
+        route_ids: ["66", "19"],
         last_broadcast_msg: nil
       }
 
@@ -115,16 +118,11 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
               %{
                 stop_id: "place-nubn",
                 all_stop_ids: ["64000", "64"],
-                data: %{
-                  by_route: %{
-                    "66" => to_full_map([prediction_66_2]),
-                    "19" => to_full_map([prediction_19_1])
-                  }
-                },
+                route_ids: ["66", "19"],
                 last_broadcast_msg: to_full_map([prediction_66_2, prediction_19_1])
               }} ==
                StopPredictions.PubSub.handle_info(
-                 {:stream_data, "predictions:route:66", to_full_map([prediction_66_2])},
+                 {:stream_data, "predictions:route:66", to_full_map([])},
                  initial_state
                )
     end
@@ -135,16 +133,15 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
       initial_state = %{
         stop_id: "place-nubn",
         all_stop_ids: ["64000"],
-        data: %{
-          by_route: %{
-            "66" => to_full_map([])
-          }
-        },
+        route_ids: ["66"],
         last_broadcast_msg: nil
       }
 
       start_link_supervised!(
-        {FakeStopPredictions.PubSub, stop_id: "place-nubn", data: %{by_route: %{}}}
+        {FakeStopPredictions.PubSub,
+         stop_id: "place-nubn",
+         data: initial_state,
+         predictions_by_route: %{by_route: %{"66" => to_full_map([prediction_66_1])}}}
       )
 
       :ok =
@@ -177,16 +174,12 @@ defmodule MobileAppBackend.StopPredictions.PubSubTest do
       initial_state = %{
         stop_id: "place-nubn",
         all_stop_ids: ["64000"],
-        data: %{
-          by_route: %{
-            "66" => to_full_map([prediction_66_1])
-          }
-        },
+        route_ids: ["66"],
         last_broadcast_msg: to_full_map([prediction_66_1])
       }
 
       start_link_supervised!(
-        {FakeStopPredictions.PubSub, stop_id: "place-nubn", data: %{by_route: %{}}}
+        {FakeStopPredictions.PubSub, stop_id: "place-nubn", data: initial_state}
       )
 
       :ok =

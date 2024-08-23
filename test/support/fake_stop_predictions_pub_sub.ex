@@ -13,8 +13,9 @@ defmodule Test.Support.FakeStopPredictions.PubSub do
   def start_link(opts) do
     data = Keyword.fetch!(opts, :data)
     stop_id = Keyword.fetch!(opts, :stop_id)
+    predictions_by_route = Keyword.get(opts, :predictions_by_route, %{})
 
-    GenServer.start_link(__MODULE__, data,
+    GenServer.start_link(__MODULE__, %{data: data, predictions_by_route: predictions_by_route},
       name: MobileAppBackend.StopPredictions.Registry.via_name(stop_id)
     )
   end
@@ -25,7 +26,7 @@ defmodule Test.Support.FakeStopPredictions.PubSub do
   end
 
   @impl true
-  def handle_call(:get_data, _from, state) do
-    {:reply, state, state}
+  def handle_call(:get_predictions_by_route, _from, state) do
+    {:reply, Map.fetch!(state, :predictions_by_route), state}
   end
 end
