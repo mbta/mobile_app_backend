@@ -1,5 +1,5 @@
 defmodule MobileAppBackendWeb.ClientConfigController do
-  alias MobielAppBackend.ClientConfig
+  alias MobileAppBackend.ClientConfig
   use MobileAppBackendWeb, :controller
 
   @spec config(Plug.Conn.t(), any()) :: Plug.Conn.t()
