@@ -13,8 +13,13 @@ defmodule MobileAppBackend.Application do
       MobileAppBackendWeb.Telemetry,
       {DNSCluster,
        query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: MobileAppBackend.PubSub},
+      Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub}, id: :general_pubsub),
       MBTAV3API.Supervisor,
+      MobileAppBackend.StopPredictions.Registry,
+      Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.StopPredictions.PubSub},
+        id: :stop_predictions_pubsub
+      ),
+      MobileAppBackend.StopPredictions.Supervisor,
       # Start to serve requests, typically the last entry
       MobileAppBackendWeb.Endpoint
     ]
