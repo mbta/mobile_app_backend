@@ -15,6 +15,7 @@ defmodule MobileAppBackend.Application do
        query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub}, id: :general_pubsub),
       MBTAV3API.Supervisor,
+      MobileAppBackend.MapboxTokenRotator,
       MobileAppBackend.StopPredictions.Registry,
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.StopPredictions.PubSub},
         id: :stop_predictions_pubsub

@@ -3,6 +3,7 @@ defmodule MobileAppBackendWeb.ClientControllerTest do
   use MobileAppBackendWeb.ConnCase
   import Test.Support.Helpers
   import Mox
+  alias MobileAppBackend.MapboxTokenRotator
 
   describe "GET /api/protected/config" do
     setup do
@@ -11,6 +12,8 @@ defmodule MobileAppBackendWeb.ClientControllerTest do
       reassign_env(:mobile_app_backend, MobileAppBackend.ClientConfig,
         mapbox_public_token: "fake_mapbox_token"
       )
+
+      MapboxTokenRotator |> Process.whereis() |> Process.exit(:refresh_config)
 
       reassign_env(:mobile_app_backend, MobileAppBackend.AppCheck.JwksApi, JwksApiMock)
 
