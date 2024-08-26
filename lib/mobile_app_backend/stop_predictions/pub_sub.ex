@@ -86,7 +86,7 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   @spec get_predictions_by_route(t()) :: %{by_route: %{Route.id() => JsonApi.Object.full_map()}}
   def get_predictions_by_route(%{route_ids: route_ids, all_stop_ids: all_stop_ids} = _state) do
     by_route =
-      Enum.map(route_ids, fn route_id ->
+      Map.new(route_ids, fn route_id ->
         route_data = StopPredictions.Store.by_route_id(route_id)
 
         filtered_data = filter_data(route_data, all_stop_ids)
