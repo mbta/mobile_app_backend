@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.15.7-erlang-26.1.2-alpine-3.18.4 as elixir-builder
+FROM hexpm/elixir:1.15.7-erlang-26.1.2-alpine-3.18.4 AS elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -16,7 +16,7 @@ RUN mix deps.compile
 
 
 # --- Build Elixir release ---
-FROM elixir-builder as app-builder
+FROM elixir-builder AS app-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
