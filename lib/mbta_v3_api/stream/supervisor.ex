@@ -32,7 +32,8 @@ defmodule MBTAV3API.Stream.Supervisor do
     instances = DynamicSupervisor.which_children(__MODULE__)
 
     for {_, instance, _, _} <- instances do
-      MBTAV3API.Stream.Instance.check_health(instance)
+    # TODO: restore
+    #  MBTAV3API.Stream.Instance.check_health(instance)
     end
 
     :ok
