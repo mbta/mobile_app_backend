@@ -16,7 +16,7 @@ defmodule MobileAppBackendWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  import MobileAppBackendWeb.Gettext
+  use Gettext, backend: MobileAppBackendWeb.Gettext
 
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
