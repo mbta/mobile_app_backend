@@ -25,4 +25,6 @@ export APP_CHECK_PROJECT=
 export APP_CHECK_APP_IDS=
 
 # Configuration for [Mapbox](https://docs.mapbox.com/help/glossary/access-token/)
-export MAPBOX_PUBLIC_TOKEN=
+# deprecated: export MAPBOX_PUBLIC_TOKEN=
+export MAPBOX_PRIMARY_TOKEN=
+export MAPBOX_USERNAME=

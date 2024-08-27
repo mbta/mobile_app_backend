@@ -16,6 +16,7 @@ defmodule MobileAppBackend.Application do
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub}, id: :general_pubsub),
       MBTAV3API.Supervisor,
             MobileAppBackend.Predictions.Store,
+      MobileAppBackend.MapboxTokenRotator,
       MobileAppBackend.StopPredictions.Registry,
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.StopPredictions.PubSub},
         id: :stop_predictions_pubsub

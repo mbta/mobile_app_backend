@@ -25,7 +25,7 @@ defmodule OpenTripPlannerClient do
 
     request =
       Nearby.request(latitude, longitude, radius)
-      |> Req.update(base_url: root_url, url: "/otp/routers/default/index/graphql")
+      |> Req.merge(base_url: root_url, url: "/otp/routers/default/index/graphql")
 
     case send_request(request) do
       {:ok, body} -> Nearby.parse(body)
