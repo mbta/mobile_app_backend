@@ -57,6 +57,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         if self.stops_channel is None:
             nearby_stops_concat = ",".join(self.nearby_stop_ids)
             self.stops_channel = self.socket.channel(
-                f'predictions:stops:v2:{nearby_stops_concat}'
+                f'predictions:stops:v2:place-tumnl'
             )
             self.stops_channel.join()

@@ -45,9 +45,20 @@ defmodule MBTAV3API.Stream.StaticInstance do
       url: "/predictions",
       filter: [route: route_id],
       include: [:trip, :vehicle],
-      topic: "predictions:route:#{route_id}",
+      topic: "predictions:route:#{route_id}"
+    ]
+  end
+
+  # TODO: cleaner separation here?
+  defp args_for_topic("predictions:from_store:route:" <> route_id) do
+    [
+      type: MBTAV3API.Prediction,
+      url: "/predictions",
+      filter: [route: route_id],
+      include: [:trip, :vehicle],
+      topic: "predictions:from_store:route:#{route_id}",
       store: MobileAppBackend.Predictions.Store,
-      scope: %{route_id: route_id}
+      scope: [route_id: route_id]
     ]
   end
 

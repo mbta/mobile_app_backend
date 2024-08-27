@@ -17,7 +17,7 @@ defmodule MBTAV3API.Stream.StoreWriteConsumer do
 
   def start_link(opts) do
     {start_opts, opts} = Keyword.split(opts, [:name])
-    GenStage.start_link(__MODULE__, opts, start_opts)
+    {:ok, _} = GenStage.start_link(__MODULE__, opts, start_opts)
   end
 
   @impl GenStage
@@ -28,6 +28,7 @@ defmodule MBTAV3API.Stream.StoreWriteConsumer do
       data: Stream.State.new(),
       destination: Keyword.fetch!(opts, :destination),
       store: Keyword.fetch!(opts, :store),
+      scope: Keyword.fetch!(opts, :scope),
       type: Keyword.fetch!(opts, :type)
     }
 
@@ -39,14 +40,14 @@ defmodule MBTAV3API.Stream.StoreWriteConsumer do
     data =
       events
       |> Enum.map(&MBTAV3API.Stream.State.parse_event(&1))
-      |> state.store.update(state.scope)
+      |> state.store.process_event(state.scope)
 
     # TODO: if first event then broadcast
     {:noreply, [], %{state | data: data}}
   end
 
-  @impl true
+  @impl
   def handle_call(:get_data, _from, state) do
-    {:reply, state.data, [], state}
+    {:reply, state.store.fetch(state.scope), [], state}
   end
 end

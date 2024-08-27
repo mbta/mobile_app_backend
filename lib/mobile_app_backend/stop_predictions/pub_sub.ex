@@ -5,22 +5,20 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   when the stop's predictions have changed.
   """
   use GenServer
-  alias MBTAV3API.{JsonApi, Prediction, Route, Stop, Trip, Vehicle}
+  alias Credo.CLI.Command.Categories.Output.Json
+  alias MBTAV3API.{JsonApi, JsonApi.Object, Prediction, Route, Stop, Stream, Trip, Vehicle}
   alias MobileAppBackend.StopPredictions
   require Logger
 
+  @broadcast_interval_ms Application.compile_env!(:mobile_app_backend, __MODULE__)[
+                           :broadcast_interval_ms
+                         ]
+
   @type t :: %{
-          data: %{
-            by_route: %{
-              Route.id() => %{
-                predictions: %{Prediction.id() => Prediction.t()},
-                trips: %{Trip.id() => Trip.t()},
-                vehicles: %{Vehicle.id() => Vehicle.t()}
-              }
-            },
-            all_stop_ids: [Stop.id()],
-            stop_id: Stop.id()
-          }
+          all_stop_ids: [Stop.id()],
+          stop_id: Stop.id(),
+          route_ids: [Route.id()],
+          last_broadcast_msg: MBTAV3API.JsonApi.Object.full_map() | nil
         }
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
@@ -46,15 +44,21 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
 
     {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
 
-    data =
-      Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->
-        {:ok, data} =
-          MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
-
-        {route_id, filter_data(data, stop_ids)}
+    :ok =
+      Enum.each(routes, fn %MBTAV3API.Route{id: route_id} ->
+        {:ok, _data} =
+          MBTAV3API.Stream.StaticInstance.subscribe("predictions:from_store:route:#{route_id}")
       end)
 
-    {:ok, %{stop_id: stop_id, all_stop_ids: stop_ids, data: %{by_route: data}}}
+    broadcast_timer()
+
+    {:ok,
+     %{
+       stop_id: stop_id,
+       all_stop_ids: stop_ids,
+       route_ids: Enum.map(routes, & &1.id),
+       last_broadcast_msg: nil
+     }}
   end
 
   def subscribe(stop_id) do
@@ -63,60 +67,107 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
         StopPredictions.Supervisor.start_instance(stop_id: stop_id, name: stop_id)
       end
 
-      current_data = GenServer.call(StopPredictions.Registry.via_name(stop_id), :get_data)
+      current_data =
+        GenServer.call(StopPredictions.Registry.via_name(stop_id), :get_data)
 
-      {:ok, merge_data(current_data.by_route)}
+      {:ok, current_data}
     end
   end
 
   @impl true
   def handle_call(:get_data, _from, state) do
-    {:reply, state.data, state}
+    {:reply, fetch_stop_predictions(state.all_stop_ids), state}
+  end
+
+  @spec fetch_stop_predictions([Stop.id()]) :: JsonApi.Object.full_map()
+  @doc """
+  Retreive the latest predictions for the given stops from the prediction store.
+  """
+  def fetch_stop_predictions(stop_ids) do
+    stop_ids
+    |> Map.new(
+      &{&1, JsonApi.Object.to_full_map(MobileAppBackend.Predictions.Store.fetch(stop_id: &1))}
+    )
+    |> merge_data()
   end
 
   @impl true
-  def handle_info({:stream_data, "predictions:route:" <> route_id, data}, state) do
-    old_data = state.data
+  # When receiving the first predictions from a route, broadcast to ensure that consumers
+  # Don't have to wait until the timed broadcast to receive initial data
+  def handle_info({:stream_data, "predictions:from_store:route:" <> _route_id, _}, state) do
+    if state.last_broadcast_msg == nil do
+      state_with_broadcast = broadcast(state)
 
-    new_data =
-      put_in(old_data, [:by_route, route_id], filter_data(data, state.all_stop_ids))
+      {:noreply, state_with_broadcast}
+    else
+      {:noreply, state}
+    end
+  end
 
-    if old_data != new_data do
+  def handle_info(:timed_broadcast, state) do
+    send(self(), :broadcast)
+    broadcast_timer()
+    {:noreply, state, :hibernate}
+  end
+
+  def handle_info(:broadcast, state) do
+    state_after_broadcast = broadcast(state)
+
+    {:noreply, state_after_broadcast, :hibernate}
+  end
+
+  @spec broadcast(%{
+          :all_stop_ids => [binary()],
+          :last_broadcast_msg => any(),
+          optional(any()) => any()
+        }) :: %{
+          :all_stop_ids => [binary()],
+          :last_broadcast_msg => %{
+            alerts: %{optional(binary()) => map()},
+            lines: %{optional(binary()) => map()},
+            predictions: %{optional(binary()) => map()},
+            route_patterns: %{optional(binary()) => map()},
+            routes: %{optional(binary()) => map()},
+            schedules: %{optional(binary()) => map()},
+            shapes: %{optional(binary()) => map()},
+            stops: %{optional(binary()) => map()},
+            trips: %{optional(binary()) => map()},
+            vehicles: %{optional(binary()) => map()}
+          },
+          optional(any()) => any()
+        }
+  @doc """
+  Broadcast the state of the world of predictions for the target stop in the format
+  %{Stop.id() => JsonApi.Object.full_map()}
+  """
+  def broadcast(state) do
+    last_broadcast_msg = state.last_broadcast_msg
+    data_to_broadcast = fetch_stop_predictions(state.all_stop_ids)
+
+    Logger.debug("BROADCAST MAYBE #{DateTime.utc_now()}")
+
+    if last_broadcast_msg != data_to_broadcast do
+      Logger.debug("BROADCAST PREICTIONS #{inspect(data_to_broadcast)}")
+
       Phoenix.PubSub.broadcast!(__MODULE__, topic(state.stop_id), {
         :new_predictions,
-        %{state.stop_id => merge_data(new_data.by_route)}
+        %{state.stop_id => data_to_broadcast}
       })
     end
 
-    {:noreply, %{state | data: new_data}}
+    %{state | last_broadcast_msg: data_to_broadcast}
   end
 
+  defp broadcast_timer(interval \\ @broadcast_interval_ms) do
+    Process.send_after(self(), :timed_broadcast, interval)
+  end
+
+  @doc """
+  The topic to broadcast messages about predictions updates to
+  """
+  @spec topic(Stop.id()) :: String.t()
   def topic(stop_id) do
     "predictions:stop:instance:#{stop_id}"
-  end
-
-  def filter_data(route_data, stop_ids) do
-    %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} =
-      for {_, %Prediction{} = prediction} <- route_data.predictions,
-          reduce: %{predictions: %{}, trip_ids: [], vehicle_ids: []} do
-        %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids} ->
-          if prediction.stop_id in stop_ids do
-            %{
-              predictions: Map.put(predictions, prediction.id, prediction),
-              trip_ids: [prediction.trip_id | trip_ids],
-              vehicle_ids: [prediction.vehicle_id | vehicle_ids]
-            }
-          else
-            %{predictions: predictions, trip_ids: trip_ids, vehicle_ids: vehicle_ids}
-          end
-      end
-
-    %{
-      MBTAV3API.JsonApi.Object.to_full_map([])
-      | predictions: predictions,
-        trips: Map.take(route_data.trips, trip_ids),
-        vehicles: Map.take(route_data.vehicles, vehicle_ids)
-    }
   end
 
   @spec merge_data(%{String.t() => JsonApi.Object.full_map()}) :: JsonApi.Object.full_map()

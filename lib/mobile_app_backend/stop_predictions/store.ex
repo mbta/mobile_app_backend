@@ -1,7 +1,7 @@
 defmodule MobileAppBackend.Predictions.Store do
   @moduledoc """
   Server for saving and editing predictions in an ETS table. Predictions are
-  added, removed, and updated by other processes via `update/2`. Predictions can
+  added, removed, and process_eventd by other processes via `process_event/2`. Predictions can
   be retrieved using `fetch/1` for any combination of values specified of
   `fetch_keys`.
   """
@@ -10,10 +10,8 @@ defmodule MobileAppBackend.Predictions.Store do
 
   require Logger
 
-  alias MBTAV3API.Prediction
-  # alias Predictions.Store.Behaviour
-
-  @behaviour Behaviour
+  alias MBTAV3API.JsonApi.Reference
+  alias MBTAV3API.{Prediction, Trip, Vehicle}
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
   def start_link(_) do
@@ -22,61 +20,62 @@ defmodule MobileAppBackend.Predictions.Store do
 
   @doc "Deletes predictions associated with the input fetch keys, e.g. clear([route: 'Red', direction: 1])"
   def clear(keys) do
-    GenServer.cast(__MODULE__, {:remove, Enum.map(fetch(keys), & &1.id)})
+    GenServer.cast(__MODULE__, {:remove, Enum.map(fetch(keys), &%Reference{type: "prediction", id: &1})})
   end
 
   def fetch(keys) do
     GenServer.call(__MODULE__, {:fetch, keys})
   end
 
-  def update({event, data}, scope) do
-    GenServer.cast(__MODULE__, {event, data})
+  def process_event({event, data}, scope) do
+    GenServer.cast(__MODULE__, {event, data, scope})
   end
 
-  def update(events, scope) when is_list(events) do
-    Enum.each(events, &update(&1, scope))
+  def process_event(events, scope) when is_list(events) do
+    Enum.each(events, &process_event(&1, scope))
   end
 
   # Server
+  @impl true
   def init(_) do
     table = :ets.new(__MODULE__, [:public])
     #  periodic_delete()
     {:ok, table}
   end
 
-  @impl GenServer
-  def handle_cast({_, []}, table), do: {:noreply, table}
+  @impl true
+  def handle_cast({event, data, _scope}, table) when event in ["add", "update"] do
+    prediction_records =
+      data
+      # TODO: what about other types
+      |> Enum.filter(&match?(%Prediction{}, &1))
+      |> Enum.map(&to_record/1)
 
-  def handle_cast({event, data}, table) when event in [:add, :update] do
-    Logger.info("Add / update event #{inspect(data)}")
-    :ets.insert(table, Enum.map(data.predictions, &to_record/1))
-
-    {:noreply, table}
-  end
-
-  def handle_cast({:remove, prediction_ids}, table) do
-    Logger.info("Remove predictions event: #{inspect(prediction_ids)}")
-
-    #  for id <- prediction_ids do
-    #    :ets.delete(table, id)
-    #  end
+    :ets.insert(table, prediction_records)
 
     {:noreply, table}
   end
 
-  def handle_cast({:reset, data}, scope, table) do
-    Logger.info("Reset event #{inspect(scope)}")
+  def handle_cast({"remove", references, _scope}, table) do
 
-    #  scope
-    # |> Map.to_list()
-    # |> clear()
-
-    #  update({:add, data}, scope)
+    do_remove(references, table)
 
     {:noreply, table}
   end
 
-  def handle_cast(_, table), do: {:noreply, table}
+
+  def handle_cast({"reset", data, scope}, table) do
+    do_clear(scope, table)
+
+    process_event({"add", data}, scope)
+
+    {:noreply, table}
+  end
+
+  def handle_cast(other, table) do
+    Logger.warning("#{__MODULE__} cast not matched #{inspect(other)}")
+    {:noreply, table}
+  end
 
   @impl GenServer
   def handle_call({:fetch, keys}, _from, table) do
@@ -107,6 +106,24 @@ defmodule MobileAppBackend.Predictions.Store do
     {:noreply, table}
   end
 
+  def do_remove(references, table) do
+    for reference <- references do
+      case reference do
+        %{type: "prediction", id: id} -> :ets.delete(table, id)
+      end
+    end
+
+  end
+
+
+  def do_clear(keys, table) do
+    table
+    |> predictions_for_keys(keys)
+    |> Enum.map(&%Reference{type: "prediction", id: &1})
+    |> do_remove(table)
+
+  end
+
   @spec predictions_for_keys(:ets.table(), Behaviour.fetch_keys()) :: [Prediction.t()]
   defp predictions_for_keys(table, opts) do
     match_pattern = {
@@ -130,6 +147,7 @@ defmodule MobileAppBackend.Predictions.Store do
            # TODO: if we periodic delete based on arrival / departure time,
            # Cancelled trip predictions would stay in the table indefinitely
            # Do we need periodic delete if we are already doing resets?
+           # Thought: only need them for streams that are closed. Could actively remove relevant records instead
            arrival_time: arrival_time,
            departure_time: departure_time,
            direction_id: direction_id,
