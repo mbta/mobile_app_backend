@@ -85,7 +85,7 @@ defmodule MBTAV3APITest do
              headers: headers,
              options: %{params: [other: "value"]}
            } ->
-          assert {"x-api-key", "test_key"} in headers
+          assert {"x-api-key", ["test_key"]} in headers
           {:ok, Req.Response.json(%{data: []})}
         end
       )
