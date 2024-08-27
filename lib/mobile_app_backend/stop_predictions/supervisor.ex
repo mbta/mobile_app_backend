@@ -10,7 +10,7 @@ defmodule MobileAppBackend.StopPredictions.Supervisor do
 
   def start_instance(args) do
     # TODO - remove match
-    {:ok, _pid} = DynamicSupervisor.start_child(__MODULE__, {StopPredictions.PubSub, args})
+    DynamicSupervisor.start_child(__MODULE__, {StopPredictions.PubSub, args})
   end
 
   @impl true

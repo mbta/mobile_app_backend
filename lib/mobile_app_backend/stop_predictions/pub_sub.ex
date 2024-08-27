@@ -84,9 +84,13 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   Retreive the latest predictions for the given stops from the prediction store.
   """
   def fetch_stop_predictions(stop_ids) do
+    Logger.error("STOP_IDS: #{inspect(stop_ids)}")
+    Logger.error("TABLES: #{inspect(:ets.all())}")
+
     stop_ids
+    #TODO: This is currently doing syncronous reads - adjust that
     |> Map.new(
-      &{&1, JsonApi.Object.to_full_map(MobileAppBackend.Predictions.Store.fetch(stop_id: &1))}
+      &{&1, JsonApi.Object.to_full_map(MobileAppBackend.Predictions.Store.predictions_for_keys(MobileAppBackend.Predictions.Store, stop_id: &1))}
     )
     |> merge_data()
   end

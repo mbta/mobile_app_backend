@@ -11,7 +11,7 @@ all_stops: list[dict] = requests.get(
 ).json()["data"]
 
 class MobileAppUser(HttpUser, PhoenixChannelUser):
-    wait_time = between(1, 5)
+    wait_time = between(10, 20)
     socket_path = "/socket"
 
     prob_reset_map_data = 0.02
@@ -23,12 +23,12 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     stops_channel: PhoenixChannel | None = None
     has_map_data = False
 
-    @task
-    def load_map(self):
-        if not self.has_map_data or random.random() < self.prob_reset_map_data:
-            self.client.get("/api/global")
-            self.client.get("/api/shapes/map-friendly/rail")
-            self.has_map_data = True
+   # @task
+    #def load_map(self):
+       # if not self.has_map_data or random.random() < self.prob_reset_map_data:
+         #   self.client.get("/api/global")
+        #    self.client.get("/api/shapes/map-friendly/rail")
+       #     self.has_map_data = True
 
     @task
     def nearby_transit(self):
@@ -57,6 +57,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         if self.stops_channel is None:
             nearby_stops_concat = ",".join(self.nearby_stop_ids)
             self.stops_channel = self.socket.channel(
-                f'predictions:stops:v2:place-tumnl'
+                f'predictions:stops:v2:{nearby_stops_concat}'
             )
             self.stops_channel.join()

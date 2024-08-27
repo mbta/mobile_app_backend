@@ -38,7 +38,7 @@ defmodule MobileAppBackend.Predictions.Store do
   # Server
   @impl true
   def init(_) do
-    table = :ets.new(__MODULE__, [:public])
+    table = :ets.new(__MODULE__, [:public, :named_table])
     #  periodic_delete()
     {:ok, table}
   end
@@ -126,7 +126,8 @@ defmodule MobileAppBackend.Predictions.Store do
   end
 
   @spec predictions_for_keys(:ets.table(), Behaviour.fetch_keys()) :: [Prediction.t()]
-  defp predictions_for_keys(table, opts) do
+  #TODO: temporarily public to see if this helps with scaling
+  def predictions_for_keys(table, opts) do
     match_pattern = {
       Keyword.get(opts, :prediction_id, :_) || :_,
       :_,
