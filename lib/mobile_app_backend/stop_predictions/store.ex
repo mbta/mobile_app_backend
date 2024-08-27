@@ -110,6 +110,7 @@ defmodule MobileAppBackend.Predictions.Store do
     for reference <- references do
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(table, id)
+        _ -> :ok
       end
     end
 
