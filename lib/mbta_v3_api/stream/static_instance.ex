@@ -13,7 +13,11 @@ defmodule MBTAV3API.Stream.StaticInstance do
     {topic, opts} = Keyword.pop!(opts, :topic)
 
     (MBTAV3API.stream_args(url, params, opts ++ [destination: topic]) ++
-       [name: Stream.Registry.via_name(topic)])
+       [
+         name: Stream.Registry.via_name(topic),
+         store: Keyword.get(opts, :store),
+         scope: Keyword.get(opts, :scope)
+       ])
     |> Stream.Instance.child_spec()
     |> Map.merge(%{id: {__MODULE__, topic}, restart: :permanent})
   end
@@ -41,7 +45,9 @@ defmodule MBTAV3API.Stream.StaticInstance do
       url: "/predictions",
       filter: [route: route_id],
       include: [:trip, :vehicle],
-      topic: "predictions:route:#{route_id}"
+      topic: "predictions:route:#{route_id}",
+      store: MobileAppBackend.Predictions.Store,
+      scope: %{route_id: route_id}
     ]
   end
 

@@ -30,19 +30,37 @@ defmodule MBTAV3API.Stream.Instance do
     type = Keyword.fetch!(opts, :type)
     destination = Keyword.fetch!(opts, :destination)
     name = Keyword.get(opts, :name)
+    store = Keyword.get(opts, :store)
 
     children = [
       {MobileAppBackend.SSE,
        name: MBTAV3API.Stream.Registry.via_name(ref),
        url: url,
        headers: headers,
-       idle_timeout: :timer.seconds(45)},
-      {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
-       destination: destination,
-       type: type,
-       name: name}
+       idle_timeout: :timer.seconds(45)}
     ]
+
+    children =
+      children ++
+        if is_nil(store) do
+          [
+            {MBTAV3API.Stream.Consumer,
+             subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+             destination: destination,
+             type: type,
+             name: name}
+          ]
+        else
+          [
+            {MBTAV3API.Stream.StoreWriteConsumer,
+             subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+             destination: destination,
+             type: type,
+             name: name,
+             store: store,
+             scope: Keyword.get(opts, :scope)}
+          ]
+        end
 
     Supervisor.init(children, strategy: :rest_for_one)
   end

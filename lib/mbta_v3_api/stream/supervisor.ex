@@ -14,12 +14,13 @@ defmodule MBTAV3API.Stream.Supervisor do
 
   @spec start_instance(Instance.opts()) :: on_start_instance()
   def start_instance(args) do
-    DynamicSupervisor.start_child(__MODULE__, {MBTAV3API.Stream.Instance, args})
+    {:ok, _pid} = DynamicSupervisor.start_child(__MODULE__, {MBTAV3API.Stream.Instance, args})
   end
 
   @spec start_static_instance(Instance.opts()) :: on_start_instance()
   def start_static_instance(args) do
-    DynamicSupervisor.start_child(__MODULE__, MBTAV3API.Stream.StaticInstance.child_spec(args))
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(__MODULE__, MBTAV3API.Stream.StaticInstance.child_spec(args))
   end
 
   @impl true
