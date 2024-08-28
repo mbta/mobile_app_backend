@@ -140,7 +140,11 @@ defmodule MobileAppBackend.Predictions.Store do
       :"$1"
     }
 
-    :ets.select(table, [{match_pattern, [], [:"$1"]}])
+    #https://github.com/mbta/skate/blob/main/lib/util/duration.ex
+    {time, result} = :timer.tc(:ets, :select, [table, [{match_pattern, [], [:"$1"]}]])
+    time_ms = time / :timer.seconds(1)
+    Logger.info("#{__MODULE__} fetch predictions #{inspect(opts)} #{time_ms}")
+    result
   end
 
   defp to_record(

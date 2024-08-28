@@ -4,7 +4,6 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
 
   alias MBTAV3API.JsonApi
 
-  @impl true
   def join("predictions:stops:v2:" <> stop_id_concat, _payload, socket) do
     if stop_id_concat == "" do
       {:error, %{code: :no_stop_ids}}
