@@ -84,29 +84,26 @@ defmodule MobileAppBackend.StopPredictions.PubSub do
   Retreive the latest predictions for the given stops from the prediction store.
   """
   def fetch_stop_predictions(stop_ids) do
-    Logger.error("STOP_IDS: #{inspect(stop_ids)}")
-    Logger.error("TABLES: #{inspect(:ets.all())}")
-
     stop_ids
     #TODO: This is currently doing syncronous reads - adjust that
-    |> Map.new(
-      &{&1, JsonApi.Object.to_full_map(MobileAppBackend.Predictions.Store.predictions_for_keys(MobileAppBackend.Predictions.Store, stop_id: &1))}
-    )
-    |> merge_data()
+    |> Enum.flat_map(
+      &MobileAppBackend.Predictions.Store.predictions_for_keys(MobileAppBackend.Predictions.Store, stop_id: &1))
+    |> JsonApi.Object.to_full_map()
   end
 
   @impl true
   # When receiving the first predictions from a route, broadcast to ensure that consumers
   # Don't have to wait until the timed broadcast to receive initial data
-  def handle_info({:stream_data, "predictions:from_store:route:" <> _route_id, _}, state) do
-    if state.last_broadcast_msg == nil do
-      state_with_broadcast = broadcast(state)
-
-      {:noreply, state_with_broadcast}
-    else
-      {:noreply, state}
-    end
-  end
+  #TODO: only handle_info for inital message
+  #def handle_info({:stream_data, "predictions:from_store:route:" <> _route_id, _}, state) do
+ #   if state.last_broadcast_msg == nil do
+ #     state_with_broadcast = broadcast(state)
+#
+ #     {:noreply, state_with_broadcast}
+ #   else
+ #     {:noreply, state}
+#    end
+ # end
 
   def handle_info(:timed_broadcast, state) do
     send(self(), :broadcast)
