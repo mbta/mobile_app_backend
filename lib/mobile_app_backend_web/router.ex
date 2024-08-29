@@ -12,6 +12,7 @@ defmodule MobileAppBackendWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug(MobileAppBackendWeb.Plugs.Etag)
   end
 
   pipeline :app_check do
