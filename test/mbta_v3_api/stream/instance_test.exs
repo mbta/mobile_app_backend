@@ -1,6 +1,8 @@
 defmodule MBTAV3API.Stream.InstanceTest do
   use ExUnit.Case, async: true
 
+  alias MBTAV3API.Prediction
+  alias MBTAV3API.Stream
   alias MBTAV3API.Route
   alias Test.Support.SSEStub
 
@@ -49,5 +51,28 @@ defmodule MBTAV3API.Stream.InstanceTest do
     assert log =~ "consumer_alive=true"
     assert log =~ "consumer_dest=#PID<"
     assert log =~ "consumer_subscribers=0"
+  end
+
+  describe "consumer_spec/1" do
+    test "when not specified, returns default consumer" do
+      assert {Stream.Consumer, _spec} =
+               Stream.Instance.consumer_spec(
+                 destination: "topic",
+                 type: Prediction,
+                 name: "name",
+                 ref: "ref"
+               )
+    end
+
+    test "when store consumer specified, returns store consumer" do
+      assert {Stream.ConsumerToStore, _spec} =
+               Stream.Instance.consumer_spec(
+                 destination: "topic",
+                 type: Prediction,
+                 name: "name",
+                 consumer: %{store: MBTAV3API.Store.Predictions, scope: [route_id: "66"]},
+                 ref: "ref"
+               )
+    end
   end
 end
