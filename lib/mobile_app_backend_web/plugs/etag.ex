@@ -23,8 +23,8 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
     hashed_body = hash_body(conn)
     conn = conn |> put_resp_header("etag", hashed_body)
 
-    if List.first(get_req_header(conn, "etag")) == hashed_body do
-      %{(conn |> put_status(:not_modified)) | resp_body: ""}
+    if List.first(get_req_header(conn, "if-none-match")) == hashed_body do
+      conn |> put_status(:not_modified) |> then(&%Plug.Conn{&1 | resp_body: ""})
     else
       conn
     end

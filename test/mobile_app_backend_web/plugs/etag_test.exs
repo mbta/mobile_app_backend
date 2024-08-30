@@ -50,7 +50,7 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
       conn =
         conn
         |> Etag.call([])
-        |> Plug.Conn.put_req_header("etag", "mismatch")
+        |> Plug.Conn.put_req_header("if-none-match", "mismatch")
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.send_resp(200, data)
 
@@ -67,7 +67,7 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
       conn =
         conn
         |> Etag.call([])
-        |> Plug.Conn.put_req_header("etag", hashed_data)
+        |> Plug.Conn.put_req_header("if-none-match", hashed_data)
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.send_resp(200, data)
 
