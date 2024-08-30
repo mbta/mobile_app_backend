@@ -105,11 +105,11 @@ defmodule MBTAV3API.Store.PredictionsTest do
       msg = capture_log([level: :info], fn -> Store.Predictions.fetch(stop_id: "12345") end)
 
       assert msg =~
-               "Elixir.MBTAV3API.Store.Predictions fetch predictions fetch_keys=[stop_id: \"12345\"] duration_ms="
+               "Elixir.MBTAV3API.Store.Predictions.Impl fetch predictions fetch_keys=[stop_id: \"12345\"] duration_ms="
     end
   end
 
-  describe "fetch_any" do
+  describe "fetch list of keywords" do
     setup do
       start_link_supervised!(Store.Predictions)
       :ok
@@ -124,7 +124,7 @@ defmodule MBTAV3API.Store.PredictionsTest do
 
       assert [prediction_1, prediction_2] ==
                Enum.sort_by(
-                 Store.Predictions.fetch_any([[stop_id: "12345"], [stop_id: "6789"]]),
+                 Store.Predictions.fetch([[stop_id: "12345"], [stop_id: "6789"]]),
                  & &1.id
                )
     end

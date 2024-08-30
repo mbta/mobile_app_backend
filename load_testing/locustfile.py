@@ -38,12 +38,12 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     stops_channel: PhoenixChannel | None = None
     has_map_data = False
 
-    @task
-    def load_map(self):
-        if not self.has_map_data or random.random() < self.prob_reset_map_data:
-            self.client.get("/api/global")
-            self.client.get("/api/shapes/map-friendly/rail")
-            self.has_map_data = True
+   # @task
+  #  def load_map(self):
+  #      if not self.has_map_data or random.random() < self.prob_reset_map_data:
+  #          self.client.get("/api/global")
+   #         self.client.get("/api/shapes/map-friendly/rail")
+   #         self.has_map_data = True
 
     @task
     def nearby_transit(self):

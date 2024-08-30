@@ -1,6 +1,6 @@
-defmodule MobileAppBackend.StopPredictions.Registry do
+defmodule MobileAppBackend.Predictions.Registry do
   def child_spec(_) do
-    Registry.child_spec(keys: :unique, name: __MODULE__)
+    Registry.child_spec(keys: :duplicate, name: __MODULE__)
   end
 
   @spec via_name(term()) :: GenServer.name()

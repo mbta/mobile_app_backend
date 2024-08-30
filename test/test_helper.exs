@@ -1,6 +1,10 @@
 Mox.defmock(JwksApiMock, for: MobileAppBackend.AppCheck.JwksApi)
 Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
+Mox.defmock(StaticInstanceMock, for: MBTAV3API.Stream.StaticInstance)
+
 Mox.defmock(MobileAppBackend.HTTPMock, for: MobileAppBackend.HTTP)
+Mox.defmock(StreamSubscriberMock, for: MobileAppBackend.Predictions.StreamSubscriber)
+Mox.defmock(PredictionsPubSubMock, for: MobileAppBackend.Predictions.PubSub.Behaviour)
 Mox.defmock(PredictionsStoreMock, for: MBTAV3API.Store)
 Application.put_env(:mobile_app_backend, MobileAppBackend.HTTP, MobileAppBackend.HTTPMock)
 

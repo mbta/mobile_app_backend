@@ -25,7 +25,8 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
                       headers: [{"x-api-key", "931"}],
                       destination: "some:topic",
                       type: MBTAV3API.Trip,
-                      name: {:via, Registry, {Stream.Registry, "some:topic"}}
+                      name: {:via, Registry, {Stream.Registry, "some:topic"}},
+                      consumer: nil
                     ]
                   ]},
                type: :supervisor
@@ -45,6 +46,37 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
         Stream.StaticInstance.child_spec(type: MBTAV3API.Trip, url: "/trips")
       end
     end
+
+    test "preserves consumer and destination" do
+      assert Stream.StaticInstance.child_spec(
+               type: MBTAV3API.Trip,
+               url: "/trips",
+               topic: "some:topic",
+               destination: "some:other:topic",
+               include: :shape,
+               filter: [date: ~D[2024-03-14]],
+               base_url: "http://example.net",
+               api_key: "931",
+               consumer: %{store: :some_store, scope: [route_id: "66"]}
+             ) == %{
+               id: {Stream.StaticInstance, "some:topic"},
+               restart: :permanent,
+               start:
+                 {Stream.Instance, :start_link,
+                  [
+                    [
+                      url:
+                        "http://example.net/trips?fields%5Bshape%5D=polyline&fields%5Btrip%5D=direction_id%2Cheadsign&filter%5Bdate%5D=2024-03-14&include=shape",
+                      headers: [{"x-api-key", "931"}],
+                      destination: "some:other:topic",
+                      type: MBTAV3API.Trip,
+                      name: {:via, Registry, {Stream.Registry, "some:topic"}},
+                      consumer: %{store: :some_store, scope: [route_id: "66"]}
+                    ]
+                  ]},
+               type: :supervisor
+             }
+    end
   end
 
   describe "subscribe/1" do
@@ -63,6 +95,13 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
       refute Stream.Registry.find_pid(topic)
       assert {:ok, _} = Stream.StaticInstance.subscribe(topic)
       assert Stream.Registry.find_pid(topic)
+    end
+
+    test "when include_current_data is false, skips returning latest data" do
+      start_link_supervised!({FakeStaticInstance, topic: "test:topic", data: :existing_data})
+
+      assert {:ok, :current_data_not_requested} ==
+               Stream.StaticInstance.subscribe("test:topic", include_current_data: false)
     end
   end
 end

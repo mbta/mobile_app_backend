@@ -22,11 +22,8 @@ defmodule MobileAppBackend.Application do
       MBTAV3API.Supervisor,
       {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
       MobileAppBackend.MapboxTokenRotator,
-      MobileAppBackend.StopPredictions.Registry,
-      Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.StopPredictions.PubSub},
-        id: :stop_predictions_pubsub
-      ),
-      MobileAppBackend.StopPredictions.Supervisor,
+      MobileAppBackend.Predictions.Registry,
+      MobileAppBackend.Predictions.PubSub,
       # Start to serve requests, typically the last entry
       MobileAppBackendWeb.Endpoint
     ]
