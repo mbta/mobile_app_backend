@@ -7,6 +7,10 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   secret_key_base: "i2tUYeAO95DpQJMjLPg+aBuneGbF6hGMyTvth/i1csZT7LeeH6ZsWpDO9F9IkJ7f",
   server: false
 
+# Don't start the real predictions processes so we can test with
+# isolated fake prediction processes
+config :mobile_app_backend, start_predictions_store?: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
