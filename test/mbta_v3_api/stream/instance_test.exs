@@ -2,8 +2,9 @@ defmodule MBTAV3API.Stream.InstanceTest do
   use ExUnit.Case, async: true
 
   alias MBTAV3API.Prediction
-  alias MBTAV3API.Stream
   alias MBTAV3API.Route
+  alias MBTAV3API.Stream
+
   alias Test.Support.SSEStub
 
   test "starts pipeline and sends messages" do

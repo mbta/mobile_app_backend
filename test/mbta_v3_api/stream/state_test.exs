@@ -8,7 +8,7 @@ defmodule MBTAV3API.Stream.StateTest do
   alias MBTAV3API.Stream.State
   alias ServerSentEventStage.Event
 
-  def add_event() do
+  def add_event do
     {%Event{
        event: "add",
        data:
@@ -25,7 +25,7 @@ defmodule MBTAV3API.Stream.StateTest do
      }}
   end
 
-  def update_event() do
+  def update_event do
     {
       %Event{
         event: "update",
@@ -43,12 +43,12 @@ defmodule MBTAV3API.Stream.StateTest do
     }
   end
 
-  def remove_event() do
+  def remove_event do
     {%Event{event: "remove", data: ~s({"id":"place-boyls","type":"stop"})},
      %JsonApi.Reference{id: "place-boyls", type: "stop"}}
   end
 
-  def reset_event() do
+  def reset_event do
     {%Event{
        event: "reset",
        data:

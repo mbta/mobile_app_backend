@@ -49,7 +49,7 @@ defmodule MBTAV3API.Stream.ConsumerToStore do
   def handle_events(events, _from, state) do
     events
     |> Enum.map(&MBTAV3API.Stream.State.parse_event(&1))
-    |> Enum.map(&process_event(&1, state))
+    |> Enum.each(&process_event(&1, state))
 
     {:noreply, [], state}
   end

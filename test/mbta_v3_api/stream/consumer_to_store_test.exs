@@ -1,4 +1,4 @@
-defmodule MBTAV3API.Stream.ConsumerToStoreTest do
+defmodule Stream.ConsumerToStoreTest do
   use ExUnit.Case
   import Mox
 
@@ -72,7 +72,7 @@ defmodule MBTAV3API.Stream.ConsumerToStoreTest do
 
   test "reset event sent to store and broadcast" do
     topic = "test:abcdefg"
-    MBTAV3API.Stream.PubSub.subscribe(topic)
+    Stream.PubSub.subscribe(topic)
 
     PredictionsStoreMock
     |> expect(:process_reset, fn data, [:route_id, "66"] ->
@@ -91,7 +91,7 @@ defmodule MBTAV3API.Stream.ConsumerToStoreTest do
 
   test "add event sent to store but not broadcast" do
     topic = "test:abcdefg"
-    MBTAV3API.Stream.PubSub.subscribe(topic)
+    Stream.PubSub.subscribe(topic)
 
     PredictionsStoreMock
     |> expect(:process_upsert, fn :add, [%RoutePattern{id: "Green-B-812-1"}] ->
@@ -108,7 +108,7 @@ defmodule MBTAV3API.Stream.ConsumerToStoreTest do
 
   test "update event sent to store but not broadcast" do
     topic = "test:abcdefg"
-    MBTAV3API.Stream.PubSub.subscribe(topic)
+    Stream.PubSub.subscribe(topic)
 
     PredictionsStoreMock
     |> expect(:process_upsert, fn :update, [%RoutePattern{id: "Green-C-832-0"}] ->
@@ -130,7 +130,7 @@ defmodule MBTAV3API.Stream.ConsumerToStoreTest do
       :ok
     end)
 
-    MBTAV3API.Stream.PubSub.subscribe(topic)
+    Stream.PubSub.subscribe(topic)
 
     Stream.ConsumerToStore.handle_events([remove_event()], self(), %{
       store: PredictionsStoreMock,
