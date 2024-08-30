@@ -27,4 +27,9 @@ defmodule MBTAV3API.Store do
   Retrieve all records that match the given filter keys.
   """
   @callback fetch(keyword()) :: [JsonApi.Object.t()]
+
+  @doc """
+  Retrieve all records that match any of the given filter keyword sets
+  """
+  @callback fetch_multi_filter([keyword()]) :: [JsonApi.Object.t()]
 end
