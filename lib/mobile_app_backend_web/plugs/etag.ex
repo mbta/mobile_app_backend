@@ -7,9 +7,7 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
   respond with, instead it returns a 304 status with an empty body.
   """
   use MobileAppBackendWeb, :controller
-
   import Plug.Conn
-  require Logger
 
   @impl Plug
   def init(opts) do
@@ -18,22 +16,17 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
 
   @impl Plug
   def call(conn, _opts) do
-    Plug.Conn.register_before_send(conn, &handle_etag/1)
+    register_before_send(conn, &handle_etag/1)
   end
 
   defp handle_etag(conn) do
-    etag = List.first(get_req_header(conn, "etag"))
     hashed_body = hash_body(conn)
+    conn = conn |> put_resp_header("etag", hashed_body)
 
-    if etag == hashed_body do
-      %{
-        (conn
-         |> Plug.Conn.put_resp_header("etag", hashed_body)
-         |> Plug.Conn.put_status(:not_modified))
-        | resp_body: ""
-      }
+    if List.first(get_req_header(conn, "etag")) == hashed_body do
+      %{(conn |> put_status(:not_modified)) | resp_body: ""}
     else
-      conn |> Plug.Conn.put_resp_header("etag", hashed_body)
+      conn
     end
   end
 

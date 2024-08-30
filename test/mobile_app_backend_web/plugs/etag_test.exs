@@ -2,9 +2,6 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
   use MobileAppBackendWeb.ConnCase
 
   alias MobileAppBackendWeb.Plugs.Etag
-  import Mox
-  import Test.Support.Helpers
-  import Phoenix.ConnTest
 
   describe "init/1" do
     test "passes options through unchanged" do
