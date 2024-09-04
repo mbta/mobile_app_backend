@@ -3,7 +3,7 @@ defmodule MBTAV3API.Stream.ConsumerToStore do
   Consume ServerSentEvents from a V3 API Stream and passes those events to
   Store that tracks the state of the world of that stream.
 
-  `store:` - MBTAV3API.Store to record the stram data in\n
+  `store:` - MBTAV3API.Store to record the stream data in
   `scope:` - The scope of the stream data of that stream - any filters applied. For example, `[route_id: 66]`
 
   based on https://github.com/mbta/dotcom/blob/main/lib/predictions/stream.ex

@@ -24,7 +24,7 @@ defmodule MBTAV3API.Store do
   @callback process_remove([JsonApi.Reference.t()]) :: :ok | :error
 
   @doc """
-  Retreive all records that match the given filter keys.
+  Retrieve all records that match the given filter keys.
   """
   @callback fetch(keyword()) :: [JsonApi.Object.t()]
 end
