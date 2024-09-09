@@ -1,4 +1,5 @@
 import random
+
 import requests
 from locust import HttpUser, between, task
 
@@ -62,7 +63,4 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.stops_channel = self.socket.channel(
                 f'predictions:stops:v2:{nearby_stops_concat}'
             )
-        # old predictions channel:
-        #   self.stops_channel = self.socket.channel("predictions:stops", {"stop_ids": self.nearby_stop_ids}
-        #    )
             self.stops_channel.join()
