@@ -10,8 +10,23 @@ all_stops: list[dict] = requests.get(
     {"fields[stop]": "latitude,longitude", "filter[location_type]": "0"},
 ).json()["data"]
 
+rail_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
+    "https://api-v3.mbta.com/stops",
+    {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "0,1"},
+).json()["data"]))
+
+cr_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
+    "https://api-v3.mbta.com/stops",
+    {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "2"},
+).json()["data"]))
+
+bus_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
+    "https://api-v3.mbta.com/stops",
+    {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "3"},
+).json()["data"]))
+
 class MobileAppUser(HttpUser, PhoenixChannelUser):
-    wait_time = between(1, 5)
+    wait_time = between(15, 20)
     socket_path = "/socket"
 
     prob_reset_map_data = 0.02
@@ -32,22 +47,11 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
 
     @task
     def nearby_transit(self):
-        if self.location is None or random.random() < self.prob_reset_location:
-            self.location = random.choice(all_stops)["attributes"]
-        assert self.location is not None
-        with self.client.rename_request("/api/nearby"):
-            nearby_result =  self.client.get(
-                    "/api/nearby",
-                    params={
-                        "latitude": self.location["latitude"],
-                        "longitude": self.location["longitude"],
-                    },
-                )
-            try:
-                self.nearby_stop_ids = nearby_result.json()["stop_ids"]
-            except Exception:
-                print(f"nearby_result: {nearby_result}")
-                raise
+        nearby_rail_ids = random.sample(rail_stop_ids, random.randint(2,8))
+        nearby_cr_ids = random.sample(cr_stop_ids, random.randint(0,14))
+        nearby_bus_ids = random.sample(bus_stop_ids, random.randint(0,14))
+       
+        self.nearby_stop_ids = nearby_rail_ids + nearby_cr_ids + nearby_bus_ids
         if (
             self.stops_channel is not None
             and random.random() < self.prob_reset_nearby_stops
