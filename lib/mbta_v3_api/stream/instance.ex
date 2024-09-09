@@ -24,12 +24,8 @@ defmodule MBTAV3API.Stream.Instance do
   @impl Supervisor
   def init(opts) do
     ref = make_ref()
-
     url = Keyword.fetch!(opts, :url)
     headers = Keyword.fetch!(opts, :headers)
-    type = Keyword.fetch!(opts, :type)
-    destination = Keyword.fetch!(opts, :destination)
-    name = Keyword.get(opts, :name)
 
     children = [
       {MobileAppBackend.SSE,
@@ -37,14 +33,40 @@ defmodule MBTAV3API.Stream.Instance do
        url: url,
        headers: headers,
        idle_timeout: :timer.seconds(45)},
-      {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
-       destination: destination,
-       type: type,
-       name: name}
+      consumer_spec(Keyword.put(opts, :ref, ref))
     ]
 
     Supervisor.init(children, strategy: :rest_for_one)
+  end
+
+  @spec consumer_spec(keyword()) :: {module(), keyword()}
+  @doc """
+  Build a spec for the stream consumer based on the :consumer argument.
+  Returns a `MBTAV3Api.StreamConsumer` spec by default if :consumer is not configured.
+  """
+  def consumer_spec(opts) do
+    ref = Keyword.fetch!(opts, :ref)
+    destination = Keyword.fetch!(opts, :destination)
+    type = Keyword.fetch!(opts, :type)
+    name = Keyword.get(opts, :name)
+
+    case Keyword.get(opts, :consumer) do
+      nil ->
+        {MBTAV3API.Stream.Consumer,
+         subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+         destination: destination,
+         type: type,
+         name: name}
+
+      %{store: store, scope: scope} ->
+        {MBTAV3API.Stream.ConsumerToStore,
+         subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+         destination: destination,
+         type: type,
+         name: name,
+         store: store,
+         scope: scope}
+    end
   end
 
   def check_health(pid) do

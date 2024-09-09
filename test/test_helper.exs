@@ -1,6 +1,7 @@
 Mox.defmock(JwksApiMock, for: MobileAppBackend.AppCheck.JwksApi)
 Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
 Mox.defmock(MobileAppBackend.HTTPMock, for: MobileAppBackend.HTTP)
+Mox.defmock(PredictionsStoreMock, for: MBTAV3API.Store)
 Application.put_env(:mobile_app_backend, MobileAppBackend.HTTP, MobileAppBackend.HTTPMock)
 
 case Test.Support.Data.start_link() do
