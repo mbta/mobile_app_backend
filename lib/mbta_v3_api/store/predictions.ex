@@ -47,12 +47,12 @@ defmodule MBTAV3API.Store.Predictions do
     # Match the fields specified in the fetch_keys and return the full prediction
     # see to_record/1 for the defined order of fields
     {
-      Keyword.get(fetch_keys, :prediction_id, :_),
-      Keyword.get(fetch_keys, :route_id, :_),
-      Keyword.get(fetch_keys, :stop_id, :_),
-      Keyword.get(fetch_keys, :direction_id, :_),
-      Keyword.get(fetch_keys, :trip_id, :_),
-      Keyword.get(fetch_keys, :vehicle_id, :_),
+      Keyword.get(fetch_keys, :prediction_id) || :_,
+      Keyword.get(fetch_keys, :route_id) || :_,
+      Keyword.get(fetch_keys, :stop_id) || :_,
+      Keyword.get(fetch_keys, :direction_id) || :_,
+      Keyword.get(fetch_keys, :trip_id) || :_,
+      Keyword.get(fetch_keys, :vehicle_id) || :_,
       :"$1"
     }
   end
