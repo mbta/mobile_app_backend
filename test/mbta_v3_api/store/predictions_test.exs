@@ -9,8 +9,6 @@ defmodule MBTAV3API.Store.PredictionsTest do
 
   describe "process_events" do
     setup do
-      # Don't start the real predictions processes so we can test with an isolated Predictions store
-      reassign_env(:mobile_app_backend, :start_predictions_store?, false)
       start_link_supervised!(Store.Predictions)
       :ok
     end
@@ -65,7 +63,6 @@ defmodule MBTAV3API.Store.PredictionsTest do
 
   describe "fetch" do
     setup do
-      reassign_env(:mobile_app_backend, :start_predictions_store?, false)
       start_link_supervised!(Store.Predictions)
       :ok
     end
@@ -112,9 +109,8 @@ defmodule MBTAV3API.Store.PredictionsTest do
     end
   end
 
-  describe "fetch_multi_filters" do
+  describe "fetch_any" do
     setup do
-      reassign_env(:mobile_app_backend, :start_predictions_store?, false)
       start_link_supervised!(Store.Predictions)
       :ok
     end
@@ -128,7 +124,7 @@ defmodule MBTAV3API.Store.PredictionsTest do
 
       assert [prediction_1, prediction_2] ==
                Enum.sort_by(
-                 Store.Predictions.fetch_multi_filter([[stop_id: "12345"], [stop_id: "6789"]]),
+                 Store.Predictions.fetch_any([[stop_id: "12345"], [stop_id: "6789"]]),
                  & &1.id
                )
     end

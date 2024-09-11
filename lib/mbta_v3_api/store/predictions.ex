@@ -33,7 +33,7 @@ defmodule MBTAV3API.Store.Predictions do
   end
 
   @impl true
-  def fetch_multi_filter(fetch_keys_list) do
+  def fetch_any(fetch_keys_list) do
     match_specs =
       fetch_keys_list
       |> Enum.map(&prediction_match_spec(&1))
@@ -121,15 +121,7 @@ defmodule MBTAV3API.Store.Predictions do
   end
 
   defp clear_data(keys) do
-    match_pattern = {
-      Keyword.get(keys, :prediction_id, :_) || :_,
-      Keyword.get(keys, :route_id, :_) || :_,
-      Keyword.get(keys, :stop_id, :_) || :_,
-      Keyword.get(keys, :direction_id, :_) || :_,
-      Keyword.get(keys, :trip_id, :_) || :_,
-      Keyword.get(keys, :vehicle_id, :_) || :_,
-      :"$1"
-    }
+    match_pattern = prediction_match_spec(keys)
 
     :ets.select_delete(@predictions_table_name, [{match_pattern, [], [true]}])
   end
