@@ -14,12 +14,10 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
     if stop_id_concat == "" do
       {:error, %{code: :no_stop_ids}}
     else
-      stop_ids = String.split(stop_id_concat, ",")
-
       initial_data =
-        stop_ids
-        |> Enum.map(&{&1, pubsub_module.subscribe_for_stop(&1)})
-        |> Map.new()
+        stop_id_concat
+        |> String.split(",")
+        |> pubsub_module.subscribe_for_stops()
 
       {:ok, initial_data, socket}
     end

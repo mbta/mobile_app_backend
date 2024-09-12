@@ -4,7 +4,12 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
   """
-  @callback subscribe_for_stop(Stop.id()) :: [Prediction.t()]
+  @callback subscribe_for_stop(Stop.id()) :: %{Stop.id() => [Prediction.t()]}
+
+  @doc """
+  Subscribe to prediction updates for multiple stops. For  parent stations, this subscribes to updates for all their child stops.
+  """
+  @callback subscribe_for_stops([Stop.id()]) :: %{Stop.id() => [Prediction.t()]}
 end
 
 defmodule MobileAppBackend.Predictions.PubSub do
@@ -50,30 +55,47 @@ defmodule MobileAppBackend.Predictions.PubSub do
   end
 
   @impl true
-  def subscribe_for_stop(stop_id) do
+  def subscribe_for_stops(stop_ids) do
     {:ok, %{data: _stop, included: %{stops: child_stops}}} =
-      MBTAV3API.Repository.stops(filter: [id: stop_id], include: :child_stops)
+      MBTAV3API.Repository.stops(filter: [id: stop_ids], include: :child_stops)
 
-    child_stop_ids =
+    child_stops =
       child_stops
       |> Map.values()
       |> Enum.filter(&(&1.location_type == :stop))
-      |> Enum.map(& &1.id)
+
+    child_stop_ids = Enum.map(child_stops, & &1.id)
+
+    child_stops_by_parent =
+      child_stops
+      |> Enum.map(&{&1.parent_station_id, &1.id})
+      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
 
     {time_micros, _result} =
       :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
-        [stop_id] ++ child_stop_ids
+        stop_ids ++ child_stop_ids
       ])
 
     Logger.info(
-      "#{__MODULE__} subscribe_for_stops stop_id=#{stop_id} duration_ms=#{time_micros / 1000}"
+      "#{__MODULE__} subscribe_for_stops stop_id=#{stop_ids} duration_ms=#{time_micros / 1000}"
     )
 
-    if Enum.empty?(child_stop_ids) do
-      register_single_stop(stop_id)
-    else
-      register_parent_stop(stop_id, child_stop_ids)
-    end
+    stop_ids
+    |> Enum.map(fn stop_id ->
+      case Map.get(child_stops_by_parent, stop_id) do
+        nil ->
+          {stop_id, register_single_stop(stop_id)}
+
+        child_ids ->
+          {stop_id, register_parent_stop(stop_id, child_ids)}
+      end
+    end)
+    |> Map.new()
+  end
+
+  @impl true
+  def subscribe_for_stop(stop_id) do
+    subscribe_for_stops([stop_id])
   end
 
   defp register_single_stop(stop_id) do

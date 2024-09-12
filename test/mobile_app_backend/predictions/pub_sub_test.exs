@@ -30,7 +30,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert [prediction_1, prediction_2] == PubSub.subscribe_for_stop("12345")
+      assert %{"12345" => [prediction_1, prediction_2]} == PubSub.subscribe_for_stop("12345")
     end
 
     test "returns initial data for the given parent stop" do
@@ -46,15 +46,41 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       RepositoryMock
       |> expect(:stops, fn _, _ ->
         ok_response([build(:stop, id: "parent_stop_id")], [
-          build(:stop, id: "12345", location_type: :stop),
-          build(:stop, id: "6789", location_type: :stop)
+          build(:stop, id: "12345", location_type: :stop, parent_station_id: "parent_stop_id"),
+          build(:stop, id: "6789", location_type: :stop, parent_station_id: "parent_stop_id")
         ])
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert [prediction_1, prediction_2] ==
-               PubSub.subscribe_for_stop("parent_stop")
+      assert %{"parent_stop_id" => [prediction_1, prediction_2]} ==
+               PubSub.subscribe_for_stop("parent_stop_id")
+    end
+  end
+
+  describe "subscribe_for_stops/1" do
+    test "returns initial data for each stop given" do
+      prediction_1 = build(:prediction, stop_id: "standalone")
+      prediction_2 = build(:prediction, stop_id: "child")
+
+      expect(PredictionsStoreMock, :fetch, 2, fn keys ->
+        case keys do
+          [stop_id: "standalone"] -> [prediction_1]
+          [[stop_id: "child"]] -> [prediction_2]
+        end
+      end)
+
+      RepositoryMock
+      |> expect(:stops, fn _, _ ->
+        ok_response([build(:stop, id: "standalone")], [
+          build(:stop, id: "child", parent_station_id: "parent")
+        ])
+      end)
+
+      expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
+
+      assert %{"standalone" => [prediction_1], "parent" => [prediction_2]} ==
+               PubSub.subscribe_for_stops(["parent", "standalone"])
     end
   end
 

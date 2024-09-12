@@ -21,11 +21,8 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
     prediction_1 = build(:prediction)
     prediction_2 = build(:prediction)
 
-    expect(PredictionsPubSubMock, :subscribe_for_stop, 2, fn stop_id ->
-      case stop_id do
-        "12345" -> [prediction_1]
-        "67890" -> [prediction_2]
-      end
+    expect(PredictionsPubSubMock, :subscribe_for_stops, 1, fn _ ->
+      %{"12345" => [prediction_1], "67890" => [prediction_2]}
     end)
 
     {:ok, reply, _socket} =
@@ -40,7 +37,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
   end
 
   test "handles new predictions", %{socket: socket} do
-    expect(PredictionsPubSubMock, :subscribe_for_stop, fn _ -> [] end)
+    expect(PredictionsPubSubMock, :subscribe_for_stops, fn _ -> %{} end)
 
     {:ok, _reply, socket} =
       subscribe_and_join(socket, "predictions:stops:v2:12345")
