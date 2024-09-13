@@ -14,7 +14,13 @@ defmodule MobileAppBackend.Application do
       {DNSCluster,
        query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub}, id: :general_pubsub),
+      {Finch,
+       name: Finch.CustomPool,
+       pools: %{
+         :default => [size: 200, start_pool_metrics?: true]
+       }},
       MBTAV3API.Supervisor,
+      {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
       MobileAppBackend.MapboxTokenRotator,
       MobileAppBackend.StopPredictions.Registry,
       Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.StopPredictions.PubSub},
