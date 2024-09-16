@@ -17,7 +17,7 @@ defmodule MobileAppBackend.Application do
       {Finch,
        name: Finch.CustomPool,
        pools: %{
-         :default => [size: 200, start_pool_metrics?: true]
+         :default => [size: 200, count: 10, start_pool_metrics?: true]
        }},
       MBTAV3API.Supervisor,
       {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
@@ -27,6 +27,8 @@ defmodule MobileAppBackend.Application do
       # Start to serve requests, typically the last entry
       MobileAppBackendWeb.Endpoint
     ]
+
+    :ok = MobileAppBackend.FinchTelemetryLogger.attach()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

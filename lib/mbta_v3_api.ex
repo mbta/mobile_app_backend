@@ -75,6 +75,7 @@ defmodule MBTAV3API do
     {time, response} =
       :timer.tc(fn ->
         Req.new(
+          pool: Finch.CustomPool,
           method: :get,
           base_url: base_url,
           url: URI.encode(url),
