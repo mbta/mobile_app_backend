@@ -4,7 +4,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
 
-  @throttle_ms 500
+  @throttle_ms 10_000
 
   @impl true
   def join("predictions:stops", payload, socket) do
