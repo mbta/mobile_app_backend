@@ -15,6 +15,10 @@ config :mobile_app_backend, MobileAppBackend.AppCheck,
 
 config :mobile_app_backend, predictions_broadcast_interval_ms: 10_000
 
+config :mobile_app_backend, MBTAV3API.ResponseCache,
+  gc_interval: :timer.hours(1),
+  allocated_memory: 250_000_000
+
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],
