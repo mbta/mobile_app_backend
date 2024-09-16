@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Application do
-  # See https://hexdocs.pm/elixir/Application.html
+  # See https://hexdocs.pm/elixir/Application.l
   # for more information on OTP Applications
   @moduledoc false
 
@@ -17,7 +17,7 @@ defmodule MobileAppBackend.Application do
       {Finch,
        name: Finch.CustomPool,
        pools: %{
-         :default => [size: 200, start_pool_metrics?: true]
+         :default => [size: 2000, start_pool_metrics?: true]
        }},
       {MBTAV3API.ResponseCache, []},
       MBTAV3API.Supervisor,
@@ -32,7 +32,7 @@ defmodule MobileAppBackend.Application do
       MobileAppBackendWeb.Endpoint
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
+    # See https://hexdocs.pm/elixir/Supervisor.l
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: MobileAppBackend.Supervisor]
     Supervisor.start_link(children, opts)
