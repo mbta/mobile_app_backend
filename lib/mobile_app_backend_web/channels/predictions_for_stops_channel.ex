@@ -27,7 +27,18 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
 
         stop_ids = Enum.uniq(stop_ids ++ child_stop_ids)
 
-        {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
+        routes =
+          stop_ids
+          |>
+          Enum.flat_map(fn stop_id ->
+            response = MBTAV3API.Repository.routes(filter: [stop: stop_id])
+
+            case response do
+              {:ok, %{data: routes}} -> routes
+              _ -> []
+            end
+          end)
+          |> Enum.uniq()
 
         data =
           Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->

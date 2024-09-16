@@ -15,9 +15,10 @@ defmodule MBTAV3API do
 
     body = ""
 
-    cached_response = url
-    |> MBTAV3API.ResponseCache.cache_key(params)
-    |> MBTAV3API.ResponseCache.get()
+    cached_response =
+      url
+      |> MBTAV3API.ResponseCache.cache_key(params)
+      |> MBTAV3API.ResponseCache.get()
 
     cache_headers =
       if is_nil(cached_response) do
@@ -34,11 +35,15 @@ defmodule MBTAV3API do
     with {time, response} <- timed_get(url, params, opts),
          :ok <- log_response(url, params, time, response),
          {:ok, %Req.Response{status: 200, body: body, headers: headers}} <- response do
-      parsed_response = body
-      |> JsonApi.parse()
-      |> maybe_log_parse_error(url, params, body)
+      parsed_response =
+        body
+        |> JsonApi.parse()
+        |> maybe_log_parse_error(url, params, body)
+
       case parsed_response do
-        {:error, error} -> {:error, error}
+        {:error, error} ->
+          {:error, error}
+
         valid_parsed_response ->
           update_cached_response(url, params, valid_parsed_response, headers)
           valid_parsed_response
@@ -47,6 +52,7 @@ defmodule MBTAV3API do
       {:error, error} ->
         _ = log_response_error(url, params, body)
         {:error, error}
+
       {:ok, %Req.Response{status: 304}} ->
         Logger.info("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
         elem(cached_response, 1)
@@ -63,9 +69,9 @@ defmodule MBTAV3API do
       |> Enum.into(%{})
       |> Map.get("last-modified")
 
-      url
-      |> MBTAV3API.ResponseCache.cache_key(params)
-      |>  MBTAV3API.ResponseCache.put({date, response})
+    url
+    |> MBTAV3API.ResponseCache.cache_key(params)
+    |> MBTAV3API.ResponseCache.put({date, response})
   end
 
   @spec start_stream(String.t(), %{String.t() => String.t()}, Keyword.t()) ::
@@ -106,14 +112,16 @@ defmodule MBTAV3API do
     api_key = Keyword.fetch!(opts, :api_key)
     base_url = Keyword.fetch!(opts, :base_url)
 
-    headers = Keyword.get(opts, :headers, []) ++ [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
+    headers =
+      Keyword.get(opts, :headers, []) ++
+        [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
 
     timeout = Keyword.fetch!(opts, :timeout)
 
     {time, response} =
       :timer.tc(fn ->
         Req.new(
-         finch: Finch.CustomPool,
+          finch: Finch.CustomPool,
           method: :get,
           base_url: base_url,
           url: URI.encode(url),
