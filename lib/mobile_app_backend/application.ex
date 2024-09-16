@@ -19,6 +19,7 @@ defmodule MobileAppBackend.Application do
        pools: %{
          :default => [size: 200, start_pool_metrics?: true]
        }},
+      {MBTAV3API.ResponseCache, []},
       MBTAV3API.Supervisor,
       {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
       MobileAppBackend.MapboxTokenRotator,
