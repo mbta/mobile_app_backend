@@ -131,7 +131,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     consumer_subscribers =
       if consumer_dest do
-        Registry.count_match(MBTAV3API.Stream.PubSub, consumer_dest, :_)
+        length(Registry.lookup(MBTAV3API.Stream.PubSub, consumer_dest))
       end
 
     healthy = consumer_alive
