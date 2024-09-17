@@ -23,7 +23,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
 
   @impl true
   def handle_info({:new_predictions, new_predictions_for_stop}, socket) do
-    :ok = push(socket, "stream_data", new_predictions_for_stop)
+    #  :ok = push(socket, "stream_data", new_predictions_for_stop)
     {:noreply, socket}
   end
 

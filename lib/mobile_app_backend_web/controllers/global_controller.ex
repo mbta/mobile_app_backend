@@ -23,6 +23,14 @@ defmodule MobileAppBackendWeb.GlobalController do
     })
   end
 
+  def routes_for_stop(conn, params) do
+    stop_id_concat = Map.get(params, "stop_ids")
+    stop_ids = String.split(stop_id_concat, ",")
+
+    {:ok, %{data: _routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
+    json(conn, "routes_found")
+  end
+
   @spec fetch_stops() :: JsonApi.Object.stop_map()
   defp fetch_stops do
     {:ok, %{data: stops}} =

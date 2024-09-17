@@ -37,13 +37,14 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     nearby_stop_ids: list[str] | None = None
     stops_channel: PhoenixChannel | None = None
     has_map_data = False
+    has_routes_data = False
 
-    @task
-    def load_map(self):
-        if not self.has_map_data or random.random() < self.prob_reset_map_data:
-            self.client.get("/api/global")
-            self.client.get("/api/shapes/map-friendly/rail")
-            self.has_map_data = True
+  #  @task
+  #  def load_map(self):
+  #      if not self.has_map_data or random.random() < self.prob_reset_map_data:
+  #          self.client.get("/api/global")
+    #        self.client.get("/api/shapes/map-friendly/rail")
+   #         self.has_map_data = True
 
     @task
     def nearby_transit(self):
@@ -53,14 +54,27 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
        
         self.nearby_stop_ids = nearby_rail_ids + nearby_cr_ids + nearby_bus_ids
         if (
-            self.stops_channel is not None
-            and random.random() < self.prob_reset_nearby_stops
+            not self.has_routes_data
+            and 
+          random.random() < self.prob_reset_nearby_stops
         ):
-            self.stops_channel.leave()
-            self.stops_channel = None
-        if self.stops_channel is None:
             nearby_stops_concat = ",".join(self.nearby_stop_ids)
-            self.stops_channel = self.socket.channel(
-                f'predictions:stops:v2:{nearby_stops_concat}'
-            )
-            self.stops_channel.join()
+            self.client.get(
+                    "/api/global/routes",
+                    params={
+                        "stop_ids": nearby_stops_concat
+                    }, 
+                    name="routes"
+                )
+            self.has_routes_data = True
+         #   self.stops_channel.leave()
+         #   self.stops_channel = None
+      #  if self.stops_channel is None:
+        #    nearby_stops_concat = ",".join(self.nearby_stop_ids)
+         #   self.stops_channel = self.socket.channel(
+         #       f'predictions:stops:v2:{nearby_stops_concat}'
+         #   )
+       #     self.stops_channel = self.socket.channel(
+        #        "predictions:stops", {"stop_ids": self.nearby_stop_ids}
+      #      )
+       #     self.stops_channel.join()
