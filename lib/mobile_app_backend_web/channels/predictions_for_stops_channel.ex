@@ -47,20 +47,20 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
 
   @impl true
   def handle_info({:stream_data, "predictions:route:" <> route_id, data}, socket) do
-    old_data = socket.assigns.data
-    new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
+  #  old_data = socket.assigns.data
+  #  new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
 
-    if old_data != new_data do
-      MobileAppBackend.Throttler.request(socket.assigns.throttler)
-    end
+ #   if old_data != new_data do
+ #     MobileAppBackend.Throttler.request(socket.assigns.throttler)
+ #   end
 
-    socket = assign(socket, data: new_data)
+#    socket = assign(socket, data: new_data)
     {:noreply, socket}
   end
 
   @impl true
   def handle_cast(:send_data, socket) do
-    :ok = push(socket, "stream_data", merge_data(socket.assigns.data))
+   # :ok = push(socket, "stream_data", merge_data(socket.assigns.data))
     {:noreply, socket}
   end
 
