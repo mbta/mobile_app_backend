@@ -77,7 +77,8 @@ defmodule MobileAppBackend.MixProject do
       {:absinthe_client, "~> 0.1.0"},
       {:server_sent_event_stage, "~> 1.2"},
       {:polyline, "~> 1.4", only: :test},
-      {:jose, "~> 1.11"}
+      {:jose, "~> 1.11"},
+      {:httpoison, "~> 2.2.1"}
     ]
   end
 
