@@ -12,7 +12,7 @@ defmodule MobileAppBackend.FinchTelemetryLogger do
         [:finch, :connect, :stop],
         [:finch, :send, :stop],
         [:finch, :recv, :stop],
-        [:finch, :recv, :exception],
+        [:finch, :recv, :exception]
       ],
       &__MODULE__.handle_event/4,
       []
@@ -21,7 +21,7 @@ defmodule MobileAppBackend.FinchTelemetryLogger do
 
   def handle_event(event, measure, meta, _) do
     Logger.info(
-      "#{__MODULE__} #{inspect(event)} duration=#{ System.convert_time_unit(measure.duration, :native, :millisecond)}"
+      "#{__MODULE__} #{inspect(event)} duration=#{System.convert_time_unit(measure.duration, :native, :millisecond)}"
     )
   end
 end

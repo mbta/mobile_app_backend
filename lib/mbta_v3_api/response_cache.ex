@@ -5,7 +5,6 @@ defmodule MBTAV3API.ResponseCache do
   """
   use Nebulex.Cache, otp_app: :mobile_app_backend, adapter: Nebulex.Adapters.Local
 
-
   def cache_key(url, params) do
     "#{url} params=#{inspect(params)}"
   end
