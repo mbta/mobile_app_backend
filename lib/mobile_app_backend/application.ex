@@ -28,6 +28,8 @@ defmodule MobileAppBackend.Application do
       MobileAppBackendWeb.Endpoint
     ]
 
+    :ok = MobileAppBackend.FinchTelemetryLogger.attach()
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: MobileAppBackend.Supervisor]
