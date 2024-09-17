@@ -67,7 +67,14 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
 
     with :ok <- Stream.PubSub.subscribe(topic) do
       if is_nil(Stream.Registry.find_pid(topic)) do
-        Stream.Supervisor.start_static_instance(args_for_topic(topic))
+        {time_micros, result} =
+          :timer.tc(Stream.Supervisor, :start_static_instance, [args_for_topic(topic)])
+
+        Logger.info(
+          "#{__MODULE__} match=false topic=#{topic} started_stream duration =#{time_micros / 1000}"
+        )
+      else
+        Logger.info("#{__MODULE__} match=true topic=#{topic}")
       end
 
       if include_current_data do
