@@ -25,8 +25,9 @@ defmodule MBTAV3API.Stream.StaticInstance do
         Stream.Supervisor.start_static_instance(args_for_topic(topic))
       end
 
-      current_data = GenServer.call(Stream.Registry.via_name(topic), :get_data)
-      {:ok, current_data}
+      # TODO: Temporarily removed since this is a known bottleneck
+      #  current_data = GenServer.call(Stream.Registry.via_name(topic), :get_data)
+      {:ok, JsonApi.Object.to_full_map([])}
     end
   end
 
