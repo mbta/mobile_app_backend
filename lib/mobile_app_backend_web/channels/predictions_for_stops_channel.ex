@@ -29,39 +29,38 @@ defmodule MobileAppBackendWeb.PredictionsForStopsChannel do
 
         {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
 
-        #   data =
-        #   Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->
-        #     {:ok, data} =
-        #       MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
+        data =
+          Map.new(routes, fn %MBTAV3API.Route{id: route_id} ->
+            {:ok, data} =
+              MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:#{route_id}")
 
-        #     {route_id, filter_data(data, stop_ids)}
-        #     end)
+            {route_id, filter_data(data, stop_ids)}
+          end)
 
-        #  {:ok, merge_data(data),
-        #    assign(socket, data: data, stop_ids: stop_ids, throttler: throttler)}
+        {:ok, merge_data(data),
+         assign(socket, data: data, stop_ids: stop_ids, throttler: throttler)}
 
-        #  :error ->
-        #  {:error, %{code: :no_stop_ids}}
-        {:ok, %{}, socket}
+      :error ->
+        {:error, %{code: :no_stop_ids}}
     end
   end
 
   @impl true
   def handle_info({:stream_data, "predictions:route:" <> route_id, data}, socket) do
-    # old_data = socket.assigns.data
-    #  new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
+    old_data = socket.assigns.data
+    new_data = put_in(old_data, [route_id], filter_data(data, socket.assigns.stop_ids))
 
-    #  if old_data != new_data do
-    #    MobileAppBackend.Throttler.request(socket.assigns.throttler)
-    #   end
+    if old_data != new_data do
+      MobileAppBackend.Throttler.request(socket.assigns.throttler)
+    end
 
-    #  socket = assign(socket, data: new_data)
+    socket = assign(socket, data: new_data)
     {:noreply, socket}
   end
 
   @impl true
   def handle_cast(:send_data, socket) do
-    #  :ok = push(socket, "stream_data", merge_data(socket.assigns.data))
+    :ok = push(socket, "stream_data", merge_data(socket.assigns.data))
     {:noreply, socket}
   end
 
