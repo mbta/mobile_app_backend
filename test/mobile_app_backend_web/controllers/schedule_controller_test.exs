@@ -46,8 +46,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       assert [
                filter: [
                  stop: "place-boyls",
-                 date: ~D[2024-03-12],
-                 min_time: "25:06"
+                 date: ~D[2024-03-12]
                ],
                include: :trip,
                sort: {:departure_time, :asc}
