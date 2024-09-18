@@ -54,6 +54,30 @@ defmodule MBTAV3API.Stream.InstanceTest do
     assert log =~ "consumer_subscribers=0"
   end
 
+  test "restarts stream if consumer crashes" do
+    instance =
+      start_link_supervised!(
+        {MBTAV3API.Stream.Instance,
+         url: "https://example.com", headers: [{"a", "b"}], destination: self(), type: Route}
+      )
+
+    old_sse_stage = SSEStub.get_from_instance(instance)
+
+    {_id, consumer, _type, [Stream.Consumer]} =
+      instance
+      |> Supervisor.which_children()
+      |> Enum.find(fn {_id, _child, _type, [module]} -> module == Stream.Consumer end)
+
+    Process.exit(consumer, :simulating_crash)
+
+    # wait for the supervisor to restart things
+    Process.sleep(5)
+
+    new_sse_stage = SSEStub.get_from_instance(instance)
+
+    refute old_sse_stage == new_sse_stage
+  end
+
   describe "consumer_spec/1" do
     test "when not specified, returns default consumer" do
       assert {Stream.Consumer, _spec} =
