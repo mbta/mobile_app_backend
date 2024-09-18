@@ -36,7 +36,7 @@ defmodule MBTAV3API.Stream.Instance do
       consumer_spec(Keyword.put(opts, :ref, ref))
     ]
 
-    Supervisor.init(children, strategy: :rest_for_one)
+    Supervisor.init(children, strategy: :one_for_all)
   end
 
   @spec consumer_spec(keyword()) :: {module(), keyword()}
