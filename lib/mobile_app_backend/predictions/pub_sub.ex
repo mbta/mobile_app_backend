@@ -77,7 +77,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
       ])
 
     Logger.info(
-      "#{__MODULE__} subscribe_for_stops stop_id=#{stop_ids} duration_ms=#{time_micros / 1000}"
+      "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000}"
     )
 
     stop_ids
@@ -194,7 +194,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
       ])
 
     Logger.info(
-      "#{__MODULE__} broadcast_to_pids fetch_keys=#{inspect(elem(registry_value, 0))}duration_ms=#{time_micros / 1000}"
+      "#{__MODULE__} broadcast_to_pids fetch_keys=#{inspect(elem(registry_value, 0))}duration=#{time_micros / 1000}"
     )
 
     :ets.insert(last_dispatched_table_name, {registry_value, predictions})
