@@ -116,7 +116,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       :timer.tc(:ets, :select, [@predictions_table_name, match_specs])
 
     time_ms = time_micros / 1000
-    Logger.info("#{__MODULE__} fetch predictions #{log_metadata} duration_ms=#{time_ms}")
+    Logger.info("#{__MODULE__} fetch predictions #{log_metadata} duration=#{time_ms}")
     results
   end
 

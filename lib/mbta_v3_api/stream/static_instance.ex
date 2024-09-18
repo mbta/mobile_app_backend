@@ -56,7 +56,7 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
     {time_micros, result} = :timer.tc(__MODULE__, :subscribe_helper, [topic, opts])
 
     Logger.info(
-      "#{__MODULE__} stream started for #{topic}. opts=#{inspect(opts)} duration_ms=#{time_micros / 1000}"
+      "#{__MODULE__} stream started for #{topic}. opts=#{inspect(opts)} duration=#{time_micros / 1000}"
     )
 
     result
