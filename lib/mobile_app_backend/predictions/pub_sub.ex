@@ -77,7 +77,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
       ])
 
     Logger.info(
-      "#{__MODULE__} subscribe_for_stops stop_id=#{stop_ids} duration_ms=#{time_micros / 1000}"
+      "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration_ms=#{time_micros / 1000}"
     )
 
     stop_ids

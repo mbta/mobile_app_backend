@@ -14,10 +14,14 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
     if stop_id_concat == "" do
       {:error, %{code: :no_stop_ids}}
     else
-      initial_data =
-        stop_id_concat
-        |> String.split(",")
-        |> pubsub_module.subscribe_for_stops()
+      {time_micros, initial_data} =
+        :timer.tc(fn ->
+          stop_id_concat
+          |> String.split(",")
+          |> pubsub_module.subscribe_for_stops()
+        end)
+
+      Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
 
       {:ok, initial_data, socket}
     end
@@ -27,7 +31,13 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
   @spec handle_info({:new_predictions, any()}, Phoenix.Socket.t()) ::
           {:noreply, Phoenix.Socket.t()}
   def handle_info({:new_predictions, new_predictions_for_stop}, socket) do
-    :ok = push(socket, "stream_data", new_predictions_for_stop)
+    {time_micros, _result} =
+      :timer.tc(fn ->
+        :ok = push(socket, "stream_data", new_predictions_for_stop)
+      end)
+
+    Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
+
     require Logger
     {:noreply, socket}
   end
