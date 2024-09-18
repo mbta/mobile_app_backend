@@ -36,7 +36,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
         :ok = push(socket, "stream_data", new_predictions_for_stop)
       end)
 
-    Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
+    Logger.info("#{__MODULE__} push duration=#{time_micros / 1000}")
 
     require Logger
     {:noreply, socket}
