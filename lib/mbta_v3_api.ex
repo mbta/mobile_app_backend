@@ -34,7 +34,7 @@ defmodule MBTAV3API do
 
     with {time, response} <- timed_get(url, params, opts),
          :ok <- log_response(url, params, time, response),
-         {:ok, %{status_code: 200, body: body, headers: headers}} <- response do
+         {:ok, %Req.Response{status: 200, body: body, headers: headers}} <- response do
       parsed_response =
         body
         |> JsonApi.parse()
@@ -53,7 +53,7 @@ defmodule MBTAV3API do
         _ = log_response_error(url, params, body)
         {:error, error}
 
-      {:ok, %{status_code: 304}} ->
+      {:ok, %Req.Response{status: 304}} ->
         Logger.info("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
         elem(cached_response, 1)
 
@@ -116,16 +116,23 @@ defmodule MBTAV3API do
       Keyword.get(opts, :headers, []) ++
         [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
 
-   # timeout = Keyword.fetch!(opts, :timeout)
-
-    full_url = "#{base_url}#{url}?#{URI.encode_query(params)}"
-
-    Logger.info("FULL URL #{full_url}")
+    timeout = Keyword.fetch!(opts, :timeout)
 
     {time, response} =
       :timer.tc(fn ->
-        HTTPoison.get(full_url, headers)
-     #   |> MobileAppBackend.HTTP.request()
+        Req.new(
+          finch: Finch.CustomPool,
+          method: :get,
+          base_url: base_url,
+          url: URI.encode(url),
+          headers: headers,
+          params: params,
+          compressed: true,
+          decode_body: false,
+          pool_timeout: timeout,
+          receive_timeout: timeout
+        )
+        |> MobileAppBackend.HTTP.request()
       end)
 
     {time, response}
@@ -168,7 +175,7 @@ defmodule MBTAV3API do
   end
 
   defp log_body({:ok, response}) do
-    "status=#{response.status_code} content_length=#{byte_size(response.body)}"
+    "status=#{response.status} content_length=#{byte_size(response.body)}"
   end
 
   defp log_body({:error, error}) do
