@@ -72,7 +72,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
 
   @impl true
   def init(_) do
-    _table = :ets.new(@predictions_table_name, [:named_table])
+    _table = :ets.new(@predictions_table_name, [:named_table, :public, read_concurrency: true])
 
     {:ok, %{}}
   end
@@ -121,38 +121,20 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   end
 
   @impl true
-  def process_upsert(event, data) do
-    GenServer.call(__MODULE__, {:process_upsert, event, data})
+  def process_upsert(_event, data) do
+    upsert_data(data)
     :ok
   end
 
   @impl true
   def process_reset(data, scope) do
-    GenServer.call(__MODULE__, {:process_reset, data, scope})
+    clear_data(scope)
+    upsert_data(data)
     :ok
   end
 
   @impl true
   def process_remove(references) do
-    GenServer.call(__MODULE__, {:process_remove, references})
-    :ok
-  end
-
-  @impl true
-  def handle_call({:process_upsert, _event, data}, _from, state) do
-    upsert_data(data)
-    {:reply, :ok, state}
-  end
-
-  @impl true
-  def handle_call({:process_reset, data, scope}, _from, state) do
-    clear_data(scope)
-    upsert_data(data)
-    {:reply, :ok, state}
-  end
-
-  @impl true
-  def handle_call({:process_remove, references}, _from, state) do
     for reference <- references do
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
@@ -161,7 +143,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       end
     end
 
-    {:reply, :ok, state}
+    :ok
   end
 
   defp upsert_data(data) do
