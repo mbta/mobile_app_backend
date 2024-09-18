@@ -135,6 +135,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
 
   @impl true
   def process_remove(references) do
+    Logger.info("#{__MODULE__} removing predictions count=#{length(references)}")
     for reference <- references do
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
