@@ -67,8 +67,8 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   use GenServer
   require Logger
   alias MBTAV3API.JsonApi
-  alias MBTAV3API.Trip
   alias MBTAV3API.Prediction
+  alias MBTAV3API.Trip
 
   @behaviour MBTAV3API.Store
 
