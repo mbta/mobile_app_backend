@@ -6,6 +6,7 @@ defmodule MBTAV3API.Store do
   alias MBTAV3API.JsonApi
 
   @type upsert_event :: :add | :update
+  @type fetch_keys :: keyword() | [keyword()]
 
   @doc """
   Add or update existing data in the data store
@@ -25,11 +26,8 @@ defmodule MBTAV3API.Store do
 
   @doc """
   Retrieve all records that match the given filter keys.
+  When given a single keyword list, all keys in the list must match.
+  When given a list of keyword lists, must match any of the keyword lists
   """
-  @callback fetch(keyword()) :: [JsonApi.Object.t()]
-
-  @doc """
-  Retrieve all records that match any of the given filter keyword sets
-  """
-  @callback fetch_any([keyword()]) :: [JsonApi.Object.t()]
+  @callback fetch(fetch_keys()) :: [JsonApi.Object.t()]
 end

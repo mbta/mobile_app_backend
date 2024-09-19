@@ -38,7 +38,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     stops_channel: PhoenixChannel | None = None
     has_map_data = False
 
-    @task
+    # @task TODO: re-instate this after global endpoint optimizations
     def load_map(self):
         if not self.has_map_data or random.random() < self.prob_reset_map_data:
             self.client.get("/api/global")

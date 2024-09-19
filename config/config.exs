@@ -13,6 +13,8 @@ config :mobile_app_backend,
 config :mobile_app_backend, MobileAppBackend.AppCheck,
   jwks_url: "https://firebaseappcheck.googleapis.com/v1/jwks"
 
+config :mobile_app_backend, predictions_broadcast_interval_ms: 10_000
+
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],

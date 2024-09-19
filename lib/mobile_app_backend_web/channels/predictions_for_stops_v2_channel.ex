@@ -2,35 +2,43 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
   use MobileAppBackendWeb, :channel
   require Logger
 
-  alias MBTAV3API.JsonApi
-
   @impl true
   def join("predictions:stops:v2:" <> stop_id_concat, _payload, socket) do
+    pubsub_module =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.Predictions.PubSub,
+        MobileAppBackend.Predictions.PubSub
+      )
+
     if stop_id_concat == "" do
       {:error, %{code: :no_stop_ids}}
     else
-      stop_ids = String.split(stop_id_concat, ",")
-
-      initial_data =
-        Map.new(stop_ids, fn stop_id ->
-          {:ok, data} = MobileAppBackend.StopPredictions.PubSub.subscribe(stop_id)
-          {stop_id, data}
+      {time_micros, initial_data} =
+        :timer.tc(fn ->
+          stop_id_concat
+          |> String.split(",")
+          |> pubsub_module.subscribe_for_stops()
         end)
 
-      {:ok, merge_data(initial_data), socket}
+      Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
+
+      {:ok, initial_data, socket}
     end
   end
 
   @impl true
+  @spec handle_info({:new_predictions, any()}, Phoenix.Socket.t()) ::
+          {:noreply, Phoenix.Socket.t()}
   def handle_info({:new_predictions, new_predictions_for_stop}, socket) do
-    :ok = push(socket, "stream_data", new_predictions_for_stop)
-    {:noreply, socket}
-  end
+    {time_micros, _result} =
+      :timer.tc(fn ->
+        :ok = push(socket, "stream_data", new_predictions_for_stop)
+      end)
 
-  @spec merge_data(%{String.t() => JsonApi.Object.full_map()}) :: JsonApi.Object.full_map()
-  defp merge_data(data) do
-    data
-    |> Map.values()
-    |> Enum.reduce(JsonApi.Object.to_full_map([]), &JsonApi.Object.merge_full_map/2)
+    Logger.info("#{__MODULE__} push duration=#{time_micros / 1000}")
+
+    require Logger
+    {:noreply, socket}
   end
 end

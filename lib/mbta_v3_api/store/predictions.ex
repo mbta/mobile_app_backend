@@ -1,4 +1,56 @@
 defmodule MBTAV3API.Store.Predictions do
+  use GenServer
+  require Logger
+  alias MBTAV3API.Prediction
+  alias MBTAV3API.Store.Predictions
+
+  @behaviour MBTAV3API.Store
+
+  def start_link(opts) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).start_link(
+      opts
+    )
+  end
+
+  @impl true
+  def init(opts) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).init(
+      opts
+    )
+  end
+
+  @impl true
+  def fetch(fetch_keys) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch(
+      fetch_keys
+    )
+  end
+
+  @impl true
+  def process_upsert(event, data) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_upsert(
+      event,
+      data
+    )
+  end
+
+  @impl true
+  def process_reset(data, scope) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_reset(
+      data,
+      scope
+    )
+  end
+
+  @impl true
+  def process_remove(references) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_remove(
+      references
+    )
+  end
+end
+
+defmodule MBTAV3API.Store.Predictions.Impl do
   @moduledoc """
   Store of predictions. Store is written to by any number of `MBTAV3API.Stream.ConsumerToStore`
   and can be read in parallel by other processes.
@@ -20,20 +72,22 @@ defmodule MBTAV3API.Store.Predictions do
 
   @impl true
   def init(_) do
-    _table = :ets.new(@predictions_table_name, [:named_table])
+    _table = :ets.new(@predictions_table_name, [:named_table, :public, read_concurrency: true])
 
     {:ok, %{}}
   end
 
   @impl true
   def fetch(fetch_keys) do
-    match_spec = prediction_match_spec(fetch_keys)
-
-    timed_fetch([{match_spec, [], [:"$1"]}], "fetch_keys=#{inspect(fetch_keys)}")
+    if Keyword.keyword?(fetch_keys) do
+      match_spec = prediction_match_spec(fetch_keys)
+      timed_fetch([{match_spec, [], [:"$1"]}], "fetch_keys=#{inspect(fetch_keys)}")
+    else
+      fetch_any(fetch_keys)
+    end
   end
 
-  @impl true
-  def fetch_any(fetch_keys_list) do
+  defp fetch_any(fetch_keys_list) do
     match_specs =
       fetch_keys_list
       |> Enum.map(&prediction_match_spec(&1))
@@ -62,43 +116,25 @@ defmodule MBTAV3API.Store.Predictions do
       :timer.tc(:ets, :select, [@predictions_table_name, match_specs])
 
     time_ms = time_micros / 1000
-    Logger.info("#{__MODULE__} fetch predictions #{log_metadata} duration_ms=#{time_ms}")
+    Logger.info("#{__MODULE__} fetch predictions #{log_metadata} duration=#{time_ms}")
     results
   end
 
   @impl true
-  def process_upsert(event, data) do
-    GenServer.call(__MODULE__, {:process_upsert, event, data})
+  def process_upsert(_event, data) do
+    upsert_data(data)
     :ok
   end
 
   @impl true
   def process_reset(data, scope) do
-    GenServer.call(__MODULE__, {:process_reset, data, scope})
+    clear_data(scope)
+    upsert_data(data)
     :ok
   end
 
   @impl true
   def process_remove(references) do
-    GenServer.call(__MODULE__, {:process_remove, references})
-    :ok
-  end
-
-  @impl true
-  def handle_call({:process_upsert, _event, data}, _from, state) do
-    upsert_data(data)
-    {:reply, :ok, state}
-  end
-
-  @impl true
-  def handle_call({:process_reset, data, scope}, _from, state) do
-    clear_data(scope)
-    upsert_data(data)
-    {:reply, :ok, state}
-  end
-
-  @impl true
-  def handle_call({:process_remove, references}, _from, state) do
     for reference <- references do
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
@@ -107,7 +143,7 @@ defmodule MBTAV3API.Store.Predictions do
       end
     end
 
-    {:reply, :ok, state}
+    :ok
   end
 
   defp upsert_data(data) do
