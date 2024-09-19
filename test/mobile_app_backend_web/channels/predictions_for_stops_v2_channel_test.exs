@@ -18,17 +18,26 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
   end
 
   test "joins and leaves ok", %{socket: socket} do
-    prediction_1 = build(:prediction)
-    prediction_2 = build(:prediction)
+    prediction_1 = build(:prediction, trip_id: "trip_1", stop_id: "12345")
+    prediction_2 = build(:prediction, trip_id: "trip_2", stop_id: "67890")
+
+    trip_1 = build(:trip, id: "trip_1")
+    trip_2 = build(:trip, id: "trip_2")
 
     expect(PredictionsPubSubMock, :subscribe_for_stops, 1, fn _ ->
-      %{"12345" => [prediction_1], "67890" => [prediction_2]}
+      %{
+        "12345" => to_full_map([prediction_1, trip_1]),
+        "67890" => to_full_map([prediction_2, trip_2])
+      }
     end)
 
     {:ok, reply, _socket} =
       subscribe_and_join(socket, "predictions:stops:v2:12345,67890")
 
-    assert reply == %{"12345" => [prediction_1], "67890" => [prediction_2]}
+    assert reply == %{
+             "12345" => to_full_map([prediction_1, trip_1]),
+             "67890" => to_full_map([prediction_2, trip_2])
+           }
   end
 
   test "error if missing stop ids in topic", %{socket: socket} do
@@ -42,13 +51,16 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
     {:ok, _reply, socket} =
       subscribe_and_join(socket, "predictions:stops:v2:12345")
 
-    prediction = build(:prediction, stop_id: "12345")
+    prediction = build(:prediction, id: "prediction_1", stop_id: "12345", trip_id: "trip_1")
+    trip = build(:trip, id: "trip_1")
 
     PredictionsForStopsV2Channel.handle_info(
-      {:new_predictions, %{"12345" => [prediction]}},
+      {:new_predictions, %{"12345" => to_full_map([prediction, trip])}},
       socket
     )
 
-    assert_push "stream_data", %{"12345" => [^prediction]}
+    assert_push "stream_data", %{
+      "12345" => %{predictions: %{"prediction_1" => ^prediction}, trips: %{"trip_1" => ^trip}}
+    }
   end
 end

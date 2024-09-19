@@ -1,15 +1,17 @@
 defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
-  alias MBTAV3API.{Prediction, Stop}
+  alias MBTAV3API.JsonApi
+  alias MBTAV3API.Stop
+
+  @type predictions_by_stop :: %{Stop.id() => JsonApi.Object.full_map()}
 
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
   """
-  @callback subscribe_for_stop(Stop.id()) :: %{Stop.id() => [Prediction.t()]}
-
+  @callback subscribe_for_stop(Stop.id()) :: predictions_by_stop()
   @doc """
   Subscribe to prediction updates for multiple stops. For  parent stations, this subscribes to updates for all their child stops.
   """
-  @callback subscribe_for_stops([Stop.id()]) :: %{Stop.id() => [Prediction.t()]}
+  @callback subscribe_for_stops([Stop.id()]) :: predictions_by_stop()
 end
 
 defmodule MobileAppBackend.Predictions.PubSub do
@@ -98,6 +100,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
     subscribe_for_stops([stop_id])
   end
 
+  @spec register_single_stop(Stop.id()) :: PubSub.Behaviour.predictions_by_stop()
   defp register_single_stop(stop_id) do
     fetch_keys = [stop_id: stop_id]
 
@@ -108,9 +111,10 @@ defmodule MobileAppBackend.Predictions.PubSub do
         {fetch_keys, fn data -> %{stop_id => data} end}
       )
 
-    Store.Predictions.fetch(fetch_keys)
+    Store.Predictions.fetch_with_associations(fetch_keys)
   end
 
+  @spec register_parent_stop(Stop.id(), [Stop.id()]) :: PubSub.Behaviour.predictions_by_stop()
   defp register_parent_stop(parent_stop_id, child_stop_ids) do
     # Fetch predictions by the relevant child stop ids. Return data & broadcast
     # future updates with format `%{parent_stop_id => predictions}`, rather than
@@ -124,7 +128,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
         {fetch_keys, fn data -> %{parent_stop_id => data} end}
       )
 
-    Store.Predictions.fetch(fetch_keys)
+    Store.Predictions.fetch_with_associations(fetch_keys)
   end
 
   @impl GenServer
@@ -174,7 +178,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
        ) do
     new_predictions =
       fetch_keys
-      |> Store.Predictions.fetch()
+      |> Store.Predictions.fetch_with_associations()
       |> format_fn.()
 
     last_dispatched_entry = :ets.lookup(last_dispatched_table_name, registry_value)
