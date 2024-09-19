@@ -5,7 +5,7 @@ defmodule MBTAV3API.Stream.StaticInstance do
   @callback child_spec(keyword()) :: Supervisor.child_spec()
 
   @doc """
-  Start a stream fo the given topic if it doesn't already exist
+  Start a stream for the given topic if it doesn't already exist
   """
   @callback subscribe(Phoenix.PubSub.topic(), Keyword.t()) ::
               {:ok, Stream.State.t()} | {:error, term()}
@@ -32,7 +32,9 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Stream
   require Logger
+  @behaviour Stream.StaticInstance
 
+  @impl true
   def child_spec(opts) do
     type = Keyword.fetch!(opts, :type)
     {params, opts} = Keyword.split(opts, [:sort, :fields, :include, :filter])
@@ -47,22 +49,8 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
     |> Map.merge(%{id: {Stream.StaticInstance, topic}, restart: :permanent})
   end
 
-  @spec subscribe(Phoenix.PubSub.topic(), Keyword.t()) ::
-          {:ok, Stream.State.t()} | {:error, term()}
-  @doc """
-  Start a stream fo the given topic if it doesn't already exist
-  """
+  @impl true
   def subscribe(topic, opts \\ []) do
-    {time_micros, result} = :timer.tc(__MODULE__, :subscribe_helper, [topic, opts])
-
-    Logger.info(
-      "#{__MODULE__} stream started for #{topic}. opts=#{inspect(opts)} duration=#{time_micros / 1000}"
-    )
-
-    result
-  end
-
-  def subscribe_helper(topic, opts \\ []) do
     include_current_data = Keyword.get(opts, :include_current_data, true)
 
     with :ok <- Stream.PubSub.subscribe(topic) do
