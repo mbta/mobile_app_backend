@@ -38,8 +38,8 @@ defmodule MobileAppBackendWeb.ScheduleController do
   @spec get_filter(String.t(), String.t()) :: [JsonApi.Params.filter_param()]
   defp get_filter(stop_ids, date_time) do
     date_time = Util.parse_datetime!(date_time)
-    {service_date, min_time} = Util.datetime_to_gtfs(date_time)
-    [stop: stop_ids, date: service_date, min_time: min_time]
+    service_date = Util.datetime_to_gtfs(date_time)
+    [stop: stop_ids, date: service_date]
   end
 
   @spec fetch_schedules([JsonApi.Params.filter_param()]) ::
