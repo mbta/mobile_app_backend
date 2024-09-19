@@ -84,7 +84,7 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
       type: MBTAV3API.Prediction,
       url: "/predictions",
       filter: [route: route_id],
-      include: [:trip, :vehicle],
+      include: [:trip],
       # `:topic` is unique to a route because we stream predictions separately by route
       # `:destination` is the same across all routes because all predictions
       # are unified in `Store.Predictions`
