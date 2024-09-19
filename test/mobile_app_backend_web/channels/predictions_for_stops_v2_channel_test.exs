@@ -24,20 +24,16 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
     trip_1 = build(:trip, id: "trip_1")
     trip_2 = build(:trip, id: "trip_2")
 
+    full_map = to_full_map([prediction_1, prediction_2, trip_1, trip_2])
+
     expect(PredictionsPubSubMock, :subscribe_for_stops, 1, fn _ ->
-      %{
-        "12345" => to_full_map([prediction_1, trip_1]),
-        "67890" => to_full_map([prediction_2, trip_2])
-      }
+      full_map
     end)
 
     {:ok, reply, _socket} =
       subscribe_and_join(socket, "predictions:stops:v2:12345,67890")
 
-    assert reply == %{
-             "12345" => to_full_map([prediction_1, trip_1]),
-             "67890" => to_full_map([prediction_2, trip_2])
-           }
+    assert reply == full_map
   end
 
   test "error if missing stop ids in topic", %{socket: socket} do

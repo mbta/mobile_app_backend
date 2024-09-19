@@ -82,17 +82,19 @@ defmodule MobileAppBackend.Predictions.PubSub do
       "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000}"
     )
 
-    stop_ids
-    |> Enum.map(fn stop_id ->
-      case Map.get(child_stops_by_parent, stop_id) do
-        nil ->
-          {stop_id, register_single_stop(stop_id)}
+    fetch_keys_all_stops =
+      stop_ids
+      |> Enum.flat_map(fn stop_id ->
+        case Map.get(child_stops_by_parent, stop_id) do
+          nil ->
+            [register_single_stop(stop_id)]
 
-        child_ids ->
-          {stop_id, register_parent_stop(stop_id, child_ids)}
-      end
-    end)
-    |> Map.new()
+          child_ids ->
+            register_parent_stop(stop_id, child_ids)
+        end
+      end)
+
+    Store.Predictions.fetch_with_associations(fetch_keys_all_stops)
   end
 
   @impl true
@@ -100,7 +102,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
     subscribe_for_stops([stop_id])
   end
 
-  @spec register_single_stop(Stop.id()) :: PubSub.Behaviour.predictions_by_stop()
+  @spec register_single_stop(Stop.id()) :: Store.fetch_keys()
   defp register_single_stop(stop_id) do
     fetch_keys = [stop_id: stop_id]
 
@@ -111,10 +113,10 @@ defmodule MobileAppBackend.Predictions.PubSub do
         {fetch_keys, fn data -> %{stop_id => data} end}
       )
 
-    Store.Predictions.fetch_with_associations(fetch_keys)
+    fetch_keys
   end
 
-  @spec register_parent_stop(Stop.id(), [Stop.id()]) :: PubSub.Behaviour.predictions_by_stop()
+  @spec register_parent_stop(Stop.id(), [Stop.id()]) :: Store.fetch_keys()
   defp register_parent_stop(parent_stop_id, child_stop_ids) do
     # Fetch predictions by the relevant child stop ids. Return data & broadcast
     # future updates with format `%{parent_stop_id => predictions}`, rather than
@@ -128,7 +130,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
         {fetch_keys, fn data -> %{parent_stop_id => data} end}
       )
 
-    Store.Predictions.fetch_with_associations(fetch_keys)
+    fetch_keys
   end
 
   @impl GenServer

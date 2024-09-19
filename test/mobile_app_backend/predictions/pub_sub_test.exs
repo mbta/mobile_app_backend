@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       full_map = JsonApi.Object.to_full_map([prediction_1, prediction_2, trip_1, trip_2])
 
-      expect(PredictionsStoreMock, :fetch_with_associations, fn _ ->
+      expect(PredictionsStoreMock, :fetch_with_associations, fn [[stop_id: "12345"]] ->
         full_map
       end)
 
@@ -37,7 +37,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert %{"12345" => full_map} == PubSub.subscribe_for_stop("12345")
+      assert full_map == PubSub.subscribe_for_stop("12345")
     end
 
     test "returns initial data for the given parent stop" do
@@ -64,7 +64,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert %{"parent_stop_id" => full_map} ==
+      assert full_map ==
                PubSub.subscribe_for_stop("parent_stop_id")
     end
   end
@@ -76,14 +76,13 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
 
-      standalone_full_map = JsonApi.Object.to_full_map([prediction_1, trip_1])
-      child_full_map = JsonApi.Object.to_full_map([prediction_2, trip_2])
+      full_map = JsonApi.Object.to_full_map([prediction_1, prediction_2, trip_1, trip_2])
 
-      expect(PredictionsStoreMock, :fetch_with_associations, 2, fn keys ->
-        case keys do
-          [stop_id: "standalone"] -> standalone_full_map
-          [[stop_id: "child"]] -> child_full_map
-        end
+      expect(PredictionsStoreMock, :fetch_with_associations, 1, fn [
+                                                                     [stop_id: "child"],
+                                                                     [stop_id: "standalone"]
+                                                                   ] ->
+        full_map
       end)
 
       RepositoryMock
@@ -95,7 +94,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert %{"standalone" => standalone_full_map, "parent" => child_full_map} ==
+      assert full_map ==
                PubSub.subscribe_for_stops(["parent", "standalone"])
     end
   end
@@ -165,12 +164,21 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
 
+      full_map_12345 = JsonApi.Object.to_full_map([prediction_1, trip_1])
+      full_map_6789 = JsonApi.Object.to_full_map([prediction_2, trip_2])
+
       PredictionsStoreMock
-      |> expect(:fetch_with_associations, 4, fn keys ->
-        case keys do
-          [stop_id: "12345"] -> JsonApi.Object.to_full_map([prediction_1, trip_1])
-          [stop_id: "6789"] -> JsonApi.Object.to_full_map([prediction_2, trip_2])
-        end
+      |> expect(:fetch_with_associations, fn [[stop_id: "12345"]] ->
+        full_map_12345
+      end)
+      |> expect(:fetch_with_associations, fn [[stop_id: "6789"]] ->
+        full_map_6789
+      end)
+      |> expect(:fetch_with_associations, fn [stop_id: "12345"] ->
+        full_map_12345
+      end)
+      |> expect(:fetch_with_associations, fn [stop_id: "6789"] ->
+        full_map_6789
       end)
 
       RepositoryMock
