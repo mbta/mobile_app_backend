@@ -1,11 +1,10 @@
 defmodule MBTAV3API.Store.VehiclesTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   import ExUnit.CaptureLog
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
   import MobileAppBackend.Factory
   import Test.Support.Helpers
 
-  alias MBTAV3API.JsonApi
   alias MBTAV3API.{JsonApi.Reference, Store}
 
   setup do

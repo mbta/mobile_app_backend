@@ -79,7 +79,6 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
   @impl true
   def init(_) do
     _table = :ets.new(@vehicles_table_name, [:named_table, :public, read_concurrency: true])
-
     {:ok, %{}}
   end
 

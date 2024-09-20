@@ -6,6 +6,8 @@ Mox.defmock(MobileAppBackend.HTTPMock, for: MobileAppBackend.HTTP)
 Mox.defmock(StreamSubscriberMock, for: MobileAppBackend.Predictions.StreamSubscriber)
 Mox.defmock(PredictionsPubSubMock, for: MobileAppBackend.Predictions.PubSub.Behaviour)
 Mox.defmock(PredictionsStoreMock, for: MBTAV3API.Store)
+Mox.defmock(VehiclesStoreMock, for: MBTAV3API.Store)
+
 Application.put_env(:mobile_app_backend, MobileAppBackend.HTTP, MobileAppBackend.HTTPMock)
 
 case Test.Support.Data.start_link() do

@@ -1,5 +1,5 @@
 defmodule MBTAV3API.Store.PredictionsTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   import ExUnit.CaptureLog
   import MobileAppBackend.Factory
   import Test.Support.Helpers
@@ -10,12 +10,17 @@ defmodule MBTAV3API.Store.PredictionsTest do
 
   setup do
     start_link_supervised!(Store.Predictions)
+    start_link_supervised!(Store.Vehicles)
 
     %{
-      prediction_1: build(:prediction, id: "1", stop_id: "12345", trip_id: "trip_1"),
-      prediction_2: build(:prediction, id: "2", stop_id: "12345", trip_id: "trip_2"),
+      prediction_1:
+        build(:prediction, id: "1", stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1"),
+      prediction_2:
+        build(:prediction, id: "2", stop_id: "12345", trip_id: "trip_2", vehicle_id: "v_2"),
       trip_1: build(:trip, id: "trip_1"),
-      trip_2: build(:trip, id: "trip_2")
+      trip_2: build(:trip, id: "trip_2"),
+      vehicle_1: build(:vehicle, id: "v_1"),
+      vehicle_2: build(:vehicle, id: "v_2")
     }
   end
 
@@ -158,42 +163,61 @@ defmodule MBTAV3API.Store.PredictionsTest do
   end
 
   describe "fetch_with_associations/1" do
-    test "fetches all associated trips", %{
+    test "fetches all associated trips and vehicles", %{
       prediction_1: prediction_1,
       prediction_2: prediction_2,
       trip_1: trip_1,
-      trip_2: trip_2
+      trip_2: trip_2,
+      vehicle_1: vehicle_1,
+      vehicle_2: vehicle_2
     } do
       prediction_without_trip = build(:prediction, trip_id: nil, stop_id: prediction_1.stop_id)
-      prediction_other_stop = build(:prediction, stop_id: "other", trip_id: "other_trip")
+
+      prediction_without_vehicle =
+        build(:prediction, trip_id: "trip_1", stop_id: prediction_1.stop_id, vehicle_id: nil)
+
+      prediction_other_stop =
+        build(:prediction, stop_id: "other", trip_id: "other_trip", vehicle_id: "other_vehicle")
+
       trip_other_stop = build(:trip, id: "other_trip")
+      other_vehicle = build(:vehicle, id: "other_vehicle")
 
       Store.Predictions.process_upsert(:add, [
         prediction_1,
         prediction_2,
         prediction_without_trip,
+        prediction_without_vehicle,
         prediction_other_stop,
         trip_1,
         trip_2,
         trip_other_stop
       ])
 
+      Store.Vehicles.process_upsert(:add, [vehicle_1, vehicle_2, other_vehicle])
+
       assert JsonApi.Object.to_full_map([
                prediction_1,
                prediction_2,
                prediction_without_trip,
+               prediction_without_vehicle,
                trip_1,
-               trip_2
+               trip_2,
+               vehicle_1,
+               vehicle_2
              ]) == Store.Predictions.fetch_with_associations(stop_id: "12345")
 
       assert JsonApi.Object.to_full_map([
                prediction_1,
                prediction_2,
                prediction_without_trip,
+               prediction_without_vehicle,
                prediction_other_stop,
                trip_1,
                trip_2,
-               trip_other_stop
+               trip_other_stop,
+               vehicle_1,
+               vehicle_2,
+               other_vehicle
              ]) ==
                Store.Predictions.fetch_with_associations([[stop_id: "12345"], [stop_id: "other"]])
     end

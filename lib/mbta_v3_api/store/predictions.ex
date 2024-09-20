@@ -62,10 +62,13 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   Store of predictions. Store is written to by any number of `MBTAV3API.Stream.ConsumerToStore`
   and can be read in parallel by other processes.
 
+  Associated vehicles can be accesssed separately from `MBTAV3!PI.Store.Vehicles`
+
   Based on https://github.com/mbta/dotcom/blob/main/lib/predictions/store.ex
   """
   use GenServer
   require Logger
+  alias MBTAV3API.Store.Vehicles
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
   alias MBTAV3API.Trip
@@ -120,10 +123,20 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   def fetch_with_associations(fetch_keys) do
     predictions = fetch(fetch_keys)
 
-    trip_fetch_keys_list =
+    {trip_fetch_keys_list, vehicle_fetch_keys_list} =
       predictions
-      |> Enum.flat_map(fn prediction ->
-        if is_nil(prediction.trip_id), do: [], else: [[id: prediction.trip_id]]
+      |> Enum.reduce({[], []}, fn prediction, {acc_trip_keys, acc_vehicle_keys} ->
+        acc_trip_keys =
+          if is_nil(prediction.trip_id),
+            do: acc_trip_keys,
+            else: [[id: prediction.trip_id] | acc_trip_keys]
+
+        acc_vehicle_keys =
+          if is_nil(prediction.vehicle_id),
+            do: acc_vehicle_keys,
+            else: [[id: prediction.vehicle_id] | acc_vehicle_keys]
+
+        {acc_trip_keys, acc_vehicle_keys}
       end)
 
     trip_match_specs = Enum.map(trip_fetch_keys_list, &{trip_match_spec(&1), [], [:"$1"]})
@@ -135,7 +148,9 @@ defmodule MBTAV3API.Store.Predictions.Impl do
         "fetch_keys=#{inspect(trip_fetch_keys_list)}"
       )
 
-    JsonApi.Object.to_full_map(predictions ++ trips)
+    vehicles = Vehicles.fetch(vehicle_fetch_keys_list)
+
+    JsonApi.Object.to_full_map(predictions ++ trips ++ vehicles)
   end
 
   defp prediction_match_spec(fetch_keys) do

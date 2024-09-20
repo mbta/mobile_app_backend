@@ -25,7 +25,9 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
   @moduledoc """
   Ensure that prediction streams from the V3 API have been started for
   each route relevant to a subscriber. Once the streams have been started,
-  prediction updates will be sent to `Store.Predictions`.
+  prediction updates will be sent to `Store.Predictions`. and vehicle updates
+  will be sent to `Store.Vehicles`.
+
   """
   @behaviour MobileAppBackend.Predictions.StreamSubscriber
 
@@ -33,7 +35,8 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
 
   @spec subscribe_for_stops([Stop.id()]) :: :ok
   @doc """
-  Ensure prediction streams have been started for every route served by the given stops.
+  Ensure prediction streams have been started for every route served by the given stops
+  and the stream of all vehicles has been started.
   """
   def subscribe_for_stops(stop_ids) do
     {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
@@ -44,5 +47,7 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
           include_current_data: false
         )
     end)
+
+    MBTAV3API.Stream.StaticInstance.subscribe("vehicles:to_store", include_current_data: false)
   end
 end

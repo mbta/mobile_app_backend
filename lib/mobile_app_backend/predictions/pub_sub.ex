@@ -1,12 +1,13 @@
 defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
   alias MBTAV3API.JsonApi
-  alias MBTAV3API.{Prediction, Stop, Trip}
+  alias MBTAV3API.{Prediction, Stop, Trip, Vehicle}
 
   @type predictions_for_stop :: %{Stop.id() => JsonApi.Object.full_map()}
 
   @type subscribe_response :: %{
           predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
-          trips: %{Trip.id() => Trip.t()}
+          trips: %{Trip.id() => Trip.t()},
+          vehicles: %{Vehicle.id() => Vehicle.t()}
         }
 
   @doc """
@@ -99,7 +100,11 @@ defmodule MobileAppBackend.Predictions.PubSub do
         child_ids_by_parent_id
       )
 
-    %{predictions_by_stop: predictions_by_stop, trips: all_predictions_data.trips}
+    %{
+      predictions_by_stop: predictions_by_stop,
+      trips: all_predictions_data.trips,
+      vehicles: all_predictions_data.vehicles
+    }
   end
 
   @impl true

@@ -25,6 +25,9 @@ defmodule MobileAppBackend.Predictions.StreamSubscriberTest do
       |> expect(:subscribe, fn "predictions:route:to_store:39", include_current_data: false ->
         {:ok, :no_data}
       end)
+      |> expect(:subscribe, fn "vehicles:to_store", include_current_data: false ->
+        {:ok, :no_data}
+      end)
 
       StreamSubscriber.subscribe_for_stops([1, 2])
     end
