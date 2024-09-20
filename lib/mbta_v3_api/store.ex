@@ -41,4 +41,60 @@ defmodule MBTAV3API.Store do
   When given a list of keyword lists, must match any of the keyword lists
   """
   @callback fetch_with_associations(fetch_keys()) :: JsonApi.Object.full_map()
+
+  defmacro __using__(opts) do
+    quote location: :keep, bind_quoted: [opts: opts] do
+      @behaviour MBTAV3API.Store
+
+      implementation_module = Keyword.fetch!(opts, :implementation_module)
+
+      def start_link(opts) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).start_link(
+          opts
+        )
+      end
+
+      @impl true
+      def init(opts) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).init(opts)
+      end
+
+      @impl true
+      def fetch(fetch_keys) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).fetch(
+          fetch_keys
+        )
+      end
+
+      @impl true
+      def fetch_with_associations(fetch_keys) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).fetch_with_associations(
+          fetch_keys
+        )
+      end
+
+      @impl true
+      def process_upsert(event, data) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).process_upsert(
+          event,
+          data
+        )
+      end
+
+      @impl true
+      def process_reset(data, scope) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).process_reset(
+          data,
+          scope
+        )
+      end
+
+      @impl true
+      def process_remove(references) do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).process_remove(
+          references
+        )
+      end
+    end
+  end
 end

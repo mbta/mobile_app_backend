@@ -1,60 +1,8 @@
 defmodule MBTAV3API.Store.Predictions do
   use GenServer
+  use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Predictions.Impl
   require Logger
   alias MBTAV3API.Prediction
-  alias MBTAV3API.Store.Predictions
-
-  @behaviour MBTAV3API.Store
-
-  def start_link(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).start_link(
-      opts
-    )
-  end
-
-  @impl true
-  def init(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).init(
-      opts
-    )
-  end
-
-  @impl true
-  def fetch(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def fetch_with_associations(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch_with_associations(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def process_upsert(event, data) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_upsert(
-      event,
-      data
-    )
-  end
-
-  @impl true
-  def process_reset(data, scope) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_reset(
-      data,
-      scope
-    )
-  end
-
-  @impl true
-  def process_remove(references) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_remove(
-      references
-    )
-  end
 end
 
 defmodule MBTAV3API.Store.Predictions.Impl do

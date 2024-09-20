@@ -1,59 +1,8 @@
 defmodule MBTAV3API.Store.Vehicles do
   use GenServer
+  use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Vehicles.Impl
   require Logger
-  alias MBTAV3API.Store.Vehicles
-
   alias MBTAV3API.Vehicle
-
-  @behaviour MBTAV3API.Store
-
-  def start_link(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).start_link(
-      opts
-    )
-  end
-
-  @impl true
-  def init(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).init(opts)
-  end
-
-  @impl true
-  def fetch(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).fetch(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def fetch_with_associations(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).fetch_with_associations(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def process_upsert(event, data) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).process_upsert(
-      event,
-      data
-    )
-  end
-
-  @impl true
-  def process_reset(data, scope) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).process_reset(
-      data,
-      scope
-    )
-  end
-
-  @impl true
-  def process_remove(references) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Vehicles, Vehicles.Impl).process_remove(
-      references
-    )
-  end
 end
 
 defmodule MBTAV3API.Store.Vehicles.Impl do
