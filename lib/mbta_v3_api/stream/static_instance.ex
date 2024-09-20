@@ -5,9 +5,12 @@ defmodule MBTAV3API.Stream.StaticInstance do
   @callback child_spec(keyword()) :: Supervisor.child_spec()
 
   @doc """
-  Start a stream for the given topic if it doesn't already exist
+  Subscribe to the topic and start a stream for it if not already started
   """
   @callback subscribe(Phoenix.PubSub.topic(), Keyword.t()) ::
+              {:ok, Stream.State.t()} | {:error, term()}
+
+  @callback ensure_stream_started(Phoenix.PubSub.topic(), Keyword.t()) ::
               {:ok, Stream.State.t()} | {:error, term()}
 
   @spec child_spec(any()) :: any()
@@ -19,6 +22,13 @@ defmodule MBTAV3API.Stream.StaticInstance do
 
   def subscribe(topic, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstance.Impl).subscribe(
+      topic,
+      opts
+    )
+  end
+
+  def ensure_stream_started(topic, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstance.Impl).ensure_stream_started(
       topic,
       opts
     )
@@ -51,26 +61,31 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
 
   @impl true
   def subscribe(topic, opts \\ []) do
+    with :ok <- Stream.PubSub.subscribe(topic) do
+      ensure_stream_started(topic, opts)
+    end
+  end
+
+  @impl true
+  def ensure_stream_started(topic, opts) do
     include_current_data = Keyword.get(opts, :include_current_data, true)
 
-    with :ok <- Stream.PubSub.subscribe(topic) do
-      if is_nil(Stream.Registry.find_pid(topic)) do
-        {time_micros, _result} =
-          :timer.tc(Stream.Supervisor, :start_static_instance, [args_for_topic(topic)])
+    if is_nil(Stream.Registry.find_pid(topic)) do
+      {time_micros, _result} =
+        :timer.tc(Stream.Supervisor, :start_static_instance, [args_for_topic(topic)])
 
-        Logger.info(
-          "#{__MODULE__} match=false topic=#{topic} started_stream duration =#{time_micros / 1000}"
-        )
-      else
-        Logger.info("#{__MODULE__} match=true topic=#{topic}")
-      end
+      Logger.info(
+        "#{__MODULE__} match=false topic=#{topic} started_stream duration =#{time_micros / 1000}"
+      )
+    else
+      Logger.info("#{__MODULE__} match=true topic=#{topic}")
+    end
 
-      if include_current_data do
-        current_data = GenServer.call(Stream.Registry.via_name(topic), :get_data)
-        {:ok, current_data}
-      else
-        {:ok, :current_data_not_requested}
-      end
+    if include_current_data do
+      current_data = GenServer.call(Stream.Registry.via_name(topic), :get_data)
+      {:ok, current_data}
+    else
+      {:ok, :current_data_not_requested}
     end
   end
 

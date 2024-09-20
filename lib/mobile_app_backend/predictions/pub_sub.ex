@@ -33,7 +33,6 @@ defmodule MobileAppBackend.Predictions.PubSub do
   Based on https://github.com/mbta/dotcom/blob/main/lib/predictions/pub_sub.ex
   """
   use GenServer
-  alias MBTAV3API.Stream.StaticInstance
   alias MBTAV3API.{JsonApi, Prediction, Stop, Store, Stream}
   alias MobileAppBackend.Predictions.PubSub
 
@@ -188,12 +187,10 @@ defmodule MobileAppBackend.Predictions.PubSub do
 
   @impl GenServer
   def init(opts \\ []) do
-    # Predictions are streamed from the V3 API by route, but events are aggregated
-    # under this single topic
+    # Predictions are streamed from the V3 API by route,
+    # but reset event messages are aggregated under this single topic
     Stream.PubSub.subscribe("predictions:all:events")
-
-    # There is only one vehicle stream - subscribe & start it if it hasn't already been started
-    StaticInstance.subscribe("vehicles:to_store", include_current_data: false)
+    Stream.PubSub.subscribe("vehicles:to_store")
 
     broadcast_timer(50)
 

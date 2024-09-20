@@ -13,8 +13,6 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
     reassign_env(:mobile_app_backend, StreamSubscriber, StreamSubscriberMock)
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
-    reassign_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstanceMock)
-
     reassign_env(:mobile_app_backend, Store.Predictions, PredictionsStoreMock)
     :ok
   end
@@ -23,21 +21,13 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
   setup :set_mox_from_context
 
   describe "init/1" do
-    test "starts vehicle stream" do
-      StaticInstanceMock
-      |> expect(:subscribe, fn "vehicles:to_store", include_current_data: false ->
-        {:ok, :no_data}
-      end)
-
+    test "subscribes to vehicle events" do
       PubSub.init(create_table_fn: fn -> :no_op end)
+      Stream.PubSub.broadcast!("vehicles:to_store", :reset_event)
+      assert_receive :reset_event
     end
 
     test "subscribes to prediction events" do
-      StaticInstanceMock
-      |> expect(:subscribe, fn "vehicles:to_store", include_current_data: false ->
-        {:ok, :no_data}
-      end)
-
       PubSub.init(create_table_fn: fn -> :no_op end)
 
       Stream.PubSub.broadcast!("predictions:all:events", :reset_event)
