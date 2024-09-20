@@ -13,16 +13,18 @@ defmodule MobileAppBackend.Predictions.StreamSubscriberTest do
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
-    test "subscribes to the routes served at the given stops" do
+    test "starts streams for to the routes served at the given stops and vehicles" do
       expect(RepositoryMock, :routes, fn _, _ ->
         ok_response([build(:route, id: "66"), build(:route, id: "39")])
       end)
 
       StaticInstanceMock
-      |> expect(:subscribe, fn "predictions:route:to_store:66", include_current_data: false ->
+      |> expect(:ensure_stream_started, fn "predictions:route:to_store:66",
+                                           include_current_data: false ->
         {:ok, :no_data}
       end)
-      |> expect(:subscribe, fn "predictions:route:to_store:39", include_current_data: false ->
+      |> expect(:ensure_stream_started, fn "predictions:route:to_store:39",
+                                           include_current_data: false ->
         {:ok, :no_data}
       end)
       |> expect(:ensure_stream_started, fn "vehicles:to_store", include_current_data: false ->
