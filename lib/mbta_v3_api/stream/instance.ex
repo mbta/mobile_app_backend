@@ -79,7 +79,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     {_, consumer_pid, _, _} =
       Enum.find(children, {nil, nil, nil, nil}, fn {_, _, _, [module]} ->
-        module == MBTAV3API.Stream.Consumer
+        module == MBTAV3API.Stream.Consumer || MBTAV3API.Stream.ConsumerToStore
       end)
 
     {stage_healthy, stage_info} = stage_health(sses_pid)
@@ -120,7 +120,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     consumer_dest =
       if consumer_alive do
-        %GenStage{state: %MBTAV3API.Stream.Consumer.State{destination: destination}} =
+        %GenStage{state: %{destination: destination}} =
           :sys.get_state(consumer_pid)
 
         case destination do

@@ -1,60 +1,7 @@
 defmodule MBTAV3API.Store.Predictions do
   use GenServer
+  use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Predictions.Impl
   require Logger
-  alias MBTAV3API.Prediction
-  alias MBTAV3API.Store.Predictions
-
-  @behaviour MBTAV3API.Store
-
-  def start_link(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).start_link(
-      opts
-    )
-  end
-
-  @impl true
-  def init(opts) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).init(
-      opts
-    )
-  end
-
-  @impl true
-  def fetch(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def fetch_with_associations(fetch_keys) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch_with_associations(
-      fetch_keys
-    )
-  end
-
-  @impl true
-  def process_upsert(event, data) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_upsert(
-      event,
-      data
-    )
-  end
-
-  @impl true
-  def process_reset(data, scope) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_reset(
-      data,
-      scope
-    )
-  end
-
-  @impl true
-  def process_remove(references) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_remove(
-      references
-    )
-  end
 end
 
 defmodule MBTAV3API.Store.Predictions.Impl do
@@ -62,12 +9,15 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   Store of predictions. Store is written to by any number of `MBTAV3API.Stream.ConsumerToStore`
   and can be read in parallel by other processes.
 
+  Associated vehicles can be accesssed separately from `MBTAV3!PI.Store.Vehicles`
+
   Based on https://github.com/mbta/dotcom/blob/main/lib/predictions/store.ex
   """
   use GenServer
   require Logger
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
+  alias MBTAV3API.Store
   alias MBTAV3API.Trip
 
   @behaviour MBTAV3API.Store
@@ -93,7 +43,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     if Keyword.keyword?(fetch_keys) do
       match_spec = prediction_match_spec(fetch_keys)
 
-      timed_fetch(
+      Store.timed_fetch(
         @predictions_table_name,
         [{match_spec, [], [:"$1"]}],
         "fetch_keys=#{inspect(fetch_keys)}"
@@ -109,7 +59,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       |> Enum.map(&prediction_match_spec(&1))
       |> Enum.map(&{&1, [], [:"$1"]})
 
-    timed_fetch(
+    Store.timed_fetch(
       @predictions_table_name,
       match_specs,
       "multi_fetch=true fetch_keys=#{inspect(fetch_keys_list)}"
@@ -120,22 +70,34 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   def fetch_with_associations(fetch_keys) do
     predictions = fetch(fetch_keys)
 
-    trip_fetch_keys_list =
+    {trip_fetch_keys_list, vehicle_fetch_keys_list} =
       predictions
-      |> Enum.flat_map(fn prediction ->
-        if is_nil(prediction.trip_id), do: [], else: [[id: prediction.trip_id]]
+      |> Enum.reduce({[], []}, fn prediction, {acc_trip_keys, acc_vehicle_keys} ->
+        acc_trip_keys =
+          if is_nil(prediction.trip_id),
+            do: acc_trip_keys,
+            else: [[id: prediction.trip_id] | acc_trip_keys]
+
+        acc_vehicle_keys =
+          if is_nil(prediction.vehicle_id),
+            do: acc_vehicle_keys,
+            else: [[id: prediction.vehicle_id] | acc_vehicle_keys]
+
+        {acc_trip_keys, acc_vehicle_keys}
       end)
 
     trip_match_specs = Enum.map(trip_fetch_keys_list, &{trip_match_spec(&1), [], [:"$1"]})
 
     trips =
-      timed_fetch(
+      Store.timed_fetch(
         @trips_table_name,
         trip_match_specs,
         "fetch_keys=#{inspect(trip_fetch_keys_list)}"
       )
 
-    JsonApi.Object.to_full_map(predictions ++ trips)
+    vehicles = Store.Vehicles.fetch(vehicle_fetch_keys_list)
+
+    JsonApi.Object.to_full_map(predictions ++ trips ++ vehicles)
   end
 
   defp prediction_match_spec(fetch_keys) do
@@ -203,19 +165,6 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       route_pattern_id,
       trip
     }
-  end
-
-  defp timed_fetch(table_name, match_specs, log_metadata) do
-    {time_micros, results} =
-      :timer.tc(:ets, :select, [table_name, match_specs])
-
-    time_ms = time_micros / 1000
-
-    Logger.info(
-      "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
-    )
-
-    results
   end
 
   @impl true
