@@ -10,6 +10,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   setup do
     verify_on_exit!()
+
     reassign_env(:mobile_app_backend, StreamSubscriber, StreamSubscriberMock)
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     reassign_env(:mobile_app_backend, Store.Predictions, PredictionsStoreMock)
@@ -19,14 +20,43 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
   # make sure mocks are globally accessible, including from the PubSub genserver
   setup :set_mox_from_context
 
+  describe "init/1" do
+    test "subscribes to vehicle events" do
+      PubSub.init(create_table_fn: fn -> :no_op end)
+      Stream.PubSub.broadcast!("vehicles:to_store", :reset_event)
+      assert_receive :reset_event
+    end
+
+    test "subscribes to prediction events" do
+      PubSub.init(create_table_fn: fn -> :no_op end)
+
+      Stream.PubSub.broadcast!("predictions:all:events", :reset_event)
+      assert_receive :reset_event
+    end
+  end
+
   describe "subscribe_for_stop/1" do
     test "returns initial data for the given isolated stop" do
-      prediction_1 = build(:prediction, id: "p_1", stop_id: "12345", trip_id: "trip_1")
-      prediction_2 = build(:prediction, id: "p_2", stop_id: "12345", trip_id: "trip_1")
+      prediction_1 =
+        build(:prediction, id: "p_1", stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
+
+      prediction_2 =
+        build(:prediction, id: "p_2", stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_2")
+
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
+      vehicle_1 = build(:vehicle, id: "v_1")
+      vehicle_2 = build(:vehicle, id: "v_2")
 
-      full_map = JsonApi.Object.to_full_map([prediction_1, prediction_2, trip_1, trip_2])
+      full_map =
+        JsonApi.Object.to_full_map([
+          prediction_1,
+          prediction_2,
+          trip_1,
+          trip_2,
+          vehicle_1,
+          vehicle_2
+        ])
 
       expect(PredictionsStoreMock, :fetch_with_associations, fn [[stop_id: "12345"]] ->
         full_map
@@ -39,17 +69,32 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       assert %{
                predictions_by_stop: %{"12345" => %{"p_1" => prediction_1, "p_2" => prediction_2}},
-               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2},
+               vehicles: %{"v_1" => vehicle_1, "v_2" => vehicle_2}
              } == PubSub.subscribe_for_stop("12345")
     end
 
     test "returns initial data for the given parent stop" do
-      prediction_1 = build(:prediction, stop_id: "12345", id: "p_1", trip_id: "trip_1")
-      prediction_2 = build(:prediction, stop_id: "6789", id: "p_2", trip_id: "trip_2")
+      prediction_1 =
+        build(:prediction, stop_id: "12345", id: "p_1", trip_id: "trip_1", vehicle_id: "v_1")
+
+      prediction_2 =
+        build(:prediction, stop_id: "6789", id: "p_2", trip_id: "trip_2", vehicle_id: "v_2")
+
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
+      vehicle_1 = build(:vehicle, id: "v_1")
+      vehicle_2 = build(:vehicle, id: "v_2")
 
-      full_map = JsonApi.Object.to_full_map([prediction_1, prediction_2, trip_1, trip_2])
+      full_map =
+        JsonApi.Object.to_full_map([
+          prediction_1,
+          prediction_2,
+          trip_1,
+          trip_2,
+          vehicle_1,
+          vehicle_2
+        ])
 
       expect(PredictionsStoreMock, :fetch_with_associations, fn fetch_keyword_list ->
         assert Enum.any?(fetch_keyword_list, &(Keyword.get(&1, :stop_id) == "12345"))
@@ -71,7 +116,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
                predictions_by_stop: %{
                  "parent_stop_id" => %{"p_1" => prediction_1, "p_2" => prediction_2}
                },
-               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2},
+               vehicles: %{"v_1" => vehicle_1, "v_2" => vehicle_2}
              } ==
                PubSub.subscribe_for_stop("parent_stop_id")
     end
@@ -79,12 +125,26 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   describe "subscribe_for_stops/1" do
     test "returns initial data for each stop given" do
-      prediction_1 = build(:prediction, id: "p_1", stop_id: "standalone", trip_id: "trip_1")
-      prediction_2 = build(:prediction, id: "p_2", stop_id: "child", trip_id: "trip_2")
+      prediction_1 =
+        build(:prediction, id: "p_1", stop_id: "standalone", trip_id: "trip_1", vehicle_id: "v_1")
+
+      prediction_2 =
+        build(:prediction, id: "p_2", stop_id: "child", trip_id: "trip_2", vehicle_id: "v_2")
+
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
+      vehicle_1 = build(:vehicle, id: "v_1")
+      vehicle_2 = build(:vehicle, id: "v_2")
 
-      full_map = JsonApi.Object.to_full_map([prediction_1, prediction_2, trip_1, trip_2])
+      full_map =
+        JsonApi.Object.to_full_map([
+          prediction_1,
+          prediction_2,
+          trip_1,
+          trip_2,
+          vehicle_1,
+          vehicle_2
+        ])
 
       expect(PredictionsStoreMock, :fetch_with_associations, 1, fn [
                                                                      [stop_id: "child"],
@@ -107,7 +167,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
                  "standalone" => %{"p_1" => prediction_1},
                  "parent" => %{"p_2" => prediction_2}
                },
-               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2},
+               vehicles: %{"v_1" => vehicle_1, "v_2" => vehicle_2}
              } ==
                PubSub.subscribe_for_stops(["parent", "standalone"])
     end
@@ -125,23 +186,24 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
     end
 
     test ":broadcast sends message to subscribed pid", state do
-      prediction_1 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
-      prediction_2 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
-      prediction_3 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
+      prediction_1 = build(:prediction, stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
+      prediction_2 = build(:prediction, stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
+      prediction_3 = build(:prediction, stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
       trip_1 = build(:trip, id: "trip_1")
+      vehicle_1 = build(:vehicle, id: "v_1")
 
       PredictionsStoreMock
       # Subscribe
       |> expect(:fetch_with_associations, fn _ ->
-        JsonApi.Object.to_full_map([prediction_1, trip_1])
+        JsonApi.Object.to_full_map([prediction_1, trip_1, vehicle_1])
       end)
       # 1st and 2nd broadcast
       |> expect(:fetch_with_associations, 2, fn _ ->
-        JsonApi.Object.to_full_map([prediction_2, trip_1])
+        JsonApi.Object.to_full_map([prediction_2, trip_1, vehicle_1])
       end)
       # 3rd broadcast
       |> expect(:fetch_with_associations, fn _ ->
-        JsonApi.Object.to_full_map([prediction_3, trip_1])
+        JsonApi.Object.to_full_map([prediction_3, trip_1, vehicle_1])
       end)
 
       RepositoryMock
@@ -154,10 +216,13 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       PubSub.subscribe_for_stop("12345")
 
       PubSub.handle_info(:broadcast, state)
-      assert_receive {:new_predictions, %{"12345" => %{predictions: predictions, trips: trips}}}
+
+      assert_receive {:new_predictions,
+                      %{"12345" => %{predictions: predictions, trips: trips, vehicles: vehicles}}}
 
       assert %{prediction_2.id => prediction_2} == predictions
       assert %{trip_1.id => trip_1} == trips
+      assert %{vehicle_1.id => vehicle_1} == vehicles
 
       # Doesn't re-send the same predictions that have already been seen
       PubSub.handle_info(:broadcast, state)
@@ -173,13 +238,29 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
     end
 
     test "pid can be subscribed to multiple keys", state do
-      prediction_1 = build(:prediction, id: "prediction_1", stop_id: "12345", trip_id: "trip_1")
-      prediction_2 = build(:prediction, id: "prediction_2", stop_id: "6789", trip_id: "trip_2")
+      prediction_1 =
+        build(:prediction,
+          id: "prediction_1",
+          stop_id: "12345",
+          trip_id: "trip_1",
+          vehicle_id: "v_1"
+        )
+
+      prediction_2 =
+        build(:prediction,
+          id: "prediction_2",
+          stop_id: "6789",
+          trip_id: "trip_2",
+          vehicle_id: "v_2"
+        )
+
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
+      vehicle_1 = build(:vehicle, id: "v_1")
+      vehicle_2 = build(:vehicle, id: "v_2")
 
-      full_map_12345 = JsonApi.Object.to_full_map([prediction_1, trip_1])
-      full_map_6789 = JsonApi.Object.to_full_map([prediction_2, trip_2])
+      full_map_12345 = JsonApi.Object.to_full_map([prediction_1, trip_1, vehicle_1])
+      full_map_6789 = JsonApi.Object.to_full_map([prediction_2, trip_2, vehicle_2])
 
       PredictionsStoreMock
       |> expect(:fetch_with_associations, fn [[stop_id: "12345"]] ->
@@ -211,7 +292,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       assert %{
                "12345" => %{
                  predictions: %{"prediction_1" => ^prediction_1},
-                 trips: %{"trip_1" => ^trip_1}
+                 trips: %{"trip_1" => ^trip_1},
+                 vehicles: %{"v_1" => ^vehicle_1}
                }
              } = new_predictions
 
@@ -220,7 +302,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       assert %{
                "6789" => %{
                  predictions: %{"prediction_2" => ^prediction_2},
-                 trips: %{"trip_2" => ^trip_2}
+                 trips: %{"trip_2" => ^trip_2},
+                 vehicles: %{"v_2" => ^vehicle_2}
                }
              } = new_predictions
     end

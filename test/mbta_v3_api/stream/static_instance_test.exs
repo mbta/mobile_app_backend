@@ -104,4 +104,28 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
                Stream.StaticInstance.subscribe("test:topic", include_current_data: false)
     end
   end
+
+  describe "ensure_stream_started/1" do
+    test "when existing stream, only fetches current data" do
+      start_link_supervised!({FakeStaticInstance, topic: "test:topic", data: :existing_data})
+
+      assert {:ok, :existing_data} == Stream.StaticInstance.ensure_stream_started("test:topic")
+    end
+
+    test "launches new instance if not already running" do
+      topic = "predictions:route:fake-route"
+      refute Stream.Registry.find_pid(topic)
+      assert {:ok, _} = Stream.StaticInstance.ensure_stream_started(topic)
+      assert Stream.Registry.find_pid(topic)
+    end
+
+    test "when include_current_data is false, skips returning latest data" do
+      start_link_supervised!({FakeStaticInstance, topic: "test:topic", data: :existing_data})
+
+      assert {:ok, :current_data_not_requested} ==
+               Stream.StaticInstance.ensure_stream_started("test:topic",
+                 include_current_data: false
+               )
+    end
+  end
 end
