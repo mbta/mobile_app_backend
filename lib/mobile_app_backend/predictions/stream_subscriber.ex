@@ -48,7 +48,5 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
           include_current_data: false
         )
     end)
-
-    StaticInstance.subscribe("vehicles:to_store", include_current_data: false)
   end
 end

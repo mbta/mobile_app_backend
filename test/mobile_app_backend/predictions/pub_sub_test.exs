@@ -10,14 +10,40 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   setup do
     verify_on_exit!()
+
     reassign_env(:mobile_app_backend, StreamSubscriber, StreamSubscriberMock)
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+    reassign_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstanceMock)
+
     reassign_env(:mobile_app_backend, Store.Predictions, PredictionsStoreMock)
     :ok
   end
 
   # make sure mocks are globally accessible, including from the PubSub genserver
   setup :set_mox_from_context
+
+  describe "init/1" do
+    test "starts vehicle stream" do
+      StaticInstanceMock
+      |> expect(:subscribe, fn "vehicles:to_store", include_current_data: false ->
+        {:ok, :no_data}
+      end)
+
+      PubSub.init(create_table_fn: fn -> :no_op end)
+    end
+
+    test "subscribes to prediction events" do
+      StaticInstanceMock
+      |> expect(:subscribe, fn "vehicles:to_store", include_current_data: false ->
+        {:ok, :no_data}
+      end)
+
+      PubSub.init(create_table_fn: fn -> :no_op end)
+
+      Stream.PubSub.broadcast!("predictions:all:events", :reset_event)
+      assert_receive :reset_event
+    end
+  end
 
   describe "subscribe_for_stop/1" do
     test "returns initial data for the given isolated stop" do
