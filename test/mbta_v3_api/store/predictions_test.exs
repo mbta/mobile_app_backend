@@ -142,7 +142,7 @@ defmodule MBTAV3API.Store.PredictionsTest do
       msg = capture_log([level: :info], fn -> Store.Predictions.fetch(stop_id: "12345") end)
 
       assert msg =~
-               "Elixir.MBTAV3API.Store.Predictions.Impl fetch table_name=predictions_from_streams fetch_keys=[stop_id: \"12345\"] duration="
+               "fetch table_name=predictions_from_streams fetch_keys=[stop_id: \"12345\"] duration="
     end
   end
 

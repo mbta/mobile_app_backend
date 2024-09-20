@@ -13,7 +13,7 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
   use GenServer
   require Logger
   alias MBTAV3API.JsonApi
-
+  alias MBTAV3API.Store
   alias MBTAV3API.Vehicle
 
   @behaviour MBTAV3API.Store
@@ -36,7 +36,7 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
     if Keyword.keyword?(fetch_keys) do
       match_spec = vehicle_match_spec(fetch_keys)
 
-      timed_fetch(
+      Store.timed_fetch(
         @vehicles_table_name,
         [{match_spec, [], [:"$1"]}],
         "fetch_keys=#{inspect(fetch_keys)}"
@@ -52,7 +52,7 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
       |> Enum.map(&vehicle_match_spec(&1))
       |> Enum.map(&{&1, [], [:"$1"]})
 
-    timed_fetch(
+    Store.timed_fetch(
       @vehicles_table_name,
       match_specs,
       "multi_fetch=true fetch_keys=#{inspect(fetch_keys_list)}"
@@ -94,19 +94,6 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
       trip_id,
       vehicle
     }
-  end
-
-  defp timed_fetch(table_name, match_specs, log_metadata) do
-    {time_micros, results} =
-      :timer.tc(:ets, :select, [table_name, match_specs])
-
-    time_ms = time_micros / 1000
-
-    Logger.info(
-      "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
-    )
-
-    results
   end
 
   @impl true

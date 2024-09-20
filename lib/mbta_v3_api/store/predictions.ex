@@ -2,7 +2,6 @@ defmodule MBTAV3API.Store.Predictions do
   use GenServer
   use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Predictions.Impl
   require Logger
-  alias MBTAV3API.Prediction
 end
 
 defmodule MBTAV3API.Store.Predictions.Impl do
@@ -18,7 +17,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   require Logger
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
-  alias MBTAV3API.Store.Vehicles
+  alias MBTAV3API.Store
   alias MBTAV3API.Trip
 
   @behaviour MBTAV3API.Store
@@ -44,7 +43,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     if Keyword.keyword?(fetch_keys) do
       match_spec = prediction_match_spec(fetch_keys)
 
-      timed_fetch(
+      Store.timed_fetch(
         @predictions_table_name,
         [{match_spec, [], [:"$1"]}],
         "fetch_keys=#{inspect(fetch_keys)}"
@@ -60,7 +59,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       |> Enum.map(&prediction_match_spec(&1))
       |> Enum.map(&{&1, [], [:"$1"]})
 
-    timed_fetch(
+    Store.timed_fetch(
       @predictions_table_name,
       match_specs,
       "multi_fetch=true fetch_keys=#{inspect(fetch_keys_list)}"
@@ -90,13 +89,13 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     trip_match_specs = Enum.map(trip_fetch_keys_list, &{trip_match_spec(&1), [], [:"$1"]})
 
     trips =
-      timed_fetch(
+      Store.timed_fetch(
         @trips_table_name,
         trip_match_specs,
         "fetch_keys=#{inspect(trip_fetch_keys_list)}"
       )
 
-    vehicles = Vehicles.fetch(vehicle_fetch_keys_list)
+    vehicles = Store.Vehicles.fetch(vehicle_fetch_keys_list)
 
     JsonApi.Object.to_full_map(predictions ++ trips ++ vehicles)
   end
@@ -166,19 +165,6 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       route_pattern_id,
       trip
     }
-  end
-
-  defp timed_fetch(table_name, match_specs, log_metadata) do
-    {time_micros, results} =
-      :timer.tc(:ets, :select, [table_name, match_specs])
-
-    time_ms = time_micros / 1000
-
-    Logger.info(
-      "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
-    )
-
-    results
   end
 
   @impl true

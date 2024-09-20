@@ -4,6 +4,7 @@ defmodule MBTAV3API.Store do
   based a the series of events streamed from a `MBTAV3Api.Stream.Consumer`.
   """
   alias MBTAV3API.JsonApi
+  require Logger
 
   @type upsert_event :: :add | :update
   @type fetch_keys :: keyword() | [keyword()]
@@ -42,6 +43,23 @@ defmodule MBTAV3API.Store do
   """
   @callback fetch_with_associations(fetch_keys()) :: JsonApi.Object.full_map()
 
+  @spec timed_fetch(atom(), :ets.match_spec(), String.t()) :: [any()]
+  @doc """
+  Fetch matching records from the given table and log the duration.
+  """
+  def timed_fetch(table_name, match_specs, log_metadata) do
+    {time_micros, results} =
+      :timer.tc(:ets, :select, [table_name, match_specs])
+
+    time_ms = time_micros / 1000
+
+    Logger.info(
+      "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
+    )
+
+    results
+  end
+
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
       @behaviour MBTAV3API.Store
@@ -56,7 +74,9 @@ defmodule MBTAV3API.Store do
 
       @impl true
       def init(opts) do
-        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).init(opts)
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).init(
+          opts
+        )
       end
 
       @impl true

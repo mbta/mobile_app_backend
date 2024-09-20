@@ -92,7 +92,7 @@ defmodule MBTAV3API.Store.VehiclesTest do
       msg = capture_log([level: :info], fn -> Store.Vehicles.fetch(id: "v_1") end)
 
       assert msg =~
-               "Elixir.MBTAV3API.Store.Vehicles.Impl fetch table_name=vehicles_from_stream fetch_keys=[id: \"v_1\"] duration="
+               "fetch table_name=vehicles_from_stream fetch_keys=[id: \"v_1\"] duration="
     end
   end
 
