@@ -33,7 +33,7 @@ defmodule MobileAppBackend.GlobalDataCache do
 
   @spec get_data(key()) :: data()
   def get_data(key \\ default_key()) do
-    :persistent_term.get(key)
+    :persistent_term.get(key, nil) || update_data(key)
   end
 
   @impl GenServer
@@ -44,8 +44,6 @@ defmodule MobileAppBackend.GlobalDataCache do
       key: opts[:key],
       update_ms: opts[:update_ms] || :timer.minutes(5)
     }
-
-    update_data(state.key)
 
     {:ok, state}
   end
@@ -59,7 +57,7 @@ defmodule MobileAppBackend.GlobalDataCache do
     {:noreply, state}
   end
 
-  @spec update_data(key()) :: :ok
+  @spec update_data(key()) :: data()
   defp update_data(key) do
     stops = fetch_stops()
 
@@ -71,14 +69,18 @@ defmodule MobileAppBackend.GlobalDataCache do
       pattern_ids_by_stop: pattern_ids_by_stop
     } = fetch_route_patterns()
 
-    :persistent_term.put(key, %{
+    data = %{
       lines: lines,
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
       route_patterns: route_patterns,
       stops: stops,
       trips: trips
-    })
+    }
+
+    :persistent_term.put(key, data)
+
+    data
   end
 
   @spec fetch_stops() :: JsonApi.Object.stop_map()

@@ -1,15 +1,13 @@
 defmodule MobileAppBackend.GlobalDataCacheTest do
-  use HttpStub.Case, async: false
-  import Mox
+  use HttpStub.Case, async: true
   alias MobileAppBackend.GlobalDataCache
-
-  setup :set_mox_global
 
   test "gets data" do
     cache_key = make_ref()
 
     start_link_supervised!({GlobalDataCache, key: cache_key})
 
+    # makes HTTP requests from the current process, so Mox will behave correctly automatically
     retrieved_data = GlobalDataCache.get_data(cache_key)
 
     assert %{
