@@ -24,6 +24,7 @@ defmodule MobileAppBackend.Application do
       MobileAppBackend.MapboxTokenRotator,
       MobileAppBackend.Predictions.Registry,
       MobileAppBackend.Predictions.PubSub,
+      MobileAppBackend.GlobalDataCache,
       # Start to serve requests, typically the last entry
       MobileAppBackendWeb.Endpoint
     ]
