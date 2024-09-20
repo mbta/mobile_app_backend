@@ -107,6 +107,22 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
     ]
   end
 
+  defp args_for_topic("vehicles:to_store") do
+    [
+      type: MBTAV3API.Vehicle,
+      url: "/vehicles",
+      # `:topic` is unique to a route because we stream predictions separately by route
+      # `:destination` is the same across all routes because all predictions
+      # are unified in `Store.Predictions`
+      topic: "vehicles:to_store",
+      consumer: %{
+        store: MBTAV3API.Store.Vehicles,
+        # Single stream for all vehicles
+        scope: []
+      }
+    ]
+  end
+
   defp args_for_topic("vehicles") do
     [type: MBTAV3API.Vehicle, url: "/vehicles", topic: "vehicles"]
   end

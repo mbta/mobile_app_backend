@@ -7,12 +7,12 @@ defmodule MBTAV3API.Supervisor do
 
   @impl true
   def init(_) do
-    start_predictions_store? =
-      Application.get_env(:mobile_app_backend, :start_predictions_store?, true)
+    start_stream_stores? =
+      Application.get_env(:mobile_app_backend, :start_stream_stores?, true)
 
     children =
-      if start_predictions_store? do
-        [MBTAV3API.Store.Predictions]
+      if start_stream_stores? do
+        [MBTAV3API.Store.Predictions, MBTAV3API.Store.Vehicles]
       else
         []
       end ++
