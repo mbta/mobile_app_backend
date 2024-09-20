@@ -21,8 +21,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   describe "subscribe_for_stop/1" do
     test "returns initial data for the given isolated stop" do
-      prediction_1 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
-      prediction_2 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
+      prediction_1 = build(:prediction, id: "p_1", stop_id: "12345", trip_id: "trip_1")
+      prediction_2 = build(:prediction, id: "p_2", stop_id: "12345", trip_id: "trip_1")
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
 
@@ -37,12 +37,15 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert full_map == PubSub.subscribe_for_stop("12345")
+      assert %{
+               predictions_by_stop: %{"12345" => %{"p_1" => prediction_1, "p_2" => prediction_2}},
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+             } == PubSub.subscribe_for_stop("12345")
     end
 
     test "returns initial data for the given parent stop" do
-      prediction_1 = build(:prediction, stop_id: "12345", id: "1", trip_id: "trip_1")
-      prediction_2 = build(:prediction, stop_id: "6789", id: "2", trip_id: "trip_2")
+      prediction_1 = build(:prediction, stop_id: "12345", id: "p_1", trip_id: "trip_1")
+      prediction_2 = build(:prediction, stop_id: "6789", id: "p_2", trip_id: "trip_2")
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
 
@@ -64,15 +67,20 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert full_map ==
+      assert %{
+               predictions_by_stop: %{
+                 "parent_stop_id" => %{"p_1" => prediction_1, "p_2" => prediction_2}
+               },
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+             } ==
                PubSub.subscribe_for_stop("parent_stop_id")
     end
   end
 
   describe "subscribe_for_stops/1" do
     test "returns initial data for each stop given" do
-      prediction_1 = build(:prediction, stop_id: "standalone", trip_id: "trip_1")
-      prediction_2 = build(:prediction, stop_id: "child", trip_id: "trip_2")
+      prediction_1 = build(:prediction, id: "p_1", stop_id: "standalone", trip_id: "trip_1")
+      prediction_2 = build(:prediction, id: "p_2", stop_id: "child", trip_id: "trip_2")
       trip_1 = build(:trip, id: "trip_1")
       trip_2 = build(:trip, id: "trip_2")
 
@@ -94,7 +102,13 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
-      assert full_map ==
+      assert %{
+               predictions_by_stop: %{
+                 "standalone" => %{"p_1" => prediction_1},
+                 "parent" => %{"p_2" => prediction_2}
+               },
+               trips: %{"trip_1" => trip_1, "trip_2" => trip_2}
+             } ==
                PubSub.subscribe_for_stops(["parent", "standalone"])
     end
   end
