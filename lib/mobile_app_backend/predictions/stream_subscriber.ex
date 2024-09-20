@@ -32,6 +32,7 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
   @behaviour MobileAppBackend.Predictions.StreamSubscriber
 
   alias MBTAV3API.Stop
+  alias MBTAV3API.Stream.StaticInstance
 
   @spec subscribe_for_stops([Stop.id()]) :: :ok
   @doc """
@@ -43,11 +44,11 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
 
     Enum.each(routes, fn %MBTAV3API.Route{id: route_id} ->
       {:ok, _data} =
-        MBTAV3API.Stream.StaticInstance.subscribe("predictions:route:to_store:#{route_id}",
+        StaticInstance.subscribe("predictions:route:to_store:#{route_id}",
           include_current_data: false
         )
     end)
 
-    MBTAV3API.Stream.StaticInstance.subscribe("vehicles:to_store", include_current_data: false)
+    StaticInstance.subscribe("vehicles:to_store", include_current_data: false)
   end
 end
