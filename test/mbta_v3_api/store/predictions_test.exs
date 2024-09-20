@@ -5,68 +5,100 @@ defmodule MBTAV3API.Store.PredictionsTest do
   import Test.Support.Helpers
   import Test.Support.Sigils
 
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.{JsonApi.Reference, Store}
 
+  setup do
+    start_link_supervised!(Store.Predictions)
+
+    %{
+      prediction_1: build(:prediction, id: "1", stop_id: "12345", trip_id: "trip_1"),
+      prediction_2: build(:prediction, id: "2", stop_id: "12345", trip_id: "trip_2"),
+      trip_1: build(:trip, id: "trip_1"),
+      trip_2: build(:trip, id: "trip_2")
+    }
+  end
+
   describe "process_events" do
-    setup do
-      start_link_supervised!(Store.Predictions)
-      :ok
+    test "process_upsert when add", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
+
+      assert %{
+               predictions: %{"1" => ^prediction_1, "2" => ^prediction_2},
+               trips: %{"trip_1" => ^trip_1, "trip_2" => ^trip_2}
+             } = Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
 
-    test "process_upsert when add" do
-      prediction_1 = build(:prediction, id: "1", stop_id: "12345")
-      prediction_2 = build(:prediction, id: "2", stop_id: "12345")
+    test "process_upsert when update", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      prediction_1_update = %{prediction_1 | departure_time: ~B[2024-03-20 16:42:01]}
 
-      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2])
+      trip_2_update = %{trip_2 | headsign: "new_headsign"}
 
-      assert [prediction_1, prediction_2] ==
-               Enum.sort_by(Store.Predictions.fetch(stop_id: "12345"), & &1.id)
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
+
+      assert %{
+               predictions: %{"1" => ^prediction_1, "2" => ^prediction_2},
+               trips: %{"trip_1" => ^trip_1}
+             } = Store.Predictions.fetch_with_associations(stop_id: "12345")
+
+      Store.Predictions.process_upsert(:update, [prediction_1_update, trip_2_update])
+
+      assert %{
+               predictions: %{"1" => ^prediction_1_update, "2" => ^prediction_2},
+               trips: %{"trip_1" => ^trip_1, "trip_2" => ^trip_2_update}
+             } = Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
 
-    test "process_upsert when update" do
-      prediction_1 = build(:prediction, id: "1", stop_id: "12345")
-      prediction_2 = build(:prediction, id: "2", stop_id: "12345")
+    test "process_remove", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
 
-      prediction_1_update =
-        build(:prediction, id: "1", stop_id: "12345", departure_time: ~B[2024-03-20 16:42:01])
+      Store.Predictions.process_remove([
+        %Reference{type: "prediction", id: prediction_1.id},
+        %Reference{type: "trip", id: trip_1.id}
+      ])
 
-      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2])
-      Store.Predictions.process_upsert(:update, [prediction_1_update])
-
-      assert [prediction_1_update, prediction_2] ==
-               Enum.sort_by(Store.Predictions.fetch(stop_id: "12345"), & &1.id)
-    end
-
-    test "process_remove" do
-      prediction_1 = build(:prediction, id: "1", stop_id: "12345")
-      prediction_2 = build(:prediction, id: "2", stop_id: "12345")
-
-      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2])
-      Store.Predictions.process_remove([%Reference{type: "prediction", id: "1"}])
-
-      assert [prediction_2] ==
-               Enum.sort_by(Store.Predictions.fetch(stop_id: "12345"), & &1.id)
+      assert JsonApi.Object.to_full_map([prediction_2, trip_2]) ==
+               Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
 
     test "process_reset" do
-      prediction_66 = build(:prediction, id: "1", stop_id: "12345", route_id: "66")
-      prediction_66_2 = build(:prediction, id: "2", stop_id: "12345", route_id: "66")
-      prediction_39 = build(:prediction, id: "3", stop_id: "12345", route_id: "39")
+      prediction_66 =
+        build(:prediction, id: "1", stop_id: "12345", route_id: "66", trip_id: "trip_1")
 
-      Store.Predictions.process_upsert(:add, [prediction_66, prediction_39])
-      Store.Predictions.process_reset([prediction_66_2], route_id: "66")
+      prediction_66_2 =
+        build(:prediction, id: "2", stop_id: "12345", route_id: "66", trip_id: "trip_2")
 
-      assert [prediction_66_2, prediction_39] ==
-               Enum.sort_by(Store.Predictions.fetch(stop_id: "12345"), & &1.id)
+      prediction_39 =
+        build(:prediction, id: "3", stop_id: "12345", route_id: "39", trip_id: "trip_3")
+
+      trip_66 = build(:trip, id: "trip_1", route_id: "66")
+      trip_66_2 = build(:trip, id: "trip_2", route_id: "66")
+      trip_39 = build(:trip, id: "trip_3", route_id: "39")
+
+      Store.Predictions.process_upsert(:add, [prediction_66, prediction_39, trip_66, trip_39])
+      Store.Predictions.process_reset([prediction_66_2, trip_66_2], route_id: "66")
+
+      assert JsonApi.Object.to_full_map([prediction_66_2, trip_66_2, prediction_39, trip_39]) ==
+               Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
   end
 
   describe "fetch" do
-    setup do
-      start_link_supervised!(Store.Predictions)
-      :ok
-    end
-
     test "by stop_id" do
       prediction_1 = build(:prediction, id: "1", stop_id: "12345")
       prediction_2 = build(:prediction, id: "2", stop_id: "6789")
@@ -105,17 +137,12 @@ defmodule MBTAV3API.Store.PredictionsTest do
       msg = capture_log([level: :info], fn -> Store.Predictions.fetch(stop_id: "12345") end)
 
       assert msg =~
-               "Elixir.MBTAV3API.Store.Predictions.Impl fetch predictions fetch_keys=[stop_id: \"12345\"] duration="
+               "Elixir.MBTAV3API.Store.Predictions.Impl fetch table_name=predictions_from_streams fetch_keys=[stop_id: \"12345\"] duration="
     end
   end
 
   describe "fetch list of keywords" do
-    setup do
-      start_link_supervised!(Store.Predictions)
-      :ok
-    end
-
-    test "process_upsert when add" do
+    test "fetches all matches from multiple fetch keys" do
       prediction_1 = build(:prediction, id: "1", stop_id: "12345")
       prediction_2 = build(:prediction, id: "2", stop_id: "6789")
       prediction_3 = build(:prediction, id: "3", stop_id: "00000")
@@ -127,6 +154,48 @@ defmodule MBTAV3API.Store.PredictionsTest do
                  Store.Predictions.fetch([[stop_id: "12345"], [stop_id: "6789"]]),
                  & &1.id
                )
+    end
+  end
+
+  describe "fetch_with_associations/1" do
+    test "fetches all associated trips", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      prediction_without_trip = build(:prediction, trip_id: nil, stop_id: prediction_1.stop_id)
+      prediction_other_stop = build(:prediction, stop_id: "other", trip_id: "other_trip")
+      trip_other_stop = build(:trip, id: "other_trip")
+
+      Store.Predictions.process_upsert(:add, [
+        prediction_1,
+        prediction_2,
+        prediction_without_trip,
+        prediction_other_stop,
+        trip_1,
+        trip_2,
+        trip_other_stop
+      ])
+
+      assert JsonApi.Object.to_full_map([
+               prediction_1,
+               prediction_2,
+               prediction_without_trip,
+               trip_1,
+               trip_2
+             ]) == Store.Predictions.fetch_with_associations(stop_id: "12345")
+
+      assert JsonApi.Object.to_full_map([
+               prediction_1,
+               prediction_2,
+               prediction_without_trip,
+               prediction_other_stop,
+               trip_1,
+               trip_2,
+               trip_other_stop
+             ]) ==
+               Store.Predictions.fetch_with_associations([[stop_id: "12345"], [stop_id: "other"]])
     end
   end
 end

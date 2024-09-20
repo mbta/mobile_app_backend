@@ -27,7 +27,18 @@ defmodule MBTAV3API.Store do
   @doc """
   Retrieve all records that match the given filter keys.
   When given a single keyword list, all keys in the list must match.
-  When given a list of keyword lists, must match any of the keyword lists
+  When given a list of keyword lists, must match any of the keyword lists.
+
+  Does not include any associated records
   """
   @callback fetch(fetch_keys()) :: [JsonApi.Object.t()]
+
+  @doc """
+  Retrieve all records that match the given filter keys, and the relevant associated records
+  based on the included record types for the  `MBTAV3API.Stream.StaticInstance.` that is populating the store.
+
+  When given a single keyword list, all keys in the list must match.
+  When given a list of keyword lists, must match any of the keyword lists
+  """
+  @callback fetch_with_associations(fetch_keys()) :: JsonApi.Object.full_map()
 end

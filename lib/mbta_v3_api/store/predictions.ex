@@ -27,6 +27,13 @@ defmodule MBTAV3API.Store.Predictions do
   end
 
   @impl true
+  def fetch_with_associations(fetch_keys) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).fetch_with_associations(
+      fetch_keys
+    )
+  end
+
+  @impl true
   def process_upsert(event, data) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Store.Predictions, Predictions.Impl).process_upsert(
       event,
@@ -59,11 +66,14 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   """
   use GenServer
   require Logger
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
+  alias MBTAV3API.Trip
 
   @behaviour MBTAV3API.Store
 
   @predictions_table_name :predictions_from_streams
+  @trips_table_name :trips_from_predictions
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
   def start_link(_) do
@@ -73,6 +83,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   @impl true
   def init(_) do
     _table = :ets.new(@predictions_table_name, [:named_table, :public, read_concurrency: true])
+    _trips_table = :ets.new(@trips_table_name, [:named_table, :public, read_concurrency: true])
 
     {:ok, %{}}
   end
@@ -81,7 +92,12 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   def fetch(fetch_keys) do
     if Keyword.keyword?(fetch_keys) do
       match_spec = prediction_match_spec(fetch_keys)
-      timed_fetch([{match_spec, [], [:"$1"]}], "fetch_keys=#{inspect(fetch_keys)}")
+
+      timed_fetch(
+        @predictions_table_name,
+        [{match_spec, [], [:"$1"]}],
+        "fetch_keys=#{inspect(fetch_keys)}"
+      )
     else
       fetch_any(fetch_keys)
     end
@@ -93,7 +109,33 @@ defmodule MBTAV3API.Store.Predictions.Impl do
       |> Enum.map(&prediction_match_spec(&1))
       |> Enum.map(&{&1, [], [:"$1"]})
 
-    timed_fetch(match_specs, "multi_fetch=true fetch_keys=#{inspect(fetch_keys_list)}")
+    timed_fetch(
+      @predictions_table_name,
+      match_specs,
+      "multi_fetch=true fetch_keys=#{inspect(fetch_keys_list)}"
+    )
+  end
+
+  @impl true
+  def fetch_with_associations(fetch_keys) do
+    predictions = fetch(fetch_keys)
+
+    trip_fetch_keys_list =
+      predictions
+      |> Enum.flat_map(fn prediction ->
+        if is_nil(prediction.trip_id), do: [], else: [[id: prediction.trip_id]]
+      end)
+
+    trip_match_specs = Enum.map(trip_fetch_keys_list, &{trip_match_spec(&1), [], [:"$1"]})
+
+    trips =
+      timed_fetch(
+        @trips_table_name,
+        trip_match_specs,
+        "fetch_keys=#{inspect(trip_fetch_keys_list)}"
+      )
+
+    JsonApi.Object.to_full_map(predictions ++ trips)
   end
 
   defp prediction_match_spec(fetch_keys) do
@@ -111,12 +153,68 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     }
   end
 
-  defp timed_fetch(match_specs, log_metadata) do
+  defp trip_match_spec(fetch_keys) do
+    # https://www.erlang.org/doc/apps/erts/match_spec.html
+    # Match the fields specified in the fetch_keys and return the full prediction
+    # see to_record/1 for the defined order of fields
+    {
+      Keyword.get(fetch_keys, :id) || :_,
+      Keyword.get(fetch_keys, :direction_id) || :_,
+      Keyword.get(fetch_keys, :route_id) || :_,
+      Keyword.get(fetch_keys, :route_pattern_id) || :_,
+      :"$1"
+    }
+  end
+
+  # Conver the struct to a record for ETS
+  defp to_record(
+         %Prediction{
+           id: id,
+           direction_id: direction_id,
+           route_id: route_id,
+           stop_id: stop_id,
+           trip_id: trip_id,
+           vehicle_id: vehicle_id
+         } = prediction
+       ) do
+    {
+      id,
+      route_id,
+      stop_id,
+      direction_id,
+      trip_id,
+      vehicle_id,
+      prediction
+    }
+  end
+
+  defp to_record(
+         %Trip{
+           id: id,
+           direction_id: direction_id,
+           route_id: route_id,
+           route_pattern_id: route_pattern_id
+         } = trip
+       ) do
+    {
+      id,
+      direction_id,
+      route_id,
+      route_pattern_id,
+      trip
+    }
+  end
+
+  defp timed_fetch(table_name, match_specs, log_metadata) do
     {time_micros, results} =
-      :timer.tc(:ets, :select, [@predictions_table_name, match_specs])
+      :timer.tc(:ets, :select, [table_name, match_specs])
 
     time_ms = time_micros / 1000
-    Logger.info("#{__MODULE__} fetch predictions #{log_metadata} duration=#{time_ms}")
+
+    Logger.info(
+      "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
+    )
+
     results
   end
 
@@ -138,7 +236,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     for reference <- references do
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
-        # TODO: handle other included types like trips
+        %{type: "trip", id: id} -> :ets.delete(@trips_table_name, id)
         _ -> :ok
       end
     end
@@ -147,39 +245,27 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   end
 
   defp upsert_data(data) do
-    prediction_records =
+    records_by_type =
       data
-      # TODO: handle other included types like trips
-      |> Enum.filter(&match?(%Prediction{}, &1))
-      |> Enum.map(&to_record/1)
+      |> Enum.group_by(
+        fn data ->
+          %data_type{} = data
+          data_type
+        end,
+        fn data -> to_record(data) end
+      )
 
-    :ets.insert(@predictions_table_name, prediction_records)
+    :ets.insert(@predictions_table_name, Map.get(records_by_type, Prediction, []))
+    :ets.insert(@trips_table_name, Map.get(records_by_type, Trip, []))
   end
 
   defp clear_data(keys) do
-    match_pattern = prediction_match_spec(keys)
+    # Since we stream predictions by route, we can clear both the predictions  & route
+    # tables by route
+    predictions_match_pattern = prediction_match_spec(keys)
+    trips_match_pattern = trip_match_spec(keys)
 
-    :ets.select_delete(@predictions_table_name, [{match_pattern, [], [true]}])
-  end
-
-  defp to_record(
-         %Prediction{
-           id: id,
-           direction_id: direction_id,
-           route_id: route_id,
-           stop_id: stop_id,
-           trip_id: trip_id,
-           vehicle_id: vehicle_id
-         } = prediction
-       ) do
-    {
-      id,
-      route_id,
-      stop_id,
-      direction_id,
-      trip_id,
-      vehicle_id,
-      prediction
-    }
+    :ets.select_delete(@predictions_table_name, [{predictions_match_pattern, [], [true]}])
+    :ets.select_delete(@trips_table_name, [{trips_match_pattern, [], [true]}])
   end
 end
