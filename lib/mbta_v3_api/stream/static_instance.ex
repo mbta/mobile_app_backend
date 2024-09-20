@@ -28,7 +28,11 @@ defmodule MBTAV3API.Stream.StaticInstance do
   end
 
   def ensure_stream_started(topic, opts \\ []) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstance.Impl).ensure_stream_started(
+    Application.get_env(
+      :mobile_app_backend,
+      MBTAV3API.Stream.StaticInstance,
+      StaticInstance.Impl
+    ).ensure_stream_started(
       topic,
       opts
     )
