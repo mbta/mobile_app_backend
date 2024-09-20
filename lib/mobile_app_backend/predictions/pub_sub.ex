@@ -32,7 +32,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   Based on https://github.com/mbta/dotcom/blob/main/lib/predictions/pub_sub.ex
   """
   use GenServer
-  alias MBTAV3API.{JsonApi, Stop, Store, Stream}
+  alias MBTAV3API.{JsonApi, Prediction, Stop, Store, Stream}
   alias MobileAppBackend.Predictions.PubSub
 
   @behaviour PubSub.Behaviour
