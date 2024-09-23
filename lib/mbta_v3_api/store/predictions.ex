@@ -89,13 +89,19 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     trip_match_specs = Enum.map(trip_fetch_keys_list, &{trip_match_spec(&1), [], [:"$1"]})
 
     trips =
-      Store.timed_fetch(
-        @trips_table_name,
-        trip_match_specs,
-        "fetch_keys=#{inspect(trip_fetch_keys_list)}"
-      )
+      if Enum.empty?(trip_fetch_keys_list),
+        do: [],
+        else:
+          Store.timed_fetch(
+            @trips_table_name,
+            trip_match_specs,
+            "fetch_keys=#{inspect(trip_fetch_keys_list)}"
+          )
 
-    vehicles = Store.Vehicles.fetch(vehicle_fetch_keys_list)
+    vehicles =
+      if Enum.empty?(vehicle_fetch_keys_list),
+        do: [],
+        else: Store.Vehicles.fetch(vehicle_fetch_keys_list)
 
     JsonApi.Object.to_full_map(predictions ++ trips ++ vehicles)
   end

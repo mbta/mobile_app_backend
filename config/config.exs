@@ -35,6 +35,8 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   route_index: "routes_test",
   stop_index: "stops_test"
 
+config :mobile_app_backend, MobileAppBackend.GlobalDataCache, update_ms: :timer.minutes(5)
+
 config :mobile_app_backend, :logger, [
   {:handler, :sentry_handler, Sentry.LoggerHandler,
    %{
