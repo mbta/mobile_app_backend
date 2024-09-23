@@ -218,7 +218,12 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       PubSub.handle_info(:broadcast, state)
 
       assert_receive {:new_predictions,
-                      %{"12345" => %{predictions: predictions, trips: trips, vehicles: vehicles}}}
+                      %{
+                        stop_id: "12345",
+                        predictions: predictions,
+                        trips: trips,
+                        vehicles: vehicles
+                      }}
 
       assert %{prediction_2.id => prediction_2} == predictions
       assert %{trip_1.id => trip_1} == trips
@@ -232,7 +237,9 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       # Sends new predictions
       PubSub.handle_info(:broadcast, state)
 
-      assert_receive {:new_predictions, %{"12345" => %{predictions: predictions, trips: trips}}}
+      assert_receive {:new_predictions,
+                      %{stop_id: "12345", predictions: predictions, trips: trips}}
+
       assert %{prediction_3.id => prediction_3} == predictions
       assert %{trip_1.id => trip_1} == trips
     end
@@ -290,21 +297,19 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       assert_receive {:new_predictions, new_predictions}
 
       assert %{
-               "12345" => %{
-                 predictions: %{"prediction_1" => ^prediction_1},
-                 trips: %{"trip_1" => ^trip_1},
-                 vehicles: %{"v_1" => ^vehicle_1}
-               }
+               stop_id: "12345",
+               predictions: %{"prediction_1" => ^prediction_1},
+               trips: %{"trip_1" => ^trip_1},
+               vehicles: %{"v_1" => ^vehicle_1}
              } = new_predictions
 
       assert_receive {:new_predictions, new_predictions}
 
       assert %{
-               "6789" => %{
-                 predictions: %{"prediction_2" => ^prediction_2},
-                 trips: %{"trip_2" => ^trip_2},
-                 vehicles: %{"v_2" => ^vehicle_2}
-               }
+               stop_id: "6789",
+               predictions: %{"prediction_2" => ^prediction_2},
+               trips: %{"trip_2" => ^trip_2},
+               vehicles: %{"v_2" => ^vehicle_2}
              } = new_predictions
     end
   end
@@ -328,7 +333,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       PubSub.subscribe_for_stop("12345")
 
       Stream.PubSub.broadcast!("predictions:all:events", :reset_event)
-      assert_receive {:new_predictions, %{"12345" => ^full_map}}
+      assert_receive {:new_predictions, response}
+      assert response == Map.put(full_map, :stop_id, "12345")
     end
   end
 end

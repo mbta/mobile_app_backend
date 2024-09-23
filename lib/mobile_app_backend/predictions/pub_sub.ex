@@ -33,7 +33,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   Based on https://github.com/mbta/dotcom/blob/main/lib/predictions/pub_sub.ex
   """
   use GenServer
-  alias MBTAV3API.{JsonApi, Prediction, Stop, Store, Stream}
+  alias MBTAV3API.{Prediction, Stop, Store, Stream, Trip, Vehicle}
   alias MobileAppBackend.Predictions.PubSub
 
   @behaviour PubSub.Behaviour
@@ -47,7 +47,14 @@ defmodule MobileAppBackend.Predictions.PubSub do
   from fetching predictions from the store into the format expected by subscribers.
   """
   @type registry_value :: {Store.fetch_keys(), function()}
-  @type broadcast_message :: {:new_predictions, %{Stop.id() => JsonApi.Object.full_map()}}
+  @type broadcast_message ::
+          {:new_predictions,
+           %{
+             stop_id: Stop.id(),
+             predictions: %{Prediction.id() => Prediction.t()},
+             trips: %{Trip.id() => Trip.t()},
+             vehicles: %{Vehicle.id() => Vehicle.t()}
+           }}
 
   @type state :: %{last_dispatched_table_name: atom()}
 
@@ -162,7 +169,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
       Registry.register(
         MobileAppBackend.Predictions.Registry,
         @fetch_registry_key,
-        {fetch_keys, fn data -> %{stop_id => data} end}
+        {fetch_keys, fn data -> Map.put(data, :stop_id, stop_id) end}
       )
 
     fetch_keys
@@ -179,7 +186,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
       Registry.register(
         MobileAppBackend.Predictions.Registry,
         @fetch_registry_key,
-        {fetch_keys, fn data -> %{parent_stop_id => data} end}
+        {fetch_keys, fn data -> Map.put(data, :stop_id, parent_stop_id) end}
       )
 
     fetch_keys
