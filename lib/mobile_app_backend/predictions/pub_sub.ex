@@ -74,21 +74,18 @@ defmodule MobileAppBackend.Predictions.PubSub do
 
   @impl true
   def subscribe_for_stops(stop_ids) do
-    with %{stops: all_stops_by_id} <- GlobalDataCache.get_data() do
-      stop_id_to_children = Stop.stop_id_to_children(all_stops_by_id, stop_ids)
-
-      child_stop_ids =
-        stop_id_to_children
-        |> Map.values()
-        |> List.flatten()
-
-      {time_micros, _result} =
-        :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
-          stop_ids ++ child_stop_ids
-        ])
-
+    with %{stops: all_stops_by_id} <- GlobalDataCache.get_data(),
+         stop_id_to_children <- Stop.stop_id_to_children(all_stops_by_id, stop_ids),
+         child_stop_ids <-
+           stop_id_to_children
+           |> Map.values()
+           |> List.flatten(),
+         {time_micros, :ok} <-
+           :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
+             stop_ids ++ child_stop_ids
+           ]) do
       Logger.info(
-        "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000}"
+        "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000} "
       )
 
       all_predictions_data =
@@ -108,11 +105,12 @@ defmodule MobileAppBackend.Predictions.PubSub do
         trips: all_predictions_data.trips,
         vehicles: all_predictions_data.vehicles
       }
+    else
+      _ -> :error
     end
   end
 
   @impl true
-  @spec subscribe_for_stop(any()) :: none()
   def subscribe_for_stop(stop_id) do
     subscribe_for_stops([stop_id])
   end

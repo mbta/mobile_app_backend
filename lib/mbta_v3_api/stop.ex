@@ -90,7 +90,7 @@ defmodule MBTAV3API.Stop do
     stop
   end
 
-  @spec stop_id_to_children(Object.stop_map(), [Stop.id()]) :: %{Stop.id() => [Stop.id()]}
+  @spec stop_id_to_children(Object.stop_map(), [id()]) :: %{id() => [id()]}
   @doc """
   Build a map containing the given stop_ids to their corresponding child stop ids.
   Excludes child stops that don't have `location_type: :stop`
