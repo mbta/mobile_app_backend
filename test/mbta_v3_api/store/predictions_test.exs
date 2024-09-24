@@ -221,5 +221,19 @@ defmodule MBTAV3API.Store.PredictionsTest do
              ]) ==
                Store.Predictions.fetch_with_associations([[stop_id: "12345"], [stop_id: "other"]])
     end
+
+    test "when prediction has no associations, returns no associations" do
+      prediction = build(:prediction, id: "p_1", stop_id: "12345", vehicle_id: nil, trip_id: nil)
+      trip = build(:trip, id: "t_1")
+      vehicle = build(:vehicle)
+
+      Store.Predictions.process_upsert(:add, [prediction, trip])
+      Store.Vehicles.process_upsert(:add, [vehicle])
+
+      assert JsonApi.Object.to_full_map([
+               prediction
+             ]) ==
+               Store.Predictions.fetch_with_associations([[stop_id: "12345"]])
+    end
   end
 end
