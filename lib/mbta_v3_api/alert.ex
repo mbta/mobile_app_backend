@@ -35,6 +35,8 @@ defmodule MBTAV3API.Alert do
       :drawbridge_being_raised,
       :electrical_work,
       :fire,
+      :fire_department_activity,
+      :flooding,
       :fog,
       :freight_train_interference,
       :hazmat_condition,
