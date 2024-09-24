@@ -35,9 +35,8 @@ defmodule Util do
         "    \\"ONGOING\\" -> :ongoing",
         "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
         "    \\"UPCOMING\\" -> :upcoming",
+        "    _ -> default",
         "  end",
-        "rescue",
-        "  CaseClauseError -> default",
         "end",
         "",
         "@spec serialize_lifecycle(lifecycle()) :: raw_lifecycle()",
@@ -73,9 +72,8 @@ defmodule Util do
         "  case x do",
         "    0 -> :a",
         "    1 -> :b",
+        "    _ -> default",
         "  end",
-        "rescue",
-        "  CaseClauseError -> default",
         "end",
         "",
         "@spec serialize_x(x()) :: raw_x()",
@@ -110,9 +108,8 @@ defmodule Util do
         case a do
           "X" -> :x
           nil -> :y
+          _ -> default
         end
-      rescue
-        CaseClauseError -> default
       end
       #
       @spec serialize_a(a()) :: raw_a()
@@ -143,6 +140,7 @@ defmodule Util do
     parse_fn = :"parse_#{name}"
     serialize_fn = :"serialize_#{name}"
     method_arg = Macro.var(name, __MODULE__)
+    default_arg = Macro.var(:default, __MODULE__)
     raw_type = :"raw_#{name}"
     raw_type_name = Macro.var(raw_type, nil)
 
@@ -156,6 +154,11 @@ defmodule Util do
         clause
       end)
 
+    parse_default_clause =
+      quote do
+        _ -> unquote(default_arg)
+      end
+
     serialize_clauses =
       Enum.map(values, fn {value, raw_value} ->
         [{:->, _, _} = clause] =
@@ -167,6 +170,7 @@ defmodule Util do
       end)
 
     parse_body = {:case, [], [method_arg, [do: parse_clauses]]}
+    parse_default_body = {:case, [], [method_arg, [do: parse_clauses ++ parse_default_clause]]}
     serialize_body = {:case, [], [method_arg, [do: serialize_clauses]]}
 
     quote do
@@ -179,10 +183,8 @@ defmodule Util do
       end
 
       @spec unquote(parse_fn)(unquote(raw_type)(), unquote(name)()) :: unquote(name)()
-      def unquote(parse_fn)(unquote(method_arg), default) do
-        unquote(parse_body)
-      rescue
-        CaseClauseError -> default
+      def unquote(parse_fn)(unquote(method_arg), unquote(default_arg)) do
+        unquote(parse_default_body)
       end
 
       @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()
