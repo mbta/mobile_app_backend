@@ -30,16 +30,14 @@ defmodule Util do
         "",
         "@spec parse_lifecycle(raw_lifecycle(), lifecycle()) :: lifecycle()",
         "def parse_lifecycle(lifecycle, default) do",
-        "  try do",
-        "    case lifecycle do",
-        "      \\"NEW\\" -> :new",
-        "      \\"ONGOING\\" -> :ongoing",
-        "      \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
-        "      \\"UPCOMING\\" -> :upcoming",
-        "    end",
-        "  rescue",
-        "    CaseClauseError -> default",
+        "  case lifecycle do",
+        "    \\"NEW\\" -> :new",
+        "    \\"ONGOING\\" -> :ongoing",
+        "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
+        "    \\"UPCOMING\\" -> :upcoming",
         "  end",
+        "rescue",
+        "  CaseClauseError -> default",
         "end",
         "",
         "@spec serialize_lifecycle(lifecycle()) :: raw_lifecycle()",
@@ -72,14 +70,12 @@ defmodule Util do
         "",
         "@spec parse_x(raw_x(), x()) :: x()",
         "def parse_x(x, default) do",
-        "  try do",
-        "    case x do",
-        "      0 -> :a",
-        "      1 -> :b",
-        "    end",
-        "  rescue",
-        "    CaseClauseError -> default",
+        "  case x do",
+        "    0 -> :a",
+        "    1 -> :b",
         "  end",
+        "rescue",
+        "  CaseClauseError -> default",
         "end",
         "",
         "@spec serialize_x(x()) :: raw_x()",
@@ -111,14 +107,12 @@ defmodule Util do
       #
       @spec parse_a(raw_a(), a()) :: a()
       def parse_a(a, default) do
-        try do
-          case a do
-            "X" -> :x
-            nil -> :y
-          end
-        rescue
-          CaseClauseError -> default
+        case a do
+          "X" -> :x
+          nil -> :y
         end
+      rescue
+        CaseClauseError -> default
       end
       #
       @spec serialize_a(a()) :: raw_a()
@@ -186,11 +180,9 @@ defmodule Util do
 
       @spec unquote(parse_fn)(unquote(raw_type)(), unquote(name)()) :: unquote(name)()
       def unquote(parse_fn)(unquote(method_arg), default) do
-        try do
-          unquote(parse_body)
-        rescue
-          CaseClauseError -> default
-        end
+        unquote(parse_body)
+      rescue
+        CaseClauseError -> default
       end
 
       @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()
