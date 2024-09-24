@@ -146,6 +146,15 @@ defmodule Util do
         unquote(parse_body)
       end
 
+      @spec unquote(parse_fn)(unquote(raw_type)(), unquote(name)()) :: unquote(name)()
+      def unquote(parse_fn)(unquote(method_arg), default) do
+        try do
+          unquote(parse_body)
+        rescue
+          CaseClauseError -> default
+        end
+      end
+
       @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()
       def unquote(serialize_fn)(unquote(method_arg)) do
         unquote(serialize_body)
