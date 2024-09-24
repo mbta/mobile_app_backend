@@ -28,6 +28,20 @@ defmodule Util do
         "  end",
         "end",
         "",
+        "@spec parse_lifecycle(raw_lifecycle(), lifecycle()) :: lifecycle()",
+        "def parse_lifecycle(lifecycle, default) do",
+        "  try do",
+        "    case lifecycle do",
+        "      \\"NEW\\" -> :new",
+        "      \\"ONGOING\\" -> :ongoing",
+        "      \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
+        "      \\"UPCOMING\\" -> :upcoming",
+        "    end",
+        "  rescue",
+        "    CaseClauseError -> default",
+        "  end",
+        "end",
+        "",
         "@spec serialize_lifecycle(lifecycle()) :: raw_lifecycle()",
         "def serialize_lifecycle(lifecycle) do",
         "  case lifecycle do",
@@ -56,6 +70,18 @@ defmodule Util do
         "  end",
         "end",
         "",
+        "@spec parse_x(raw_x(), x()) :: x()",
+        "def parse_x(x, default) do",
+        "  try do",
+        "    case x do",
+        "      0 -> :a",
+        "      1 -> :b",
+        "    end",
+        "  rescue",
+        "    CaseClauseError -> default",
+        "  end",
+        "end",
+        "",
         "@spec serialize_x(x()) :: raw_x()",
         "def serialize_x(x) do",
         "  case x do",
@@ -80,6 +106,18 @@ defmodule Util do
         case a do
           "X" -> :x
           nil -> :y
+        end
+      end
+      #
+      @spec parse_a(raw_a(), a()) :: a()
+      def parse_a(a, default) do
+        try do
+          case a do
+            "X" -> :x
+            nil -> :y
+          end
+        rescue
+          CaseClauseError -> default
         end
       end
       #
