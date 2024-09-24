@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Stop do
+  alias MBTAV3API.JsonApi.Object
   use MBTAV3API.JsonApi.Object
   require Util
 
@@ -87,6 +88,27 @@ defmodule MBTAV3API.Stop do
 
   def parent_if_exists(stop, _stops_by_id) do
     stop
+  end
+
+  @spec stop_id_to_children(Object.stop_map(), [Stop.id()]) :: %{Stop.id() => [Stop.id()]}
+  @doc """
+  Build a map containing the given stop_ids to their corresponding child stop ids.
+  Excludes child stops that don't have `location_type: :stop`
+  """
+  def stop_id_to_children(all_stops_by_id, target_stop_ids) do
+    Map.take(all_stops_by_id, target_stop_ids)
+    |> Map.new(fn {stop_id, stop} ->
+      {stop_id,
+       Enum.filter(
+         List.wrap(stop.child_stop_ids),
+         fn child_stop_id ->
+           case Map.get(all_stops_by_id, child_stop_id) do
+             nil -> false
+             %{location_type: location_type} -> location_type == :stop
+           end
+         end
+       )}
+    end)
   end
 
   @impl JsonApi.Object

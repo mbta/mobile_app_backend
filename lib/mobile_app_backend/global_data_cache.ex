@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.GlobalDataCache do
   use GenServer
+  alias MBTAV3API.Stop
   alias MBTAV3API.{JsonApi, Repository}
   alias MBTAV3API.JsonApi.Object
 
@@ -24,6 +25,7 @@ defmodule MobileAppBackend.GlobalDataCache do
     defstruct [:key, :update_ms, :first_update_ms]
   end
 
+
   @callback default_key :: key()
   @callback get_data(key()) :: data()
 
@@ -33,14 +35,6 @@ defmodule MobileAppBackend.GlobalDataCache do
       MobileAppBackend.GlobalDataCache.Module,
       MobileAppBackend.GlobalDataCache.Impl
     ).start_link(opts)
-  end
-
-  def handle_info(msg, state) do
-    Application.get_env(
-      :mobile_app_backend,
-      MobileAppBackend.GlobalDataCache.Module,
-      MobileAppBackend.GlobalDataCache.Impl
-    ).handle_info(msg, state)
   end
 
   def init(opts \\ []) do
@@ -70,6 +64,7 @@ end
 
 defmodule MobileAppBackend.GlobalDataCache.Impl do
   use GenServer
+  alias MBTAV3API.Stop
   alias MBTAV3API.{JsonApi, Repository}
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.GlobalDataCache.State
@@ -90,9 +85,40 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
     :persistent_term.get(key, nil) || update_data(key)
   end
 
+  @spec route_ids_for_stops([Stop.id()]) :: :error | {:ok, [Route.id()]}
+  @doc """
+  Get the id of all routes that serve the given stop
+  """
+  def route_ids_for_stops(stop_ids, key \\ default_key()) do
+    data = :persistent_term.get(key, nil) || update_data(key)
+
+    if is_nil(data) do
+      :error
+    else
+      %{pattern_ids_by_stop: pattern_ids_by_stop, route_patterns: route_patterns} =
+        data
+
+      route_pattern_ids =
+        pattern_ids_by_stop
+        |> Map.take(stop_ids)
+        |> Map.values()
+        |> Enum.uniq()
+
+      routes =
+        route_patterns
+        |> Map.take(route_pattern_ids)
+        |> Map.values()
+        |> Enum.map(& &1.route_id)
+        |> Enum.uniq()
+
+      {:ok, routes}
+    end
+  end
+
   @impl GenServer
   def init(opts \\ []) do
     opts = Keyword.merge(Application.get_env(:mobile_app_backend, GlobalDataCache), opts)
+
     first_update_ms = opts[:first_update_ms] || :timer.seconds(1)
 
     state = %State{

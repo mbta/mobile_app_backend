@@ -11,6 +11,12 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
   setup do
     verify_on_exit!()
 
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
     reassign_env(:mobile_app_backend, StreamSubscriber, StreamSubscriberMock)
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     reassign_env(:mobile_app_backend, Store.Predictions, PredictionsStoreMock)
@@ -62,8 +68,9 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
         full_map
       end)
 
-      RepositoryMock
-      |> expect(:stops, fn _, _ -> ok_response([build(:stop, id: "12345")]) end)
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ -> %{stops: %{"12345" => build(:stop, id: "12345")}} end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
 
@@ -102,12 +109,19 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
         full_map
       end)
 
-      RepositoryMock
-      |> expect(:stops, fn _, _ ->
-        ok_response([build(:stop, id: "parent_stop_id")], [
-          build(:stop, id: "12345", location_type: :stop, parent_station_id: "parent_stop_id"),
-          build(:stop, id: "6789", location_type: :stop, parent_station_id: "parent_stop_id")
-        ])
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ ->
+        %{
+          stops: %{
+            "parent_stop_id" =>
+              build(:stop, id: "parent_stop_id", child_stop_ids: ["12345", "6789"]),
+            "12345" =>
+              build(:stop, id: "12345", location_type: :stop, parent_station_id: "parent_stop_id"),
+            "6789" =>
+              build(:stop, id: "6789", location_type: :stop, parent_station_id: "parent_stop_id")
+          }
+        }
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
@@ -153,11 +167,16 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
         full_map
       end)
 
-      RepositoryMock
-      |> expect(:stops, fn _, _ ->
-        ok_response([build(:stop, id: "standalone")], [
-          build(:stop, id: "child", parent_station_id: "parent")
-        ])
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ ->
+        %{
+          stops: %{
+            "parent" => build(:stop, id: "parent", child_stop_ids: ["child"]),
+            "child" => build(:stop, id: "child"),
+            "standalone" => build(:stop, id: "standalone")
+          }
+        }
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
@@ -206,9 +225,14 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
         JsonApi.Object.to_full_map([prediction_3, trip_1, vehicle_1])
       end)
 
-      RepositoryMock
-      |> expect(:stops, fn _, _ ->
-        ok_response([build(:stop, id: "12345")], [])
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ ->
+        %{
+          stops: %{
+            "12345" => build(:stop, id: "12345")
+          }
+        }
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)
@@ -283,9 +307,12 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
         full_map_6789
       end)
 
-      RepositoryMock
-      |> expect(:stops, 2, fn _, _ ->
-        ok_response([], [])
+      GlobalDataCacheMock
+      |> expect(:default_key, 2, fn -> :default_key end)
+      |> expect(:get_data, 2, fn _ ->
+        %{
+          stops: %{}
+        }
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, 2, fn _ -> :ok end)
@@ -323,9 +350,12 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
       expect(PredictionsStoreMock, :fetch_with_associations, 2, fn _ -> full_map end)
 
-      RepositoryMock
-      |> expect(:stops, fn _, _ ->
-        ok_response([build(:stop, id: "12345")], [])
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ ->
+        %{
+          stops: %{}
+        }
       end)
 
       expect(StreamSubscriberMock, :subscribe_for_stops, fn _ -> :ok end)

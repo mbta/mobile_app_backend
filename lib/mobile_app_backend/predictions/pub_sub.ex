@@ -4,20 +4,22 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
 
   @type predictions_for_stop :: %{Stop.id() => JsonApi.Object.full_map()}
 
-  @type subscribe_response :: %{
-          predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
-          trips: %{Trip.id() => Trip.t()},
-          vehicles: %{Vehicle.id() => Vehicle.t()}
-        }
+  @type subscribe_response ::
+          :error
+          | %{
+              predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
+              trips: %{Trip.id() => Trip.t()},
+              vehicles: %{Vehicle.id() => Vehicle.t()}
+            }
 
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
   """
-  @callback subscribe_for_stop(Stop.id()) :: subscribe_response()
+  @callback subscribe_for_stop(Stop.id()) :: :error | subscribe_response()
   @doc """
   Subscribe to prediction updates for multiple stops. For  parent stations, this subscribes to updates for all their child stops.
   """
-  @callback subscribe_for_stops([Stop.id()]) :: subscribe_response()
+  @callback subscribe_for_stops([Stop.id()]) :: :error | subscribe_response()
 end
 
 defmodule MobileAppBackend.Predictions.PubSub do
@@ -34,6 +36,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   """
   use GenServer
   alias MBTAV3API.{Prediction, Stop, Store, Stream, Trip, Vehicle}
+  alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Predictions.PubSub
 
   @behaviour PubSub.Behaviour
@@ -71,50 +74,45 @@ defmodule MobileAppBackend.Predictions.PubSub do
 
   @impl true
   def subscribe_for_stops(stop_ids) do
-    {:ok, %{data: _stop, included: %{stops: child_stops}}} =
-      MBTAV3API.Repository.stops(filter: [id: stop_ids], include: :child_stops)
+    with %{stops: all_stops_by_id} <- GlobalDataCache.get_data() do
+      stop_id_to_children = Stop.stop_id_to_children(all_stops_by_id, stop_ids)
 
-    child_stops =
-      child_stops
-      |> Map.values()
-      |> Enum.filter(&(&1.location_type == :stop))
+      child_stop_ids =
+        stop_id_to_children
+        |> Map.values()
+        |> List.flatten()
 
-    child_stop_ids = Enum.map(child_stops, & &1.id)
+      {time_micros, _result} =
+        :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
+          stop_ids ++ child_stop_ids
+        ])
 
-    child_ids_by_parent_id =
-      child_stops
-      |> Enum.map(&{&1.parent_station_id, &1.id})
-      |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
-
-    {time_micros, _result} =
-      :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
-        stop_ids ++ child_stop_ids
-      ])
-
-    Logger.info(
-      "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000}"
-    )
-
-    all_predictions_data =
-      stop_ids
-      |> register_all_stops(child_ids_by_parent_id)
-      |> Store.Predictions.fetch_with_associations()
-
-    predictions_by_stop =
-      group_predictions_for_stop(
-        all_predictions_data.predictions,
-        stop_ids,
-        child_ids_by_parent_id
+      Logger.info(
+        "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000}"
       )
 
-    %{
-      predictions_by_stop: predictions_by_stop,
-      trips: all_predictions_data.trips,
-      vehicles: all_predictions_data.vehicles
-    }
+      all_predictions_data =
+        stop_ids
+        |> register_all_stops(stop_id_to_children)
+        |> Store.Predictions.fetch_with_associations()
+
+      predictions_by_stop =
+        group_predictions_for_stop(
+          all_predictions_data.predictions,
+          stop_ids,
+          stop_id_to_children
+        )
+
+      %{
+        predictions_by_stop: predictions_by_stop,
+        trips: all_predictions_data.trips,
+        vehicles: all_predictions_data.vehicles
+      }
+    end
   end
 
   @impl true
+  @spec subscribe_for_stop(any()) :: none()
   def subscribe_for_stop(stop_id) do
     subscribe_for_stops([stop_id])
   end
@@ -129,8 +127,8 @@ defmodule MobileAppBackend.Predictions.PubSub do
       |> Enum.group_by(& &1.stop_id)
 
     Map.new(stop_ids, fn stop_id ->
-      case Map.get(child_ids_by_parent_id, stop_id) do
-        nil ->
+      case Map.get(child_ids_by_parent_id, stop_id, []) do
+        [] ->
           {stop_id,
            prediction_list_by_stop
            |> Map.get(stop_id, [])
@@ -151,8 +149,8 @@ defmodule MobileAppBackend.Predictions.PubSub do
   defp register_all_stops(stop_ids, child_ids_by_parent_id) do
     stop_ids
     |> Enum.flat_map(fn stop_id ->
-      case Map.get(child_ids_by_parent_id, stop_id) do
-        nil ->
+      case Map.get(child_ids_by_parent_id, stop_id, []) do
+        [] ->
           [register_single_stop(stop_id)]
 
         child_ids ->
