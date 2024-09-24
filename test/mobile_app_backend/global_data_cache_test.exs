@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.GlobalDataCacheTest do
-  use HttpStub.Case, async: true
+  use HttpStub.Case
+  import MobileAppBackend.Factory
   alias MobileAppBackend.GlobalDataCache
 
   test "gets data" do
@@ -86,5 +87,45 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
                text_color: "FFFFFF"
              }
            } = lines
+  end
+
+  describe "init/1" do
+    test "sends recalculation message" do
+      cache_key = make_ref()
+
+      :persistent_term.put(cache_key, %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes: %{},
+        route_patterns: %{},
+        stops: %{},
+        trips: %{}
+      })
+
+      GlobalDataCache.init(key: cache_key, first_update_ms: 10)
+      assert_receive :recalculate, 2_000
+    end
+  end
+
+  describe "handle_info/1" do
+    test "sends another recalculate message" do
+      cache_key = make_ref()
+
+      :persistent_term.put(cache_key, %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes: %{},
+        route_patterns: %{},
+        stops: %{},
+        trips: %{}
+      })
+
+      GlobalDataCache.handle_info(:recalculate, %MobileAppBackend.GlobalDataCache.State{
+        key: cache_key,
+        update_ms: 10
+      })
+
+      assert_receive :recalculate
+    end
   end
 end

@@ -119,6 +119,9 @@ jobs:
         run: docker compose build
       - name: docker compose up
         run: docker compose up --wait
+        env:
+          API_KEY: ${{secrets.API_KEY}}
+          API_URL: ${{secrets.API_URL}}
       - name: ensure running properly
         run: docker compose exec --no-TTY mobile-app-backend wget --spider -S http://localhost:4000/
       - name: show docker container logs

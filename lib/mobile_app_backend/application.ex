@@ -9,26 +9,38 @@ defmodule MobileAppBackend.Application do
   def start(_type, _args) do
     Logger.add_handlers(:mobile_app_backend)
 
-    children = [
-      MobileAppBackendWeb.Telemetry,
-      {DNSCluster,
-       query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
-      Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub}, id: :general_pubsub),
-      {Finch,
-       name: Finch.CustomPool,
-       pools: %{
-         :default => [size: 200, count: 10, start_pool_metrics?: true]
-       }},
-      {MBTAV3API.ResponseCache, []},
-      MBTAV3API.Supervisor,
-      {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
-      MobileAppBackend.MapboxTokenRotator,
-      MobileAppBackend.Predictions.Registry,
-      MobileAppBackend.Predictions.PubSub,
-      MobileAppBackend.GlobalDataCache,
-      # Start to serve requests, typically the last entry
-      MobileAppBackendWeb.Endpoint
-    ]
+    start_global_cache? =
+      Application.get_env(:mobile_app_backend, :stat_global_cache?, true)
+
+    children =
+      [
+        MobileAppBackendWeb.Telemetry,
+        {DNSCluster,
+         query: Application.get_env(:mobile_app_backend, :dns_cluster_query) || :ignore},
+        Supervisor.child_spec({Phoenix.PubSub, name: MobileAppBackend.PubSub},
+          id: :general_pubsub
+        ),
+        {Finch,
+         name: Finch.CustomPool,
+         pools: %{
+           :default => [size: 200, count: 10, start_pool_metrics?: true]
+         }},
+        {MBTAV3API.ResponseCache, []},
+        MBTAV3API.Supervisor,
+        {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
+        MobileAppBackend.MapboxTokenRotator,
+        MobileAppBackend.Predictions.Registry,
+        MobileAppBackend.Predictions.PubSub
+      ] ++
+        if start_global_cache? do
+          [MobileAppBackend.GlobalDataCache]
+        else
+          []
+        end ++
+        [
+          # Start to serve requests, typically the last entry
+          MobileAppBackendWeb.Endpoint
+        ]
 
     :ok = MobileAppBackend.FinchTelemetryLogger.attach()
 
