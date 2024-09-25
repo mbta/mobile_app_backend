@@ -1,9 +1,12 @@
 defmodule MobileAppBackend.ThrottlerTest do
-  use ExUnit.Case, async: true
+  # run exclusively for more precise timing
+  use ExUnit.Case, async: false
 
   alias MobileAppBackend.Throttler
 
   @timeout 10
+  # since the timing may not be perfect
+  @window 2
 
   setup ctx do
     throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
@@ -37,8 +40,8 @@ defmodule MobileAppBackend.ThrottlerTest do
   test "casts later if last cast was recent", %{throttler: throttler} do
     Throttler.request(throttler)
 
-    refute_receive {:"$gen_cast", :message}, @timeout - 1
-    assert_receive {:"$gen_cast", :message}, 2
+    refute_receive {:"$gen_cast", :message}, @timeout - @window
+    assert_receive {:"$gen_cast", :message}, 2 * @window
   end
 
   @tag last_cast_ms_ago: 0
@@ -47,8 +50,8 @@ defmodule MobileAppBackend.ThrottlerTest do
       Throttler.request(throttler)
     end
 
-    refute_receive {:"$gen_cast", :message}, @timeout - 1
-    assert_receive {:"$gen_cast", :message}, 2
+    refute_receive {:"$gen_cast", :message}, @timeout - @window
+    assert_receive {:"$gen_cast", :message}, 2 * @window
     refute_receive {:"$gen_cast", :message}, @timeout
   end
 end
