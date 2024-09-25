@@ -71,16 +71,15 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
     vehicle = build(:vehicle, id: "v_1")
 
     PredictionsForStopsV2Channel.handle_info(
-      {:new_predictions, %{"12345" => to_full_map([prediction, trip, vehicle])}},
+      {:new_predictions, Map.put(to_full_map([prediction, trip, vehicle]), :stop_id, "12345")},
       socket
     )
 
     assert_push "stream_data", %{
-      "12345" => %{
-        predictions: %{"prediction_1" => ^prediction},
-        trips: %{"trip_1" => ^trip},
-        vehicles: %{"v_1" => ^vehicle}
-      }
+      stop_id: "12345",
+      predictions: %{"prediction_1" => ^prediction},
+      trips: %{"trip_1" => ^trip},
+      vehicles: %{"v_1" => ^vehicle}
     }
   end
 end
