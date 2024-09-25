@@ -241,4 +241,42 @@ defmodule MBTAV3API.AlertTest do
              updated_at: ~B[2024-02-12 11:49:00]
            }
   end
+
+  test "unexpected enum values fall back" do
+    assert Alert.parse(%JsonApi.Item{
+             id: "553407",
+             attributes: %{
+               "active_period" => [
+                 %{"start" => "2024-02-12T11:49:00-05:00", "end" => "2024-02-12T14:26:40-05:00"}
+               ],
+               "cause" => "ALIENS",
+               "description" => "Description",
+               "effect" => "TELEPORTATION",
+               "header" => "Header",
+               "informed_entity" => [
+                 %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
+               ],
+               "lifecycle" => "NEW",
+               "updated_at" => "2024-02-12T11:49:00-05:00"
+             }
+           }) == %Alert{
+             id: "553407",
+             active_period: [
+               %Alert.ActivePeriod{start: ~B[2024-02-12 11:49:00], end: ~B[2024-02-12 14:26:40]}
+             ],
+             cause: :unknown_cause,
+             description: "Description",
+             effect: :unknown_effect,
+             header: "Header",
+             informed_entity: [
+               %Alert.InformedEntity{
+                 activities: [:board, :exit, :ride],
+                 route: "39",
+                 route_type: :bus
+               }
+             ],
+             lifecycle: :new,
+             updated_at: ~B[2024-02-12 11:49:00]
+           }
+  end
 end
