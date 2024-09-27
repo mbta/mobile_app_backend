@@ -10,7 +10,7 @@ defmodule MobileAppBackend.Application do
     Logger.add_handlers(:mobile_app_backend)
 
     start_global_cache? =
-      Application.get_env(:mobile_app_backend, :stat_global_cache?, true)
+      Application.get_env(:mobile_app_backend, :start_global_cache?, true)
 
     children =
       [

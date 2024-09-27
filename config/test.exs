@@ -11,7 +11,7 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 # isolated fake processes
 config :mobile_app_backend, start_stream_stores?: false
 
-config :mobile_app_backend, stat_global_cache?: false
+config :mobile_app_backend, start_global_cache?: false
 
 # Print only warnings and errors during test
 config :logger, level: :warning
