@@ -1,7 +1,5 @@
 defmodule MobileAppBackend.GlobalDataCache do
   use GenServer
-  alias MBTAV3API.Route
-  alias MBTAV3API.Stop
   alias MBTAV3API.{JsonApi, Repository}
   alias MBTAV3API.JsonApi.Object
 
