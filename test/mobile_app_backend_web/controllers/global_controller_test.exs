@@ -1,70 +1,82 @@
 defmodule MobileAppBackendWeb.GlobalControllerTest do
   use HttpStub.Case
   use MobileAppBackendWeb.ConnCase
+  import Mox
+  import Test.Support.Helpers
 
   describe "GET /api/global" do
-    test "retrieves all stop and route info from the V3 API", %{conn: conn} do
-      cache_key = make_ref()
+    setup do
+      verify_on_exit!()
 
-      :persistent_term.put(cache_key, %{
-        lines: %{
-          "line-Red" => %MBTAV3API.Line{
-            id: "line-Red",
-            color: "DA291C",
-            long_name: "Red Line",
-            short_name: "",
-            sort_order: 10_010,
-            text_color: "FFFFFF"
-          }
-        },
-        pattern_ids_by_stop: %{"70076" => ["Red-1-1", "Red-3-1"]},
-        routes: %{
-          "Red" => %MBTAV3API.Route{
-            id: "Red",
-            color: "DA291C",
-            direction_destinations: ["Ashmont/Braintree", "Alewife"],
-            direction_names: ["South", "North"],
-            line_id: "line-Red",
-            long_name: "Red Line",
-            type: :heavy_rail
-          }
-        },
-        route_patterns: %{
-          "Red-1-1" => %MBTAV3API.RoutePattern{
-            id: "Red-1-1",
-            direction_id: 1,
-            name: "Ashmont - Alewife",
-            representative_trip_id: "canonical-Red-C2-1",
-            route_id: "Red",
-            sort_order: 100_101_001
-          }
-        },
-        stops: %{
-          "place-pktrm" => %MBTAV3API.Stop{
-            id: "place-pktrm",
-            latitude: 42.356395,
-            location_type: :station,
-            longitude: -71.062424,
-            name: "Park Street",
-            child_stop_ids: ["70076"],
-            connecting_stop_ids: ["10000"]
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+    end
+
+    test "retrieves all stop and route info from the V3 API", %{conn: conn} do
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:get_data, fn _ ->
+        %{
+          lines: %{
+            "line-Red" => %MBTAV3API.Line{
+              id: "line-Red",
+              color: "DA291C",
+              long_name: "Red Line",
+              short_name: "",
+              sort_order: 10_010,
+              text_color: "FFFFFF"
+            }
           },
-          "70076" => %MBTAV3API.Stop{
-            id: "70076",
-            name: "Park Street",
-            location_type: :stop,
-            parent_station_id: "place-pktrm"
-          }
-        },
-        trips: %{
-          "canonical-Red-C2-1" => %MBTAV3API.Trip{
-            headsign: "Alewife",
-            stop_ids: 70_094..70_062//-2 |> Enum.map(&to_string/1)
+          pattern_ids_by_stop: %{"70076" => ["Red-1-1", "Red-3-1"]},
+          routes: %{
+            "Red" => %MBTAV3API.Route{
+              id: "Red",
+              color: "DA291C",
+              direction_destinations: ["Ashmont/Braintree", "Alewife"],
+              direction_names: ["South", "North"],
+              line_id: "line-Red",
+              long_name: "Red Line",
+              type: :heavy_rail
+            }
+          },
+          route_patterns: %{
+            "Red-1-1" => %MBTAV3API.RoutePattern{
+              id: "Red-1-1",
+              direction_id: 1,
+              name: "Ashmont - Alewife",
+              representative_trip_id: "canonical-Red-C2-1",
+              route_id: "Red",
+              sort_order: 100_101_001
+            }
+          },
+          stops: %{
+            "place-pktrm" => %MBTAV3API.Stop{
+              id: "place-pktrm",
+              latitude: 42.356395,
+              location_type: :station,
+              longitude: -71.062424,
+              name: "Park Street",
+              child_stop_ids: ["70076"],
+              connecting_stop_ids: ["10000"]
+            },
+            "70076" => %MBTAV3API.Stop{
+              id: "70076",
+              name: "Park Street",
+              location_type: :stop,
+              parent_station_id: "place-pktrm"
+            }
+          },
+          trips: %{
+            "canonical-Red-C2-1" => %MBTAV3API.Trip{
+              headsign: "Alewife",
+              stop_ids: 70_094..70_062//-2 |> Enum.map(&to_string/1)
+            }
           }
         }
-      })
-
-      conn = Plug.Conn.assign(conn, :global_cache_key_for_testing, cache_key)
+      end)
 
       conn = get(conn, "/api/global")
       stop_response = json_response(conn, 200)
