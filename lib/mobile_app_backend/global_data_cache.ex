@@ -109,12 +109,7 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
   def handle_info(:recalculate, %State{update_ms: update_ms} = state) do
     update_data(state.key)
 
-    if :persistent_term.get(state.key, nil) do
-      Process.send_after(self(), :recalculate, update_ms)
-    else
-      # no data yet, try again sooner
-      Process.send_after(self(), :recalculate, state.first_update_ms)
-    end
+    Process.send_after(self(), :recalculate, update_ms)
 
     {:noreply, state}
   end

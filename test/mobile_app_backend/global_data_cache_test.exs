@@ -1,6 +1,5 @@
 defmodule MobileAppBackend.GlobalDataCacheTest do
   use HttpStub.Case
-  import MobileAppBackend.Factory
   alias MobileAppBackend.GlobalDataCache
 
   test "gets data" do
