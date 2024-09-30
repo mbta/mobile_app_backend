@@ -6,6 +6,15 @@ defmodule MobileAppBackendWeb.HealthController do
   use MobileAppBackendWeb, :controller
 
   def index(conn, _params) do
-    send_resp(conn, :ok, "Ok")
+    backend = conn.private[:health_check_module] || MobileAppBackend.HealthCheck
+
+    {code, body} =
+      if backend.healthy?() do
+        {:ok, "Ok"}
+      else
+        {:service_unavailable, "Service Unavailable"}
+      end
+
+    send_resp(conn, code, body)
   end
 end
