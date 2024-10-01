@@ -4,22 +4,20 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
 
   @type predictions_for_stop :: %{Stop.id() => JsonApi.Object.full_map()}
 
-  @type subscribe_response ::
-          :error
-          | %{
-              predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
-              trips: %{Trip.id() => Trip.t()},
-              vehicles: %{Vehicle.id() => Vehicle.t()}
-            }
+  @type subscribe_response :: %{
+          predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
+          trips: %{Trip.id() => Trip.t()},
+          vehicles: %{Vehicle.id() => Vehicle.t()}
+        }
 
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
   """
-  @callback subscribe_for_stop(Stop.id()) :: :error | subscribe_response()
+  @callback subscribe_for_stop(Stop.id()) :: subscribe_response()
   @doc """
   Subscribe to prediction updates for multiple stops. For  parent stations, this subscribes to updates for all their child stops.
   """
-  @callback subscribe_for_stops([Stop.id()]) :: :error | subscribe_response()
+  @callback subscribe_for_stops([Stop.id()]) :: subscribe_response()
 end
 
 defmodule MobileAppBackend.Predictions.PubSub do
@@ -62,6 +60,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   @type state :: %{last_dispatched_table_name: atom()}
 
   @spec start_link(Keyword.t()) :: GenServer.on_start()
+  @spec start_link() :: :ignore | {:error, any()} | {:ok, pid()}
   def start_link(opts \\ []) do
     name = Keyword.get(opts, :name, __MODULE__)
 
@@ -74,40 +73,40 @@ defmodule MobileAppBackend.Predictions.PubSub do
 
   @impl true
   def subscribe_for_stops(stop_ids) do
-    with %{stops: all_stops_by_id} <- GlobalDataCache.get_data(),
-         stop_id_to_children <- Stop.stop_id_to_children(all_stops_by_id, stop_ids),
-         child_stop_ids <-
-           stop_id_to_children
-           |> Map.values()
-           |> List.flatten(),
-         {time_micros, :ok} <-
-           :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
-             stop_ids ++ child_stop_ids
-           ]) do
-      Logger.info(
-        "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000} "
+    %{stops: all_stops_by_id} = GlobalDataCache.get_data()
+    stop_id_to_children = Stop.stop_id_to_children(all_stops_by_id, stop_ids)
+
+    child_stop_ids =
+      stop_id_to_children
+      |> Map.values()
+      |> List.flatten()
+
+    {time_micros, :ok} =
+      :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_stops, [
+        stop_ids ++ child_stop_ids
+      ])
+
+    Logger.info(
+      "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000} "
+    )
+
+    all_predictions_data =
+      stop_ids
+      |> register_all_stops(stop_id_to_children)
+      |> Store.Predictions.fetch_with_associations()
+
+    predictions_by_stop =
+      group_predictions_for_stop(
+        all_predictions_data.predictions,
+        stop_ids,
+        stop_id_to_children
       )
 
-      all_predictions_data =
-        stop_ids
-        |> register_all_stops(stop_id_to_children)
-        |> Store.Predictions.fetch_with_associations()
-
-      predictions_by_stop =
-        group_predictions_for_stop(
-          all_predictions_data.predictions,
-          stop_ids,
-          stop_id_to_children
-        )
-
-      %{
-        predictions_by_stop: predictions_by_stop,
-        trips: all_predictions_data.trips,
-        vehicles: all_predictions_data.vehicles
-      }
-    else
-      _ -> :error
-    end
+    %{
+      predictions_by_stop: predictions_by_stop,
+      trips: all_predictions_data.trips,
+      vehicles: all_predictions_data.vehicles
+    }
   end
 
   @impl true
