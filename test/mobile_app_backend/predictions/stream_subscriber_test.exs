@@ -4,19 +4,25 @@ defmodule MobileAppBackend.Predictions.StreamSubscriberTest do
   alias MobileAppBackend.Predictions.StreamSubscriber
   import Mox
   import Test.Support.Helpers
-  import MobileAppBackend.Factory
 
   describe "subscribe_for_stops/1" do
     setup do
       verify_on_exit!()
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+
       reassign_env(:mobile_app_backend, MBTAV3API.Stream.StaticInstance, StaticInstanceMock)
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
     test "starts streams for to the routes served at the given stops and vehicles" do
-      expect(RepositoryMock, :routes, fn _, _ ->
-        ok_response([build(:route, id: "66"), build(:route, id: "39")])
-      end)
+      GlobalDataCacheMock
+      |> expect(:default_key, fn -> :default_key end)
+      |> expect(:route_ids_for_stops, fn _, _ -> ["66", "39"] end)
 
       StaticInstanceMock
       |> expect(:ensure_stream_started, fn "predictions:route:to_store:66",

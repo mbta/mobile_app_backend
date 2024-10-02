@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.GlobalDataCacheTest do
   use HttpStub.Case
+  import MobileAppBackend.Factory
   alias MobileAppBackend.GlobalDataCache
 
   test "gets data" do
@@ -125,6 +126,43 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
       })
 
       assert_receive :recalculate
+    end
+  end
+
+  describe "route_ids_for_stops/2" do
+    test "returns route ids for the given stops only" do
+      cache_key = make_ref()
+
+      start_link_supervised!({GlobalDataCache, key: cache_key})
+
+      :persistent_term.put(cache_key, %{
+        lines: %{},
+        pattern_ids_by_stop: %{
+          "stop_1" => ["66_1", "39_1"],
+          "stop_2" => ["66_2"],
+          "stop_3" => ["15_1"]
+        },
+        routes: %{
+          "66" => build(:route, id: "66"),
+          "39" => build(:route, id: "39"),
+          "15" => build(:route, id: "15")
+        },
+        route_patterns: %{
+          "66_1" => build(:route_pattern, id: "66_1", route_id: "66"),
+          "66_2" => build(:route_pattern, id: "66_2", route_id: "66"),
+          "39_1" => build(:route_pattern, id: "39_1", route_id: "39"),
+          "15_1" => build(:route_pattern, id: "15_1", route_id: "15")
+        },
+        stops: %{
+          "stop_1" => build(:stop, id: "stop_1"),
+          "stop_2" => build(:stop, id: "stop_2"),
+          "stop_3" => build(:stop, id: "stop_3")
+        },
+        trips: %{}
+      })
+
+      assert ["39", "66"] =
+               Enum.sort(GlobalDataCache.route_ids_for_stops(["stop_1", "stop_2"], cache_key))
     end
   end
 end

@@ -1,5 +1,7 @@
 defmodule MobileAppBackend.GlobalDataCache do
   use GenServer
+  alias MBTAV3API.Route
+  alias MBTAV3API.Stop
   alias MBTAV3API.{JsonApi, Repository}
   alias MBTAV3API.JsonApi.Object
 
@@ -26,6 +28,11 @@ defmodule MobileAppBackend.GlobalDataCache do
 
   @callback default_key :: key()
   @callback get_data(key()) :: data()
+
+  @doc """
+  Get the id of all routes that serve the given stops
+  """
+  @callback route_ids_for_stops([Stop.id()], key()) :: :error | [Route.id()]
 
   def start_link(opts \\ []) do
     Application.get_env(
@@ -66,6 +73,14 @@ defmodule MobileAppBackend.GlobalDataCache do
       MobileAppBackend.GlobalDataCache.Impl
     ).get_data(key)
   end
+
+  def route_ids_for_stops(stop_ids, key \\ default_key()) do
+    Application.get_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      MobileAppBackend.GlobalDataCache.Impl
+    ).route_ids_for_stops(stop_ids, key)
+  end
 end
 
 defmodule MobileAppBackend.GlobalDataCache.Impl do
@@ -90,9 +105,36 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
     :persistent_term.get(key, nil) || update_data(key)
   end
 
+  @impl true
+  def route_ids_for_stops(stop_ids, key \\ default_key()) do
+    data = :persistent_term.get(key, nil) || update_data(key)
+
+    if is_nil(data) do
+      :error
+    else
+      %{pattern_ids_by_stop: pattern_ids_by_stop, route_patterns: route_patterns} =
+        data
+
+      route_pattern_ids =
+        pattern_ids_by_stop
+        |> Map.take(stop_ids)
+        |> Enum.flat_map(fn {_stop_id, pattern_ids} -> pattern_ids end)
+        |> Enum.uniq()
+
+      routes =
+        route_patterns
+        |> Map.take(route_pattern_ids)
+        |> Enum.map(fn {_route_pattern_id, pattern} -> pattern.route_id end)
+        |> Enum.uniq()
+
+      routes
+    end
+  end
+
   @impl GenServer
   def init(opts \\ []) do
     opts = Keyword.merge(Application.get_env(:mobile_app_backend, GlobalDataCache), opts)
+
     first_update_ms = opts[:first_update_ms] || :timer.seconds(1)
 
     state = %State{
@@ -108,7 +150,6 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
   @impl GenServer
   def handle_info(:recalculate, %State{update_ms: update_ms} = state) do
     update_data(state.key)
-
     Process.send_after(self(), :recalculate, update_ms)
 
     {:noreply, state}
