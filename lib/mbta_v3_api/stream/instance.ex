@@ -24,12 +24,8 @@ defmodule MBTAV3API.Stream.Instance do
   @impl Supervisor
   def init(opts) do
     ref = make_ref()
-
     url = Keyword.fetch!(opts, :url)
     headers = Keyword.fetch!(opts, :headers)
-    type = Keyword.fetch!(opts, :type)
-    destination = Keyword.fetch!(opts, :destination)
-    name = Keyword.get(opts, :name)
 
     children = [
       {MobileAppBackend.SSE,
@@ -37,14 +33,40 @@ defmodule MBTAV3API.Stream.Instance do
        url: url,
        headers: headers,
        idle_timeout: :timer.seconds(45)},
-      {MBTAV3API.Stream.Consumer,
-       subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
-       destination: destination,
-       type: type,
-       name: name}
+      consumer_spec(Keyword.put(opts, :ref, ref))
     ]
 
-    Supervisor.init(children, strategy: :rest_for_one)
+    Supervisor.init(children, strategy: :one_for_all)
+  end
+
+  @spec consumer_spec(keyword()) :: {module(), keyword()}
+  @doc """
+  Build a spec for the stream consumer based on the :consumer argument.
+  Returns a `MBTAV3Api.StreamConsumer` spec by default if :consumer is not configured.
+  """
+  def consumer_spec(opts) do
+    ref = Keyword.fetch!(opts, :ref)
+    destination = Keyword.fetch!(opts, :destination)
+    type = Keyword.fetch!(opts, :type)
+    name = Keyword.get(opts, :name)
+
+    case Keyword.get(opts, :consumer) do
+      nil ->
+        {MBTAV3API.Stream.Consumer,
+         subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+         destination: destination,
+         type: type,
+         name: name}
+
+      %{store: store, scope: scope} ->
+        {MBTAV3API.Stream.ConsumerToStore,
+         subscribe_to: [{MBTAV3API.Stream.Registry.via_name(ref), []}],
+         destination: destination,
+         type: type,
+         name: name,
+         store: store,
+         scope: scope}
+    end
   end
 
   def check_health(pid) do
@@ -57,7 +79,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     {_, consumer_pid, _, _} =
       Enum.find(children, {nil, nil, nil, nil}, fn {_, _, _, [module]} ->
-        module == MBTAV3API.Stream.Consumer
+        module == MBTAV3API.Stream.Consumer || MBTAV3API.Stream.ConsumerToStore
       end)
 
     {stage_healthy, stage_info} = stage_health(sses_pid)
@@ -98,7 +120,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     consumer_dest =
       if consumer_alive do
-        %GenStage{state: %MBTAV3API.Stream.Consumer.State{destination: destination}} =
+        %GenStage{state: %{destination: destination}} =
           :sys.get_state(consumer_pid)
 
         case destination do
@@ -109,7 +131,7 @@ defmodule MBTAV3API.Stream.Instance do
 
     consumer_subscribers =
       if consumer_dest do
-        Registry.count_match(MBTAV3API.Stream.PubSub, consumer_dest, :_)
+        length(Registry.lookup(MBTAV3API.Stream.PubSub, consumer_dest))
       end
 
     healthy = consumer_alive

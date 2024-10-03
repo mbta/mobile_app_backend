@@ -14,7 +14,8 @@ defmodule MBTAV3API.AlertTest do
       :request,
       fn %Req.Request{url: %URI{path: "/alerts"}, options: %{params: params}} ->
         assert params == %{
-                 "fields[alert]" => "active_period,effect,effect_name,informed_entity,lifecycle",
+                 "fields[alert]" =>
+                   "active_period,cause,description,effect,effect_name,header,informed_entity,lifecycle,updated_at",
                  "filter[lifecycle]" => "NEW,ONGOING,ONGOING_UPCOMING",
                  "filter[stop]" =>
                    "9983,6542,1241,8281,place-boyls,8279,49002,6565,place-tumnl,145,place-pktrm,place-bbsta"
@@ -28,7 +29,10 @@ defmodule MBTAV3API.AlertTest do
                  "active_period" => [
                    %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T14:38:00-05:00"}
                  ],
+                 "cause" => "UNKNOWN_CAUSE",
+                 "description" => "Description 1",
                  "effect" => "DELAY",
+                 "header" => "Header 1",
                  "informed_entity" => [
                    %{
                      "activities" => ["BOARD", "EXIT", "RIDE"],
@@ -36,7 +40,8 @@ defmodule MBTAV3API.AlertTest do
                      "route_type" => 3
                    }
                  ],
-                 "lifecycle" => "NEW"
+                 "lifecycle" => "NEW",
+                 "updated_at" => "2024-02-08T14:38:00-05:00"
                },
                "id" => "552825",
                "links" => %{"self" => "/alerts/552825"},
@@ -47,7 +52,10 @@ defmodule MBTAV3API.AlertTest do
                  "active_period" => [
                    %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T12:55:00-05:00"}
                  ],
+                 "cause" => "UNRULY_PASSENGER",
+                 "description" => "Description 2",
                  "effect" => "DELAY",
+                 "header" => "Header 2",
                  "informed_entity" => [
                    %{
                      "activities" => ["BOARD", "EXIT", "RIDE"],
@@ -55,7 +63,8 @@ defmodule MBTAV3API.AlertTest do
                      "route_type" => 3
                    }
                  ],
-                 "lifecycle" => "NEW"
+                 "lifecycle" => "NEW",
+                 "updated_at" => "2024-02-08T12:55:00-05:00"
                },
                "id" => "552803",
                "links" => %{"self" => "/alerts/552803"},
@@ -93,7 +102,10 @@ defmodule MBTAV3API.AlertTest do
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 14:38:00], end: ~B[2024-02-08 19:12:40]}
                ],
+               cause: :unknown_cause,
+               description: "Description 1",
                effect: :delay,
+               header: "Header 1",
                informed_entity: [
                  %Alert.InformedEntity{
                    activities: [:board, :exit, :ride],
@@ -101,14 +113,18 @@ defmodule MBTAV3API.AlertTest do
                    route_type: :bus
                  }
                ],
-               lifecycle: :new
+               lifecycle: :new,
+               updated_at: ~B[2024-02-08 14:38:00]
              },
              %Alert{
                id: "552803",
                active_period: [
                  %Alert.ActivePeriod{start: ~B[2024-02-08 12:55:00], end: ~B[2024-02-08 19:12:40]}
                ],
+               cause: :unruly_passenger,
+               description: "Description 2",
                effect: :delay,
+               header: "Header 2",
                informed_entity: [
                  %Alert.InformedEntity{
                    activities: [:board, :exit, :ride],
@@ -116,7 +132,8 @@ defmodule MBTAV3API.AlertTest do
                    route_type: :bus
                  }
                ],
-               lifecycle: :new
+               lifecycle: :new,
+               updated_at: ~B[2024-02-08 12:55:00]
              }
            ]
   end
@@ -194,18 +211,25 @@ defmodule MBTAV3API.AlertTest do
                "active_period" => [
                  %{"start" => "2024-02-12T11:49:00-05:00", "end" => "2024-02-12T14:26:40-05:00"}
                ],
+               "cause" => "FIRE",
+               "description" => "Description",
                "effect" => "DELAY",
+               "header" => "Header",
                "informed_entity" => [
                  %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
                ],
-               "lifecycle" => "NEW"
+               "lifecycle" => "NEW",
+               "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
              id: "553407",
              active_period: [
                %Alert.ActivePeriod{start: ~B[2024-02-12 11:49:00], end: ~B[2024-02-12 14:26:40]}
              ],
+             cause: :fire,
+             description: "Description",
              effect: :delay,
+             header: "Header",
              informed_entity: [
                %Alert.InformedEntity{
                  activities: [:board, :exit, :ride],
@@ -213,7 +237,46 @@ defmodule MBTAV3API.AlertTest do
                  route_type: :bus
                }
              ],
-             lifecycle: :new
+             lifecycle: :new,
+             updated_at: ~B[2024-02-12 11:49:00]
+           }
+  end
+
+  test "unexpected enum values fall back" do
+    assert Alert.parse(%JsonApi.Item{
+             id: "553407",
+             attributes: %{
+               "active_period" => [
+                 %{"start" => "2024-02-12T11:49:00-05:00", "end" => "2024-02-12T14:26:40-05:00"}
+               ],
+               "cause" => "ALIENS",
+               "description" => "Description",
+               "effect" => "TELEPORTATION",
+               "header" => "Header",
+               "informed_entity" => [
+                 %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
+               ],
+               "lifecycle" => "NEW",
+               "updated_at" => "2024-02-12T11:49:00-05:00"
+             }
+           }) == %Alert{
+             id: "553407",
+             active_period: [
+               %Alert.ActivePeriod{start: ~B[2024-02-12 11:49:00], end: ~B[2024-02-12 14:26:40]}
+             ],
+             cause: :unknown_cause,
+             description: "Description",
+             effect: :unknown_effect,
+             header: "Header",
+             informed_entity: [
+               %Alert.InformedEntity{
+                 activities: [:board, :exit, :ride],
+                 route: "39",
+                 route_type: :bus
+               }
+             ],
+             lifecycle: :new,
+             updated_at: ~B[2024-02-12 11:49:00]
            }
   end
 end
