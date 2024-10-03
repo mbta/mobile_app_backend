@@ -210,8 +210,8 @@ defmodule MBTAV3API.Store.Predictions.Impl do
         fn data -> to_record(data) end
       )
 
-    :ets.insert(@predictions_table_name, Map.get(records_by_type, Prediction, []))
     :ets.insert(@trips_table_name, Map.get(records_by_type, Trip, []))
+    :ets.insert(@predictions_table_name, Map.get(records_by_type, Prediction, []))
   end
 
   defp clear_data(keys) do

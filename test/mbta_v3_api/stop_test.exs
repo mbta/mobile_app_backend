@@ -80,6 +80,34 @@ defmodule MBTAV3API.StopTest do
     end
   end
 
+  describe "stop_id_to_children/2" do
+    test "returns only the given stop ids with their :stop children" do
+      other_stop = build(:stop, id: "other")
+      standalone = build(:stop, id: "standalone")
+      child_stop = build(:stop, id: "child_stop", location_type: :stop)
+      node_stop = build(:stop, id: "child_node", location_type: :generic_node)
+
+      parent_stop =
+        build(:stop,
+          id: "parent",
+          location_type: :station,
+          child_stop_ids: ["child_stop", "child_node", "child_missing"]
+        )
+
+      assert %{"parent" => ["child_stop"], "standalone" => []} ==
+               Stop.stop_id_to_children(
+                 %{
+                   other_stop.id => other_stop,
+                   standalone.id => standalone,
+                   child_stop.id => child_stop,
+                   node_stop.id => node_stop,
+                   parent_stop.id => parent_stop
+                 },
+                 ["standalone", "parent"]
+               )
+    end
+  end
+
   describe "include_missing_siblings/1" do
     test "sibling stops which aren't included in the stop map are added to the stop map" do
       stops_with_missing_sibling = %{

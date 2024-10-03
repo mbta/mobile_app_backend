@@ -13,7 +13,7 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber do
   Ensure prediction streams have been started for every route served by the given stops
   and the stream of all vehicles has been started.
   """
-  @callback subscribe_for_stops([Stop.id()]) :: :ok
+  @callback subscribe_for_stops([Stop.id()]) :: :ok | :error
 
   def subscribe_for_stops(stop_ids) do
     Application.get_env(
@@ -28,21 +28,29 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
   @behaviour MobileAppBackend.Predictions.StreamSubscriber
 
   alias MBTAV3API.Stream.StaticInstance
+  alias MobileAppBackend.GlobalDataCache
+
+  require Logger
 
   @impl true
   def subscribe_for_stops(stop_ids) do
-    {:ok, %{data: routes}} = MBTAV3API.Repository.routes(filter: [stop: stop_ids])
+    case GlobalDataCache.route_ids_for_stops(stop_ids) do
+      :error ->
+        Logger.error("#{__MODULE__} failed to fetch route_ids_for_stops from global data")
+        :error
 
-    Enum.each(routes, fn %MBTAV3API.Route{id: route_id} ->
-      {:ok, _data} =
-        StaticInstance.ensure_stream_started("predictions:route:to_store:#{route_id}",
-          include_current_data: false
-        )
-    end)
+      route_ids ->
+        Enum.each(route_ids, fn route_id ->
+          {:ok, _data} =
+            StaticInstance.ensure_stream_started("predictions:route:to_store:#{route_id}",
+              include_current_data: false
+            )
+        end)
 
-    {:ok, _data} =
-      StaticInstance.ensure_stream_started("vehicles:to_store", include_current_data: false)
+        {:ok, _data} =
+          StaticInstance.ensure_stream_started("vehicles:to_store", include_current_data: false)
 
-    :ok
+        :ok
+    end
   end
 end
