@@ -1,5 +1,5 @@
 defmodule MBTAV3API.Stream.ConsumerTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Route

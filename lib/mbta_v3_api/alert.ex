@@ -7,11 +7,70 @@ defmodule MBTAV3API.Alert do
   @type t :: %__MODULE__{
           id: String.t(),
           active_period: [ActivePeriod.t()],
+          cause: cause(),
+          description: String.t() | nil,
           effect: effect(),
           effect_name: String.t() | nil,
+          header: String.t() | nil,
           informed_entity: [InformedEntity.t()],
-          lifecycle: lifecycle()
+          lifecycle: lifecycle(),
+          updated_at: DateTime.t()
         }
+
+  Util.declare_enum(
+    :cause,
+    Util.enum_values(:uppercase_string, [
+      :accident,
+      :amtrak,
+      :an_earlier_mechanical_problem,
+      :an_earlier_signal_problem,
+      :autos_impeding_service,
+      :coast_guard_restriction,
+      :congestion,
+      :construction,
+      :crossing_malfunction,
+      :demonstration,
+      :disabled_bus,
+      :disabled_train,
+      :drawbridge_being_raised,
+      :electrical_work,
+      :fire,
+      :fire_department_activity,
+      :flooding,
+      :fog,
+      :freight_train_interference,
+      :hazmat_condition,
+      :heavy_ridership,
+      :high_winds,
+      :holiday,
+      :hurricane,
+      :ice_in_harbor,
+      :maintenance,
+      :mechanical_problem,
+      :medical_emergency,
+      :other_cause,
+      :parade,
+      :police_action,
+      :police_activity,
+      :power_problem,
+      :severe_weather,
+      :signal_problem,
+      :slippery_rail,
+      :snow,
+      :special_event,
+      :speed_restriction,
+      :strike,
+      :switch_problem,
+      :technical_problem,
+      :tie_replacement,
+      :track_problem,
+      :track_work,
+      :traffic,
+      :unruly_passenger,
+      :unknown_cause,
+      :weather
+    ])
+  )
 
   Util.declare_enum(
     :effect,
@@ -44,6 +103,7 @@ defmodule MBTAV3API.Alert do
       :stop_closure,
       :stop_move,
       :stop_moved,
+      :stop_shoveling,
       :summary,
       :suspension,
       :track_change,
@@ -57,10 +117,33 @@ defmodule MBTAV3API.Alert do
   )
 
   @derive Jason.Encoder
-  defstruct [:id, :active_period, :effect, :effect_name, :informed_entity, :lifecycle]
+  defstruct [
+    :id,
+    :active_period,
+    :cause,
+    :description,
+    :effect,
+    :effect_name,
+    :header,
+    :informed_entity,
+    :lifecycle,
+    :updated_at
+  ]
 
   @impl JsonApi.Object
-  def fields, do: [:active_period, :effect, :effect_name, :informed_entity, :lifecycle]
+  def fields do
+    [
+      :active_period,
+      :cause,
+      :description,
+      :effect,
+      :effect_name,
+      :header,
+      :informed_entity,
+      :lifecycle,
+      :updated_at
+    ]
+  end
 
   @impl JsonApi.Object
   def includes, do: %{}
@@ -87,10 +170,14 @@ defmodule MBTAV3API.Alert do
     %__MODULE__{
       id: item.id,
       active_period: Enum.map(item.attributes["active_period"], &ActivePeriod.parse/1),
-      effect: parse_effect(item.attributes["effect"]),
+      cause: parse_cause(item.attributes["cause"], :unknown_cause),
+      description: item.attributes["description"],
+      effect: parse_effect(item.attributes["effect"], :unknown_effect),
       effect_name: item.attributes["effect_name"],
+      header: item.attributes["header"],
       informed_entity: Enum.map(item.attributes["informed_entity"], &InformedEntity.parse/1),
-      lifecycle: parse_lifecycle(item.attributes["lifecycle"])
+      lifecycle: parse_lifecycle(item.attributes["lifecycle"]),
+      updated_at: Util.parse_datetime!(item.attributes["updated_at"])
     }
   end
 end

@@ -1,7 +1,10 @@
 defmodule MBTAV3API.Stream.InstanceTest do
   use ExUnit.Case, async: true
 
+  alias MBTAV3API.Prediction
   alias MBTAV3API.Route
+  alias MBTAV3API.Stream
+
   alias Test.Support.SSEStub
 
   test "starts pipeline and sends messages" do
@@ -49,5 +52,52 @@ defmodule MBTAV3API.Stream.InstanceTest do
     assert log =~ "consumer_alive=true"
     assert log =~ "consumer_dest=#PID<"
     assert log =~ "consumer_subscribers=0"
+  end
+
+  test "restarts stream if consumer crashes" do
+    instance =
+      start_link_supervised!(
+        {MBTAV3API.Stream.Instance,
+         url: "https://example.com", headers: [{"a", "b"}], destination: self(), type: Route}
+      )
+
+    old_sse_stage = SSEStub.get_from_instance(instance)
+
+    {_id, consumer, _type, [Stream.Consumer]} =
+      instance
+      |> Supervisor.which_children()
+      |> Enum.find(fn {_id, _child, _type, [module]} -> module == Stream.Consumer end)
+
+    Process.exit(consumer, :simulating_crash)
+
+    # wait for the supervisor to restart things
+    Process.sleep(5)
+
+    new_sse_stage = SSEStub.get_from_instance(instance)
+
+    refute old_sse_stage == new_sse_stage
+  end
+
+  describe "consumer_spec/1" do
+    test "when not specified, returns default consumer" do
+      assert {Stream.Consumer, _spec} =
+               Stream.Instance.consumer_spec(
+                 destination: "topic",
+                 type: Prediction,
+                 name: "name",
+                 ref: "ref"
+               )
+    end
+
+    test "when store consumer specified, returns store consumer" do
+      assert {Stream.ConsumerToStore, _spec} =
+               Stream.Instance.consumer_spec(
+                 destination: "topic",
+                 type: Prediction,
+                 name: "name",
+                 consumer: %{store: MBTAV3API.Store.Predictions, scope: [route_id: "66"]},
+                 ref: "ref"
+               )
+    end
   end
 end

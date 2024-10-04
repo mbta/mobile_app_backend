@@ -12,6 +12,28 @@ config :sentry,
   enable_source_code_context: true,
   root_source_code_path: File.cwd!()
 
+config :mobile_app_backend, MobileAppBackend.AppCheck,
+  issuer: System.get_env("APP_CHECK_ISSUER"),
+  project: System.get_env("APP_CHECK_PROJECT"),
+  subjects:
+    "APP_CHECK_APP_IDS"
+    |> System.get_env("")
+    |> String.trim()
+    |> String.split(",")
+
+case System.get_env("MAPBOX_PRIMARY_TOKEN") do
+  primary_token when is_binary(primary_token) and primary_token != "" ->
+    config :mobile_app_backend, MobileAppBackend.ClientConfig,
+      mapbox_primary_token: primary_token,
+      mapbox_username: System.get_env("MAPBOX_USERNAME"),
+      token_expiration: :timer.minutes(30),
+      token_renewal: :timer.minutes(25)
+
+  _ ->
+    config :mobile_app_backend, MobileAppBackend.ClientConfig,
+      mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
+end
+
 if config_env() != :test do
   # mbta_v3_api configuration in disguise
   config :mobile_app_backend,

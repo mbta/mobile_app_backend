@@ -63,7 +63,7 @@ class PhoenixSocket:
         self.on_phoenix_message(join_ref, ref, topic, event, payload, len(message))
 
     def on_phoenix_message(self, join_ref, ref, topic, event, payload, response_length):
-       # print(f"Ref: {ref} event:  {event} all_open_pushes: {self.open_pushes} ")
+        name = "predictions:stops:v2" if "predictions:stops:v2" in topic else topic
         if (
             event == "phx_reply"
             and (push := self.open_pushes.pop(ref, None)) is not None
@@ -71,9 +71,10 @@ class PhoenixSocket:
             exception = None
             if payload["status"] == "error":
                 exception = ValueError(payload["response"])
+
             self.environment.events.request.fire(
                 request_type=f"WS:SEND {push.event}",
-                name=push.topic,
+                name=name,
                 response_time=(time.monotonic() - push.send_time) * 1000,
                 response_length=response_length,
                 response=payload,
@@ -84,7 +85,7 @@ class PhoenixSocket:
                 
                 self.environment.events.request.fire(
                 request_type=f"WS:RECV {event}",
-                name=topic,
+                name=name,
                 response_time=None,
                 response_length=response_length,
             )
@@ -93,7 +94,7 @@ class PhoenixSocket:
         else:
             self.environment.events.request.fire(
                 request_type=f"WS:RECV {event}",
-                name=topic,
+                name=name,
                 response_time=None,
                 response_length=response_length,
             )

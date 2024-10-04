@@ -12,6 +12,11 @@ defmodule MobileAppBackendWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug(MobileAppBackendWeb.Plugs.Etag)
+  end
+
+  pipeline :app_check do
+    plug(MobileAppBackendWeb.Plugs.AppCheck)
   end
 
   scope "/", MobileAppBackendWeb do
@@ -24,6 +29,11 @@ defmodule MobileAppBackendWeb.Router do
     get("/_health", HealthController, :index)
   end
 
+  scope "/api/protected", MobileAppBackendWeb do
+    pipe_through([:api, :app_check])
+    get("/config", ClientConfigController, :config)
+  end
+
   # Other scopes may use custom stacks.
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
@@ -33,7 +43,8 @@ defmodule MobileAppBackendWeb.Router do
     get("/shapes/rail", ShapesController, :rail)
     get("/shapes/map-friendly/rail", ShapesController, :rail)
     get("/stop/map", StopController, :map)
-
+    get("/trip", TripController, :trip)
+    get("/trip/map", TripController, :map)
     get("/schedules", ScheduleController, :schedules)
   end
 

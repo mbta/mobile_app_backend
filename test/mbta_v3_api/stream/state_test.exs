@@ -8,6 +8,88 @@ defmodule MBTAV3API.Stream.StateTest do
   alias MBTAV3API.Stream.State
   alias ServerSentEventStage.Event
 
+  def add_event do
+    {%Event{
+       event: "add",
+       data:
+         ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
+     },
+     %RoutePattern{
+       id: "Green-B-812-0",
+       direction_id: 0,
+       name: "Government Center - Boston College",
+       sort_order: 100_320_000,
+       typicality: :typical,
+       representative_trip_id: nil,
+       route_id: "Green-B"
+     }}
+  end
+
+  def update_event do
+    {
+      %Event{
+        event: "update",
+        data:
+          ~s({"attributes":{"latitude":-42.35302,"location_type":3,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
+      },
+      %Stop{
+        id: "place-boyls",
+        latitude: -42.35302,
+        longitude: 71.06459,
+        name: "Not Boylston",
+        location_type: :generic_node,
+        parent_station_id: nil
+      }
+    }
+  end
+
+  def remove_event do
+    {%Event{event: "remove", data: ~s({"id":"place-boyls","type":"stop"})},
+     %JsonApi.Reference{id: "place-boyls", type: "stop"}}
+  end
+
+  def reset_event do
+    {%Event{
+       event: "reset",
+       data:
+         ~s([{"attributes":{"latitude":42.377359,"location_type":1,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
+     },
+     %Stop{
+       id: "place-unsqu",
+       latitude: 42.377359,
+       longitude: -71.094761,
+       name: "Union Square",
+       location_type: :station,
+       parent_station_id: nil
+     }}
+  end
+
+  describe "parse_event/1" do
+    test "add" do
+      {event, parsed} = add_event()
+
+      assert {:add, [parsed]} == State.parse_event(event)
+    end
+
+    test "update" do
+      {event, parsed} = update_event()
+
+      assert {:update, [parsed]} == State.parse_event(event)
+    end
+
+    test "remove" do
+      {event, parsed} = remove_event()
+
+      assert {:remove, [parsed]} == State.parse_event(event)
+    end
+
+    test "reset" do
+      {event, parsed} = reset_event()
+
+      assert {:reset, [parsed]} == State.parse_event(event)
+    end
+  end
+
   describe "apply_events/2" do
     test "adds" do
       green_b = %Route{
@@ -23,24 +105,12 @@ defmodule MBTAV3API.Stream.StateTest do
 
       state = JsonApi.Object.to_full_map([green_b])
 
-      assert State.apply_events(state, [
-               %Event{
-                 event: "add",
-                 data:
-                   ~s({"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","relationships":{"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"})
-               }
-             ]) ==
+      {event, parsed} = add_event()
+
+      assert State.apply_events(state, [event]) ==
                JsonApi.Object.to_full_map([
                  green_b,
-                 %RoutePattern{
-                   id: "Green-B-812-0",
-                   direction_id: 0,
-                   name: "Government Center - Boston College",
-                   sort_order: 100_320_000,
-                   typicality: :typical,
-                   representative_trip_id: nil,
-                   route_id: "Green-B"
-                 }
+                 parsed
                ])
     end
 
@@ -56,9 +126,9 @@ defmodule MBTAV3API.Stream.StateTest do
           }
         ])
 
-      assert State.apply_events(state, [
-               %Event{event: "remove", data: ~s({"id":"place-boyls","type":"stop"})}
-             ]) == JsonApi.Object.to_full_map([])
+      {event, _parsed} = remove_event()
+
+      assert State.apply_events(state, [event]) == JsonApi.Object.to_full_map([])
     end
 
     test "updates" do
@@ -73,23 +143,10 @@ defmodule MBTAV3API.Stream.StateTest do
           }
         ])
 
-      assert State.apply_events(state, [
-               %Event{
-                 event: "update",
-                 data:
-                   ~s({"attributes":{"latitude":-42.35302,"location_type":3,"longitude":71.06459,"name":"Not Boylston"},"id":"place-boyls","type":"stop"})
-               }
-             ]) ==
-               JsonApi.Object.to_full_map([
-                 %Stop{
-                   id: "place-boyls",
-                   latitude: -42.35302,
-                   longitude: 71.06459,
-                   name: "Not Boylston",
-                   location_type: :generic_node,
-                   parent_station_id: nil
-                 }
-               ])
+      {event, parsed} = update_event()
+
+      assert State.apply_events(state, [event]) ==
+               JsonApi.Object.to_full_map([parsed])
     end
 
     test "resets" do
@@ -105,23 +162,10 @@ defmodule MBTAV3API.Stream.StateTest do
           }
         ])
 
-      assert State.apply_events(state, [
-               %Event{
-                 event: "reset",
-                 data:
-                   ~s([{"attributes":{"latitude":42.377359,"location_type":1,"longitude":-71.094761,"name":"Union Square"},"id":"place-unsqu","type":"stop"}])
-               }
-             ]) ==
-               JsonApi.Object.to_full_map([
-                 %Stop{
-                   id: "place-unsqu",
-                   latitude: 42.377359,
-                   longitude: -71.094761,
-                   name: "Union Square",
-                   location_type: :station,
-                   parent_station_id: nil
-                 }
-               ])
+      {event, parsed} = reset_event()
+
+      assert State.apply_events(state, [event]) ==
+               JsonApi.Object.to_full_map([parsed])
     end
   end
 end

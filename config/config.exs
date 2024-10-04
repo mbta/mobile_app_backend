@@ -10,6 +10,15 @@ import Config
 config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
+config :mobile_app_backend, MobileAppBackend.AppCheck,
+  jwks_url: "https://firebaseappcheck.googleapis.com/v1/jwks"
+
+config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
+
+config :mobile_app_backend, MBTAV3API.ResponseCache,
+  gc_interval: :timer.hours(1),
+  allocated_memory: 250_000_000
+
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],
@@ -25,6 +34,8 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 config :mobile_app_backend, MobileAppBackend.Search.Algolia,
   route_index: "routes_test",
   stop_index: "stops_test"
+
+config :mobile_app_backend, MobileAppBackend.GlobalDataCache, update_ms: :timer.minutes(5)
 
 config :mobile_app_backend, :logger, [
   {:handler, :sentry_handler, Sentry.LoggerHandler,

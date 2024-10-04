@@ -28,6 +28,17 @@ defmodule Util do
         "  end",
         "end",
         "",
+        "@spec parse_lifecycle(raw_lifecycle(), lifecycle()) :: lifecycle()",
+        "def parse_lifecycle(lifecycle, default) do",
+        "  case lifecycle do",
+        "    \\"NEW\\" -> :new",
+        "    \\"ONGOING\\" -> :ongoing",
+        "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
+        "    \\"UPCOMING\\" -> :upcoming",
+        "    _ -> default",
+        "  end",
+        "end",
+        "",
         "@spec serialize_lifecycle(lifecycle()) :: raw_lifecycle()",
         "def serialize_lifecycle(lifecycle) do",
         "  case lifecycle do",
@@ -56,6 +67,15 @@ defmodule Util do
         "  end",
         "end",
         "",
+        "@spec parse_x(raw_x(), x()) :: x()",
+        "def parse_x(x, default) do",
+        "  case x do",
+        "    0 -> :a",
+        "    1 -> :b",
+        "    _ -> default",
+        "  end",
+        "end",
+        "",
         "@spec serialize_x(x()) :: raw_x()",
         "def serialize_x(x) do",
         "  case x do",
@@ -80,6 +100,15 @@ defmodule Util do
         case a do
           "X" -> :x
           nil -> :y
+        end
+      end
+      #
+      @spec parse_a(raw_a(), a()) :: a()
+      def parse_a(a, default) do
+        case a do
+          "X" -> :x
+          nil -> :y
+          _ -> default
         end
       end
       #
@@ -111,6 +140,7 @@ defmodule Util do
     parse_fn = :"parse_#{name}"
     serialize_fn = :"serialize_#{name}"
     method_arg = Macro.var(name, __MODULE__)
+    default_arg = Macro.var(:default, __MODULE__)
     raw_type = :"raw_#{name}"
     raw_type_name = Macro.var(raw_type, nil)
 
@@ -124,6 +154,11 @@ defmodule Util do
         clause
       end)
 
+    parse_default_clause =
+      quote do
+        _ -> unquote(default_arg)
+      end
+
     serialize_clauses =
       Enum.map(values, fn {value, raw_value} ->
         [{:->, _, _} = clause] =
@@ -135,6 +170,7 @@ defmodule Util do
       end)
 
     parse_body = {:case, [], [method_arg, [do: parse_clauses]]}
+    parse_default_body = {:case, [], [method_arg, [do: parse_clauses ++ parse_default_clause]]}
     serialize_body = {:case, [], [method_arg, [do: serialize_clauses]]}
 
     quote do
@@ -144,6 +180,11 @@ defmodule Util do
       @spec unquote(parse_fn)(unquote(raw_type)()) :: unquote(name)()
       def unquote(parse_fn)(unquote(method_arg)) do
         unquote(parse_body)
+      end
+
+      @spec unquote(parse_fn)(unquote(raw_type)(), unquote(name)()) :: unquote(name)()
+      def unquote(parse_fn)(unquote(method_arg), unquote(default_arg)) do
+        unquote(parse_default_body)
       end
 
       @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()
@@ -234,30 +275,22 @@ defmodule Util do
 
       iex> import Test.Support.Sigils
       iex> Util.datetime_to_gtfs(~B[2024-03-12 10:55:39])
-      {~D[2024-03-12], "10:55"}
+      ~D[2024-03-12]
       iex> Util.datetime_to_gtfs(~B[2024-03-12 00:19:03])
-      {~D[2024-03-11], "24:19"}
+      ~D[2024-03-11]
       iex> Util.datetime_to_gtfs(~B[2024-03-12 01:23:45])
-      {~D[2024-03-11], "25:23"}
+      ~D[2024-03-11]
       iex> Util.datetime_to_gtfs(~B[2024-03-12 02:11:00])
-      {~D[2024-03-12], "02:11"}
+      ~D[2024-03-12]
   """
-  @spec datetime_to_gtfs(DateTime.t()) :: {Date.t(), String.t()}
-  def datetime_to_gtfs(
-        %DateTime{hour: hour, minute: minute, time_zone: "America/New_York"} = datetime
-      ) do
+  @spec datetime_to_gtfs(DateTime.t()) :: Date.t()
+  def datetime_to_gtfs(%DateTime{hour: hour, time_zone: "America/New_York"} = datetime) do
     date = DateTime.to_date(datetime)
 
-    {date, hour} =
-      if hour in [0, 1] do
-        {Date.add(date, -1), hour + 24}
-      else
-        {date, hour}
-      end
-
-    hour = to_string(hour) |> String.pad_leading(2, "0")
-    minute = to_string(minute) |> String.pad_leading(2, "0")
-
-    {date, "#{hour}:#{minute}"}
+    if hour in [0, 1] do
+      Date.add(date, -1)
+    else
+      date
+    end
   end
 end

@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "mix_task",
+            "request": "launch",
+            "name": "mix phx.server",
+            "task": "phx.server",
+            "taskArgs": [],
+            "projectDir": "${workspaceRoot}",
+            "debugAutoInterpretAllModules": false,
+            "exitAfterTaskReturns": false
+        },
+    ]
+}

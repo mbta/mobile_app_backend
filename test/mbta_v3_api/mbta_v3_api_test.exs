@@ -1,9 +1,10 @@
 defmodule MBTAV3APITest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   import Mox
   import Test.Support.Helpers
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.JsonApi.Reference
+  alias MBTAV3API.{JsonApi, ResponseCache}
   alias Test.Support.SSEStub
 
   setup _ do
@@ -85,7 +86,7 @@ defmodule MBTAV3APITest do
              headers: headers,
              options: %{params: [other: "value"]}
            } ->
-          assert {"x-api-key", "test_key"} in headers
+          assert {"x-api-key", ["test_key"]} in headers
           {:ok, Req.Response.json(%{data: []})}
         end
       )
@@ -108,6 +109,111 @@ defmodule MBTAV3APITest do
       )
 
       %JsonApi{} = MBTAV3API.get_json("/without_api_key", [], api_key: nil)
+    end
+  end
+
+  describe "get_json/1 caching" do
+    setup do
+      on_exit(fn -> ResponseCache.delete_all() end)
+    end
+
+    test "when no response in the cache, stores it after fetching" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/normal_response"}} ->
+          {:ok, Req.Response.json(%{data: [%{"type" => "prediction", "id" => "p_1"}]})}
+        end
+      )
+
+      response = MBTAV3API.get_json("/normal_response")
+      assert %JsonApi{} = response
+
+      assert {_time, ^response} =
+               ResponseCache.get!(ResponseCache.cache_key("/normal_response", %{}))
+    end
+
+    test "when response in the cache and new data, stores new data" do
+      cache_key = ResponseCache.cache_key("/normal_response", %{})
+
+      ResponseCache.put(
+        cache_key,
+        {"last_modified",
+         %{
+           data: [%{"type" => "prediction", "id" => "p_1"}]
+         }}
+      )
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/normal_response"},
+             headers: headers
+           } ->
+          assert ["last_modified"] == Map.get(headers, "if-modified-since")
+
+          {:ok,
+           Req.Response.json(%{data: [%{"type" => "prediction", "id" => "p_2"}]})
+           |> Req.Response.put_header("last-modified", "new_last_modified")}
+        end
+      )
+
+      response = MBTAV3API.get_json("/normal_response")
+      assert %JsonApi{data: [%Reference{type: "prediction", id: "p_2"}]} = response
+
+      assert {"new_last_modified", ^response} =
+               ResponseCache.get!(cache_key)
+    end
+
+    test "when response in the cache and 304, returns cached data" do
+      cache_key = ResponseCache.cache_key("/normal_response", %{})
+
+      old_data = %JsonApi{
+        data: [%Reference{type: "prediction", id: "p_1"}]
+      }
+
+      ResponseCache.put(cache_key, {"last_modified", old_data})
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/normal_response"},
+             headers: headers
+           } ->
+          assert ["last_modified"] == Map.get(headers, "if-modified-since")
+          {:ok, Req.Response.new(%{status: 304})}
+        end
+      )
+
+      assert ^old_data = MBTAV3API.get_json("/normal_response")
+
+      assert {"last_modified", ^old_data} = ResponseCache.get!(cache_key)
+    end
+
+    test "when error, returns error" do
+      cache_key = ResponseCache.cache_key("/normal_response", %{})
+
+      old_data = %JsonApi{
+        data: [%Reference{type: "prediction", id: "p_1"}]
+      }
+
+      ResponseCache.put(cache_key, {"last_modified", old_data})
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/normal_response"},
+             headers: headers
+           } ->
+          assert ["last_modified"] == Map.get(headers, "if-modified-since")
+          {:error, Req.Response.new(%{status: 500})}
+        end
+      )
+
+      assert {:error, %Req.Response{status: 500}} = MBTAV3API.get_json("/normal_response")
     end
   end
 
