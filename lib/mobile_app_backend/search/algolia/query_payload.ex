@@ -25,7 +25,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
   def for_index(:stop, query) do
     Algolia.Index.index_name(:stop)
     |> new(query)
-    |> with_hit_size(2)
+    |> with_hit_size(10)
   end
 
   defp new(index_name, query) do
