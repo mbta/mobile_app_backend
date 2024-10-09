@@ -2,6 +2,7 @@ defmodule MobileAppBackendWeb.VehiclesForRouteChannel do
   use MobileAppBackendWeb, :channel
 
   alias MBTAV3API.JsonApi
+  alias MBTAV3API.Stream
   alias MBTAV3API.Vehicle
 
   @throttle_ms 500
@@ -13,7 +14,7 @@ defmodule MobileAppBackendWeb.VehiclesForRouteChannel do
       {:ok, throttler} =
         MobileAppBackend.Throttler.start_link(target: self(), cast: :send_data, ms: @throttle_ms)
 
-      {:ok, vehicle_data} = MBTAV3API.Stream.StaticInstance.subscribe("vehicles")
+      {:ok, vehicle_data} = Stream.StaticInstance.subscribe("vehicles")
 
       vehicle_data = filter_data(vehicle_data, [route_id], direction_id)
 
@@ -31,23 +32,29 @@ defmodule MobileAppBackendWeb.VehiclesForRouteChannel do
 
   @impl true
   def join("vehicles:routes:" <> topic_param_concat, _payload, socket) do
-    with {:ok, route_ids, direction_id} <- parse_params(topic_param_concat) do
-      {:ok, throttler} =
-        MobileAppBackend.Throttler.start_link(target: self(), cast: :send_data, ms: @throttle_ms)
+    case parse_params(topic_param_concat) do
+      {:ok, route_ids, direction_id} ->
+        {:ok, throttler} =
+          MobileAppBackend.Throttler.start_link(
+            target: self(),
+            cast: :send_data,
+            ms: @throttle_ms
+          )
 
-      {:ok, vehicle_data} = MBTAV3API.Stream.StaticInstance.subscribe("vehicles")
+        {:ok, vehicle_data} = Stream.StaticInstance.subscribe("vehicles")
 
-      vehicle_data = filter_data(vehicle_data, route_ids, direction_id)
+        vehicle_data = filter_data(vehicle_data, route_ids, direction_id)
 
-      {:ok, vehicle_data,
-       assign(socket,
-         data: vehicle_data,
-         route_ids: route_ids,
-         direction_id: direction_id,
-         throttler: throttler
-       )}
-    else
-      :error -> {:error, %{code: :missing_param}}
+        {:ok, vehicle_data,
+         assign(socket,
+           data: vehicle_data,
+           route_ids: route_ids,
+           direction_id: direction_id,
+           throttler: throttler
+         )}
+
+      _ ->
+        {:error, %{code: :missing_param}}
     end
   end
 
