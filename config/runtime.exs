@@ -26,8 +26,8 @@ case System.get_env("MAPBOX_PRIMARY_TOKEN") do
     config :mobile_app_backend, MobileAppBackend.ClientConfig,
       mapbox_primary_token: primary_token,
       mapbox_username: System.get_env("MAPBOX_USERNAME"),
-      token_expiration: :timer.minutes(30),
-      token_renewal: :timer.minutes(25)
+      token_expiration: :timer.minutes(2),
+      token_renewal: :timer.minutes(1)
 
   _ ->
     config :mobile_app_backend, MobileAppBackend.ClientConfig,
