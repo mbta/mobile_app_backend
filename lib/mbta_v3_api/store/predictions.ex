@@ -95,7 +95,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
           Store.timed_fetch(
             @trips_table_name,
             trip_match_specs,
-            "fetch_keys=#{inspect(trip_fetch_keys_list)}"
+            "trip_count=#{inspect(length(trip_fetch_keys_list))}"
           )
 
     vehicles =
@@ -193,7 +193,6 @@ defmodule MBTAV3API.Store.Predictions.Impl do
 
       case reference do
         %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
-        %{type: "trip", id: id} -> :ets.delete(@trips_table_name, id)
         _ -> :ok
       end
     end
