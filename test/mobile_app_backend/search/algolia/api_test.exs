@@ -67,7 +67,7 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
       assert "fake_url/1/indexes/*/queries" == url
 
-      assert ~s({"requests":[{"indexName":"stops_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=2&query=1"},{"indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=5&query=1"}]}) ==
+      assert ~s({"requests":[{"indexName":"stops_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=10&query=1"},{"indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=5&query=1"}]}) ==
                body
 
       assert [

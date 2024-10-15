@@ -29,7 +29,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                index_name: "fake_stop_index",
                params: %{
                  "query" => "testString",
-                 "hitsPerPage" => 2,
+                 "hitsPerPage" => 10,
                  "clickAnalytics" => true,
                  "analytics" => false
                }
