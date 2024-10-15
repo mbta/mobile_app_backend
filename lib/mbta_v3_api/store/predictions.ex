@@ -189,11 +189,25 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   @impl true
   def process_remove(references) do
     for reference <- references do
-      Logger.info("#{__MODULE__} process_remove #{inspect(reference)}")
-
       case reference do
-        %{type: "prediction", id: id} -> :ets.delete(@predictions_table_name, id)
-        _ -> :ok
+        %{type: "prediction", id: id} ->
+          Logger.info("#{__MODULE__} process_remove type=prediction id=#{id}")
+          :ets.delete(@predictions_table_name, id)
+
+        %{type: "trip", id: id} ->
+          exsiting_predictions_for_trip = fetch(trip_id: id)
+
+          if Enum.empty?(exsiting_predictions_for_trip) do
+            Logger.info("#{__MODULE__} process_remove type=trip id=#{id}")
+            :ets.delete(@trips_table_name, id)
+          else
+            Logger.info(
+              "#{__MODULE__} process_remove skipping removal type=trip id=#{id} remaining_prediction_count=#{length(exsiting_predictions_for_trip)}"
+            )
+          end
+
+        _ ->
+          :ok
       end
     end
 
