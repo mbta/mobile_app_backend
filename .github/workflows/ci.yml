@@ -90,6 +90,8 @@ jobs:
       - name: Run tests
         run: mix test --cover
       - name: Report test coverage
+        # Disabled due to dependency issues
+        if: false
         uses: mbta/github-actions-report-lcov@v1
         with:
           coverage-files: cover/lcov.info
