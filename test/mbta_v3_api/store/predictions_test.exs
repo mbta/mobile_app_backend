@@ -83,10 +83,55 @@ defmodule MBTAV3API.Store.PredictionsTest do
           ])
         end)
 
-      assert msg =~ "process_remove %MBTAV3API.JsonApi.Reference{type: \"prediction\", id: \"1\"}"
-      assert msg =~ "process_remove %MBTAV3API.JsonApi.Reference{type: \"trip\", id: \"trip_1\"}"
+      assert msg =~ "process_remove type=prediction id=1"
+      assert msg =~ "process_remove type=trip id=trip_1"
 
       assert JsonApi.Object.to_full_map([prediction_2, trip_2]) ==
+               Store.Predictions.fetch_with_associations(stop_id: "12345")
+    end
+
+    @tag :capture_log
+    test "process_remove when trip still has predictions on another route, trip not deleted", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      set_log_level(:info)
+
+      trip_1_prediction_other_route = %{
+        prediction_1
+        | id: "other_prediction_trip_1",
+          route_id: "OTHER_ROUTE"
+      }
+
+      Store.Predictions.process_upsert(:add, [
+        prediction_1,
+        prediction_2,
+        trip_1_prediction_other_route,
+        trip_1,
+        trip_2
+      ])
+
+      msg =
+        capture_log([level: :info], fn ->
+          Store.Predictions.process_remove([
+            %Reference{type: "prediction", id: prediction_1.id},
+            %Reference{type: "trip", id: trip_1.id}
+          ])
+        end)
+
+      assert msg =~ "process_remove type=prediction id=1"
+
+      assert msg =~
+               "process_remove skipping removal type=trip id=trip_1 remaining_prediction_count=1"
+
+      assert JsonApi.Object.to_full_map([
+               prediction_2,
+               trip_1_prediction_other_route,
+               trip_1,
+               trip_2
+             ]) ==
                Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
 
