@@ -80,26 +80,26 @@ defmodule MBTAV3API.RoutePattern do
     |> Enum.group_by(& &1.stop_id, & &1.route_pattern_id)
   end
 
-  @spec most_canonical_or_typical_per_route([t()]) :: [t()]
+  @spec canonical_or_most_typical_per_route([t()]) :: [t()]
   @doc """
-  Filter the list of route patterns to include only the most canonical or most typical patterns for each route.
-  Where there are multiple canonical patterns, returns the canonical patterns with the lowest typicality (ignoring undefined).
+  Filter the list of route patterns to include only the canonical or most typical patterns for each route.
+  Where there are multiple canonical patterns, returns the canonical patterns.
   When there are no canonical route patterns for a route, returns the ones with the lowest typicality.
   """
-  def most_canonical_or_typical_per_route(route_patterns) do
+  def canonical_or_most_typical_per_route(route_patterns) do
     route_patterns
     |> Enum.group_by(& &1.route_id)
-    |> Enum.flat_map(fn {_route_id, patterns} -> most_canonical_or_typical(patterns) end)
+    |> Enum.flat_map(fn {_route_id, patterns} -> canonical_or_most_typical(patterns) end)
   end
 
-  @spec most_canonical_or_typical([t()]) :: [t()]
-  # Filter the list of route patterns to include only the most canonical or most typical patterns
-  defp most_canonical_or_typical(route_patterns) do
+  @spec canonical_or_most_typical([t()]) :: [t()]
+  # Filter the list of route patterns to include only the canonical or most typical patterns
+  defp canonical_or_most_typical(route_patterns) do
     canonical_patterns = Enum.filter(route_patterns, & &1.canonical)
 
     case canonical_patterns do
       [] -> most_typical(route_patterns)
-      canonical_patterns -> most_typical(canonical_patterns)
+      canonical_patterns -> canonical_patterns
     end
   end
 
