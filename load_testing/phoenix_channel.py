@@ -67,6 +67,8 @@ class PhoenixSocket:
             name = "predictions:stops:v2"
         elif "vehicles:routes" in topic:
             name = "vehicles:routes"
+        elif "predictions:trip" in topic:
+            name = "predictions:trip"
         else: 
             name = topic
         if (

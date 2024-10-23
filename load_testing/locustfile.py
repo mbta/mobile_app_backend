@@ -32,22 +32,21 @@ all_routes: list[dict] = requests.get(
 ).json()["data"]
 
 class MobileAppUser(HttpUser, PhoenixChannelUser):
-    wait_time = between(5, 20)
+    wait_time = between(1, 2)
     socket_path = "/socket"
 
     prob_reset_initial_load = 0.02
-    prob_reset_location = 0.3
     prob_reset_nearby_stops = 0.3
-    prob_filtered_stop_details = 1
+    prob_filtered_stop_details = 0.76
 
     location: dict | None = None
     nearby_stop_ids: list[str] | None = None
     alerts_channel: PhoenixChannel | None = None
-    stops_channel: PhoenixChannel | None = None
+    predictions_channel: PhoenixChannel | None = None
     vehicles_channel: PhoenixChannel | None = None
     did_initial_load = False
 
-    @task 
+    @task(1)
     def initial_app_load(self):
         should_reset = not self.did_initial_load or random.random() < self.prob_reset_initial_load
         if should_reset:
@@ -57,14 +56,15 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             if self.alerts_channel is not None:
                     self.alerts_channel.leave()
                     self.alerts_channel = None
-            if self.alerts_channel is None:
-                nearby_stops_concat = ",".join(self.nearby_stop_ids)
-                self.alerts_channel = self.socket.channel("alerts")
-                self.alerts_channel.join()
+            
+            nearby_stops_concat = ",".join(self.nearby_stop_ids)
+            self.alerts_channel = self.socket.channel("alerts")
+            self.alerts_channel.join()
+            
             self.did_initial_load = True
 
 
-    @task
+    @task(2)
     def nearby_transit(self):
         nearby_rail_ids = random.sample(rail_stop_ids, random.randint(2,8))
         nearby_cr_ids = random.sample(cr_stop_ids, random.randint(0,14))
@@ -72,35 +72,35 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
        
         self.nearby_stop_ids = nearby_rail_ids + nearby_cr_ids + nearby_bus_ids
         if (
-            self.stops_channel is not None
+            self.predictions_channel is not None
             and random.random() < self.prob_reset_nearby_stops
         ):
-            self.stops_channel.leave()
-            self.stops_channel = None
-        if self.stops_channel is None:
+            self.predictions_channel.leave()
+            self.predictions_channel = None
+
             nearby_stops_concat = ",".join(self.nearby_stop_ids)
-            self.stops_channel = self.socket.channel(
+            self.predictions_channel = self.socket.channel(
                 f'predictions:stops:v2:{nearby_stops_concat}'
             )
-            self.stops_channel.join()
+            self.predictions_channel.join()
 
 
-    @task
+    @task(1)
     def stop_details(self):
         selected_stop_id = random.choice(all_stop_ids)
         self.client.get(f'/api/schedules?stop_ids={selected_stop_id}&date_time={datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()}', name="/api/schedules")
         self.client.get(f'/api/stop/map?stop_id={selected_stop_id}', name = "/api/stop/map")
        
         if (
-            self.stops_channel is not None
+            self.predictions_channel is not None
         ):
-            self.stops_channel.leave()
-            self.stops_channel = None
-        if self.stops_channel is None:
-            self.stops_channel = self.socket.channel(
-                f'predictions:stops:v2:{selected_stop_id}'
-            )
-            self.stops_channel.join()
+            self.predictions_channel.leave()
+            self.predictions_channel = None
+
+        self.predictions_channel = self.socket.channel(
+            f'predictions:stops:v2:{selected_stop_id}'
+        )
+        self.predictions_channel.join()
 
         if (random.random() < self.prob_filtered_stop_details):
             if (self.vehicles_channel is not None):
@@ -109,10 +109,41 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
 
             route = random.choice(all_routes)
 
-            if (self.vehicles_channel is None):
-                self.vehicles_channel = self.socket.channel(
-                    f'vehicles:routes:{route["id"]}:0'
-                )
-                self.vehicles_channel.join()
-                self.stops_channel.join()
+            self.vehicles_channel = self.socket.channel(
+                f'vehicles:routes:{route["id"]}:0'
+            )
+            self.vehicles_channel.join()
 
+    @task(1)
+    def trip_details(self):
+        stop_id = random.choice(all_stop_ids)
+        predictions_for_stop = requests.get(
+            "https://api-v3.mbta.com/predictions", 
+            {"stop": stop_id}).json()["data"]
+        if (len(predictions_for_stop) != 0):
+            prediction = predictions_for_stop[0]
+            trip_id = prediction["relationships"]["trip"]["data"]["id"]
+            route_id = prediction["relationships"]["route"]["data"]["id"]
+
+        
+            self.client.get(f'/api/schedules?trip_id={trip_id}', name="/api/schedules/trip")
+            self.client.get(f'/api/trip/map?trip_id={trip_id}', name = "/api/trip/map")
+        
+            if (
+                self.predictions_channel is not None
+            ):
+                self.predictions_channel.leave()
+                self.predictions_channel = None
+            self.predictions_channel = self.socket.channel(
+                f'predictions:trip:{trip_id}'
+            )
+            self.predictions_channel.join()
+
+            if (self.vehicles_channel is not None):
+                self.vehicles_channel.leave()
+                self.vehicles_channel = None
+
+            self.vehicles_channel = self.socket.channel(
+                f'vehicles:routes:{route_id}:0'
+            )
+            self.vehicles_channel.join()
