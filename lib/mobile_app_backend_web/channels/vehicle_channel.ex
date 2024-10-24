@@ -1,49 +1,23 @@
 defmodule MobileAppBackendWeb.VehicleChannel do
   use MobileAppBackendWeb, :channel
 
-  alias MBTAV3API.JsonApi
-  alias MBTAV3API.Vehicle
-
-  @throttle_ms 500
-
   @impl true
   def join("vehicle:id:" <> vehicle_id, _payload, socket) do
-    {:ok, throttler} =
-      MobileAppBackend.Throttler.start_link(target: self(), cast: :send_data, ms: @throttle_ms)
+    pubsub_module =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.Vehicles.PubSub,
+        MobileAppBackend.Vehicles.PubSub
+      )
 
-    {:ok, vehicle_data} = MBTAV3API.Stream.StaticInstance.subscribe("vehicles")
+    vehicle = pubsub_module.subscribe(vehicle_id)
 
-    vehicle_data = filter_data(vehicle_data, vehicle_id)
-
-    {:ok, vehicle_data,
-     assign(socket,
-       data: vehicle_data,
-       vehicle_id: vehicle_id,
-       throttler: throttler
-     )}
+    {:ok, %{vehicle: vehicle}, socket}
   end
 
   @impl true
-  def handle_info({:stream_data, "vehicles", all_vehicles_data}, socket) do
-    old_data = socket.assigns.data
-    new_data = filter_data(all_vehicles_data, socket.assigns.vehicle_id)
-
-    if old_data != new_data do
-      MobileAppBackend.Throttler.request(socket.assigns.throttler)
-    end
-
-    socket = assign(socket, data: new_data)
+  def handle_info({:new_vehicles, vehicle}, socket) do
+    :ok = push(socket, "stream_data", %{vehicle: vehicle})
     {:noreply, socket}
-  end
-
-  @impl true
-  def handle_cast(:send_data, socket) do
-    :ok = push(socket, "stream_data", socket.assigns.data)
-    {:noreply, socket}
-  end
-
-  @spec filter_data(JsonApi.Object.full_map(), String.t()) :: %{vehicle: Vehicle.t() | nil}
-  defp filter_data(all_vehicles_data, vehicle_id) do
-    %{vehicle: Map.get(all_vehicles_data.vehicles, vehicle_id)}
   end
 end

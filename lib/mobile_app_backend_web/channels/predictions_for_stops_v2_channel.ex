@@ -31,14 +31,7 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
   @spec handle_info({:new_predictions, any()}, Phoenix.Socket.t()) ::
           {:noreply, Phoenix.Socket.t()}
   def handle_info({:new_predictions, new_predictions_for_stop}, socket) do
-    {time_micros, _result} =
-      :timer.tc(fn ->
-        :ok = push(socket, "stream_data", new_predictions_for_stop)
-      end)
-
-    Logger.info("#{__MODULE__} push duration=#{time_micros / 1000}")
-
-    require Logger
+    :ok = push(socket, "stream_data", new_predictions_for_stop)
     {:noreply, socket}
   end
 end

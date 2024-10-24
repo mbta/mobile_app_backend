@@ -141,8 +141,4 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
       }
     ]
   end
-
-  defp args_for_topic("vehicles") do
-    [type: MBTAV3API.Vehicle, url: "/vehicles", topic: "vehicles"]
-  end
 end

@@ -1,12 +1,14 @@
 defmodule MobileAppBackendWeb.VehicleChannelTest do
+  alias MobileAppBackendWeb.VehicleChannel
   use MobileAppBackendWeb.ChannelCase
 
-  import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
   import MobileAppBackend.Factory
-  alias MBTAV3API.Stream
-  alias Test.Support.FakeStaticInstance
+  import Mox
+  import Test.Support.Helpers
 
   setup do
+    reassign_env(:mobile_app_backend, MobileAppBackend.Vehicles.PubSub, VehiclesPubSubMock)
+
     {:ok, socket} = connect(MobileAppBackendWeb.UserSocket, %{})
 
     %{socket: socket}
@@ -14,56 +16,34 @@ defmodule MobileAppBackendWeb.VehicleChannelTest do
 
   test "returns vehicle data on join", %{socket: socket} do
     target = build(:vehicle)
-    other = build(:vehicle)
 
-    start_link_supervised!(
-      {FakeStaticInstance, topic: "vehicles", data: to_full_map([target, other])}
-    )
+    expect(VehiclesPubSubMock, :subscribe, 1, fn _ -> target end)
 
     {:ok, reply, _socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
 
     assert reply == %{vehicle: target}
   end
 
-  describe "handles incoming vehicles messages" do
-    setup %{socket: socket} do
-      target = build(:vehicle)
-      other = build(:vehicle)
+  test "handles incoming vehicles messages", %{socket: socket} do
+    target = build(:vehicle)
+    expect(VehiclesPubSubMock, :subscribe, 1, fn _ -> target end)
 
-      start_link_supervised!(
-        {FakeStaticInstance, topic: "vehicles", data: to_full_map([target, other])}
-      )
+    {:ok, _reply, socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
 
-      {:ok, _reply, _socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
-      {:ok, %{target: target, other: other}}
-    end
+    VehicleChannel.handle_info({:new_vehicles, target}, socket)
 
-    test "returns nil when there is no longer data for the vehicle", %{
-      other: other
-    } do
-      broadcast_vehicles([other])
+    assert_push "stream_data", %{vehicle: ^target}
+  end
 
-      assert_push "stream_data", data
-      assert %{vehicle: nil} = data
-    end
+  test "returns nil when there is no longer data for the vehicle", %{socket: socket} do
+    target = build(:vehicle)
 
-    test "returns updated vehicle", %{target: target, other: other} do
-      updated_target = %{target | current_status: :stopped_at}
+    expect(VehiclesPubSubMock, :subscribe, 1, fn _ -> target end)
 
-      broadcast_vehicles([updated_target, other])
+    {:ok, _reply, socket} = subscribe_and_join(socket, "vehicle:id:#{target.id}")
 
-      assert_push "stream_data", data
-      assert %{vehicle: ^updated_target} = data
-    end
+    VehicleChannel.handle_info({:new_vehicles, nil}, socket)
 
-    test "when vehicle data hasn't changed, doesn't push", %{target: target} do
-      broadcast_vehicles([target])
-
-      refute_push "stream_data", _
-    end
-
-    defp broadcast_vehicles(vehicles) do
-      Stream.PubSub.broadcast!("vehicles", {:stream_data, "vehicles", to_full_map(vehicles)})
-    end
+    assert_push "stream_data", %{vehicle: nil}
   end
 end
