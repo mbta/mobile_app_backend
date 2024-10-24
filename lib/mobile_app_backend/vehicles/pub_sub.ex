@@ -1,11 +1,15 @@
 defmodule MobileAppBackend.Vehicles.PubSub.Behaviour do
-  alias MBTAV3API.JsonApi
-  alias MBTAV3API.Vehicle
+  alias MBTAV3API.{Route, Vehicle}
 
   @doc """
   Subscribe to vehicle updates for the given routes & direction
   """
   @callback subscribe_for_routes([Route.id()], 0 | 1) :: [Vehicle.t()]
+
+  @doc """
+  Subscribe to updates for the given vehicle
+  """
+  @callback subscribe(Vehicle.id()) :: Vehicle.t() | nil
 end
 
 defmodule MobileAppBackend.Vehicles.PubSub do
@@ -19,7 +23,7 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   2. When there is a reset event of the underlying vehicle stream.
   """
   use GenServer
-  alias MBTAV3API.{JsonApi, Store, Stream}
+  alias MBTAV3API.{Store, Stream}
   alias MobileAppBackend.Vehicles.PubSub
 
   @behaviour PubSub.Behaviour
@@ -28,8 +32,11 @@ defmodule MobileAppBackend.Vehicles.PubSub do
 
   @fetch_registry_key :fetch_registry_key
 
-  @type registry_value :: Store.fetch_keys()
-  @type broadcast_message :: {:stream_data, JsonApi.Object.vehicle_map()}
+  @typedoc """
+  tuple {fetch_keys, format_fn} where format_fn transforms the data returned
+  into the format expected by subscribers.
+  """
+  @type registry_value :: {Store.fetch_keys(), function()}
 
   @type state :: %{last_dispatched_table_name: atom()}
 
@@ -52,10 +59,32 @@ defmodule MobileAppBackend.Vehicles.PubSub do
     Registry.register(
       MobileAppBackend.Vehicles.Registry,
       @fetch_registry_key,
-      route_fetch_key_pairs
+      {route_fetch_key_pairs, fn data -> data end}
     )
 
     Store.Vehicles.fetch(route_fetch_key_pairs)
+  end
+
+  @impl true
+  def subscribe(vehicle_id) do
+    fetch_keys = [id: vehicle_id]
+
+    format_fn = fn data ->
+      case data do
+        [vehicle | _shouldnt_be_rest] -> vehicle
+        _ -> nil
+      end
+    end
+
+    Registry.register(
+      MobileAppBackend.Vehicles.Registry,
+      @fetch_registry_key,
+      {fetch_keys, format_fn}
+    )
+
+    fetch_keys
+    |> Store.Vehicles.fetch()
+    |> format_fn.()
   end
 
   @impl GenServer
@@ -95,7 +124,7 @@ defmodule MobileAppBackend.Vehicles.PubSub do
     Registry.dispatch(MobileAppBackend.Vehicles.Registry, @fetch_registry_key, fn entries ->
       Enum.group_by(
         entries,
-        fn {_, fetch_keys} -> fetch_keys end,
+        fn {_, {fetch_keys, format_fn}} -> {fetch_keys, format_fn} end,
         fn {pid, _} -> pid end
       )
       |> Enum.each(fn {registry_value, pids} ->
@@ -107,20 +136,28 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   end
 
   defp broadcast_new_vehicles(
-         fetch_keys,
+         {fetch_keys, format_fn} = registry_value,
          pids,
          last_dispatched_table_name
        ) do
-    new_vehicles = Store.Vehicles.fetch(fetch_keys)
+    new_vehicles =
+      fetch_keys
+      |> Store.Vehicles.fetch()
+      |> format_fn.()
 
-    last_dispatched_entry = :ets.lookup(last_dispatched_table_name, fetch_keys)
+    last_dispatched_entry = :ets.lookup(last_dispatched_table_name, registry_value)
 
     if !vehicles_already_broadcast(last_dispatched_entry, new_vehicles) do
-      broadcast_vehicles(pids, new_vehicles, fetch_keys, last_dispatched_table_name)
+      broadcast_vehicles(pids, new_vehicles, registry_value, last_dispatched_table_name)
     end
   end
 
-  defp broadcast_vehicles(pids, vehicles, fetch_keys, last_dispatched_table_name) do
+  defp broadcast_vehicles(
+         pids,
+         vehicles,
+         {fetch_keys, _format_fn} = registry_value,
+         last_dispatched_table_name
+       ) do
     Logger.info("#{__MODULE__} broadcasting to pids len=#{length(pids)}")
 
     {time_micros, _result} =
@@ -133,7 +170,7 @@ defmodule MobileAppBackend.Vehicles.PubSub do
       "#{__MODULE__} broadcast_to_pids fetch_keys=#{inspect(fetch_keys)} duration=#{time_micros / 1000}"
     )
 
-    :ets.insert(last_dispatched_table_name, {fetch_keys, vehicles})
+    :ets.insert(last_dispatched_table_name, {registry_value, vehicles})
   end
 
   defp vehicles_already_broadcast([], _new_vehicles) do

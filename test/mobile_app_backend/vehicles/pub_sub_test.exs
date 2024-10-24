@@ -29,7 +29,7 @@ defmodule MobileAppBackend.Vehicles.PubSubTests do
     end
   end
 
-  describe "subscribe_for_routes/1" do
+  describe "subscribe_for_routes/2" do
     test "returns initial data for the given routes" do
       vehicle_1 = build(:vehicle, id: "v_1")
       vehicle_2 = build(:vehicle, id: "v_2")
@@ -42,6 +42,26 @@ defmodule MobileAppBackend.Vehicles.PubSubTests do
       end)
 
       assert [vehicle_1, vehicle_2] == PubSub.subscribe_for_routes(["123", "456"], 1)
+    end
+  end
+
+  describe "subscribe/1" do
+    test "returns initial data for the given vehicle" do
+      vehicle_1 = build(:vehicle, id: "v_1")
+
+      expect(VehiclesStoreMock, :fetch, fn [id: "v_1"] ->
+        [vehicle_1]
+      end)
+
+      assert vehicle_1 == PubSub.subscribe("v_1")
+    end
+
+    test "returns nil when no vehicle" do
+      expect(VehiclesStoreMock, :fetch, fn [id: "v_1"] ->
+        []
+      end)
+
+      assert nil == PubSub.subscribe("v_1")
     end
   end
 
