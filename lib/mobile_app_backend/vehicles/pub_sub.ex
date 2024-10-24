@@ -61,7 +61,6 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   @impl GenServer
   def init(opts \\ []) do
     if Keyword.get(opts, :start_stream?, true) do
-      Logger.error("STARTING STREAM")
       Stream.StaticInstance.subscribe("vehicles:to_store")
     end
 
