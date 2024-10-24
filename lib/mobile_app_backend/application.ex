@@ -31,10 +31,13 @@ defmodule MobileAppBackend.Application do
         MobileAppBackend.MapboxTokenRotator,
         MobileAppBackend.Predictions.Registry,
         MobileAppBackend.Predictions.PubSub,
-        MobileAppBackend.Vehicles.Registry,
-        {MobileAppBackend.Vehicles.PubSub,
-         start_stream?: Application.get_env(:mobile_app_backend, :start_vehicle_stream?, true)}
+        MobileAppBackend.Vehicles.Registry
       ] ++
+        if Application.get_env(:mobile_app_backend, :start_vehicle_pub_sub?, true) do
+          [MobileAppBackend.Vehicles.PubSub]
+        else
+          []
+        end ++
         if start_global_cache? do
           [MobileAppBackend.GlobalDataCache]
         else
