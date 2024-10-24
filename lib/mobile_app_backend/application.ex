@@ -30,7 +30,10 @@ defmodule MobileAppBackend.Application do
         {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
         MobileAppBackend.MapboxTokenRotator,
         MobileAppBackend.Predictions.Registry,
-        MobileAppBackend.Predictions.PubSub
+        MobileAppBackend.Predictions.PubSub,
+        MobileAppBackend.Vehicles.Registry,
+        {MobileAppBackend.Vehicles.PubSub,
+         start_stream?: Application.get_env(:mobile_app_backend, :start_vehicle_stream?, true)}
       ] ++
         if start_global_cache? do
           [MobileAppBackend.GlobalDataCache]
