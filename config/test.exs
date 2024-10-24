@@ -15,6 +15,10 @@ config :mobile_app_backend, start_global_cache?: false
 
 config :mobile_app_backend, start_vehicle_stream?: false
 
+# sufficiently long so that there are not timed broadcasts during tests
+config :mobile_app_backend, vehicles_broadcast_interval_ms: 60_000
+
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
