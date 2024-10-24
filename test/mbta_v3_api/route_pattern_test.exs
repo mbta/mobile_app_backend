@@ -29,7 +29,7 @@ defmodule MBTAV3API.RoutePatternTest do
            }
   end
 
-  describe "most_canonical_or_typical_per_route/1" do
+  describe "canonical_or_most_typical_per_route/1" do
     test "when no canonical routes, returns all patterns with the lowest non-nil typicality" do
       [nil, :typical, :deviation, :atypical, :diversion, :canonical_only]
 
@@ -41,7 +41,7 @@ defmodule MBTAV3API.RoutePatternTest do
       rps_5 = build_list(2, :route_pattern, %{typicality: :canonical_only})
 
       assert ^rps_1 =
-               RoutePattern.most_canonical_or_typical_per_route(
+               RoutePattern.canonical_or_most_typical_per_route(
                  rps_5 ++ rps_0 ++ rps_4 ++ rps_1 ++ rps_3 ++ rps_2
                )
     end
@@ -56,8 +56,8 @@ defmodule MBTAV3API.RoutePatternTest do
       rps_4 = build_list(2, :route_pattern, %{typicality: :diversion})
       rps_5 = build_list(2, :route_pattern, %{typicality: :canonical_only, canonical: true})
 
-      assert ^rps_1 =
-               RoutePattern.most_canonical_or_typical_per_route(
+      assert rps_5 ++ rps_1 ==
+               RoutePattern.canonical_or_most_typical_per_route(
                  rps_5 ++ rps_0 ++ rps_4 ++ rps_1 ++ rps_3 ++ rps_2
                )
     end
@@ -73,7 +73,7 @@ defmodule MBTAV3API.RoutePatternTest do
       rps_5 = build_list(2, :route_pattern, %{typicality: :canonical_only, canonical: true})
 
       assert ^rps_5 =
-               RoutePattern.most_canonical_or_typical_per_route(
+               RoutePattern.canonical_or_most_typical_per_route(
                  rps_0 ++ rps_1 ++ rps_2 ++ rps_3 ++ rps_4 ++ rps_5
                )
     end
