@@ -51,10 +51,10 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     vehicles_channel: PhoenixChannel | None = None
     did_initial_load = False
 
-    headers: dict = {}
+    v3_api_headers: dict = {}
 
     def on_start(self):
-        self.headers = {"x-api-key" : self.environment.parsed_options.api_key}
+        self.v3_api_headers = {"x-api-key" : self.environment.parsed_options.api_key}
         self.app_reload()
 
     @task(1)
@@ -128,7 +128,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.stop_id = random.choice(all_stop_ids)
         predictions_for_stop = requests.get(
             "https://api-v3.mbta.com/predictions", 
-            params={"stop": self.stop_id}, headers=self.headers).json()["data"]
+            params={"stop": self.stop_id}, v3_api_headers=self.v3_api_headers).json()["data"]
         if (len(predictions_for_stop) != 0):
             prediction = predictions_for_stop[0]
             trip_id = prediction["relationships"]["trip"]["data"]["id"]
