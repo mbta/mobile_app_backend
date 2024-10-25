@@ -1,11 +1,11 @@
 import datetime
 import random
-import requests
-
-from locust import HttpUser, between, events, task
-from phoenix_channel import PhoenixChannel, PhoenixChannelUser
 from zoneinfo import ZoneInfo
 
+import requests
+from locust import HttpUser, between, events, task
+
+from phoenix_channel import PhoenixChannel, PhoenixChannelUser
 
 all_stop_ids: list[str] = list(map(lambda stop: stop["id"],requests.get(
     "https://api-v3.mbta.com/stops",
