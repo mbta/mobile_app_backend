@@ -58,7 +58,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         self.v3_api_headers = {"x-api-key" : self.environment.parsed_options.api_key}
         self.app_reload()
 
-  #  @task(1)
+    @task(1)
     def app_reload(self):
         self.client.get("/api/global")
         self.client.get("/api/shapes/map-friendly/rail")
@@ -73,7 +73,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         self.did_initial_load = True
 
 
-  #  @task(10)
+    @task(10)
     def nearby_transit(self):
         nearby_rail_ids = random.sample(rail_stop_ids, random.randint(2,8))
         nearby_cr_ids = random.sample(cr_stop_ids, random.randint(0,14))
@@ -123,7 +123,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             )
             self.vehicles_channel.join()
 
- #   @task(5)
+    @task(5)
     def trip_details(self):
         if self.stop_id is None:
             self.stop_id = random.choice(all_stop_ids)
