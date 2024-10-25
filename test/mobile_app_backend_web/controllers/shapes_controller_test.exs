@@ -11,7 +11,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
     end
 
-    test "when separate_overlapping_segments is true, returns non-overlapping segments for the most canonical direction 0 route patterns with the associated shape",
+    test "when separate_overlapping_segments is true, returns non-overlapping segments for the canonical direction 0 route patterns with the associated shape",
          %{conn: conn} do
       red_route = build(:route, id: "Red")
       andrew = build(:stop, id: "andrew", location_type: :station)
@@ -164,7 +164,7 @@ defmodule MobileAppBackendWeb.ShapeControllerTest do
                map_friendly_route_shapes
     end
 
-    test "when separate_overlapping_segments is not set, returns a segment per route pattern for the most canonical direction 0 route patterns with the associated shape",
+    test "when separate_overlapping_segments is not set, returns a segment per route pattern for the canonical direction 0 route patterns with the associated shape",
          %{conn: conn} do
       red_route = build(:route, id: "Red")
       andrew = build(:stop, id: "andrew", location_type: :station)

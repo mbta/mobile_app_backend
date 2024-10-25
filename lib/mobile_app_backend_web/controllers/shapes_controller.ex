@@ -85,7 +85,7 @@ defmodule MobileAppBackendWeb.ShapesController do
       route_patterns_by_id
       |> Map.values()
       |> Enum.filter(&(&1.direction_id == 0))
-      |> RoutePattern.most_canonical_or_typical_per_route()
+      |> RoutePattern.canonical_or_most_typical_per_route()
 
     trip_ids =
       patterns

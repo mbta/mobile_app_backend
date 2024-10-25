@@ -63,7 +63,14 @@ class PhoenixSocket:
         self.on_phoenix_message(join_ref, ref, topic, event, payload, len(message))
 
     def on_phoenix_message(self, join_ref, ref, topic, event, payload, response_length):
-        name = "predictions:stops:v2" if "predictions:stops:v2" in topic else topic
+        if "predictions:stops:v2" in topic:
+            name = "predictions:stops:v2"
+        elif "vehicles:routes" in topic:
+            name = "vehicles:routes"
+        elif "predictions:trip" in topic:
+            name = "predictions:trip"
+        else: 
+            name = topic
         if (
             event == "phx_reply"
             and (push := self.open_pushes.pop(ref, None)) is not None
