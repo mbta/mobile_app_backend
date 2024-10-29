@@ -33,4 +33,23 @@ defmodule MBTAV3API.RouteTest do
              line_id: "line-Green"
            }
   end
+
+  test "override_colors/2" do
+    assert %Route{id: "Orange-Shuttle", color: "right_color", text_color: "right_text_color"} =
+             Route.override_colors(
+               %Route{
+                 id: "Orange-Shuttle",
+                 color: "wrong_color",
+                 text_color: "wrong_ext_color",
+                 direction_destinations: [],
+                 direction_names: [],
+                 long_name: "Orange Shuttle",
+                 short_name: "OS",
+                 sort_order: 123,
+                 type: :bus,
+                 line_id: "line-Orange"
+               },
+               %{color: "right_color", text_color: "right_text_color"}
+             )
+  end
 end

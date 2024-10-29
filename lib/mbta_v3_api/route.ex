@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Route do
+  alias MBTAV3API.Line
   use MBTAV3API.JsonApi.Object
   require Util
 
@@ -74,5 +75,10 @@ defmodule MBTAV3API.Route do
       line_id: JsonApi.Object.get_one_id(item.relationships["line"]),
       route_pattern_ids: JsonApi.Object.get_many_ids(item.relationships["route_patterns"])
     }
+  end
+
+  @spec override_colors(t(), Line.t()) :: t()
+  def override_colors(route, %{color: color, text_color: text_color}) do
+    %__MODULE__{route | color: color, text_color: text_color}
   end
 end

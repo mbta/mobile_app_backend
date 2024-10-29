@@ -3,6 +3,7 @@ defmodule MBTAV3API.RepositoryTest do
 
   import Mox
 
+  alias MBTAV3API.Route
   alias MBTAV3API.{Alert, Repository, RoutePattern, Stop}
   import Test.Support.Sigils
 
@@ -220,6 +221,206 @@ defmodule MBTAV3API.RepositoryTest do
                 }
               ]
             }} = Repository.route_patterns([])
+  end
+
+  describe "routes/2" do
+    test "fetches routes with included line data" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/routes"}, options: %{params: %{"include" => "line"}}} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 attributes: %{
+                   color: "ED8B00",
+                   description: "Rapid Transit",
+                   direction_destinations: [
+                     "Forest Hills",
+                     "Oak Grove"
+                   ],
+                   direction_names: [
+                     "South",
+                     "North"
+                   ],
+                   fare_class: "Rapid Transit",
+                   long_name: "Orange Line",
+                   short_name: "",
+                   sort_order: 10_020,
+                   text_color: "FFFFFF",
+                   type: 1
+                 },
+                 id: "Orange",
+                 links: %{
+                   self: "/routes/Orange"
+                 },
+                 relationships: %{
+                   line: %{
+                     data: %{
+                       id: "line-Orange",
+                       type: "line"
+                     }
+                   }
+                 },
+                 type: "route"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Route{
+                    id: "Orange",
+                    long_name: "Orange Line"
+                  }
+                ]
+              }} = Repository.routes([])
+    end
+
+    test "adds included line to existing params" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/routes"},
+             options: %{
+               params: %{"include" => "line,route_patterns", "fields[route]" => "short_name"}
+             }
+           } ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 attributes: %{
+                   color: "ED8B00",
+                   description: "Rapid Transit",
+                   direction_destinations: [
+                     "Forest Hills",
+                     "Oak Grove"
+                   ],
+                   direction_names: [
+                     "South",
+                     "North"
+                   ],
+                   fare_class: "Rapid Transit",
+                   long_name: "Orange Line",
+                   short_name: "",
+                   sort_order: 10_020,
+                   text_color: "FFFFFF",
+                   type: 1
+                 },
+                 id: "Orange",
+                 links: %{
+                   self: "/routes/Orange"
+                 },
+                 relationships: %{
+                   line: %{
+                     data: %{
+                       id: "line-Orange",
+                       type: "line"
+                     }
+                   }
+                 },
+                 type: "route"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Route{
+                    id: "Orange",
+                    long_name: "Orange Line"
+                  }
+                ]
+              }} = Repository.routes(include: :route_patterns, fields: [route: [:short_name]])
+    end
+
+    test "overrides route color with line color" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{
+             url: %URI{path: "/routes"},
+             options: %{
+               params: %{"include" => "line,route_patterns", "fields[route]" => "short_name"}
+             }
+           } ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 attributes: %{
+                   color: "FFC72C",
+                   description: "Rail Replacement Bus",
+                   direction_destinations: [
+                     "Forest Hills",
+                     "Back Bay"
+                   ],
+                   direction_names: [
+                     "South",
+                     "North"
+                   ],
+                   fare_class: "Free",
+                   long_name: "Forest Hills - Back Bay",
+                   short_name: "Orange Line Shuttle",
+                   sort_order: 60_491,
+                   text_color: "000000",
+                   type: 3
+                 },
+                 id: "Shuttle-BackBayForestHills",
+                 links: %{
+                   self: "/routes/Shuttle-BackBayForestHills"
+                 },
+                 relationships: %{
+                   line: %{
+                     data: %{
+                       id: "line-Orange",
+                       type: "line"
+                     }
+                   }
+                 },
+                 type: "route"
+               }
+             ],
+             included: [
+               %{
+                 attributes: %{
+                   color: "ED8B00",
+                   long_name: "Orange Line",
+                   short_name: "",
+                   sort_order: 10_020,
+                   text_color: "FFFFFF"
+                 },
+                 id: "line-Orange",
+                 links: %{
+                   self: "/lines/line-Orange"
+                 },
+                 type: "line"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Route{
+                    id: "Shuttle-BackBayForestHills",
+                    color: "ED8B00",
+                    text_color: "FFFFFF"
+                  }
+                ]
+              }} = Repository.routes(include: :route_patterns, fields: [route: [:short_name]])
+    end
   end
 
   test "stops/2" do
