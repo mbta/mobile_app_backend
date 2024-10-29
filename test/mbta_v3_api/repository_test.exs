@@ -224,11 +224,11 @@ defmodule MBTAV3API.RepositoryTest do
   end
 
   describe "routes/2" do
-    test "fetches routes with included line data" do
+    test "fetches routes" do
       expect(
         MobileAppBackend.HTTPMock,
         :request,
-        fn %Req.Request{url: %URI{path: "/routes"}, options: %{params: %{"include" => "line"}}} ->
+        fn %Req.Request{url: %URI{path: "/routes"}, options: _params} ->
           {:ok,
            Req.Response.json(%{
              data: [
@@ -279,68 +279,6 @@ defmodule MBTAV3API.RepositoryTest do
                   }
                 ]
               }} = Repository.routes([])
-    end
-
-    test "adds included line to existing params" do
-      expect(
-        MobileAppBackend.HTTPMock,
-        :request,
-        fn %Req.Request{
-             url: %URI{path: "/routes"},
-             options: %{
-               params: %{"include" => "line,route_patterns", "fields[route]" => "short_name"}
-             }
-           } ->
-          {:ok,
-           Req.Response.json(%{
-             data: [
-               %{
-                 attributes: %{
-                   color: "ED8B00",
-                   description: "Rapid Transit",
-                   direction_destinations: [
-                     "Forest Hills",
-                     "Oak Grove"
-                   ],
-                   direction_names: [
-                     "South",
-                     "North"
-                   ],
-                   fare_class: "Rapid Transit",
-                   long_name: "Orange Line",
-                   short_name: "",
-                   sort_order: 10_020,
-                   text_color: "FFFFFF",
-                   type: 1
-                 },
-                 id: "Orange",
-                 links: %{
-                   self: "/routes/Orange"
-                 },
-                 relationships: %{
-                   line: %{
-                     data: %{
-                       id: "line-Orange",
-                       type: "line"
-                     }
-                   }
-                 },
-                 type: "route"
-               }
-             ]
-           })}
-        end
-      )
-
-      assert {:ok,
-              %{
-                data: [
-                  %Route{
-                    id: "Orange",
-                    long_name: "Orange Line"
-                  }
-                ]
-              }} = Repository.routes(include: :route_patterns, fields: [route: [:short_name]])
     end
 
     test "overrides route color with line color" do
@@ -419,7 +357,11 @@ defmodule MBTAV3API.RepositoryTest do
                     text_color: "FFFFFF"
                   }
                 ]
-              }} = Repository.routes(include: :route_patterns, fields: [route: [:short_name]])
+              }} =
+               Repository.routes(
+                 include: [:line, :route_patterns],
+                 fields: [route: [:short_name]]
+               )
     end
   end
 

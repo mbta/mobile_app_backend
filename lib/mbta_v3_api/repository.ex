@@ -69,8 +69,6 @@ defmodule MBTAV3API.Repository.Impl do
   @behaviour MBTAV3API.Repository
   alias MBTAV3API.JsonApi
 
-  alias MBTAV3API.Route
-
   @impl true
   def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
 
@@ -78,31 +76,7 @@ defmodule MBTAV3API.Repository.Impl do
   def route_patterns(params, opts \\ []), do: all(MBTAV3API.RoutePattern, params, opts)
 
   @impl true
-  def routes(params, opts \\ []) do
-    existing_included =
-      params
-      |> Keyword.get(:include, [])
-      |> List.wrap()
-
-    params = Keyword.merge(params, include: [:line | existing_included])
-
-    with {:ok, %{data: data, included: %{lines: lines}} = response} <-
-           all(MBTAV3API.Route, params, opts) do
-      {:ok, %{response | data: override_route_color(data, lines)}}
-    end
-  end
-
-  defp override_route_color(data, lines) when is_list(data) do
-    Enum.map(data, fn route ->
-      line = Map.get(lines, route.line_id)
-
-      if is_nil(line) do
-        route
-      else
-        Route.override_colors(route, line)
-      end
-    end)
-  end
+  def routes(params, opts \\ []), do: all(MBTAV3API.Route, params, opts)
 
   @impl true
   def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
