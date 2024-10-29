@@ -4,11 +4,15 @@ defmodule MobileAppBackendWeb.ScheduleController do
   alias MBTAV3API.Repository
 
   def schedules(conn, %{"stop_ids" => stop_ids, "date_time" => date_time}) do
-    {:ok, data} =
-      get_filter(stop_ids, date_time)
-      |> fetch_schedules()
+    if stop_ids == "" do
+      json(conn, %{schedules: [], trips: %{}})
+    else
+      {:ok, data} =
+        get_filter(stop_ids, date_time)
+        |> fetch_schedules()
 
-    json(conn, data)
+      json(conn, data)
+    end
   end
 
   def schedules(conn, %{"trip_id" => trip_id}) do

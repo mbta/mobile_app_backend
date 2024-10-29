@@ -66,7 +66,7 @@ defmodule MobileAppBackend.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:ex_machina, "~> 2.7.0", only: :test},
+      {:ex_machina, "~> 2.8.0", only: :test},
       {:mox, "~> 1.0", only: :test},
       {:nebulex, "~>2.6.3"},
       {:uniq, "~> 0.6", only: :test},

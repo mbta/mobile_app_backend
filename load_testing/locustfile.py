@@ -1,5 +1,6 @@
 import datetime
 import random
+from zoneinfo import ZoneInfo
 
 import requests
 from locust import HttpUser, between, events, task
@@ -96,7 +97,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     @task(5)
     def stop_details(self):
         self.stop_id = random.choice(all_stop_ids)
-        self.client.get(f'/api/schedules?stop_ids={self.stop_id}&date_time={datetime.datetime.now().astimezone().replace(microsecond=0).isoformat()}' , name="/api/schedules",)
+        self.client.get(f'/api/schedules?stop_ids={self.stop_id}&date_time={datetime.datetime.now().astimezone(ZoneInfo("America/New_York")).replace(microsecond=0).isoformat()}' , name="/api/schedules",)
         self.client.get(f'/api/stop/map?stop_id={self.stop_id}', name = "/api/stop/map")
        
         if (
@@ -128,7 +129,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.stop_id = random.choice(all_stop_ids)
         predictions_for_stop = requests.get(
             "https://api-v3.mbta.com/predictions", 
-            params={"stop": self.stop_id}, v3_api_headers=self.v3_api_headers).json()["data"]
+            params={"stop": self.stop_id}, headers=self.v3_api_headers).json()["data"]
         if (len(predictions_for_stop) != 0):
             prediction = predictions_for_stop[0]
             trip_id = prediction["relationships"]["trip"]["data"]["id"]

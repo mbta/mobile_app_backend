@@ -93,6 +93,11 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
            } = json_response(conn, 200)
   end
 
+  test "gracefully handles empty stops", %{conn: conn} do
+    conn = get(conn, "/api/schedules", %{stop_ids: "", date_time: "2024-10-28T15:29:06-04:00"})
+    assert json_response(conn, 200) == %{"schedules" => [], "trips" => %{}}
+  end
+
   test "finds individual trip schedules if available", %{conn: conn} do
     trip = %MBTAV3API.Trip{
       id: "61723264",
