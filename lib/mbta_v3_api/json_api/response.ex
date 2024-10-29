@@ -13,8 +13,8 @@ defmodule MBTAV3API.JsonApi.Response do
   @spec parse(JsonApi.t()) :: t(JsonApi.Object.t())
   def parse(%JsonApi{data: data, included: included}) do
     %__MODULE__{
-      data: Enum.map(data, &JsonApi.Object.parse/1),
-      included: included |> Enum.map(&JsonApi.Object.parse/1) |> to_full_map()
+      data: Enum.map(data, &JsonApi.Object.parse(&1, included)),
+      included: included |> Enum.map(&JsonApi.Object.parse(&1, included)) |> to_full_map()
     }
   end
 end

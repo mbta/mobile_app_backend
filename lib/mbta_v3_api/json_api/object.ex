@@ -3,6 +3,7 @@ defmodule MBTAV3API.JsonApi.Object do
   Shared logic for all objects that can be represented as JSON:API resources.
   """
   alias MBTAV3API.JsonApi
+  alias MBTAV3API.Route
 
   @doc """
   JSON:API type name for the object this module represents.
@@ -16,6 +17,7 @@ defmodule MBTAV3API.JsonApi.Object do
   Map of related objects that can be included to their struct modules. `%{trip: MBTAV3API.Trip, stops: MBTAV3API.Stop, parent_station: MBTAV3API.Stop}`, etc. Names should match `defstruct/1`.
   """
   @callback includes :: %{atom() => module()}
+
   @doc """
   If needed, a custom serialize function.
 
@@ -180,10 +182,12 @@ defmodule MBTAV3API.JsonApi.Object do
 
   Preserving references is probably not still useful now that we are never nesting objects.
   """
-  @spec parse(JsonApi.Item.t()) :: t()
-  @spec parse(JsonApi.Reference.t()) :: JsonApi.Reference.t()
-  def parse(%JsonApi.Item{type: type} = item), do: module_for(type).parse(item)
-  def parse(%JsonApi.Reference{} = ref), do: ref
+  @spec parse(JsonApi.Item.t(), [JsonApi.Item.t()]) :: t()
+  @spec parse(JsonApi.Reference.t(), [JsonApi.Item.t()]) :: JsonApi.Reference.t()
+  def parse(item, included \\ [])
+  def parse(%JsonApi.Item{type: "route"} = item, included), do: Route.parse(item, included)
+  def parse(%JsonApi.Item{type: type} = item, _included), do: module_for(type).parse(item)
+  def parse(%JsonApi.Reference{} = ref, _included), do: ref
 
   @doc """
   Gets the `id` of a single `JsonApi.Reference`.
