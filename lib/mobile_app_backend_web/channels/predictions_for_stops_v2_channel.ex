@@ -12,7 +12,12 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2Channel do
       )
 
     if stop_id_concat == "" do
-      {:error, %{code: :no_stop_ids}}
+      {:ok,
+       %{
+         predictions_by_stop: %{},
+         trips: %{},
+         vehicles: %{}
+       }, socket}
     else
       {time_micros, initial_data} =
         :timer.tc(fn ->
