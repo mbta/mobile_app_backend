@@ -32,10 +32,10 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
 
     response = %{
       predictions_by_stop: %{
-        "12345" => %{"p_1" => prediction_1, "p_2" => prediction_2},
-        trips: %{"trip_1" => trip_1, "trip_2" => trip_2},
-        vehicles: %{"v_1" => vehicle_1, "v_2" => vehicle_2}
-      }
+        "12345" => %{"p_1" => prediction_1, "p_2" => prediction_2}
+      },
+      trips: %{"trip_1" => trip_1, "trip_2" => trip_2},
+      vehicles: %{"v_1" => vehicle_1, "v_2" => vehicle_2}
     }
 
     expect(PredictionsPubSubMock, :subscribe_for_stops, 1, fn _ ->
@@ -48,9 +48,11 @@ defmodule MobileAppBackendWeb.PredictionsForStopsV2ChannelTest do
     assert reply == response
   end
 
-  test "error if missing stop ids in topic", %{socket: socket} do
-    {:error, %{code: :no_stop_ids}} =
-      subscribe_and_join(socket, "predictions:stops:v2:")
+  test "empty data if missing stop ids in topic", %{socket: socket} do
+    assert {:ok, data, _socket} =
+             subscribe_and_join(socket, "predictions:stops:v2:")
+
+    assert data == %{predictions_by_stop: %{}, trips: %{}, vehicles: %{}}
   end
 
   test "handles new predictions", %{socket: socket} do
