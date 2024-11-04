@@ -1,5 +1,8 @@
 import datetime
+import json
 import random
+from hashlib import sha256
+
 from zoneinfo import ZoneInfo
 
 import requests
@@ -32,6 +35,31 @@ all_routes: list[dict] = requests.get(
     {},
 ).json()["data"]
 
+initial_global_headers = {}
+initial_rail_headers = {}
+
+
+@events.test_start.add_listener
+def on_init(environment, **_kwargs):
+    # Assume some % of users have already loaded global data before.
+    # Fetch global + rail data once from target host to use as baseline etag headers for newly spawned users
+    host = environment.host
+    print(f'environment host: {host}')
+
+    global initial_global_headers
+    global initial_rail_headers
+
+    initial_global_response = requests.get(f"{host}/api/global")
+    initial_global_headers = {}
+    if initial_global_response.status_code == 200:
+        initial_global_headers = {"if-none-match": sha256(initial_global_response.text.encode()).hexdigest()}
+
+    initial_rail_response = requests.get(f"{host}/api/shapes/map-friendly/rail")
+    initial_rail_headers = {}
+    if initial_rail_response.status_code == 200:
+        initial_rail_headers = {"if-none-match": sha256(initial_rail_response.text.encode()).hexdigest()}
+
+
 @events.init_command_line_parser.add_listener
 def _(parser):
     parser.add_argument("--api-key", type=str, env_var="V3_API_KEY", default="", help="API Key for the V3 API. Set to avoid rate limiting.")
@@ -43,6 +71,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     prob_reset_initial_load = 0.02
     prob_reset_nearby_stops = 0.3
     prob_filtered_stop_details = 0.76
+    prob_already_loaded_global = 0.8
 
     location: dict | None = None
     stop_id: str | None = None
@@ -50,18 +79,36 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     alerts_channel: PhoenixChannel | None = None
     predictions_channel: PhoenixChannel | None = None
     vehicles_channel: PhoenixChannel | None = None
-    did_initial_load = False
+    global_headers: dict = {}
+    rail_headers: dict = {}
+    v3_api_headers: dict = {} 
 
-    v3_api_headers: dict = {}
+   
+
 
     def on_start(self):
         self.v3_api_headers = {"x-api-key" : self.environment.parsed_options.api_key}
+
+        if random.random() < self.prob_already_loaded_global:
+            self.global_headers = initial_global_headers
+            self.rail_headers = initial_rail_headers
+            print(f"Starting with headers {self.global_headers}")
+        else:
+            print("skipping headers")
+
+
         self.app_reload()
 
     @task(1)
     def app_reload(self):
-        self.client.get("/api/global")
-        self.client.get("/api/shapes/map-friendly/rail")
+        print(f'headers in app reload: {self.global_headers}')
+        global_response = self.client.get("/api/global", headers=self.global_headers)
+        if global_response.status_code == 200:
+            self.global_headers = {"if-none-match": sha256(global_response.text.encode()).hexdigest()}
+        
+        rail_response = self.client.get("/api/shapes/map-friendly/rail", headers=self.rail_headers)
+        if rail_response.status_code == 200:
+            self.rail_headers = {"if-none-match": sha256(rail_response.text.encode()).hexdigest()}
 
         if self.alerts_channel is not None:
                 self.alerts_channel.leave()
@@ -69,9 +116,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         
         self.alerts_channel = self.socket.channel("alerts")
         self.alerts_channel.join()
-        
-        self.did_initial_load = True
-
 
     @task(10)
     def nearby_transit(self):
