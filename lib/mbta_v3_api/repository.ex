@@ -67,7 +67,12 @@ end
 
 defmodule MBTAV3API.Repository.Impl do
   @behaviour MBTAV3API.Repository
+
+  use Nebulex.Caching.Decorators
+
   alias MBTAV3API.JsonApi
+
+  @ttl :timer.hours(1)
 
   @impl true
   def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
@@ -79,6 +84,7 @@ defmodule MBTAV3API.Repository.Impl do
   def routes(params, opts \\ []), do: all(MBTAV3API.Route, params, opts)
 
   @impl true
+  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
 
   @impl true
