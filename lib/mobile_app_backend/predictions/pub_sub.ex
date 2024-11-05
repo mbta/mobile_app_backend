@@ -4,8 +4,14 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
 
   @type predictions_for_stop :: %{Stop.id() => JsonApi.Object.full_map()}
 
-  @type subscribe_response :: %{
+  @type subscribe_stop_response :: %{
           predictions_by_stop: %{Stop.id() => %{Prediction.id() => Prediction.t()}},
+          trips: %{Trip.id() => Trip.t()},
+          vehicles: %{Vehicle.id() => Vehicle.t()}
+        }
+
+  @type subscribe_trip_response :: %{
+          predictions: %{Prediction.id() => Prediction.t()},
           trips: %{Trip.id() => Trip.t()},
           vehicles: %{Vehicle.id() => Vehicle.t()}
         }
@@ -13,11 +19,15 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
   """
-  @callback subscribe_for_stop(Stop.id()) :: subscribe_response()
+  @callback subscribe_for_stop(Stop.id()) :: subscribe_stop_response()
   @doc """
   Subscribe to prediction updates for multiple stops. For  parent stations, this subscribes to updates for all their child stops.
   """
-  @callback subscribe_for_stops([Stop.id()]) :: subscribe_response()
+  @callback subscribe_for_stops([Stop.id()]) :: subscribe_stop_response()
+  @doc """
+  Subscribe to prediction updates for the given trip.
+  """
+  @callback subscribe_for_trip(Trip.id()) :: subscribe_trip_response()
 end
 
 defmodule MobileAppBackend.Predictions.PubSub do
@@ -114,6 +124,33 @@ defmodule MobileAppBackend.Predictions.PubSub do
     subscribe_for_stops([stop_id])
   end
 
+  @impl true
+  def subscribe_for_trip(trip_id) do
+    case :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_trip, [trip_id]) do
+      {time_micros, :ok} ->
+        Logger.info(
+          "#{__MODULE__} subscribe_for_trip trip_id=#{trip_id} duration=#{time_micros / 1000} "
+        )
+
+        predictions_data =
+          register_trip(trip_id)
+          |> Store.Predictions.fetch_with_associations()
+
+        %{
+          predictions: predictions_data.predictions,
+          trips: predictions_data.trips,
+          vehicles: predictions_data.vehicles
+        }
+
+      {time_micros, :error} ->
+        Logger.warning(
+          "#{__MODULE__} failed to subscribe_for_trip trip_id=#{trip_id} duration=#{time_micros / 1000} "
+        )
+
+        :error
+    end
+  end
+
   @spec group_predictions_for_stop(%{Prediction.id() => Prediction.t()}, [Stop.id()], %{
           Stop.id() => [Stop.id()]
         }) :: %{Stop.id() => %{Prediction.id() => Prediction.t()}}
@@ -182,6 +219,20 @@ defmodule MobileAppBackend.Predictions.PubSub do
         MobileAppBackend.Predictions.Registry,
         @fetch_registry_key,
         {fetch_keys, fn data -> Map.put(data, :stop_id, parent_stop_id) end}
+      )
+
+    fetch_keys
+  end
+
+  @spec register_trip(Trip.id()) :: Store.fetch_keys()
+  defp register_trip(trip_id) do
+    fetch_keys = [trip_id: trip_id]
+
+    {:ok, _owner} =
+      Registry.register(
+        MobileAppBackend.Predictions.Registry,
+        @fetch_registry_key,
+        {fetch_keys, fn data -> Map.put(data, :trip_id, trip_id) end}
       )
 
     fetch_keys

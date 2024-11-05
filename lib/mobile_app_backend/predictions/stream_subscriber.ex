@@ -7,6 +7,7 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber do
 
   """
   alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
   alias MobileAppBackend.Predictions.StreamSubscriber
 
   @doc """
@@ -14,13 +15,21 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber do
   and the stream of all vehicles has been started.
   """
   @callback subscribe_for_stops([Stop.id()]) :: :ok | :error
-
   def subscribe_for_stops(stop_ids) do
     Application.get_env(
       :mobile_app_backend,
       MobileAppBackend.Predictions.StreamSubscriber,
       StreamSubscriber.Impl
     ).subscribe_for_stops(stop_ids)
+  end
+
+  @callback subscribe_for_trip(Trip.id()) :: :ok | :error
+  def subscribe_for_trip(trip_id) do
+    Application.get_env(
+      :mobile_app_backend,
+      MobileAppBackend.Predictions.StreamSubscriber,
+      StreamSubscriber.Impl
+    ).subscribe_for_trip(trip_id)
   end
 end
 
@@ -51,6 +60,28 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
           StaticInstance.ensure_stream_started("vehicles:to_store", include_current_data: false)
 
         :ok
+    end
+  end
+
+  @impl true
+  def subscribe_for_trip(trip_id) do
+    case MBTAV3API.Repository.trips(filter: [id: trip_id]) do
+      {:ok, %{data: [trip]}} ->
+        route_id = trip.route_id
+
+        {:ok, _data} =
+          StaticInstance.ensure_stream_started("predictions:route:to_store:#{route_id}",
+            include_current_data: false
+          )
+
+        {:ok, _data} =
+          StaticInstance.ensure_stream_started("vehicles:to_store", include_current_data: false)
+
+        :ok
+
+      _ ->
+        Logger.error("#{__MODULE__} failed to fetch trip from repository for #{trip_id}")
+        :error
     end
   end
 end

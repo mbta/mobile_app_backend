@@ -11,6 +11,7 @@ defmodule MobileAppBackendWeb.UserSocket do
   channel "predictions:stops", MobileAppBackendWeb.PredictionsForStopsChannel
   channel "predictions:stops:v2:*", MobileAppBackendWeb.PredictionsForStopsV2Channel
 
+  channel "predictions:trip:v2:*", MobileAppBackendWeb.PredictionsForTripV2Channel
   channel "predictions:trip:*", MobileAppBackendWeb.PredictionsForTripChannel
   channel "alerts", MobileAppBackendWeb.AlertsChannel
   channel "vehicles:*", MobileAppBackendWeb.VehiclesForRouteChannel
