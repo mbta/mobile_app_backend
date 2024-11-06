@@ -225,22 +225,8 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
              } == PubSub.subscribe_for_trip("trip_1")
     end
 
+    @tag :capture_log
     test "returns an error when subscriber fails" do
-      prediction_1 =
-        build(:prediction, id: "p_1", stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
-
-      prediction_2 =
-        build(:prediction, id: "p_2", stop_id: "67890", trip_id: "trip_1", vehicle_id: "v_1")
-
-      vehicle_1 = build(:vehicle, id: "v_1")
-
-      full_map =
-        JsonApi.Object.to_full_map([
-          prediction_1,
-          prediction_2,
-          vehicle_1
-        ])
-
       expect(StreamSubscriberMock, :subscribe_for_trip, fn _ -> :error end)
 
       assert :error == PubSub.subscribe_for_trip("trip_1")
