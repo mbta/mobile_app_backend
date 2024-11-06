@@ -10,25 +10,19 @@ from locust import HttpUser, between, events, task
 
 from phoenix_channel import PhoenixChannel, PhoenixChannelUser
 
-all_stop_ids: list[str] = list(map(lambda stop: stop["id"],requests.get(
+all_station_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
     "https://api-v3.mbta.com/stops",
-    {"fields[stop]": "latitude,longitude", "filter[location_type]": "0,1"},
+    {"fields[stop]": "id", "filter[location_type]": "1"},
 ).json()["data"]))
 
-rail_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
-    "https://api-v3.mbta.com/stops",
-    {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "0,1"},
-).json()["data"]))
-
-cr_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
-    "https://api-v3.mbta.com/stops",
-    {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "2"},
-).json()["data"]))
-
-bus_stop_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
+standalone_bus_stop_ids: list[str] = list(map(lambda stop: stop["id"],
+filter(lambda stop: stop["relationships"]["parent_station"]["data"] == None, requests.get(
     "https://api-v3.mbta.com/stops",
     {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "3"},
-).json()["data"]))
+).json()["data"])))
+
+all_stations_and_bus = all_station_ids + standalone_bus_stop_ids
+
 
 all_routes: list[dict] = requests.get(
     "https://api-v3.mbta.com/routes",
@@ -65,13 +59,14 @@ def _(parser):
     parser.add_argument("--api-key", type=str, env_var="V3_API_KEY", default="", help="API Key for the V3 API. Set to avoid rate limiting.")
 
 class MobileAppUser(HttpUser, PhoenixChannelUser):
-    wait_time = between(5, 20)
+    wait_time = between(5, 60)
     socket_path = "/socket"
 
     prob_reset_initial_load = 0.02
     prob_reset_nearby_stops = 0.3
     prob_filtered_stop_details = 0.76
     prob_already_loaded_global = 0.8
+    prob_station = 0.6
 
     location: dict | None = None
     stop_id: str | None = None
@@ -92,10 +87,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         if random.random() < self.prob_already_loaded_global:
             self.global_headers = initial_global_headers
             self.rail_headers = initial_rail_headers
-            print(f"Starting with headers {self.global_headers}")
-        else:
-            print("skipping headers")
-
 
         self.app_reload()
 
@@ -116,14 +107,17 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
         
         self.alerts_channel = self.socket.channel("alerts")
         self.alerts_channel.join()
+    
+    def fetch_schedules_for_stops(self, stop_ids):
+        self.client.get(f'/api/schedules?stop_ids={stop_ids}&date_time={datetime.datetime.now().astimezone(ZoneInfo("America/New_York")).replace(microsecond=0).isoformat()}' , name="/api/schedules",)
+
 
     @task(10)
     def nearby_transit(self):
-        nearby_rail_ids = random.sample(rail_stop_ids, random.randint(2,8))
-        nearby_cr_ids = random.sample(cr_stop_ids, random.randint(0,14))
-        nearby_bus_ids = random.sample(bus_stop_ids, random.randint(0,14))
+        nearby_station_ids = random.sample(all_station_ids, random.randint(2,14))
+        nearby_bus_ids = random.sample(standalone_bus_stop_ids, random.randint(0,14))
        
-        self.nearby_stop_ids = nearby_rail_ids + nearby_cr_ids + nearby_bus_ids
+        self.nearby_stop_ids = nearby_station_ids + nearby_bus_ids
         if (
             self.predictions_channel is not None
             and random.random() < self.prob_reset_nearby_stops
@@ -136,12 +130,19 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
                 f'predictions:stops:v2:{nearby_stops_concat}'
             )
             self.predictions_channel.join()
+        
+        self.fetch_schedules_for_stops(self.nearby_stop_ids)
+
 
 
     @task(5)
     def stop_details(self):
-        self.stop_id = random.choice(all_stop_ids)
-        self.client.get(f'/api/schedules?stop_ids={self.stop_id}&date_time={datetime.datetime.now().astimezone(ZoneInfo("America/New_York")).replace(microsecond=0).isoformat()}' , name="/api/schedules",)
+        if random.random() < self.prob_station:
+            self.stop_id = random.choice(all_station_ids)
+        else: 
+            self.stop_id = random.choice(standalone_bus_stop_ids)
+        
+        self.fetch_schedules_for_stops([self.stop_id])
         self.client.get(f'/api/stop/map?stop_id={self.stop_id}', name = "/api/stop/map")
        
         if (
@@ -170,7 +171,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     @task(5)
     def trip_details(self):
         if self.stop_id is None:
-            self.stop_id = random.choice(all_stop_ids)
+            self.stop_id = random.choice(all_stations_and_bus)
         predictions_for_stop = requests.get(
             "https://api-v3.mbta.com/predictions", 
             params={"stop": self.stop_id}, headers=self.v3_api_headers).json()["data"]
