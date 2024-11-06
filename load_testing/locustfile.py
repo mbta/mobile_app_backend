@@ -1,8 +1,6 @@
 import datetime
-import json
 import random
 from hashlib import sha256
-
 from zoneinfo import ZoneInfo
 
 import requests
@@ -16,7 +14,7 @@ all_station_ids: list[str] = list(map(lambda stop: stop["id"], requests.get(
 ).json()["data"]))
 
 standalone_bus_stop_ids: list[str] = list(map(lambda stop: stop["id"],
-filter(lambda stop: stop["relationships"]["parent_station"]["data"] == None, requests.get(
+filter(lambda stop: stop["relationships"]["parent_station"]["data"] is None, requests.get(
     "https://api-v3.mbta.com/stops",
     {"fields[stop]": "id", "filter[location_type]": "0", "filter[route_type]": "3"},
 ).json()["data"])))
