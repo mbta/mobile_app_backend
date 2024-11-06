@@ -4,6 +4,14 @@ defmodule MobileAppBackendWeb.PredictionsForTripV2Channel do
 
   @impl true
   def join("predictions:trip:v2:" <> trip_id, _payload, socket) do
+    if trip_id == "" do
+      {:error, %{code: :no_trip_id}}
+    else
+      subscribe(trip_id, socket)
+    end
+  end
+
+  defp subscribe(trip_id, socket) do
     pubsub_module =
       Application.get_env(
         :mobile_app_backend,
@@ -11,19 +19,15 @@ defmodule MobileAppBackendWeb.PredictionsForTripV2Channel do
         MobileAppBackend.Predictions.PubSub
       )
 
-    if trip_id == "" do
-      {:error, %{code: :no_trip_id}}
-    else
-      case :timer.tc(fn -> pubsub_module.subscribe_for_trip(trip_id) end) do
-        {time_micros, :error} ->
-          Logger.warning("#{__MODULE__} failed join duration=#{time_micros / 1000}")
-          {:error, %{code: :subscribe_failed}}
+    case :timer.tc(fn -> pubsub_module.subscribe_for_trip(trip_id) end) do
+      {time_micros, :error} ->
+        Logger.warning("#{__MODULE__} failed join duration=#{time_micros / 1000}")
+        {:error, %{code: :subscribe_failed}}
 
-        {time_micros, initial_data} ->
-          Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
+      {time_micros, initial_data} ->
+        Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
 
-          {:ok, initial_data, socket}
-      end
+        {:ok, initial_data, socket}
     end
   end
 
