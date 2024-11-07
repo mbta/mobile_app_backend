@@ -14,10 +14,11 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
       filters = Enum.map(stop_ids, &get_filter(&1, service_date))
 
-      data = case filters do
-        [filter] -> fetch_schedules(filter)
-        filters -> fetch_schedules_parallel(filters)
-      end
+      data =
+        case filters do
+          [filter] -> fetch_schedules(filter)
+          filters -> fetch_schedules_parallel(filters)
+        end
 
       case data do
         :error ->
@@ -93,12 +94,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
           | :error
   defp fetch_schedules(filter) do
-    with {:ok, %{data: schedules, included: %{trips: trips}}} <-
-           Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
-      %{schedules: schedules, trips: trips}
-    else
-      _ ->      :error
+    case Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
+      {:ok, %{data: schedules, included: %{trips: trips}}} ->
+        %{schedules: schedules, trips: trips}
 
+      _ ->
+        :error
     end
   end
 end
