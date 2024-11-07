@@ -219,6 +219,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
       expect(StreamSubscriberMock, :subscribe_for_trip, fn _ -> :ok end)
 
       assert %{
+               trip_id: trip_1.id,
                predictions: %{"p_1" => prediction_1, "p_2" => prediction_2},
                trips: %{"trip_1" => trip_1},
                vehicles: %{"v_1" => vehicle_1}
