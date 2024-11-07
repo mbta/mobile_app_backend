@@ -11,6 +11,7 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
         }
 
   @type subscribe_trip_response :: %{
+          trip_id: Trip.id(),
           predictions: %{Prediction.id() => Prediction.t()},
           trips: %{Trip.id() => Trip.t()},
           vehicles: %{Vehicle.id() => Vehicle.t()}
