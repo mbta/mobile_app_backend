@@ -112,8 +112,8 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
 
     @task(10)
     def nearby_transit(self):
-        nearby_station_ids = random.sample(all_station_ids, random.randint(2,14))
-        nearby_bus_ids = random.sample(standalone_bus_stop_ids, random.randint(0,14))
+        nearby_station_ids = random.sample(all_station_ids, random.randint(2,5))
+        nearby_bus_ids = random.sample(standalone_bus_stop_ids, random.randint(0,10))
        
         self.nearby_stop_ids = nearby_station_ids + nearby_bus_ids
         if (
