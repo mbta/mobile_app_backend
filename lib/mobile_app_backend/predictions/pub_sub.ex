@@ -10,12 +10,14 @@ defmodule MobileAppBackend.Predictions.PubSub.Behaviour do
           vehicles: %{Vehicle.id() => Vehicle.t()}
         }
 
-  @type subscribe_trip_response :: %{
-          trip_id: Trip.id(),
-          predictions: %{Prediction.id() => Prediction.t()},
-          trips: %{Trip.id() => Trip.t()},
-          vehicles: %{Vehicle.id() => Vehicle.t()}
-        }
+  @type subscribe_trip_response ::
+          %{
+            trip_id: Trip.id(),
+            predictions: %{Prediction.id() => Prediction.t()},
+            trips: %{Trip.id() => Trip.t()},
+            vehicles: %{Vehicle.id() => Vehicle.t()}
+          }
+          | :error
 
   @doc """
   Subscribe to prediction updates for the given stop. For a parent station, this subscribes to updates for all child stops.
@@ -138,6 +140,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
           |> Store.Predictions.fetch_with_associations()
 
         %{
+          trip_id: trip_id,
           predictions: predictions_data.predictions,
           trips: predictions_data.trips,
           vehicles: predictions_data.vehicles
