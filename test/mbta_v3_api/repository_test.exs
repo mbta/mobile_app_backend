@@ -9,6 +9,11 @@ defmodule MBTAV3API.RepositoryTest do
 
   setup :verify_on_exit!
 
+  setup do
+    MBTAV3API.RepositoryCache.flush()
+    :ok
+  end
+
   test "alerts/2" do
     expect(
       MobileAppBackend.HTTPMock,
