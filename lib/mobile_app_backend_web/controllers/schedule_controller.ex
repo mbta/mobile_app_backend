@@ -12,10 +12,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
       service_date = parse_service_date(date_time)
 
-      data =
-        stop_ids
-        |> Enum.map(&get_filter(&1, service_date))
-        |> fetch_schedules_parallel()
+      filters = Enum.map(stop_ids, &get_filter(&1, service_date))
+
+      data = case filters do
+        [filter] -> fetch_schedules(filter)
+        filters -> fetch_schedules_parallel(filters)
+      end
 
       case data do
         :error ->
@@ -74,12 +76,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
     end)
     |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
       case result do
-        {:ok, {_params, {:ok, %{schedules: schedules, trips: trips}}}} ->
+        {:ok, {_params, %{schedules: schedules, trips: trips}}} ->
           {:cont, %{schedules: acc.schedules ++ schedules, trips: Map.merge(acc.trips, trips)}}
 
-        {_result_type, {params, api_response}} ->
+        {_result_type, {params, _response}} ->
           Logger.warning(
-            "#{__MODULE__} skipped returning schedules due to error. params=#{inspect(params)} response=#{inspect(api_response)}"
+            "#{__MODULE__} skipped returning schedules due to error. params=#{inspect(params)}"
           )
 
           {:halt, :error}
@@ -88,12 +90,15 @@ defmodule MobileAppBackendWeb.ScheduleController do
   end
 
   @spec fetch_schedules([JsonApi.Params.filter_param()]) ::
-          {:ok, %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}}
-          | {:error, term()}
+          %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
+          | :error
   defp fetch_schedules(filter) do
     with {:ok, %{data: schedules, included: %{trips: trips}}} <-
            Repository.schedules(filter: filter, include: :trip, sort: {:departure_time, :asc}) do
-      {:ok, %{schedules: schedules, trips: trips}}
+      %{schedules: schedules, trips: trips}
+    else
+      _ ->      :error
+
     end
   end
 end
