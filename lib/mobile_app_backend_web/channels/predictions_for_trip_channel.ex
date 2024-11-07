@@ -42,7 +42,6 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannel do
 
     Logger.info("#{__MODULE__} push duration=#{time_micros / 1000}")
 
-    require Logger
     {:noreply, socket}
   end
 end
