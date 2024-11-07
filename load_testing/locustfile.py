@@ -36,8 +36,6 @@ def on_init(environment, **_kwargs):
     # Assume some % of users have already loaded global data before.
     # Fetch global + rail data once from target host to use as baseline etag headers for newly spawned users
     host = environment.host
-    print(f'environment host: {host}')
-
     global initial_global_headers
     global initial_rail_headers
 
@@ -90,7 +88,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
 
     @task(1)
     def app_reload(self):
-        print(f'headers in app reload: {self.global_headers}')
         global_response = self.client.get("/api/global", headers=self.global_headers)
         if global_response.status_code == 200:
             self.global_headers = {"if-none-match": sha256(global_response.text.encode()).hexdigest()}
