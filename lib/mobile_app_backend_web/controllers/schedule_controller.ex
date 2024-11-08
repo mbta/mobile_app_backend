@@ -72,9 +72,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
   defp fetch_schedules_parallel(filters) do
     filters
-    |> Task.async_stream(fn filter_params ->
-      {filter_params, fetch_schedules(filter_params)}
-    end, ordered: false)
+    |> Task.async_stream(
+      fn filter_params ->
+        {filter_params, fetch_schedules(filter_params)}
+      end,
+      ordered: false
+    )
     |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
       case result do
         {:ok, {_params, %{schedules: schedules, trips: trips}}} ->
