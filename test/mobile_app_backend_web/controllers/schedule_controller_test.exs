@@ -49,8 +49,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  stop: "place-boyls",
                  date: ~D[2024-03-12]
                ],
-               include: :trip,
-               sort: {:departure_time, :asc}
+               include: :trip
              ] = params
 
       ok_response([s1, s2], [t1, t2])
@@ -129,8 +128,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                                  stop: "place-boyls",
                                  date: ~D[2024-03-12]
                                ],
-                               include: :trip,
-                               sort: {:departure_time, :asc}
+                               include: :trip
                              ],
                              _opts ->
       ok_response([s1], [t1])
@@ -140,8 +138,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                                  stop: "place-pktrm",
                                  date: ~D[2024-03-12]
                                ],
-                               include: :trip,
-                               sort: {:departure_time, :asc}
+                               include: :trip
                              ],
                              _opts ->
       ok_response([s2], [t2])
@@ -209,8 +206,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  stop: "place-boyls",
                  date: ~D[2024-03-12]
                ],
-               include: :trip,
-               sort: {:departure_time, :asc}
+               include: :trip
              ] = params
 
       ok_response([s1], [t1])
@@ -221,8 +217,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  stop: "place-pktrm",
                  date: ~D[2024-03-12]
                ],
-               include: :trip,
-               sort: {:departure_time, :asc}
+               include: :trip
              ] = params
 
       {:error, :some_error_message}
