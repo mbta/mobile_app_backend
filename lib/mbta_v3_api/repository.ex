@@ -4,9 +4,6 @@ defmodule MBTAV3API.Repository do
   """
   alias MBTAV3API.{JsonApi, Repository}
 
-  @callback alerts(JsonApi.Params.t(), Keyword.t()) ::
-              {:ok, JsonApi.Response.t(MBTAV3API.Alert.t())} | {:error, term()}
-
   @callback route_patterns(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.RoutePattern.t())} | {:error, term()}
 
@@ -21,13 +18,6 @@ defmodule MBTAV3API.Repository do
 
   @callback trips(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Trip.t())} | {:error, term()}
-
-  def alerts(params, opts \\ []) do
-    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
-      params,
-      opts
-    )
-  end
 
   def route_patterns(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).route_patterns(
@@ -75,30 +65,23 @@ defmodule MBTAV3API.Repository.Impl do
   @ttl :timer.hours(1)
 
   @impl true
-  def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
-
-  @impl true
-  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def route_patterns(params, opts \\ []), do: all(MBTAV3API.RoutePattern, params, opts)
 
   @impl true
-  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def routes(params, opts \\ []), do: all(MBTAV3API.Route, params, opts)
 
   @impl true
-  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
 
   @impl true
-  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
 
   @impl true
-  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def trips(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
 
   @spec all(module(), JsonApi.Params.t(), Keyword.t()) ::
           {:ok, JsonApi.Response.t(JsonApi.Object.t())} | {:error, term()}
+  @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   defp all(module, params, opts) do
     params = JsonApi.Params.flatten_params(params, module)
     url = "/#{JsonApi.Object.plural_type(module.jsonapi_type())}"
