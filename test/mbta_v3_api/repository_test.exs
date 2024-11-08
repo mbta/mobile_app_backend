@@ -3,140 +3,15 @@ defmodule MBTAV3API.RepositoryTest do
 
   import Mox
 
-  alias MBTAV3API.Route
-  alias MBTAV3API.{Alert, Repository, RoutePattern, Stop}
-  import Test.Support.Sigils
+  alias MBTAV3API.JsonApi
+  alias MBTAV3API.JsonApi.Object
+  alias MBTAV3API.{Repository, Route, RoutePattern, Schedule, Stop}
 
   setup :verify_on_exit!
 
-  test "alerts/2" do
-    expect(
-      MobileAppBackend.HTTPMock,
-      :request,
-      fn %Req.Request{url: %URI{path: "/alerts"}, options: %{params: params}} ->
-        assert params == %{
-                 "fields[alert]" =>
-                   "active_period,cause,description,effect,effect_name,header,informed_entity,lifecycle,updated_at",
-                 "filter[lifecycle]" => "NEW,ONGOING,ONGOING_UPCOMING",
-                 "filter[stop]" =>
-                   "9983,6542,1241,8281,place-boyls,8279,49002,6565,place-tumnl,145,place-pktrm,place-bbsta"
-               }
-
-        {:ok,
-         Req.Response.json(%{
-           data: [
-             %{
-               "attributes" => %{
-                 "active_period" => [
-                   %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T14:38:00-05:00"}
-                 ],
-                 "cause" => "AMTRAK",
-                 "description" => "Description 1",
-                 "effect" => "DELAY",
-                 "header" => "Header 1",
-                 "informed_entity" => [
-                   %{
-                     "activities" => ["BOARD", "EXIT", "RIDE"],
-                     "route" => "11",
-                     "route_type" => 3
-                   }
-                 ],
-                 "lifecycle" => "NEW",
-                 "updated_at" => "2024-02-08T14:38:00-05:00"
-               },
-               "id" => "552825",
-               "links" => %{"self" => "/alerts/552825"},
-               "type" => "alert"
-             },
-             %{
-               "attributes" => %{
-                 "active_period" => [
-                   %{"end" => "2024-02-08T19:12:40-05:00", "start" => "2024-02-08T12:55:00-05:00"}
-                 ],
-                 "cause" => "HURRICANE",
-                 "description" => "Description 2",
-                 "effect" => "DELAY",
-                 "header" => "Header 2",
-                 "informed_entity" => [
-                   %{
-                     "activities" => ["BOARD", "EXIT", "RIDE"],
-                     "route" => "15",
-                     "route_type" => 3
-                   }
-                 ],
-                 "lifecycle" => "NEW",
-                 "updated_at" => "2024-02-08T12:55:00-05:00"
-               },
-               "id" => "552803",
-               "links" => %{"self" => "/alerts/552803"},
-               "type" => "alert"
-             }
-           ]
-         })}
-      end
-    )
-
-    {:ok, %{data: alerts}} =
-      Repository.alerts(
-        filter: [
-          lifecycle: [:new, :ongoing, :ongoing_upcoming],
-          stop: [
-            "9983",
-            "6542",
-            "1241",
-            "8281",
-            "place-boyls",
-            "8279",
-            "49002",
-            "6565",
-            "place-tumnl",
-            "145",
-            "place-pktrm",
-            "place-bbsta"
-          ]
-        ]
-      )
-
-    assert alerts == [
-             %Alert{
-               id: "552825",
-               active_period: [
-                 %Alert.ActivePeriod{start: ~B[2024-02-08 14:38:00], end: ~B[2024-02-08 19:12:40]}
-               ],
-               cause: :amtrak,
-               description: "Description 1",
-               effect: :delay,
-               header: "Header 1",
-               informed_entity: [
-                 %Alert.InformedEntity{
-                   activities: [:board, :exit, :ride],
-                   route: "11",
-                   route_type: :bus
-                 }
-               ],
-               lifecycle: :new,
-               updated_at: ~B[2024-02-08 14:38:00]
-             },
-             %Alert{
-               id: "552803",
-               active_period: [
-                 %Alert.ActivePeriod{start: ~B[2024-02-08 12:55:00], end: ~B[2024-02-08 19:12:40]}
-               ],
-               cause: :hurricane,
-               description: "Description 2",
-               effect: :delay,
-               header: "Header 2",
-               informed_entity: [
-                 %Alert.InformedEntity{
-                   activities: [:board, :exit, :ride],
-                   route: "15",
-                   route_type: :bus
-                 }
-               ],
-               lifecycle: :new,
-               updated_at: ~B[2024-02-08 12:55:00]
-             }
-           ]
+  setup do
+    MBTAV3API.RepositoryCache.flush()
+    :ok
   end
 
   test "route_patterns/2" do
@@ -427,5 +302,151 @@ defmodule MBTAV3API.RepositoryTest do
                 }
               ]
             }} = Repository.stops([])
+  end
+
+  describe "schedules/2" do
+    test "returns cached response when given same request twice" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        # Only called once because first response is cached
+        1,
+        fn %Req.Request{url: %URI{path: "/schedules"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 "attributes" => %{
+                   "arrival_time" => "2024-03-13T01:07:00-04:00",
+                   "departure_time" => "2024-03-13T01:07:00-04:00",
+                   "drop_off_type" => 0,
+                   "id" => "schedule-60565179-70159-90",
+                   "pickup_type" => 0,
+                   "route_id" => "Green-B",
+                   "stop_id" => "70159",
+                   "stop_sequence" => 90,
+                   "trip_id" => "trip_1"
+                 },
+                 "id" => "sched_1",
+                 "relationships" => %{
+                   "trip" => %{
+                     "data" => %{
+                       "id" => "trip_1",
+                       "type" => "trip"
+                     }
+                   }
+                 },
+                 "type" => "schedule"
+               }
+             ],
+             included: [
+               %{
+                 "attributes" => %{
+                   "headsign" => "Headsign",
+                   "direction_id" => 1
+                 },
+                 "id" => "trip_1",
+                 "type" => "trip"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Schedule{
+                    id: "sched_1"
+                  }
+                ],
+                included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
+              }} = Repository.schedules([])
+
+      assert {:ok,
+              %{
+                data: [
+                  %Schedule{
+                    id: "sched_1"
+                  }
+                ],
+                included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
+              }} = Repository.schedules([])
+    end
+
+    test "makes new request when new params passed" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/schedules"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 "attributes" => %{
+                   "arrival_time" => "2024-03-13T01:07:00-04:00",
+                   "departure_time" => "2024-03-13T01:07:00-04:00",
+                   "drop_off_type" => 0,
+                   "id" => "schedule-60565179-70159-90",
+                   "pickup_type" => 0,
+                   "route_id" => "Green-B",
+                   "stop_id" => "70159",
+                   "stop_sequence" => 90,
+                   "trip_id" => "trip_1"
+                 },
+                 "id" => "sched_1",
+                 "relationships" => %{
+                   "trip" => %{
+                     "data" => %{
+                       "id" => "trip_1",
+                       "type" => "trip"
+                     }
+                   }
+                 },
+                 "type" => "schedule"
+               }
+             ],
+             included: [
+               %{
+                 "attributes" => %{
+                   "headsign" => "Headsign",
+                   "direction_id" => 1
+                 },
+                 "id" => "trip_1",
+                 "type" => "trip"
+               }
+             ]
+           })}
+        end
+      )
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/schedules"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [],
+             included: []
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Schedule{
+                    id: "sched_1"
+                  }
+                ],
+                included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
+              }} = Repository.schedules([])
+
+      assert {:ok,
+              %JsonApi.Response{
+                data: [],
+                included: Object.to_full_map([])
+              }} == Repository.schedules(filter: [stop: "fake_stop"])
+    end
   end
 end
