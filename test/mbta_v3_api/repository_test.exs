@@ -323,6 +323,7 @@ defmodule MBTAV3API.RepositoryTest do
                    "id" => "schedule-60565179-70159-90",
                    "pickup_type" => 0,
                    "route_id" => "Green-B",
+                   "stop_headsign" => nil,
                    "stop_id" => "70159",
                    "stop_sequence" => 90,
                    "trip_id" => "trip_1"
@@ -390,6 +391,7 @@ defmodule MBTAV3API.RepositoryTest do
                    "id" => "schedule-60565179-70159-90",
                    "pickup_type" => 0,
                    "route_id" => "Green-B",
+                   "stop_headsign" => nil,
                    "stop_id" => "70159",
                    "stop_sequence" => 90,
                    "trip_id" => "trip_1"
