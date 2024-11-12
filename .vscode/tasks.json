@@ -2,10 +2,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "test",
+            "label": "credo --strict",
             "type": "shell",
-            "command": "mix test",
-            "group": "test"
+            "command": "mix credo --strict",
+            "group": "build"
         },
         {
             "label": "deps.compile",
@@ -18,6 +18,12 @@
             "type": "shell",
             "command": "mix deps.get",
             "group": "build"
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "mix test",
+            "group": "test"
         }
     ]
 }
