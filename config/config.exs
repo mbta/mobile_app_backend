@@ -10,9 +10,6 @@ import Config
 config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
-config :mobile_app_backend, MobileAppBackend.AppCheck,
-  jwks_url: "https://firebaseappcheck.googleapis.com/v1/jwks"
-
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 

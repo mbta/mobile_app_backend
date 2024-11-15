@@ -1,5 +1,4 @@
 Mox.defmock(GlobalDataCacheMock, for: MobileAppBackend.GlobalDataCache)
-Mox.defmock(JwksApiMock, for: MobileAppBackend.AppCheck.JwksApi)
 Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
 Mox.defmock(StaticInstanceMock, for: MBTAV3API.Stream.StaticInstance)
 Mox.defmock(MobileAppBackend.HTTPMock, for: MobileAppBackend.HTTP)

@@ -31,55 +31,7 @@ defmodule MobileAppBackendWeb.ConnCase do
     end
   end
 
-  setup tags do
-    conn =
-      cond do
-        tags[:firebase_valid_token] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "valid_token"
-          )
-
-        tags[:firebase_invalid_token] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "invalid_token"
-          )
-
-        tags[:firebase_invalid_issuer] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "invalid_issuer"
-          )
-
-        tags[:firebase_invalid_project] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "invalid_project"
-          )
-
-        tags[:firebase_invalid_subject] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "invalid_subject"
-          )
-
-        tags[:firebase_expired_token] ->
-          Plug.Conn.put_req_header(
-            Phoenix.ConnTest.build_conn(),
-            "http_x_firebase_appcheck",
-            "expired_token"
-          )
-
-        true ->
-          Phoenix.ConnTest.build_conn()
-      end
-
-    {:ok, conn: conn}
+  setup _tags do
+    {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
 end
