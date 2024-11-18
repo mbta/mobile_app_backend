@@ -1,12 +1,11 @@
 defmodule MobileAppBackendWeb.AlertsChannel do
+  alias MobileAppBackend.Alerts
   use MobileAppBackendWeb, :channel
 
   @impl true
   def join("alerts", _payload, socket) do
-    case MBTAV3API.Stream.StaticInstance.subscribe("alerts") do
-      {:ok, data} -> {:ok, data, socket}
-      {:error, error} -> {:error, %{code: error}}
-    end
+    alerts_data = Alerts.PubSub.subscribe()
+    {:ok, alerts_data, socket}
   end
 
   @impl true
