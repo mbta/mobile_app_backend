@@ -4,8 +4,9 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
   import Mox
   import Test.Support.Helpers
   import Test.Support.Sigils
-  alias MobileAppBackendWeb.AlertsChannel
   alias MBTAV3API.Alert
+
+  alias MobileAppBackendWeb.AlertsChannel
 
   setup do
     reassign_env(:mobile_app_backend, MobileAppBackend.Alerts.PubSub, AlertsPubSubMock)

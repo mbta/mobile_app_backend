@@ -1,9 +1,9 @@
 defmodule MobileAppBackend.Predictions.PubSubTests do
   use ExUnit.Case
 
-  alias MobileAppBackend.Predictions
   alias MBTAV3API.JsonApi
   alias MBTAV3API.{Store, Stream}
+  alias MobileAppBackend.Predictions
   alias MobileAppBackend.Predictions.{PubSub, StreamSubscriber}
   import Mox
   import Test.Support.Helpers
