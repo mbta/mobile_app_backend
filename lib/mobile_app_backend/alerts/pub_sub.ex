@@ -1,6 +1,5 @@
 defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.Alert
 
   @doc """
   Subscribe to updates for all alerts
@@ -48,7 +47,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
   end
 
   @impl true
-  def subscribe() do
+  def subscribe do
     fetch_keys = []
 
     format_fn = fn data -> JsonApi.Object.to_full_map(data) end
@@ -162,7 +161,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
       pids,
       &send(
         &1,
-        {:stream_data, data}
+        {:new_alerts, data}
       )
     )
   end

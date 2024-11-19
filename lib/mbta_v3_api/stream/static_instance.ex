@@ -108,10 +108,6 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
     ]
   end
 
-  defp args_for_topic("alerts") do
-    [type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"]
-  end
-
   defp args_for_topic("predictions:route:to_store:" <> route_id) do
     [
       type: MBTAV3API.Prediction,

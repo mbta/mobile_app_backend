@@ -12,10 +12,7 @@ defmodule MBTAV3API.Supervisor do
 
     children =
       if start_stream_stores? do
-        [MBTAV3API.Store.Alerts,
-         MBTAV3API.Store.Predictions,
-         MBTAV3API.Store.Vehicles
-        ]
+        [MBTAV3API.Store.Alerts, MBTAV3API.Store.Predictions, MBTAV3API.Store.Vehicles]
       else
         []
       end ++

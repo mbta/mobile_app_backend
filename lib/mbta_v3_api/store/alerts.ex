@@ -12,9 +12,10 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   """
   use GenServer
   require Logger
+  alias MBTAV3API.Alert
+
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Store
-  alias MBTAV3API.Alert
 
   @behaviour MBTAV3API.Store
 
