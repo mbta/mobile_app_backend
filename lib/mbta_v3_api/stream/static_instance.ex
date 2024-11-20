@@ -94,8 +94,18 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
   end
 
   @spec args_for_topic(Phoenix.PubSub.topic()) :: Stream.Instance.opts()
-  defp args_for_topic("alerts") do
-    [type: MBTAV3API.Alert, url: "/alerts", topic: "alerts"]
+
+  defp args_for_topic("alerts:to_store") do
+    [
+      type: MBTAV3API.Alert,
+      url: "/alerts",
+      topic: "alerts:to_store",
+      consumer: %{
+        store: MBTAV3API.Store.Alerts,
+        # Single stream for all alerts
+        scope: []
+      }
+    ]
   end
 
   defp args_for_topic("predictions:route:to_store:" <> route_id) do
@@ -130,9 +140,6 @@ defmodule MBTAV3API.Stream.StaticInstance.Impl do
     [
       type: MBTAV3API.Vehicle,
       url: "/vehicles",
-      # `:topic` is unique to a route because we stream predictions separately by route
-      # `:destination` is the same across all routes because all predictions
-      # are unified in `Store.Predictions`
       topic: "vehicles:to_store",
       consumer: %{
         store: MBTAV3API.Store.Vehicles,
