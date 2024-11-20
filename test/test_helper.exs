@@ -1,3 +1,5 @@
+Mox.defmock(AlertsStoreMock, for: MBTAV3API.Store)
+Mox.defmock(AlertsPubSubMock, for: MobileAppBackend.Alerts.PubSub.Behaviour)
 Mox.defmock(GlobalDataCacheMock, for: MobileAppBackend.GlobalDataCache)
 Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
 Mox.defmock(StaticInstanceMock, for: MBTAV3API.Stream.StaticInstance)

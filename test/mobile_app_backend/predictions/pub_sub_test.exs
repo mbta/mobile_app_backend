@@ -3,6 +3,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.{Store, Stream}
+  alias MobileAppBackend.Predictions
   alias MobileAppBackend.Predictions.{PubSub, StreamSubscriber}
   import Mox
   import Test.Support.Helpers
@@ -384,6 +385,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   describe "reset event e2e" do
     test "when a reset event is broadcast, subscribers are pushed latest predictions" do
+      {:ok, _server} = start_supervised(Predictions.PubSub)
       prediction_1 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
       trip_1 = build(:trip, id: "trip_1")
 
