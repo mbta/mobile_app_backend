@@ -1,16 +1,22 @@
 defmodule MobileAppBackendWeb.AlertsChannelTest do
   use MobileAppBackendWeb.ChannelCase
   import MBTAV3API.JsonApi.Object, only: [to_full_map: 1]
+  import Mox
   import Test.Support.Helpers
   import Test.Support.Sigils
   alias MBTAV3API.Alert
-  alias Test.Support.FakeStaticInstance
+
+  alias MobileAppBackendWeb.AlertsChannel
 
   setup do
+    reassign_env(:mobile_app_backend, MobileAppBackend.Alerts.PubSub, AlertsPubSubMock)
+
     {:ok, socket} = connect(MobileAppBackendWeb.UserSocket, %{})
 
     %{socket: socket}
   end
+
+  setup :verify_on_exit!
 
   test "joins and subscribes correctly", %{socket: socket} do
     alert1 = %Alert{
@@ -50,14 +56,14 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_full_map([alert1, alert2])
 
-    start_supervised_replacing!({FakeStaticInstance, topic: "alerts", data: data1})
+    expect(AlertsPubSubMock, :subscribe, 1, fn -> data1 end)
 
-    {:ok, ^data1, _socket} =
-      subscribe_and_join(socket, MobileAppBackendWeb.AlertsChannel, "alerts")
+    {:ok, ^data1, socket} =
+      subscribe_and_join(socket, "alerts")
 
     data2 = to_full_map([alert1])
 
-    MBTAV3API.Stream.PubSub.broadcast!("alerts", {:stream_data, "alerts", data2})
+    AlertsChannel.handle_info({:new_alerts, data2}, socket)
 
     assert_push("stream_data", ^data2)
   end

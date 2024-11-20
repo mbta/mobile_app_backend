@@ -3,6 +3,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.{Store, Stream}
+  alias MobileAppBackend.Predictions
   alias MobileAppBackend.Predictions.{PubSub, StreamSubscriber}
   import Mox
   import Test.Support.Helpers
@@ -193,6 +194,47 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
     end
   end
 
+  describe "subscribe_for_trip/1" do
+    test "returns initial data for the given trip" do
+      prediction_1 =
+        build(:prediction, id: "p_1", stop_id: "12345", trip_id: "trip_1", vehicle_id: "v_1")
+
+      prediction_2 =
+        build(:prediction, id: "p_2", stop_id: "67890", trip_id: "trip_1", vehicle_id: "v_1")
+
+      trip_1 = build(:trip, id: "trip_1")
+      vehicle_1 = build(:vehicle, id: "v_1")
+
+      full_map =
+        JsonApi.Object.to_full_map([
+          prediction_1,
+          prediction_2,
+          trip_1,
+          vehicle_1
+        ])
+
+      expect(PredictionsStoreMock, :fetch_with_associations, fn [trip_id: "trip_1"] ->
+        full_map
+      end)
+
+      expect(StreamSubscriberMock, :subscribe_for_trip, fn _ -> :ok end)
+
+      assert %{
+               trip_id: trip_1.id,
+               predictions: %{"p_1" => prediction_1, "p_2" => prediction_2},
+               trips: %{"trip_1" => trip_1},
+               vehicles: %{"v_1" => vehicle_1}
+             } == PubSub.subscribe_for_trip("trip_1")
+    end
+
+    @tag :capture_log
+    test "returns an error when subscriber fails" do
+      expect(StreamSubscriberMock, :subscribe_for_trip, fn _ -> :error end)
+
+      assert :error == PubSub.subscribe_for_trip("trip_1")
+    end
+  end
+
   describe "handle_info" do
     setup do
       _dispatched_table = :ets.new(:test_last_dispatched, [:set, :named_table])
@@ -343,6 +385,7 @@ defmodule MobileAppBackend.Predictions.PubSubTests do
 
   describe "reset event e2e" do
     test "when a reset event is broadcast, subscribers are pushed latest predictions" do
+      {:ok, _server} = start_supervised(Predictions.PubSub)
       prediction_1 = build(:prediction, stop_id: "12345", trip_id: "trip_1")
       trip_1 = build(:trip, id: "trip_1")
 

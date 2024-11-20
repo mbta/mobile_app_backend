@@ -26,15 +26,20 @@ defmodule MobileAppBackend.Application do
            :default => [size: 200, count: 10, start_pool_metrics?: true]
          }},
         {MBTAV3API.ResponseCache, []},
+        {MBTAV3API.RepositoryCache, []},
         MBTAV3API.Supervisor,
         {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
         MobileAppBackend.MapboxTokenRotator,
+        MobileAppBackend.Alerts.Registry,
         MobileAppBackend.Predictions.Registry,
-        MobileAppBackend.Predictions.PubSub,
         MobileAppBackend.Vehicles.Registry
       ] ++
-        if Application.get_env(:mobile_app_backend, :start_vehicle_pub_sub?, true) do
-          [MobileAppBackend.Vehicles.PubSub]
+        if Application.get_env(:mobile_app_backend, :start_pub_subs?, true) do
+          [
+            MobileAppBackend.Alerts.PubSub,
+            MobileAppBackend.Vehicles.PubSub,
+            MobileAppBackend.Predictions.PubSub
+          ]
         else
           []
         end ++

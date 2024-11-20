@@ -10,14 +10,16 @@ import Config
 config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
-config :mobile_app_backend, MobileAppBackend.AppCheck,
-  jwks_url: "https://firebaseappcheck.googleapis.com/v1/jwks"
-
+config :mobile_app_backend, alerts_broadcast_interval_ms: 500
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 
 config :mobile_app_backend, MBTAV3API.ResponseCache,
   gc_interval: :timer.hours(1),
+  allocated_memory: 250_000_000
+
+config :mobile_app_backend, MBTAV3API.RepositoryCache,
+  gc_interval: :timer.hours(2),
   allocated_memory: 250_000_000
 
 # Configures the endpoint

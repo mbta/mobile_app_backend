@@ -55,6 +55,7 @@ defmodule MobileAppBackend.MixProject do
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:logster, "~> 1.1"},
+      {:decorator, "~> 1.4"},
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
