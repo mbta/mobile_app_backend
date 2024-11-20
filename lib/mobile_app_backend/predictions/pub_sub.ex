@@ -47,8 +47,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   """
   use MobileAppBackend.PubSub,
     broadcast_interval_ms:
-      Application.compile_env(:mobile_app_backend, :predictions_broadcast_interval_ms, 10_000),
-    broadcast_message_name: :new_vehicles
+      Application.compile_env(:mobile_app_backend, :predictions_broadcast_interval_ms, 10_000)
 
   alias MBTAV3API.{Prediction, Stop, Store, Stream, Trip, Vehicle}
   alias MobileAppBackend.GlobalDataCache

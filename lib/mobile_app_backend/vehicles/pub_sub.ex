@@ -24,8 +24,7 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   """
   use MobileAppBackend.PubSub,
     broadcast_interval_ms:
-      Application.compile_env(:mobile_app_backend, :vehicles_broadcast_interval_ms, 500),
-    broadcast_message_name: :new_vehicles
+      Application.compile_env(:mobile_app_backend, :vehicles_broadcast_interval_ms, 500)
 
   alias MBTAV3API.{Store, Stream}
   alias MobileAppBackend.Vehicles.PubSub
