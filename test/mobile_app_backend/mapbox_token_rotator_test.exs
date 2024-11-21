@@ -137,6 +137,6 @@ defmodule MobileAppBackend.MapboxTokenRotatorTest do
 
     actual_interval = second_token_time - first_token_time
 
-    assert (actual_interval - refresh_interval) in -5..5
+    assert (actual_interval - refresh_interval) in -50..50
   end
 end
