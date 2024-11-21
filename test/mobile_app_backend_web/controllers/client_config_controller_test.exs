@@ -3,22 +3,24 @@ defmodule MobileAppBackendWeb.ClientControllerTest do
   use MobileAppBackendWeb.ConnCase
   import Test.Support.Helpers
   import Mox
-  alias MobileAppBackend.MapboxTokenRotator
 
   describe "GET /api/protected/config" do
     setup do
       verify_on_exit!()
 
-      reassign_env(:mobile_app_backend, MobileAppBackend.ClientConfig,
-        mapbox_public_token: "fake_mapbox_token"
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.MapboxTokenRotator,
+        MapboxTokenRotatorMock
       )
-
-      MapboxTokenRotator |> Process.whereis() |> Process.exit(:refresh_config)
 
       :ok
     end
 
     test "returns config", %{conn: conn} do
+      MapboxTokenRotatorMock
+      |> expect(:get_public_token, fn -> "fake_mapbox_token" end)
+
       conn = get(conn, "/api/protected/config")
       %{"mapbox_public_token" => "fake_mapbox_token"} = json_response(conn, 200)
     end
