@@ -22,21 +22,16 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   1. Regularly scheduled interval - configured by `:vehicles_broadcast_interval_ms`
   2. When there is a reset event of the underlying vehicle stream.
   """
-  use GenServer
+  use MobileAppBackend.PubSub,
+    broadcast_interval_ms:
+      Application.compile_env(:mobile_app_backend, :vehicles_broadcast_interval_ms, 500)
+
   alias MBTAV3API.{Store, Stream}
   alias MobileAppBackend.Vehicles.PubSub
 
   @behaviour PubSub.Behaviour
 
-  require Logger
-
   @fetch_registry_key :fetch_registry_key
-
-  @typedoc """
-  tuple {fetch_keys, format_fn} where format_fn transforms the data returned
-  into the format expected by subscribers.
-  """
-  @type registry_value :: {Store.fetch_keys(), function()}
 
   @type state :: %{last_dispatched_table_name: atom()}
 
@@ -102,102 +97,24 @@ defmodule MobileAppBackend.Vehicles.PubSub do
     create_table_fn.()
   end
 
-  @impl true
-  # Any time there is a reset_event, broadcast so that subscribers are immediately
-  # notified of the changes. This way, when the vehicle stream first starts,
-  # consumers don't have to wait `:vehicles_broadcast_interval_ms` to receive their first message.
-  def handle_info(:reset_event, state) do
-    send(self(), :broadcast)
-    {:noreply, state, :hibernate}
-  end
-
-  def handle_info(:timed_broadcast, state) do
-    send(self(), :broadcast)
-    broadcast_timer()
-    {:noreply, state, :hibernate}
-  end
-
   @impl GenServer
   def handle_info(:broadcast, %{last_dispatched_table_name: last_dispatched} = state) do
     Registry.dispatch(MobileAppBackend.Vehicles.Registry, @fetch_registry_key, fn entries ->
-      Enum.group_by(
-        entries,
-        fn {_, {fetch_keys, format_fn}} -> {fetch_keys, format_fn} end,
-        fn {pid, _} -> pid end
-      )
-      |> Enum.each(fn {registry_value, pids} ->
-        broadcast_new_vehicles(registry_value, pids, last_dispatched)
+      entries
+      |> MobileAppBackend.PubSub.group_pids_by_target_data()
+      |> Enum.each(fn {{fetch_keys, format_fn} = registry_value, pids} ->
+        fetch_keys
+        |> Store.Vehicles.fetch()
+        |> format_fn.()
+        |> MobileAppBackend.PubSub.broadcast_latest_data(
+          :new_vehicles,
+          registry_value,
+          pids,
+          last_dispatched
+        )
       end)
     end)
 
     {:noreply, state, :hibernate}
-  end
-
-  defp broadcast_new_vehicles(
-         {fetch_keys, format_fn} = registry_value,
-         pids,
-         last_dispatched_table_name
-       ) do
-    new_vehicles =
-      fetch_keys
-      |> Store.Vehicles.fetch()
-      |> format_fn.()
-
-    last_dispatched_entry = :ets.lookup(last_dispatched_table_name, registry_value)
-
-    if !vehicles_already_broadcast(last_dispatched_entry, new_vehicles) do
-      broadcast_vehicles(pids, new_vehicles, registry_value, last_dispatched_table_name)
-    end
-  end
-
-  defp broadcast_vehicles(
-         pids,
-         vehicles,
-         {fetch_keys, _format_fn} = registry_value,
-         last_dispatched_table_name
-       ) do
-    Logger.info("#{__MODULE__} broadcasting to pids len=#{length(pids)}")
-
-    {time_micros, _result} =
-      :timer.tc(__MODULE__, :broadcast_to_pids, [
-        pids,
-        vehicles
-      ])
-
-    Logger.info(
-      "#{__MODULE__} broadcast_to_pids fetch_keys=#{inspect(fetch_keys)} duration=#{time_micros / 1000}"
-    )
-
-    :ets.insert(last_dispatched_table_name, {registry_value, vehicles})
-  end
-
-  defp vehicles_already_broadcast([], _new_vehicles) do
-    # Nothing has been broadcast yet
-    false
-  end
-
-  defp vehicles_already_broadcast([{_registry_key, last_vehicles}], new_vehicles) do
-    last_vehicles == new_vehicles
-  end
-
-  def broadcast_to_pids(pids, vehicles) do
-    Enum.each(
-      pids,
-      &send(
-        &1,
-        {:new_vehicles, vehicles}
-      )
-    )
-  end
-
-  defp broadcast_timer do
-    interval =
-      Application.get_env(:mobile_app_backend, :vehicles_broadcast_interval_ms, 500)
-
-    broadcast_timer(interval)
-  end
-
-  defp broadcast_timer(interval) do
-    Process.send_after(self(), :timed_broadcast, interval)
   end
 end
