@@ -6,8 +6,11 @@ defmodule MobileAppBackendWeb.ClientConfigController do
 
   @spec config(Plug.Conn.t(), any()) :: Plug.Conn.t()
   def config(conn, _params) do
+    token_rotator_module =
+      Application.get_env(:mobile_app_backend, MapboxTokenRotator, MapboxTokenRotator)
+
     client_config = %ClientConfig{
-      mapbox_public_token: MapboxTokenRotator.get_public_token()
+      mapbox_public_token: token_rotator_module.get_public_token()
     }
 
     json(conn, client_config)

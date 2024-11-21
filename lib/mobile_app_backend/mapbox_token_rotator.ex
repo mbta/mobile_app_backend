@@ -1,5 +1,13 @@
+defmodule MobileAppBackend.MapboxTokenRotator.Behaviour do
+  @callback get_public_token() :: String.t()
+end
+
 defmodule MobileAppBackend.MapboxTokenRotator do
   use GenServer
+
+  alias MobileAppBackend.MapboxTokenRotator
+
+  @behaviour MapboxTokenRotator.Behaviour
 
   defmodule State do
     defstruct [:primary_token, :username, :current_public_token, :expire_ms, :rotate_ms]
@@ -10,7 +18,7 @@ defmodule MobileAppBackend.MapboxTokenRotator do
     GenServer.start_link(__MODULE__, nil, name: server_name)
   end
 
-  @spec get_public_token(GenServer.server()) :: String.t()
+  @impl MapboxTokenRotator.Behaviour
   def get_public_token(server \\ __MODULE__) do
     GenServer.call(server, :get_public_token)
   end
