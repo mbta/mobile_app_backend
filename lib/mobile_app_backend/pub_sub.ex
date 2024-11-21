@@ -94,7 +94,7 @@ defmodule MobileAppBackend.PubSub do
     quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer
 
-      broadcast_interval_ms = Keyword.fetch!(opts, :broadcast_interval_ms)
+      @broadcast_interval_ms Keyword.fetch!(opts, :broadcast_interval_ms)
 
       # Any time there is a reset_event, broadcast so that subscribers are immediately
       # notified of the changes. This way, when the stream first starts,
@@ -107,8 +107,7 @@ defmodule MobileAppBackend.PubSub do
 
       def handle_info(:timed_broadcast, state) do
         send(self(), :broadcast)
-        interval = unquote(broadcast_interval_ms)
-        broadcast_timer(interval)
+        broadcast_timer(@broadcast_interval_ms)
         {:noreply, state, :hibernate}
       end
 
