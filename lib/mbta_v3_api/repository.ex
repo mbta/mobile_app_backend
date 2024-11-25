@@ -60,29 +60,28 @@ defmodule MBTAV3API.Repository.Impl do
 
   use Nebulex.Caching.Decorators
 
-  alias MBTAV3API.RepositoryCache
-  alias MBTAV3API.JsonApi
+  alias MBTAV3API.{JsonApi, RepositoryCache}
 
   @ttl :timer.hours(1)
 
   @impl true
-    @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def route_patterns(params, opts \\ []), do: all(MBTAV3API.RoutePattern, params, opts)
 
   @impl true
-    @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def routes(params, opts \\ []), do: all(MBTAV3API.Route, params, opts)
 
   @impl true
-    @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
 
   @impl true
-    @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
 
   @impl true
-    @decorate cacheable(cache: MBTAV3API.RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def trips(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
 
   @spec all(module(), JsonApi.Params.t(), Keyword.t()) ::
