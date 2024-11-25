@@ -14,11 +14,7 @@ defmodule MBTAV3API.RepositoryCache do
     "#{mod}|#{fun}"
   end
 
-  def generate(mod, fun, [arg]) do
-    "#{mod}|#{fun}|#{:erlang.phash2(arg)}"
-  end
-
   def generate(mod, fun, args) do
-    "#{mod}|#{fun}|#{:erlang.phash2(args)}"
+    "#{mod}|#{fun}|#{inspect(args)}"
   end
 end
