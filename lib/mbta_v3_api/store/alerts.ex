@@ -76,7 +76,7 @@ defmodule MBTAV3API.Store.Alerts.Impl do
     }
   end
 
-  # Conver the struct to a record for ETS
+  # override alert 611483 behavior to temporarily address GL Park St alert boundary issue
   defp to_record(
          %Alert{
            id: "611483"
@@ -85,16 +85,10 @@ defmodule MBTAV3API.Store.Alerts.Impl do
     entities =
       alert.informed_entity
       |> Enum.reject(fn entity ->
-        entity.stop == "70196" && entity.route != "Green-B"
-      end)
-      |> Enum.reject(fn entity ->
-        entity.stop == "70197" && entity.route != "Green-C"
-      end)
-      |> Enum.reject(fn entity ->
-        entity.stop == "70198" && entity.route != "Green-D"
-      end)
-      |> Enum.reject(fn entity ->
-        entity.stop == "70199" && entity.route != "Green-E"
+        (entity.stop == "70196" && entity.route != "Green-B") ||
+          (entity.stop == "70197" && entity.route != "Green-C") ||
+          (entity.stop == "70198" && entity.route != "Green-D") ||
+          (entity.stop == "70199" && entity.route != "Green-E")
       end)
 
     {
@@ -103,6 +97,7 @@ defmodule MBTAV3API.Store.Alerts.Impl do
     }
   end
 
+  # Convert the struct to a record for ETS
   defp to_record(
          %Alert{
            id: id
