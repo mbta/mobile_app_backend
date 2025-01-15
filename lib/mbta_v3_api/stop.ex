@@ -12,6 +12,7 @@ defmodule MBTAV3API.Stop do
           vehicle_type: MBTAV3API.Route.type() | nil,
           description: String.t() | nil,
           platform_name: String.t() | nil,
+          wheelchair_boarding: wheelchair_boarding() | nil,
           child_stop_ids: [String.t()] | nil,
           connecting_stop_ids: [String.t()] | nil,
           parent_station_id: String.t() | nil
@@ -20,6 +21,11 @@ defmodule MBTAV3API.Stop do
   Util.declare_enum(
     :location_type,
     Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
+  )
+
+  Util.declare_enum(
+    :wheelchair_boarding,
+    Util.enum_values(:index, [nil, :accessible, :inaccessible])
   )
 
   defstruct [
@@ -31,6 +37,7 @@ defmodule MBTAV3API.Stop do
     :vehicle_type,
     :description,
     :platform_name,
+    :wheelchair_boarding,
     :child_stop_ids,
     :connecting_stop_ids,
     :parent_station_id
@@ -45,7 +52,8 @@ defmodule MBTAV3API.Stop do
       :location_type,
       :vehicle_type,
       :description,
-      :platform_name
+      :platform_name,
+      :wheelchair_boarding
     ]
   end
 
@@ -141,7 +149,11 @@ defmodule MBTAV3API.Stop do
       platform_name: item.attributes["platform_name"],
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"]),
       connecting_stop_ids: JsonApi.Object.get_many_ids(item.relationships["connecting_stops"]),
-      parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"])
+      parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"]),
+      wheelchair_boarding:
+        if wheelchair_boarding = item.attributes["wheelchair_boarding"] do
+          parse_wheelchair_boarding(wheelchair_boarding)
+        end
     }
   end
 
