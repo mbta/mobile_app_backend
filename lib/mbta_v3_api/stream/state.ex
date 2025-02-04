@@ -23,7 +23,7 @@ defmodule MBTAV3API.Stream.State do
     %ServerSentEventStage.Event{event: event, data: data} = event
 
     %JsonApi{data: raw_data} = JsonApi.parse(data)
-    parsed_data = Enum.map(raw_data, &JsonApi.Object.parse/1)
+    parsed_data = JsonApi.Object.parse_all_discarding_failures(raw_data)
 
     {event_type(event), parsed_data}
   end

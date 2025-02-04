@@ -5,8 +5,8 @@ defmodule MBTAV3API.PredictionTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Prediction
 
-  test "parse/1" do
-    assert Prediction.parse(%JsonApi.Item{
+  test "parse!/1" do
+    assert Prediction.parse!(%JsonApi.Item{
              id: "prediction-ADDED-1591587107-70237-440",
              attributes: %{
                "arrival_time" => "2024-01-24T17:08:51-05:00",

@@ -21,7 +21,8 @@ defmodule MBTAV3API.Prediction do
     Util.enum_values(
       :uppercase_string,
       [:added, :cancelled, :no_data, :skipped, :unscheduled]
-    ) ++ [scheduled: nil]
+    ) ++ [scheduled: nil],
+    :scheduled
   )
 
   @derive Jason.Encoder
@@ -61,8 +62,8 @@ defmodule MBTAV3API.Prediction do
     }
   end
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       arrival_time: Util.parse_optional_datetime!(item.attributes["arrival_time"]),

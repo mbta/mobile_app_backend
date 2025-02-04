@@ -27,11 +27,11 @@ defmodule MBTAV3API.Stream.InstanceTest do
     SSEStub.push_events(sse_stage, [
       %ServerSentEventStage.Event{
         event: "add",
-        data: ~s({"attributes":{},"id":"1723","type":"route"})
+        data: ~s({"attributes":{"type":3},"id":"1723","type":"route"})
       }
     ])
 
-    assert_receive {:stream_data, %{routes: %{"1723" => %Route{id: "1723"}}}}
+    assert_receive {:stream_data, %{routes: %{"1723" => %Route{id: "1723", type: :bus}}}}
   end
 
   test "logs health" do

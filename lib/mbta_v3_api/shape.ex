@@ -13,8 +13,8 @@ defmodule MBTAV3API.Shape do
 
   def includes, do: %{}
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       polyline: item.attributes["polyline"]

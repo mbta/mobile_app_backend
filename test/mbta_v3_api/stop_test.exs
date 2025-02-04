@@ -5,8 +5,8 @@ defmodule MBTAV3API.StopTest do
   alias MBTAV3API.Stop
   import MobileAppBackend.Factory
 
-  test "parse/1" do
-    assert Stop.parse(%JsonApi.Item{
+  test "parse!/1" do
+    assert Stop.parse!(%JsonApi.Item{
              type: "stop",
              id: "70158",
              attributes: %{
@@ -27,7 +27,7 @@ defmodule MBTAV3API.StopTest do
              parent_station_id: "place-boyls"
            }
 
-    assert Stop.parse(%JsonApi.Item{
+    assert Stop.parse!(%JsonApi.Item{
              type: "stop",
              id: "70158",
              attributes: %{

@@ -4,8 +4,8 @@ defmodule MBTAV3API.ScheduleTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Schedule
 
-  test "parse/1" do
-    assert Schedule.parse(%JsonApi.Item{
+  test "parse!/1" do
+    assert Schedule.parse!(%JsonApi.Item{
              type: "schedule",
              id: "schedule-60565179-70159-90",
              attributes: %{

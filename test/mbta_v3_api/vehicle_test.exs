@@ -5,7 +5,7 @@ defmodule MBTAV3API.VehicleTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Vehicle
 
-  test "parse/1" do
+  test "parse!/1" do
     assert %Vehicle{
              id: "y1886",
              bearing: 315,
@@ -20,7 +20,7 @@ defmodule MBTAV3API.VehicleTest do
              trip_id: "61391720",
              updated_at: ~B[2024-01-24 17:08:51]
            } ==
-             Vehicle.parse(%JsonApi.Item{
+             Vehicle.parse!(%JsonApi.Item{
                type: "vehicle",
                id: "y1886",
                attributes: %{
@@ -41,7 +41,7 @@ defmodule MBTAV3API.VehicleTest do
              })
   end
 
-  test "parse/1 with nil occupancy status" do
+  test "parse!/1 with nil occupancy status" do
     assert %Vehicle{
              id: "y1886",
              bearing: 315,
@@ -56,7 +56,7 @@ defmodule MBTAV3API.VehicleTest do
              trip_id: "61391720",
              updated_at: ~B[2024-01-24 17:08:51]
            } ==
-             Vehicle.parse(%JsonApi.Item{
+             Vehicle.parse!(%JsonApi.Item{
                type: "vehicle",
                id: "y1886",
                attributes: %{

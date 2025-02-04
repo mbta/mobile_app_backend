@@ -8,13 +8,14 @@ defmodule MBTAV3API.JsonApi.Response do
   defstruct [:data, included: JsonApi.Object.to_full_map([])]
 
   @doc """
-  Parses everything in a `t:JsonApi.t/0`.
+  Parses everything in a `t:JsonApi.t/0`, discarding objects which cannot be parsed.
   """
   @spec parse(JsonApi.t()) :: t(JsonApi.Object.t())
   def parse(%JsonApi{data: data, included: included}) do
     %__MODULE__{
-      data: Enum.map(data, &JsonApi.Object.parse(&1, included)),
-      included: included |> Enum.map(&JsonApi.Object.parse(&1, included)) |> to_full_map()
+      data: JsonApi.Object.parse_all_discarding_failures(data, included),
+      included:
+        included |> JsonApi.Object.parse_all_discarding_failures(included) |> to_full_map()
     }
   end
 end

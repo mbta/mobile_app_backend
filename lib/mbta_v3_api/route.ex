@@ -18,7 +18,8 @@ defmodule MBTAV3API.Route do
 
   Util.declare_enum(
     :type,
-    Util.enum_values(:index, [:light_rail, :heavy_rail, :commuter_rail, :bus, :ferry])
+    Util.enum_values(:index, [:light_rail, :heavy_rail, :commuter_rail, :bus, :ferry]),
+    Util.FailOnUnknown
   )
 
   @derive Jason.Encoder
@@ -53,11 +54,11 @@ defmodule MBTAV3API.Route do
   def includes, do: %{line: MBTAV3API.Line, route_patterns: MBTAV3API.RoutePattern}
 
   @impl JsonApi.Object
-  def serialize_filter_value(:type, type), do: serialize_type(type)
+  def serialize_filter_value(:type, type), do: serialize_type!(type)
   def serialize_filter_value(_field, value), do: value
 
-  @spec parse(JsonApi.Item.t(), [JsonApi.Object.t()]) :: t()
-  def parse(%JsonApi.Item{} = item, included_items \\ []) do
+  @spec parse!(JsonApi.Item.t(), [JsonApi.Object.t()]) :: t()
+  def parse!(%JsonApi.Item{} = item, included_items \\ []) do
     line_id = JsonApi.Object.get_one_id(item.relationships["line"])
 
     line = Enum.find(included_items, fn item -> item.type == "line" && item.id == line_id end)
@@ -72,10 +73,7 @@ defmodule MBTAV3API.Route do
 
     %__MODULE__{
       id: item.id,
-      type:
-        if type = item.attributes["type"] do
-          parse_type(type)
-        end,
+      type: parse_type!(item.attributes["type"]),
       color: color,
       direction_names: item.attributes["direction_names"],
       direction_destinations: item.attributes["direction_destinations"],
