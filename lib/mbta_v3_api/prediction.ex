@@ -22,7 +22,7 @@ defmodule MBTAV3API.Prediction do
       :uppercase_string,
       [:added, :cancelled, :no_data, :skipped, :unscheduled]
     ) ++ [scheduled: nil],
-    nil
+    :scheduled
   )
 
   @derive Jason.Encoder
