@@ -25,22 +25,23 @@ defmodule MBTAV3API.Alert.InformedEntity do
         :using_escalator,
         :using_wheelchair
       ]
-    )
+    ),
+    nil
   )
 
   @derive Jason.Encoder
   defstruct [:activities, :direction_id, :facility, :route, :route_type, :stop, :trip]
 
-  @spec parse(map()) :: t()
-  def parse(data) when is_map(data) do
+  @spec parse!(map()) :: t()
+  def parse!(data) when is_map(data) do
     %__MODULE__{
-      activities: data["activities"] |> Enum.map(&parse_activity/1),
+      activities: data["activities"] |> Enum.map(&parse_activity/1) |> Enum.reject(&is_nil/1),
       direction_id: data["direction_id"],
       facility: data["facility"],
       route: data["route"],
       route_type:
         if route_type = data["route_type"] do
-          MBTAV3API.Route.parse_type(route_type)
+          MBTAV3API.Route.parse_type!(route_type)
         end,
       stop: data["stop"],
       trip: data["trip"]

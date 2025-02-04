@@ -13,7 +13,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
           event: "reset",
           data: """
           [
-            {"attributes":{},"id":"Green-B","type":"route"},
+            {"attributes":{"type":0},"id":"Green-B","type":"route"},
             {"attributes":{"direction_id":0,"name":"Government Center - Boston College","sort_order":100320000,"typicality":1},"id":"Green-B-812-0","links":{"self":"/route_patterns/Green-B-812-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-B-C1-0","type":"trip"}},"route":{"data":{"id":"Green-B","type":"route"}}},"type":"route_pattern"},
             {"attributes":{"direction_id":0,"name":"Government Center - Cleveland Circle","sort_order":100330000,"typicality":1},"id":"Green-C-832-0","links":{"self":"/route_patterns/Green-C-832-0"},"relationships":{"representative_trip":{"data":{"id":"canonical-Green-C-C1-0","type":"trip"}},"route":{"data":{"id":"Green-C","type":"route"}}},"type":"route_pattern"}
           ]
@@ -42,7 +42,7 @@ defmodule MBTAV3API.Stream.ConsumerTest do
 
     def expected_data do
       JsonApi.Object.to_full_map([
-        %Route{id: "Green-B"},
+        %Route{id: "Green-B", type: :light_rail},
         %RoutePattern{
           id: "Green-B-812-1",
           direction_id: 1,

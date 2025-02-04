@@ -47,14 +47,14 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
     end
   end
 
-  describe "parse/1" do
+  describe "parse!/1" do
     test "dispatches by type" do
-      assert %MBTAV3API.Prediction{} = parse(%JsonApi.Item{type: "prediction"})
-      assert %MBTAV3API.Stop{} = parse(%JsonApi.Item{type: "stop"})
+      assert %MBTAV3API.Prediction{} = parse!(%JsonApi.Item{type: "prediction"})
+      assert %MBTAV3API.Stop{} = parse!(%JsonApi.Item{type: "stop"})
     end
 
     test "preserves reference" do
-      assert %JsonApi.Reference{} = parse(%JsonApi.Reference{})
+      assert %JsonApi.Reference{} = parse!(%JsonApi.Reference{})
     end
   end
 

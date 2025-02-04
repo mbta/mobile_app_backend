@@ -25,6 +25,13 @@ defmodule MBTAV3API.Stream.StateTest do
      }}
   end
 
+  def bad_add_event do
+    %Event{
+      event: "add",
+      data: ~s({"attributes":{"lifecycle":"RETROACTIVE"},"id":"9","type":"alert"})
+    }
+  end
+
   def update_event do
     {
       %Event{
@@ -87,6 +94,12 @@ defmodule MBTAV3API.Stream.StateTest do
       {event, parsed} = reset_event()
 
       assert {:reset, [parsed]} == State.parse_event(event)
+    end
+
+    test "discards invalid" do
+      event = bad_add_event()
+
+      assert {:add, []} == State.parse_event(event)
     end
   end
 

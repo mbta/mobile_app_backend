@@ -4,7 +4,7 @@ defmodule MBTAV3API.TripTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Trip
 
-  test "parse/1" do
+  test "parse!/1" do
     assert %Trip{
              id: "60451275",
              direction_id: 0,
@@ -12,7 +12,7 @@ defmodule MBTAV3API.TripTest do
              route_pattern_id: "24-2-0",
              stop_ids: ["334", "536"]
            } ==
-             Trip.parse(%JsonApi.Item{
+             Trip.parse!(%JsonApi.Item{
                id: "60451275",
                attributes: %{
                  "direction_id" => 0,

@@ -20,12 +20,14 @@ defmodule MBTAV3API.Stop do
 
   Util.declare_enum(
     :location_type,
-    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
+    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area]),
+    Util.FailOnUnknown
   )
 
   Util.declare_enum(
     :wheelchair_boarding,
-    Util.enum_values(:index, [nil, :accessible, :inaccessible])
+    Util.enum_values(:index, [nil, :accessible, :inaccessible]),
+    nil
   )
 
   defstruct [
@@ -121,17 +123,17 @@ defmodule MBTAV3API.Stop do
 
   @impl JsonApi.Object
   def serialize_filter_value(:route_type, route_type) do
-    MBTAV3API.Route.serialize_type(route_type)
+    MBTAV3API.Route.serialize_type!(route_type)
   end
 
   def serialize_filter_value(:location_type, location_type) do
-    serialize_location_type(location_type)
+    serialize_location_type!(location_type)
   end
 
   def serialize_filter_value(_field, value), do: value
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       latitude: item.attributes["latitude"],
@@ -139,11 +141,11 @@ defmodule MBTAV3API.Stop do
       name: item.attributes["name"],
       location_type:
         if location_type = item.attributes["location_type"] do
-          parse_location_type(location_type)
+          parse_location_type!(location_type)
         end,
       vehicle_type:
         if vehicle_type = item.attributes["vehicle_type"] do
-          MBTAV3API.Route.parse_type(vehicle_type)
+          MBTAV3API.Route.parse_type!(vehicle_type)
         end,
       description: item.attributes["description"],
       platform_name: item.attributes["platform_name"],

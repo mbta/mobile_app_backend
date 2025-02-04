@@ -4,9 +4,9 @@ defmodule MBTAV3API.RouteTest do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Route
 
-  describe "parse/1" do
+  describe "parse!/1" do
     test "parse route only" do
-      assert Route.parse(%JsonApi.Item{
+      assert Route.parse!(%JsonApi.Item{
                id: "Green-C",
                attributes: %{
                  "color" => "00843D",
@@ -48,7 +48,7 @@ defmodule MBTAV3API.RouteTest do
                type: :bus,
                line_id: "line-Orange"
              } ==
-               Route.parse(
+               Route.parse!(
                  %JsonApi.Item{
                    id: "orange-shuttle",
                    attributes: %{

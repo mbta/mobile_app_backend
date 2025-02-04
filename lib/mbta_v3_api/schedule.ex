@@ -17,7 +17,8 @@ defmodule MBTAV3API.Schedule do
 
   Util.declare_enum(
     :stop_edge_type,
-    Util.enum_values(:index, [:regular, :unavailable, :call_agency, :coordinate_with_driver])
+    Util.enum_values(:index, [:regular, :unavailable, :call_agency, :coordinate_with_driver]),
+    Util.FailOnUnknown
   )
 
   @derive Jason.Encoder
@@ -48,14 +49,14 @@ defmodule MBTAV3API.Schedule do
   @impl JsonApi.Object
   def includes, do: %{route: MBTAV3API.Route, stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       arrival_time: Util.parse_optional_datetime!(item.attributes["arrival_time"]),
       departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
-      drop_off_type: parse_stop_edge_type(item.attributes["drop_off_type"]),
-      pick_up_type: parse_stop_edge_type(item.attributes["pickup_type"]),
+      drop_off_type: parse_stop_edge_type!(item.attributes["drop_off_type"]),
+      pick_up_type: parse_stop_edge_type!(item.attributes["pickup_type"]),
       stop_headsign: item.attributes["stop_headsign"],
       stop_sequence: item.attributes["stop_sequence"],
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),

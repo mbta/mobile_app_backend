@@ -25,8 +25,8 @@ defmodule MBTAV3API.Trip do
     }
   end
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       direction_id: item.attributes["direction_id"],
