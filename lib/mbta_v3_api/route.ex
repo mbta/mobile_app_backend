@@ -18,7 +18,8 @@ defmodule MBTAV3API.Route do
 
   Util.declare_enum(
     :type,
-    Util.enum_values(:index, [:light_rail, :heavy_rail, :commuter_rail, :bus, :ferry])
+    Util.enum_values(:index, [:light_rail, :heavy_rail, :commuter_rail, :bus, :ferry]),
+    Util.CrashOnUnknownEvenThoughThisIsABadIdea
   )
 
   @derive Jason.Encoder

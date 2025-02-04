@@ -17,7 +17,8 @@ defmodule MBTAV3API.Schedule do
 
   Util.declare_enum(
     :stop_edge_type,
-    Util.enum_values(:index, [:regular, :unavailable, :call_agency, :coordinate_with_driver])
+    Util.enum_values(:index, [:regular, :unavailable, :call_agency, :coordinate_with_driver]),
+    :call_agency
   )
 
   @derive Jason.Encoder

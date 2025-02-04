@@ -25,7 +25,8 @@ defmodule MBTAV3API.Alert.InformedEntity do
         :using_escalator,
         :using_wheelchair
       ]
-    )
+    ),
+    nil
   )
 
   @derive Jason.Encoder
@@ -34,7 +35,7 @@ defmodule MBTAV3API.Alert.InformedEntity do
   @spec parse(map()) :: t()
   def parse(data) when is_map(data) do
     %__MODULE__{
-      activities: data["activities"] |> Enum.map(&parse_activity/1),
+      activities: data["activities"] |> Enum.map(&parse_activity/1) |> Enum.reject(&is_nil/1),
       direction_id: data["direction_id"],
       facility: data["facility"],
       route: data["route"],

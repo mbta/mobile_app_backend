@@ -26,7 +26,8 @@ defmodule MBTAV3API.RoutePattern do
   """
   Util.declare_enum(
     :typicality,
-    Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only])
+    Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only]),
+    nil
   )
 
   @derive Jason.Encoder

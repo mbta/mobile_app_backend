@@ -126,7 +126,7 @@ defmodule MBTAV3API.AlertTest do
                "informed_entity" => [
                  %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
                ],
-               "lifecycle" => "NEW",
+               "lifecycle" => "RETROACTIVE",
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{

@@ -20,12 +20,14 @@ defmodule MBTAV3API.Stop do
 
   Util.declare_enum(
     :location_type,
-    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
+    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area]),
+    :generic_node
   )
 
   Util.declare_enum(
     :wheelchair_boarding,
-    Util.enum_values(:index, [nil, :accessible, :inaccessible])
+    Util.enum_values(:index, [nil, :accessible, :inaccessible]),
+    nil
   )
 
   defstruct [

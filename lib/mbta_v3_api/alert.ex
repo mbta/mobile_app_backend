@@ -69,7 +69,8 @@ defmodule MBTAV3API.Alert do
       :unruly_passenger,
       :unknown_cause,
       :weather
-    ])
+    ]),
+    :unknown_cause
   )
 
   Util.declare_enum(
@@ -108,12 +109,14 @@ defmodule MBTAV3API.Alert do
       :suspension,
       :track_change,
       :unknown_effect
-    ])
+    ]),
+    :unknown_effect
   )
 
   Util.declare_enum(
     :lifecycle,
-    Util.enum_values(:uppercase_string, [:new, :ongoing, :ongoing_upcoming, :upcoming])
+    Util.enum_values(:uppercase_string, [:new, :ongoing, :ongoing_upcoming, :upcoming]),
+    :new
   )
 
   @derive Jason.Encoder
@@ -170,9 +173,9 @@ defmodule MBTAV3API.Alert do
     %__MODULE__{
       id: item.id,
       active_period: Enum.map(item.attributes["active_period"], &ActivePeriod.parse/1),
-      cause: parse_cause(item.attributes["cause"], :unknown_cause),
+      cause: parse_cause(item.attributes["cause"]),
       description: item.attributes["description"],
-      effect: parse_effect(item.attributes["effect"], :unknown_effect),
+      effect: parse_effect(item.attributes["effect"]),
       effect_name: item.attributes["effect_name"],
       header: item.attributes["header"],
       informed_entity: Enum.map(item.attributes["informed_entity"], &InformedEntity.parse/1),

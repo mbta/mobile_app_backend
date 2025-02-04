@@ -21,7 +21,8 @@ defmodule MBTAV3API.Prediction do
     Util.enum_values(
       :uppercase_string,
       [:added, :cancelled, :no_data, :skipped, :unscheduled]
-    ) ++ [scheduled: nil]
+    ) ++ [scheduled: nil],
+    nil
   )
 
   @derive Jason.Encoder

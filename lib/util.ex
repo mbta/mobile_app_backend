@@ -1,4 +1,7 @@
 defmodule Util do
+  defmodule CrashOnUnknownEvenThoughThisIsABadIdea do
+  end
+
   @doc """
   Define some helper types and functions for working with enums returned from the V3 API.
 
@@ -6,10 +9,13 @@ defmodule Util do
 
       iex> quote do
       ...>   Util.declare_enum(:lifecycle,
-      ...>     new: "NEW",
-      ...>     ongoing: "ONGOING",
-      ...>     ongoing_upcoming: "ONGOING_UPCOMING",
-      ...>     upcoming: "UPCOMING"
+      ...>     [
+      ...>       new: "NEW",
+      ...>       ongoing: "ONGOING",
+      ...>       ongoing_upcoming: "ONGOING_UPCOMING",
+      ...>       upcoming: "UPCOMING"
+      ...>     ],
+      ...>     :new
       ...>   )
       ...> end
       ...> |> Macro.expand_once(__ENV__)
@@ -25,17 +31,7 @@ defmodule Util do
         "    \\"ONGOING\\" -> :ongoing",
         "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
         "    \\"UPCOMING\\" -> :upcoming",
-        "  end",
-        "end",
-        "",
-        "@spec parse_lifecycle(raw_lifecycle(), lifecycle()) :: lifecycle()",
-        "def parse_lifecycle(lifecycle, default) do",
-        "  case lifecycle do",
-        "    \\"NEW\\" -> :new",
-        "    \\"ONGOING\\" -> :ongoing",
-        "    \\"ONGOING_UPCOMING\\" -> :ongoing_upcoming",
-        "    \\"UPCOMING\\" -> :upcoming",
-        "    _ -> default",
+        "    _ -> :new",
         "  end",
         "end",
         "",
@@ -51,7 +47,7 @@ defmodule Util do
       ]
 
       iex> quote do
-      ...>   Util.declare_enum(:x, a: 0, b: 1)
+      ...>   Util.declare_enum(:x, [a: 0, b: 1], nil)
       ...> end
       ...> |> Macro.expand_once(__ENV__)
       ...> |> Macro.to_string()
@@ -59,20 +55,12 @@ defmodule Util do
       [
         "@type x :: :a | :b",
         "@type raw_x :: 0 | 1",
-        "@spec parse_x(raw_x()) :: x()",
+        "@spec parse_x(raw_x()) :: x() | nil",
         "def parse_x(x) do",
         "  case x do",
         "    0 -> :a",
         "    1 -> :b",
-        "  end",
-        "end",
-        "",
-        "@spec parse_x(raw_x(), x()) :: x()",
-        "def parse_x(x, default) do",
-        "  case x do",
-        "    0 -> :a",
-        "    1 -> :b",
-        "    _ -> default",
+        "    _ -> nil",
         "  end",
         "end",
         "",
@@ -86,7 +74,7 @@ defmodule Util do
       ]
 
       iex> quote do
-      ...>   Util.declare_enum(:a, x: "X", y: nil)
+      ...>   Util.declare_enum(:a, [x: "X", y: nil], Util.CrashOnUnknownEvenThoughThisIsABadIdea)
       ...> end
       ...> |> Macro.expand_once(__ENV__)
       ...> |> Macro.to_string()
@@ -103,15 +91,6 @@ defmodule Util do
         end
       end
       #
-      @spec parse_a(raw_a(), a()) :: a()
-      def parse_a(a, default) do
-        case a do
-          "X" -> :x
-          nil -> :y
-          _ -> default
-        end
-      end
-      #
       @spec serialize_a(a()) :: raw_a()
       def serialize_a(a) do
         case a do
@@ -121,8 +100,13 @@ defmodule Util do
       end
       \"\"\"
   """
-  defmacro declare_enum(name, values) do
+  defmacro declare_enum(name, values, default) do
     {values, _} = Code.eval_quoted(values, [], __CALLER__)
+    {default, _} = Code.eval_quoted(default, [], __CALLER__)
+
+    if not is_atom(default) do
+      raise "Illegal default #{inspect(default)}, must be atom"
+    end
 
     type_spec =
       values
@@ -140,7 +124,6 @@ defmodule Util do
     parse_fn = :"parse_#{name}"
     serialize_fn = :"serialize_#{name}"
     method_arg = Macro.var(name, __MODULE__)
-    default_arg = Macro.var(:default, __MODULE__)
     raw_type = :"raw_#{name}"
     raw_type_name = Macro.var(raw_type, nil)
 
@@ -154,9 +137,27 @@ defmodule Util do
         clause
       end)
 
+    parse_return_type =
+      if default == CrashOnUnknownEvenThoughThisIsABadIdea or
+           Enum.any?(values, fn {value, _raw_value} -> value == default end) do
+        quote do
+          unquote(name)()
+        end
+      else
+        quote do
+          unquote(name)() | unquote(default)
+        end
+      end
+
     parse_default_clause =
-      quote do
-        _ -> unquote(default_arg)
+      case default do
+        CrashOnUnknownEvenThoughThisIsABadIdea ->
+          []
+
+        _ ->
+          quote do
+            _ -> unquote(default)
+          end
       end
 
     serialize_clauses =
@@ -169,22 +170,16 @@ defmodule Util do
         clause
       end)
 
-    parse_body = {:case, [], [method_arg, [do: parse_clauses]]}
-    parse_default_body = {:case, [], [method_arg, [do: parse_clauses ++ parse_default_clause]]}
+    parse_body = {:case, [], [method_arg, [do: parse_clauses ++ parse_default_clause]]}
     serialize_body = {:case, [], [method_arg, [do: serialize_clauses]]}
 
     quote do
       @type unquote(type_name) :: unquote(type_spec)
       @type unquote(raw_type_name) :: unquote(raw_type_spec)
 
-      @spec unquote(parse_fn)(unquote(raw_type)()) :: unquote(name)()
+      @spec unquote(parse_fn)(unquote(raw_type)()) :: unquote(parse_return_type)
       def unquote(parse_fn)(unquote(method_arg)) do
         unquote(parse_body)
-      end
-
-      @spec unquote(parse_fn)(unquote(raw_type)(), unquote(name)()) :: unquote(name)()
-      def unquote(parse_fn)(unquote(method_arg), unquote(default_arg)) do
-        unquote(parse_default_body)
       end
 
       @spec unquote(serialize_fn)(unquote(name)()) :: unquote(raw_type)()

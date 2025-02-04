@@ -18,7 +18,8 @@ defmodule MBTAV3API.Vehicle do
         }
   Util.declare_enum(
     :current_status,
-    Util.enum_values(:uppercase_string, [:incoming_at, :stopped_at, :in_transit_to])
+    Util.enum_values(:uppercase_string, [:incoming_at, :stopped_at, :in_transit_to]),
+    :in_transit_to
   )
 
   Util.declare_enum(
@@ -31,7 +32,8 @@ defmodule MBTAV3API.Vehicle do
       :full,
       :not_accepting_passengers,
       :no_data_available
-    ])
+    ]),
+    :no_data_available
   )
 
   @derive Jason.Encoder
