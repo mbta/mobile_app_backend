@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Search.Algolia.StopResult do
       routes:
         Enum.map(
           result_response["routes"],
-          &%{type: MBTAV3API.Route.parse_type(&1["type"]), icon: &1["icon"]}
+          &%{type: MBTAV3API.Route.parse_type!(&1["type"]), icon: &1["icon"]}
         )
     }
   end

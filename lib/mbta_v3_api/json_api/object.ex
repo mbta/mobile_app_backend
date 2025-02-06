@@ -180,14 +180,37 @@ defmodule MBTAV3API.JsonApi.Object do
   @doc """
   Parses a `t:JsonApi.Item.t/0` into a struct of the right type, or preserves a `t:JsonApi.Reference.t/0` as-is.
 
-  Preserving references is probably not still useful now that we are never nesting objects.
+  Preserving references is important for correctly handing stream remove messages.
   """
-  @spec parse(JsonApi.Item.t(), [JsonApi.Item.t()]) :: t()
-  @spec parse(JsonApi.Reference.t(), [JsonApi.Item.t()]) :: JsonApi.Reference.t()
-  def parse(item, included \\ [])
-  def parse(%JsonApi.Item{type: "route"} = item, included), do: Route.parse(item, included)
-  def parse(%JsonApi.Item{type: type} = item, _included), do: module_for(type).parse(item)
-  def parse(%JsonApi.Reference{} = ref, _included), do: ref
+  @spec parse!(JsonApi.Item.t(), [JsonApi.Item.t()]) :: t()
+  @spec parse!(JsonApi.Reference.t(), [JsonApi.Item.t()]) :: JsonApi.Reference.t()
+  def parse!(item, included \\ [])
+  def parse!(%JsonApi.Item{type: "route"} = item, included), do: Route.parse!(item, included)
+  def parse!(%JsonApi.Item{type: type} = item, _included), do: module_for(type).parse!(item)
+  def parse!(%JsonApi.Reference{} = ref, _included), do: ref
+
+  @doc """
+  Parses a list of `t:JsonApi.Item.t/0`s into structs of the right type, discarding any which cannot be parsed.
+
+  Preserves `t:JsonApi.Reference.t/0`s as-is, which is important for correctly handing stream remove messages.
+  """
+  @spec parse_all_discarding_failures([JsonApi.Item.t()], [JsonApi.Item.t()]) :: [t()]
+  @spec parse_all_discarding_failures(
+          [JsonApi.Item.t() | JsonApi.Reference.t()],
+          [JsonApi.Item.t()]
+        ) :: [t() | JsonApi.Reference.t()]
+  def parse_all_discarding_failures(items, included \\ []) do
+    # Kotlin's mapNotNull would be really nice here, but alas, we don't have it.
+    Enum.flat_map(items, fn raw_item ->
+      try do
+        [parse!(raw_item, included)]
+      rescue
+        ex ->
+          Sentry.capture_exception(ex, stacktrace: __STACKTRACE__)
+          []
+      end
+    end)
+  end
 
   @doc """
   Gets the `id` of a single `JsonApi.Reference`.

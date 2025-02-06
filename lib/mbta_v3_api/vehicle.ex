@@ -18,7 +18,8 @@ defmodule MBTAV3API.Vehicle do
         }
   Util.declare_enum(
     :current_status,
-    Util.enum_values(:uppercase_string, [:incoming_at, :stopped_at, :in_transit_to])
+    Util.enum_values(:uppercase_string, [:incoming_at, :stopped_at, :in_transit_to]),
+    Util.FailOnUnknown
   )
 
   Util.declare_enum(
@@ -31,7 +32,8 @@ defmodule MBTAV3API.Vehicle do
       :full,
       :not_accepting_passengers,
       :no_data_available
-    ])
+    ]),
+    :no_data_available
   )
 
   @derive Jason.Encoder
@@ -67,12 +69,12 @@ defmodule MBTAV3API.Vehicle do
   @impl JsonApi.Object
   def includes, do: %{route: MBTAV3API.Route, stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       bearing: item.attributes["bearing"],
-      current_status: parse_current_status(item.attributes["current_status"]),
+      current_status: parse_current_status!(item.attributes["current_status"]),
       current_stop_sequence: item.attributes["current_stop_sequence"],
       direction_id: item.attributes["direction_id"],
       latitude: item.attributes["latitude"],

@@ -74,8 +74,8 @@ defmodule MBTAV3API.AlertTest do
     end
   end
 
-  test "parse/1" do
-    assert Alert.parse(%JsonApi.Item{
+  test "parse!/1" do
+    assert Alert.parse!(%JsonApi.Item{
              id: "553407",
              attributes: %{
                "active_period" => [
@@ -113,7 +113,7 @@ defmodule MBTAV3API.AlertTest do
   end
 
   test "unexpected enum values fall back" do
-    assert Alert.parse(%JsonApi.Item{
+    assert Alert.parse!(%JsonApi.Item{
              id: "553407",
              attributes: %{
                "active_period" => [

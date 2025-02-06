@@ -12,6 +12,7 @@ defmodule MBTAV3API.Stop do
           vehicle_type: MBTAV3API.Route.type() | nil,
           description: String.t() | nil,
           platform_name: String.t() | nil,
+          wheelchair_boarding: wheelchair_boarding() | nil,
           child_stop_ids: [String.t()] | nil,
           connecting_stop_ids: [String.t()] | nil,
           parent_station_id: String.t() | nil
@@ -19,7 +20,14 @@ defmodule MBTAV3API.Stop do
 
   Util.declare_enum(
     :location_type,
-    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area])
+    Util.enum_values(:index, [:stop, :station, :entrance_exit, :generic_node, :boarding_area]),
+    Util.FailOnUnknown
+  )
+
+  Util.declare_enum(
+    :wheelchair_boarding,
+    Util.enum_values(:index, [nil, :accessible, :inaccessible]),
+    nil
   )
 
   defstruct [
@@ -31,6 +39,7 @@ defmodule MBTAV3API.Stop do
     :vehicle_type,
     :description,
     :platform_name,
+    :wheelchair_boarding,
     :child_stop_ids,
     :connecting_stop_ids,
     :parent_station_id
@@ -45,7 +54,8 @@ defmodule MBTAV3API.Stop do
       :location_type,
       :vehicle_type,
       :description,
-      :platform_name
+      :platform_name,
+      :wheelchair_boarding
     ]
   end
 
@@ -113,17 +123,17 @@ defmodule MBTAV3API.Stop do
 
   @impl JsonApi.Object
   def serialize_filter_value(:route_type, route_type) do
-    MBTAV3API.Route.serialize_type(route_type)
+    MBTAV3API.Route.serialize_type!(route_type)
   end
 
   def serialize_filter_value(:location_type, location_type) do
-    serialize_location_type(location_type)
+    serialize_location_type!(location_type)
   end
 
   def serialize_filter_value(_field, value), do: value
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       latitude: item.attributes["latitude"],
@@ -131,17 +141,21 @@ defmodule MBTAV3API.Stop do
       name: item.attributes["name"],
       location_type:
         if location_type = item.attributes["location_type"] do
-          parse_location_type(location_type)
+          parse_location_type!(location_type)
         end,
       vehicle_type:
         if vehicle_type = item.attributes["vehicle_type"] do
-          MBTAV3API.Route.parse_type(vehicle_type)
+          MBTAV3API.Route.parse_type!(vehicle_type)
         end,
       description: item.attributes["description"],
       platform_name: item.attributes["platform_name"],
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"]),
       connecting_stop_ids: JsonApi.Object.get_many_ids(item.relationships["connecting_stops"]),
-      parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"])
+      parent_station_id: JsonApi.Object.get_one_id(item.relationships["parent_station"]),
+      wheelchair_boarding:
+        if wheelchair_boarding = item.attributes["wheelchair_boarding"] do
+          parse_wheelchair_boarding(wheelchair_boarding)
+        end
     }
   end
 

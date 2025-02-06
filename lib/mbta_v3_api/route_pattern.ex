@@ -26,7 +26,8 @@ defmodule MBTAV3API.RoutePattern do
   """
   Util.declare_enum(
     :typicality,
-    Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only])
+    Util.enum_values(:index, [nil, :typical, :deviation, :atypical, :diversion, :canonical_only]),
+    nil
   )
 
   @derive Jason.Encoder
@@ -47,8 +48,8 @@ defmodule MBTAV3API.RoutePattern do
   @impl JsonApi.Object
   def includes, do: %{representative_trip: MBTAV3API.Trip, route: MBTAV3API.Route}
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       canonical: item.attributes["canonical"],
@@ -111,7 +112,7 @@ defmodule MBTAV3API.RoutePattern do
     route_patterns_asc =
       route_patterns
       |> Enum.reject(&is_nil(&1.typicality))
-      |> Enum.sort_by(&serialize_typicality(&1.typicality))
+      |> Enum.sort_by(&serialize_typicality!(&1.typicality))
 
     [%{typicality: lowest_typicality} | _rest] = route_patterns_asc
 

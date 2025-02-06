@@ -5,8 +5,8 @@ defmodule MBTAV3API.RoutePatternTest do
   alias MBTAV3API.RoutePattern
   import MobileAppBackend.Factory
 
-  test "parse/1" do
-    assert RoutePattern.parse(%JsonApi.Item{
+  test "parse!/1" do
+    assert RoutePattern.parse!(%JsonApi.Item{
              id: "Green-C-832-1",
              attributes: %{
                "direction_id" => 1,

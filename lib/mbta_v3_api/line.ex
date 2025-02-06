@@ -34,8 +34,8 @@ defmodule MBTAV3API.Line do
   @impl JsonApi.Object
   def includes, do: %{}
 
-  @spec parse(JsonApi.Item.t()) :: t()
-  def parse(%JsonApi.Item{} = item) do
+  @spec parse!(JsonApi.Item.t()) :: t()
+  def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
       color: item.attributes["color"],
