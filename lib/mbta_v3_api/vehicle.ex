@@ -7,7 +7,7 @@ defmodule MBTAV3API.Vehicle do
           bearing: number() | nil,
           current_status: current_status(),
           current_stop_sequence: integer() | nil,
-          direction_id: 0 | 1 | nil,
+          direction_id: 0 | 1,
           latitude: float(),
           longitude: float(),
           occupancy_status: occupancy_status(),
@@ -76,7 +76,11 @@ defmodule MBTAV3API.Vehicle do
       bearing: item.attributes["bearing"],
       current_status: parse_current_status!(item.attributes["current_status"]),
       current_stop_sequence: item.attributes["current_stop_sequence"],
-      direction_id: item.attributes["direction_id"],
+      direction_id:
+        case item.attributes["direction_id"] do
+          nil -> raise "vehicle has nil direction_id"
+          direction_id -> direction_id
+        end,
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       occupancy_status: parse_optional_occupancy(item.attributes["occupancy_status"]),

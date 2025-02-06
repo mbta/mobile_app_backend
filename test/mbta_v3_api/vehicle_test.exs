@@ -76,4 +76,28 @@ defmodule MBTAV3API.VehicleTest do
                }
              })
   end
+
+  test "parse!/1 with nil direction_id" do
+    assert_raise RuntimeError, "vehicle has nil direction_id", fn ->
+      Vehicle.parse!(%JsonApi.Item{
+        type: "vehicle",
+        id: "y1886",
+        attributes: %{
+          "bearing" => 315,
+          "current_status" => "IN_TRANSIT_TO",
+          "current_stop_sequence" => 30,
+          "occupancy_status" => "MANY_SEATS_AVAILABLE",
+          "direction_id" => nil,
+          "latitude" => 42.359901428222656,
+          "longitude" => -71.09449005126953,
+          "updated_at" => "2024-01-24T17:08:51-05:00"
+        },
+        relationships: %{
+          "route" => %JsonApi.Reference{type: "route", id: "1"},
+          "stop" => %JsonApi.Reference{type: "stop", id: "99"},
+          "trip" => %JsonApi.Reference{type: "trip", id: "61391720"}
+        }
+      })
+    end
+  end
 end
