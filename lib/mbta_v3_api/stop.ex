@@ -151,6 +151,7 @@ defmodule MBTAV3API.Stop do
           MBTAV3API.Route.parse_type!(vehicle_type)
         end,
       description: item.attributes["description"],
+      platform_code: item.attributes["platform_code"],
       platform_name: item.attributes["platform_name"],
       child_stop_ids: JsonApi.Object.get_many_ids(item.relationships["child_stops"]),
       connecting_stop_ids: JsonApi.Object.get_many_ids(item.relationships["connecting_stops"]),
