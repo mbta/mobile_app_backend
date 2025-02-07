@@ -11,6 +11,7 @@ defmodule MBTAV3API.Stop do
           location_type: location_type(),
           vehicle_type: MBTAV3API.Route.type() | nil,
           description: String.t() | nil,
+          platform_code: String.t() | nil,
           platform_name: String.t() | nil,
           wheelchair_boarding: wheelchair_boarding() | nil,
           child_stop_ids: [String.t()] | nil,
@@ -38,6 +39,7 @@ defmodule MBTAV3API.Stop do
     :location_type,
     :vehicle_type,
     :description,
+    :platform_code,
     :platform_name,
     :wheelchair_boarding,
     :child_stop_ids,
@@ -54,6 +56,7 @@ defmodule MBTAV3API.Stop do
       :location_type,
       :vehicle_type,
       :description,
+      :platform_code,
       :platform_name,
       :wheelchair_boarding
     ]

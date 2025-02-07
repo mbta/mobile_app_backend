@@ -13,7 +13,8 @@ defmodule MBTAV3API.StopTest do
                "latitude" => 42.352531,
                "longitude" => -71.064682,
                "name" => "Boylston",
-               "location_type" => 0
+               "location_type" => 0,
+               "platform_code" => nil
              },
              relationships: %{
                "parent_station" => %JsonApi.Reference{type: "stop", id: "place-boyls"}
@@ -24,6 +25,7 @@ defmodule MBTAV3API.StopTest do
              longitude: -71.064682,
              name: "Boylston",
              location_type: :stop,
+             platform_code: nil,
              parent_station_id: "place-boyls"
            }
 
@@ -34,7 +36,8 @@ defmodule MBTAV3API.StopTest do
                "latitude" => 42.352531,
                "longitude" => -71.064682,
                "name" => "Boylston",
-               "location_type" => 0
+               "location_type" => 0,
+               "platform_code" => "3"
              },
              relationships: %{
                "parent_station" => %JsonApi.Reference{
@@ -48,6 +51,7 @@ defmodule MBTAV3API.StopTest do
              longitude: -71.064682,
              name: "Boylston",
              location_type: :stop,
+             platform_code: "3",
              parent_station_id: "place-boyls"
            }
   end
