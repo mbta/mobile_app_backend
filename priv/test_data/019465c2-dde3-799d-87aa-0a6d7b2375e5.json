@@ -7,6 +7,7 @@
         "location_type": 0,
         "longitude": -71.177035,
         "name": "Millennium Park",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -40,6 +41,7 @@
         "location_type": 0,
         "longitude": -71.175667,
         "name": "Rivermoor St @ Charles Park Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -73,6 +75,7 @@
         "location_type": 0,
         "longitude": -71.175492,
         "name": "Charles Park Rd @ Rivermoor St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -106,6 +109,7 @@
         "location_type": 0,
         "longitude": -71.174171,
         "name": "17 Charles Park Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -139,6 +143,7 @@
         "location_type": 0,
         "longitude": -71.172904,
         "name": "Charles Park Rd @ VFW Pkwy",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -172,6 +177,7 @@
         "location_type": 0,
         "longitude": -71.18138,
         "name": "Rivermoor St @ Industrial Park",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -205,6 +211,7 @@
         "location_type": 0,
         "longitude": -71.169626,
         "name": "Baker St opp Varick Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -238,6 +245,7 @@
         "location_type": 0,
         "longitude": -71.171522,
         "name": "Veterans Hospital West Roxbury",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -271,6 +279,7 @@
         "location_type": 0,
         "longitude": -71.169493,
         "name": "Baker St @ Varick Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -304,6 +313,7 @@
         "location_type": 0,
         "longitude": -71.168981,
         "name": "Baker St @ Amesbury St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -337,6 +347,7 @@
         "location_type": 0,
         "longitude": -71.170734,
         "name": "Baker St @ Capital St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -370,6 +381,7 @@
         "location_type": 0,
         "longitude": -71.168998,
         "name": "Baker St @ Rumford Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -403,6 +415,7 @@
         "location_type": 0,
         "longitude": -71.16977,
         "name": "Vermont St @ Baker St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -436,6 +449,7 @@
         "location_type": 0,
         "longitude": -71.170648,
         "name": "Baker St @ Lasell St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -469,6 +483,7 @@
         "location_type": 0,
         "longitude": -71.171457,
         "name": "Baker St @ VFW Pkwy",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -502,6 +517,7 @@
         "location_type": 0,
         "longitude": -71.170052,
         "name": "Lasell St @ Temple St",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -535,6 +551,7 @@
         "location_type": 0,
         "longitude": -71.168076,
         "name": "Baker St @ Cutter Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -568,6 +585,7 @@
         "location_type": 0,
         "longitude": -71.167935,
         "name": "Baker St @ Cutter Rd",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": 3,
         "wheelchair_boarding": 1

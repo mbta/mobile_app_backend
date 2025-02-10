@@ -7,6 +7,7 @@
         "location_type": 0,
         "longitude": -70.868956,
         "name": "Montserrat - Essex St opp Parramatta Rd",
+        "platform_code": null,
         "platform_name": "Boston Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -40,6 +41,7 @@
         "location_type": 0,
         "longitude": -70.86876,
         "name": "Montserrat - Essex St @ Parramatta Rd",
+        "platform_code": null,
         "platform_name": "Outbound Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -75,6 +77,7 @@
         "location_type": 0,
         "longitude": -70.869254,
         "name": "Montserrat",
+        "platform_code": null,
         "platform_name": "Commuter Rail",
         "vehicle_type": 2,
         "wheelchair_boarding": 1
@@ -111,6 +114,7 @@
         "location_type": 0,
         "longitude": -70.869254,
         "name": "Montserrat",
+        "platform_code": "1",
         "platform_name": "Track 1 (Outbound)",
         "vehicle_type": 2,
         "wheelchair_boarding": 1
@@ -147,6 +151,7 @@
         "location_type": 0,
         "longitude": -70.869254,
         "name": "Montserrat",
+        "platform_code": "2",
         "platform_name": "Track 2 (Boston)",
         "vehicle_type": 2,
         "wheelchair_boarding": 1
@@ -183,6 +188,7 @@
         "location_type": 1,
         "longitude": -70.869254,
         "name": "Montserrat",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": null,
         "wheelchair_boarding": 1

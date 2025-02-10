@@ -7,6 +7,7 @@
         "location_type": 0,
         "longitude": -71.160065,
         "name": "West Roxbury",
+        "platform_code": "1",
         "platform_name": "Track 1 (All Trains)",
         "vehicle_type": 2,
         "wheelchair_boarding": 1
@@ -45,6 +46,7 @@
         "location_type": 0,
         "longitude": -71.159678,
         "name": "West Roxbury",
+        "platform_code": null,
         "platform_name": "Outbound Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -78,6 +80,7 @@
         "location_type": 0,
         "longitude": -71.159686,
         "name": "West Roxbury",
+        "platform_code": null,
         "platform_name": "Boston Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -111,6 +114,7 @@
         "location_type": 0,
         "longitude": -71.158278,
         "name": "West Roxbury - Centre St @ Lagrange St",
+        "platform_code": null,
         "platform_name": "Outbound Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -144,6 +148,7 @@
         "location_type": 0,
         "longitude": -71.158096,
         "name": "West Roxbury - Centre St @ Lagrange St",
+        "platform_code": null,
         "platform_name": "Boston Shuttle",
         "vehicle_type": 3,
         "wheelchair_boarding": 1
@@ -177,6 +182,7 @@
         "location_type": 1,
         "longitude": -71.160065,
         "name": "West Roxbury",
+        "platform_code": null,
         "platform_name": null,
         "vehicle_type": null,
         "wheelchair_boarding": 1
