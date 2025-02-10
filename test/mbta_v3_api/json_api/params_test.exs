@@ -20,7 +20,7 @@ defmodule MBTAV3API.JsonApi.ParamsTest do
     test "uses fields for type if no includes or overrides" do
       assert %{
                "fields[stop]" =>
-                 "latitude,longitude,name,location_type,vehicle_type,description,platform_name,wheelchair_boarding"
+                 "latitude,longitude,name,location_type,vehicle_type,description,platform_code,platform_name,wheelchair_boarding"
              } =
                flatten_params([], MBTAV3API.Stop)
     end
