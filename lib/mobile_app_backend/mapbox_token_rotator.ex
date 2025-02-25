@@ -36,7 +36,8 @@ defmodule MobileAppBackend.MapboxTokenRotator do
             primary_token: primary_token,
             username: config[:mapbox_username],
             expire_ms: config[:token_expiration],
-            rotate_ms: config[:token_renewal]
+            rotate_ms: config[:token_renewal],
+            current_public_token: ""
           }
 
         _ ->
@@ -55,7 +56,7 @@ defmodule MobileAppBackend.MapboxTokenRotator do
   def handle_info(:rotate_token, %State{} = state) do
     expiration_time = DateTime.utc_now() |> DateTime.add(state.expire_ms, :millisecond)
 
-    {:ok, %Req.Response{status: 201, body: %{"token" => public_token}}} =
+    public_token =
       Req.new(
         method: :post,
         url: "https://api.mapbox.com/tokens/v2/#{state.username}",
@@ -66,6 +67,14 @@ defmodule MobileAppBackend.MapboxTokenRotator do
         }
       )
       |> MobileAppBackend.HTTP.request()
+      |> case do
+        {:ok, %Req.Response{status: 201, body: %{"token" => public_token}}} ->
+          public_token
+
+        fail ->
+          Sentry.capture_message("Mapbox key rotation failed: #{inspect(fail)}")
+          state.current_public_token
+      end
 
     Process.send_after(self(), :rotate_token, state.rotate_ms)
 
