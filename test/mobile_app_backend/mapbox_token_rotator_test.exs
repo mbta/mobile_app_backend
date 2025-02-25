@@ -80,7 +80,6 @@ defmodule MobileAppBackend.MapboxTokenRotatorTest do
   #   assert MapboxTokenRotator.get_public_token(rotator) == fake_temporary_token
   # end
 
-
   # test "refreshes token on interval" do
   #   refresh_interval = 100
 
