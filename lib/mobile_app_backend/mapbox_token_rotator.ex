@@ -25,20 +25,23 @@ defmodule MobileAppBackend.MapboxTokenRotator do
 
   @impl GenServer
   def init(_) do
-    # config = Application.get_env(:mobile_app_backend, MobileAppBackend.ClientConfig)
+    config = Application.get_env(:mobile_app_backend, MobileAppBackend.ClientConfig)
 
-    # state =
-    #   case Keyword.fetch(config, :mapbox_primary_token) do
-    #    {:ok, primary_token} ->
-    #      Process.send_after(self(), :rotate_token, 0)
+    state =
+      case Keyword.fetch(config, :mapbox_primary_token) do
+        {:ok, primary_token} ->
+          Process.send_after(self(), :rotate_token, 0)
 
-    state = %State{
-      primary_token: "fake_token",
-      username: "fake_username",
-      current_public_token: "fake_public_token"
-    }
+          %State{
+            primary_token: primary_token,
+            username: config[:mapbox_username],
+            expire_ms: config[:token_expiration],
+            rotate_ms: config[:token_renewal]
+          }
 
-    # end
+        _ ->
+          %State{current_public_token: config[:mapbox_public_token]}
+      end
 
     {:ok, state}
   end
@@ -64,7 +67,7 @@ defmodule MobileAppBackend.MapboxTokenRotator do
       )
       |> MobileAppBackend.HTTP.request()
 
-    #  Process.send_after(self(), :rotate_token, state.rotate_ms)
+    Process.send_after(self(), :rotate_token, state.rotate_ms)
 
     {:noreply, %State{state | current_public_token: public_token}}
   end
