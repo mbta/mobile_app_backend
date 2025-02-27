@@ -53,7 +53,7 @@ defmodule MobileAppBackend.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3.0", runtime: Mix.env() == :dev},
       {:logster, "~> 1.1"},
       {:decorator, "~> 1.4"},
       {:diskusage_logger, "~> 0.2", only: :prod},
