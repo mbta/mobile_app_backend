@@ -4,6 +4,9 @@ defmodule MBTAV3API.Repository do
   """
   alias MBTAV3API.{JsonApi, Repository}
 
+  @callback alerts(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, JsonApi.Response.t(MBTAV3API.Alert.t())} | {:error, term()}
+
   @callback route_patterns(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.RoutePattern.t())} | {:error, term()}
 
@@ -18,6 +21,13 @@ defmodule MBTAV3API.Repository do
 
   @callback trips(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Trip.t())} | {:error, term()}
+
+  def alerts(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
+      params,
+      opts
+    )
+  end
 
   def route_patterns(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).route_patterns(
@@ -63,6 +73,9 @@ defmodule MBTAV3API.Repository.Impl do
   alias MBTAV3API.{JsonApi, RepositoryCache}
 
   @ttl :timer.hours(1)
+
+  @impl true
+  def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
 
   @impl true
   @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])

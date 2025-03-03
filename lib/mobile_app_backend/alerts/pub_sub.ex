@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
   Subscribe to updates for all alerts
   """
   @callback subscribe() :: Object.full_map()
+  @callback health_check() :: boolean()
 end
 
 defmodule MobileAppBackend.Alerts.PubSub do
@@ -20,7 +21,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
     broadcast_interval_ms:
       Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
 
-  alias MBTAV3API.{JsonApi, Store, Stream}
+  alias MBTAV3API.{JsonApi, Repository, Store, Stream}
   alias MobileAppBackend.Alerts.PubSub
 
   @behaviour PubSub.Behaviour
@@ -56,6 +57,16 @@ defmodule MobileAppBackend.Alerts.PubSub do
     fetch_keys
     |> Store.Alerts.fetch()
     |> format_fn.()
+  end
+
+  @impl true
+  def health_check() do
+    all_stored = Store.Alerts.fetch([])
+
+    case Repository.alerts([]) do
+      {:ok, %{data: from_repo}} -> length(all_stored) == length(from_repo)
+      _ -> false
+    end
   end
 
   @impl GenServer

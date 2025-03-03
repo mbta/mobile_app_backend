@@ -10,6 +10,7 @@ defmodule MobileAppBackend.HealthCheck do
   """
   @spec healthy?() :: boolean
   def healthy? do
-    MobileAppBackend.GlobalDataCache.get_data() != nil
+    MobileAppBackend.GlobalDataCache.get_data() != nil &&
+      MobileAppBackend.Alerts.PubSub.health_check()
   end
 end
