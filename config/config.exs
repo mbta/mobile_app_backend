@@ -25,8 +25,7 @@ config :mobile_app_backend, MBTAV3API.RepositoryCache,
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],
-  http: [compress: true],
-  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: MobileAppBackendWeb.ErrorHTML, json: MobileAppBackendWeb.ErrorJSON],
     layout: false
