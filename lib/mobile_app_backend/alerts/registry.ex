@@ -1,6 +1,4 @@
 defmodule MobileAppBackend.Alerts.Registry do
-  alias MBTAV3API.{JsonApi, Store, Stream}
-
   def child_spec(_) do
     Registry.child_spec(keys: :duplicate, name: __MODULE__)
   end

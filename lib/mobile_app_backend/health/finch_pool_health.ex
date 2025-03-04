@@ -1,4 +1,4 @@
-defmodule MobileAppBackend.FinchPoolHealth do
+defmodule MobileAppBackend.Health.FinchPool do
   use GenServer
   require Logger
 
