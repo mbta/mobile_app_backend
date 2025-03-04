@@ -5,13 +5,100 @@ defmodule MBTAV3API.RepositoryTest do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.{Repository, Route, RoutePattern, Schedule, Stop}
+  alias MBTAV3API.{Alert, Repository, Route, RoutePattern, Schedule, Stop}
 
   setup :verify_on_exit!
 
   setup do
     MBTAV3API.RepositoryCache.flush()
     :ok
+  end
+
+  test "alerts/2" do
+    expect(
+      MobileAppBackend.HTTPMock,
+      :request,
+      fn %Req.Request{url: %URI{path: "/alerts"}, options: _params} ->
+        {:ok,
+         Req.Response.json(%{
+           data: [
+             %{
+               attributes: %{
+                 active_period: [
+                   %{
+                     end: nil,
+                     start: "2025-02-05T14:49:00-05:00"
+                   }
+                 ],
+                 banner: nil,
+                 cause: "UNKNOWN_CAUSE",
+                 created_at: "2025-02-05T14:49:33-05:00",
+                 description:
+                   "Scheduled to complete sometime in 2027, the Reconstruction of Foster Street includes widening and resurfacing with the addition of bicycle lanes.",
+                 duration_certainty: "UNKNOWN",
+                 effect: "STATION_ISSUE",
+                 header:
+                   "Littleton/Route 495 passengers can expect occasional traffic and detours accessing the station due to the Foster Street reconstruction work.",
+                 image: nil,
+                 image_alternative_text: nil,
+                 informed_entity: [
+                   %{
+                     stop: "FR-0301-01",
+                     route_type: 2,
+                     route: "CR-Fitchburg",
+                     activities: [
+                       "BOARD"
+                     ]
+                   },
+                   %{
+                     stop: "FR-0301-02",
+                     route_type: 2,
+                     route: "CR-Fitchburg",
+                     activities: [
+                       "BOARD"
+                     ]
+                   },
+                   %{
+                     stop: "place-FR-0301",
+                     route_type: 2,
+                     route: "CR-Fitchburg",
+                     activities: [
+                       "BOARD"
+                     ]
+                   }
+                 ],
+                 lifecycle: "ONGOING",
+                 service_effect: "Change at Littleton/Route 495",
+                 severity: 1,
+                 short_header:
+                   "Littleton/Route 495 passengers can expect occasional traffic and detours accessing the station due to the Foster Street reconstruction work",
+                 timeframe: "Ongoing",
+                 updated_at: "2025-02-12T14:49:16-05:00",
+                 url: nil
+               },
+               id: "625935",
+               links: %{
+                 self: "/alerts/625935"
+               },
+               type: "alert"
+             }
+           ]
+         })}
+      end
+    )
+
+    assert {:ok,
+            %{
+              data: [
+                %Alert{
+                  id: "625935",
+                  cause: :unknown_cause,
+                  effect: :station_issue,
+                  header:
+                    "Littleton/Route 495 passengers can expect occasional traffic and detours accessing the station due to the Foster Street reconstruction work."
+                }
+              ]
+            }} = Repository.alerts([])
   end
 
   test "route_patterns/2" do
