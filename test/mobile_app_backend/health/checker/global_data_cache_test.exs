@@ -8,7 +8,7 @@ defmodule MobileAppBackend.Health.Checker.GlobalDataCacheTest do
   import Mox
   import Test.Support.Helpers
 
-  describe "healthy?/0" do
+  describe "check_health/0" do
     setup do
       verify_on_exit!()
 
@@ -30,7 +30,7 @@ defmodule MobileAppBackend.Health.Checker.GlobalDataCacheTest do
 
       msg =
         capture_log(fn ->
-          refute Checker.healthy?()
+          assert {:error, "cached data was nil"} = Checker.check_health()
         end)
 
       assert msg =~
@@ -40,7 +40,7 @@ defmodule MobileAppBackend.Health.Checker.GlobalDataCacheTest do
     test "returns true after global data cache has loaded" do
       expect(GlobalDataCacheMock, :get_data, fn :default_key -> :some_data end)
 
-      assert Checker.healthy?()
+      assert :ok = Checker.check_health()
     end
   end
 end

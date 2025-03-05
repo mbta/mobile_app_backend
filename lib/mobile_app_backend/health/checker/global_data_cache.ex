@@ -9,11 +9,14 @@ defmodule MobileAppBackend.Health.Checker.GlobalDataCache.Impl do
   """
 
   alias MobileAppBackend.GlobalDataCache
-  alias MobileAppBackend.Health.Checker.GlobalDataCache, as: Checker
   @behaviour MobileAppBackend.Health.Checker
 
   @impl true
-  def healthy? do
-    Checker.log_failure(GlobalDataCache.get_data() != nil, "cached data was nil")
+  def check_health do
+    if GlobalDataCache.get_data() != nil do
+      :ok
+    else
+      {:error, "cached data was nil"}
+    end
   end
 end

@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
   import Mox
   import Test.Support.Helpers
 
-  describe "healthy?/0" do
+  describe "check_health/0" do
     setup do
       verify_on_exit!()
 
@@ -95,7 +95,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
         [build(:alert, id: "a_1", effect: :shuttle)]
       end)
 
-      assert Checker.healthy?()
+      assert :ok = Checker.check_health()
     end
 
     test "returns false when alert counts do not match" do
@@ -107,7 +107,8 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
 
       msg =
         capture_log(fn ->
-          refute Checker.healthy?()
+          assert {:error, "stored alert count 2 != backend alert count 1"} =
+                   Checker.check_health()
         end)
 
       assert msg =~

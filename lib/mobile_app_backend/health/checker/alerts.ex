@@ -11,24 +11,25 @@ defmodule MobileAppBackend.Health.Checker.Alerts.Impl do
 
   alias MBTAV3API.Repository
   alias MBTAV3API.Store
-  alias MobileAppBackend.Health.Checker.Alerts, as: Checker
 
   @behaviour MobileAppBackend.Health.Checker
 
   @impl true
-  def healthy? do
-    all_stored = Store.Alerts.fetch([])
-    from_backend = Repository.alerts([])
+  def check_health do
+    store_count = length(Store.Alerts.fetch([]))
 
-    case from_backend do
-      {:ok, %{data: from_repo}} ->
-        Checker.log_failure(
-          length(all_stored) == length(from_repo),
-          "stored alert count #{length(all_stored)} != backend alert count #{length(from_repo)}"
-        )
+    case Repository.alerts([]) do
+      {:ok, %{data: repo_alerts}} ->
+        repo_count = length(repo_alerts)
+
+        if store_count == repo_count do
+          :ok
+        else
+          {:error, "stored alert count #{store_count} != backend alert count #{repo_count}"}
+        end
 
       _ ->
-        Checker.log_failure(false, "backend alert request failed")
+        {:error, "backend alert request failed"}
     end
   end
 end

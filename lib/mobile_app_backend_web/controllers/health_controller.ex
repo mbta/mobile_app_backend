@@ -6,7 +6,7 @@ defmodule MobileAppBackendWeb.HealthController do
   use MobileAppBackendWeb, :controller
 
   def index(conn, _params) do
-    backend = conn.private[:health_check_module] || MobileAppBackend.Health.Checker.Overall
+    backend = conn.private[:health_check_module] || MobileAppBackend.Health.Check
 
     {code, body} =
       if backend.healthy?() do

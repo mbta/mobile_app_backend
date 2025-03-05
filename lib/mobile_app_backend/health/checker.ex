@@ -3,46 +3,27 @@ defmodule MobileAppBackend.Health.Checker do
   Behavior defining a module that checks the health of some piece of the system
   """
 
-  require Logger
-
   @doc """
-  Check the health of the module, returns true if healthy.
+  Check the health of the module, returns :ok if healthy or {:error, "cause string"} if not.
   """
-  @callback healthy? :: boolean()
-
-  @doc """
-  Take the result of the health check, and if it's false, log a warning with the module name.
-  The Checker implementations can also provide an optional reason for the failure.
-  Return the provided result as is, so that this can be chained.
-  """
-  @spec log_failure(boolean(), module(), String.t()) :: boolean()
-  def log_failure(result, module, reason) do
-    if !result do
-      warning = "Health check failed for #{module}"
-
-      Logger.warning(
-        if reason != "" do
-          "#{warning}: #{reason}"
-        else
-          warning
-        end
-      )
-    end
-
-    result
-  end
+  @callback check_health :: :ok | {:error, String.t()}
 
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
+      require Logger
       @behaviour MobileAppBackend.Health.Checker
       implementation_module = Keyword.fetch!(opts, :implementation_module)
 
-      def healthy? do
-        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).healthy?()
-      end
+      def check_health do
+        healthy =
+          Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).check_health()
 
-      def log_failure(result, reason \\ "") do
-        MobileAppBackend.Health.Checker.log_failure(result, __MODULE__, reason)
+        case healthy do
+          {:error, reason} -> Logger.warning("Health check failed for #{__MODULE__}: #{reason}")
+          _ -> nil
+        end
+
+        healthy
       end
     end
   end
