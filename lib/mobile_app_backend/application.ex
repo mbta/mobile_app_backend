@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Application do
         {MBTAV3API.ResponseCache, []},
         {MBTAV3API.RepositoryCache, []},
         MBTAV3API.Supervisor,
-        {MobileAppBackend.FinchPoolHealth, pool_name: Finch.CustomPool},
+        {MobileAppBackend.Health.FinchPool, pool_name: Finch.CustomPool},
         MobileAppBackend.MapboxTokenRotator,
         MobileAppBackend.Alerts.Registry,
         MobileAppBackend.Predictions.Registry,
