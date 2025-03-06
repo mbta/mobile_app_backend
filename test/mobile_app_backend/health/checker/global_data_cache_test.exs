@@ -1,11 +1,14 @@
-defmodule MobileAppBackend.HealthCheckTest do
+defmodule MobileAppBackend.Health.Checker.GlobalDataCacheTest do
   @moduledoc false
   use ExUnit.Case
-  alias MobileAppBackend.HealthCheck
+
+  alias MobileAppBackend.Health.Checker.GlobalDataCache, as: Checker
+
+  import ExUnit.CaptureLog
   import Mox
   import Test.Support.Helpers
 
-  describe "healthy?/0" do
+  describe "check_health/0" do
     setup do
       verify_on_exit!()
 
@@ -23,13 +26,21 @@ defmodule MobileAppBackend.HealthCheckTest do
     test "defaults to false" do
       expect(GlobalDataCacheMock, :get_data, fn :default_key -> nil end)
 
-      refute HealthCheck.healthy?()
+      set_log_level(:warning)
+
+      msg =
+        capture_log(fn ->
+          assert {:error, "cached data was nil"} = Checker.check_health()
+        end)
+
+      assert msg =~
+               "Health check failed for Elixir.MobileAppBackend.Health.Checker.GlobalDataCache: cached data was nil"
     end
 
     test "returns true after global data cache has loaded" do
       expect(GlobalDataCacheMock, :get_data, fn :default_key -> :some_data end)
 
-      assert HealthCheck.healthy?()
+      assert :ok = Checker.check_health()
     end
   end
 end
