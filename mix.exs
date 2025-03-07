@@ -52,7 +52,7 @@ defmodule MobileAppBackend.MixProject do
       {:decorator, "~> 1.4"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:diskusage_logger, "~> 0.2", only: :prod},
-      {:dns_cluster, "~> 0.1.1"},
+      {:dns_cluster, "~> 0.2.0"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:ex_machina, "~> 2.8.0", only: :test},
