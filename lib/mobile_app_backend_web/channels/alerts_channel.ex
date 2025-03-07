@@ -10,7 +10,20 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
-    data = pubsub_module.subscribe()
+    data = pubsub_module.subscribe(legacy_compatibility: true)
+    {:ok, data, socket}
+  end
+
+  @impl true
+  def join("alerts:v2", _payload, socket) do
+    pubsub_module =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.Alerts.PubSub,
+        MobileAppBackend.Alerts.PubSub
+      )
+
+    data = pubsub_module.subscribe(legacy_compatibility: false)
     {:ok, data, socket}
   end
 

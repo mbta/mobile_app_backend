@@ -22,12 +22,14 @@ defmodule MBTAV3API.Alert do
     Util.enum_values(:uppercase_string, [
       :accident,
       :amtrak,
+      :amtrak_train_traffic,
       :an_earlier_mechanical_problem,
       :an_earlier_signal_problem,
       :autos_impeding_service,
       :coast_guard_restriction,
       :congestion,
       :construction,
+      :crossing_issue,
       :crossing_malfunction,
       :demonstration,
       :disabled_bus,
@@ -46,6 +48,7 @@ defmodule MBTAV3API.Alert do
       :hurricane,
       :ice_in_harbor,
       :maintenance,
+      :mechanical_issue,
       :mechanical_problem,
       :medical_emergency,
       :other_cause,
@@ -53,19 +56,24 @@ defmodule MBTAV3API.Alert do
       :police_action,
       :police_activity,
       :power_problem,
+      :rail_defect,
       :severe_weather,
+      :signal_issue,
       :signal_problem,
+      :single_tracking,
       :slippery_rail,
       :snow,
       :special_event,
       :speed_restriction,
       :strike,
+      :switch_issue,
       :switch_problem,
       :technical_problem,
       :tie_replacement,
       :track_problem,
       :track_work,
       :traffic,
+      :train_traffic,
       :unruly_passenger,
       :unknown_cause,
       :weather
@@ -182,5 +190,25 @@ defmodule MBTAV3API.Alert do
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
       updated_at: Util.parse_datetime!(item.attributes["updated_at"])
     }
+  end
+
+  @doc """
+  These are newly added causes that were not included in the initial release, we filter them out of the original
+  alert channel so users who haven't upgraded the app don't get crashes when an alert contains one.
+  Any clients using the v2 alert channel also have handling for unknown cause and effect types, so any future
+  causes can be added here as well.
+  """
+  @spec v2_causes :: MapSet.t(cause())
+  def v2_causes do
+    MapSet.new([
+      :amtrak_train_traffic,
+      :crossing_issue,
+      :mechanical_issue,
+      :rail_defect,
+      :signal_issue,
+      :single_tracking,
+      :switch_issue,
+      :train_traffic
+    ])
   end
 end

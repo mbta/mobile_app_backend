@@ -2,7 +2,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
   use ExUnit.Case
 
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.{Store, Stream}
+  alias MBTAV3API.{Alert, Store, Stream}
   alias MobileAppBackend.Alerts.PubSub
   import Mox
   import Test.Support.Helpers
@@ -62,8 +62,8 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
     end
 
     test ":broadcast sends message to subscribed pid", state do
-      alert_1 = build(:alert, id: "a_1")
-      alert_2 = build(:alert, id: "a_2")
+      alert_1 = build(:alert, id: "a_1", cause: :single_tracking)
+      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
 
       AlertsStoreMock
       # Subscribe
@@ -73,7 +73,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       # 3rd broadcast
       |> expect(:fetch, fn _ -> [alert_1] end)
 
-      PubSub.subscribe()
+      PubSub.subscribe(legacy_compatibility: false)
 
       PubSub.handle_info(:broadcast, state)
 
@@ -92,6 +92,26 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       assert_receive {:new_alerts, new_alerts}
 
       assert Object.to_full_map([alert_1]) == new_alerts
+    end
+
+    test "legacy compatibility converts v2 alert causes", state do
+      alert_1 = build(:alert, id: "a_1", cause: :single_tracking)
+      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
+      alert_3 = build(:alert, id: "a_3", cause: :shuttle)
+
+      AlertsStoreMock
+      # Subscribe
+      |> expect(:fetch, fn _ -> [alert_1] end)
+      # Broadcast
+      |> expect(:fetch, fn _ -> [alert_2, alert_3] end)
+
+      initial_alerts = PubSub.subscribe(legacy_compatibility: true)
+      assert Object.to_full_map([%Alert{alert_1 | cause: :unknown_cause}]) == initial_alerts
+
+      PubSub.handle_info(:broadcast, state)
+
+      assert_receive {:new_alerts, new_alerts}
+      assert Object.to_full_map([%Alert{alert_2 | cause: :unknown_cause}, alert_3]) == new_alerts
     end
   end
 end

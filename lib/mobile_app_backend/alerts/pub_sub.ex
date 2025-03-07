@@ -4,7 +4,7 @@ defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
   @doc """
   Subscribe to updates for all alerts
   """
-  @callback subscribe() :: Object.full_map()
+  @callback subscribe(legacy_compatibility: boolean()) :: Object.full_map()
 end
 
 defmodule MobileAppBackend.Alerts.PubSub do
@@ -21,6 +21,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
       Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
 
   alias MBTAV3API.{JsonApi, Store, Stream}
+  alias MBTAV3API.{Alert, JsonApi, Store, Stream}
   alias MobileAppBackend.Alerts.PubSub
 
   @behaviour PubSub.Behaviour
@@ -41,11 +42,30 @@ defmodule MobileAppBackend.Alerts.PubSub do
     )
   end
 
+  @doc """
+  The legacy alert channel needs to filter out any references to new alert causes,
+  they will break old versions of the app entirely if they're sent to the frontend.
+  """
+  @spec map_data([Alert.t()], boolean()) :: [Alert.t()]
+  def map_data(data, legacy_compatibility) do
+    Enum.map(data, fn alert ->
+      if legacy_compatibility && MapSet.member?(Alert.v2_causes(), alert.cause) do
+        %Alert{alert | cause: :unknown_cause}
+      else
+        alert
+      end
+    end)
+  end
+
   @impl true
-  def subscribe do
+  def subscribe(opts \\ []) do
     fetch_keys = []
 
-    format_fn = fn data -> JsonApi.Object.to_full_map(data) end
+    format_fn = fn data ->
+      data
+      |> map_data(Keyword.get(opts, :legacy_compatibility, true))
+      |> JsonApi.Object.to_full_map()
+    end
 
     Registry.register(
       MobileAppBackend.Alerts.Registry,
