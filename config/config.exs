@@ -25,8 +25,7 @@ config :mobile_app_backend, MBTAV3API.RepositoryCache,
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],
-  http: [compress: true],
-  adapter: Phoenix.Endpoint.Cowboy2Adapter,
+  adapter: Bandit.PhoenixAdapter,
   render_errors: [
     formats: [html: MobileAppBackendWeb.ErrorHTML, json: MobileAppBackendWeb.ErrorJSON],
     layout: false
@@ -59,7 +58,7 @@ config :esbuild,
 
 # Configure tailwind (the version is required)
 config :tailwind,
-  version: "3.3.2",
+  version: "4.0.9",
   default: [
     args: ~w(
       --config=tailwind.config.js

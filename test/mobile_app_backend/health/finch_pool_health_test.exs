@@ -1,6 +1,6 @@
-defmodule MobileAppBackend.FinchPoolHealthTest do
+defmodule MobileAppBackend.Health.FinchPoolTest do
   use ExUnit.Case
-  alias MobileAppBackend.FinchPoolHealth
+  alias MobileAppBackend.Health.FinchPool
   import ExUnit.CaptureLog
   import Test.Support.Helpers
 
@@ -10,7 +10,7 @@ defmodule MobileAppBackend.FinchPoolHealthTest do
 
       msg =
         capture_log(fn ->
-          FinchPoolHealth.handle_info(:check, %{
+          FinchPool.handle_info(:check, %{
             pool_name: "test_pool",
             get_pool_status_fn: fn _, _ -> {:error, :not_found} end
           })
@@ -24,7 +24,7 @@ defmodule MobileAppBackend.FinchPoolHealthTest do
 
       msg =
         capture_log(fn ->
-          FinchPoolHealth.handle_info(:check, %{
+          FinchPool.handle_info(:check, %{
             pool_name: "test_pool",
             get_pool_status_fn: fn _, _ -> {:error, :other_error} end
           })
@@ -40,7 +40,7 @@ defmodule MobileAppBackend.FinchPoolHealthTest do
 
       msg =
         capture_log(fn ->
-          FinchPoolHealth.handle_info(:check, %{
+          FinchPool.handle_info(:check, %{
             pool_name: "test_pool",
             get_pool_status_fn: fn _, _ -> {:ok, [status]} end
           })
