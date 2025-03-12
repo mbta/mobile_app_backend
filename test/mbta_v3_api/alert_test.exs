@@ -123,7 +123,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                "cause" => "ALIENS",
                "description" => "Description",
-               "duration_certainty" => "UNKNOWABLE",
+               "duration_certainty" => "BEYOND_MORTAL_COMPREHENSION",
                "effect" => "TELEPORTATION",
                "header" => "Header",
                "informed_entity" => [
