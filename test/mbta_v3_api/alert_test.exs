@@ -83,6 +83,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                "cause" => "FIRE",
                "description" => "Description",
+               "duration_certainty" => "ESTIMATED",
                "effect" => "DELAY",
                "header" => "Header",
                "informed_entity" => [
@@ -98,6 +99,7 @@ defmodule MBTAV3API.AlertTest do
              ],
              cause: :fire,
              description: "Description",
+             duration_certainty: :estimated,
              effect: :delay,
              header: "Header",
              informed_entity: [
@@ -121,6 +123,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                "cause" => "ALIENS",
                "description" => "Description",
+               "duration_certainty" => "BEYOND_MORTAL_COMPREHENSION",
                "effect" => "TELEPORTATION",
                "header" => "Header",
                "informed_entity" => [
@@ -136,6 +139,7 @@ defmodule MBTAV3API.AlertTest do
              ],
              cause: :unknown_cause,
              description: "Description",
+             duration_certainty: :unknown,
              effect: :unknown_effect,
              header: "Header",
              informed_entity: [

@@ -9,6 +9,7 @@ defmodule MBTAV3API.Alert do
           active_period: [ActivePeriod.t()],
           cause: cause(),
           description: String.t() | nil,
+          duration_certainty: duration_certainty(),
           effect: effect(),
           effect_name: String.t() | nil,
           header: String.t() | nil,
@@ -82,6 +83,12 @@ defmodule MBTAV3API.Alert do
   )
 
   Util.declare_enum(
+    :duration_certainty,
+    Util.enum_values(:uppercase_string, [:estimated, :known, :unknown]),
+    :unknown
+  )
+
+  Util.declare_enum(
     :effect,
     Util.enum_values(:uppercase_string, [
       :access_issue,
@@ -133,6 +140,7 @@ defmodule MBTAV3API.Alert do
     :active_period,
     :cause,
     :description,
+    :duration_certainty,
     :effect,
     :effect_name,
     :header,
@@ -147,6 +155,7 @@ defmodule MBTAV3API.Alert do
       :active_period,
       :cause,
       :description,
+      :duration_certainty,
       :effect,
       :effect_name,
       :header,
@@ -183,6 +192,7 @@ defmodule MBTAV3API.Alert do
       active_period: Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1),
       cause: parse_cause(item.attributes["cause"]),
       description: item.attributes["description"],
+      duration_certainty: parse_duration_certainty(item.attributes["duration_certainty"]),
       effect: parse_effect(item.attributes["effect"]),
       effect_name: item.attributes["effect_name"],
       header: item.attributes["header"],
