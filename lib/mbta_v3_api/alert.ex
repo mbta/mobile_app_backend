@@ -15,6 +15,7 @@ defmodule MBTAV3API.Alert do
           header: String.t() | nil,
           informed_entity: [InformedEntity.t()],
           lifecycle: lifecycle(),
+          severity: integer(),
           updated_at: DateTime.t()
         }
 
@@ -146,6 +147,7 @@ defmodule MBTAV3API.Alert do
     :header,
     :informed_entity,
     :lifecycle,
+    :severity,
     :updated_at
   ]
 
@@ -161,6 +163,7 @@ defmodule MBTAV3API.Alert do
       :header,
       :informed_entity,
       :lifecycle,
+      :severity,
       :updated_at
     ]
   end
@@ -198,6 +201,7 @@ defmodule MBTAV3API.Alert do
       header: item.attributes["header"],
       informed_entity: Enum.map(item.attributes["informed_entity"], &InformedEntity.parse!/1),
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
+      severity: item.attributes["severity"],
       updated_at: Util.parse_datetime!(item.attributes["updated_at"])
     }
   end
