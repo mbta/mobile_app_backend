@@ -90,6 +90,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
                ],
                "lifecycle" => "NEW",
+               "severity" => 7,
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
@@ -110,6 +111,7 @@ defmodule MBTAV3API.AlertTest do
                }
              ],
              lifecycle: :new,
+             severity: 7,
              updated_at: ~B[2024-02-12 11:49:00]
            }
   end
