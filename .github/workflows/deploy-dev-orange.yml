@@ -39,7 +39,7 @@ jobs:
   deploy:
     name: Deploy ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }} to Dev-Orange
     needs: check
-    if: needs.check.outputs.should-run
+    if: ${{ needs.check.outputs.should-run == 'true' }}
     uses: ./.github/workflows/deploy.yml
     with:
       env: dev-orange
