@@ -1,17 +1,45 @@
 name: Deploy to Dev-Orange
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Deploy {0} {1} to Dev-Orange', github.ref_type, github.ref_name) || '' }}
+run-name: ${{ github.event_name != 'pull_request' && format('Deploy {0} {1} to Dev-Orange', github.ref_type, github.ref_name) || '' }}
 
 on:
   workflow_dispatch:
+    inputs:
+      ack:
+        description: "Manual deploys to dev-orange will be wiped out weekly; consider using a PR instead"
+        type: choice
+        options:
+          - OK
   pull_request:
     types:
       - synchronize
       - labeled
+  schedule:
+    - cron: "45 16 * * MON"
 
 jobs:
+  check:
+    name: Check if build is necessary
+    runs-on: ubuntu-latest
+    steps:
+      - id: check
+        name: Check
+        run: |
+          if ${{ github.event_name == 'schedule' }}; then
+            echo "should-run=$(gh pr list --label 'deploy to dev-orange' --json id --jq 'length == 0')" | tee -a "$GITHUB_OUTPUT"
+          elif ${{ github.event_name == 'pull_request' }}; then
+            echo "should-run=${{ contains(github.event.pull_request.labels.*.name, 'deploy to dev-orange') }}" | tee -a "$GITHUB_OUTPUT"
+          else
+            echo "should-run=true" | tee -a "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
   deploy:
     name: Deploy ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }} to Dev-Orange
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.labels.*.name, 'deploy to dev-orange') }}
+    needs: check
+    if: ${{ needs.check.outputs.should-run == 'true' }}
     uses: ./.github/workflows/deploy.yml
     with:
       env: dev-orange
