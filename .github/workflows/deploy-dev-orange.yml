@@ -6,11 +6,9 @@ on:
     inputs:
       ack:
         description: "Manual deploys to dev-orange will be wiped out weekly; consider using a PR instead"
-        required: true
         type: choice
         options:
-          - I am just deploying main anyway
-          - I am for some other reason okay with that
+          - OK
   pull_request:
     types:
       - synchronize
