@@ -114,7 +114,10 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   end
 
   defp upsert_data(api_records) do
-    records = Enum.map(api_records, &to_record(&1))
+    records =
+      api_records
+      |> Enum.reject(fn alert -> alert.id == "636777" end)
+      |> Enum.map(&to_record(&1))
 
     :ets.insert(@alerts_table_name, records)
   end
