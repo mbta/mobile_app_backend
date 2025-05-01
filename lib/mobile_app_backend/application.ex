@@ -48,6 +48,11 @@ defmodule MobileAppBackend.Application do
         else
           []
         end ++
+        if Application.get_env(:mobile_app_backend, :start_alerts_last_fresh_store?, true) do
+          [MobileAppBackend.Health.Checker.Alerts.LastFreshStore]
+        else
+          []
+        end ++
         [
           # Start to serve requests, typically the last entry
           MobileAppBackendWeb.Endpoint
