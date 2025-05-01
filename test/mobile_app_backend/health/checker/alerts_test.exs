@@ -96,7 +96,10 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
         [build(:alert, id: "a_1", effect: :shuttle)]
       end)
 
+      first_timestamp = Checker.LastFreshStore.last_fresh_timestamp()
       assert :ok = Checker.check_health()
+
+      assert DateTime.after?(Checker.LastFreshStore.last_fresh_timestamp(), first_timestamp)
     end
 
     test "returns ok when alert counts do not match but last match time < 5 min" do
