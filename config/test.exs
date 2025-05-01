@@ -15,6 +15,8 @@ config :mobile_app_backend, start_global_cache?: false
 
 config :mobile_app_backend, start_pub_subs?: false
 
+config :mobile_app_backend, start_alerts_last_fresh_store?: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 
