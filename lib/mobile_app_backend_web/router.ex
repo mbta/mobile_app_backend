@@ -33,15 +33,16 @@ defmodule MobileAppBackendWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
-    get("/nearby", NearbyController, :show)
     get("/global", GlobalController, :show)
+    get("/nearby", NearbyController, :show)
+    get("/route/stops", RouteController, :stops)
+    get("/schedules", ScheduleController, :schedules)
     get("/search/query", SearchController, :query)
-    get("/shapes/rail", ShapesController, :rail)
     get("/shapes/map-friendly/rail", ShapesController, :rail)
+    get("/shapes/rail", ShapesController, :rail)
     get("/stop/map", StopController, :map)
     get("/trip", TripController, :trip)
     get("/trip/map", TripController, :map)
-    get("/schedules", ScheduleController, :schedules)
   end
 
   # Enable LiveDashboard in development
