@@ -12,6 +12,12 @@ config :sentry,
   enable_source_code_context: true,
   root_source_code_path: File.cwd!()
 
+config :mobile_app_backend, :deep_links,
+  android_cert_fingerprint: System.get_env("MBTA_GO_ANDROID_CERT_FINGERPRINT"),
+  android_package_name: System.get_env("MBTA_GO_ANDROID_PACKAGE_NAME"),
+  dotcom_root: System.get_env("MBTA_GO_DOTCOM_ROOT"),
+  ios_appid: System.get_env("MBTA_GO_IOS_APPID")
+
 case System.get_env("MAPBOX_PRIMARY_TOKEN") do
   primary_token when is_binary(primary_token) and primary_token != "" ->
     config :mobile_app_backend, MobileAppBackend.ClientConfig,
