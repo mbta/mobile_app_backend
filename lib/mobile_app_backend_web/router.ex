@@ -19,11 +19,6 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through :browser
 
     get "/", DeepLinkController, :root
-    get "/go", DeepLinkController, :root
-    get "/gotest/redir/dotcom", DeepLinkTestController, :redir_dotcom
-    get "/gotest/redir/backend", DeepLinkTestController, :redir_backend
-    get "/gotest/link/dotcom", DeepLinkTestController, :link_dotcom
-    get "/gotest/link/backend", DeepLinkTestController, :link_backend
   end
 
   scope "/", MobileAppBackendWeb do
