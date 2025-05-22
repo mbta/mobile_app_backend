@@ -17,8 +17,9 @@ defmodule MobileAppBackendWeb.DeepLinkController do
           %{
             appIDs: [config(:ios_appid)],
             components: [
-              %{/: "/"},
-              %{/: "/*"}
+              %{/: "/go"},
+              # %{/: "/"},
+              # %{/: "/*"}
             ]
           }
         ]
