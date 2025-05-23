@@ -4,7 +4,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
 
-  def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time}) do
+  def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time} = params) do
     if stop_ids_concat == "" do
       json(conn, %{schedules: [], trips: %{}})
     else
@@ -14,10 +14,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
       filters = Enum.map(stop_ids, &get_filter(&1, service_date))
 
+      parallel_timeout = String.to_integer(Map.get(params, "timeout", "5000"))
+
       data =
         case filters do
           [filter] -> fetch_schedules(filter)
-          filters -> fetch_schedules_parallel(filters)
+          filters -> fetch_schedules_parallel(filters, parallel_timeout)
         end
 
       case data do
@@ -68,15 +70,16 @@ defmodule MobileAppBackendWeb.ScheduleController do
     [stop: stop_id, date: service_date]
   end
 
-  @spec fetch_schedules_parallel([[JsonApi.Params.filter_param()]]) ::
+  @spec fetch_schedules_parallel([[JsonApi.Params.filter_param()]], integer()) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
-  defp fetch_schedules_parallel(filters) do
+  defp fetch_schedules_parallel(filters, timeout) do
     filters
     |> Task.async_stream(
       fn filter_params ->
         {filter_params, fetch_schedules(filter_params)}
       end,
-      ordered: false
+      ordered: false,
+      timeout: timeout
     )
     |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
       case result do
@@ -91,6 +94,10 @@ defmodule MobileAppBackendWeb.ScheduleController do
           {:halt, :error}
       end
     end)
+  catch
+    :exit, {:timeout, _} ->
+      Logger.warning("#{__MODULE__} fetch_schedules_parallel timeout timeout=#{timeout}")
+      :error
   end
 
   @spec fetch_schedules([JsonApi.Params.filter_param()]) ::
