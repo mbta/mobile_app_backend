@@ -34,6 +34,25 @@ defmodule MobileAppBackend.Health.CheckTest do
                "Health check failed for Elixir.MobileAppBackend.Health.Checker.GlobalDataCache: bad cache"
     end
 
+    test "fails cleanly if timeout" do
+      expect(AlertsCheckerMock, :check_health, fn ->
+        Process.sleep(200)
+        :ok
+      end)
+
+      set_log_level(:warning)
+
+      expect(GlobalDataCacheCheckerMock, :check_health, fn -> {:error, "bad cache"} end)
+
+      msg =
+        capture_log(fn ->
+          refute Check.healthy?(100)
+        end)
+
+      assert msg =~
+               "health_check_timeout"
+    end
+
     test "returns true if all checks pass" do
       expect(AlertsCheckerMock, :check_health, fn -> :ok end)
       expect(GlobalDataCacheCheckerMock, :check_health, fn -> :ok end)
