@@ -236,6 +236,27 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
     assert log =~ "skipped returning schedules due to error"
   end
 
+  @tag :capture_log
+  test "when stop fetch times out, then cleanly returns error", %{conn: conn} do
+    RepositoryMock
+    |> expect(:schedules, 2, fn _params, _opts ->
+      Process.sleep(200)
+    end)
+
+    {conn, log} =
+      with_log([level: :warning], fn ->
+        get(conn, "/api/schedules", %{
+          stop_ids: "place-boyls,place-pktrm",
+          date_time: "2024-03-13T01:06:30-04:00",
+          timeout: 100
+        })
+      end)
+
+    assert %{"error" => "fetch_failed"} = json_response(conn, 500)
+
+    assert log =~ "fetch_schedules_parallel timeout"
+  end
+
   test "gracefully handles empty stops", %{conn: conn} do
     conn = get(conn, "/api/schedules", %{stop_ids: "", date_time: "2024-10-28T15:29:06-04:00"})
     assert json_response(conn, 200) == %{"schedules" => [], "trips" => %{}}

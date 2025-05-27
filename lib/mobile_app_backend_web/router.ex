@@ -18,11 +18,19 @@ defmodule MobileAppBackendWeb.Router do
   scope "/", MobileAppBackendWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    get "/", DeepLinkController, :root
   end
 
   scope "/", MobileAppBackendWeb do
     get("/_health", HealthController, :index)
+
+    get(
+      "/.well-known/apple-app-site-association",
+      DeepLinkController,
+      :apple_app_site_association
+    )
+
+    get("/.well-known/assetlinks.json", DeepLinkController, :assetlinks_json)
   end
 
   scope "/api/protected", MobileAppBackendWeb do
