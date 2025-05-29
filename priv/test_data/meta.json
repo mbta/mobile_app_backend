@@ -1,5 +1,8 @@
 {
   "V3_API": {
+    "/facilities": {
+      "fields%5Bfacility%5D=long_name%2Cshort_name%2Ctype": "01971cc5-8f84-71a1-aa28-33f62f68b64e"
+    },
     "/route_patterns": {
       "fields%5Bline%5D=color%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Croute.line%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
     },

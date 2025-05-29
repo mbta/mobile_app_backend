@@ -12,6 +12,7 @@ defmodule MobileAppBackend.GlobalDataCache do
   @type key :: term()
 
   @type data :: %{
+          facilities: Object.facility_map(),
           lines: Object.line_map(),
           pattern_ids_by_stop: %{
             (stop_id :: String.t()) => route_pattern_ids :: [String.t()]
@@ -158,6 +159,7 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
   @spec update_data(GlobalDataCache.key()) :: GlobalDataCache.data()
   defp update_data(key) do
     stops = fetch_stops()
+    facilities = fetch_facilities()
 
     %{
       lines: lines,
@@ -168,6 +170,7 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
     } = fetch_route_patterns()
 
     data = %{
+      facilities: facilities,
       lines: lines,
       pattern_ids_by_stop: pattern_ids_by_stop,
       routes: routes,
@@ -221,5 +224,14 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
       trips: trips,
       pattern_ids_by_stop: pattern_ids_by_stop
     }
+  end
+
+  @spec fetch_facilities() :: JsonApi.Object.facility_map()
+  defp fetch_facilities do
+    {:ok, %{data: facilities}} = Repository.facilities([])
+
+    # Only include elevator facilities since that's all we want to use right now
+    elevators = Enum.filter(facilities, &(&1.type == :elevator))
+    Map.new(elevators, &{&1.id, &1})
   end
 end
