@@ -160,4 +160,9 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
       assert [{GoodModule, _}] = Code.compile_quoted(good_module)
     end
   end
+
+  describe "facility plurals" do
+    test "type", do: assert(:facilities = plural_type(:facility))
+    test "includes_key", do: assert(:facility_ids = key_for_include_name(:facilities))
+  end
 end

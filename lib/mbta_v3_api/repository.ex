@@ -7,6 +7,9 @@ defmodule MBTAV3API.Repository do
   @callback alerts(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Alert.t())} | {:error, term()}
 
+  @callback facilities(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, JsonApi.Response.t(MBTAV3API.Facility.t())} | {:error, term()}
+
   @callback route_patterns(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.RoutePattern.t())} | {:error, term()}
 
@@ -24,6 +27,13 @@ defmodule MBTAV3API.Repository do
 
   def alerts(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).alerts(
+      params,
+      opts
+    )
+  end
+
+  def facilities(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).facilities(
       params,
       opts
     )
@@ -76,6 +86,10 @@ defmodule MBTAV3API.Repository.Impl do
 
   @impl true
   def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
+
+  @impl true
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  def facilities(params, opts \\ []), do: all(MBTAV3API.Facility, params, opts)
 
   @impl true
   @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])

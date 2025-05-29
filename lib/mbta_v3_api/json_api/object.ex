@@ -83,6 +83,7 @@ defmodule MBTAV3API.JsonApi.Object do
 
   types = [
     :alert,
+    :facility,
     :line,
     :prediction,
     :route,
@@ -94,7 +95,14 @@ defmodule MBTAV3API.JsonApi.Object do
     :vehicle
   ]
 
-  @plural_types Map.new(types, &{&1, :"#{&1}s"})
+  @plural_types Map.new(
+                  types,
+                  &{&1,
+                   case &1 do
+                     :facility -> :facilities
+                     _ -> :"#{&1}s"
+                   end}
+                )
 
   modules =
     for type <- types do
@@ -278,7 +286,10 @@ defmodule MBTAV3API.JsonApi.Object do
 
     key_string =
       if String.ends_with?(name_string, "s") do
-        String.replace_suffix(name_string, "s", "_ids")
+        case name do
+          :facilities -> "facility_ids"
+          _ -> String.replace_suffix(name_string, "s", "_ids")
+        end
       else
         "#{name_string}_id"
       end
