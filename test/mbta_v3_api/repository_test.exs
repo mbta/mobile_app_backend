@@ -5,7 +5,7 @@ defmodule MBTAV3API.RepositoryTest do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.{Alert, Repository, Route, RoutePattern, Schedule, Stop}
+  alias MBTAV3API.{Alert, Facility, Repository, Route, RoutePattern, Schedule, Stop}
 
   setup :verify_on_exit!
 
@@ -99,6 +99,58 @@ defmodule MBTAV3API.RepositoryTest do
                 }
               ]
             }} = Repository.alerts([])
+  end
+
+  describe "facilities/2" do
+    test "fetches facilities" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/facilities"}, options: _params} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 "attributes" => %{
+                   "long_name" =>
+                     "Park Street Elevator 808 (Red Line center platform to Government Center & North platform, Winter Street Concourse)",
+                   "short_name" =>
+                     "Red Line center platform to Government Center & North platform, Winter Street Concourse",
+                   "type" => "ELEVATOR"
+                 },
+                 "id" => "808",
+                 "links" => %{
+                   "self" => "/facilities/808"
+                 },
+                 "relationships" => %{
+                   "stop" => %{
+                     "data" => %{
+                       "id" => "place-pktrm",
+                       "type" => "stop"
+                     }
+                   }
+                 },
+                 "type" => "facility"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Facility{
+                    id: "808",
+                    long_name:
+                      "Park Street Elevator 808 (Red Line center platform to Government Center & North platform, Winter Street Concourse)",
+                    short_name:
+                      "Red Line center platform to Government Center & North platform, Winter Street Concourse",
+                    type: :elevator
+                  }
+                ]
+              }} = Repository.facilities([])
+    end
   end
 
   test "route_patterns/2" do
