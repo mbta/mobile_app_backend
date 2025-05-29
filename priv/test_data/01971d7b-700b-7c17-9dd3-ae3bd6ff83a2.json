@@ -1,0 +1,4607 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "long_name": "Wickford Junction Elevator (Lobby and platform to garage)",
+        "short_name": "Lobby and platform to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_3b81_7260_398",
+      "links": {
+        "self": "/facilities/fake_3b81_7260_398"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1659",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Boston Landing Elevator 726 (Platform to Arthur Street pedestrian bridge)",
+        "short_name": "Platform to Arthur Street pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "726",
+      "links": {
+        "self": "/facilities/726"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0035",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Forest Hills Elevator 843 (Lower busway to upper lobby)",
+        "short_name": "Lower busway to upper lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "843",
+      "links": {
+        "self": "/facilities/843"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-forhl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "East Taunton Elevator 778 (Parking to pedestrian bridge)",
+        "short_name": "Parking to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "778",
+      "links": {
+        "self": "/facilities/778"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NBM-0374",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 808 (Red Line center platform to Government Center & North platform, Winter Street Concourse)",
+        "short_name": "Red Line center platform to Government Center & North platform, Winter Street Concourse",
+        "type": "ELEVATOR"
+      },
+      "id": "808",
+      "links": {
+        "self": "/facilities/808"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 949 (Lobby to Dewey Square)",
+        "short_name": "Lobby to Dewey Square",
+        "type": "ELEVATOR"
+      },
+      "id": "949",
+      "links": {
+        "self": "/facilities/949"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 745 (Busway, parking lot to lobby)",
+        "short_name": "Busway, parking lot to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "745",
+      "links": {
+        "self": "/facilities/745"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 907 (Underpass to Oak Grove platform)",
+        "short_name": "Underpass to Oak Grove platform",
+        "type": "ELEVATOR"
+      },
+      "id": "907",
+      "links": {
+        "self": "/facilities/907"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kenmore Elevator 948 (Lobby to Commonwealth Avenue)",
+        "short_name": "Lobby to Commonwealth Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "948",
+      "links": {
+        "self": "/facilities/948"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-kencl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lansdowne Elevator 990 (Street to Track 5 (South Station platform) and bridge)",
+        "short_name": "Street to Track 5 (South Station platform) and bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "990",
+      "links": {
+        "self": "/facilities/990"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0025",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Jackson Square Elevator 846 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "846",
+      "links": {
+        "self": "/facilities/846"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-jaksn",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Magoun Square Elevator 767 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "767",
+      "links": {
+        "self": "/facilities/767"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mgngl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "State Elevator 802 (Oak Grove platform to Forest Hills, Wonderland platforms)",
+        "short_name": "Oak Grove platform to Forest Hills, Wonderland platforms",
+        "type": "ELEVATOR"
+      },
+      "id": "802",
+      "links": {
+        "self": "/facilities/802"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-state",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Shawmut Elevator 953 (Alewife platform to lobby)",
+        "short_name": "Alewife platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "953",
+      "links": {
+        "self": "/facilities/953"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-smmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ball Square Elevator 769 (Platform to Broadway lobby)",
+        "short_name": "Platform to Broadway lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "769",
+      "links": {
+        "self": "/facilities/769"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-balsq",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 892 (Forest Hills platform to Washington Street, Winter Street)",
+        "short_name": "Forest Hills platform to Washington Street, Winter Street",
+        "type": "ELEVATOR"
+      },
+      "id": "892",
+      "links": {
+        "self": "/facilities/892"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Worcester Elevator 781 (Platform to pedestrian bridge)",
+        "short_name": "Platform to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "781",
+      "links": {
+        "self": "/facilities/781"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0442",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Prudential Elevator 917 (Lobby to Huntington Avenue)",
+        "short_name": "Lobby to Huntington Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "917",
+      "links": {
+        "self": "/facilities/917"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-prmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Andrew Elevator 872 (Lobby to street)",
+        "short_name": "Lobby to street",
+        "type": "ELEVATOR"
+      },
+      "id": "872",
+      "links": {
+        "self": "/facilities/872"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-andrw",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Worcester Elevator (Lobby to platform)",
+        "short_name": "Lobby to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_36ef_bfa5_401",
+      "links": {
+        "self": "/facilities/fake_36ef_bfa5_401"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0442",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Arlington Elevator 964 (Lobby to Boylston Street)",
+        "short_name": "Lobby to Boylston Street",
+        "type": "ELEVATOR"
+      },
+      "id": "964",
+      "links": {
+        "self": "/facilities/964"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-armnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 906 (Underpass to Green Line platforms, busway)",
+        "short_name": "Underpass to Green Line platforms, busway",
+        "type": "ELEVATOR"
+      },
+      "id": "906",
+      "links": {
+        "self": "/facilities/906"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Alewife Elevator 815 (Main lobby to street, parking garage)",
+        "short_name": "Main lobby to street, parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "815",
+      "links": {
+        "self": "/facilities/815"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-alfcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Science Park/West End Elevator 981 (Lechmere & North platform to lobby)",
+        "short_name": "Lechmere & North platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "981",
+      "links": {
+        "self": "/facilities/981"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-spmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Medford/Tufts Elevator 772 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "772",
+      "links": {
+        "self": "/facilities/772"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mdftf",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kenmore Elevator 971 (Westbound platform to lobby)",
+        "short_name": "Westbound platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "971",
+      "links": {
+        "self": "/facilities/971"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-kencl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Pawtucket/Central Falls Elevator (Track 1 (outbound platform) to Pine St, Barton St)",
+        "short_name": "Track 1 (outbound platform) to Pine St, Barton St",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_b748_c4e7_403",
+      "links": {
+        "self": "/facilities/fake_b748_c4e7_403"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1891",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Center Elevator 896 (Commuter Rail platform to lobby)",
+        "short_name": "Commuter Rail platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "896",
+      "links": {
+        "self": "/facilities/896"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qnctr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Framingham Elevator 51 (Waverly Street to pedestrian bridge)",
+        "short_name": "Waverly Street to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "51",
+      "links": {
+        "self": "/facilities/51"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0214",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 915 (State Street lobby to street)",
+        "short_name": "State Street lobby to street",
+        "type": "ELEVATOR"
+      },
+      "id": "915",
+      "links": {
+        "self": "/facilities/915"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kendall/MIT Elevator 757 (Ashmont/Braintree platform to Main Street)",
+        "short_name": "Ashmont/Braintree platform to Main Street",
+        "type": "ELEVATOR"
+      },
+      "id": "757",
+      "links": {
+        "self": "/facilities/757"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-knncl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 703 (Main lobby to garage)",
+        "short_name": "Main lobby to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "703",
+      "links": {
+        "self": "/facilities/703"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Winchester Center Elevator 748 (Track 1 (outbound platform) to Aberjona parking)",
+        "short_name": "Track 1 (outbound platform) to Aberjona parking",
+        "type": "ELEVATOR"
+      },
+      "id": "748",
+      "links": {
+        "self": "/facilities/748"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NHRML-0078",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 891 (Oak Grove platform to Franklin Street)",
+        "short_name": "Oak Grove platform to Franklin Street",
+        "type": "ELEVATOR"
+      },
+      "id": "891",
+      "links": {
+        "self": "/facilities/891"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 918 (Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby)",
+        "short_name": "Ashmont/Braintree platform to Airport/Design Center/Chelsea platform and lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "918",
+      "links": {
+        "self": "/facilities/918"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Davis Elevator 816 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "816",
+      "links": {
+        "self": "/facilities/816"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-davis",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Alewife Elevator 813 (Platform to main lobby)",
+        "short_name": "Platform to main lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "813",
+      "links": {
+        "self": "/facilities/813"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-alfcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 905 (Underpass to Forest Hills platform)",
+        "short_name": "Underpass to Forest Hills platform",
+        "type": "ELEVATOR"
+      },
+      "id": "905",
+      "links": {
+        "self": "/facilities/905"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Pawtucket/Central Falls Elevator (Track 1 (outbound platform) to Pine St, Barton St)",
+        "short_name": "Track 1 (outbound platform) to Pine St, Barton St",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_b748_c4e7_402",
+      "links": {
+        "self": "/facilities/fake_b748_c4e7_402"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1891",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "East Taunton Elevator 779 (Platform to pedestrian bridge)",
+        "short_name": "Platform to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "779",
+      "links": {
+        "self": "/facilities/779"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NBM-0374",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "JFK/UMass Elevator 830 (Braintree branch platform to lobby)",
+        "short_name": "Braintree branch platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "830",
+      "links": {
+        "self": "/facilities/830"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-jfk",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "World Trade Center Elevator 935 (South Station platform to lobby)",
+        "short_name": "South Station platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "935",
+      "links": {
+        "self": "/facilities/935"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wtcst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Maverick Elevator 965 (Platform to Maverick Square, busway)",
+        "short_name": "Platform to Maverick Square, busway",
+        "type": "ELEVATOR"
+      },
+      "id": "965",
+      "links": {
+        "self": "/facilities/965"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mvbcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 927 (Alewife platform to Silver Line Drop-off platform)",
+        "short_name": "Alewife platform to Silver Line Drop-off platform",
+        "type": "ELEVATOR"
+      },
+      "id": "927",
+      "links": {
+        "self": "/facilities/927"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ashmont Elevator 970 (Ashmont platform to Mattapan Line lobby, busway)",
+        "short_name": "Ashmont platform to Mattapan Line lobby, busway",
+        "type": "ELEVATOR"
+      },
+      "id": "970",
+      "links": {
+        "self": "/facilities/970"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-asmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "World Trade Center Elevator 936 (Airport/Design Center/Chelsea platform to lobby)",
+        "short_name": "Airport/Design Center/Chelsea platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "936",
+      "links": {
+        "self": "/facilities/936"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wtcst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 709 (North Shore Road Busway to pedestrian plaza)",
+        "short_name": "North Shore Road Busway to pedestrian plaza",
+        "type": "ELEVATOR"
+      },
+      "id": "709",
+      "links": {
+        "self": "/facilities/709"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Harvard Elevator 821 (Lobby to Harvard Square)",
+        "short_name": "Lobby to Harvard Square",
+        "type": "ELEVATOR"
+      },
+      "id": "821",
+      "links": {
+        "self": "/facilities/821"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-harsq",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "State Elevator 967 (Oak Grove platform to Forest Hills, Wonderland platforms)",
+        "short_name": "Oak Grove platform to Forest Hills, Wonderland platforms",
+        "type": "ELEVATOR"
+      },
+      "id": "967",
+      "links": {
+        "self": "/facilities/967"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-state",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lowell Elevator (Platform 1 to pedestrian bridge)",
+        "short_name": "Platform 1 to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_99c7_c4e9_391",
+      "links": {
+        "self": "/facilities/fake_99c7_c4e9_391"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NHRML-0254",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Broadway Elevator 867 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "867",
+      "links": {
+        "self": "/facilities/867"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-brdwy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wickford Junction Elevator (North end of platform to garage)",
+        "short_name": "North end of platform to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_3b81_c387_400",
+      "links": {
+        "self": "/facilities/fake_3b81_c387_400"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1659",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kendall/MIT Elevator 756 (Ashmont/Braintree platform to Main Street)",
+        "short_name": "Ashmont/Braintree platform to Main Street",
+        "type": "ELEVATOR"
+      },
+      "id": "756",
+      "links": {
+        "self": "/facilities/756"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-knncl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wickford Junction Elevator (Lobby and platform to garage)",
+        "short_name": "Lobby and platform to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_3b81_7260_399",
+      "links": {
+        "self": "/facilities/fake_3b81_7260_399"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1659",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Assembly Elevator 719 (Platform to Revolution Drive paid lobby)",
+        "short_name": "Platform to Revolution Drive paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "719",
+      "links": {
+        "self": "/facilities/719"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-astao",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 904 (Forest Hills platform to Congress Street lobby)",
+        "short_name": "Forest Hills platform to Congress Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "904",
+      "links": {
+        "self": "/facilities/904"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Broadway Elevator 868 (Lobby to street)",
+        "short_name": "Lobby to street",
+        "type": "ELEVATOR"
+      },
+      "id": "868",
+      "links": {
+        "self": "/facilities/868"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-brdwy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 746 (Orange Line platform to paid lobby)",
+        "short_name": "Orange Line platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "746",
+      "links": {
+        "self": "/facilities/746"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wollaston Elevator 734 (Newport Ave lobby to platform)",
+        "short_name": "Newport Ave lobby to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "734",
+      "links": {
+        "self": "/facilities/734"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wlsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 708 (Main lobby to pedestrian bridge)",
+        "short_name": "Main lobby to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "708",
+      "links": {
+        "self": "/facilities/708"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Courthouse Elevator 937 (South Station platform to lobby)",
+        "short_name": "South Station platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "937",
+      "links": {
+        "self": "/facilities/937"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-crtst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Boston Landing Elevator 725 (Arthur Street to pedestrian bridge)",
+        "short_name": "Arthur Street to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "725",
+      "links": {
+        "self": "/facilities/725"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0035",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 925 (Atlantic Avenue lobby to Long Wharf)",
+        "short_name": "Atlantic Avenue lobby to Long Wharf",
+        "type": "ELEVATOR"
+      },
+      "id": "925",
+      "links": {
+        "self": "/facilities/925"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Revere Beach Elevator 884 (Bowdoin platform to lobby)",
+        "short_name": "Bowdoin platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "884",
+      "links": {
+        "self": "/facilities/884"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rbmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 908 (Green Line lobby to busway, Sudbury Street, New Chardon Street)",
+        "short_name": "Green Line lobby to busway, Sudbury Street, New Chardon Street",
+        "type": "ELEVATOR"
+      },
+      "id": "908",
+      "links": {
+        "self": "/facilities/908"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lynn Elevator 930 (Street to parking garage)",
+        "short_name": "Street to parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "930",
+      "links": {
+        "self": "/facilities/930"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0115",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Roxbury Crossing Elevator 847 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "847",
+      "links": {
+        "self": "/facilities/847"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rcmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Airport Elevator 956 (Busway lobby to unpaid pedestrian bridge)",
+        "short_name": "Busway lobby to unpaid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "956",
+      "links": {
+        "self": "/facilities/956"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aport",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Alewife Elevator 814 (Main lobby to street, parking garage)",
+        "short_name": "Main lobby to street, parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "814",
+      "links": {
+        "self": "/facilities/814"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-alfcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 919 (Alewife platform to Airport/Design Center/Chelsea platform)",
+        "short_name": "Alewife platform to Airport/Design Center/Chelsea platform",
+        "type": "ELEVATOR"
+      },
+      "id": "919",
+      "links": {
+        "self": "/facilities/919"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Chinatown Elevator 876 (Oak Grove platform to Washington St, Essex St)",
+        "short_name": "Oak Grove platform to Washington St, Essex St",
+        "type": "ELEVATOR"
+      },
+      "id": "876",
+      "links": {
+        "self": "/facilities/876"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-chncl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Green Street Elevator 844 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "844",
+      "links": {
+        "self": "/facilities/844"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-grnst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Massachusetts Avenue Elevator 852 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "852",
+      "links": {
+        "self": "/facilities/852"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-masta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Boston Landing Elevator 727 (Platform to Everett Street)",
+        "short_name": "Platform to Everett Street",
+        "type": "ELEVATOR"
+      },
+      "id": "727",
+      "links": {
+        "self": "/facilities/727"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0035",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Revere Beach Elevator 885 (Wonderland platform to lobby)",
+        "short_name": "Wonderland platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "885",
+      "links": {
+        "self": "/facilities/885"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rbmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Shawmut Elevator 954 (Ashmont platform to lobby)",
+        "short_name": "Ashmont platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "954",
+      "links": {
+        "self": "/facilities/954"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-smmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 923 (Bowdoin platform to Atlantic Avenue lobby)",
+        "short_name": "Bowdoin platform to Atlantic Avenue lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "923",
+      "links": {
+        "self": "/facilities/923"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 912 (Orange Line, Green Line lobby to Causeway Street)",
+        "short_name": "Orange Line, Green Line lobby to Causeway Street",
+        "type": "ELEVATOR"
+      },
+      "id": "912",
+      "links": {
+        "self": "/facilities/912"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Winchester Center Elevator 747 (Track 2 (Boston platform) to Waterfield parking)",
+        "short_name": "Track 2 (Boston platform) to Waterfield parking",
+        "type": "ELEVATOR"
+      },
+      "id": "747",
+      "links": {
+        "self": "/facilities/747"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NHRML-0078",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Porter Elevator 986 (Commuter Rail platform to lobby)",
+        "short_name": "Commuter Rail platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "986",
+      "links": {
+        "self": "/facilities/986"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-portr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wood Island Elevator 889 (Bowdoin platform to pedestrian bridge)",
+        "short_name": "Bowdoin platform to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "889",
+      "links": {
+        "self": "/facilities/889"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wimnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ruggles Elevator 851 (Forsyth Street to upper lobby)",
+        "short_name": "Forsyth Street to upper lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "851",
+      "links": {
+        "self": "/facilities/851"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rugg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Framingham Elevator 50 (Track 1 (outbound platform) to pedestrian bridge)",
+        "short_name": "Track 1 (outbound platform) to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "50",
+      "links": {
+        "self": "/facilities/50"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0214",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ashmont Elevator 968 (Alewife platform to Peabody Square lobby)",
+        "short_name": "Alewife platform to Peabody Square lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "968",
+      "links": {
+        "self": "/facilities/968"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-asmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 910 (Lobby to Forest Hills, Copley & West platform)",
+        "short_name": "Lobby to Forest Hills, Copley & West platform",
+        "type": "ELEVATOR"
+      },
+      "id": "910",
+      "links": {
+        "self": "/facilities/910"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Gilman Square Elevator 766 (Platform to School Street lobby)",
+        "short_name": "Platform to School Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "766",
+      "links": {
+        "self": "/facilities/766"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gilmn",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Courthouse Elevator 939 (Lobby to Seaport Boulevard, Thomson Place)",
+        "short_name": "Lobby to Seaport Boulevard, Thomson Place",
+        "type": "ELEVATOR"
+      },
+      "id": "939",
+      "links": {
+        "self": "/facilities/939"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-crtst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Airport Elevator 955 (Bremen Street lobby to unpaid pedestrian bridge)",
+        "short_name": "Bremen Street lobby to unpaid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "955",
+      "links": {
+        "self": "/facilities/955"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aport",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wollaston Elevator 735 (Platform to pedestrian bridge)",
+        "short_name": "Platform to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "735",
+      "links": {
+        "self": "/facilities/735"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wlsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Courthouse Elevator 938 (Airport/Design Center/Chelsea platform to lobby)",
+        "short_name": "Airport/Design Center/Chelsea platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "938",
+      "links": {
+        "self": "/facilities/938"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-crtst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 870 (Ashmont/Braintree platform to Summer Street Concourse)",
+        "short_name": "Ashmont/Braintree platform to Summer Street Concourse",
+        "type": "ELEVATOR"
+      },
+      "id": "870",
+      "links": {
+        "self": "/facilities/870"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Route 128 Elevator 52 (Lobby to South Station platform)",
+        "short_name": "Lobby to South Station platform",
+        "type": "ELEVATOR"
+      },
+      "id": "52",
+      "links": {
+        "self": "/facilities/52"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-2173",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Central Elevator 860 (Alewife platform to Massachusetts Avenue)",
+        "short_name": "Alewife platform to Massachusetts Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "860",
+      "links": {
+        "self": "/facilities/860"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-cntsq",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Quincy Elevator 899 (Platform to northern lobby)",
+        "short_name": "Platform to northern lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "899",
+      "links": {
+        "self": "/facilities/899"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-nqncy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Stony Brook Elevator 845 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "845",
+      "links": {
+        "self": "/facilities/845"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sbmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 6476 (Red Line, Silver Line SL1/SL2/SL3 lobby to Commuter Rail lobby)",
+        "short_name": "Red Line, Silver Line SL1/SL2/SL3 lobby to Commuter Rail lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "6476",
+      "links": {
+        "self": "/facilities/6476"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Forest Hills Elevator 842 (Orange Line platform to main upper lobby)",
+        "short_name": "Orange Line platform to main upper lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "842",
+      "links": {
+        "self": "/facilities/842"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-forhl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Orient Heights Elevator 713 (Bennington Street Busway to unpaid pedestrian bridge)",
+        "short_name": "Bennington Street Busway to unpaid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "713",
+      "links": {
+        "self": "/facilities/713"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-orhte",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wollaston Elevator 733 (Parking lot lobby to pedestrian bridge)",
+        "short_name": "Parking lot lobby to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "733",
+      "links": {
+        "self": "/facilities/733"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wlsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Central Elevator 861 (Ashmont/Braintree platform to Massachusetts Avenue)",
+        "short_name": "Ashmont/Braintree platform to Massachusetts Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "861",
+      "links": {
+        "self": "/facilities/861"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-cntsq",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Adams Elevator 806 (Lobby to parking garage)",
+        "short_name": "Lobby to parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "806",
+      "links": {
+        "self": "/facilities/806"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qamnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lynn Elevator 928 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "928",
+      "links": {
+        "self": "/facilities/928"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0115",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Quincy Elevator 898 (Newport Avenue parking to northern lobby)",
+        "short_name": "Newport Avenue parking to northern lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "898",
+      "links": {
+        "self": "/facilities/898"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-nqncy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Government Center Elevator 721 (Green Line platform to street)",
+        "short_name": "Green Line platform to street",
+        "type": "ELEVATOR"
+      },
+      "id": "721",
+      "links": {
+        "self": "/facilities/721"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gover",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 812 (Green Line underpass to Government Center & North platform)",
+        "short_name": "Green Line underpass to Government Center & North platform",
+        "type": "ELEVATOR"
+      },
+      "id": "812",
+      "links": {
+        "self": "/facilities/812"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Charles/MGH Elevator 951 (Ashmont/Braintree platform to lobby)",
+        "short_name": "Ashmont/Braintree platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "951",
+      "links": {
+        "self": "/facilities/951"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-chmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Route 128 Elevator (Lobby to pedestrian bridge)",
+        "short_name": "Lobby to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_5a7e_af2a_395",
+      "links": {
+        "self": "/facilities/fake_5a7e_af2a_395"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-2173",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 998 (Oak Grove platform to Alewife platform)",
+        "short_name": "Oak Grove platform to Alewife platform",
+        "type": "ELEVATOR"
+      },
+      "id": "998",
+      "links": {
+        "self": "/facilities/998"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Savin Hill Elevator 946 (Platform to paid lobby)",
+        "short_name": "Platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "946",
+      "links": {
+        "self": "/facilities/946"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-shmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Sullivan Square Elevator 840 (Center platform to lobby)",
+        "short_name": "Center platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "840",
+      "links": {
+        "self": "/facilities/840"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sull",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Magoun Square Elevator 768 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "768",
+      "links": {
+        "self": "/facilities/768"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mgngl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "State Elevator 975 (Wonderland platform to Congress Street, 53 State Street)",
+        "short_name": "Wonderland platform to Congress Street, 53 State Street",
+        "type": "ELEVATOR"
+      },
+      "id": "975",
+      "links": {
+        "self": "/facilities/975"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-state",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Forest Hills Elevator 724 (Orange Line platform to Southwest Corridor Park lobby)",
+        "short_name": "Orange Line platform to Southwest Corridor Park lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "724",
+      "links": {
+        "self": "/facilities/724"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-forhl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Quincy Elevator 900 (Platform to main lobby, busway)",
+        "short_name": "Platform to main lobby, busway",
+        "type": "ELEVATOR"
+      },
+      "id": "900",
+      "links": {
+        "self": "/facilities/900"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-nqncy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Courthouse Elevator 940 (Lobby to Seaport Boulevard, Fan Pier Boulevard)",
+        "short_name": "Lobby to Seaport Boulevard, Fan Pier Boulevard",
+        "type": "ELEVATOR"
+      },
+      "id": "940",
+      "links": {
+        "self": "/facilities/940"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-crtst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ruggles Elevator 850 (Orange Line platform to upper lobby)",
+        "short_name": "Orange Line platform to upper lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "850",
+      "links": {
+        "self": "/facilities/850"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rugg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Government Center Elevator 723 (Blue Line platform to Green Line platform)",
+        "short_name": "Blue Line platform to Green Line platform",
+        "type": "ELEVATOR"
+      },
+      "id": "723",
+      "links": {
+        "self": "/facilities/723"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gover",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wood Island Elevator 890 (Wonderland platform to pedestrian bridge)",
+        "short_name": "Wonderland platform to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "890",
+      "links": {
+        "self": "/facilities/890"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wimnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Providence Elevator (Lobby to tracks 3 and 5)",
+        "short_name": "Lobby to tracks 3 and 5",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_c2ed_e7ea_394",
+      "links": {
+        "self": "/facilities/fake_c2ed_e7ea_394"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1851",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Alewife Elevator 961 (Platform to Russell Field, Rindge Avenue lobby)",
+        "short_name": "Platform to Russell Field, Rindge Avenue lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "961",
+      "links": {
+        "self": "/facilities/961"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-alfcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lansdowne Elevator 992 (Track 7 (outbound platform) to west side of bridge)",
+        "short_name": "Track 7 (outbound platform) to west side of bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "992",
+      "links": {
+        "self": "/facilities/992"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0025",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Science Park/West End Elevator 980 (Copley & West platform to lobby)",
+        "short_name": "Copley & West platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "980",
+      "links": {
+        "self": "/facilities/980"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-spmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 913 (Wonderland platform to State Street lobby)",
+        "short_name": "Wonderland platform to State Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "913",
+      "links": {
+        "self": "/facilities/913"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Harvard Elevator 973 (Upper busway to Brattle Square)",
+        "short_name": "Upper busway to Brattle Square",
+        "type": "ELEVATOR"
+      },
+      "id": "973",
+      "links": {
+        "self": "/facilities/973"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-harsq",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Back Bay Elevator 854 (Commuter Rail track 2 to lobby)",
+        "short_name": "Commuter Rail track 2 to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "854",
+      "links": {
+        "self": "/facilities/854"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bbsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Prudential Elevator 921 (Lechmere platform to lobby)",
+        "short_name": "Lechmere platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "921",
+      "links": {
+        "self": "/facilities/921"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-prmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 744 (Washington Street to lobby)",
+        "short_name": "Washington Street to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "744",
+      "links": {
+        "self": "/facilities/744"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 702 (Main lobby to garage)",
+        "short_name": "Main lobby to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "702",
+      "links": {
+        "self": "/facilities/702"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Route 128 Elevator 53 (Lobby to outbound platform)",
+        "short_name": "Lobby to outbound platform",
+        "type": "ELEVATOR"
+      },
+      "id": "53",
+      "links": {
+        "self": "/facilities/53"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-2173",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Assembly Elevator 718 (Revolution Drive to unpaid lobby)",
+        "short_name": "Revolution Drive to unpaid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "718",
+      "links": {
+        "self": "/facilities/718"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-astao",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ashmont Elevator 969 (Alewife platform to Mattapan Line lobby)",
+        "short_name": "Alewife platform to Mattapan Line lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "969",
+      "links": {
+        "self": "/facilities/969"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-asmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Charles/MGH Elevator 952 (Alewife platform to lobby)",
+        "short_name": "Alewife platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "952",
+      "links": {
+        "self": "/facilities/952"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-chmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Quincy Elevator 897 (Hancock Street parking to northern lobby)",
+        "short_name": "Hancock Street parking to northern lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "897",
+      "links": {
+        "self": "/facilities/897"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-nqncy",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "State Elevator 974 (Bowdoin platform to Congress Street, 60 State Street)",
+        "short_name": "Bowdoin platform to Congress Street, 60 State Street",
+        "type": "ELEVATOR"
+      },
+      "id": "974",
+      "links": {
+        "self": "/facilities/974"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-state",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Tufts Medical Center Elevator 859 (Forest Hills platform to Washington Street lobby)",
+        "short_name": "Forest Hills platform to Washington Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "859",
+      "links": {
+        "self": "/facilities/859"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-tumnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Beachmont Elevator 887 (Wonderland platform to lobby)",
+        "short_name": "Wonderland platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "887",
+      "links": {
+        "self": "/facilities/887"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bmmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 909 (Orange Line, Green Line lobby to Valenti Way)",
+        "short_name": "Orange Line, Green Line lobby to Valenti Way",
+        "type": "ELEVATOR"
+      },
+      "id": "909",
+      "links": {
+        "self": "/facilities/909"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Braintree Elevator 811 (Red Line platform to lobby)",
+        "short_name": "Red Line platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "811",
+      "links": {
+        "self": "/facilities/811"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-brntn",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Tufts Medical Center Elevator 858 (Oak Grove platform to Washington Street lobby)",
+        "short_name": "Oak Grove platform to Washington Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "858",
+      "links": {
+        "self": "/facilities/858"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-tumnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Malden Center Elevator 944 (Lobby to Commuter Rail platform)",
+        "short_name": "Lobby to Commuter Rail platform",
+        "type": "ELEVATOR"
+      },
+      "id": "944",
+      "links": {
+        "self": "/facilities/944"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mlmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Maverick Elevator 966 (Platform to Lewis Courtyard)",
+        "short_name": "Platform to Lewis Courtyard",
+        "type": "ELEVATOR"
+      },
+      "id": "966",
+      "links": {
+        "self": "/facilities/966"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mvbcl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Airport Elevator 932 (Bowdoin platform to paid pedestrian bridge)",
+        "short_name": "Bowdoin platform to paid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "932",
+      "links": {
+        "self": "/facilities/932"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aport",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Porter Elevator 982 (Lobby to Somerville Avenue & Mass Avenue)",
+        "short_name": "Lobby to Somerville Avenue & Mass Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "982",
+      "links": {
+        "self": "/facilities/982"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-portr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 804 (Government Center & North lobby to Tremont Street, Winter Street)",
+        "short_name": "Government Center & North lobby to Tremont Street, Winter Street",
+        "type": "ELEVATOR"
+      },
+      "id": "804",
+      "links": {
+        "self": "/facilities/804"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Providence Elevator (Lobby to tracks 1 and 2)",
+        "short_name": "Lobby to tracks 1 and 2",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_c2ed_07bd_393",
+      "links": {
+        "self": "/facilities/fake_c2ed_07bd_393"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1851",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Porter Elevator 983 (Red Line platforms to lobby)",
+        "short_name": "Red Line platforms to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "983",
+      "links": {
+        "self": "/facilities/983"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-portr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Fields Corner Elevator 958 (Paid lobby to Ashmont platform)",
+        "short_name": "Paid lobby to Ashmont platform",
+        "type": "ELEVATOR"
+      },
+      "id": "958",
+      "links": {
+        "self": "/facilities/958"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-fldcr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Assembly Elevator 717 (Platform to Foley Street paid lobby)",
+        "short_name": "Platform to Foley Street paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "717",
+      "links": {
+        "self": "/facilities/717"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-astao",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "TF Green Airport Elevator (Walkway to platform)",
+        "short_name": "Walkway to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_7a57_3d92_396",
+      "links": {
+        "self": "/facilities/fake_7a57_3d92_396"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1768",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Copley Elevator 977 (Kenmore & West, Heath Street platform to Boylston Street)",
+        "short_name": "Kenmore & West, Heath Street platform to Boylston Street",
+        "type": "ELEVATOR"
+      },
+      "id": "977",
+      "links": {
+        "self": "/facilities/977"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-coecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Assembly Elevator 716 (Foley Street to unpaid lobby)",
+        "short_name": "Foley Street to unpaid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "716",
+      "links": {
+        "self": "/facilities/716"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-astao",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 911 (Oak Grove platform to paid lobby)",
+        "short_name": "Oak Grove platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "911",
+      "links": {
+        "self": "/facilities/911"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 914 (Bowdoin platform to State Street lobby)",
+        "short_name": "Bowdoin platform to State Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "914",
+      "links": {
+        "self": "/facilities/914"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lechmere Elevator 762 (Platform to North First Street lobby)",
+        "short_name": "Platform to North First Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "762",
+      "links": {
+        "self": "/facilities/762"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-lech",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wellington Elevator 864 (Oak Grove platform to lobby)",
+        "short_name": "Oak Grove platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "864",
+      "links": {
+        "self": "/facilities/864"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-welln",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Union Square Elevator 771 (Platform to Prospect Street)",
+        "short_name": "Platform to Prospect Street",
+        "type": "ELEVATOR"
+      },
+      "id": "771",
+      "links": {
+        "self": "/facilities/771"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-unsqu",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Davis Elevator 817 (Lobby to College Avenue)",
+        "short_name": "Lobby to College Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "817",
+      "links": {
+        "self": "/facilities/817"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-davis",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lowell Elevator (Lobby to pedestrian bridge)",
+        "short_name": "Lobby to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_99c7_af2a_392",
+      "links": {
+        "self": "/facilities/fake_99c7_af2a_392"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NHRML-0254",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 978 (Copley & West platform to Boston Common)",
+        "short_name": "Copley & West platform to Boston Common",
+        "type": "ELEVATOR"
+      },
+      "id": "978",
+      "links": {
+        "self": "/facilities/978"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Orient Heights Elevator 712 (Bowdoin platform to paid pedestrian bridge)",
+        "short_name": "Bowdoin platform to paid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "712",
+      "links": {
+        "self": "/facilities/712"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-orhte",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Medford/Tufts Elevator 770 (Platform to lobby)",
+        "short_name": "Platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "770",
+      "links": {
+        "self": "/facilities/770"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mdftf",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lechmere Elevator 764 (Platform to O'Brien Highway lobby)",
+        "short_name": "Platform to O'Brien Highway lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "764",
+      "links": {
+        "self": "/facilities/764"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-lech",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Beverly Elevator 995 (Parking garage to platform walkway)",
+        "short_name": "Parking garage to platform walkway",
+        "type": "ELEVATOR"
+      },
+      "id": "995",
+      "links": {
+        "self": "/facilities/995"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0183",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 979 (Red Line center platform to Copley & West platform)",
+        "short_name": "Red Line center platform to Copley & West platform",
+        "type": "ELEVATOR"
+      },
+      "id": "979",
+      "links": {
+        "self": "/facilities/979"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 710 (Wonderland platform to pedestrian plaza)",
+        "short_name": "Wonderland platform to pedestrian plaza",
+        "type": "ELEVATOR"
+      },
+      "id": "710",
+      "links": {
+        "self": "/facilities/710"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Community College Elevator 933 (Paid lobby to platform)",
+        "short_name": "Paid lobby to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "933",
+      "links": {
+        "self": "/facilities/933"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ccmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Acton Elevator 705 (Track 2 (Boston platform) to pedestrian bridge)",
+        "short_name": "Track 2 (Boston platform) to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "705",
+      "links": {
+        "self": "/facilities/705"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-FR-0253",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Andrew Elevator 879 (Ashmont/Braintree platform to lobby)",
+        "short_name": "Ashmont/Braintree platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "879",
+      "links": {
+        "self": "/facilities/879"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-andrw",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 926 (Subway Lobby to Atlantic Avenue, Summer Street)",
+        "short_name": "Subway Lobby to Atlantic Avenue, Summer Street",
+        "type": "ELEVATOR"
+      },
+      "id": "926",
+      "links": {
+        "self": "/facilities/926"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Porter Elevator 985 (Lobby to Somerville Avenue)",
+        "short_name": "Lobby to Somerville Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "985",
+      "links": {
+        "self": "/facilities/985"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-portr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Worcester Elevator 782 (Parking lot to pedestrian bridge )",
+        "short_name": "Parking lot to pedestrian bridge ",
+        "type": "ELEVATOR"
+      },
+      "id": "782",
+      "links": {
+        "self": "/facilities/782"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0442",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Back Bay Elevator 856 (Commuter Rail tracks 5 and 7 to lobby)",
+        "short_name": "Commuter Rail tracks 5 and 7 to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "856",
+      "links": {
+        "self": "/facilities/856"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bbsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Beverly Elevator 994 (Parking garage to platform walkway)",
+        "short_name": "Parking garage to platform walkway",
+        "type": "ELEVATOR"
+      },
+      "id": "994",
+      "links": {
+        "self": "/facilities/994"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0183",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Arlington Elevator 962 (Copley & West platform to lobby)",
+        "short_name": "Copley & West platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "962",
+      "links": {
+        "self": "/facilities/962"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-armnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "JFK/UMass Elevator 831 (Ashmont branch platform to lobby)",
+        "short_name": "Ashmont branch platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "831",
+      "links": {
+        "self": "/facilities/831"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-jfk",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Government Center Elevator 720 (Green Line platform to street)",
+        "short_name": "Green Line platform to street",
+        "type": "ELEVATOR"
+      },
+      "id": "720",
+      "links": {
+        "self": "/facilities/720"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gover",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Andrew Elevator 880 (Alewife platform to lobby)",
+        "short_name": "Alewife platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "880",
+      "links": {
+        "self": "/facilities/880"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-andrw",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 731 (Passageway to Causeway Street)",
+        "short_name": "Passageway to Causeway Street",
+        "type": "ELEVATOR"
+      },
+      "id": "731",
+      "links": {
+        "self": "/facilities/731"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Gilman Square Elevator 765 (Platform to Medford Street lobby)",
+        "short_name": "Platform to Medford Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "765",
+      "links": {
+        "self": "/facilities/765"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gilmn",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Orient Heights Elevator 715 (Saratoga Street Busway to unpaid pedestrian bridge)",
+        "short_name": "Saratoga Street Busway to unpaid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "715",
+      "links": {
+        "self": "/facilities/715"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-orhte",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Station Elevator 901 (Ashmont/Braintree platform to Silver Line drop-off platform and lobby)",
+        "short_name": "Ashmont/Braintree platform to Silver Line drop-off platform and lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "901",
+      "links": {
+        "self": "/facilities/901"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sstat",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Haymarket Elevator 903 (Oak Grove platform to Congress Street lobby)",
+        "short_name": "Oak Grove platform to Congress Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "903",
+      "links": {
+        "self": "/facilities/903"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-haecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Back Bay Elevator 855 (Commuter Rail tracks 1 and 3 to lobby)",
+        "short_name": "Commuter Rail tracks 1 and 3 to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "855",
+      "links": {
+        "self": "/facilities/855"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bbsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Government Center Elevator 722 (Blue Line platform to Green Line platform)",
+        "short_name": "Blue Line platform to Green Line platform",
+        "type": "ELEVATOR"
+      },
+      "id": "722",
+      "links": {
+        "self": "/facilities/722"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-gover",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Center Elevator 810 (Red Line platform to lobby)",
+        "short_name": "Red Line platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "810",
+      "links": {
+        "self": "/facilities/810"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qnctr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Sullivan Square Elevator 881 (Oak Grove platform to lobby)",
+        "short_name": "Oak Grove platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "881",
+      "links": {
+        "self": "/facilities/881"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-sull",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Aquarium Elevator 924 (Wonderland platform to Atlantic Avenue lobby)",
+        "short_name": "Wonderland platform to Atlantic Avenue lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "924",
+      "links": {
+        "self": "/facilities/924"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aqucl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 701 (Main lobby to garage)",
+        "short_name": "Main lobby to garage",
+        "type": "ELEVATOR"
+      },
+      "id": "701",
+      "links": {
+        "self": "/facilities/701"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "World Trade Center Elevator 934 (Lobby to World Trade Center Avenue)",
+        "short_name": "Lobby to World Trade Center Avenue",
+        "type": "ELEVATOR"
+      },
+      "id": "934",
+      "links": {
+        "self": "/facilities/934"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wtcst",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "TF Green Airport Elevator (Walkway to platform)",
+        "short_name": "Walkway to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "fake_7a57_3d92_397",
+      "links": {
+        "self": "/facilities/fake_7a57_3d92_397"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-NEC-1768",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Prudential Elevator 920 (Heath Street platform to lobby)",
+        "short_name": "Heath Street platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "920",
+      "links": {
+        "self": "/facilities/920"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-prmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 800 (Busway, Commuter Rail, parking lot to lobby)",
+        "short_name": "Busway, Commuter Rail, parking lot to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "800",
+      "links": {
+        "self": "/facilities/800"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Copley Elevator 976 (Park Street & North platform to Boylston Street)",
+        "short_name": "Park Street & North platform to Boylston Street",
+        "type": "ELEVATOR"
+      },
+      "id": "976",
+      "links": {
+        "self": "/facilities/976"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-coecl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Tufts Medical Center Elevator 857 (Lobby to Washington Street)",
+        "short_name": "Lobby to Washington Street",
+        "type": "ELEVATOR"
+      },
+      "id": "857",
+      "links": {
+        "self": "/facilities/857"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-tumnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Adams Elevator 736 (Lobby to platform)",
+        "short_name": "Lobby to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "736",
+      "links": {
+        "self": "/facilities/736"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qamnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Salem Elevator 997 (Bridge St to parking garage to busway and platforms)",
+        "short_name": "Bridge St to parking garage to busway and platforms",
+        "type": "ELEVATOR"
+      },
+      "id": "997",
+      "links": {
+        "self": "/facilities/997"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0168",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ruggles Elevator 849 (Commuter Rail platform to upper lobby)",
+        "short_name": "Commuter Rail platform to upper lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "849",
+      "links": {
+        "self": "/facilities/849"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rugg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Chinatown Elevator 922 (Forest Hills platform to Boylston St, Washington St)",
+        "short_name": "Forest Hills platform to Boylston St, Washington St",
+        "type": "ELEVATOR"
+      },
+      "id": "922",
+      "links": {
+        "self": "/facilities/922"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-chncl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Beachmont Elevator 886 (Bowdoin platform to lobby)",
+        "short_name": "Bowdoin platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "886",
+      "links": {
+        "self": "/facilities/886"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bmmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 869 (Alewife platform to Summer Street Concourse)",
+        "short_name": "Alewife platform to Summer Street Concourse",
+        "type": "ELEVATOR"
+      },
+      "id": "869",
+      "links": {
+        "self": "/facilities/869"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "State Elevator 803 (Forest Hills platform to Washington Street, Milk Street)",
+        "short_name": "Forest Hills platform to Washington Street, Milk Street",
+        "type": "ELEVATOR"
+      },
+      "id": "803",
+      "links": {
+        "self": "/facilities/803"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-state",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Downtown Crossing Elevator 999 (Oak Grove platform to Alewife platform)",
+        "short_name": "Oak Grove platform to Alewife platform",
+        "type": "ELEVATOR"
+      },
+      "id": "999",
+      "links": {
+        "self": "/facilities/999"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-dwnxg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Porter Elevator 987 (Red Line platforms to lobby)",
+        "short_name": "Red Line platforms to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "987",
+      "links": {
+        "self": "/facilities/987"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-portr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Adams Elevator 805 (Lobby to platform)",
+        "short_name": "Lobby to platform",
+        "type": "ELEVATOR"
+      },
+      "id": "805",
+      "links": {
+        "self": "/facilities/805"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qamnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "North Station Elevator 732 (Passageway to Commuter Rail, TD Garden)",
+        "short_name": "Passageway to Commuter Rail, TD Garden",
+        "type": "ELEVATOR"
+      },
+      "id": "732",
+      "links": {
+        "self": "/facilities/732"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-north",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Forest Hills Elevator 841 (Commuter Rail platform to lobby)",
+        "short_name": "Commuter Rail platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "841",
+      "links": {
+        "self": "/facilities/841"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-forhl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kenmore Elevator 972 (Park Street & North platform to lobby, busway)",
+        "short_name": "Park Street & North platform to lobby, busway",
+        "type": "ELEVATOR"
+      },
+      "id": "972",
+      "links": {
+        "self": "/facilities/972"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-kencl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Arlington Elevator 963 (Park Street & North platform to lobby)",
+        "short_name": "Park Street & North platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "963",
+      "links": {
+        "self": "/facilities/963"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-armnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lechmere Elevator 763 (Platform to North First Street lobby)",
+        "short_name": "Platform to North First Street lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "763",
+      "links": {
+        "self": "/facilities/763"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-lech",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wonderland Elevator 711 (Ocean Avenue to pedestrian plaza)",
+        "short_name": "Ocean Avenue to pedestrian plaza",
+        "type": "ELEVATOR"
+      },
+      "id": "711",
+      "links": {
+        "self": "/facilities/711"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-wondl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "South Acton Elevator 704 (Track 1 (outbound platform) to pedestrian bridge)",
+        "short_name": "Track 1 (outbound platform) to pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "704",
+      "links": {
+        "self": "/facilities/704"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-FR-0253",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Savin Hill Elevator 947 (Sydney Street to unpaid lobby)",
+        "short_name": "Sydney Street to unpaid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "947",
+      "links": {
+        "self": "/facilities/947"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-shmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Orient Heights Elevator 714 (Wonderland platform to paid pedestrian bridge)",
+        "short_name": "Wonderland platform to paid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "714",
+      "links": {
+        "self": "/facilities/714"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-orhte",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Worcester Elevator 780 (Platform to buses, Union Station)",
+        "short_name": "Platform to buses, Union Station",
+        "type": "ELEVATOR"
+      },
+      "id": "780",
+      "links": {
+        "self": "/facilities/780"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0442",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lynn Elevator 929 (Street to parking garage)",
+        "short_name": "Street to parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "929",
+      "links": {
+        "self": "/facilities/929"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0115",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Airport Elevator 931 (Wonderland platform to paid pedestrian bridge)",
+        "short_name": "Wonderland platform to paid pedestrian bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "931",
+      "links": {
+        "self": "/facilities/931"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-aport",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Quincy Adams Elevator 807 (Lobby to parking garage)",
+        "short_name": "Lobby to parking garage",
+        "type": "ELEVATOR"
+      },
+      "id": "807",
+      "links": {
+        "self": "/facilities/807"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-qamnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lansdowne Elevator 993 (Track 7 (outbound platform) to east side of bridge)",
+        "short_name": "Track 7 (outbound platform) to east side of bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "993",
+      "links": {
+        "self": "/facilities/993"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0025",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Lansdowne Elevator 991 (Track 5 (South Station platform) to bridge)",
+        "short_name": "Track 5 (South Station platform) to bridge",
+        "type": "ELEVATOR"
+      },
+      "id": "991",
+      "links": {
+        "self": "/facilities/991"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-WML-0025",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Park Street Elevator 823 (Green Line underpass to Copley & West platform)",
+        "short_name": "Green Line underpass to Copley & West platform",
+        "type": "ELEVATOR"
+      },
+      "id": "823",
+      "links": {
+        "self": "/facilities/823"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-pktrm",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 743 (Orange Line platform to paid lobby)",
+        "short_name": "Orange Line platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "743",
+      "links": {
+        "self": "/facilities/743"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Salem Elevator 996 (Bridge St to parking garage to busway and platforms)",
+        "short_name": "Bridge St to parking garage to busway and platforms",
+        "type": "ELEVATOR"
+      },
+      "id": "996",
+      "links": {
+        "self": "/facilities/996"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ER-0168",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ruggles Elevator 848 (Lobby to lower busway side platform)",
+        "short_name": "Lobby to lower busway side platform",
+        "type": "ELEVATOR"
+      },
+      "id": "848",
+      "links": {
+        "self": "/facilities/848"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rugg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Fields Corner Elevator 957 (Paid lobby to Alewife platform)",
+        "short_name": "Paid lobby to Alewife platform",
+        "type": "ELEVATOR"
+      },
+      "id": "957",
+      "links": {
+        "self": "/facilities/957"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-fldcr",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Ruggles Elevator 728 (Lobby to lower busway center platform)",
+        "short_name": "Lobby to lower busway center platform",
+        "type": "ELEVATOR"
+      },
+      "id": "728",
+      "links": {
+        "self": "/facilities/728"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-rugg",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Oak Grove Elevator 801 (Orange Line platform to paid lobby)",
+        "short_name": "Orange Line platform to paid lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "801",
+      "links": {
+        "self": "/facilities/801"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-ogmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Malden Center Elevator 945 (Lobby to Orange Line platform)",
+        "short_name": "Lobby to Orange Line platform",
+        "type": "ELEVATOR"
+      },
+      "id": "945",
+      "links": {
+        "self": "/facilities/945"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-mlmnl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Back Bay Elevator 853 (Orange Line platform to lobby)",
+        "short_name": "Orange Line platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "853",
+      "links": {
+        "self": "/facilities/853"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-bbsta",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Kendall/MIT Elevator 866 (Alewife platform to Main Street)",
+        "short_name": "Alewife platform to Main Street",
+        "type": "ELEVATOR"
+      },
+      "id": "866",
+      "links": {
+        "self": "/facilities/866"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-knncl",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    },
+    {
+      "attributes": {
+        "long_name": "Wellington Elevator 865 (Forest Hills platform to lobby)",
+        "short_name": "Forest Hills platform to lobby",
+        "type": "ELEVATOR"
+      },
+      "id": "865",
+      "links": {
+        "self": "/facilities/865"
+      },
+      "relationships": {
+        "stop": {
+          "data": {
+            "id": "place-welln",
+            "type": "stop"
+          }
+        }
+      },
+      "type": "facility"
+    }
+  ],
+  "jsonapi": {
+    "version": "1.0"
+  }
+}

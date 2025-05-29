@@ -49,6 +49,7 @@ defmodule MBTAV3API.Facility do
   def includes, do: %{}
 
   @impl JsonApi.Object
+  def serialize_filter_value(:type, type), do: serialize_facility_type!(type)
   def serialize_filter_value(_field, value), do: value
 
   @spec parse!(JsonApi.Item.t()) :: t()

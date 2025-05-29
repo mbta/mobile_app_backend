@@ -286,7 +286,10 @@ defmodule MBTAV3API.JsonApi.Object do
 
     key_string =
       if String.ends_with?(name_string, "s") do
-        String.replace_suffix(name_string, "s", "_ids")
+        case name do
+          :facilities -> "facility_ids"
+          _ -> String.replace_suffix(name_string, "s", "_ids")
+        end
       else
         "#{name_string}_id"
       end

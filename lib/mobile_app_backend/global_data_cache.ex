@@ -228,10 +228,7 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
 
   @spec fetch_facilities() :: JsonApi.Object.facility_map()
   defp fetch_facilities do
-    {:ok, %{data: facilities}} = Repository.facilities([])
-
-    # Only include elevator facilities since that's all we want to use right now
-    elevators = Enum.filter(facilities, &(&1.type == :elevator))
-    Map.new(elevators, &{&1.id, &1})
+    {:ok, %{data: facilities}} = Repository.facilities(filter: [type: :elevator])
+    Map.new(facilities, &{&1.id, &1})
   end
 end
