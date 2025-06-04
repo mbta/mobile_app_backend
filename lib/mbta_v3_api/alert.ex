@@ -192,7 +192,9 @@ defmodule MBTAV3API.Alert do
   def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      active_period: Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1),
+      active_period:
+        Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
+        |> ActivePeriod.collapse(),
       cause: parse_cause(item.attributes["cause"]),
       description: item.attributes["description"],
       duration_certainty: parse_duration_certainty(item.attributes["duration_certainty"]),
