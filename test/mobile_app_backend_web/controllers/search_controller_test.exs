@@ -83,4 +83,64 @@ defmodule MobileAppBackendWeb.SearchControllerTest do
                json_response(conn, 500)
     end
   end
+
+  describe "/api/search/routes" do
+    test "when query is an empty string, returns an empty list", %{conn: conn} do
+      conn = get(conn, "/api/search/routes?query=")
+
+      assert %{"data" => %{}} =
+               json_response(conn, 200)
+    end
+
+    test "when valid query string, returns search results", %{conn: conn} do
+      route = %RouteResult{
+        type: :route,
+        id: "33",
+        name: "33Name",
+        long_name: "33 Long Name",
+        rank: 5,
+        route_type: 3
+      }
+
+      reassign_env(
+        :mobile_app_backend,
+        :algolia_multi_index_search_fn,
+        fn _queries -> {:ok, %{routes: [route]}} end
+      )
+
+      conn = get(conn, "/api/search/routes?query=1")
+
+      assert %{
+               "data" => %{
+                 "routes" => [
+                   %{
+                     "type" => "route",
+                     "id" => route.id,
+                     "name" => route.name,
+                     "long_name" => route.long_name,
+                     "rank" => route.rank,
+                     "route_type" => route.route_type
+                   }
+                 ]
+               }
+             } ==
+               json_response(conn, 200)
+    end
+
+    @tag capture_log: true
+    test "when there is an error performing algolia search, returns an error", %{conn: conn} do
+      reassign_env(
+        :mobile_app_backend,
+        :algolia_multi_index_search_fn,
+        fn _queries -> {:error, "something_went_wrong"} end
+      )
+
+      conn = get(conn, "/api/search/routes?query=1")
+
+      assert %{
+               "error" => "search_failed"
+             } ==
+               json_response(conn, 500)
+    end
+  end
 end

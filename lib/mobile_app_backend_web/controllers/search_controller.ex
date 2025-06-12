@@ -11,11 +11,25 @@ defmodule MobileAppBackendWeb.SearchController do
   end
 
   def query(%Conn{} = conn, %{"query" => query}) do
-    queries = [
+    algolia_request(conn, [
       Algolia.QueryPayload.for_index(:route, query),
       Algolia.QueryPayload.for_index(:stop, query)
-    ]
+    ])
+  end
 
+  @spec routes(Conn.t(), map) :: Conn.t()
+  def routes(%Conn{} = conn, %{"query" => ""}) do
+    json(conn, %{data: %{}})
+  end
+
+  def routes(%Conn{} = conn, %{"query" => query}) do
+    algolia_request(conn, [
+      Algolia.QueryPayload.for_route_filter(query)
+    ])
+  end
+
+  @spec routes(Conn.t(), [Algolia.QueryPayload.t()]) :: Conn.t()
+  defp algolia_request(conn, queries) do
     algolia_query_fn =
       Application.get_env(
         :mobile_app_backend,

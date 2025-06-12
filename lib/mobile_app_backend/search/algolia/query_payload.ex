@@ -28,6 +28,12 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
     |> with_hit_size(10)
   end
 
+  def for_route_filter(query) do
+    Algolia.Index.index_name(:route)
+    |> new(query)
+    |> with_hit_size(50)
+  end
+
   defp new(index_name, query) do
     track_analytics? =
       Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)[:track_analytics?] ||
