@@ -36,6 +36,22 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
              } == QueryPayload.for_index(:stop, "testString")
     end
 
+    test "when for a route filter, configures the index & params" do
+      reassign_env(:mobile_app_backend, MobileAppBackend.Search.Algolia,
+        route_index: "fake_route_index"
+      )
+
+      assert %QueryPayload{
+               index_name: "fake_route_index",
+               params: %{
+                 "query" => "testString",
+                 "hitsPerPage" => 50,
+                 "clickAnalytics" => true,
+                 "analytics" => false
+               }
+             } == QueryPayload.for_route_filter("testString")
+    end
+
     test "when analytics is configured for the environment, then sets analytics param to true" do
       reassign_env(:mobile_app_backend, MobileAppBackend.Search.Algolia, track_analytics?: true)
 
