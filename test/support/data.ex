@@ -29,8 +29,7 @@ defmodule Test.Support.Data do
             {"V3_API", conn.query_string}
 
           ^otp_host ->
-            {:ok, body, _conn} = Plug.Conn.read_body(conn)
-            {"OPEN_TRIP_PLANNER", body}
+            {"OPEN_TRIP_PLANNER", conn.params}
 
           _ ->
             raise "Unknown host reference #{host}"
