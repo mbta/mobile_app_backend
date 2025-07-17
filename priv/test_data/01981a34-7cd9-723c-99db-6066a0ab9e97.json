@@ -1,0 +1,415 @@
+{
+  "data": [
+    {
+      "attributes": {},
+      "id": "place-sstat",
+      "links": {
+        "self": "/stops/place-sstat"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-sstat"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-bbsta",
+      "links": {
+        "self": "/stops/place-bbsta"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-bbsta"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-rugg",
+      "links": {
+        "self": "/stops/place-rugg"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-rugg"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-2203",
+      "links": {
+        "self": "/stops/place-NEC-2203"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-2203"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-DB-0095",
+      "links": {
+        "self": "/stops/place-DB-0095"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-DB-0095"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-2173",
+      "links": {
+        "self": "/stops/place-NEC-2173"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-2173"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-2",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-2139",
+      "links": {
+        "self": "/stops/place-NEC-2139"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-2139"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-3",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-SB-0156",
+      "links": {
+        "self": "/stops/place-SB-0156"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-SB-0156"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-3",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-SB-0189",
+      "links": {
+        "self": "/stops/place-SB-0189"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-SB-0189"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-2108",
+      "links": {
+        "self": "/stops/place-NEC-2108"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-2108"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-4",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-2040",
+      "links": {
+        "self": "/stops/place-NEC-2040"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-2040"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-6",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1969",
+      "links": {
+        "self": "/stops/place-NEC-1969"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1969"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-7",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1919",
+      "links": {
+        "self": "/stops/place-NEC-1919"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1919"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-7",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1891",
+      "links": {
+        "self": "/stops/place-NEC-1891"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1891"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-8",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1851",
+      "links": {
+        "self": "/stops/place-NEC-1851"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1851"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-8",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1768",
+      "links": {
+        "self": "/stops/place-NEC-1768"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1768"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-9",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
+      "id": "place-NEC-1659",
+      "links": {
+        "self": "/stops/place-NEC-1659"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-NEC-1659"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-10",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    }
+  ],
+  "jsonapi": {
+    "version": "1.0"
+  }
+}
