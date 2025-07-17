@@ -80,7 +80,8 @@ defmodule MobileAppBackend.Factory do
       latitude: 42.375302,
       longitude: -71.119237,
       location_type: :stop,
-      vehicle_type: :bus
+      vehicle_type: :bus,
+      child_stop_ids: []
     }
   end
 
