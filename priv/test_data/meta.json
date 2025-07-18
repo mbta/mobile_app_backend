@@ -4,7 +4,7 @@
       "fields%5Bfacility%5D=long_name%2Cshort_name%2Ctype&filter%5Btype%5D=ELEVATOR": "01971d7b-700b-7c17-9dd3-ae3bd6ff83a2"
     },
     "/route_patterns": {
-      "fields%5Bline%5D=color%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Croute.line%2Crepresentative_trip%2Crepresentative_trip.stops": "018e7b10-f51d-7624-9087-83b27d9d70f4"
+      "fields%5Bline%5D=color%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute%5D=type%2Ccolor%2Cdirection_names%2Cdirection_destinations%2Clisted_route%2Clong_name%2Cshort_name%2Csort_order%2Ctext_color&fields%5Broute_pattern%5D=canonical%2Cdirection_id%2Cname%2Csort_order%2Ctypicality&fields%5Bstop%5D=&fields%5Btrip%5D=direction_id%2Cheadsign&include=route%2Croute.line%2Crepresentative_trip%2Crepresentative_trip.stops": "01981a0c-4eb5-73eb-b8c6-8cdac9dbde96"
     },
     "/stops": {
       "fields%5Bstop%5D=id&filter%5Bdirection_id%5D=0&filter%5Broute%5D=CR-Providence": "01981a34-7cd9-723c-99db-6066a0ab9e97",

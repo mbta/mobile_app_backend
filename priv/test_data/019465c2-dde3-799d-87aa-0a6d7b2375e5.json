@@ -241,40 +241,6 @@
     {
       "attributes": {
         "description": null,
-        "latitude": 42.275977,
-        "location_type": 0,
-        "longitude": -71.171522,
-        "name": "Veterans Hospital West Roxbury",
-        "platform_code": null,
-        "platform_name": null,
-        "vehicle_type": 3,
-        "wheelchair_boarding": 1
-      },
-      "id": "10820",
-      "links": {
-        "self": "/stops/10820"
-      },
-      "relationships": {
-        "facilities": {
-          "links": {
-            "related": "/facilities/?filter[stop]=10820"
-          }
-        },
-        "parent_station": {
-          "data": null
-        },
-        "zone": {
-          "data": {
-            "id": "LocalBus",
-            "type": "zone"
-          }
-        }
-      },
-      "type": "stop"
-    },
-    {
-      "attributes": {
-        "description": null,
         "latitude": 42.283723,
         "location_type": 0,
         "longitude": -71.169493,
@@ -462,6 +428,40 @@
         "facilities": {
           "links": {
             "related": "/facilities/?filter[stop]=833"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "LocalBus",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {
+        "description": null,
+        "latitude": 42.275227,
+        "location_type": 0,
+        "longitude": -71.172037,
+        "name": "Veterans Hospital West Roxbury",
+        "platform_code": null,
+        "platform_name": null,
+        "vehicle_type": 3,
+        "wheelchair_boarding": 1
+      },
+      "id": "10820",
+      "links": {
+        "self": "/stops/10820"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=10820"
           }
         },
         "parent_station": {
