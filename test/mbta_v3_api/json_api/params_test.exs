@@ -28,7 +28,7 @@ defmodule MBTAV3API.JsonApi.ParamsTest do
     test "uses fields for included type" do
       assert %{
                "fields[route]" =>
-                 "type,color,direction_names,direction_destinations,long_name,short_name,sort_order,text_color",
+                 "type,color,direction_names,direction_destinations,listed_route,long_name,short_name,sort_order,text_color",
                "fields[route_pattern]" => "canonical,direction_id,name,sort_order,typicality"
              } =
                flatten_params([include: :route], MBTAV3API.RoutePattern)
