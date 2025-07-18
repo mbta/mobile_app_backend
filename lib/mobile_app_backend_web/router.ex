@@ -44,6 +44,7 @@ defmodule MobileAppBackendWeb.Router do
     get("/global", GlobalController, :show)
     get("/nearby", NearbyController, :show)
     get("/route/stops", RouteController, :stops)
+    get("/route/stop-graph", RouteController, :stop_graph)
     get("/schedules", ScheduleController, :schedules)
     get("/search/query", SearchController, :query)
     get("/search/routes", SearchController, :routes)
