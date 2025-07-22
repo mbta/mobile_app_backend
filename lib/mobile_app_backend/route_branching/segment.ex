@@ -1,91 +1,122 @@
 defmodule MobileAppBackend.RouteBranching.Segment do
+  require Logger
+
   alias MBTAV3API.Stop
+  alias MobileAppBackend.RouteBranching.Segment
   alias MobileAppBackend.RouteBranching.SegmentGraph
 
-  @type stick_side :: :left | :right
-  def opposite_side(:left), do: :right
-  def opposite_side(:right), do: :left
+  @typep segment_id :: SegmentGraph.vertex_id()
+  @typedoc """
+  Every segment is in one of these three lanes; its stops have that horizontal position,
+  and connections to and from it end and start in that horizontal position.
+  """
+  @type lane :: :left | :center | :right
 
-  defmodule StickSideState do
-    @moduledoc """
-    - `before` is true if the stick diagram should be filled on this side above the center
-    - `converging` is true if the stick diagram from this side and the other side should merge above the center
-    - `current_stop` is true if the stop should be drawn in the center (or false if the stop is on the other side)
-    - `diverging` is true if the stick diagram should fork to this side and the other side below the center
-    - `after` is true if the stick diagram should be filled on this side below the center
-    """
+  # while building the lane assignments, we represent the lanes as 0, 1, 2 rather than :left, :center, :right
+  # so that they sort [0, 1, 2, nil] rather than [:center, :left, nil, :right]
+  @typep lane_index :: 0 | 1 | 2
+
+  defmodule StickConnection do
+    @type vpos :: :top | :center | :bottom
+
     @type t :: %__MODULE__{
-            before: boolean(),
-            converging: boolean(),
-            current_stop: boolean(),
-            diverging: boolean(),
-            after: boolean()
+            from_stop: Stop.id(),
+            from_lane: Segment.lane(),
+            from_vpos: vpos(),
+            to_stop: Stop.id(),
+            to_lane: Segment.lane(),
+            to_vpos: vpos()
           }
     @derive Jason.Encoder
-    defstruct [:before, :converging, :current_stop, :diverging, :after]
-  end
-
-  defmodule StickState do
-    @type t :: %__MODULE__{left: StickSideState.t(), right: StickSideState.t()}
-    @derive Jason.Encoder
-    defstruct [:left, :right]
+    defstruct [:from_stop, :from_lane, :from_vpos, :to_stop, :to_lane, :to_vpos]
   end
 
   defmodule BranchStop do
     alias MBTAV3API.Stop
-    @type t :: %__MODULE__{stop_id: Stop.id(), stick_state: StickState.t()}
+
+    @type t :: %__MODULE__{
+            stop_id: Stop.id(),
+            stop_lane: Segment.lane(),
+            connections: [StickConnection.t()]
+          }
     @derive Jason.Encoder
-    defstruct [:stop_id, :stick_state]
+    defstruct [:stop_id, :stop_lane, :connections]
   end
 
   @type t :: %__MODULE__{stops: [BranchStop.t()], name: String.t() | nil, typical?: boolean()}
   @derive Jason.Encoder
   defstruct [:stops, :name, :typical?]
 
-  @spec get_list_from_graph([SegmentGraph.vertex_id()], SegmentGraph.t(), [String.t()]) ::
+  @spec get_list_from_graph([segment_id()], SegmentGraph.t(), [String.t()]) ::
           {:ok, [t()]} | {:error, String.t()}
   def get_list_from_graph(segment_order, segment_graph, segment_name_candidates) do
-    with {:ok, segment_sides} <-
-           set_segment_sides(segment_order, segment_graph, %{}, segment_order) do
-      {:ok, segments_skipping_current} = Agent.start_link(fn -> MapSet.new() end)
+    with {:ok, segment_lanes} <-
+           set_segment_lanes(segment_order, segment_graph) do
+      {:ok, connections_skipping_current} = Agent.start_link(fn -> [] end)
 
       result =
         segment_order
         |> Enum.with_index(fn segment_id, segment_index ->
           {_, segment} = :digraph.vertex(segment_graph, segment_id)
 
-          Agent.update(segments_skipping_current, &MapSet.delete(&1, segment_id))
+          Agent.update(connections_skipping_current, fn ssc ->
+            Enum.reject(ssc, &(&1.to_stop == elem(segment_id, 0)))
+          end)
 
-          ssc = Agent.get(segments_skipping_current, & &1)
+          csc = Agent.get(connections_skipping_current, & &1)
 
-          if MapSet.size(ssc) > 1 do
-            {:error, "Multiple segments skipping current: #{inspect(ssc)}"}
+          segment_lane = segment_lanes[segment_id]
+
+          lanes_with_conflicts = get_lanes_with_conflict(csc, segment_id, segment_lane)
+
+          if map_size(lanes_with_conflicts) > 0 do
+            {:error,
+             "Multiple segments on the same lane at the same time: #{inspect(lanes_with_conflicts)}"}
           else
-            has_segment_skipping = Agent.get(segments_skipping_current, &(MapSet.size(&1) > 0))
-
-            parents = :digraph.in_neighbours(segment_graph, segment_id)
             children = :digraph.out_neighbours(segment_graph, segment_id)
 
-            parent_sides = Enum.map(parents, &segment_sides[&1])
-            children_sides = Enum.map(children, &segment_sides[&1])
+            incoming_from_parents =
+              segment_neighbor_stops(
+                segment_id,
+                segment_lanes,
+                segment_graph,
+                &:digraph.in_neighbours/2,
+                &List.last/1,
+                &{&1, segment_id}
+              )
 
-            segment_side = segment_sides[segment_id]
+            outgoing_to_children =
+              segment_neighbor_stops(
+                segment_id,
+                segment_lanes,
+                segment_graph,
+                &:digraph.out_neighbours/2,
+                &List.first/1,
+                &{segment_id, &1}
+              )
 
             next_segment_id = Enum.at(segment_order, segment_index + 1)
-            subsequent_segment_connections = Enum.reject(children, &(&1 == next_segment_id))
+            subsequent_segments = Enum.reject(children, &(&1 == next_segment_id))
 
             segment_stops =
               build_segment_stops(
                 segment.stops,
-                segment_side,
-                parent_sides,
-                children_sides,
-                has_segment_skipping
+                segment_lane,
+                incoming_from_parents,
+                outgoing_to_children,
+                csc
               )
 
             Agent.update(
-              segments_skipping_current,
-              &MapSet.union(&1, MapSet.new(subsequent_segment_connections))
+              connections_skipping_current,
+              &(&1 ++
+                  connections_to_subsequent(
+                    segment_id,
+                    segment,
+                    subsequent_segments,
+                    segment_lanes,
+                    segment_graph
+                  ))
             )
 
             %__MODULE__{
@@ -96,112 +127,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
           end
         end)
 
-      Agent.stop(segments_skipping_current)
+      Agent.stop(connections_skipping_current)
 
       Enum.find(result, {:ok, result}, &match?({:error, _}, &1))
     end
-  end
-
-  defp set_segment_sides(segment_order, segment_graph, finished_sides, segments_pending_side)
-
-  defp set_segment_sides(_, _, finished_sides, []), do: {:ok, finished_sides}
-
-  defp set_segment_sides(segment_order, segment_graph, finished_sides, [
-         next_segment | remaining_segments
-       ]) do
-    parents = :digraph.in_neighbours(segment_graph, next_segment)
-
-    if Enum.any?(parents, &(not Map.has_key?(finished_sides, &1))) do
-      {:error, "Stop ID sequence out of order"}
-    else
-      parent_sides = parents |> MapSet.new(&finished_sides[&1])
-      children = :digraph.out_neighbours(segment_graph, next_segment)
-
-      siblings_up =
-        parents
-        |> Enum.flat_map(fn parent -> :digraph.out_neighbours(segment_graph, parent) end)
-
-      siblings_down =
-        children
-        |> Enum.flat_map(fn child -> :digraph.in_neighbours(segment_graph, child) end)
-
-      siblings =
-        siblings_up
-        |> MapSet.new()
-        |> MapSet.union(MapSet.new(siblings_down))
-        |> MapSet.delete(next_segment)
-
-      sibling_sides = MapSet.new(siblings, &finished_sides[&1]) |> MapSet.delete(nil)
-
-      next_side =
-        cond do
-          MapSet.size(sibling_sides) == 1 ->
-            {:ok, opposite_side(hd(MapSet.to_list(sibling_sides)))}
-
-          MapSet.size(sibling_sides) == 2 ->
-            {:error, "Siblings on both sides"}
-
-          MapSet.size(parent_sides) == 1 ->
-            {:ok, hd(MapSet.to_list(parent_sides))}
-
-          true ->
-            {:ok, :right}
-        end
-
-      with {:ok, next_side} <- next_side do
-        finished_sides = Map.put(finished_sides, next_segment, next_side)
-        set_segment_sides(segment_order, segment_graph, finished_sides, remaining_segments)
-      end
-    end
-  end
-
-  @spec build_segment_stops([Stop.t()], stick_side(), [stick_side()], [stick_side()], boolean()) ::
-          [BranchStop.t()]
-  defp build_segment_stops(
-         segment_stops,
-         segment_side,
-         parent_sides,
-         children_sides,
-         has_segment_skipping
-       ) do
-    Enum.with_index(segment_stops, fn stop, stop_index ->
-      is_first_stop = stop_index == 0
-      is_last_stop = stop_index == length(segment_stops) - 1
-
-      converging = is_first_stop and length(parent_sides) > 1
-      diverging = is_last_stop and length(children_sides) > 1
-
-      segment_side_state = %StickSideState{
-        before: not is_first_stop or length(parent_sides) > 0,
-        converging: converging,
-        current_stop: true,
-        diverging: diverging,
-        after: not is_last_stop or length(children_sides) > 0
-      }
-
-      opposite_side_state = %StickSideState{
-        before: (is_first_stop and length(parent_sides) == 2) or has_segment_skipping,
-        converging: converging,
-        current_stop: false,
-        diverging: diverging,
-        after:
-          (is_last_stop and opposite_side(segment_side) in children_sides) or
-            has_segment_skipping
-      }
-
-      states = %{
-        segment_side => segment_side_state,
-        opposite_side(segment_side) => opposite_side_state
-      }
-
-      %BranchStop{
-        stop_id: stop.id,
-        stick_state: %StickState{
-          left: states[:left],
-          right: states[:right]
-        }
-      }
-    end)
   end
 
   @spec get_segment_name([Stop.t()], [String.t()]) :: String.t() | nil
@@ -210,5 +139,406 @@ defmodule MobileAppBackend.RouteBranching.Segment do
       regex = ~r"(\b|^)#{candidate}(\b|$)"
       Enum.any?(segment_stops, &Regex.match?(regex, &1.name))
     end)
+  end
+
+  @spec set_segment_lanes([segment_id()], SegmentGraph.t()) ::
+          {:ok, %{segment_id() => lane()}} | {:error, String.t()}
+  defp set_segment_lanes(segment_order, segment_graph) do
+    # initially, this used the Coffman-Graham algorithm, but we want to analyze a segment across all vertical positions
+    # where it conflicts with other segments, not just at one level. plus we already have a topological sort
+    segments_with_concurrent =
+      Enum.with_index(segment_order, fn current_segment, index ->
+        segments_before = Enum.take(segment_order, index)
+        segments_after = Enum.drop(segment_order, index + 1)
+
+        segments_concurrent =
+          :digraph.edges(segment_graph)
+          |> Enum.filter(fn {v1, v2} -> v1 in segments_before and v2 in segments_after end)
+          |> Enum.map(fn {v1, v2} ->
+            less_crowded_neighbor(segment_graph, {v1, v2})
+          end)
+          |> Enum.uniq()
+
+        {index, current_segment, segments_concurrent}
+      end)
+
+    if Enum.any?(segments_with_concurrent, fn {_, _, concurrent} -> length(concurrent) > 2 end) do
+      {:error, "A segment had more than two concurrent segments"}
+    else
+      # rather than an iterative global approach that would be more likely to give an optimal result, we sort vertices
+      # by constrainedness and then visit each vertex sequentially, for decent performance and implementation simplicity
+      segments_with_concurrent
+      |> Enum.sort_by(
+        fn {index, _, _} -> segment_constrainedness(index, segments_with_concurrent) end,
+        :desc
+      )
+      |> Enum.reduce(%{}, fn {_, segment, concurrent_segments}, segment_lanes ->
+        segment_lanes_reducer(segment, concurrent_segments, segment_lanes, segment_graph)
+      end)
+      |> Map.new(fn
+        {vertex, 0} -> {vertex, :left}
+        {vertex, 1} -> {vertex, :center}
+        {vertex, _} -> {vertex, :right}
+      end)
+      |> then(&{:ok, &1})
+    end
+  end
+
+  @spec get_lanes_with_conflict([StickConnection.t()], segment_id(), lane()) :: %{
+          lane() => [StickConnection.t()]
+        }
+  defp get_lanes_with_conflict(connections_skipping_current, segment_id, segment_lane) do
+    Enum.group_by(connections_skipping_current, & &1.to_lane)
+    |> update_in([segment_lane], fn existing_connections ->
+      {stop_id, _} = segment_id
+
+      new_conn = %StickConnection{
+        from_stop: stop_id,
+        from_lane: segment_lane,
+        from_vpos: :center,
+        to_stop: stop_id,
+        to_lane: segment_lane,
+        to_vpos: :center
+      }
+
+      [new_conn | existing_connections || []]
+    end)
+    |> Map.filter(fn {_lane, connections_in_lane} ->
+      # if there are multiple connections in the same lane, that’s legal if they’re either
+      # all from the same stop or all to the same stop
+      if length(connections_in_lane) > 1 do
+        from_all_match? =
+          connections_in_lane
+          |> Enum.uniq_by(& &1.from_stop)
+          |> length()
+          |> then(&(&1 == 1))
+
+        to_all_match? =
+          connections_in_lane
+          |> Enum.uniq_by(& &1.from_stop)
+          |> length()
+          |> then(&(&1 == 1))
+
+        not (from_all_match? or to_all_match?)
+      end
+    end)
+  end
+
+  @spec segment_neighbor_stops(
+          segment_id(),
+          %{segment_id() => lane()},
+          SegmentGraph.t(),
+          (:digraph.graph(), :digraph.vertex() -> [:digraph.vertex()]),
+          ([Stop.t()] -> Stop.t()),
+          (segment_id() -> {segment_id(), segment_id()})
+        ) :: [{Stop.id(), lane()}]
+  defp segment_neighbor_stops(
+         segment_id,
+         segment_lanes,
+         segment_graph,
+         get_neighbors,
+         get_stop_from_list,
+         build_edge_tuple
+       ) do
+    get_neighbors.(segment_graph, segment_id)
+    |> Enum.map(fn neighbor ->
+      {_, neighbor_segment} = :digraph.vertex(segment_graph, neighbor)
+      neighbor_stop = get_stop_from_list.(neighbor_segment.stops).id
+      lane = segment_lanes[less_crowded_neighbor(segment_graph, build_edge_tuple.(neighbor))]
+      {neighbor_stop, lane}
+    end)
+    |> Enum.sort()
+  end
+
+  @spec less_crowded_neighbor(:digraph.graph(), {:digraph.vertex(), :digraph.vertex()}) ::
+          :digraph.vertex()
+  defp less_crowded_neighbor(segment_graph, {from, to}) do
+    if :digraph.out_degree(segment_graph, from) <= :digraph.in_degree(segment_graph, to) do
+      from
+    else
+      to
+    end
+  end
+
+  @spec build_segment_stops(
+          [Stop.t()],
+          lane(),
+          [{Stop.id(), lane()}],
+          [{Stop.id(), lane()}],
+          [StickConnection.t()]
+        ) ::
+          [BranchStop.t()]
+  defp build_segment_stops(
+         segment_stops,
+         segment_lane,
+         incoming_from_parents,
+         outgoing_to_children,
+         connections_skipping_current
+       ) do
+    Enum.with_index(segment_stops, fn stop, stop_index ->
+      previous_stop = if stop_index > 0, do: Enum.at(segment_stops, stop_index - 1)
+      next_stop = Enum.at(segment_stops, stop_index + 1)
+
+      stop_connections =
+        build_segment_stop_connections(
+          stop,
+          previous_stop,
+          next_stop,
+          segment_lane,
+          incoming_from_parents,
+          outgoing_to_children
+        )
+
+      %BranchStop{
+        stop_id: stop.id,
+        stop_lane: segment_lane,
+        connections: stop_connections ++ connections_skipping_current
+      }
+    end)
+  end
+
+  @spec connections_to_subsequent(
+          segment_id(),
+          SegmentGraph.Node.t(),
+          [StickConnection.t()],
+          %{segment_id() => lane()},
+          SegmentGraph.t()
+        ) :: [StickConnection.t()]
+  defp connections_to_subsequent(
+         segment_id,
+         segment,
+         subsequent_segments,
+         segment_lanes,
+         segment_graph
+       ) do
+    from_stop = List.last(segment.stops).id
+
+    Enum.map(
+      subsequent_segments,
+      fn to_segment ->
+        lane =
+          segment_lanes[
+            less_crowded_neighbor(segment_graph, {segment_id, to_segment})
+          ]
+
+        {to_stop, _} = to_segment
+
+        %StickConnection{
+          from_stop: from_stop,
+          from_lane: lane,
+          from_vpos: :top,
+          to_stop: to_stop,
+          to_lane: lane,
+          to_vpos: :bottom
+        }
+      end
+    )
+  end
+
+  @spec segment_constrainedness(non_neg_integer(), [
+          {non_neg_integer(), segment_id(), [segment_id()]}
+        ]) :: float()
+  defp segment_constrainedness(index, segments_with_concurrent) do
+    # intuitively, segments with more concurrent segments are more constrained, and segments adjacent to more
+    # constrained segments are more constrained.
+    # mathematically, constrainedness comes from the number of concurrent segments at each segment, with
+    # inverse-square falloff
+    segments_with_concurrent
+    |> Enum.sum_by(fn {other_index, _, other_concurrent} ->
+      length(other_concurrent) / Integer.pow(abs(other_index - index) + 1, 2)
+    end)
+  end
+
+  @spec segment_lanes_reducer(
+          segment_id(),
+          [segment_id()],
+          %{segment_id() => lane_index()},
+          SegmentGraph.t()
+        ) :: %{segment_id() => lane_index()}
+  defp segment_lanes_reducer(segment, concurrent_segments, segment_lanes, segment_graph) do
+    if Map.has_key?(segment_lanes, segment) do
+      segment_lanes
+    else
+      lane_to_segment =
+        [segment | concurrent_segments]
+        |> Enum.group_by(&segment_constrained_lane(&1, segment_graph, segment_lanes))
+        |> Map.filter(fn {lane, segments} -> not is_nil(lane) and length(segments) == 1 end)
+        |> Map.new(fn {lane, [segment]} -> {lane, segment} end)
+
+      segment_to_lane =
+        Map.new(lane_to_segment, fn {lane, segment} -> {segment, lane} end)
+
+      unconstrained_lanes = [0, 1, 2] -- Map.keys(lane_to_segment)
+
+      unconstrained_segments =
+        [segment | Enum.sort(concurrent_segments)] -- Map.keys(segment_to_lane)
+
+      extra_assignments =
+        assign_segments(unconstrained_segments, unconstrained_lanes, segment_to_lane)
+
+      new_assignments = Map.merge(segment_to_lane, extra_assignments)
+
+      Map.merge(segment_lanes, new_assignments)
+    end
+  end
+
+  @spec build_segment_stop_connections(
+          Stop.t(),
+          Stop.t() | nil,
+          Stop.t() | nil,
+          lane(),
+          [{Stop.id(), lane()}],
+          [{Stop.id(), lane()}]
+        ) :: [StickConnection.t()]
+  defp build_segment_stop_connections(
+         stop,
+         previous_stop,
+         next_stop,
+         segment_lane,
+         incoming_from_parents,
+         outgoing_to_children
+       ) do
+    connections_before =
+      if is_nil(previous_stop) do
+        Enum.map(incoming_from_parents, fn {parent_stop, parent_lane} ->
+          %StickConnection{
+            from_stop: parent_stop,
+            from_lane: parent_lane,
+            from_vpos: :top,
+            to_stop: stop.id,
+            to_lane: segment_lane,
+            to_vpos: :center
+          }
+        end)
+      else
+        [
+          %StickConnection{
+            from_stop: previous_stop.id,
+            from_lane: segment_lane,
+            from_vpos: :top,
+            to_stop: stop.id,
+            to_lane: segment_lane,
+            to_vpos: :center
+          }
+        ]
+      end
+
+    connections_after =
+      if is_nil(next_stop) do
+        Enum.map(outgoing_to_children, fn {child_stop, child_lane} ->
+          %StickConnection{
+            from_stop: stop.id,
+            from_lane: segment_lane,
+            from_vpos: :center,
+            to_stop: child_stop,
+            to_lane: child_lane,
+            to_vpos: :bottom
+          }
+        end)
+      else
+        [
+          %StickConnection{
+            from_stop: stop.id,
+            from_lane: segment_lane,
+            from_vpos: :center,
+            to_stop: next_stop.id,
+            to_lane: segment_lane,
+            to_vpos: :bottom
+          }
+        ]
+      end
+
+    connections_before ++ connections_after
+  end
+
+  @spec segment_constrained_lane(segment_id(), SegmentGraph.t(), %{segment_id() => lane_index()}) ::
+          lane_index() | nil
+  defp segment_constrained_lane(segment, segment_graph, segment_lanes) do
+    if already_assigned_lane = segment_lanes[segment] do
+      already_assigned_lane
+    else
+      parent_lane =
+        segment_lanes[
+          neighbor_constraint(
+            segment_graph,
+            segment,
+            &:digraph.in_neighbours/2,
+            &:digraph.out_degree/2
+          )
+        ]
+
+      child_lane =
+        segment_lanes[
+          neighbor_constraint(
+            segment_graph,
+            segment,
+            &:digraph.out_neighbours/2,
+            &:digraph.in_degree/2
+          )
+        ]
+
+      # if one is nil, we take the other, but if neither is nil, we only take if they’re the same
+      case {parent_lane, child_lane} do
+        {lane, lane} -> lane
+        {lane, nil} -> lane
+        {nil, lane} -> lane
+        _ -> nil
+      end
+    end
+  end
+
+  @spec assign_segments([segment_id()], [lane_index()], %{segment_id() => lane_index()}) :: %{
+          segment_id() => lane_index()
+        }
+  defp assign_segments(unconstrained_segments, unconstrained_lanes, constrained_segments_to_lanes)
+
+  defp assign_segments([], _, _), do: %{}
+  defp assign_segments([s], [t], _), do: %{s => t}
+  defp assign_segments([s], [0, 1, 2], _), do: %{s => 1}
+  defp assign_segments([s], [0, 1], _), do: %{s => 0}
+  defp assign_segments([s], [1, 2], _), do: %{s => 2}
+  defp assign_segments([s], [0, 2], _), do: %{s => 2}
+  defp assign_segments([s1, s2], [t1, t2], _), do: %{s1 => t1, s2 => t2}
+  defp assign_segments([s1, s2], [0, 1, 2], _), do: %{s1 => 0, s2 => 2}
+  defp assign_segments([s1, s2, s3], [0, 1, 2], _), do: %{s1 => 0, s2 => 1, s3 => 2}
+
+  # should not be possible
+  defp assign_segments(segments, _, constrained_segments_to_lanes) do
+    Logger.error(
+      "Bad extra_assignments: constrained_segments_to_lanes #{inspect(constrained_segments_to_lanes)}, unconstrained_segments #{segments}"
+    )
+
+    Sentry.capture_message("Bad extra_assignments",
+      extra: %{
+        constrained_segments_to_lanes: constrained_segments_to_lanes,
+        unconstrained_segments: segments
+      }
+    )
+
+    case segments do
+      [s] -> %{s => 1}
+      [s1, s2] -> %{s1 => 0, s2 => 2}
+      _ -> segments |> Enum.with_index() |> Map.new()
+    end
+  end
+
+  @spec neighbor_constraint(
+          :digraph.graph(),
+          :digraph.vertex(),
+          (:digraph.graph(), :digraph.vertex() -> [:digraph.vertex()]),
+          (:digraph.graph(), :digraph.vertex() -> non_neg_integer())
+        ) :: :digraph.vertex() | nil
+  defp neighbor_constraint(graph, vertex, get_neighbors, reverse_degree) do
+    graph
+    |> get_neighbors.(vertex)
+    |> case do
+      [neighbor] ->
+        if reverse_degree.(graph, neighbor) == 1 do
+          neighbor
+        end
+
+      _ ->
+        nil
+    end
   end
 end

@@ -1,6 +1,8 @@
 defmodule Mix.Tasks.CheckRouteBranching do
   @moduledoc """
   Previews the `MobileAppBackend.RouteBranching` logic, rendering graphs and diagrams for all non-trivial routes.
+
+  Filter to a handful of routes and directions with `mix check_route_branching 33 Boat-F1:1 350:0`.
   """
 
   use Mix.Task
@@ -13,6 +15,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.RouteBranching
   alias MobileAppBackend.RouteBranching.Segment
+  alias MobileAppBackend.RouteBranching.Segment.StickConnection
   alias MobileAppBackend.RouteBranching.SegmentGraph
   alias MobileAppBackend.RouteBranching.StopGraph
 
@@ -21,12 +24,17 @@ defmodule Mix.Tasks.CheckRouteBranching do
 
     # rather than define a second list of known workarounds here that will usually be stale, just read the source code
     # to know which workarounds are defined and should be used
-    workarounds_module =
+    workarounds_path =
       __ENV__.file
       |> Path.split()
       |> Enum.take_while(&(&1 != "lib"))
       |> Path.join()
       |> Path.join("lib/mobile_app_backend/route_branching/workarounds.ex")
+
+    @external_resource workarounds_path
+
+    workarounds_module =
+      workarounds_path
       |> File.read!()
       |> Code.string_to_quoted!()
 
@@ -82,13 +90,18 @@ defmodule Mix.Tasks.CheckRouteBranching do
   def run(args) do
     global_data = GlobalDataCache.get_data()
 
-    route_ids = global_data.routes |> Map.keys() |> Enum.sort()
+    routes_directions =
+      global_data.routes |> Map.keys() |> Enum.sort() |> Enum.flat_map(&[{&1, 0}, {&1, 1}])
 
-    route_ids =
+    routes_directions =
       if args != [] do
-        Enum.filter(route_ids, &(&1 in args))
+        Enum.filter(routes_directions, fn {route_id, direction_id} ->
+          route_id in args or "#{route_id}:#{direction_id}" in args
+        end)
       else
-        route_ids
+        Enum.reject(routes_directions, fn {route_id, _} ->
+          String.starts_with?(route_id, "Shuttle")
+        end)
       end
 
     if args == [] do
@@ -96,13 +109,9 @@ defmodule Mix.Tasks.CheckRouteBranching do
     end
 
     serious_issue =
-      route_ids
-      |> Enum.reject(&String.starts_with?(&1, "Shuttle"))
-      |> Enum.flat_map(fn route_id ->
+      routes_directions
+      |> Enum.map(fn {route_id, direction} ->
         route = global_data.routes[route_id]
-        [{route, 0}, {route, 1}]
-      end)
-      |> Enum.map(fn {route, direction} ->
         run_single_case(route, direction, global_data)
       end)
       |> then(&(:error in &1))
@@ -193,7 +202,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
   end
 
   defp visualize_segment_graph_node(
-         _id,
+         id,
          %SegmentGraph.Node{stops: stops, typicalities: typicalities},
          segment_name_candidates
        ) do
@@ -211,7 +220,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
       "#{name} branch (#{stop_names})"
     else
       stop_names
-    end <> " [#{best_typicality(typicalities)}]"
+    end <> " (#{elem(id, 0)} ##{elem(id, 1)}) [#{best_typicality(typicalities)}]"
   end
 
   defp visualize_segments(segments, global_data) do
@@ -224,11 +233,12 @@ defmodule Mix.Tasks.CheckRouteBranching do
         end
 
       for stop <- segment.stops do
-        left = side_box(stop.stick_state.left, :left)
-        right = side_box(stop.stick_state.right, :right)
+        left = lane_box(stop, :left)
+        center = lane_box(stop, :center)
+        right = lane_box(stop, :right)
 
         stop = global_data.stops[stop.stop_id]
-        "#{non_typical} #{left}#{right} #{stop.name}"
+        "#{non_typical} #{left}#{center}#{right} #{stop.name}"
       end
     end)
     |> Enum.join("\n")
@@ -271,24 +281,53 @@ defmodule Mix.Tasks.CheckRouteBranching do
     Regex.replace(~r"\W", "s#{stop_id}-c#{stop_count}", "_")
   end
 
-  defp side_box(state, side) do
-    {left, right} =
-      case side do
-        :left ->
-          {side_stop(state), side_cross(state)}
+  defp lane_box(stop, lane) do
+    left = lane_side(stop, lane, :left)
 
-        :right ->
-          {side_cross(state), side_stop(state)}
-      end
+    right = lane_side(stop, lane, :right)
 
-    box_drawing(left, right, if(state.before, do: :light), if(state.after, do: :light))
+    up =
+      Enum.any?(
+        stop.connections,
+        &(&1.from_lane == lane and &1.from_vpos == :top)
+      )
+      |> if(do: :light)
+
+    down =
+      Enum.any?(
+        stop.connections,
+        &(&1.to_lane == lane and &1.to_vpos == :bottom)
+      )
+      |> if(do: :light)
+
+    box_drawing(left, right, up, down)
   end
 
-  defp side_stop(%Segment.StickSideState{current_stop: true}), do: :heavy
-  defp side_stop(_), do: nil
-  defp side_cross(%Segment.StickSideState{converging: true}), do: :light
-  defp side_cross(%Segment.StickSideState{diverging: true}), do: :light
-  defp side_cross(_), do: nil
+  defp lane_side(stop, lane, side) do
+    cond do
+      stop.stop_lane == lane -> :heavy
+      lane_side_cross(lane, side, stop.connections) -> :light
+      true -> nil
+    end
+  end
+
+  defp lane_side_cross(lane, side, connections) do
+    Enum.any?(connections, fn %StickConnection{from_lane: from_lane, to_lane: to_lane} ->
+      from_side? = lane_relative_side(lane, from_lane) == side
+      to_side? = lane_relative_side(lane, to_lane) == side
+      from_side? != to_side?
+    end)
+  end
+
+  defp lane_relative_side(:left, :left), do: :center
+  defp lane_relative_side(:left, :center), do: :right
+  defp lane_relative_side(:left, :right), do: :right
+  defp lane_relative_side(:center, :left), do: :left
+  defp lane_relative_side(:center, :center), do: :center
+  defp lane_relative_side(:center, :right), do: :right
+  defp lane_relative_side(:right, :left), do: :left
+  defp lane_relative_side(:right, :center), do: :left
+  defp lane_relative_side(:right, :right), do: :center
 
   defp box_drawing(left, right, up, down)
   defp box_drawing(nil, nil, nil, nil), do: " "
@@ -307,6 +346,10 @@ defmodule Mix.Tasks.CheckRouteBranching do
   defp box_drawing(:light, nil, nil, :light), do: "┐"
   defp box_drawing(:light, nil, :light, nil), do: "┘"
   defp box_drawing(:light, nil, :light, :light), do: "┤"
+  defp box_drawing(:light, :light, nil, nil), do: "─"
+  defp box_drawing(:light, :light, nil, :light), do: "┬"
+  defp box_drawing(:light, :light, :light, nil), do: "┴"
+  defp box_drawing(:light, :light, :light, :light), do: "┼"
   defp box_drawing(:light, :heavy, nil, nil), do: "╼"
   defp box_drawing(:light, :heavy, nil, :light), do: "┮"
   defp box_drawing(:light, :heavy, :light, nil), do: "┶"
@@ -319,4 +362,8 @@ defmodule Mix.Tasks.CheckRouteBranching do
   defp box_drawing(:heavy, :light, nil, :light), do: "┭"
   defp box_drawing(:heavy, :light, :light, nil), do: "┵"
   defp box_drawing(:heavy, :light, :light, :light), do: "┽"
+  defp box_drawing(:heavy, :heavy, nil, nil), do: "━"
+  defp box_drawing(:heavy, :heavy, nil, :light), do: "┯"
+  defp box_drawing(:heavy, :heavy, :light, nil), do: "┷"
+  defp box_drawing(:heavy, :heavy, :light, :light), do: "┿"
 end

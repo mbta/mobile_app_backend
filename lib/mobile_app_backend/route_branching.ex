@@ -3,12 +3,12 @@ defmodule MobileAppBackend.RouteBranching do
   Encapsulates the logic that turns A->B->D->E->F typical B->C->E atypical into
 
   ```text
-     ┍ A
-    ┌┾ B
-  ® │┝ C
-    ┥│ D
-    └┾ E
-     ┕ F
+     ┯  A
+    ┌┷┐ B
+  ® │ ┿ C
+    ┿ │ D
+    └┯┘ E
+     ┷  F
   ```
 
   (although the actual Unicode graph rendering is in Mix.Tasks.CheckRouteBranching).
