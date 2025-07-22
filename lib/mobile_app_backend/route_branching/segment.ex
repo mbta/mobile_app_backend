@@ -141,6 +141,27 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end)
   end
 
+  # If the segment order has [A, B, C] with an edge A -> C, then that edge will be drawn next to B, so that edge
+  # (and therefore whichever of A or C wins less_crowded_neighbor/2) needs to be in a different lane than B.
+  # The less crowded of A or C will be a _concurrent segment_ when evaluating B.
+  # (“Concurrent” may not be the best term there, but it was the best term Melody could think of at the time.)
+  #
+  # The primary constraint on the lane assignment is that concurrent segments must always be assigned to different
+  # lanes. As such, segments with more concurrent segments are more constrained.
+  #
+  # For changes in typicality that do not branch, we would prefer to keep those adjacent segments in the same lane;
+  # if we have A -> B with no A -> C or C -> B, then B will inherit a lane from A if A is assigned a lane before B,
+  # and if we have A -> B with no C -> B or A -> C, then A will inherit a lane from B if B is assigned a lane before A.
+  #
+  # Algorithm:
+  # 1. Sort the segments by how constrained they are (see segment_constrainedness/2)
+  # 2. For each segment from most constrained to least: (see segment_lanes_reducer/4)
+  #   a. If this segment has already been assigned a lane, skip it
+  #   b. Assign lanes to this segment and all its concurrent segments:
+  #     i. If a segment already has an assigned lane, keep it
+  #     ii. If a segment should inherit a lane from its parent or child, use it (see segment_constrained_lane/3)
+  #     iii. Assign other segments to other lanes, aiming to put two segments on the left and right and
+  #            one segment in the center (see assign_segments/3)
   @spec set_segment_lanes([segment_id()], SegmentGraph.t()) ::
           {:ok, %{segment_id() => lane()}} | {:error, String.t()}
   defp set_segment_lanes(segment_order, segment_graph) do
@@ -184,6 +205,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
+  # Gets the map (which should be empty) of connections which are in the same lane but conflict with each other.
   @spec get_lanes_with_conflict([StickConnection.t()], segment_id(), lane()) :: %{
           lane() => [StickConnection.t()]
         }
@@ -224,6 +246,9 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end)
   end
 
+  # Turns A->C B->C into [{last stop of A, lane of {A, C}}, {last stop of B, lane of {A, B}}] or
+  # A->B A->C into [{first stop of B, lane of {A, B}}, {first stop of C, lane of {A, C}}],
+  # using less_crowded_neighbor/2 to assign lanes to edges.
   @spec segment_neighbor_stops(
           segment_id(),
           %{segment_id() => lane()},
@@ -250,6 +275,9 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     |> Enum.sort()
   end
 
+  # The edge A -> B will be drawn in either A’s lane or B’s lane, and this is the function that decides which one.
+  # We want the edges to spread out closer to the more crowded neighbor,
+  # so we use the lane of the less crowded neighbor, with ties going to the parent.
   @spec less_crowded_neighbor(:digraph.graph(), {:digraph.vertex(), :digraph.vertex()}) ::
           :digraph.vertex()
   defp less_crowded_neighbor(segment_graph, {from, to}) do
@@ -260,6 +288,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
+  # Turns the list of Stops into a list of BranchStops with the relevant StickConnections
+  # (see build_segment_stop_connections/6).
   @spec build_segment_stops(
           [Stop.t()],
           lane(),
@@ -297,10 +327,12 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end)
   end
 
+  # Computes the list of connections from this segment to its children after the next segment;
+  # these are the connections which will be skipping segments.
   @spec connections_to_subsequent(
           segment_id(),
           SegmentGraph.Node.t(),
-          [StickConnection.t()],
+          [segment_id()],
           %{segment_id() => lane()},
           SegmentGraph.t()
         ) :: [StickConnection.t()]
@@ -335,20 +367,22 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     )
   end
 
+  # Intuitively, segments with more concurrent segments are more constrained, and segments adjacent to more
+  # constrained segments are more constrained.
+  # Mathematically, constrainedness comes from the number of concurrent segments at each segment, with
+  # inverse-square falloff.
   @spec segment_constrainedness(non_neg_integer(), [
           {non_neg_integer(), segment_id(), [segment_id()]}
         ]) :: float()
   defp segment_constrainedness(index, segments_with_concurrent) do
-    # intuitively, segments with more concurrent segments are more constrained, and segments adjacent to more
-    # constrained segments are more constrained.
-    # mathematically, constrainedness comes from the number of concurrent segments at each segment, with
-    # inverse-square falloff
     segments_with_concurrent
     |> Enum.sum_by(fn {other_index, _, other_concurrent} ->
       length(other_concurrent) / Integer.pow(abs(other_index - index) + 1, 2)
     end)
   end
 
+  # Update a segment_lanes map with the new lane assignments for the given segment and its concurrent segments
+  # (see segment_constrained_lane/3 and assign_segments/3).
   @spec segment_lanes_reducer(
           segment_id(),
           [segment_id()],
@@ -382,6 +416,9 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
+  # Constructs the connections for an individual stop, to either its previous/next stop
+  # (if it’s in the middle of a segment) or the incoming/outgoing segment connections
+  # (if it’s at the start/end of a segment).
   @spec build_segment_stop_connections(
           Stop.t(),
           Stop.t() | nil,
@@ -451,6 +488,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     connections_before ++ connections_after
   end
 
+  # If this segment has already been assigned a lane, or if it should inherit a lane from its parent/child,
+  # it must have that lane and should not be passed to `assign_segments/3`.
   @spec segment_constrained_lane(segment_id(), SegmentGraph.t(), %{segment_id() => lane_index()}) ::
           lane_index() | nil
   defp segment_constrained_lane(segment, segment_graph, segment_lanes) do
@@ -487,6 +526,14 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
+  # Fill unoccupied lanes with the segments that did not have a constraint (see segment_constrained_lane/3).
+  # Cases with multiple possible answers to choose from:
+  # - If there is one segment but all lanes are open, put it in the center
+  # - If there are two segments and all lanes are open, put them on the sides
+  # - If there is one segment and one side is full but the center and the other side are open, take the other side
+  # - If there is one segment and the center is full but the sides are open, take the left
+  #
+  # Assumes unconstrained_segments and unconstrained_lanes are sorted.
   @spec assign_segments([segment_id()], [lane_index()], %{segment_id() => lane_index()}) :: %{
           segment_id() => lane_index()
         }
@@ -497,7 +544,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   defp assign_segments([s], [0, 1, 2], _), do: %{s => 1}
   defp assign_segments([s], [0, 1], _), do: %{s => 0}
   defp assign_segments([s], [1, 2], _), do: %{s => 2}
-  defp assign_segments([s], [0, 2], _), do: %{s => 2}
+  defp assign_segments([s], [0, 2], _), do: %{s => 0}
   defp assign_segments([s1, s2], [t1, t2], _), do: %{s1 => t1, s2 => t2}
   defp assign_segments([s1, s2], [0, 1, 2], _), do: %{s1 => 0, s2 => 2}
   defp assign_segments([s1, s2, s3], [0, 1, 2], _), do: %{s1 => 0, s2 => 1, s3 => 2}
@@ -522,6 +569,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
+  # Checks if this vertex has only one neighbor and that neighbor has only this vertex coming the other direction;
+  # i.e. if this vertex is its only parent’s only child or its only child’s only parent.
   @spec neighbor_constraint(
           :digraph.graph(),
           :digraph.vertex(),
