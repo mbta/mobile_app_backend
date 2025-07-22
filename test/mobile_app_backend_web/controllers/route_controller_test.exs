@@ -211,7 +211,7 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                    },
                    %{
                      "connections" =>
-                       forward("place-SB-0156", "place-SB-0189", nil, "left") ++
+                       forward.("place-SB-0156", "place-SB-0189", nil, "left") ++
                          [
                            %{
                              "from_stop" => "place-NEC-2139",
