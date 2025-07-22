@@ -13,21 +13,22 @@ defmodule MobileAppBackend.RouteBranchingTest do
     [
       %StickConnection{
         from_stop: s1,
-        from_lane: lane,
-        from_vpos: :top,
         to_stop: s2,
+        from_lane: lane,
         to_lane: lane,
+        from_vpos: :top,
         to_vpos: :center
       },
       %StickConnection{
         from_stop: s2,
-        from_lane: lane,
-        from_vpos: :center,
         to_stop: s3,
+        from_lane: lane,
         to_lane: lane,
+        from_vpos: :center,
         to_vpos: :bottom
       }
     ]
+    |> Enum.reject(&(is_nil(&1.from_stop) or is_nil(&1.to_stop)))
   end
 
   describe "calculate/4" do
@@ -74,18 +75,18 @@ defmodule MobileAppBackend.RouteBranchingTest do
                      connections: [
                        %StickConnection{
                          from_stop: a.id,
-                         from_lane: :center,
-                         from_vpos: :center,
                          to_stop: b.id,
+                         from_lane: :center,
                          to_lane: :left,
+                         from_vpos: :center,
                          to_vpos: :bottom
                        },
                        %StickConnection{
                          from_stop: a.id,
-                         from_lane: :center,
-                         from_vpos: :center,
                          to_stop: c.id,
+                         from_lane: :center,
                          to_lane: :right,
+                         from_vpos: :center,
                          to_vpos: :bottom
                        }
                      ]
@@ -104,10 +105,10 @@ defmodule MobileAppBackend.RouteBranchingTest do
                          [
                            %StickConnection{
                              from_stop: a.id,
-                             from_lane: :right,
-                             from_vpos: :top,
                              to_stop: c.id,
+                             from_lane: :right,
                              to_lane: :right,
+                             from_vpos: :top,
                              to_vpos: :bottom
                            }
                          ]
@@ -126,10 +127,10 @@ defmodule MobileAppBackend.RouteBranchingTest do
                          [
                            %StickConnection{
                              from_stop: b.id,
-                             from_lane: :left,
-                             from_vpos: :top,
                              to_stop: d.id,
+                             from_lane: :left,
                              to_lane: :left,
+                             from_vpos: :top,
                              to_vpos: :bottom
                            }
                          ]
@@ -146,18 +147,18 @@ defmodule MobileAppBackend.RouteBranchingTest do
                      connections: [
                        %StickConnection{
                          from_stop: b.id,
-                         from_lane: :left,
-                         from_vpos: :top,
                          to_stop: d.id,
+                         from_lane: :left,
                          to_lane: :center,
+                         from_vpos: :top,
                          to_vpos: :center
                        },
                        %StickConnection{
                          from_stop: c.id,
-                         from_lane: :right,
-                         from_vpos: :top,
                          to_stop: d.id,
+                         from_lane: :right,
                          to_lane: :center,
+                         from_vpos: :top,
                          to_vpos: :center
                        }
                      ]
@@ -223,10 +224,10 @@ defmodule MobileAppBackend.RouteBranchingTest do
 
       jfk_to_north_quincy_skip = %StickConnection{
         from_stop: jfk.id,
-        from_lane: :right,
-        from_vpos: :top,
         to_stop: north_quincy.id,
+        from_lane: :right,
         to_lane: :right,
+        from_vpos: :top,
         to_vpos: :bottom
       }
 
@@ -238,16 +239,8 @@ defmodule MobileAppBackend.RouteBranchingTest do
                      %BranchStop{
                        stop_id: alewife.id,
                        stop_lane: :center,
-                       connections: [
-                         %StickConnection{
-                           from_stop: alewife.id,
-                           from_lane: :center,
-                           from_vpos: :center,
-                           to_stop: List.first(trunk_interior).id,
-                           to_lane: :center,
-                           to_vpos: :bottom
-                         }
-                       ]
+                       connections:
+                         forward(nil, alewife.id, List.first(trunk_interior).id, :center)
                      }
                    ] ++
                      Enum.with_index(
@@ -273,26 +266,26 @@ defmodule MobileAppBackend.RouteBranchingTest do
                          connections: [
                            %StickConnection{
                              from_stop: List.last(trunk_interior).id,
-                             from_lane: :center,
-                             from_vpos: :top,
                              to_stop: jfk.id,
+                             from_lane: :center,
                              to_lane: :center,
+                             from_vpos: :top,
                              to_vpos: :center
                            },
                            %StickConnection{
                              from_stop: jfk.id,
-                             from_lane: :center,
-                             from_vpos: :center,
                              to_stop: north_quincy.id,
+                             from_lane: :center,
                              to_lane: :right,
+                             from_vpos: :center,
                              to_vpos: :bottom
                            },
                            %StickConnection{
                              from_stop: jfk.id,
-                             from_lane: :center,
-                             from_vpos: :center,
                              to_stop: savin_hill.id,
+                             from_lane: :center,
                              to_lane: :left,
+                             from_vpos: :center,
                              to_vpos: :bottom
                            }
                          ]
@@ -332,17 +325,9 @@ defmodule MobileAppBackend.RouteBranchingTest do
                        %BranchStop{
                          stop_id: ashmont.id,
                          stop_lane: :left,
-                         connections: [
-                           %StickConnection{
-                             from_stop: List.last(ashmont_interior).id,
-                             from_lane: :left,
-                             from_vpos: :top,
-                             to_stop: ashmont.id,
-                             to_lane: :left,
-                             to_vpos: :center
-                           },
-                           jfk_to_north_quincy_skip
-                         ]
+                         connections:
+                           forward(List.last(ashmont_interior).id, ashmont.id, nil, :left) ++
+                             [jfk_to_north_quincy_skip]
                        }
                      ],
                  typical?: true
@@ -383,16 +368,8 @@ defmodule MobileAppBackend.RouteBranchingTest do
                        %BranchStop{
                          stop_id: braintree.id,
                          stop_lane: :right,
-                         connections: [
-                           %StickConnection{
-                             from_stop: List.last(braintree_interior).id,
-                             from_lane: :right,
-                             from_vpos: :top,
-                             to_stop: braintree.id,
-                             to_lane: :right,
-                             to_vpos: :center
-                           }
-                         ]
+                         connections:
+                           forward(List.last(braintree_interior).id, braintree.id, nil, :right)
                        }
                      ],
                  typical?: true

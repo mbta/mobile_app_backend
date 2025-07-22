@@ -88,21 +88,22 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
         [
           %{
             "from_stop" => s1,
-            "from_lane" => lane,
-            "from_vpos" => "top",
             "to_stop" => s2,
+            "from_lane" => lane,
             "to_lane" => lane,
+            "from_vpos" => "top",
             "to_vpos" => "center"
           },
           %{
             "from_stop" => s2,
-            "from_lane" => lane,
-            "from_vpos" => "center",
             "to_stop" => s3,
+            "from_lane" => lane,
             "to_lane" => lane,
+            "from_vpos" => "center",
             "to_vpos" => "bottom"
           }
         ]
+        |> Enum.reject(&(is_nil(&1["from_stop"]) or is_nil(&1["to_stop"])))
       end
 
       assert data == [
@@ -110,16 +111,7 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                  "name" => nil,
                  "stops" => [
                    %{
-                     "connections" => [
-                       %{
-                         "from_stop" => "place-sstat",
-                         "from_lane" => "center",
-                         "from_vpos" => "center",
-                         "to_stop" => "place-bbsta",
-                         "to_lane" => "center",
-                         "to_vpos" => "bottom"
-                       }
-                     ],
+                     "connections" => forward.(nil, "place-sstat", "place-bbsta", "center"),
                      "stop_id" => "place-sstat",
                      "stop_lane" => "center"
                    },
@@ -169,26 +161,26 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                      "connections" => [
                        %{
                          "from_stop" => "place-NEC-2173",
-                         "from_lane" => "center",
-                         "from_vpos" => "top",
                          "to_stop" => "place-NEC-2139",
+                         "from_lane" => "center",
                          "to_lane" => "center",
+                         "from_vpos" => "top",
                          "to_vpos" => "center"
                        },
                        %{
                          "from_stop" => "place-NEC-2139",
-                         "from_lane" => "center",
-                         "from_vpos" => "center",
                          "to_stop" => "place-NEC-2108",
+                         "from_lane" => "center",
                          "to_lane" => "right",
+                         "from_vpos" => "center",
                          "to_vpos" => "bottom"
                        },
                        %{
                          "from_stop" => "place-NEC-2139",
-                         "from_lane" => "center",
-                         "from_vpos" => "center",
                          "to_stop" => "place-SB-0156",
+                         "from_lane" => "center",
                          "to_lane" => "left",
+                         "from_vpos" => "center",
                          "to_vpos" => "bottom"
                        }
                      ],
@@ -207,10 +199,10 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                          [
                            %{
                              "from_stop" => "place-NEC-2139",
-                             "from_lane" => "right",
-                             "from_vpos" => "top",
                              "to_stop" => "place-NEC-2108",
+                             "from_lane" => "right",
                              "to_lane" => "right",
+                             "from_vpos" => "top",
                              "to_vpos" => "bottom"
                            }
                          ],
@@ -218,24 +210,18 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                      "stop_lane" => "left"
                    },
                    %{
-                     "connections" => [
-                       %{
-                         "from_stop" => "place-SB-0156",
-                         "from_lane" => "left",
-                         "from_vpos" => "top",
-                         "to_stop" => "place-SB-0189",
-                         "to_lane" => "left",
-                         "to_vpos" => "center"
-                       },
-                       %{
-                         "from_stop" => "place-NEC-2139",
-                         "from_lane" => "right",
-                         "from_vpos" => "top",
-                         "to_stop" => "place-NEC-2108",
-                         "to_lane" => "right",
-                         "to_vpos" => "bottom"
-                       }
-                     ],
+                     "connections" =>
+                       forward("place-SB-0156", "place-SB-0189", nil, "left") ++
+                         [
+                           %{
+                             "from_stop" => "place-NEC-2139",
+                             "to_stop" => "place-NEC-2108",
+                             "from_lane" => "right",
+                             "to_lane" => "right",
+                             "from_vpos" => "top",
+                             "to_vpos" => "bottom"
+                           }
+                         ],
                      "stop_id" => "place-SB-0189",
                      "stop_lane" => "left"
                    }
@@ -300,16 +286,7 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                      "stop_lane" => "right"
                    },
                    %{
-                     "connections" => [
-                       %{
-                         "from_stop" => "place-NEC-1768",
-                         "from_lane" => "right",
-                         "from_vpos" => "top",
-                         "to_stop" => "place-NEC-1659",
-                         "to_lane" => "right",
-                         "to_vpos" => "center"
-                       }
-                     ],
+                     "connections" => forward.("place-NEC-1768", "place-NEC-1659", nil, "right"),
                      "stop_id" => "place-NEC-1659",
                      "stop_lane" => "right"
                    }

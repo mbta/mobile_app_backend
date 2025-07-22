@@ -21,14 +21,14 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
     @type t :: %__MODULE__{
             from_stop: Stop.id(),
-            from_lane: Segment.lane(),
-            from_vpos: vpos(),
             to_stop: Stop.id(),
+            from_lane: Segment.lane(),
             to_lane: Segment.lane(),
+            from_vpos: vpos(),
             to_vpos: vpos()
           }
     @derive Jason.Encoder
-    defstruct [:from_stop, :from_lane, :from_vpos, :to_stop, :to_lane, :to_vpos]
+    defstruct [:from_stop, :to_stop, :from_lane, :to_lane, :from_vpos, :to_vpos]
   end
 
   defmodule BranchStop do
@@ -205,7 +205,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
-  # Gets the map (which should be empty) of connections which are in the same lane but conflict with each other.
+  # Gets the map (which should be empty) of connections which are in the same lane but conflict with each other,
+  # also checking for conflicts with the current segment in its lane.
   @spec get_lanes_with_conflict([StickConnection.t()], segment_id(), lane()) :: %{
           lane() => [StickConnection.t()]
         }
@@ -216,10 +217,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
       new_conn = %StickConnection{
         from_stop: stop_id,
-        from_lane: segment_lane,
-        from_vpos: :center,
         to_stop: stop_id,
+        from_lane: segment_lane,
         to_lane: segment_lane,
+        from_vpos: :center,
         to_vpos: :center
       }
 
@@ -357,10 +358,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
         %StickConnection{
           from_stop: from_stop,
-          from_lane: lane,
-          from_vpos: :top,
           to_stop: to_stop,
+          from_lane: lane,
           to_lane: lane,
+          from_vpos: :top,
           to_vpos: :bottom
         }
       end
@@ -440,10 +441,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
         Enum.map(incoming_from_parents, fn {parent_stop, parent_lane} ->
           %StickConnection{
             from_stop: parent_stop,
-            from_lane: parent_lane,
-            from_vpos: :top,
             to_stop: stop.id,
+            from_lane: parent_lane,
             to_lane: segment_lane,
+            from_vpos: :top,
             to_vpos: :center
           }
         end)
@@ -451,10 +452,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
         [
           %StickConnection{
             from_stop: previous_stop.id,
-            from_lane: segment_lane,
-            from_vpos: :top,
             to_stop: stop.id,
+            from_lane: segment_lane,
             to_lane: segment_lane,
+            from_vpos: :top,
             to_vpos: :center
           }
         ]
@@ -465,10 +466,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
         Enum.map(outgoing_to_children, fn {child_stop, child_lane} ->
           %StickConnection{
             from_stop: stop.id,
-            from_lane: segment_lane,
-            from_vpos: :center,
             to_stop: child_stop,
+            from_lane: segment_lane,
             to_lane: child_lane,
+            from_vpos: :center,
             to_vpos: :bottom
           }
         end)
@@ -476,10 +477,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
         [
           %StickConnection{
             from_stop: stop.id,
-            from_lane: segment_lane,
-            from_vpos: :center,
             to_stop: next_stop.id,
+            from_lane: segment_lane,
             to_lane: segment_lane,
+            from_vpos: :center,
             to_vpos: :bottom
           }
         ]
