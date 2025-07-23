@@ -143,11 +143,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
   # If the segment order has [A, B, C] with an edge A -> C, then that edge will be drawn next to B, so that edge
   # (and therefore whichever of A or C wins less_crowded_neighbor/2) needs to be in a different lane than B.
-  # The less crowded of A or C will be a _concurrent segment_ when evaluating B.
-  # (“Concurrent” may not be the best term there, but it was the best term Melody could think of at the time.)
+  # The less crowded of A or C will be a _parallel segment_ when evaluating B.
   #
-  # The primary constraint on the lane assignment is that concurrent segments must always be assigned to different
-  # lanes. As such, segments with more concurrent segments are more constrained.
+  # The primary constraint on the lane assignment is that parallel segments must always be assigned to different
+  # lanes. As such, segments with more parallel segments are more constrained.
   #
   # For changes in typicality that do not branch, we would prefer to keep those adjacent segments in the same lane;
   # if we have A -> B with no A -> C or C -> B, then B will inherit a lane from A if A is assigned a lane before B,
@@ -157,7 +156,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   # 1. Sort the segments by how constrained they are (see segment_constrainedness/2)
   # 2. For each segment from most constrained to least: (see segment_lanes_reducer/4)
   #   a. If this segment has already been assigned a lane, skip it
-  #   b. Assign lanes to this segment and all its concurrent segments:
+  #   b. Assign lanes to this segment and all its parallel segments:
   #     i. If a segment already has an assigned lane, keep it
   #     ii. If a segment should inherit a lane from its parent or child, use it (see segment_constrained_lane/3)
   #     iii. Assign other segments to other lanes, aiming to put two segments on the left and right and
@@ -167,12 +166,12 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   defp set_segment_lanes(segment_order, segment_graph) do
     # initially, this used the Coffman-Graham algorithm, but we want to analyze a segment across all vertical positions
     # where it conflicts with other segments, not just at one level. plus we already have a topological sort
-    segments_with_concurrent =
+    segments_with_parallel =
       Enum.with_index(segment_order, fn current_segment, index ->
         segments_before = Enum.take(segment_order, index)
         segments_after = Enum.drop(segment_order, index + 1)
 
-        segments_concurrent =
+        segments_parallel =
           :digraph.edges(segment_graph)
           |> Enum.filter(fn {v1, v2} -> v1 in segments_before and v2 in segments_after end)
           |> Enum.map(fn {v1, v2} ->
@@ -180,21 +179,21 @@ defmodule MobileAppBackend.RouteBranching.Segment do
           end)
           |> Enum.uniq()
 
-        {index, current_segment, segments_concurrent}
+        {index, current_segment, segments_parallel}
       end)
 
-    if Enum.any?(segments_with_concurrent, fn {_, _, concurrent} -> length(concurrent) > 2 end) do
-      {:error, "A segment had more than two concurrent segments"}
+    if Enum.any?(segments_with_parallel, fn {_, _, parallel} -> length(parallel) > 2 end) do
+      {:error, "A segment had more than two parallel segments"}
     else
       # rather than an iterative global approach that would be more likely to give an optimal result, we sort vertices
       # by constrainedness and then visit each vertex sequentially, for decent performance and implementation simplicity
-      segments_with_concurrent
+      segments_with_parallel
       |> Enum.sort_by(
-        fn {index, _, _} -> segment_constrainedness(index, segments_with_concurrent) end,
+        fn {index, _, _} -> segment_constrainedness(index, segments_with_parallel) end,
         :desc
       )
-      |> Enum.reduce(%{}, fn {_, segment, concurrent_segments}, segment_lanes ->
-        segment_lanes_reducer(segment, concurrent_segments, segment_lanes, segment_graph)
+      |> Enum.reduce(%{}, fn {_, segment, parallel_segments}, segment_lanes ->
+        segment_lanes_reducer(segment, parallel_segments, segment_lanes, segment_graph)
       end)
       |> Map.new(fn
         {vertex, 0} -> {vertex, :left}
@@ -368,21 +367,21 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     )
   end
 
-  # Intuitively, segments with more concurrent segments are more constrained, and segments adjacent to more
+  # Intuitively, segments with more parallel segments are more constrained, and segments adjacent to more
   # constrained segments are more constrained.
-  # Mathematically, constrainedness comes from the number of concurrent segments at each segment, with
+  # Mathematically, constrainedness comes from the number of parallel segments at each segment, with
   # inverse-square falloff.
   @spec segment_constrainedness(non_neg_integer(), [
           {non_neg_integer(), segment_id(), [segment_id()]}
         ]) :: float()
-  defp segment_constrainedness(index, segments_with_concurrent) do
-    segments_with_concurrent
-    |> Enum.sum_by(fn {other_index, _, other_concurrent} ->
-      length(other_concurrent) / Integer.pow(abs(other_index - index) + 1, 2)
+  defp segment_constrainedness(index, segments_with_parallel) do
+    segments_with_parallel
+    |> Enum.sum_by(fn {other_index, _, other_parallel} ->
+      length(other_parallel) / Integer.pow(abs(other_index - index) + 1, 2)
     end)
   end
 
-  # Update a segment_lanes map with the new lane assignments for the given segment and its concurrent segments
+  # Update a segment_lanes map with the new lane assignments for the given segment and its parallel segments
   # (see segment_constrained_lane/3 and assign_segments/3).
   @spec segment_lanes_reducer(
           segment_id(),
@@ -390,12 +389,12 @@ defmodule MobileAppBackend.RouteBranching.Segment do
           %{segment_id() => lane_index()},
           SegmentGraph.t()
         ) :: %{segment_id() => lane_index()}
-  defp segment_lanes_reducer(segment, concurrent_segments, segment_lanes, segment_graph) do
+  defp segment_lanes_reducer(segment, parallel_segments, segment_lanes, segment_graph) do
     if Map.has_key?(segment_lanes, segment) do
       segment_lanes
     else
       lane_to_segment =
-        [segment | concurrent_segments]
+        [segment | parallel_segments]
         |> Enum.group_by(&segment_constrained_lane(&1, segment_graph, segment_lanes))
         |> Map.filter(fn {lane, segments} -> not is_nil(lane) and length(segments) == 1 end)
         |> Map.new(fn {lane, [segment]} -> {lane, segment} end)
@@ -406,7 +405,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
       unconstrained_lanes = [0, 1, 2] -- Map.keys(lane_to_segment)
 
       unconstrained_segments =
-        [segment | Enum.sort(concurrent_segments)] -- Map.keys(segment_to_lane)
+        [segment | Enum.sort(parallel_segments)] -- Map.keys(segment_to_lane)
 
       extra_assignments =
         assign_segments(unconstrained_segments, unconstrained_lanes, segment_to_lane)
