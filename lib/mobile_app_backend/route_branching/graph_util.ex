@@ -1,6 +1,8 @@
 defmodule MobileAppBackend.RouteBranching.GraphUtil do
   @doc """
   If we have A->B->C and also A->C, we want to drop A->C so neither A nor C thinks it has an extra neighbor.
+  In graph theory, this is called the [transitive reduction](https://en.wikipedia.org/wiki/Transitive_reduction), and
+  there are probably better algorithms to calculate it than this.
   """
   @spec drop_skipping_edges(:digraph.graph()) :: :ok
   def drop_skipping_edges(graph) do

@@ -9,39 +9,55 @@ defmodule MobileAppBackend.RouteBranching.Workarounds do
   @spec rewrite_stop_ids([Stop.id()], Route.id(), 0 | 1) :: [Stop.id()]
   def rewrite_stop_ids(stop_ids, route_id, direction_id)
 
-  # as of 2025-07-11, the 64 outbound has an A->C->E B->C->E D->E, which would be manageable if the RouteStopsResult
-  # said ABCDE, but it says DABCE, causing three parallel segments.
+  # as of 2025-07-21, the 33 inbound has typical B->C atypical A->C A->D B->D, but the stop IDs are ADBC
   # with minor Elixir crimes we can use pure pattern matching in a legible way to solve this
-  special_case_64_outbound_abc = ["730", "2755", "1060", "72", "1123"]
-
-  special_case_64_outbound_d = [
-    "2231",
-    "12232",
-    "24486",
-    "24487",
-    "24488",
-    "24489",
-    "2442",
-    "2443"
+  special_case_33_inbound_a = [
+    "18975",
+    "8328",
+    "8329",
+    "8330",
+    "8331",
+    "8332",
+    "8333",
+    "42820",
+    "8335"
   ]
 
-  special_case_64_outbound_e = ["2444"]
+  special_case_33_inbound_bc = [
+    "18974",
+    "6512",
+    "6513",
+    "6514",
+    "6515",
+    "6516",
+    "6517",
+    "6519",
+    "6522",
+    "6523",
+    "6524",
+    "6526",
+    "6527",
+    "6528",
+    "6529"
+  ]
+
+  special_case_33_inbound_d = ["8337", "8343", "8344"]
 
   def rewrite_stop_ids(
         [
-          unquote_splicing(special_case_64_outbound_d),
-          unquote_splicing(special_case_64_outbound_abc),
-          unquote_splicing(special_case_64_outbound_e) | rest
+          unquote_splicing(special_case_33_inbound_a),
+          unquote_splicing(special_case_33_inbound_d),
+          unquote_splicing(special_case_33_inbound_bc) | rest
         ],
-        "64",
-        0
+        "33",
+        1
       ) do
-    record_workaround_used("64", 0)
+    record_workaround_used("33", 1)
 
     [
-      unquote_splicing(special_case_64_outbound_abc),
-      unquote_splicing(special_case_64_outbound_d),
-      unquote_splicing(special_case_64_outbound_e) | rest
+      unquote_splicing(special_case_33_inbound_a),
+      unquote_splicing(special_case_33_inbound_bc),
+      unquote_splicing(special_case_33_inbound_d) | rest
     ]
   end
 
@@ -49,40 +65,6 @@ defmodule MobileAppBackend.RouteBranching.Workarounds do
 
   @spec rewrite_stop_graph(StopGraph.t(), Route.id(), 0 | 1) :: :ok
   def rewrite_stop_graph(stop_graph, route_id, direction_id)
-
-  def rewrite_stop_graph(stop_graph, "33", 0) do
-    # as of 2025-07-11 the 33 outbound has A->C B->C B->D, and that’s not technically three parallel segments, but it
-    # is three parallel lines, which is not better for us, so drop the atypical A->C
-    a = {"89414", 1}
-    b = {"8955", 1}
-    c = {"89413", 1}
-    d = {"8970", 1}
-
-    if contains_all_edges(stop_graph, [{a, c}, {b, c}, {b, d}]) do
-      record_workaround_used("33", 0)
-
-      :digraph.del_edge(stop_graph, {a, c})
-    end
-
-    :ok
-  end
-
-  def rewrite_stop_graph(stop_graph, "33", 1) do
-    # as of 2025-07-14 the 33 inbound has A->C A->D B->C B->D, and A->D and B->D are atypical but the RouteStopsResult
-    # says ADBC so we erase the deviation A->C and the atypical B->D
-    a = {"8335", 1}
-    b = {"6515", 1}
-    c = {"6516", 1}
-    d = {"8337", 1}
-
-    if contains_all_edges(stop_graph, [{a, c}, {a, d}, {b, c}, {b, d}]) do
-      record_workaround_used("33", 1)
-
-      :digraph.del_edges(stop_graph, [{a, c}, {b, d}])
-    end
-
-    :ok
-  end
 
   def rewrite_stop_graph(stop_graph, "70", 0) do
     # as of 2025-07-14 the 70 outbound has A->B typical B->A deviation, so drop the deviation B->A
@@ -93,56 +75,6 @@ defmodule MobileAppBackend.RouteBranching.Workarounds do
       record_workaround_used("70", 0)
 
       :digraph.del_edge(stop_graph, {b, a})
-    end
-
-    :ok
-  end
-
-  def rewrite_stop_graph(stop_graph, "238", 0) do
-    # as of 2025-07-14 the 238 outbound has A->B->... typical A->C deviation A->D->... atypical so connect C->D
-    a = {"4058", 1}
-    b = {"4252", 1}
-    c = {"4277", 1}
-    d = {"4214", 1}
-
-    if contains_all_edges(stop_graph, [{a, b}, {a, c}, {a, d}]) do
-      record_workaround_used("238", 0)
-
-      :digraph.add_edge(stop_graph, {c, d}, c, d, nil)
-    end
-
-    :ok
-  end
-
-  def rewrite_stop_graph(stop_graph, "350", 0) do
-    # as of 2025-07-14 the 350 outbound has A->...->B->C->...->F B->D A->...->E->F, so connect D->C
-    b = {"50940", 1}
-    c = {"49807", 1}
-    d = {"49805", 1}
-    e = {"1691", 1}
-    f = {"1692", 1}
-
-    if contains_all_edges(stop_graph, [{b, c}, {b, d}, {e, f}]) do
-      record_workaround_used("350", 0)
-
-      :digraph.add_edge(stop_graph, {d, c}, d, c, nil)
-    end
-
-    :ok
-  end
-
-  def rewrite_stop_graph(stop_graph, "Boat-F1", 1) do
-    # as of 2025-07-14 the Hingham/Hull Ferry inbound has atypical A->B typical A->C A->D and the stop ID list has
-    # ACBD so connect C->B
-    a = {"Boat-Hingham", 1}
-    b = {"Boat-George", 1}
-    c = {"Boat-Rowes", 1}
-    d = {"Boat-Hull", 1}
-
-    if contains_all_edges(stop_graph, [{a, b}, {a, c}, {a, d}]) do
-      record_workaround_used("Boat-F1", 1)
-
-      :digraph.add_edge(stop_graph, {c, b}, c, b, nil)
     end
 
     :ok
