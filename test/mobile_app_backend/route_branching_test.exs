@@ -459,5 +459,51 @@ defmodule MobileAppBackend.RouteBranchingTest do
                 %Segment{name: "South Station"}
               ]} = RouteBranching.calculate(route.id, 1, Enum.reverse(stop_ids), global_data)
     end
+
+    test "fallback works" do
+      # simplest failure case is a cycle
+      route = build(:route)
+      a = build(:stop, id: "a")
+      b = build(:stop, id: "b")
+      trip1 = build(:trip, stop_ids: [a.id, b.id])
+      trip2 = build(:trip, stop_ids: [b.id, a.id])
+
+      pattern1 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :typical,
+          representative_trip_id: trip1.id
+        )
+
+      pattern2 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :typical,
+          representative_trip_id: trip2.id
+        )
+
+      objects = Object.to_full_map([route, a, b, trip1, trip2, pattern1, pattern2])
+
+      {{stop_graph, segment_graph, segments}, log} =
+        ExUnit.CaptureLog.with_log(fn ->
+          RouteBranching.calculate(route.id, pattern1.direction_id, [a.id, b.id], objects)
+        end)
+
+      assert :digraph.info(stop_graph)
+      assert is_nil(segment_graph)
+
+      assert segments == [
+               %Segment{
+                 stops: [
+                   %BranchStop{stop_id: a.id, stop_lane: :center, connections: []},
+                   %BranchStop{stop_id: b.id, stop_lane: :center, connections: []}
+                 ],
+                 name: nil,
+                 typical?: true
+               }
+             ]
+
+      assert log =~ "[error] Stop graph contains cycle"
+    end
   end
 end
