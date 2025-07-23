@@ -1,6 +1,4 @@
 defmodule MobileAppBackend.RouteBranching.Segment do
-  require Logger
-
   alias MBTAV3API.Stop
   alias MobileAppBackend.RouteBranching.Segment
   alias MobileAppBackend.RouteBranching.SegmentGraph
@@ -195,12 +193,18 @@ defmodule MobileAppBackend.RouteBranching.Segment do
       |> Enum.reduce(%{}, fn {_, segment, parallel_segments}, segment_lanes ->
         segment_lanes_reducer(segment, parallel_segments, segment_lanes, segment_graph)
       end)
-      |> Map.new(fn
-        {vertex, 0} -> {vertex, :left}
-        {vertex, 1} -> {vertex, :center}
-        {vertex, _} -> {vertex, :right}
-      end)
-      |> then(&{:ok, &1})
+      |> case do
+        {:error, error} ->
+          {:error, error}
+
+        %{} = segment_lanes ->
+          {:ok,
+           Map.new(segment_lanes, fn
+             {vertex, 0} -> {vertex, :left}
+             {vertex, 1} -> {vertex, :center}
+             {vertex, _} -> {vertex, :right}
+           end)}
+      end
     end
   end
 
@@ -386,33 +390,41 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   @spec segment_lanes_reducer(
           segment_id(),
           [segment_id()],
-          %{segment_id() => lane_index()},
+          %{segment_id() => lane_index()} | {:error, String.t()},
           SegmentGraph.t()
-        ) :: %{segment_id() => lane_index()}
+        ) :: %{segment_id() => lane_index()} | {:error, String.t()}
   defp segment_lanes_reducer(segment, parallel_segments, segment_lanes, segment_graph) do
-    if Map.has_key?(segment_lanes, segment) do
-      segment_lanes
-    else
-      lane_to_segment =
-        [segment | parallel_segments]
-        |> Enum.group_by(&segment_constrained_lane(&1, segment_graph, segment_lanes))
-        |> Map.filter(fn {lane, segments} -> not is_nil(lane) and length(segments) == 1 end)
-        |> Map.new(fn {lane, [segment]} -> {lane, segment} end)
+    case segment_lanes do
+      {:error, error} ->
+        {:error, error}
 
-      segment_to_lane =
-        Map.new(lane_to_segment, fn {lane, segment} -> {segment, lane} end)
+      %{^segment => _} ->
+        segment_lanes
 
-      unconstrained_lanes = [0, 1, 2] -- Map.keys(lane_to_segment)
+      _ ->
+        lane_to_segment =
+          [segment | parallel_segments]
+          |> Enum.group_by(&segment_constrained_lane(&1, segment_graph, segment_lanes))
+          |> Map.filter(fn {lane, segments} -> not is_nil(lane) and length(segments) == 1 end)
+          |> Map.new(fn {lane, [segment]} -> {lane, segment} end)
 
-      unconstrained_segments =
-        [segment | Enum.sort(parallel_segments)] -- Map.keys(segment_to_lane)
+        segment_to_lane =
+          Map.new(lane_to_segment, fn {lane, segment} -> {segment, lane} end)
 
-      extra_assignments =
-        assign_segments(unconstrained_segments, unconstrained_lanes, segment_to_lane)
+        unconstrained_lanes = [0, 1, 2] -- Map.keys(lane_to_segment)
 
-      new_assignments = Map.merge(segment_to_lane, extra_assignments)
+        unconstrained_segments =
+          [segment | Enum.sort(parallel_segments)] -- Map.keys(segment_to_lane)
 
-      Map.merge(segment_lanes, new_assignments)
+        case assign_segments(unconstrained_segments, unconstrained_lanes, segment_to_lane) do
+          {:error, error} ->
+            {:error, error}
+
+          %{} = extra_assignments ->
+            new_assignments = Map.merge(segment_to_lane, extra_assignments)
+
+            Map.merge(segment_lanes, new_assignments)
+        end
     end
   end
 
@@ -533,10 +545,9 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   # - If there is one segment and one side is full but the center and the other side are open, take the other side
   # - If there is one segment and the center is full but the sides are open, take the left
   #
-  # Assumes unconstrained_segments and unconstrained_lanes are sorted.
-  @spec assign_segments([segment_id()], [lane_index()], %{segment_id() => lane_index()}) :: %{
-          segment_id() => lane_index()
-        }
+  # Assumes unconstrained_segments are in a deterministic order and unconstrained_lanes are sorted.
+  @spec assign_segments([segment_id()], [lane_index()], %{segment_id() => lane_index()}) ::
+          %{segment_id() => lane_index()} | {:error, String.t()}
   defp assign_segments(unconstrained_segments, unconstrained_lanes, constrained_segments_to_lanes)
 
   defp assign_segments([], _, _), do: %{}
@@ -551,22 +562,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
   # should not be possible
   defp assign_segments(segments, _, constrained_segments_to_lanes) do
-    Logger.error(
-      "Bad extra_assignments: constrained_segments_to_lanes #{inspect(constrained_segments_to_lanes)}, unconstrained_segments #{segments}"
-    )
-
-    Sentry.capture_message("Bad extra_assignments",
-      extra: %{
-        constrained_segments_to_lanes: constrained_segments_to_lanes,
-        unconstrained_segments: segments
-      }
-    )
-
-    case segments do
-      [s] -> %{s => 1}
-      [s1, s2] -> %{s1 => 0, s2 => 2}
-      _ -> segments |> Enum.with_index() |> Map.new()
-    end
+    {:error,
+     "Bad extra_assignments: constrained_segments_to_lanes #{inspect(constrained_segments_to_lanes)}, unconstrained_segments #{segments}"}
   end
 
   # Checks if this vertex has only one neighbor and that neighbor has only this vertex coming the other direction;
