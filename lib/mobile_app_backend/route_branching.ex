@@ -5,8 +5,8 @@ defmodule MobileAppBackend.RouteBranching do
   ```text
      ┯  A
     ┌┷┐ B
-  ® │ ┿ C
-    ┿ │ D
+  ® ┿ │ C
+    │ ┿ D
     └┯┘ E
      ┷  F
   ```
