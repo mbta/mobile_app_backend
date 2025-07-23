@@ -139,6 +139,24 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end)
   end
 
+  @doc """
+  Constructs a single segment with all stops with no connections. Used as a fallback if the graph-based process
+  encountered an error.
+  """
+  @spec get_fallback([Stop.id()]) :: [t()]
+  def get_fallback(stop_ids) do
+    [
+      %__MODULE__{
+        stops:
+          Enum.map(stop_ids, fn stop_id ->
+            %BranchStop{stop_id: stop_id, stop_lane: :center, connections: []}
+          end),
+        name: nil,
+        typical?: true
+      }
+    ]
+  end
+
   # If the segment order has [A, B, C] with an edge A -> C, then that edge will be drawn next to B, so that edge
   # (and therefore whichever of A or C wins less_crowded_neighbor/2) needs to be in a different lane than B.
   # The less crowded of A or C will be a _parallel segment_ when evaluating B.

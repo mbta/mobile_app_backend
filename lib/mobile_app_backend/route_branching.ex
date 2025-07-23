@@ -34,7 +34,7 @@ defmodule MobileAppBackend.RouteBranching do
   alias MobileAppBackend.RouteBranching.Workarounds
 
   @spec calculate(Route.id(), 0 | 1, [Stop.id()], GlobalDataCache.data()) ::
-          {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()] | nil}
+          {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
   def calculate(route_id, direction_id, stop_ids, global_data) do
     context = %{route_id: route_id, direction_id: direction_id}
     stop_ids = Workarounds.rewrite_stop_ids(stop_ids, route_id, direction_id)
@@ -76,6 +76,8 @@ defmodule MobileAppBackend.RouteBranching do
         )
         |> unpeel_result(context)
       end
+
+    segments = segments || Segment.get_fallback(stop_ids)
 
     {stop_graph, segment_graph, segments}
   end
