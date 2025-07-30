@@ -45,7 +45,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                index_name: "fake_route_index",
                params: %{
                  "query" => "testString",
-                 "hitsPerPage" => 50,
+                 "hitsPerPage" => 1000,
                  "clickAnalytics" => true,
                  "analytics" => false
                }

@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
   def for_route_filter(query) do
     Algolia.Index.index_name(:route)
     |> new(query)
-    |> with_hit_size(50)
+    |> with_hit_size(1000)
   end
 
   defp new(index_name, query) do
