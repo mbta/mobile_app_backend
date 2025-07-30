@@ -11,7 +11,8 @@ defmodule MobileAppBackend.MixProject do
       aliases: aliases(),
       deps: deps(),
       dialyzer: [plt_add_apps: [:mix]],
-      test_coverage: [tool: LcovEx]
+      test_coverage: [tool: LcovEx],
+      compilers: [:phoenix_live_view] ++ Mix.compilers()
     ]
   end
 
@@ -56,10 +57,10 @@ defmodule MobileAppBackend.MixProject do
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:ex_machina, "~> 2.8.0", only: :test},
-      {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.11"},
+      {:lazy_html, ">= 0.0.0", only: :test},
       {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
       {:logster, "~> 1.1"},
       {:mox, "~> 1.0", only: :test},
@@ -67,7 +68,7 @@ defmodule MobileAppBackend.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.0.0"},
+      {:phoenix_live_view, "~> 1.1.0"},
       {:phoenix, "~> 1.7.9"},
       {:polyline, "~> 1.4", only: :test},
       {:req, "~> 0.3"},
