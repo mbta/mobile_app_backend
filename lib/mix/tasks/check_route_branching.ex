@@ -253,6 +253,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
     nodes_dot =
       graph
       |> :digraph.vertices()
+      |> Enum.sort()
       |> Enum.map_join(fn id ->
         {_, label} = :digraph.vertex(graph, id)
         "#{dot_vertex_id(id)} [label=\"#{process_vertex_label.(id, label)}\"];\n"
@@ -261,6 +262,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
     edges_dot =
       graph
       |> :digraph.edges()
+      |> Enum.sort()
       |> Enum.map_join(fn {from, to} ->
         "#{dot_vertex_id(from)} -> #{dot_vertex_id(to)};\n"
       end)

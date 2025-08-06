@@ -461,12 +461,17 @@ defmodule MobileAppBackend.RouteBranchingTest do
     end
 
     test "fallback works" do
-      # simplest failure case is a cycle
+      # simplest failure case is four branches
       route = build(:route)
       a = build(:stop, id: "a")
       b = build(:stop, id: "b")
+      c = build(:stop, id: "c")
+      d = build(:stop, id: "d")
+      e = build(:stop, id: "e")
       trip1 = build(:trip, stop_ids: [a.id, b.id])
-      trip2 = build(:trip, stop_ids: [b.id, a.id])
+      trip2 = build(:trip, stop_ids: [a.id, c.id])
+      trip3 = build(:trip, stop_ids: [a.id, d.id])
+      trip4 = build(:trip, stop_ids: [a.id, e.id])
 
       pattern1 =
         build(:route_pattern,
@@ -482,28 +487,66 @@ defmodule MobileAppBackend.RouteBranchingTest do
           representative_trip_id: trip2.id
         )
 
-      objects = Object.to_full_map([route, a, b, trip1, trip2, pattern1, pattern2])
+      pattern3 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :typical,
+          representative_trip_id: trip3.id
+        )
+
+      pattern4 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :typical,
+          representative_trip_id: trip4.id
+        )
+
+      objects =
+        Object.to_full_map([
+          route,
+          a,
+          b,
+          c,
+          d,
+          e,
+          trip1,
+          trip2,
+          trip3,
+          trip4,
+          pattern1,
+          pattern2,
+          pattern3,
+          pattern4
+        ])
 
       {{stop_graph, segment_graph, segments}, log} =
         ExUnit.CaptureLog.with_log(fn ->
-          RouteBranching.calculate(route.id, pattern1.direction_id, [a.id, b.id], objects)
+          RouteBranching.calculate(
+            route.id,
+            pattern1.direction_id,
+            [a.id, b.id, c.id, d.id, e.id],
+            objects
+          )
         end)
 
       assert :digraph.info(stop_graph)
-      assert is_nil(segment_graph)
+      assert :digraph.info(segment_graph)
 
       assert segments == [
                %Segment{
                  stops: [
                    %BranchStop{stop_id: a.id, stop_lane: :center, connections: []},
-                   %BranchStop{stop_id: b.id, stop_lane: :center, connections: []}
+                   %BranchStop{stop_id: b.id, stop_lane: :center, connections: []},
+                   %BranchStop{stop_id: c.id, stop_lane: :center, connections: []},
+                   %BranchStop{stop_id: d.id, stop_lane: :center, connections: []},
+                   %BranchStop{stop_id: e.id, stop_lane: :center, connections: []}
                  ],
                  name: nil,
                  typical?: true
                }
              ]
 
-      assert log =~ "[error] Stop graph contains cycle"
+      assert log =~ "A segment had more than two parallel segments"
     end
   end
 end
