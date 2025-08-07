@@ -22,11 +22,43 @@ defmodule MobileAppBackendWeb.SearchController do
     json(conn, %{data: %{}})
   end
 
-  def routes(%Conn{} = conn, %{"query" => query}) do
+  def routes(%Conn{} = conn, %{"query" => query} = params) do
     algolia_request(conn, [
-      Algolia.QueryPayload.for_route_filter(query)
+      Algolia.QueryPayload.for_route_filter(
+        query,
+        Map.new(["type", "line_id"], fn facet ->
+          {"route.#{facet}", parse_facet_param(params, facet)}
+        end)
+        |> Map.reject(fn {_, v} -> is_nil(v) end)
+      )
     ])
   end
+
+  defp param_split_or_nil(params, key) do
+    case Map.get(params, key) do
+      nil -> nil
+      value -> String.split(value, ",")
+    end
+  end
+
+  # Converts lists of route types like ["bus", "heavy_rail"] into GTFS IDs like ["3", "1"]
+  defp parse_facet_param(params, "type" = key) do
+    case param_split_or_nil(params, key) do
+      nil ->
+        nil
+
+      types ->
+        Enum.map(types, fn type ->
+          String.to_existing_atom(type)
+          |> MBTAV3API.Route.serialize_type!()
+          |> Integer.to_string()
+        end)
+    end
+  catch
+    _, _ -> nil
+  end
+
+  defp parse_facet_param(params, key), do: param_split_or_nil(params, key)
 
   @spec routes(Conn.t(), [Algolia.QueryPayload.t()]) :: Conn.t()
   defp algolia_request(conn, queries) do
