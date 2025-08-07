@@ -11,7 +11,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
           filters: String.t()
         }
 
-  @type facets :: %{String.t() => String.t()}
+  @type facets :: %{String.t() => [String.t()]}
 
   @default_params %{"hitsPerPage" => 5, "clickAnalytics" => true}
 
@@ -66,9 +66,8 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
     %__MODULE__{
       query_payload
       | filters:
-          facets
-          |> Enum.map_join(" AND ", fn {facet, terms} ->
-            "(#{String.split(terms, ",") |> Enum.map_join(" OR ", &"#{facet}:#{&1}")})"
+          Enum.map_join(facets, " AND ", fn {facet, terms} ->
+            "(#{Enum.map_join(terms, " OR ", &"#{facet}:#{&1}")})"
           end)
     }
   end

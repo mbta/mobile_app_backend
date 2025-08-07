@@ -72,8 +72,8 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                  "(facet_key_1:facet_term_1 OR facet_key_1:facet_term_2) AND (facet_key_2:facet_term_2)"
              } ==
                QueryPayload.for_route_filter("testString", %{
-                 "facet_key_1" => "facet_term_1,facet_term_2",
-                 "facet_key_2" => "facet_term_2"
+                 "facet_key_1" => ["facet_term_1", "facet_term_2"],
+                 "facet_key_2" => ["facet_term_2"]
                })
     end
 
@@ -91,7 +91,7 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                  "analytics" => false
                },
                filters: "(facet_key:facet_term)"
-             } == QueryPayload.for_route_filter("testString", %{"facet_key" => "facet_term"})
+             } == QueryPayload.for_route_filter("testString", %{"facet_key" => ["facet_term"]})
     end
 
     test "when analytics is configured for the environment, then sets analytics param to true" do

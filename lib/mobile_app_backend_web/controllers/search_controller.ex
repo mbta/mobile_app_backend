@@ -26,30 +26,39 @@ defmodule MobileAppBackendWeb.SearchController do
     algolia_request(conn, [
       Algolia.QueryPayload.for_route_filter(
         query,
-        %{
-          "route.type" => parse_type_param(Map.get(params, "type")),
-          "route.line_id" => Map.get(params, "line_id")
-        }
-        |> Map.reject(fn {_, v} -> v == nil end)
+        Map.new(["type", "line_id"], fn facet ->
+          {"route.#{facet}", parse_facet_param(params, facet)}
+        end)
+        |> Map.reject(fn {_, v} -> is_nil(v) end)
       )
     ])
   end
 
-  @spec parse_type_param(String.t() | nil) :: String.t() | nil
-  defp parse_type_param(nil), do: nil
+  defp param_split_or_nil(params, key) do
+    case Map.get(params, key) do
+      nil -> nil
+      value -> String.split(value, ",")
+    end
+  end
 
-  # Accept comma separated lists of types like "bus" or "heavy_rail",
-  # then convert to GTFS route type IDs, and join back to a comma separated string
-  defp parse_type_param(type_string) do
-    String.split(type_string, ",")
-    |> Enum.map_join(",", fn type ->
-      String.to_existing_atom(type)
-      |> MBTAV3API.Route.serialize_type!()
-      |> Integer.to_string()
-    end)
+  # Converts lists of route types like ["bus", "heavy_rail"] into GTFS IDs like ["3", "1"]
+  defp parse_facet_param(params, "type" = key) do
+    case param_split_or_nil(params, key) do
+      nil ->
+        nil
+
+      types ->
+        Enum.map(types, fn type ->
+          String.to_existing_atom(type)
+          |> MBTAV3API.Route.serialize_type!()
+          |> Integer.to_string()
+        end)
+    end
   catch
     _, _ -> nil
   end
+
+  defp parse_facet_param(params, key), do: param_split_or_nil(params, key)
 
   @spec routes(Conn.t(), [Algolia.QueryPayload.t()]) :: Conn.t()
   defp algolia_request(conn, queries) do

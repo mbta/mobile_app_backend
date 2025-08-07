@@ -97,8 +97,8 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
       Api.multi_index_search([
         QueryPayload.for_route_filter("testString", %{
-          "facet_key_1" => "facet_term_1,facet_term_2",
-          "facet_key_2" => "facet_term_2"
+          "facet_key_1" => ["facet_term_1", "facet_term_2"],
+          "facet_key_2" => ["facet_term_2"]
         })
       ])
 
