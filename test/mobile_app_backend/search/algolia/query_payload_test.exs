@@ -16,7 +16,8 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                  "hitsPerPage" => 5,
                  "clickAnalytics" => true,
                  "analytics" => false
-               }
+               },
+               filters: ""
              } == QueryPayload.for_index(:route, "testString")
     end
 
@@ -32,7 +33,8 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                  "hitsPerPage" => 10,
                  "clickAnalytics" => true,
                  "analytics" => false
-               }
+               },
+               filters: ""
              } == QueryPayload.for_index(:stop, "testString")
     end
 
@@ -48,8 +50,48 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
                  "hitsPerPage" => 1000,
                  "clickAnalytics" => true,
                  "analytics" => false
-               }
-             } == QueryPayload.for_route_filter("testString")
+               },
+               filters: ""
+             } == QueryPayload.for_route_filter("testString", %{})
+    end
+
+    test "applies multiple facet filters" do
+      reassign_env(:mobile_app_backend, MobileAppBackend.Search.Algolia,
+        route_index: "fake_route_index"
+      )
+
+      assert %QueryPayload{
+               index_name: "fake_route_index",
+               params: %{
+                 "query" => "testString",
+                 "hitsPerPage" => 1000,
+                 "clickAnalytics" => true,
+                 "analytics" => false
+               },
+               filters:
+                 "(facet_key_1:facet_term_1 OR facet_key_1:facet_term_2) AND (facet_key_2:facet_term_2)"
+             } ==
+               QueryPayload.for_route_filter("testString", %{
+                 "facet_key_1" => "facet_term_1,facet_term_2",
+                 "facet_key_2" => "facet_term_2"
+               })
+    end
+
+    test "applies single facet filter" do
+      reassign_env(:mobile_app_backend, MobileAppBackend.Search.Algolia,
+        route_index: "fake_route_index"
+      )
+
+      assert %QueryPayload{
+               index_name: "fake_route_index",
+               params: %{
+                 "query" => "testString",
+                 "hitsPerPage" => 1000,
+                 "clickAnalytics" => true,
+                 "analytics" => false
+               },
+               filters: "(facet_key:facet_term)"
+             } == QueryPayload.for_route_filter("testString", %{"facet_key" => "facet_term"})
     end
 
     test "when analytics is configured for the environment, then sets analytics param to true" do

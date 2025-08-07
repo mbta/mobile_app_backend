@@ -27,12 +27,31 @@ defmodule MobileAppBackendWeb.SearchController do
       Algolia.QueryPayload.for_route_filter(
         query,
         %{
-          "route.type" => Map.get(params, "type"),
+          "route.type" => parse_type_param(Map.get(params, "type")),
           "route.line_id" => Map.get(params, "line_id")
         }
         |> Map.reject(fn {_, v} -> v == nil end)
       )
     ])
+  end
+
+  @spec parse_type_param(String.t() | nil) :: String.t() | nil
+  defp parse_type_param(nil), do: nil
+
+  # Accept comma separated lists of types like "bus" or "heavy_rail",
+  # then convert to GTFS route type IDs, and join back to a comma separated string
+  defp parse_type_param(type_string) do
+    try do
+      String.split(type_string, ",")
+      |> Enum.map(fn type ->
+        String.to_existing_atom(type)
+        |> MBTAV3API.Route.serialize_type!()
+        |> Integer.to_string()
+      end)
+      |> Enum.join(",")
+    rescue
+      _ -> nil
+    end
   end
 
   @spec routes(Conn.t(), [Algolia.QueryPayload.t()]) :: Conn.t()

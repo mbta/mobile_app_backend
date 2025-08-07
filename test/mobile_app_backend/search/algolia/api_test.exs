@@ -67,13 +67,45 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
       assert "fake_url/1/indexes/*/queries" == url
 
-      assert ~s({"requests":[{"indexName":"stops_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=10&query=1"},{"indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=5&query=1"}]}) ==
+      assert ~s({"requests":[{"filters":"","indexName":"stops_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=10&query=1"},{"filters":"","indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=5&query=1"}]}) ==
                body
 
       assert [
                {"X-Algolia-API-Key", "fake_search_key"},
                {"X-Algolia-Application-Id", "fake_app_id"}
              ] == headers
+    end
+
+    test "makes requests to the algolia endpoint with expected filters" do
+      pid = self()
+
+      default_env = Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.Search.Algolia,
+        Keyword.merge(default_env,
+          search_key: "fake_search_key",
+          app_id: "fake_app_id"
+        )
+      )
+
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn url, body, headers ->
+        send(pid, %{url: url, body: body, headers: headers})
+        {:ok, %{body: %{"results" => []}}}
+      end)
+
+      Api.multi_index_search([
+        QueryPayload.for_route_filter("testString", %{
+          "facet_key_1" => "facet_term_1,facet_term_2",
+          "facet_key_2" => "facet_term_2"
+        })
+      ])
+
+      assert_received(%{url: _, body: body, headers: _})
+
+      assert ~s({"requests":[{"filters":"\(facet_key_1:facet_term_1 OR facet_key_1:facet_term_2\) AND \(facet_key_2:facet_term_2\)","indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=1000&query=testString"}]}) ==
+               body
     end
 
     @tag capture_log: true
