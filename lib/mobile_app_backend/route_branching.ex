@@ -30,6 +30,7 @@ defmodule MobileAppBackend.RouteBranching do
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.RouteBranching.Segment
   alias MobileAppBackend.RouteBranching.SegmentGraph
+  alias MobileAppBackend.RouteBranching.StopDisambiguation
   alias MobileAppBackend.RouteBranching.StopGraph
   alias MobileAppBackend.RouteBranching.Workarounds
 
@@ -48,7 +49,8 @@ defmodule MobileAppBackend.RouteBranching do
       |> Map.values()
 
     segment_name_candidates = get_name_candidates(route, direction_id)
-    stop_graph = StopGraph.build(route_id, direction_id, stop_ids, patterns, global_data)
+    stop_disambiguation = StopDisambiguation.build(stop_ids, patterns, global_data)
+    stop_graph = StopGraph.build(stop_disambiguation, global_data)
 
     segment_graph =
       if :digraph_utils.is_acyclic(stop_graph) do
@@ -59,8 +61,7 @@ defmodule MobileAppBackend.RouteBranching do
 
     segment_order =
       if not is_nil(segment_graph) and :digraph_utils.is_acyclic(segment_graph) do
-        get_segment_order(segment_graph, stop_ids, global_data)
-        |> unpeel_result(context)
+        get_segment_order(segment_graph, stop_ids)
       else
         if not is_nil(segment_graph) do
           unpeel_result({:error, "Segment graph contains cycle"}, context)
@@ -87,32 +88,63 @@ defmodule MobileAppBackend.RouteBranching do
   defp unpeel_result({:ok, result}, _), do: result
 
   defp unpeel_result({:error, error}, context) do
-    Logger.error(error)
+    Logger.error("in context #{inspect(context)}: #{error}")
 
     Sentry.capture_message(error, request: context)
 
     nil
   end
 
-  @spec get_segment_order(SegmentGraph.t(), [Stop.id()], GlobalDataCache.data()) ::
-          {:ok, [SegmentGraph.vertex_id()]} | {:error, String.t()}
-  defp get_segment_order(segment_graph, stop_ids, global_data) do
-    result =
-      stop_ids
-      |> Enum.map(fn stop_id ->
-        stop = global_data.stops[stop_id]
+  # the index of a segment in the canon stop list is the number of stops from the canon list that would need to be
+  # deleted before the segment starts. unfortunately, we need to break ties topologically, rather than in a way
+  # that’s easy to determine a priori, so it’s actually a topological sort with ties broken by index in the canon
+  # stop list
+  @spec get_segment_order(SegmentGraph.t(), [Stop.id()]) :: [SegmentGraph.vertex_id()]
+  defp get_segment_order(segment_graph, stop_ids) do
+    segment_canon_indices =
+      Map.new(:digraph.vertices(segment_graph), fn segment_id ->
+        {_, segment} = :digraph.vertex(segment_graph, segment_id)
+        segment_stop_ids = Enum.map(segment.stops, & &1.id)
 
-        [stop_id | stop.child_stop_ids]
-        |> Enum.map(&{&1, 1})
-        |> Enum.find(&(:digraph.vertex(segment_graph, &1) != false))
+        segment_index_into_stop_ids =
+          List.myers_difference(stop_ids, segment_stop_ids)
+          |> Enum.take_while(fn {action, _} -> action != :eq end)
+          |> Enum.sum_by(fn
+            {:del, sublist} -> length(sublist)
+            {:ins, _} -> 0
+          end)
+
+        {segment_id, segment_index_into_stop_ids}
       end)
-      |> Enum.reject(&is_nil/1)
 
-    if length(result) == :digraph.no_vertices(segment_graph) do
-      {:ok, result}
+    sources =
+      :digraph.vertices(segment_graph)
+      |> Enum.filter(&(:digraph.in_degree(segment_graph, &1) == 0))
+      |> MapSet.new()
+
+    segment_topo_index_sort(sources, segment_graph, segment_canon_indices)
+  end
+
+  @spec segment_topo_index_sort(
+          MapSet.t(SegmentGraph.vertex_id()),
+          SegmentGraph.t(),
+          %{SegmentGraph.vertex_id() => non_neg_integer()},
+          [SegmentGraph.vertex_id()]
+        ) :: [SegmentGraph.vertex_id()]
+  defp segment_topo_index_sort(frontier, segment_graph, canon_indices, result \\ []) do
+    if Enum.empty?(frontier) do
+      Enum.reverse(result)
     else
-      {:error,
-       "#{:digraph.no_vertices(segment_graph) - length(result)} segments lost, presumably with count greater than 1"}
+      # anything in the frontier that has a parent still in the frontier is not ready even if its index is lower
+      frontier_ready =
+        MapSet.reject(frontier, fn vertex ->
+          Enum.any?(:digraph.in_neighbours(segment_graph, vertex), &MapSet.member?(frontier, &1))
+        end)
+
+      next_segment = Enum.min_by(frontier_ready, &canon_indices[&1])
+      next_neighbors = :digraph.out_neighbours(segment_graph, next_segment) |> MapSet.new()
+      frontier = frontier |> MapSet.union(next_neighbors) |> MapSet.delete(next_segment)
+      segment_topo_index_sort(frontier, segment_graph, canon_indices, [next_segment | result])
     end
   end
 
