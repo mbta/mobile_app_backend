@@ -22,7 +22,7 @@ defmodule MobileAppBackendWeb.SearchController do
     json(conn, %{data: %{}})
   end
 
-  def routes(%Conn{} = conn, params = %{"query" => query}) do
+  def routes(%Conn{} = conn, %{"query" => query} = params) do
     algolia_request(conn, [
       Algolia.QueryPayload.for_route_filter(
         query,
@@ -41,17 +41,14 @@ defmodule MobileAppBackendWeb.SearchController do
   # Accept comma separated lists of types like "bus" or "heavy_rail",
   # then convert to GTFS route type IDs, and join back to a comma separated string
   defp parse_type_param(type_string) do
-    try do
-      String.split(type_string, ",")
-      |> Enum.map(fn type ->
-        String.to_existing_atom(type)
-        |> MBTAV3API.Route.serialize_type!()
-        |> Integer.to_string()
-      end)
-      |> Enum.join(",")
-    rescue
-      _ -> nil
-    end
+    String.split(type_string, ",")
+    |> Enum.map_join(",", fn type ->
+      String.to_existing_atom(type)
+      |> MBTAV3API.Route.serialize_type!()
+      |> Integer.to_string()
+    end)
+  catch
+    _, _ -> nil
   end
 
   @spec routes(Conn.t(), [Algolia.QueryPayload.t()]) :: Conn.t()

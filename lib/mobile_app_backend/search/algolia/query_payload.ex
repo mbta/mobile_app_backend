@@ -67,10 +67,9 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
       query_payload
       | filters:
           facets
-          |> Enum.map(fn {facet, terms} ->
-            "(#{String.split(terms, ",") |> Enum.map(fn term -> "#{facet}:#{term}" end) |> Enum.join(" OR ")})"
+          |> Enum.map_join(" AND ", fn {facet, terms} ->
+            "(#{String.split(terms, ",") |> Enum.map_join(" OR ", &"#{facet}:#{&1}")})"
           end)
-          |> Enum.join(" AND ")
     }
   end
 end
