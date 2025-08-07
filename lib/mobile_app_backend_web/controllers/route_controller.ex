@@ -5,16 +5,6 @@ defmodule MobileAppBackendWeb.RouteController do
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.RouteBranching
 
-  def stops(conn, %{"route_id" => route_id, "direction_id" => direction_id}) do
-    {:ok, %{data: stops}} =
-      Repository.stops(
-        filter: [route: route_id, direction_id: direction_id],
-        fields: [stop: [:id]]
-      )
-
-    json(conn, %{stop_ids: stops |> Enum.map(fn stop -> stop.id end)})
-  end
-
   def stop_graph(conn, %{"route_id" => route_id, "direction_id" => direction_id}) do
     direction_id = String.to_integer(direction_id)
 
