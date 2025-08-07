@@ -43,7 +43,6 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through :api
     get("/global", GlobalController, :show)
     get("/nearby", NearbyController, :show)
-    get("/route/stops", RouteController, :stops)
     get("/route/stop-graph", RouteController, :stop_graph)
     get("/schedules", ScheduleController, :schedules)
     get("/search/query", SearchController, :query)
