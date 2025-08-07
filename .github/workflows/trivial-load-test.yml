@@ -47,8 +47,6 @@ jobs:
       - name: show docker container logs
         run: docker compose logs mobile-app-backend
         if: ${{ failure() }}
-      - name: cause failure for testing reporting
-        run: false
       - name: send failure to slack
         if: ${{ failure() }}
         run: |
