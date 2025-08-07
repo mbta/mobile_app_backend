@@ -47,3 +47,7 @@ jobs:
       - name: show docker container logs
         run: docker compose logs mobile-app-backend
         if: ${{ failure() }}
+      - name: send failure to slack
+        if: ${{ failure() }}
+        run: |
+          curl -X POST ${{ secrets.LOAD_TEST_FAILURE_SLACK_WEBHOOK }}
