@@ -22,9 +22,16 @@ defmodule MobileAppBackendWeb.SearchController do
     json(conn, %{data: %{}})
   end
 
-  def routes(%Conn{} = conn, %{"query" => query}) do
+  def routes(%Conn{} = conn, params = %{"query" => query}) do
     algolia_request(conn, [
-      Algolia.QueryPayload.for_route_filter(query)
+      Algolia.QueryPayload.for_route_filter(
+        query,
+        %{
+          "route.type" => Map.get(params, "type"),
+          "route.line_id" => Map.get(params, "line_id")
+        }
+        |> Map.reject(fn {_, v} -> v == nil end)
+      )
     ])
   end
 

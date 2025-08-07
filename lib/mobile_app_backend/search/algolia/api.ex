@@ -71,7 +71,8 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   defp encode_query_payload(query) do
     %{
       "indexName" => query.index_name,
-      "params" => URI.encode_query(query.params)
+      "params" => URI.encode_query(query.params),
+      "filters" => query.filters
     }
   end
 
