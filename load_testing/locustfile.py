@@ -52,7 +52,7 @@ def on_init(environment, **_kwargs):
 
 @events.init_command_line_parser.add_listener
 def _(parser):
-    parser.add_argument("--api-key", type=str, env_var="V3_API_KEY", default="", help="API Key for the V3 API. Set to avoid rate limiting.")
+    parser.add_argument("--api-key", type=str, env_var="V3_API_KEY", default=None, help="API Key for the V3 API. Set to avoid rate limiting.")
 
 class MobileAppUser(HttpUser, PhoenixChannelUser):
     wait_time = between(5, 60)
