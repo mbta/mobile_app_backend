@@ -8,6 +8,10 @@ import Config
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
+config :mobile_app_backend, MobileAppBackend.Search.Algolia,
+  route_index: "routes",
+  stop_index: "stops"
+
 # Do not print debug messages in production
 config :logger, level: :info
 
