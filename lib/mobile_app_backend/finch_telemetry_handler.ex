@@ -20,7 +20,7 @@ defmodule MobileAppBackend.FinchTelemetryLogger do
   end
 
   def handle_event(event, measure, _meta, _) do
-    Logger.info(
+    Logger.debug(
       "#{__MODULE__} #{inspect(event)} duration=#{System.convert_time_unit(measure.duration, :native, :millisecond)}"
     )
   end
