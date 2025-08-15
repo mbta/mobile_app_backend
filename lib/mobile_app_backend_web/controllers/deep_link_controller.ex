@@ -1,7 +1,7 @@
 defmodule MobileAppBackendWeb.DeepLinkController do
   use MobileAppBackendWeb, :controller
 
-  defp t_alert_cta_campaign_params(),
+  defp t_alert_cta_campaign_params,
     do: %{
       "pt" => "117998862",
       "ct" => "TAlerts",
@@ -15,16 +15,16 @@ defmodule MobileAppBackendWeb.DeepLinkController do
     |> Keyword.get(key)
   end
 
+  defp app_store_redirect(conn, params) do
+    redirect(conn, external: "#{config(:dotcom_root)}/app-store?#{URI.encode_query(params)}")
+  end
+
   def root(conn, params) do
     app_store_redirect(conn, params)
   end
 
   def t_alert_cta(conn, params) do
     app_store_redirect(conn, Map.merge(params, t_alert_cta_campaign_params()))
-  end
-
-  defp app_store_redirect(conn, params) do
-    redirect(conn, external: "#{config(:dotcom_root)}/app-store?#{URI.encode_query(params)}")
   end
 
   def apple_app_site_association(conn, _params) do
