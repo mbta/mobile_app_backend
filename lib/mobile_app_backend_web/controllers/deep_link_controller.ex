@@ -1,14 +1,15 @@
 defmodule MobileAppBackendWeb.DeepLinkController do
   use MobileAppBackendWeb, :controller
 
-  defp t_alert_cta_campaign_params,
-    do: %{
+  defp t_alert_cta_campaign_params do
+    %{
       "pt" => "117998862",
       "ct" => "TAlerts",
       "mt" => "8",
       "utm_source" => "TAlerts",
       "utm_campaign" => "TAlerts"
     }
+  end
 
   defp config(key) do
     Application.fetch_env!(:mobile_app_backend, :deep_links)
