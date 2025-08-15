@@ -19,6 +19,7 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through :browser
 
     get "/", DeepLinkController, :root
+    get "/t-alert", DeepLinkController, :t_alert_cta
   end
 
   scope "/", MobileAppBackendWeb do
