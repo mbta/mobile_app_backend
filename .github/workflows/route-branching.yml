@@ -1,0 +1,101 @@
+name: Check route branching
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "38 17 * * MON-FRI"
+
+jobs:
+  check:
+    name: Check route branching
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    env:
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set cache keys
+        id: cache-keys
+        run: |
+          echo "asdf-restore=cache-asdf-" >> $GITHUB_OUTPUT
+          echo "asdf=cache-asdf-${{ hashFiles('.tool-versions') }}" >> $GITHUB_OUTPUT
+          echo "mix-restore=cache-mix-" >> $GITHUB_OUTPUT
+          echo "mix=cache-mix-${{ hashFiles('**/mix.lock', '.tool-versions') }}" >> $GITHUB_OUTPUT
+      - name: asdf cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.asdf
+          key: ${{ steps.cache-keys.outputs.asdf }}
+          restore-keys: ${{ steps.cache-keys.outputs.asdf-restore }}
+        id: asdf-cache
+      - uses: asdf-vm/actions/install@v4
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+      - name: Setup asdf environment
+        uses: mbta/actions/reshim-asdf@v2
+      - name: mix rebar and hex
+        run: |
+          mix local.rebar --force
+          mix local.hex --force
+        if: steps.asdf-cache.outputs.cache-hit != 'true'
+      - name: Mix cache
+        id: deps-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ steps.cache-keys.outputs.mix }}
+          restore-keys: ${{ steps.cache-keys.outputs.mix-restore }}
+      - name: Install and compile Mix dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: |
+          mix deps.get
+          mix deps.compile
+      - name: Check route branching for prod/dev backend
+        id: check-prod-dev
+        run: mix check_route_branching
+        env:
+          API_KEY: ${{secrets.API_KEY}}
+          API_URL: ${{secrets.API_URL}}
+          LOG_LEVEL: notice
+      - name: Report failure for prod/dev
+        if: ${{ failure() && steps.check-prod-dev.outcome == 'failure' }}
+        run: |
+          jq --null-input '{text: "‼️ Route branching failing for prod/dev!", url: env.RUN_URL}' | \
+            curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
+      - name: Prepare diffs
+        run: |
+          cd route-branching
+          git init
+          echo '*.png' >> .gitignore
+          echo '*.png.dot' >> .gitignore
+          git add .
+          git commit -m "calculate route branching for prod/dev"
+          rm -r *
+      - name: Check route branching for dev-orange backend
+        id: check-dev-orange
+        run: mix check_route_branching
+        env:
+          API_KEY: ${{secrets.API_KEY}}
+          API_URL: ${{secrets.DEV_ORANGE_BACKEND_API_URL}}
+          LOG_LEVEL: notice
+      - name: Report failure for dev-orange
+        if: ${{ failure() && steps.check-dev-orange.outcome == 'failure' }}
+        run: |
+          jq --null-input '{text: "‼️ Route branching failing for dev-orange!", url: env.RUN_URL}' | \
+            curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
+      - name: Calculate diffs
+        id: diff
+        continue-on-error: true
+        run: |
+          cd route-branching
+          git add --all
+          echo 'DIFFSTAT<<EOF' >> "$GITHUB_ENV"
+          git diff --staged --compact-summary | tee -a "$GITHUB_ENV"
+          echo 'EOF' >> "$GITHUB_ENV"
+          git diff --staged --color --exit-code --src-prefix="      prod/" --dst-prefix="dev-orange/"
+      - name: Report diff
+        if: ${{ steps.diff.outcome == 'failure' }}
+        run: |
+          jq --null-input '{text: "⚠️ Route branching different between prod/dev and dev-orange:\n```\n\(env.DIFFSTAT)```", url: env.RUN_URL}' | \
+            curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
