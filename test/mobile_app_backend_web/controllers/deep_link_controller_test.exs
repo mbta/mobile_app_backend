@@ -12,6 +12,17 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
     end
   end
 
+  describe "t-alert" do
+    test "redirects to dotcom, adding tracking params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/t-alert?param_1=val_1")
+
+      assert redirected_to(conn, 302) ==
+               "https://example.com/app-store?ct=TAlerts&mt=8&param_1=val_1&pt=117998862&utm_campaign=TAlerts&utm_source=TAlerts"
+    end
+  end
+
   describe "Android deep link approval" do
     test "works when configured", %{conn: conn} do
       package_name = "com.mbta.tid.mbta_app"
