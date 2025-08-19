@@ -3,6 +3,8 @@ defmodule Mix.Tasks.CheckRouteBranching do
   Previews the `MobileAppBackend.RouteBranching` logic, rendering graphs and diagrams for all non-trivial routes.
 
   Filter to a handful of routes and directions with `mix check_route_branching 33 Boat-F1:1 350:0`.
+
+  Works best with GraphViz installed.
   """
 
   use Mix.Task
@@ -271,12 +273,16 @@ defmodule Mix.Tasks.CheckRouteBranching do
     dot_path = path <> ".dot"
     File.write!(dot_path, dot_source)
 
-    Mix.Shell.cmd(
-      {"dot", ["-T#{Path.extname(path) |> String.slice(1, 10)}", "-o#{path}", dot_path]},
-      fn exit_status ->
-        IO.puts(exit_status)
-      end
-    )
+    try do
+      Mix.Shell.cmd(
+        {"dot", ["-T#{Path.extname(path) |> String.slice(1, 10)}", "-o#{path}", dot_path]},
+        fn exit_status ->
+          IO.puts(exit_status)
+        end
+      )
+    rescue
+      ErlangError -> :ok
+    end
   end
 
   defp dot_vertex_id({stop_id, stop_count}) do
