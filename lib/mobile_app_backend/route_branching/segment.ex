@@ -573,10 +573,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   defp assign_segments([s], [0, 1, 2], _), do: %{s => 1}
   defp assign_segments([s], [0, 1], _), do: %{s => 0}
   defp assign_segments([s], [1, 2], _), do: %{s => 2}
-  defp assign_segments([s], [0, 2], _), do: %{s => 0}
-  defp assign_segments([s1, s2], [t1, t2], _), do: %{s1 => t1, s2 => t2}
-  defp assign_segments([s1, s2], [0, 1, 2], _), do: %{s1 => 0, s2 => 2}
-  defp assign_segments([s1, s2, s3], [0, 1, 2], _), do: %{s1 => 0, s2 => 1, s3 => 2}
+  defp assign_segments([s], [0, 2], _), do: %{s => 2}
+  defp assign_segments([s1, s2], [t1, t2], _), do: %{s1 => t2, s2 => t1}
+  defp assign_segments([s1, s2], [0, 1, 2], _), do: %{s1 => 2, s2 => 0}
+  defp assign_segments([s1, s2, s3], [0, 1, 2], _), do: %{s1 => 2, s2 => 1, s3 => 0}
 
   # should not be possible
   defp assign_segments(segments, _, constrained_segments_to_lanes) do
