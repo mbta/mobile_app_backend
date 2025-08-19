@@ -95,7 +95,7 @@ jobs:
           echo 'DIFFSTAT<<EOF' >> "$GITHUB_ENV"
           git diff --staged --compact-summary | tee -a "$GITHUB_ENV"
           echo 'EOF' >> "$GITHUB_ENV"
-          git diff --staged --color --exit-code --src-prefix="      prod/" --dst-prefix="dev-orange/"
+          git diff --staged --color --exit-code --src-prefix="      prod/" --dst-prefix="dev-orange/" && git status
       - name: Report diff
         if: ${{ steps.diff.outcome == 'failure' }}
         run: |
