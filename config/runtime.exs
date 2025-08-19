@@ -31,6 +31,10 @@ case System.get_env("MAPBOX_PRIMARY_TOKEN") do
       mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
 end
 
+if config_env() == :dev do
+  config :logger, :console, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "debug"))
+end
+
 if config_env() != :test do
   # mbta_v3_api configuration in disguise
   config :mobile_app_backend,
