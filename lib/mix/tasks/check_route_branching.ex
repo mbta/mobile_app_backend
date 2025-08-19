@@ -116,6 +116,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
         route = global_data.routes[route_id]
         run_single_case(route, direction, global_data)
       end)
+      |> tap(&IO.puts("Checked route branching across #{length(&1)} routes and directions"))
       |> then(&(:error in &1))
 
     if args == [] do
