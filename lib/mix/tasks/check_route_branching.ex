@@ -171,7 +171,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
       else
         output_path
         |> Path.join("out.txt")
-        |> File.write!([[caption, "\n"], visualize_segments(segments, global_data)])
+        |> File.write!([caption, "\n", visualize_segments(segments, global_data), "\n"])
       end
 
       if is_nil(segment_graph) or is_nil(segments) do
