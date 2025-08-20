@@ -99,5 +99,5 @@ jobs:
       - name: Report diff
         if: ${{ steps.diff.outcome == 'failure' }}
         run: |
-          jq --null-input '{text: "⚠️ Route branching different between prod/dev and dev-orange:\n```\n\(env.DIFFSTAT)\n```", url: env.RUN_URL}' | \
+          jq --null-input '{text: "⚠️ Route branching different between prod/dev and dev-orange:\n\(env.DIFFSTAT)", url: env.RUN_URL}' | \
             curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
