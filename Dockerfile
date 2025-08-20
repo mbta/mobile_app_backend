@@ -1,5 +1,5 @@
 # --- Set up Elixir build ---
-FROM hexpm/elixir:1.18.1-erlang-27.2-alpine-3.21.0 AS elixir-builder
+FROM hexpm/elixir:1.18.4-erlang-28.0.2-alpine-3.22.1 AS elixir-builder
 
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
@@ -32,7 +32,7 @@ RUN mix release
 
 
 # --- Set up runtime container ---
-FROM alpine:3.21.0
+FROM alpine:3.22.1
 
 ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 
