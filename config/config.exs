@@ -22,6 +22,11 @@ config :mobile_app_backend, MBTAV3API.RepositoryCache,
   gc_interval: :timer.hours(2),
   allocated_memory: 250_000_000
 
+config :mobile_app_backend, MobileAppBackend.Search.Algolia.Cache,
+  gc_interval: :timer.hours(2),
+  allocated_memory: 250_000_000,
+  stats: true
+
 # Configures the endpoint
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
   url: [host: "localhost"],

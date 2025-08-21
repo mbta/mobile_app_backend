@@ -12,7 +12,8 @@ defmodule MobileAppBackend.MixProject do
       deps: deps(),
       dialyzer: [plt_add_apps: [:mix]],
       test_coverage: [tool: LcovEx],
-      compilers: [:phoenix_live_view] ++ Mix.compilers()
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 

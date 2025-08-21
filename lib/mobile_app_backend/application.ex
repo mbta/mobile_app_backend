@@ -29,6 +29,8 @@ defmodule MobileAppBackend.Application do
         {MBTAV3API.RepositoryCache, []},
         MBTAV3API.Supervisor,
         {MobileAppBackend.Health.FinchPool, pool_name: Finch.CustomPool},
+        {MobileAppBackend.Search.Algolia.Cache, []},
+        {MobileAppBackend.Health.Cache, cache: MobileAppBackend.Search.Algolia.Cache},
         MobileAppBackend.MapboxTokenRotator,
         MobileAppBackend.Alerts.Registry,
         MobileAppBackend.Predictions.Registry,

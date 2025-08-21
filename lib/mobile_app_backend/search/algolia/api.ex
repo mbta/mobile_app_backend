@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   See https://www.algolia.com/doc/rest-api/search/
   Relies on configuration from :mobile_app_backend, MobileAppBackend.Search.Algolia
   """
+  use Nebulex.Caching
   @algolia_api_version 1
   alias MobileAppBackend.Search.Algolia
   require Logger
@@ -13,6 +14,7 @@ defmodule MobileAppBackend.Search.Algolia.Api do
   @doc """
   Perform the given index queries and return a flattened list of parsed results
   """
+  @decorate cacheable(cache: Algolia.Cache)
   def multi_index_search(queries) do
     perform_request_fn =
       Application.get_env(
