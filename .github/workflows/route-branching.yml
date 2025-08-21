@@ -19,8 +19,8 @@ jobs:
         run: |
           echo "asdf-restore=cache-asdf-" >> $GITHUB_OUTPUT
           echo "asdf=cache-asdf-${{ hashFiles('.tool-versions') }}" >> $GITHUB_OUTPUT
-          echo "mix-restore=cache-mix-" >> $GITHUB_OUTPUT
-          echo "mix=cache-mix-${{ hashFiles('**/mix.lock', '.tool-versions') }}" >> $GITHUB_OUTPUT
+          echo "mix-restore=cache-mix-${{ hashFiles('.tool-versions') }}-" >> $GITHUB_OUTPUT
+          echo "mix=cache-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('**/mix.lock') }}" >> $GITHUB_OUTPUT
       - name: asdf cache
         uses: actions/cache@v4
         with:
