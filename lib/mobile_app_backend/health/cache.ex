@@ -2,7 +2,7 @@ defmodule MobileAppBackend.Health.Cache do
   use GenServer
   require Logger
 
-  @interval :timer.seconds(5)
+  @interval to_timeout(minute: 1)
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts)
