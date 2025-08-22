@@ -4,6 +4,11 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
   import Test.Support.Helpers
 
+  setup do
+    MobileAppBackend.Search.Algolia.Cache.delete_all()
+    :ok
+  end
+
   describe "multi_index_search/2" do
     test "when request is successful, returns flattened list of parsed results" do
       reassign_env(:mobile_app_backend, :algolia_perform_request_fn, &mock_perform_request_fn/3)
@@ -106,6 +111,34 @@ defmodule MobileAppBackend.Search.Algolia.ApiTest do
 
       assert ~s({"requests":[{"filters":"\(facet_key_1:facet_term_1 OR facet_key_1:facet_term_2\) AND \(facet_key_2:facet_term_2\)","indexName":"routes_test","params":"analytics=false&clickAnalytics=true&hitsPerPage=1000&query=testString"}]}) ==
                body
+    end
+
+    test "uses cache" do
+      pid = self()
+
+      default_env = Application.get_env(:mobile_app_backend, MobileAppBackend.Search.Algolia)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.Search.Algolia,
+        Keyword.merge(default_env,
+          search_key: "fake_search_key",
+          app_id: "fake_app_id"
+        )
+      )
+
+      reassign_env(:mobile_app_backend, :algolia_perform_request_fn, fn url, body, headers ->
+        send(pid, %{url: url, body: body, headers: headers})
+        {:ok, %{body: %{"results" => []}}}
+      end)
+
+      Api.multi_index_search([QueryPayload.for_index(:stop, "North")])
+
+      assert_received %{url: _, body: _, headers: _}
+
+      Api.multi_index_search([QueryPayload.for_index(:stop, "North")])
+
+      refute_received %{url: _, body: _, headers: _}
     end
 
     @tag capture_log: true
