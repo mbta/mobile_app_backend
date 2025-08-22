@@ -10,7 +10,6 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
   setup do
     verify_on_exit!()
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
-    MobileAppBackend.Search.Algolia.Cache.delete_all()
     :ok
   end
 
