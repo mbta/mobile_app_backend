@@ -19,7 +19,7 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
       conn = get(conn, ~p"/t-alert?param_1=val_1")
 
       assert redirected_to(conn, 302) ==
-               "https://example.com/app-store?ct=TAlerts&mt=8&param_1=val_1&pt=117998862&utm_campaign=TAlerts&utm_source=TAlerts"
+               "https://example.com/app-store?ct=TAlerts&mt=8&param_1=val_1&pt=117998862&referrer=utm_source%3DTAlerts%26utm_campaign%3DTAlerts"
     end
   end
 

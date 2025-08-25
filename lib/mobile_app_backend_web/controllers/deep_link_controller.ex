@@ -3,11 +3,10 @@ defmodule MobileAppBackendWeb.DeepLinkController do
 
   defp t_alert_cta_campaign_params do
     %{
+      "referrer" => "utm_source=TAlerts&utm_campaign=TAlerts",
       "pt" => "117998862",
       "ct" => "TAlerts",
-      "mt" => "8",
-      "utm_source" => "TAlerts",
-      "utm_campaign" => "TAlerts"
+      "mt" => "8"
     }
   end
 
