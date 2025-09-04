@@ -33,7 +33,7 @@ jobs:
         run: cat load_testing/.tool-versions | sed 's/ /=/' | tee -a "$GITHUB_OUTPUT"
       - name: Install poetry
         run: pipx install poetry==${{steps.asdf.outputs.poetry}}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{steps.asdf.outputs.python}}
           cache: poetry
