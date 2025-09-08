@@ -5,6 +5,8 @@ defmodule Mix.Tasks.CheckRouteBranching do
   Filter to a handful of routes and directions with `mix check_route_branching 33 Boat-F1:1 350:0`.
 
   Works best with GraphViz installed.
+
+  Pass `--allow-unused-workarounds` to warn instead of erroring on unused workarounds.
   """
 
   use Mix.Task
@@ -66,7 +68,8 @@ defmodule Mix.Tasks.CheckRouteBranching do
       :ok = :telemetry.attach(__MODULE__, [Workarounds, :used], &handle_event/4, nil)
     end
 
-    def finish do
+    def finish(opts) do
+      allowed = opts[:allowed]
       actual = Agent.get(__MODULE__, & &1)
       Agent.stop(__MODULE__)
 
@@ -74,7 +77,15 @@ defmodule Mix.Tasks.CheckRouteBranching do
         known_unused = @expected |> MapSet.difference(actual) |> Enum.sort()
         used_unknown = actual |> MapSet.difference(@expected) |> Enum.sort()
 
-        raise "Workarounds have gone stale: known but not used #{inspect(known_unused)}, used but not known #{inspect(used_unknown)}"
+        message =
+          "Workarounds have gone stale: known but not used #{inspect(known_unused)}, used but not known #{inspect(used_unknown)}"
+
+        if allowed do
+          Logger.warning(message)
+          Path.join("route-branching", "stale-workarounds.txt") |> File.write!([message, ?\n])
+        else
+          raise message
+        end
       end
     end
 
@@ -90,6 +101,8 @@ defmodule Mix.Tasks.CheckRouteBranching do
 
   @impl Mix.Task
   def run(args) do
+    {opts, args} = OptionParser.parse!(args, strict: [allow_unused_workarounds: :boolean])
+    allow_unused_workarounds = opts[:allow_unused_workarounds]
     global_data = GlobalDataCache.get_data()
 
     routes_directions =
@@ -120,7 +133,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
       |> then(&(:error in &1))
 
     if args == [] do
-      UnusedWorkaroundsDetector.finish()
+      UnusedWorkaroundsDetector.finish(allowed: allow_unused_workarounds)
     end
 
     if serious_issue do

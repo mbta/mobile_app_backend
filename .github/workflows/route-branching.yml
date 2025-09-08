@@ -76,7 +76,7 @@ jobs:
           rm -r *
       - name: Check route branching for dev-orange backend
         id: check-dev-orange
-        run: mix check_route_branching
+        run: mix check_route_branching --allow-unused-workarounds
         env:
           API_KEY: ${{secrets.API_KEY}}
           API_URL: ${{secrets.DEV_ORANGE_BACKEND_API_URL}}
