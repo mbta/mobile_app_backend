@@ -39,6 +39,10 @@ ENV LANG=C.UTF-8 MIX_ENV=prod REPLACE_OS_VARS=true
 RUN apk add --no-cache \
   dumb-init libgcc libstdc++ ncurses-libs
 
+# Fetch Amazon RDS certificate chain
+RUN wget -O /usr/local/share/amazon-certs.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+RUN chmod a=r /usr/local/share/amazon-certs.pem
+
 # Create non-root user
 RUN addgroup --system mobileappbackend && adduser --system --ingroup mobileappbackend mobileappbackend
 USER mobileappbackend

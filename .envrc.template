@@ -3,6 +3,17 @@
 export API_URL=https://api-dev.mbtace.com/
 export API_KEY=
 
+# Configuration for the Database
+# Used for managing notifications
+# Note: if DATABASE_PASSWORD is omitted, then RDS IAM auth will be used
+export DATABASE_USERNAME=
+export DATABASE_PASSWORD=
+export DATABASE_NAME=
+export DATABASE_HOST=
+
+# Set DATABASE_DISABLE_SSL to 'insecure-yes' locally to disable SSL
+export DATABASE_DISABLE_SSL=
+
 # Configuration for [OpenTripPlanner](https://github.com/mbta/otp-deploy)
 # Used for generating trip plans
 export OTP_URL=

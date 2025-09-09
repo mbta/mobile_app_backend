@@ -8,6 +8,9 @@
 import Config
 
 config :mobile_app_backend,
+  ecto_repos: [MobileAppBackend.Repo]
+
+config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
 config :mobile_app_backend, alerts_broadcast_interval_ms: 500

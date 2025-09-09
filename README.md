@@ -8,6 +8,15 @@ The backend server supporting our mobile app. Provides data from the V3 API and 
 
 Install the tools specified in `.tool-versions`. You can use [asdf](https://asdf-vm.com/) to help manage the required versions.
 
+Install postgres. Consider using one of the following methods
+
+- [Postgres.app](https://postgresapp.com/downloads.html)
+- `brew install postgresql`
+  - Brew may ask you to upgrade your database upon installation: `brew postgresql-upgrade-database`
+  - Start Postgres with `brew services start postgresql`
+  - If this is the first time you've used it, you may need to create a database. Run `createdb`
+  - You may also need a `postgres` role: `createuser -s postgres`
+
 ### External Dependencies
 
 ##### V3 API - [docs](https://www.mbta.com/developers/v3-api) - [mbta/api](https://github.com/mbta/api) - [dev](https://api-dev.mbtace.com/) - [prod](https://api.mbtace.com/)
@@ -26,14 +35,13 @@ Algolia provides well indexed route and stop data for incremental search results
 
 Sentry is used for error logging and aggregation.
 
-
 ### Environment Configuration
 
 Install [direnv](https://direnv.net/) if you don't already have it, copy `.envrc.example` to `.envrc`, populate any required values, then run `direnv allow`.
 
 ### Running the application
 
-- Run `mix setup` to install and setup dependencies
+- Run `mix setup` to install and setup dependencies, as well as set up the database and run migrations.
 - Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
