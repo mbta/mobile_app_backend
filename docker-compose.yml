@@ -17,7 +17,7 @@ services:
       # inherit V3 API endpoints from shell environment, if available
       - API_KEY
       - API_URL
-      - DATABASE_USERNAME=postgres
+      - DATABASE_USER=postgres
       - DATABASE_PASSWORD=insecure
       - DATABASE_HOST=db
       - DATABASE_NAME=postgres

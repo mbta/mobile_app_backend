@@ -6,7 +6,7 @@ export API_KEY=
 # Configuration for the Database
 # Used for managing notifications
 # Note: if DATABASE_PASSWORD is omitted, then RDS IAM auth will be used
-export DATABASE_USERNAME=
+export DATABASE_USER=
 export DATABASE_PASSWORD=
 export DATABASE_NAME=
 export DATABASE_HOST=

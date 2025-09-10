@@ -43,10 +43,11 @@ database_name =
   end
 
 config :mobile_app_backend, MobileAppBackend.Repo,
-  username: System.get_env("DATABASE_USERNAME"),
+  username: System.get_env("DATABASE_USER"),
   password: System.get_env("DATABASE_PASSWORD"),
   database: database_name,
   hostname: System.get_env("DATABASE_HOST"),
+  show_sensitive_data_on_connection_error: true,
   ssl: System.get_env("DATABASE_DISABLE_SSL") != "insecure-yes",
   ssl_opts: [
     verify: :verify_peer,
