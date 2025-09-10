@@ -10,11 +10,6 @@ RUN mix local.rebar --force
 
 WORKDIR /root
 
-ADD \
-  --checksum=sha256:e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3 \
-  https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
-  aws-cert-bundle.pem
-
 COPY ./mix.exs mix.exs
 COPY ./mix.lock mix.lock
 RUN mix deps.get --only prod
@@ -27,6 +22,12 @@ FROM elixir-builder AS app-builder
 ENV LANG=C.UTF-8 MIX_ENV=prod
 
 WORKDIR /root
+
+ADD \
+  --checksum=sha256:e5bb2084ccf45087bda1c9bffdea0eb15ee67f0b91646106e466714f9de3c7e3 \
+  https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem \
+  aws-cert-bundle.pem
+
 COPY ./assets assets
 COPY ./config config
 COPY ./lib lib
