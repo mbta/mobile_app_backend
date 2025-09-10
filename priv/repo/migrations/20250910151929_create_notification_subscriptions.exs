@@ -8,6 +8,8 @@ defmodule MobileAppBackend.Repo.Migrations.CreateNotificationSubscriptions do
       add :stop_id, :string, null: false
       add :direction_id, :int, null: false
       add :include_accessibility, :boolean, null: false
+
+      timestamps([type: :utc_datetime])
     end
 
     create unique_index(:notification_subscriptions, [:user_id, :route_id, :stop_id, :direction_id], name: :user_rsd_unique_index )
