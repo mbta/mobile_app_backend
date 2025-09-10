@@ -1,7 +1,7 @@
 defmodule MobileAppBackend.Notifications.Window do
   use MobileAppBackend.Schema
 
-  typed_schema "notification_windows" do
+  typed_schema "notification_subscription_windows" do
     belongs_to(:subscription, MobileAppBackend.Notifications.Subscription)
 
     field(:start_time, :time, null: false)
