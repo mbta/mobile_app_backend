@@ -50,7 +50,7 @@ config :mobile_app_backend, MobileAppBackend.Repo,
   ssl: System.get_env("DATABASE_DISABLE_SSL") != "insecure-yes",
   ssl_opts: [
     verify: :verify_peer,
-    cacertfile: "/usr/local/share/amazon-certs.pem",
+    cacertfile: "/priv/ aws-cert-bundle.pem",
     server_name_indication: String.to_charlist(System.get_env("DATABASE_HOST")),
     verify_fun:
       {&:ssl_verify_hostname.verify_fun/3,

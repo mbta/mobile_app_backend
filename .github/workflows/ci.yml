@@ -70,7 +70,6 @@ jobs:
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: localhost
       DATABASE_NAME: mobile_app_backend_test
-      DATABASE_DISABLE_SSL: insecure-yes
     services:
       postgres:
         image: postgres
