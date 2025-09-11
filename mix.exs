@@ -84,6 +84,7 @@ defmodule MobileAppBackend.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:timex, "~> 3.7"},
+      {:typed_ecto_schema, "~> 0.4.3"},
       {:uniq, "~> 0.6", only: :test}
     ]
   end

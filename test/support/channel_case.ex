@@ -28,7 +28,8 @@ defmodule MobileAppBackendWeb.ChannelCase do
     end
   end
 
-  setup _tags do
+  setup tags do
+    MobileAppBackend.DataCase.setup_sandbox(tags)
     :ok
   end
 end
