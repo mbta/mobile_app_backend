@@ -31,6 +31,39 @@ case System.get_env("MAPBOX_PRIMARY_TOKEN") do
       mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
 end
 
+database_name_raw = System.get_env("DATABASE_NAME")
+
+database_name =
+  if config_env() == :test do
+    # Convenience so that we can switch between running application
+    # And running tests without having to change environment variables
+    database_name_raw <> "_test"
+  else
+    database_name_raw
+  end
+
+config :mobile_app_backend, MobileAppBackend.Repo,
+  username: System.get_env("DATABASE_USER"),
+  password: System.get_env("DATABASE_PASSWORD"),
+  database: database_name,
+  hostname: System.get_env("DATABASE_HOST"),
+  show_sensitive_data_on_connection_error: true,
+  ssl: System.get_env("DATABASE_DISABLE_SSL") != "insecure-yes",
+  ssl_opts: [
+    verify: :verify_peer,
+    cacertfile: "priv/aws-cert-bundle.pem",
+    server_name_indication: String.to_charlist(System.get_env("DATABASE_HOST")),
+    verify_fun:
+      {&:ssl_verify_hostname.verify_fun/3,
+       [check_hostname: String.to_charlist(System.get_env("DATABASE_HOST"))]}
+  ],
+  # function to call before every connection
+  # add RDS IAM auth, but only if there's no password
+  configure:
+    (if System.get_env("DATABASE_PASSWORD") == nil do
+       {MobileAppBackend.Repo, :add_iam_credentials, []}
+     end)
+
 if config_env() == :dev do
   config :logger, :console, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "debug"))
 end

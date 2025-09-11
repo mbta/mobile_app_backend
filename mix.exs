@@ -55,8 +55,11 @@ defmodule MobileAppBackend.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:dns_cluster, "~> 0.2.0"},
+      {:ecto_sql, "~> 3.0"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:ex_aws, "== 2.5.1"},
+      {:ex_aws_rds, "== 2.0.2"},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
@@ -72,6 +75,7 @@ defmodule MobileAppBackend.MixProject do
       {:phoenix_live_view, "~> 1.1.0"},
       {:phoenix, "~> 1.8.0"},
       {:polyline, "~> 1.4", only: :test},
+      {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.3"},
       {:sentry, "~> 11.0"},
       {:server_sent_event_stage, "~> 1.2"},
@@ -92,10 +96,13 @@ defmodule MobileAppBackend.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "assets.setup", "assets.build"],
+      setup: ["deps.get", "assets.setup", "assets.build", "ecto.setup"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 end
