@@ -8,7 +8,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
     field(:stop_id, :string, null: false)
     field(:direction_id, :integer, null: false)
     field(:include_accessibility, :boolean, null: false)
-    has_many(:window, MobileAppBackend.Notifications.Window)
+    has_many(:windows, MobileAppBackend.Notifications.Window, on_replace: :delete_if_exists)
 
     timestamps(type: :utc_datetime)
   end

@@ -11,6 +11,8 @@ defmodule MobileAppBackend.User do
     field(:fcm_token, :string, null: false)
     field(:fcm_last_verified, :utc_datetime, null: false)
 
-    has_many(:notification_subscription, MobileAppBackend.Notifications.Subscription)
+    has_many(:notification_subscriptions, MobileAppBackend.Notifications.Subscription,
+      on_replace: :delete_if_exists
+    )
   end
 end
