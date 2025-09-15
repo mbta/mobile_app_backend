@@ -3,9 +3,33 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
 
   import Ecto.Query
 
+  alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.WritePayload
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
+
+  def set_include_accessibility(conn, params) do
+    status =
+      with {:ok, fcm_token} <- Map.fetch(params, "fcm_token"),
+           {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
+        now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
+
+        Repo.update_all(from(u in User, where: u.fcm_token == ^fcm_token),
+          set: [fcm_last_verified: now]
+        )
+
+        Repo.update_all(
+          from(ns in Subscription, join: u in assoc(ns, :user), where: u.fcm_token == ^fcm_token),
+          set: [include_accessibility: include_accessibility]
+        )
+
+        :ok
+      else
+        :error -> :bad_request
+      end
+
+    conn |> put_status(status) |> json(nil)
+  end
 
   def write(conn, params) do
     status =
