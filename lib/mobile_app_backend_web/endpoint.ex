@@ -12,14 +12,15 @@ defmodule MobileAppBackendWeb.Endpoint do
     same_site: "Lax"
   ]
 
-  plug CORSPlug, origin: ["http://localhost:4001"]
+  plug CORSPlug, origin: [~r[https://.*\.mbta(ce)?\.com$], "http://localhost:4001"]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", MobileAppBackendWeb.UserSocket,
-    websocket: true,
-    longpoll: false,
-    check_origin: false
+    websocket: [
+      check_origin: ["https://*.mbtace.com", "https://*.mbta.com", "http://localhost:4001"]
+    ],
+    longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
   #
