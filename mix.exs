@@ -50,6 +50,7 @@ defmodule MobileAppBackend.MixProject do
     [
       {:absinthe_client, "~> 0.1.0"},
       {:bandit, "~> 1.0"},
+      {:cors_plug, "~> 3.0"},
       {:credo, "~> 1.7", only: [:dev, :test]},
       {:decorator, "~> 1.4"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
