@@ -12,6 +12,8 @@ defmodule MobileAppBackendWeb.Endpoint do
     same_site: "Lax"
   ]
 
+  plug CORSPlug, origin: ["http://localhost:4001"]
+
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", MobileAppBackendWeb.UserSocket,
@@ -54,8 +56,6 @@ defmodule MobileAppBackendWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
-
-  plug CORSPlug, origin: ["http://localhost:4001"]
 
   plug MobileAppBackendWeb.Router
 end
