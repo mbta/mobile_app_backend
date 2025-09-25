@@ -47,6 +47,17 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
 
 config :mobile_app_backend, MobileAppBackend.GlobalDataCache, update_ms: :timer.minutes(5)
 
+config :mobile_app_backend, Oban,
+  engine: Oban.Engines.Basic,
+  plugins: [
+    {Oban.Plugins.Cron, crontab: [], timezone: "America/New_York"},
+    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)},
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    Oban.Plugins.Reindexer
+  ],
+  queues: [],
+  repo: MobileAppBackend.Repo
+
 config :mobile_app_backend, :logger, [
   {:handler, :sentry_handler, Sentry.LoggerHandler,
    %{

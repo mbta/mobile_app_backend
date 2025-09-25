@@ -29,9 +29,9 @@ defmodule MobileAppBackend.Application do
         {MBTAV3API.RepositoryCache, []},
         MBTAV3API.Supervisor,
         {MobileAppBackend.Health.FinchPool, pool_name: Finch.CustomPool},
-        # TODO: Enable this once DB is created in deployed environments
         MobileAppBackend.Repo,
         {Ecto.Migrator, repos: Application.fetch_env!(:mobile_app_backend, :ecto_repos)},
+        {Oban, Application.fetch_env!(:mobile_app_backend, Oban)},
         {MobileAppBackend.Search.Algolia.Cache, []},
         {MobileAppBackend.Health.Cache, cache: MobileAppBackend.Search.Algolia.Cache},
         MobileAppBackend.MapboxTokenRotator,
@@ -64,6 +64,7 @@ defmodule MobileAppBackend.Application do
         ]
 
     :ok = MobileAppBackend.FinchTelemetryLogger.attach()
+    :ok = Oban.Telemetry.attach_default_logger()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
