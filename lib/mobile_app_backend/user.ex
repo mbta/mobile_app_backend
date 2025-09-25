@@ -14,5 +14,7 @@ defmodule MobileAppBackend.User do
     has_many(:notification_subscriptions, MobileAppBackend.Notifications.Subscription,
       on_replace: :delete_if_exists
     )
+
+    has_many(:delivered_notifications, MobileAppBackend.Notifications.DeliveredNotification)
   end
 end

@@ -52,6 +52,8 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
     ]
   ]
 
+config :mobile_app_backend, Oban, peer: Oban.Peers.Global
+
 # Enable dev routes for dashboard and mailbox
 config :mobile_app_backend, dev_routes: true
 
