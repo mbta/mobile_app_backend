@@ -19,7 +19,7 @@ defmodule MobileAppBackendWeb.Endpoint do
   socket "/socket", MobileAppBackendWeb.UserSocket,
     websocket: true,
     longpoll: false,
-    check_origin: ["https://*.mbtace.com", "https://*.mbta.com", "http://localhost:4001"]
+    check_origin: false
 
   # Serve at "/" the static files from "priv/static" directory.
   #
