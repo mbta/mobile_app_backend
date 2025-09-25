@@ -70,12 +70,14 @@ defmodule MobileAppBackendWeb.Router do
     # If your application does not have an admins-only section yet,
     # you can use Plug.BasicAuth to set up some basic authentication
     # as long as you are also using SSL (which you should anyway).
+    import Oban.Web.Router
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
+      oban_dashboard("/oban")
     end
   end
 end
