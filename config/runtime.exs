@@ -10,7 +10,13 @@ config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
   environment_name: System.get_env("SENTRY_ENV", "local"),
   enable_source_code_context: true,
-  root_source_code_path: File.cwd!()
+  root_source_code_path: File.cwd!(),
+  integrations: [
+    oban: [
+      capture_errors: true,
+      cron: [enabled: true]
+    ]
+  ]
 
 config :mobile_app_backend, :deep_links,
   android_cert_fingerprint: System.get_env("ANDROID_CERT_FINGERPRINT"),
