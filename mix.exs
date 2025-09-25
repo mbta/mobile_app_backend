@@ -69,6 +69,7 @@ defmodule MobileAppBackend.MixProject do
       {:logster, "~> 1.1"},
       {:mox, "~> 1.0", only: :test},
       {:nebulex, "~>2.6.3"},
+      {:oban, "~> 2.20"},
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},

@@ -9,6 +9,8 @@ config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
 
 config :mobile_app_backend, MobileAppBackend.Repo, pool: Ecto.Adapters.SQL.Sandbox
 
+config :mobile_app_backend, Oban, testing: :manual
+
 # Don't start the real stream store processes so we can test with
 # isolated fake processes
 config :mobile_app_backend, start_stream_stores?: false
