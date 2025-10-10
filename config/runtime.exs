@@ -14,7 +14,7 @@ config :sentry,
   integrations: [
     oban: [
       capture_errors: true,
-      cron: [enabled: true]
+      cron: [enabled: false]
     ]
   ]
 
