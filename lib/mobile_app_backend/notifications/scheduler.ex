@@ -48,16 +48,18 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @spec get_open_windows :: %{User.t() => [Subscription.t()]}
   defp get_open_windows do
-    now = DateTime.now!("America/New_York")
-    today = Date.day_of_week(now)
-    now = DateTime.to_time(now)
+    current_datetime = DateTime.now!("America/New_York")
+    current_day_of_week = Date.day_of_week(current_datetime)
+    current_time = DateTime.to_time(current_datetime)
 
     open_window_users =
       Repo.all(
         from u in User,
           join: s in assoc(u, :notification_subscriptions),
           join: w in assoc(s, :windows),
-          where: w.start_time <= ^now and ^now <= w.end_time and ^today in w.days_of_week,
+          where:
+            w.start_time <= ^current_time and ^current_time <= w.end_time and
+              ^current_day_of_week in w.days_of_week,
           select: %{user: u, subscription: s}
       )
 
