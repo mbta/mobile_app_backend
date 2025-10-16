@@ -35,7 +35,10 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     status =
       case WritePayload.parse(params) do
         {:ok, payload} ->
-          now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
+          now =
+            Map.get_lazy(conn.private, :mobile_app_backend_now, fn ->
+              DateTime.utc_now(:second)
+            end)
 
           case perform_write(payload, now) do
             {:ok, _} ->
