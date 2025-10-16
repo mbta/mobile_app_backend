@@ -16,6 +16,22 @@ defmodule Test.Support.Helpers do
     end
   end
 
+  defmacro reassign_persistent_term(key, value) do
+    quote bind_quoted: [key: key, value: value] do
+      did_not_exist = make_ref()
+      old_value = :persistent_term.get(key, did_not_exist)
+      :persistent_term.put(key, value)
+
+      on_exit(fn ->
+        if old_value == did_not_exist do
+          :persistent_term.erase(key)
+        else
+          :persistent_term.put(key, old_value)
+        end
+      end)
+    end
+  end
+
   defmacro set_log_level(log_level) do
     quote do
       old_log_level = Logger.level()
