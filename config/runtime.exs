@@ -37,6 +37,9 @@ case System.get_env("MAPBOX_PRIMARY_TOKEN") do
       mapbox_public_token: System.get_env("MAPBOX_PUBLIC_TOKEN")
 end
 
+config :mobile_app_backend, MobileAppBackend.Notifications.GCPToken,
+  gcp_provider_name: System.get_env("GCP_PROVIDER_NAME")
+
 database_name_raw = System.get_env("DATABASE_NAME")
 
 database_name =
