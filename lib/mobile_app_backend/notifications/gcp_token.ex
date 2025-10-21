@@ -96,7 +96,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             audience: "//iam.googleapis.com/#{gcp_provider_name}",
             grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
             requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
-            scope: "https://www.googleapis.com/auth/firebase.messaging",
+            scope: "https://www.googleapis.com/auth/cloud-platform",
             subjectToken: gcp_subject_token |> Jason.encode!() |> URI.encode(),
             subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
           }
