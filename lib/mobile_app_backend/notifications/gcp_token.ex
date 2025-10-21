@@ -85,7 +85,8 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             audience: "//iam.googleapis.com/#{gcp_provider_name}",
             grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
             requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
-            scope: "https://www.googleapis.com/auth/firebase.messaging",
+            scope:
+              "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/firebase.messaging",
             subjectToken: gcp_subject_token |> Jason.encode!() |> URI.encode(),
             subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
           }
@@ -96,6 +97,8 @@ defmodule MobileAppBackend.Notifications.GCPToken do
 
           {:ok, gcp_sts_response} =
             STS.Api.V1.sts_token(gcp_sts_connection, body: gcp_sts_request)
+
+          Logger.info("#{__MODULE__} STS response #{inspect(gcp_sts_response)}")
 
           token = gcp_sts_response.access_token
           expires_at = DateTime.add(issued_at, gcp_sts_response.expires_in, :second)
