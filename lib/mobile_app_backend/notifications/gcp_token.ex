@@ -52,14 +52,16 @@ defmodule MobileAppBackend.Notifications.GCPToken do
           # (borrowed from https://github.com/peburrows/goth/pull/186)
           aws_config = ExAws.Config.new(:sts)
 
-          aws_config_keys =
-            Map.keys(aws_config) --
-              ~w(port scheme host http_client retries json_codec normalize_path require_imds_v2)a
-
-          Logger.info("#{__MODULE__} aws_config keys #{inspect(aws_config_keys)}")
+          # if this fixes anything at all, i am going to be so mad
+          aws_config =
+            Map.update(aws_config, :security_token, nil, fn security_token ->
+              case Base.decode64(security_token) do
+                {:ok, raw_token} -> Base.url_encode64(raw_token)
+                :error -> security_token
+              end
+            end)
 
           operation = ExAws.STS.get_caller_identity()
-          Logger.info("#{__MODULE__} GetCallerIdentity #{inspect(ExAws.request(operation))}")
           url = ExAws.Request.Url.build(operation, aws_config)
 
           {:ok, sig_headers} =
@@ -68,28 +70,15 @@ defmodule MobileAppBackend.Notifications.GCPToken do
               url,
               :sts,
               aws_config,
-              [],
+              [{"x-goog-cloud-target-resource", "//iam.googleapis.com/#{gcp_provider_name}"}],
               ""
             )
-
-          sig_header_names = Enum.map(sig_headers, fn {key, _value} -> key end)
-          Logger.info("#{__MODULE__} sig_headers keys #{inspect(sig_header_names)}")
 
           # https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds#rest
           gcp_subject_token = %{
             url: url,
             method: "POST",
-            headers:
-              Enum.map(sig_headers, fn
-                {"Authorization" = key, value} -> %{key: key, value: value}
-                {key, value} -> %{key: String.downcase(key), value: value}
-              end) ++
-                [
-                  %{
-                    key: "x-goog-cloud-target-resource",
-                    value: "//iam.googleapis.com/#{gcp_provider_name}"
-                  }
-                ]
+            headers: Enum.map(sig_headers, fn {key, value} -> %{key: key, value: value} end)
           }
 
           gcp_sts_request = %STS.Model.GoogleIdentityStsV1ExchangeTokenRequest{
