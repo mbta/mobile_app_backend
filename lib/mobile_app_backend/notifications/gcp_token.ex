@@ -51,6 +51,13 @@ defmodule MobileAppBackend.Notifications.GCPToken do
           # which will cause GCP to reject the request, so we have to do this manually
           # (borrowed from https://github.com/peburrows/goth/pull/186)
           aws_config = ExAws.Config.new(:sts)
+
+          aws_config_keys =
+            Map.keys(aws_config) --
+              ~w(port scheme host http_client retries json_codec normalize_path require_imds_v2)a
+
+          Logger.info("#{__MODULE__} aws_config keys #{aws_config_keys}")
+
           operation = ExAws.STS.get_caller_identity()
           Logger.info("#{__MODULE__} GetCallerIdentity #{inspect(ExAws.request(operation))}")
           url = ExAws.Request.Url.build(operation, aws_config)
@@ -64,6 +71,9 @@ defmodule MobileAppBackend.Notifications.GCPToken do
               [],
               ""
             )
+
+          sig_header_names = Enum.map(sig_headers, fn {key, _value} -> key end)
+          Logger.info("#{__MODULE__} sig_headers keys #{sig_header_names}")
 
           # https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds#rest
           gcp_subject_token = %{
