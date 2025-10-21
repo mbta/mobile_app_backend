@@ -80,7 +80,10 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             url: url,
             method: "POST",
             headers:
-              Enum.map(sig_headers, fn {key, value} -> %{key: key, value: value} end) ++
+              Enum.map(sig_headers, fn
+                {"Authorization" = key, value} -> %{key: key, value: value}
+                {key, value} -> %{key: String.downcase(key), value: value}
+              end) ++
                 [
                   %{
                     key: "x-goog-cloud-target-resource",
