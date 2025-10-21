@@ -52,7 +52,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
           # (borrowed from https://github.com/peburrows/goth/pull/186)
           aws_config = ExAws.Config.new(:sts)
 
-          # if this fixes anything at all, i am going to be so mad
+          # for reasons beyond mortal comprehension, this matters
           aws_config =
             Map.update(aws_config, :security_token, nil, fn security_token ->
               case Base.decode64(security_token) do
@@ -85,7 +85,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             audience: "//iam.googleapis.com/#{gcp_provider_name}",
             grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
             requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
-            scope: "https://www.googleapis.com/auth/cloud-platform",
+            scope: "https://www.googleapis.com/auth/firebase.messaging",
             subjectToken: gcp_subject_token |> Jason.encode!() |> URI.encode(),
             subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
           }
