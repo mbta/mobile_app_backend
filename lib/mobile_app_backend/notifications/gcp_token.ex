@@ -56,7 +56,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             Map.keys(aws_config) --
               ~w(port scheme host http_client retries json_codec normalize_path require_imds_v2)a
 
-          Logger.info("#{__MODULE__} aws_config keys #{aws_config_keys}")
+          Logger.info("#{__MODULE__} aws_config keys #{inspect(aws_config_keys)}")
 
           operation = ExAws.STS.get_caller_identity()
           Logger.info("#{__MODULE__} GetCallerIdentity #{inspect(ExAws.request(operation))}")
@@ -73,7 +73,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
             )
 
           sig_header_names = Enum.map(sig_headers, fn {key, _value} -> key end)
-          Logger.info("#{__MODULE__} sig_headers keys #{sig_header_names}")
+          Logger.info("#{__MODULE__} sig_headers keys #{inspect(sig_header_names)}")
 
           # https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds#rest
           gcp_subject_token = %{
