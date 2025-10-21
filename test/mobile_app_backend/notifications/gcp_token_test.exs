@@ -99,8 +99,6 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
                %{key: "Authorization", value: aws4_hmac_sha256},
                %{key: "host", value: "sts.us-east-1.amazonaws.com"},
                %{key: "x-amz-date", value: _},
-               %{key: "content-type", value: "application/x-www-form-urlencoded"},
-               %{key: "content-encoding", value: "identity"},
                %{
                  key: "x-goog-cloud-target-resource",
                  value:
@@ -113,7 +111,7 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
            } = Jason.decode!(URI.decode(received_subject_token), keys: :atoms!)
 
     assert aws4_hmac_sha256 =~
-             ~r"^AWS4-HMAC-SHA256 Credential=/\d+/us-east-1/sts/aws4_request,SignedHeaders=content-encoding;content-type;host;x-amz-date,Signature=[0-9a-f]+$"
+             ~r"^AWS4-HMAC-SHA256 Credential=/\d+/us-east-1/sts/aws4_request,SignedHeaders=host;x-amz-date,Signature=[0-9a-f]+$"
 
     assert received_opts == []
 

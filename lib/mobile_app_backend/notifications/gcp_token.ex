@@ -5,6 +5,8 @@ defmodule MobileAppBackend.Notifications.GCPToken do
   """
   @type key :: term()
 
+  alias GoogleApi.STS.V1, as: STS
+
   defmodule StoredToken do
     @type t :: %__MODULE__{token: String.t(), expires: DateTime.t()}
     defstruct [:token, :expires]
@@ -27,55 +29,6 @@ defmodule MobileAppBackend.Notifications.GCPToken do
     stored_token_if_valid || update_token(key)
   end
 
-  defmodule GCPSTSTokenRequester do
-    alias GoogleApi.STS.V1, as: STS
-
-    @behaviour ExAws.Request.HttpClient
-
-    @impl ExAws.Request.HttpClient
-    def request(method, url, req_body, headers, http_opts) do
-      # https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds#rest
-      gcp_sts_connection = STS.Connection.new()
-
-      provider_name = Keyword.fetch!(http_opts, :gcp_provider_name)
-
-      gcp_subject_token = %{
-        url: URI.append_query(URI.new!(url), req_body) |> to_string(),
-        method:
-          case method do
-            :post -> "POST"
-          end,
-        headers:
-          Enum.map(headers, fn {key, value} -> %{key: key, value: value} end) ++
-            [
-              %{
-                key: "x-goog-cloud-target-resource",
-                value: "//iam.googleapis.com/#{provider_name}"
-              }
-            ]
-      }
-
-      gcp_sts_request = %STS.Model.GoogleIdentityStsV1ExchangeTokenRequest{
-        audience: "//iam.googleapis.com/#{provider_name}",
-        grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
-        requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
-        scope: "https://www.googleapis.com/auth/firebase.messaging",
-        subjectToken: gcp_subject_token |> Jason.encode!() |> URI.encode(),
-        subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
-      }
-
-      issued_at = :erlang.system_time(:second)
-
-      {:ok, gcp_sts_response} = STS.Api.V1.sts_token(gcp_sts_connection, body: gcp_sts_request)
-
-      token = gcp_sts_response.access_token
-      expires_at = issued_at + gcp_sts_response.expires_in
-
-      {:ok,
-       %{status_code: 200, headers: [], body: Jason.encode!(%{token: token, expires: expires_at})}}
-    end
-  end
-
   @spec update_token(key()) :: String.t()
   defp update_token(key) do
     stored_token =
@@ -93,17 +46,57 @@ defmodule MobileAppBackend.Notifications.GCPToken do
           %StoredToken{token: token.token, expires: DateTime.from_unix!(token.expires)}
 
         gcp_provider_name ->
-          request = ExAws.STS.get_caller_identity()
+          # unfortunately, ExAws.request/2 will include content-type and content-encoding headers,
+          # which will cause GCP to reject the request, so we have to do this manually
+          # (borrowed from https://github.com/peburrows/goth/pull/186)
+          aws_config = ExAws.Config.new(:sts)
+          operation = ExAws.STS.get_caller_identity()
+          url = ExAws.Request.Url.build(operation, aws_config)
 
-          response =
-            ExAws.request!(request,
-              http_client: GCPSTSTokenRequester,
-              http_opts: [gcp_provider_name: gcp_provider_name]
+          {:ok, sig_headers} =
+            ExAws.Auth.headers(
+              :post,
+              url,
+              :sts,
+              aws_config,
+              [],
+              ""
             )
 
-          %{"token" => token, "expires" => expires} = Jason.decode!(response.body)
+          # https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds#rest
+          gcp_subject_token = %{
+            url: url,
+            method: "POST",
+            headers:
+              Enum.map(sig_headers, fn {key, value} -> %{key: key, value: value} end) ++
+                [
+                  %{
+                    key: "x-goog-cloud-target-resource",
+                    value: "//iam.googleapis.com/#{gcp_provider_name}"
+                  }
+                ]
+          }
 
-          %StoredToken{token: token, expires: DateTime.from_unix!(expires)}
+          gcp_sts_request = %STS.Model.GoogleIdentityStsV1ExchangeTokenRequest{
+            audience: "//iam.googleapis.com/#{gcp_provider_name}",
+            grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
+            requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
+            scope: "https://www.googleapis.com/auth/firebase.messaging",
+            subjectToken: gcp_subject_token |> Jason.encode!() |> URI.encode(),
+            subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
+          }
+
+          issued_at = DateTime.utc_now(:second)
+
+          gcp_sts_connection = STS.Connection.new()
+
+          {:ok, gcp_sts_response} =
+            STS.Api.V1.sts_token(gcp_sts_connection, body: gcp_sts_request)
+
+          token = gcp_sts_response.access_token
+          expires_at = DateTime.add(issued_at, gcp_sts_response.expires_in, :second)
+
+          %StoredToken{token: token, expires: expires_at}
       end
 
     :persistent_term.put(key, stored_token)
