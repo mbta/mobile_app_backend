@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
   """
   @type key :: term()
 
+  require Logger
   alias GoogleApi.STS.V1, as: STS
 
   defmodule StoredToken do
@@ -51,6 +52,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
           # (borrowed from https://github.com/peburrows/goth/pull/186)
           aws_config = ExAws.Config.new(:sts)
           operation = ExAws.STS.get_caller_identity()
+          Logger.info("#{__MODULE__} GetCallerIdentity #{inspect(ExAws.request(operation))}")
           url = ExAws.Request.Url.build(operation, aws_config)
 
           {:ok, sig_headers} =
