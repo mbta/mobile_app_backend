@@ -65,6 +65,7 @@ defmodule MobileAppBackend.MixProject do
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 0.20"},
       {:google_api_fcm, "~> 0.14.0"},
+      {:google_api_iam_credentials, "~> 0.15.0"},
       {:google_api_sts, "~> 0.9.2"},
       {:goth, "~> 1.4"},
       {:jason, "~> 1.2"},
