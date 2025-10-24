@@ -54,22 +54,42 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
     provider_name =
       "projects/12345678/locations/global/workloadIdentityPools/my-pool/providers/my-aws-provider"
 
-    reassign_env(:mobile_app_backend, GCPToken, gcp_provider_name: provider_name)
+    service_account_id = "12345678901234567890"
+
+    reassign_env(:mobile_app_backend, GCPToken,
+      gcp_provider_name: provider_name,
+      gcp_service_account_id: service_account_id
+    )
+
     reassign_env(:ex_aws, :access_key_id, [""])
     reassign_env(:ex_aws, :secret_access_key, [""])
+    reassign_env(:ex_aws, :security_token, ["/+/+"])
     reassign_env(:tesla, :adapter, TeslaMockAdapter)
 
     expires_in = 10
     expires_at = DateTime.utc_now(:second) |> DateTime.add(expires_in, :second)
 
     expect_tesla_call(
-      times: 1,
-      returns: %Tesla.Env{status: 200} |> json(%{access_token: "token", expires_in: expires_in}),
+      times: 2,
+      returns: fn
+        %Tesla.Env{url: "https://sts.googleapis.com/v1/token"}, _ ->
+          %Tesla.Env{status: 200}
+          |> json(%{access_token: "federated_access_token", expires_in: expires_in})
+          |> then(&{:ok, &1})
+
+        %Tesla.Env{url: "https://iamcredentials.googleapis.com" <> _}, _ ->
+          %Tesla.Env{status: 200}
+          |> json(%{
+            accessToken: "service_account_access_token",
+            expireTime: expires_at
+          })
+          |> then(&{:ok, &1})
+      end,
       adapter: TeslaMockAdapter
     )
 
     key = make_ref()
-    assert GCPToken.get_token(key) == "token"
+    assert GCPToken.get_token(key) == "service_account_access_token"
 
     assert_received_tesla_call(received_env, received_opts, adapter: TeslaMockAdapter)
 
@@ -85,7 +105,7 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
            } = received_env
 
     assert %{
-             scope: "https://www.googleapis.com/auth/firebase.messaging",
+             scope: "https://www.googleapis.com/auth/cloud-platform",
              audience:
                "//iam.googleapis.com/projects/12345678/locations/global/workloadIdentityPools/my-pool/providers/my-aws-provider",
              grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
@@ -97,10 +117,9 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
     assert %{
              headers: [
                %{key: "Authorization", value: aws4_hmac_sha256},
+               %{key: "X-Amz-Security-Token", value: "_-_-"},
                %{key: "host", value: "sts.us-east-1.amazonaws.com"},
                %{key: "x-amz-date", value: _},
-               %{key: "content-type", value: "application/x-www-form-urlencoded"},
-               %{key: "content-encoding", value: "identity"},
                %{
                  key: "x-goog-cloud-target-resource",
                  value:
@@ -112,13 +131,40 @@ defmodule MobileAppBackend.Notifications.GCPTokenTest do
                "https://sts.us-east-1.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15"
            } = Jason.decode!(URI.decode(received_subject_token), keys: :atoms!)
 
-    assert aws4_hmac_sha256 =~
-             ~r"^AWS4-HMAC-SHA256 Credential=/\d+/us-east-1/sts/aws4_request,SignedHeaders=content-encoding;content-type;host;x-amz-date,Signature=[0-9a-f]+$"
+    assert [_, signed_headers] =
+             Regex.run(
+               ~r"^AWS4-HMAC-SHA256 Credential=/\d+/us-east-1/sts/aws4_request,SignedHeaders=(.*),Signature=[0-9a-f]+$",
+               aws4_hmac_sha256
+             )
+
+    assert ["host", "x-amz-date", "x-amz-security-token", "x-goog-cloud-target-resource"] =
+             String.split(signed_headers, ";")
+
+    assert received_opts == []
+
+    assert_received_tesla_call(received_env, received_opts, adapter: TeslaMockAdapter)
+
+    assert %Tesla.Env{
+             method: :post,
+             url:
+               "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/12345678901234567890:generateAccessToken",
+             headers: [
+               {"x-goog-api-client", _},
+               {"authorization", "Bearer federated_access_token"},
+               {"accept-encoding", "gzip, deflate, identity"},
+               {"content-type", "application/json"}
+             ],
+             body: received_body
+           } = received_env
+
+    assert %{
+             scope: ["https://www.googleapis.com/auth/firebase.messaging"]
+           } = Jason.decode!(received_body, keys: :atoms!)
 
     assert received_opts == []
 
     assert :persistent_term.get(key) == %GCPToken.StoredToken{
-             token: "token",
+             token: "service_account_access_token",
              expires: expires_at
            }
   end

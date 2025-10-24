@@ -38,7 +38,8 @@ case System.get_env("MAPBOX_PRIMARY_TOKEN") do
 end
 
 config :mobile_app_backend, MobileAppBackend.Notifications.GCPToken,
-  gcp_provider_name: System.get_env("GCP_PROVIDER_NAME")
+  gcp_provider_name: System.get_env("GCP_PROVIDER_NAME"),
+  gcp_service_account_id: System.get_env("GCP_SERVICE_ACCOUNT_ID")
 
 database_name_raw = System.get_env("DATABASE_NAME")
 
