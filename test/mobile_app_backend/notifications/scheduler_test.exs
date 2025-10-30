@@ -53,6 +53,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
+        "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "upstream_timestamp" => alert.last_push_notification_timestamp
       }
     )
