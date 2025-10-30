@@ -67,24 +67,49 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec find_new_recipients([active_notification()], %{User.t() => [Subscription.t()]}) :: [
-          {User.t(), active_notification()}
+          {User.t(), [Subscription.t()], active_notification()}
         ]
   defp find_new_recipients(active_notifications, open_windows) do
-    Enum.flat_map(active_notifications, fn {%Alert{id: alert_id} = alert, upstream_timestamp} ->
+    Enum.flat_map(active_notifications, fn active_notification ->
       open_windows
-      |> Enum.filter(fn {%User{id: user_id}, subscriptions} ->
-        Enum.any?(subscriptions, &Engine.matches?(alert, &1)) and
-          not DeliveredNotification.already_sent?(user_id, alert_id, upstream_timestamp)
-      end)
-      |> Enum.map(fn {user, _} -> {user, {alert, upstream_timestamp}} end)
+      |> Enum.map(&new_recipient(active_notification, &1))
+      |> Enum.reject(&is_nil/1)
     end)
   end
 
-  @spec enqueue_delivery([{User.t(), active_notification()}]) :: :ok
+  defp new_recipient(
+         {%Alert{id: alert_id} = alert, upstream_timestamp},
+         {%User{id: user_id} = user, subscriptions}
+       ) do
+    with [_ | _] = matching_subscriptions <-
+           Enum.filter(subscriptions, &Engine.matches?(alert, &1)),
+         false <- DeliveredNotification.already_sent?(user_id, alert_id, upstream_timestamp) do
+      {user, matching_subscriptions, {alert, upstream_timestamp}}
+    else
+      _ -> nil
+    end
+  end
+
+  @spec enqueue_delivery([{User.t(), [Subscription.t()], active_notification()}]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, {%Alert{} = alert, upstream_timestamp}} ->
-      %{user_id: recipient.id, alert_id: alert.id, upstream_timestamp: upstream_timestamp}
+    Enum.each(recipients, fn {%User{} = recipient, subscriptions,
+                              {%Alert{} = alert, upstream_timestamp}} ->
+      subscriptions =
+        Enum.map(subscriptions, fn %Subscription{
+                                     route_id: route_id,
+                                     stop_id: stop_id,
+                                     direction_id: direction_id
+                                   } ->
+          %{route: route_id, stop: stop_id, direction: direction_id}
+        end)
+
+      %{
+        user_id: recipient.id,
+        alert_id: alert.id,
+        subscriptions: subscriptions,
+        upstream_timestamp: upstream_timestamp
+      }
       |> Deliverer.new()
       |> Oban.insert!()
     end)

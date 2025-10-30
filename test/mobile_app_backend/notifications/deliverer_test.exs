@@ -42,6 +42,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       perform_job(Notifications.Deliverer, %{
         user_id: user_id,
         alert_id: alert_id,
+        subscriptions: [%{route: "1", stop: "1", direction: 1}],
         upstream_timestamp: upstream_timestamp
       })
 
@@ -61,10 +62,12 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
     assert %{
              message: %{
-               notification: %{title: "Alert " <> ^alert_id, body: "Hello we are your bus"},
+               data: %{alertId: ^alert_id, subscriptions: subscriptions},
                token: ^fcm_token
              }
            } = Jason.decode!(received_body, keys: :atoms!)
+
+    assert [%{route: "1", stop: "1", direction: 1}] = Jason.decode!(subscriptions, keys: :atoms!)
 
     assert [] = received_opts
 
@@ -106,6 +109,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
+          subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp
         })
       end)
