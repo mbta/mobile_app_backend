@@ -16,13 +16,6 @@ defmodule MobileAppBackendWeb.Router do
   end
 
   scope "/", MobileAppBackendWeb do
-    pipe_through :browser
-
-    get "/", DeepLinkController, :root
-    get "/t-alert", DeepLinkController, :t_alert_cta
-  end
-
-  scope "/", MobileAppBackendWeb do
     get("/_health", HealthController, :index)
 
     get(
@@ -80,5 +73,18 @@ defmodule MobileAppBackendWeb.Router do
       live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
       oban_dashboard("/oban")
     end
+  end
+
+  scope "/", MobileAppBackendWeb do
+    pipe_through :browser
+
+    get "/", DeepLinkController, :root
+    get "/t-alert", DeepLinkController, :t_alert_cta
+    get "/s/*_", DeepLinkController, :nav_path
+    get "/stop/*_", DeepLinkController, :nav_path
+    get "/a/*_", DeepLinkController, :nav_path
+    get "/alert/*_", DeepLinkController, :nav_path
+    get "/c/*_", DeepLinkController, :nav_path
+    get "/:stop_id/*_", DeepLinkController, :root_stop
   end
 end

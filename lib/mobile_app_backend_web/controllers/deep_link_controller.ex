@@ -19,8 +19,24 @@ defmodule MobileAppBackendWeb.DeepLinkController do
     redirect(conn, external: "#{config(:dotcom_root)}/app-store?#{URI.encode_query(params)}")
   end
 
+  defp stop_redirect(conn, stop_id, params) do
+    redirect(conn,
+      external: "#{config(:dotcom_root)}/stops/#{URI.encode(stop_id)}?#{URI.encode_query(params)}"
+    )
+  end
+
   def root(conn, params) do
     app_store_redirect(conn, params)
+  end
+
+  # Any unrecognized strings at the root path are assumed to be stop IDs
+  def root_stop(conn, %{"stop_id" => stop_id} = params) do
+    stop_redirect(conn, stop_id, Map.delete(Map.delete(params, "_"), "stop_id"))
+  end
+
+  def nav_path(conn, params) do
+    # For now we ignore the path params, we may add special handling for the different paths eventually
+    app_store_redirect(conn, Map.delete(params, "_"))
   end
 
   def t_alert_cta(conn, params) do

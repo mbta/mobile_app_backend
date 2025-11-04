@@ -12,6 +12,66 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
     end
   end
 
+  describe "stop root" do
+    test "redirects to dotcom stop page, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/place-chill?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
+    end
+
+    test "redirects to dotcom stop page, ignoring remainder of path", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/place-chill/test/path?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
+    end
+  end
+
+  describe "nav paths" do
+    test "redirects stop urls, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/s/place-chill?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+    end
+
+    test "redirects expanded stop urls, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/stop/place-chill/r/line-Green/d/1?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+    end
+
+    test "redirects alert urls, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/a/1234567/r/line-Green?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+    end
+
+    test "redirects expanded alert urls, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/alert/1234567/s/place-pktrm?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+    end
+
+    test "redirects campaign urls, preserving query params", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/c/campaign?param_1=val_1")
+
+      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+    end
+  end
+
   describe "t-alert" do
     test "redirects to dotcom, adding tracking params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
