@@ -72,14 +72,23 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
     end
   end
 
-  describe "t-alert" do
-    test "redirects to dotcom, adding tracking params", %{conn: conn} do
+  describe "campaigns" do
+    test "redirects t-alert campaign", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
       conn = get(conn, ~p"/t-alert?param_1=val_1")
 
       assert redirected_to(conn, 302) ==
                "https://example.com/app-store?ct=TAlerts&mt=8&param_1=val_1&pt=117998862&referrer=utm_source%3DTAlerts%26utm_campaign%3DTAlerts"
+    end
+
+    test "redirects screens-sl-kiosk campaign", %{conn: conn} do
+      reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
+
+      conn = get(conn, ~p"/c/screens-sl-kiosk?param_1=val_1")
+
+      assert redirected_to(conn, 302) ==
+               "https://example.com/app-store?ct=screens-sl-kiosk&mt=8&param_1=val_1&pt=117998862&referrer=utm_source%3Dscreens%26utm_campaign%3Dscreens-sl-kiosk"
     end
   end
 
