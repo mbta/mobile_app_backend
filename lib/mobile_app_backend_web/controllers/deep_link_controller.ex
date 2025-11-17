@@ -1,11 +1,17 @@
 defmodule MobileAppBackendWeb.DeepLinkController do
   use MobileAppBackendWeb, :controller
 
-  defp t_alert_cta_campaign_params do
+  defp campaign_params("screens-sl-kiosk"), do: campaign_params("screens-sl-kiosk", "screens")
+
+  defp campaign_params("t-alert"), do: campaign_params("TAlerts", "TAlerts")
+
+  defp campaign_params(_), do: %{}
+
+  defp campaign_params(campaign, source) do
     %{
-      "referrer" => "utm_source=TAlerts&utm_campaign=TAlerts",
+      "referrer" => "utm_source=#{source}&utm_campaign=#{campaign}",
       "pt" => "117998862",
-      "ct" => "TAlerts",
+      "ct" => campaign,
       "mt" => "8"
     }
   end
@@ -39,8 +45,14 @@ defmodule MobileAppBackendWeb.DeepLinkController do
     app_store_redirect(conn, Map.delete(params, "_"))
   end
 
+  def campaign(conn, %{"campaign_id" => campaign_id} = params) do
+    remaining_params = Map.delete(Map.delete(params, "campaign_id"), "_")
+
+    app_store_redirect(conn, Map.merge(remaining_params, campaign_params(campaign_id)))
+  end
+
   def t_alert_cta(conn, params) do
-    app_store_redirect(conn, Map.merge(params, t_alert_cta_campaign_params()))
+    app_store_redirect(conn, Map.merge(params, campaign_params("t-alert")))
   end
 
   def apple_app_site_association(conn, _params) do
