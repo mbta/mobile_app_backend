@@ -2,8 +2,11 @@ defmodule MBTAV3API.AlertTest do
   use ExUnit.Case
 
   import Mox
+  import MobileAppBackend.Factory
 
+  alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.{Alert, JsonApi}
+  alias MobileAppBackend.GlobalDataCache
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -246,5 +249,343 @@ defmodule MBTAV3API.AlertTest do
              severity: 5,
              updated_at: ~B[2025-03-17 15:17:11]
            }
+  end
+
+  test "alert significance is set properly" do
+    for effect <- [
+          :access_issue,
+          :additional_service,
+          :amber_alert,
+          :bike_issue,
+          :cancellation,
+          :delay,
+          :detour,
+          :dock_closure,
+          :dock_issue,
+          :elevator_closure,
+          :escalator_closure,
+          :extra_service,
+          :facility_issue,
+          :modified_service,
+          :no_service,
+          :other_effect,
+          :parking_closure,
+          :parking_issue,
+          :policy_change,
+          :schedule_change,
+          :service_change,
+          :shuttle,
+          :snow_route,
+          :station_closure,
+          :station_issue,
+          :stop_closure,
+          :stop_move,
+          :stop_moved,
+          :stop_shoveling,
+          :summary,
+          :suspension,
+          :track_change,
+          :unknown_effect
+        ] do
+      inherently_stop_specific =
+        effect in [:dock_closure, :dock_issue, :station_closure, :station_issue, :stop_closure]
+
+      specified_stops_options = if inherently_stop_specific, do: [true], else: [false, true]
+
+      for specified_stops <- specified_stops_options do
+        alert =
+          build(:alert,
+            effect: effect,
+            severity: 1,
+            informed_entity: [%InformedEntity{stop: if(specified_stops, do: "stop")}]
+          )
+
+        expected_significance =
+          case effect do
+            :detour -> if specified_stops, do: :major, else: :secondary
+            :dock_closure -> :major
+            :elevator_closure -> :accessibility
+            :service_change -> :secondary
+            :shuttle -> :major
+            :snow_route -> if specified_stops, do: :major, else: :secondary
+            :station_closure -> :major
+            :stop_closure -> :major
+            :suspension -> :major
+            :track_change -> :minor
+            _ -> nil
+          end
+
+        assert Alert.significance(alert) == expected_significance,
+               "significance for effect #{effect} #{if specified_stops, do: "with", else: "without"} specified stops"
+      end
+    end
+  end
+
+  test "alert significance for delay alerts" do
+    subway_delay_severe =
+      build(:alert,
+        effect: :delay,
+        severity: 10,
+        informed_entity: [%InformedEntity{route_type: :light_rail, stop: "stop"}]
+      )
+
+    cr_delay_severe =
+      build(:alert,
+        effect: :delay,
+        severity: 10,
+        informed_entity: [%InformedEntity{route_type: :commuter_rail, stop: "stop"}]
+      )
+
+    ferry_delay_severe =
+      build(:alert,
+        effect: :delay,
+        severity: 10,
+        informed_entity: [%InformedEntity{route_type: :ferry, stop: "stop"}]
+      )
+
+    subway_delay_not_severe =
+      build(:alert,
+        effect: :delay,
+        severity: 0,
+        informed_entity: [%InformedEntity{route_type: :light_rail, stop: "stop"}]
+      )
+
+    bus_delay_severe =
+      build(:alert,
+        effect: :delay,
+        severity: 10,
+        informed_entity: [%InformedEntity{route_type: :bus, stop: "stop"}]
+      )
+
+    single_tracking_delay_info =
+      build(:alert,
+        cause: :single_tracking,
+        effect: :delay,
+        severity: 1
+      )
+
+    assert Alert.significance(subway_delay_severe) == :minor
+    assert Alert.significance(cr_delay_severe) == :minor
+    assert Alert.significance(ferry_delay_severe) == :minor
+    assert Alert.significance(single_tracking_delay_info) == :minor
+    assert Alert.significance(subway_delay_not_severe) == nil
+    assert Alert.significance(bus_delay_severe) == nil
+  end
+
+  test "downstreamAlerts returns alerts for first downstream alerting stop" do
+    route = build(:route)
+    target_stop = build(:stop)
+    stop_with_board_alert = build(:stop)
+    [first_stop_with_ride_alert, second_stop_with_ride_alert] = build_pair(:stop)
+
+    alert_ride_target_stop =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:ride],
+            direction_id: 0,
+            route: route.id,
+            stop: target_stop.id
+          }
+        ]
+      )
+
+    alert_board =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:board],
+            direction_id: 0,
+            route: route.id,
+            stop: stop_with_board_alert.id
+          }
+        ]
+      )
+
+    first_ride_alert =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:ride],
+            route: route.id,
+            stop: first_stop_with_ride_alert.id
+          }
+        ]
+      )
+
+    second_ride_alert =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:ride],
+            route: route.id,
+            stop: second_stop_with_ride_alert.id
+          }
+        ]
+      )
+
+    trip =
+      build(:trip,
+        direction_id: 0,
+        route_id: route.id,
+        stop_ids: [
+          target_stop.id,
+          stop_with_board_alert.id,
+          first_stop_with_ride_alert.id,
+          second_stop_with_ride_alert.id
+        ]
+      )
+
+    downstream_alerts =
+      Alert.downstream_alerts(
+        [alert_ride_target_stop, alert_board, first_ride_alert, second_ride_alert],
+        trip,
+        [target_stop.id]
+      )
+
+    assert downstream_alerts == [first_ride_alert]
+  end
+
+  test "downstreamAlerts excludes alerts affecting the target stop" do
+    route = build(:route)
+    target_stop = build(:stop)
+    [downstream_stop1, downstream_stop2] = build_pair(:stop)
+
+    alert_all_stops =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:board, :ride],
+            direction_id: 0,
+            route: route.id,
+            stop: target_stop.id
+          },
+          %InformedEntity{
+            activities: [:board, :ride],
+            direction_id: 0,
+            route: route.id,
+            stop: downstream_stop1.id
+          },
+          %InformedEntity{
+            activities: [:board, :ride],
+            direction_id: 0,
+            route: route.id,
+            stop: downstream_stop2.id
+          }
+        ]
+      )
+
+    alert_downstream2_only =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:ride],
+            direction_id: 0,
+            route: route.id,
+            stop: downstream_stop2.id
+          }
+        ]
+      )
+
+    trip =
+      build(:trip,
+        direction_id: 0,
+        route_id: route.id,
+        stop_ids: [target_stop.id, downstream_stop1.id, downstream_stop2.id]
+      )
+
+    downstream_alerts =
+      Alert.downstream_alerts([alert_all_stops, alert_downstream2_only], trip, [target_stop.id])
+
+    assert downstream_alerts == [alert_downstream2_only]
+  end
+
+  test "downstreamAlerts ignores alert without stops specified" do
+    route = build(:route)
+    [target_stop, next_stop] = build_pair(:stop)
+
+    alert =
+      build(:alert,
+        effect: :service_change,
+        informed_entity: [%InformedEntity{activities: [:board], route: route.id}]
+      )
+
+    trip =
+      build(:trip, direction_id: 0, route_id: route.id, stop_ids: [target_stop.id, next_stop.id])
+
+    downstream_alerts = Alert.downstream_alerts([alert], trip, [target_stop.id])
+    assert downstream_alerts == []
+  end
+
+  test "alertsDownstreamForPatterns returns alert for downstream stop" do
+    Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+    global_data = GlobalDataCache.get_data()
+
+    route_pattern_ashmont = global_data.route_patterns["Red-1-0"]
+    route_pattern_braintree = global_data.route_patterns["Red-3-0"]
+    route_pattern_alewife = global_data.route_patterns["Red-3-1"]
+
+    shawmut_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70091"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70092"}
+        ]
+      )
+
+    ashmont_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70093"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70094"}
+        ]
+      )
+
+    alewife_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70061"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "Alewife-01"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "Alewife-02"}
+        ]
+      )
+
+    park_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70075"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70076"}
+        ]
+      )
+
+    southbound_downstream_alerts =
+      Alert.alerts_downstream_for_patterns(
+        [ashmont_shuttle_alert, shawmut_shuttle_alert, park_shuttle_alert, alewife_shuttle_alert],
+        [route_pattern_ashmont, route_pattern_braintree],
+        ["place-pktrm", "70075", "70076"],
+        global_data.trips
+      )
+
+    assert southbound_downstream_alerts == [shawmut_shuttle_alert]
+
+    northbound_downstream_alerts =
+      Alert.alerts_downstream_for_patterns(
+        [ashmont_shuttle_alert, shawmut_shuttle_alert, park_shuttle_alert, alewife_shuttle_alert],
+        [route_pattern_alewife],
+        ["place-pktrm", "70075", "70076"],
+        global_data.trips
+      )
+
+    assert northbound_downstream_alerts == [alewife_shuttle_alert]
   end
 end

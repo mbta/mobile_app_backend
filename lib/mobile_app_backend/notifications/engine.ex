@@ -5,10 +5,12 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.Subscription
 
   def matches?(%Alert{} = alert, %Subscription{} = subscription) do
+    downstream? = downstream?(alert, subscription)
+
     Enum.any?(alert.informed_entity, fn %Alert.InformedEntity{} = ie ->
       matches_direction?(ie.direction_id, subscription.direction_id) and
         matches_route?(ie.route, subscription.route_id) and
-        matches_stop?(ie.stop, subscription.stop_id)
+        (matches_stop?(ie.stop, subscription.stop_id) or downstream?)
     end)
   end
 
@@ -47,5 +49,42 @@ defmodule MobileAppBackend.Notifications.Engine do
       end
 
     alert_root_stop == subscription_root_stop
+  end
+
+  defp downstream?(%Alert{} = alert, %Subscription{} = subscription) do
+    global_data = GlobalDataCache.get_data()
+
+    route_patterns =
+      case subscription.route_id do
+        "line-" <> _ ->
+          routes =
+            global_data.routes
+            |> Map.values()
+            |> Enum.filter(&(&1.line_id == subscription.route_id))
+            |> Enum.map(& &1.id)
+
+          global_data.route_patterns |> Map.values() |> Enum.filter(&(&1.route_id in routes))
+
+        _ ->
+          global_data.route_patterns
+          |> Map.values()
+          |> Enum.filter(&(&1.route_id == subscription.route_id))
+      end
+
+    target_stop_with_children =
+      case Stop.parent_if_exists(global_data.stops[subscription.stop_id], global_data.stops) do
+        %Stop{id: target_stop_id, child_stop_ids: child_stop_ids} ->
+          [target_stop_id | child_stop_ids]
+
+        nil ->
+          []
+      end
+
+    Alert.alerts_downstream_for_patterns(
+      [alert],
+      route_patterns,
+      target_stop_with_children,
+      global_data.trips
+    ) == [alert]
   end
 end
