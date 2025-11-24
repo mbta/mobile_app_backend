@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.Notifications.EngineTest do
   use ExUnit.Case, async: false
+  use HttpStub.Case
   import MobileAppBackend.Factory
   import Mox
   import Test.Support.Helpers
@@ -23,8 +24,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     )
 
     GlobalDataCacheMock
-    |> expect(:default_key, fn -> :default_key end)
-    |> expect(:get_data, fn _ ->
+    |> expect(:default_key, 2, fn -> :default_key end)
+    |> expect(:get_data, 2, fn _ ->
       %{
         lines: %{},
         pattern_ids_by_stop: %{},
@@ -41,6 +42,36 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     alert = build(:alert, informed_entity: [%Alert.InformedEntity{stop: "70158"}])
     subscription = NotificationsFactory.build(:notification_subscription, stop_id: "place-boyls")
+    assert Engine.matches?(alert, subscription)
+  end
+
+  test "includes downstream alerts" do
+    alert =
+      build(:alert,
+        effect: :station_closure,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:board, :exit],
+            direction_id: 0,
+            route: "Orange",
+            stop: "70004"
+          },
+          %Alert.InformedEntity{
+            activities: [:board, :exit],
+            direction_id: 1,
+            route: "Orange",
+            stop: "70005"
+          }
+        ]
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Orange",
+        stop_id: "place-north",
+        direction_id: 0
+      )
+
     assert Engine.matches?(alert, subscription)
   end
 end

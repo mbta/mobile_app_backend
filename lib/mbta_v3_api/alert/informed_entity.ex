@@ -47,4 +47,26 @@ defmodule MBTAV3API.Alert.InformedEntity do
       trip: data["trip"]
     }
   end
+
+  @spec matches?(term(), term()) :: boolean()
+  defp matches?(actual, expected) do
+    is_nil(actual) or is_nil(expected) or actual == expected
+  end
+
+  @spec activity_in?(t(), [activity()]) :: boolean()
+  def activity_in?(informed_entity, activities) do
+    Enum.any?(activities, &(&1 in informed_entity.activities))
+  end
+
+  def direction?(informed_entity, direction) do
+    matches?(informed_entity.direction_id, direction)
+  end
+
+  def route?(informed_entity, route) do
+    matches?(informed_entity.route, route)
+  end
+
+  def stop_in?(informed_entity, stops) do
+    is_nil(informed_entity.stop) or informed_entity.stop in stops
+  end
 end

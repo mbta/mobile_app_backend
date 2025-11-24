@@ -84,6 +84,7 @@ defmodule MBTAV3API.Stop do
   def parent_id(%__MODULE__{parent_station_id: parent_id}), do: parent_id
 
   @spec parent_if_exists(t(), %{id() => t()}) :: t()
+  @spec parent_if_exists(nil, %{id() => t()}) :: nil
   @doc """
   If the stop has a parent station and that parent is present in the map of stops, return the parent.
   Otherwise, returns the stop as-is.

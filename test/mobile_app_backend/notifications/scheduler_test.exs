@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.Notifications.SchedulerTest do
   use MobileAppBackend.DataCase, async: true
   use Oban.Testing, repo: MobileAppBackend.Repo
+  use HttpStub.Case
   import MobileAppBackend.Factory
   alias MBTAV3API.Store
   alias MobileAppBackend.Notifications

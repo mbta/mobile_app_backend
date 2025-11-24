@@ -3,6 +3,9 @@ defmodule MBTAV3API.Alert do
   require Util
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
+  alias MBTAV3API.RoutePattern
+  alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -231,5 +234,128 @@ defmodule MBTAV3API.Alert do
       :switch_issue,
       :train_traffic
     ])
+  end
+
+  @spec has_stops_specified(t()) :: boolean()
+  def has_stops_specified(alert) do
+    Enum.all?(alert.informed_entity, &(&1.stop != nil))
+  end
+
+  @type significance :: :major | :secondary | :accessibility | :minor | nil
+
+  @spec significance(t()) :: :accessibility | :major | :minor | nil | :secondary
+  def significance(alert) do
+    case alert.effect do
+      e when e in [:shuttle, :suspension] ->
+        :major
+
+      e when e in [:station_closure, :stop_closure, :dock_closure, :detour, :snow_route] ->
+        if has_stops_specified(alert) do
+          :major
+        else
+          :secondary
+        end
+
+      :service_change ->
+        :secondary
+
+      :elevator_closure ->
+        :accessibility
+
+      :track_change ->
+        :minor
+
+      :delay ->
+        delay_alert_significance(alert)
+
+      _ ->
+        nil
+    end
+  end
+
+  defp delay_alert_significance(alert) do
+    if (alert.severity >= 3 and Enum.any?(alert.informed_entity, &(&1.route_type != :bus))) or
+         alert.cause == :single_tracking do
+      :minor
+    else
+      nil
+    end
+  end
+
+  @spec compare_significance(significance(), significance()) :: :lt | :eq | :gt
+  def compare_significance(s1, s2) do
+    significance_numbers = %{major: 5, secondary: 4, accessibility: 3, minor: 2, nil: 1}
+    n1 = significance_numbers[s1]
+    n2 = significance_numbers[s2]
+
+    cond do
+      n1 < n2 -> :lt
+      n1 == n2 -> :eq
+      n1 > n2 -> :gt
+    end
+  end
+
+  @spec any_informed_entity_satisfies(t(), (InformedEntity.t() -> boolean())) :: boolean()
+  def any_informed_entity_satisfies(alert, predicate) do
+    Enum.any?(alert.informed_entity, predicate)
+  end
+
+  @spec downstream_alerts([t()], Trip.t(), [Stop.id()]) :: [t()]
+  def downstream_alerts(alerts, trip, target_stop_with_children) do
+    stop_ids = trip.stop_ids || []
+
+    alerts =
+      Enum.filter(
+        alerts,
+        &(has_stops_specified(&1) and
+            compare_significance(significance(&1), :accessibility) != :lt)
+      )
+
+    target_stop_alert_ids =
+      alerts
+      |> Enum.filter(fn alert ->
+        any_informed_entity_satisfies(
+          alert,
+          &applies_downstream_at(&1, trip, target_stop_with_children)
+        )
+      end)
+      |> MapSet.new(& &1.id)
+
+    downstream_stops =
+      stop_ids |> Enum.drop_while(&(&1 not in target_stop_with_children)) |> Enum.drop(1)
+
+    Enum.find_value(downstream_stops, [], fn stop ->
+      alerts
+      |> Enum.filter(fn alert ->
+        any_informed_entity_satisfies(alert, &applies_downstream_at(&1, trip, [stop])) and
+          alert.id not in target_stop_alert_ids
+      end)
+      |> case do
+        [] -> nil
+        downstream_alerts -> downstream_alerts
+      end
+    end)
+  end
+
+  defp applies_downstream_at(ie, trip, stop_ids) do
+    InformedEntity.activity_in?(ie, [:exit, :ride]) and
+      InformedEntity.direction?(ie, trip.direction_id) and
+      InformedEntity.route?(ie, trip.route_id) and
+      InformedEntity.stop_in?(ie, stop_ids)
+  end
+
+  @spec alerts_downstream_for_patterns([t()], [RoutePattern.t()], [Stop.id()], %{
+          Trip.id() => Trip.t()
+        }) :: [t()]
+  def alerts_downstream_for_patterns(alerts, patterns, target_stop_with_children, trips_by_id) do
+    patterns
+    |> Enum.flat_map(fn pattern ->
+      if trip = trips_by_id[pattern.representative_trip_id] do
+        downstream_alerts(alerts, trip, target_stop_with_children)
+      else
+        []
+      end
+    end)
+    |> Enum.uniq()
   end
 end
