@@ -20,7 +20,7 @@ jobs:
       cache-key-asdf: ${{ steps.cache-keys.outputs.asdf }}
       cache-key-mix: ${{ steps.cache-keys.outputs.mix }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set cache keys
         id: cache-keys
         run: |
@@ -89,7 +89,7 @@ jobs:
           key: ${{ needs.setup.outputs.cache-key-asdf }}
       - name: Setup asdf environment
         uses: mbta/actions/reshim-asdf@v2
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Restore Mix cache
         uses: actions/cache/restore@v4
         with:
@@ -122,7 +122,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: docker build
@@ -151,7 +151,7 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Read asdf versions
         id: asdf
         run: cat load_testing/.tool-versions | sed 's/ /=/' | tee -a "$GITHUB_OUTPUT"
