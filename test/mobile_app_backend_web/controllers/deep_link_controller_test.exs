@@ -12,7 +12,7 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
     end
   end
 
-  describe "stop root" do
+  describe "stop" do
     test "redirects to dotcom stop page, preserving query params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
@@ -28,15 +28,13 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
     end
-  end
 
-  describe "nav paths" do
     test "redirects stop urls, preserving query params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
       conn = get(conn, ~p"/s/place-chill?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
     end
 
     test "redirects expanded stop urls, preserving query params", %{conn: conn} do
@@ -44,25 +42,29 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       conn = get(conn, ~p"/stop/place-chill/r/line-Green/d/1?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
     end
+  end
 
-    test "redirects alert urls, preserving query params", %{conn: conn} do
+  describe "alert" do
+    test "redirects alert urls with route, preserving query params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
       conn = get(conn, ~p"/a/1234567/r/line-Green?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+      assert redirected_to(conn, 302) == "https://example.com/schedules/Green/line?param_1=val_1"
     end
 
-    test "redirects expanded alert urls, preserving query params", %{conn: conn} do
+    test "redirects alert urls with stop, preserving query params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
-      conn = get(conn, ~p"/alert/1234567/s/place-pktrm?param_1=val_1")
+      conn = get(conn, ~p"/alert/1234567/stop/place-pktrm?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
+      assert redirected_to(conn, 302) == "https://example.com/stops/place-pktrm?param_1=val_1"
     end
+  end
 
+  describe "campaigns" do
     test "redirects campaign urls, preserving query params", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
@@ -70,9 +72,7 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       assert redirected_to(conn, 302) == "https://example.com/app-store?param_1=val_1"
     end
-  end
 
-  describe "campaigns" do
     test "redirects t-alert campaign", %{conn: conn} do
       reassign_env(:mobile_app_backend, :deep_links, dotcom_root: "https://example.com")
 
@@ -89,6 +89,34 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       assert redirected_to(conn, 302) ==
                "https://example.com/app-store?ct=screens-sl-kiosk&mt=8&param_1=val_1&pt=117998862&referrer=utm_source%3Dscreens%26utm_campaign%3Dscreens-sl-kiosk"
+    end
+  end
+
+  describe "find_path_param" do
+    test "matches keys", _ do
+      assert "value" ==
+               MobileAppBackendWeb.DeepLinkController.find_path_param(
+                 ["path", "path", "path", "key3", "value", "path"],
+                 ["key1", "key2", "key3"]
+               )
+    end
+
+    test "returns nil with missing key", _ do
+      assert is_nil(
+               MobileAppBackendWeb.DeepLinkController.find_path_param(
+                 ["path", "path", "path", "otherKey", "value"],
+                 ["key1", "key2", "key3"]
+               )
+             )
+    end
+
+    test "returns nil with missing value", _ do
+      assert is_nil(
+               MobileAppBackendWeb.DeepLinkController.find_path_param(
+                 ["path", "path", "path", "key2"],
+                 ["key1", "key2", "key3"]
+               )
+             )
     end
   end
 

@@ -80,11 +80,11 @@ defmodule MobileAppBackendWeb.Router do
 
     get "/", DeepLinkController, :root
     get "/t-alert", DeepLinkController, :t_alert_cta
-    get "/s/*_", DeepLinkController, :nav_path
-    get "/stop/*_", DeepLinkController, :nav_path
-    get "/a/*_", DeepLinkController, :nav_path
-    get "/alert/*_", DeepLinkController, :nav_path
+    get "/s/:stop_id/*_", DeepLinkController, :stop
+    get "/stop/:stop_id/*_", DeepLinkController, :stop
+    get "/a/*path_params", DeepLinkController, :alert
+    get "/alert/*path_params", DeepLinkController, :alert
     get "/c/:campaign_id/*_", DeepLinkController, :campaign
-    get "/:stop_id/*_", DeepLinkController, :root_stop
+    get "/:stop_id/*_", DeepLinkController, :stop
   end
 end
