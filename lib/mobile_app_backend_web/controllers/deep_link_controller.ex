@@ -16,6 +16,9 @@ defmodule MobileAppBackendWeb.DeepLinkController do
     }
   end
 
+  defp stop_keys, do: ["s", "stop"]
+  defp route_keys, do: ["r", "route"]
+
   defp config(key) do
     Application.fetch_env!(:mobile_app_backend, :deep_links)
     |> Keyword.get(key)
@@ -31,18 +34,40 @@ defmodule MobileAppBackendWeb.DeepLinkController do
     )
   end
 
+  defp line_redirect(conn, "line-Green", params), do: line_redirect(conn, "Green", params)
+
+  defp line_redirect(conn, route_id, params) do
+    redirect(conn,
+      external:
+        "#{config(:dotcom_root)}/schedules/#{URI.encode(route_id)}/line?#{URI.encode_query(params)}"
+    )
+  end
+
   def root(conn, params) do
     app_store_redirect(conn, params)
   end
 
-  # Any unrecognized strings at the root path are assumed to be stop IDs
-  def root_stop(conn, %{"stop_id" => stop_id} = params) do
+  # Any unrecognized strings at the root path are assumed to be stop IDs,
+  # along with explicit /s/ or /stop/ deep links
+  def stop(conn, %{"stop_id" => stop_id} = params) do
     stop_redirect(conn, stop_id, Map.delete(Map.delete(params, "_"), "stop_id"))
   end
 
-  def nav_path(conn, params) do
-    # For now we ignore the path params, we may add special handling for the different paths eventually
-    app_store_redirect(conn, Map.delete(params, "_"))
+  def alert(conn, %{"path_params" => path_params} = params) do
+    final_params = Map.delete(params, "path_params")
+    stop_id = find_path_param(path_params, stop_keys())
+
+    if is_nil(stop_id) do
+      route_id = find_path_param(path_params, route_keys())
+
+      if is_nil(route_id) do
+        app_store_redirect(conn, final_params)
+      else
+        line_redirect(conn, route_id, final_params)
+      end
+    else
+      stop_redirect(conn, stop_id, final_params)
+    end
   end
 
   def campaign(conn, %{"campaign_id" => campaign_id} = params) do
@@ -53,6 +78,19 @@ defmodule MobileAppBackendWeb.DeepLinkController do
 
   def t_alert_cta(conn, params) do
     app_store_redirect(conn, Map.merge(params, campaign_params("t-alert")))
+  end
+
+  @spec find_path_param([String.t()], [String.t()]) :: String.t() | nil
+  def find_path_param(path_params, keys) do
+    key_index =
+      Enum.find_index(path_params, fn param ->
+        Enum.any?(keys, fn key -> key == param end)
+      end)
+
+    case key_index do
+      nil -> nil
+      _ -> Enum.at(path_params, key_index + 1)
+    end
   end
 
   def apple_app_site_association(conn, _params) do
