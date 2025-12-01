@@ -3,6 +3,7 @@ defmodule MBTAV3API.Alert do
   require Util
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
+  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
@@ -244,36 +245,24 @@ defmodule MBTAV3API.Alert do
   @type significance :: :major | :secondary | :accessibility | :minor | nil
 
   @spec significance(t()) :: :accessibility | :major | :minor | nil | :secondary
-  def significance(alert) do
-    case alert.effect do
-      e when e in [:shuttle, :suspension] ->
-        :major
+  def significance(alert)
 
-      e when e in [:station_closure, :stop_closure, :dock_closure, :detour, :snow_route] ->
-        if has_stops_specified(alert) do
-          :major
-        else
-          :secondary
-        end
+  def significance(%__MODULE__{effect: e}) when e in [:shuttle, :suspension], do: :major
 
-      :service_change ->
-        :secondary
-
-      :elevator_closure ->
-        :accessibility
-
-      :track_change ->
-        :minor
-
-      :delay ->
-        delay_alert_significance(alert)
-
-      _ ->
-        nil
+  def significance(%__MODULE__{effect: e} = alert)
+      when e in [:station_closure, :stop_closure, :dock_closure, :detour, :snow_route] do
+    if has_stops_specified(alert) do
+      :major
+    else
+      :secondary
     end
   end
 
-  defp delay_alert_significance(alert) do
+  def significance(%__MODULE__{effect: :service_change}), do: :secondary
+  def significance(%__MODULE__{effect: :elevator_closure}), do: :accessibility
+  def significance(%__MODULE__{effect: :track_change}), do: :minor
+
+  def significance(%__MODULE__{effect: :delay} = alert) do
     if (alert.severity >= 3 and Enum.any?(alert.informed_entity, &(&1.route_type != :bus))) or
          alert.cause == :single_tracking do
       :minor
@@ -281,6 +270,12 @@ defmodule MBTAV3API.Alert do
       nil
     end
   end
+
+  # in the frontend, we ignore cancellation alerts, since we show trips as cancelled directly,
+  # but in the backend, we still want to treat them as significant enough to be sent
+  def significance(%__MODULE__{effect: :cancellation}), do: :secondary
+
+  def significance(_), do: nil
 
   @spec compare_significance(significance(), significance()) :: :lt | :eq | :gt
   def compare_significance(s1, s2) do
@@ -298,6 +293,31 @@ defmodule MBTAV3API.Alert do
   @spec any_informed_entity_satisfies(t(), (InformedEntity.t() -> boolean())) :: boolean()
   def any_informed_entity_satisfies(alert, predicate) do
     Enum.any?(alert.informed_entity, predicate)
+  end
+
+  @spec applicable_alerts([t()], 0 | 1 | nil, [Route.id()], [Stop.id()] | nil, Trip.id() | nil) ::
+          [t()]
+  def applicable_alerts(alerts, direction_id, route_ids, stop_ids, trip_id) do
+    Enum.filter(alerts, fn alert ->
+      any_informed_entity_satisfies(alert, fn ie ->
+        InformedEntity.activity_in?(ie, [:board]) and
+          InformedEntity.direction?(ie, direction_id) and
+          InformedEntity.route_in?(ie, route_ids) and
+          (is_nil(stop_ids) or InformedEntity.stop_in?(ie, stop_ids)) and
+          InformedEntity.trip?(ie, trip_id)
+      end)
+    end)
+  end
+
+  @spec elevator_alerts([t()], [Stop.id()]) :: [t()]
+  def elevator_alerts(alerts, stop_ids) do
+    Enum.filter(alerts, fn alert ->
+      alert.effect == :elevator_closure and
+        any_informed_entity_satisfies(alert, fn ie ->
+          InformedEntity.activity_in?(ie, [:using_wheelchair]) and
+            InformedEntity.stop_in?(ie, stop_ids)
+        end)
+    end)
   end
 
   @spec downstream_alerts([t()], Trip.t(), [Stop.id()]) :: [t()]
