@@ -13,10 +13,20 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           "user_id" => user_id,
           "alert_id" => alert_id,
           "subscriptions" => subscriptions,
-          "upstream_timestamp" => upstream_timestamp
+          "upstream_timestamp" => upstream_timestamp,
+          "type" => type
         }
       }) do
-    {:ok, upstream_timestamp, _} = DateTime.from_iso8601(upstream_timestamp)
+    upstream_timestamp =
+      if is_nil(upstream_timestamp) do
+        nil
+      else
+        {:ok, upstream_timestamp, _} = DateTime.from_iso8601(upstream_timestamp)
+        upstream_timestamp
+      end
+
+    {:ok, type} = Ecto.Enum.cast_value(DeliveredNotification, :type, type)
+
     Logger.info("#{__MODULE__} sending alert #{alert_id} to user #{user_id}")
 
     user = Repo.get!(User, user_id)
@@ -53,7 +63,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     Repo.insert!(%DeliveredNotification{
       user_id: user_id,
       alert_id: alert_id,
-      upstream_timestamp: upstream_timestamp
+      upstream_timestamp: upstream_timestamp,
+      type: type
     })
 
     :ok

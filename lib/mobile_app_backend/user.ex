@@ -1,6 +1,8 @@
 defmodule MobileAppBackend.User do
   use MobileAppBackend.Schema
 
+  @type id :: integer()
+
   @moduledoc """
   Represent a mobile app user. Users are not required to log in to a unique account.
   Accordingly, a single device may end up with multiple user records, though old records

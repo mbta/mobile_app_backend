@@ -12,6 +12,7 @@ defmodule MBTAV3API.Alert do
           id: String.t(),
           active_period: [ActivePeriod.t()],
           cause: cause(),
+          closed_timestamp: DateTime.t() | nil,
           description: String.t() | nil,
           duration_certainty: duration_certainty(),
           effect: effect(),
@@ -145,6 +146,7 @@ defmodule MBTAV3API.Alert do
     :id,
     :active_period,
     :cause,
+    :closed_timestamp,
     :description,
     :duration_certainty,
     :effect,
@@ -162,6 +164,7 @@ defmodule MBTAV3API.Alert do
     [
       :active_period,
       :cause,
+      :closed_timestamp,
       :description,
       :duration_certainty,
       :effect,
@@ -203,6 +206,7 @@ defmodule MBTAV3API.Alert do
         Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
         |> ActivePeriod.collapse(),
       cause: parse_cause(item.attributes["cause"]),
+      closed_timestamp: Util.parse_optional_datetime!(item.attributes["closed_timestamp"]),
       description: item.attributes["description"],
       duration_certainty: parse_duration_certainty(item.attributes["duration_certainty"]),
       effect: parse_effect(item.attributes["effect"]),

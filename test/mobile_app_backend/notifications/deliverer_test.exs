@@ -24,6 +24,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     Alerts.process_reset([alert], [])
     alert_id = alert.id
     upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -43,7 +44,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         user_id: user_id,
         alert_id: alert_id,
         subscriptions: [%{route: "1", stop: "1", direction: 1}],
-        upstream_timestamp: upstream_timestamp
+        upstream_timestamp: upstream_timestamp,
+        type: type
       })
 
     assert_received_tesla_call(received_env, received_opts, adapter: TeslaMockAdapter)
@@ -75,7 +77,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
              %DeliveredNotification{
                user_id: ^user_id,
                alert_id: ^alert_id,
-               upstream_timestamp: ^upstream_timestamp
+               upstream_timestamp: ^upstream_timestamp,
+               type: ^type
              }
            ] = Repo.all(DeliveredNotification)
 
@@ -90,6 +93,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     Alerts.process_reset([alert], [])
     alert_id = alert.id
     upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -110,7 +114,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           user_id: user_id,
           alert_id: alert_id,
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
-          upstream_timestamp: upstream_timestamp
+          upstream_timestamp: upstream_timestamp,
+          type: type
         })
       end)
 
@@ -118,7 +123,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
              %DeliveredNotification{
                user_id: ^user_id,
                alert_id: ^alert_id,
-               upstream_timestamp: ^upstream_timestamp
+               upstream_timestamp: ^upstream_timestamp,
+               type: ^type
              }
            ] = Repo.all(DeliveredNotification)
 

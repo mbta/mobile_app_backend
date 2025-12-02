@@ -13,88 +13,102 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   @impl Oban.Worker
   def perform(_) do
     Repo.transact(fn ->
-      active_notifications = get_active_notifications()
-      open_windows = get_open_windows()
+      now = DateTime.now!("America/New_York")
+      relevant_alerts = get_relevant_alerts(now)
+      open_windows = get_open_windows(now)
 
-      find_new_recipients(active_notifications, open_windows)
+      find_new_recipients(relevant_alerts, open_windows, now)
       |> enqueue_delivery()
 
       {:ok, nil}
     end)
   end
 
-  @typep active_notification :: {Alert.t(), upstream_timestamp :: DateTime.t()}
-
-  @spec get_active_notifications :: [active_notification()]
-  defp get_active_notifications do
+  @spec get_relevant_alerts(DateTime.t()) :: [Alert.t()]
+  defp get_relevant_alerts(now) do
     alerts = Alerts.fetch([])
-    now = DateTime.now!("America/New_York")
 
-    Enum.flat_map(alerts, fn %Alert{} = alert ->
-      active? =
+    Enum.filter(alerts, fn %Alert{} = alert ->
+      # to send anything, the alert must be significant
+      significant? = Alert.significance(alert) != nil
+
+      # to send a reminder, the alert must be active at some point within the next 24h
+      # to send a notification, the alert must be active right now
+      active_now_or_soon? =
         alert.active_period
-        |> Enum.any?(fn %Alert.ActivePeriod{} = active_period ->
-          DateTime.compare(active_period.start, now) != :gt and
-            (is_nil(active_period.end) or DateTime.compare(active_period.end, now) != :lt)
+        |> Enum.any?(fn %Alert.ActivePeriod{start: active_start, end: active_end} ->
+          start_hours_away = DateTime.diff(now, active_start, :hour)
+          ends_in_future? = is_nil(active_end) or DateTime.compare(active_end, now) != :lt
+
+          start_hours_away < 24 and ends_in_future?
         end)
 
-      if active? and not is_nil(alert.last_push_notification_timestamp) do
-        [{alert, alert.last_push_notification_timestamp}]
+      # to send an all clear, the alert must have an all clear timestamp
+      all_clear? = not is_nil(alert.closed_timestamp)
+
+      significant? and (active_now_or_soon? or all_clear?)
+    end)
+  end
+
+  @spec get_open_windows(DateTime.t()) :: [User.t()]
+  defp get_open_windows(now) do
+    # to receive a reminder, the window must be open either right now or in twelve hours
+    # to receive a notification or all clear, the window must be open right now
+    current_datetime = now
+    current_day_of_week = Date.day_of_week(current_datetime)
+    current_time = DateTime.to_time(current_datetime)
+
+    reminder_target = DateTime.add(current_datetime, 12, :hour)
+    reminder_target_day_of_week = Date.day_of_week(reminder_target)
+    reminder_target_time = DateTime.to_time(reminder_target)
+
+    Repo.all(
+      from u in User,
+        join: s in assoc(u, :notification_subscriptions),
+        join: w in assoc(s, :windows),
+        where:
+          (w.start_time <= ^current_time and ^current_time <= w.end_time and
+             ^current_day_of_week in w.days_of_week) or
+            (w.start_time <= ^reminder_target_time and ^reminder_target_time <= w.end_time and
+               ^reminder_target_day_of_week in w.days_of_week),
+        preload: [notification_subscriptions: {s, windows: w}]
+    )
+  end
+
+  @spec find_new_recipients([Alert.t()], [User.t()], DateTime.t()) :: [
+          {User.t(), [Subscription.t()], Alert.t()}
+        ]
+  defp find_new_recipients(alerts, users, now) do
+    Enum.flat_map(users, &new_notifications(&1, alerts, now))
+  end
+
+  defp new_notifications(
+         %User{id: user_id, notification_subscriptions: subscriptions} = user,
+         alerts,
+         now
+       ) do
+    Engine.notifications(subscriptions, alerts, now)
+    |> Enum.flat_map(fn {subscriptions, alert, type} ->
+      if DeliveredNotification.can_send?(user_id, alert.id, type) do
+        [{user, subscriptions, {alert, type}}]
       else
         []
       end
     end)
   end
 
-  @spec get_open_windows :: %{User.t() => [Subscription.t()]}
-  defp get_open_windows do
-    current_datetime = DateTime.now!("America/New_York")
-    current_day_of_week = Date.day_of_week(current_datetime)
-    current_time = DateTime.to_time(current_datetime)
-
-    open_window_users =
-      Repo.all(
-        from u in User,
-          join: s in assoc(u, :notification_subscriptions),
-          join: w in assoc(s, :windows),
-          where:
-            w.start_time <= ^current_time and ^current_time <= w.end_time and
-              ^current_day_of_week in w.days_of_week,
-          select: %{user: u, subscription: s}
-      )
-
-    Enum.group_by(open_window_users, & &1.user, & &1.subscription)
-  end
-
-  @spec find_new_recipients([active_notification()], %{User.t() => [Subscription.t()]}) :: [
-          {User.t(), [Subscription.t()], active_notification()}
-        ]
-  defp find_new_recipients(active_notifications, open_windows) do
-    Enum.flat_map(active_notifications, fn active_notification ->
-      open_windows
-      |> Enum.map(&new_recipient(active_notification, &1))
-      |> Enum.reject(&is_nil/1)
-    end)
-  end
-
-  defp new_recipient(
-         {%Alert{id: alert_id} = alert, upstream_timestamp},
-         {%User{id: user_id} = user, subscriptions}
-       ) do
-    with [_ | _] = matching_subscriptions <-
-           Enum.filter(subscriptions, &Engine.matches?(alert, &1)),
-         false <- DeliveredNotification.already_sent?(user_id, alert_id, upstream_timestamp) do
-      {user, matching_subscriptions, {alert, upstream_timestamp}}
-    else
-      _ -> nil
-    end
-  end
-
-  @spec enqueue_delivery([{User.t(), [Subscription.t()], active_notification()}]) :: :ok
+  @spec enqueue_delivery([
+          {User.t(), [Subscription.t()], {Alert.t(), DeliveredNotification.type()}}
+        ]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, subscriptions,
-                              {%Alert{} = alert, upstream_timestamp}} ->
+    Enum.each(recipients, fn {%User{} = recipient, subscriptions, {%Alert{} = alert, type}} ->
+      {type, upstream_timestamp} =
+        case type do
+          {type, upstream_timestamp} -> {type, upstream_timestamp}
+          type when is_atom(type) -> {type, nil}
+        end
+
       subscriptions =
         Enum.map(subscriptions, fn %Subscription{
                                      route_id: route_id,
@@ -108,7 +122,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         user_id: recipient.id,
         alert_id: alert.id,
         subscriptions: subscriptions,
-        upstream_timestamp: upstream_timestamp
+        upstream_timestamp: upstream_timestamp,
+        type: type
       }
       |> Deliverer.new()
       |> Oban.insert!()
