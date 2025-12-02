@@ -11,7 +11,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   setup :verify_on_exit!
 
   test "matches Green Line subscription to individual routes" do
-    alert = build(:alert, informed_entity: [%Alert.InformedEntity{route: "Green-D"}])
+    alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}]
+      )
+
     subscription = NotificationsFactory.build(:notification_subscription, route_id: "line-Green")
     assert Engine.matches?(alert, subscription)
   end
@@ -24,23 +29,28 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     )
 
     GlobalDataCacheMock
-    |> expect(:default_key, 2, fn -> :default_key end)
-    |> expect(:get_data, 2, fn _ ->
+    |> expect(:default_key, fn -> :default_key end)
+    |> expect(:get_data, fn _ ->
       %{
         lines: %{},
         pattern_ids_by_stop: %{},
         routes: %{},
         route_patterns: %{},
         stops: %{
-          "70158" => %MBTAV3API.Stop{
-            parent_station_id: "place-boyls"
+          "place-boyls" => %MBTAV3API.Stop{
+            child_stop_ids: ["70158"]
           }
         },
         trips: %{}
       }
     end)
 
-    alert = build(:alert, informed_entity: [%Alert.InformedEntity{stop: "70158"}])
+    alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "70158"}]
+      )
+
     subscription = NotificationsFactory.build(:notification_subscription, stop_id: "place-boyls")
     assert Engine.matches?(alert, subscription)
   end
@@ -73,5 +83,38 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert Engine.matches?(alert, subscription)
+  end
+
+  test "includes elevator closures if requested" do
+    alert =
+      build(:alert,
+        effect: :elevator_closure,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:using_wheelchair],
+            stop: "place-chncl"
+          }
+        ]
+      )
+
+    subscription_including =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Orange",
+        stop_id: "place-chncl",
+        direction_id: 0,
+        include_accessibility: true
+      )
+
+    assert Engine.matches?(alert, subscription_including)
+
+    subscription_excluding =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Orange",
+        stop_id: "place-chncl",
+        direction_id: 0,
+        include_accessibility: false
+      )
+
+    refute Engine.matches?(alert, subscription_excluding)
   end
 end

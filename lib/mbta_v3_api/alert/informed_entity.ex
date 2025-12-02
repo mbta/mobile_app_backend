@@ -30,7 +30,13 @@ defmodule MBTAV3API.Alert.InformedEntity do
   )
 
   @derive Jason.Encoder
-  defstruct [:activities, :direction_id, :facility, :route, :route_type, :stop, :trip]
+  defstruct activities: [],
+            direction_id: nil,
+            facility: nil,
+            route: nil,
+            route_type: nil,
+            stop: nil,
+            trip: nil
 
   @spec parse!(map()) :: t()
   def parse!(data) when is_map(data) do
@@ -66,7 +72,15 @@ defmodule MBTAV3API.Alert.InformedEntity do
     matches?(informed_entity.route, route)
   end
 
+  def route_in?(informed_entity, routes) do
+    is_nil(informed_entity.route) or informed_entity.route in routes
+  end
+
   def stop_in?(informed_entity, stops) do
     is_nil(informed_entity.stop) or informed_entity.stop in stops
+  end
+
+  def trip?(informed_entity, trip) do
+    matches?(informed_entity.trip, trip)
   end
 end

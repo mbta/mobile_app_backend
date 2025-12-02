@@ -19,6 +19,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
             end: DateTime.add(now, 10, :minute)
           }
         ],
+        effect: :suspension,
         informed_entity: [
           %MBTAV3API.Alert.InformedEntity{
             activities: [:board, :exit, :ride],

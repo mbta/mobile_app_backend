@@ -312,11 +312,25 @@ defmodule MBTAV3API.AlertTest do
             :stop_closure -> :major
             :suspension -> :major
             :track_change -> :minor
+            :cancellation -> :secondary
             _ -> nil
           end
 
-        assert Alert.significance(alert) == expected_significance,
-               "significance for effect #{effect} #{if specified_stops, do: "with", else: "without"} specified stops"
+        actual_significance = Alert.significance(alert)
+
+        assert actual_significance == expected_significance,
+               Enum.join(
+                 [
+                   "significance for effect",
+                   effect,
+                   if(specified_stops, do: "with", else: "without"),
+                   "specified stops: expected",
+                   inspect(expected_significance),
+                   "but was",
+                   actual_significance
+                 ],
+                 " "
+               )
       end
     end
   end
@@ -370,6 +384,167 @@ defmodule MBTAV3API.AlertTest do
     assert Alert.significance(single_tracking_delay_info) == :minor
     assert Alert.significance(subway_delay_not_severe) == nil
     assert Alert.significance(bus_delay_severe) == nil
+  end
+
+  test "filter filters alerts to matching stops routes and directions" do
+    route = build(:route)
+    stop = build(:stop)
+
+    alert_match =
+      build(:alert,
+        informed_entity: [
+          %InformedEntity{activities: [:board], route: route.id, stop: stop.id, direction_id: 0}
+        ]
+      )
+
+    alert_match_no_direction =
+      build(:alert,
+        informed_entity: [
+          %InformedEntity{activities: [:board], route: route.id, stop: stop.id, direction_id: nil}
+        ]
+      )
+
+    alert_different_route =
+      build(:alert,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:board],
+            route: "other_route",
+            stop: stop.id,
+            direction_id: 0
+          }
+        ]
+      )
+
+    alert_different_stop =
+      build(:alert,
+        informed_entity: [
+          %InformedEntity{
+            activities: [:board],
+            route: route.id,
+            stop: "other_stop",
+            direction_id: 0
+          }
+        ]
+      )
+
+    alert_different_direction =
+      build(:alert,
+        informed_entity: [
+          %InformedEntity{activities: [:board], route: route.id, stop: stop.id, direction_id: 1}
+        ]
+      )
+
+    filtered_list =
+      Alert.applicable_alerts(
+        [
+          alert_match,
+          alert_match_no_direction,
+          alert_different_route,
+          alert_different_stop,
+          alert_different_direction
+        ],
+        0,
+        [route.id],
+        [stop.id],
+        nil
+      )
+
+    assert filtered_list == [alert_match, alert_match_no_direction]
+  end
+
+  test "filters applicable alerts" do
+    stop = build(:stop)
+    route = build(:route)
+
+    valid_alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [
+          %InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: route.id,
+            route_type: route.type,
+            stop: stop.id
+          }
+        ]
+      )
+
+    invalid_alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [
+          %InformedEntity{
+            activities: ~w(exit ride)a,
+            route: "wrong",
+            route_type: route.type,
+            stop: "wrong"
+          }
+        ]
+      )
+
+    assert Alert.applicable_alerts([valid_alert, invalid_alert], nil, [route.id], [stop.id], nil) ==
+             [valid_alert]
+  end
+
+  test "filters out alerts without board activity" do
+    stop = build(:stop)
+    route = build(:route)
+
+    alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [
+          %InformedEntity{
+            activities: ~w(exit ride)a,
+            route: route.id,
+            route_type: route.type,
+            stop: stop.id
+          }
+        ]
+      )
+
+    assert Alert.applicable_alerts([alert], nil, [route.id], [stop.id], nil) == []
+  end
+
+  test "filters out alerts with non-matching route ID" do
+    stop = build(:stop)
+    route = build(:route)
+
+    alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [
+          %InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: "not matching",
+            route_type: route.type,
+            stop: stop.id
+          }
+        ]
+      )
+
+    assert Alert.applicable_alerts([alert], nil, [route.id], [stop.id], nil) == []
+  end
+
+  test "filters out alerts with non-matching stop ID" do
+    stop = build(:stop)
+    route = build(:route)
+
+    alert =
+      build(:alert,
+        effect: :suspension,
+        informed_entity: [
+          %InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: route.id,
+            route_type: route.type,
+            stop: "not matching"
+          }
+        ]
+      )
+
+    assert Alert.applicable_alerts([alert], nil, [route.id], [stop.id], nil) == []
   end
 
   test "downstreamAlerts returns alerts for first downstream alerting stop" do
@@ -521,6 +696,24 @@ defmodule MBTAV3API.AlertTest do
 
     downstream_alerts = Alert.downstream_alerts([alert], trip, [target_stop.id])
     assert downstream_alerts == []
+  end
+
+  test "elevatorAlerts matches relevant accessibility alerts" do
+    stop = build(:stop)
+
+    elevator_alert =
+      build(:alert,
+        effect: :elevator_closure,
+        informed_entity: [%InformedEntity{activities: [:using_wheelchair], stop: stop.id}]
+      )
+
+    service_alert =
+      build(:alert,
+        effect: :no_service,
+        informed_entity: [%InformedEntity{activities: [:board], stop: stop.id}]
+      )
+
+    assert Alert.elevator_alerts([service_alert, elevator_alert], [stop.id]) == [elevator_alert]
   end
 
   test "alertsDownstreamForPatterns returns alert for downstream stop" do
