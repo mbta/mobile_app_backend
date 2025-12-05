@@ -19,6 +19,9 @@ defmodule MBTAV3API.Repository do
   @callback schedules(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Schedule.t())} | {:error, term()}
 
+  @callback services(JsonApi.Params.t(), Keyword.t()) ::
+              {:ok, JsonApi.Response.t(MBTAV3API.Service.t())} | {:error, term()}
+
   @callback stops(JsonApi.Params.t(), Keyword.t()) ::
               {:ok, JsonApi.Response.t(MBTAV3API.Stop.t())} | {:error, term()}
 
@@ -55,6 +58,13 @@ defmodule MBTAV3API.Repository do
 
   def schedules(params, opts \\ []) do
     Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).schedules(
+      params,
+      opts
+    )
+  end
+
+  def services(params, opts \\ []) do
+    Application.get_env(:mobile_app_backend, MBTAV3API.Repository, Repository.Impl).services(
       params,
       opts
     )
@@ -102,6 +112,10 @@ defmodule MBTAV3API.Repository.Impl do
   @impl true
   @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
   def schedules(params, opts \\ []), do: all(MBTAV3API.Schedule, params, opts)
+
+  @impl true
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  def services(params, opts \\ []), do: all(MBTAV3API.Service, params, opts)
 
   @impl true
   @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
