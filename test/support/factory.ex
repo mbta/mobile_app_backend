@@ -65,6 +65,29 @@ defmodule MobileAppBackend.Factory do
     }
   end
 
+  def schedule_factory do
+    %MBTAV3API.Schedule{
+      id: Uniq.UUID.uuid7(),
+      arrival_time: nil,
+      departure_time: ~B[2024-03-20 16:41:01],
+      stop_sequence: 20,
+      route_id: "Green-D",
+      stop_id: "70206",
+      trip_id: "1591593214"
+    }
+  end
+
+  def service_factory do
+    %MBTAV3API.Service{
+      id: Uniq.UUID.uuid7(),
+      start_date: ~D[2025-12-23],
+      end_date: ~D[2026-04-02],
+      added_dates: [],
+      removed_dates: [],
+      valid_days: [1, 2, 3, 4]
+    }
+  end
+
   def shape_factory do
     %MBTAV3API.Shape{
       id: Uniq.UUID.uuid7(),

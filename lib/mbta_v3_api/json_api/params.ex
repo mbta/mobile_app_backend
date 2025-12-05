@@ -1,12 +1,14 @@
 defmodule MBTAV3API.JsonApi.Params do
   alias MBTAV3API.JsonApi.FilterValue
 
+  @type page_param :: {:offset | :limit, non_neg_integer()}
   @type sort_param :: {atom(), :asc | :desc}
   @type fields_param :: {atom(), list(atom())}
   @type include_param :: atom() | {atom(), include_param()} | list(include_param())
   @type filter_param :: {atom(), FilterValue.t()}
   @type param ::
-          {:sort, sort_param()}
+          {:page, page_param()}
+          | {:sort, sort_param()}
           | {:fields, [fields_param()]}
           | {:include, include_param()}
           | {:filter, [filter_param()]}
@@ -19,6 +21,7 @@ defmodule MBTAV3API.JsonApi.Params do
 
       iex> MBTAV3API.JsonApi.Params.flatten_params(
       ...>   [
+      ...>     page: [offset: 3, limit: 2],
       ...>     sort: {:name, :asc},
       ...>     fields: [route: [:color, :short_name]],
       ...>     include: :route,
@@ -27,6 +30,8 @@ defmodule MBTAV3API.JsonApi.Params do
       ...>   MBTAV3API.RoutePattern
       ...> )
       %{
+        "page[offset]" => "3",
+        "page[limit]" => "2",
         "sort" => "name",
         "fields[route]" => "color,short_name",
         "fields[route_pattern]" => "canonical,direction_id,name,sort_order,typicality",
@@ -38,14 +43,19 @@ defmodule MBTAV3API.JsonApi.Params do
   """
   @spec flatten_params(t(), module()) :: %{String.t() => String.t()}
   def flatten_params(params, root_module) do
-    Map.merge(
-      Map.merge(
-        sort(params[:sort]),
-        fields(root_module, params[:include], Keyword.get(params, :fields, []))
-      ),
-      Map.merge(include(params[:include]), filter(root_module, params[:filter]))
-    )
+    [
+      page(params[:page]),
+      sort(params[:sort]),
+      fields(root_module, params[:include], Keyword.get(params, :fields, [])),
+      include(params[:include]),
+      filter(root_module, params[:filter])
+    ]
+    |> Enum.reduce(&Map.merge/2)
   end
+
+  @spec page(nil | [page_param()]) :: %{String.t() => String.t()}
+  defp page(nil), do: %{}
+  defp page(args), do: Map.new(args, fn {k, v} -> {"page[#{k}]", to_string(v)} end)
 
   @spec sort(nil | sort_param()) :: %{String.t() => String.t()}
   defp sort(nil), do: %{}

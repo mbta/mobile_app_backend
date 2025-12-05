@@ -89,6 +89,7 @@ defmodule MBTAV3API.JsonApi.Object do
     :route,
     :route_pattern,
     :schedule,
+    :service,
     :shape,
     :stop,
     :trip,
