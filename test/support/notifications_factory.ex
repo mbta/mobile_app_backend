@@ -32,4 +32,12 @@ defmodule MobileAppBackend.NotificationsFactory do
       days_of_week: days_of_week
     }
   end
+
+  def perpetual_window_factory do
+    %MobileAppBackend.Notifications.Window{
+      start_time: ~T[00:00:00],
+      end_time: ~T[23:59:59],
+      days_of_week: Range.to_list(0..6)
+    }
+  end
 end
