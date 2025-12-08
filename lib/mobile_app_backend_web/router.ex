@@ -48,6 +48,7 @@ defmodule MobileAppBackendWeb.Router do
     post("/notifications/subscriptions/write", NotificationSubscriptionsController, :write)
     get("/route/stop-graph", RouteController, :stop_graph)
     get("/schedules", ScheduleController, :schedules)
+    get("/schedules/next", NextScheduleController, :next_schedule)
     get("/search/query", SearchController, :query)
     get("/search/routes", SearchController, :routes)
     get("/shapes/map-friendly/rail", ShapesController, :rail)
