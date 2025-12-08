@@ -77,6 +77,118 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   end
 
   # Convert the struct to a record for ETS
+  # override alert 679818 behavior to temporarily address GL North Station alert boundary issue
+  defp to_record(%Alert{id: "679818"} = alert) do
+    entities =
+      alert.informed_entity
+      |> Enum.concat([
+        %Alert.InformedEntity{
+          stop: "70203",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "70203",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "70204",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "70204",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "70206",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "70206",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-haecl",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-haecl",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-haecl",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-haecl",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-north",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-north",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-B",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-north",
+          direction_id: 0,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        },
+        %Alert.InformedEntity{
+          stop: "place-north",
+          direction_id: 1,
+          route_type: :light_rail,
+          route: "Green-C",
+          activities: [:board, :exit, :ride]
+        }
+      ])
+
+    {
+      "679818",
+      %{alert | informed_entity: entities}
+    }
+  end
+
+  # Convert the struct to a record for ETS
   defp to_record(
          %Alert{
            id: id
