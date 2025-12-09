@@ -11,6 +11,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
   alias MobileAppBackend.NotificationsFactory
+  alias MobileAppBackend.User
 
   setup :set_mox_from_context
   setup :verify_on_exit!
@@ -129,5 +130,45 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
            ] = Repo.all(DeliveredNotification)
 
     assert user.fcm_last_verified == Repo.reload!(user).fcm_last_verified
+  end
+
+  test "deletes user if FCM returns 404" do
+    start_link_supervised!(Alerts)
+    user = NotificationsFactory.insert(:user)
+    NotificationsFactory.insert(:notification_subscription, user: user)
+    user_id = user.id
+    alert = Factory.build(:alert)
+    Alerts.process_reset([alert], [])
+    alert_id = alert.id
+    upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
+
+    reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
+      token: "gcp_token",
+      expires: ~U[9999-12-31 23:59:59Z]
+    })
+
+    reassign_env(:tesla, :adapter, TeslaMockAdapter)
+
+    expect_tesla_call(
+      times: 1,
+      returns: %Tesla.Env{status: 404} |> json(%{}),
+      adapter: TeslaMockAdapter
+    )
+
+    {:ok, _} =
+      with_log(fn ->
+        perform_job(Notifications.Deliverer, %{
+          user_id: user_id,
+          alert_id: alert_id,
+          subscriptions: [%{route: "1", stop: "1", direction: 1}],
+          upstream_timestamp: upstream_timestamp,
+          type: type
+        })
+      end)
+
+    assert [] = Repo.all(DeliveredNotification)
+    assert [] = Repo.all(User)
+    assert [] = Repo.all(Notifications.Subscription)
   end
 end
