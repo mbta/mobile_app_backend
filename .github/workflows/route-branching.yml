@@ -37,7 +37,7 @@ jobs:
           echo "mix-restore=cache-mix-${{ hashFiles('.tool-versions') }}-" >> $GITHUB_OUTPUT
           echo "mix=cache-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('**/mix.lock') }}" >> $GITHUB_OUTPUT
       - name: asdf cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.asdf
           key: ${{ steps.cache-keys.outputs.asdf }}
@@ -54,7 +54,7 @@ jobs:
         if: steps.asdf-cache.outputs.cache-hit != 'true'
       - name: Mix cache
         id: deps-cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: |
             deps
