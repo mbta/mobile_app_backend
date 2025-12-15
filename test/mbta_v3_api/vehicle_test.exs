@@ -2,9 +2,9 @@ defmodule MBTAV3API.VehicleTest do
   use ExUnit.Case, async: true
 
   import Test.Support.Sigils
-  alias MBTAV3API.Vehicle.Carriage
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Vehicle
+  alias MBTAV3API.Vehicle.Carriage
 
   test "parse!/1" do
     assert %Vehicle{
