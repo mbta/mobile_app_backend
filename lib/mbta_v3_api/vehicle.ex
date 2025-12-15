@@ -135,5 +135,14 @@ defmodule MBTAV3API.Vehicle do
     end)
   end
 
+  # Orange Line vehicles will always have vehicle ID O-1234ABCD
+  defp parse_decoration("O-" <> _, carriages) do
+    Enum.find_value(carriages, fn %Carriage{label: label} ->
+      if label in ["1524", "1525", "1528", "1529", "1530", "1531"] do
+        :winter_holiday
+      end
+    end)
+  end
+
   defp parse_decoration(_, _), do: nil
 end
