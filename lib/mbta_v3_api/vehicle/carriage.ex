@@ -8,6 +8,7 @@ defmodule MBTAV3API.Vehicle.Carriage do
           label: String.t() | nil
         }
 
+  @derive Jason.Encoder
   defstruct [:occupancy_status, :occupancy_percentage, :label]
 
   @spec parse!(map()) :: t()
