@@ -17,6 +17,10 @@ defmodule MBTAV3API.JsonApi.Object do
   Map of related objects that can be included to their struct modules. `%{trip: MBTAV3API.Trip, stops: MBTAV3API.Stop, parent_station: MBTAV3API.Stop}`, etc. Names should match `defstruct/1`.
   """
   @callback includes :: %{atom() => module()}
+  @doc """
+  If needed, a list of virtual fields that should be included at the end of `defstruct/1` but not loaded from the API.
+  """
+  @callback virtual_fields :: [atom()]
 
   @doc """
   If needed, a custom serialize function.
@@ -30,7 +34,7 @@ defmodule MBTAV3API.JsonApi.Object do
               field_name :: atom(),
               provided_value :: JsonApi.FilterValue.t()
             ) :: JsonApi.FilterValue.t()
-  @optional_callbacks serialize_filter_value: 2
+  @optional_callbacks virtual_fields: 0, serialize_filter_value: 2
 
   @doc """
   Sets up the `JsonApi.Object` behaviour with compile-time validation of `c:fields/0` and `c:includes/0` against the `defstruct/1`.
@@ -259,7 +263,15 @@ defmodule MBTAV3API.JsonApi.Object do
       |> Enum.map(&key_for_include_name/1)
       |> Enum.sort()
 
-    expected_struct_keys = [:id] ++ expected_fields ++ expected_includes
+    expected_virtual_fields =
+      if Module.defines?(module, {:virtual_fields, 0}) do
+        module.virtual_fields() |> Enum.map(apply_rename)
+      else
+        []
+      end
+
+    expected_struct_keys =
+      [:id] ++ expected_fields ++ expected_includes ++ expected_virtual_fields
 
     if expected_struct_keys == actual_struct_keys do
       :ok
