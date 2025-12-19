@@ -12,7 +12,7 @@ defmodule MobileAppBackendWeb.NextScheduleControllerTest do
   end
 
   test "finds the next schedule", %{conn: conn} do
-    now = DateTime.now!("America/New_York")
+    now = DateTime.from_unix!(1_765_209_600)
     today = DateTime.to_date(now)
     tomorrow = Date.add(today, 1)
     later_day = Date.add(today, 5)
