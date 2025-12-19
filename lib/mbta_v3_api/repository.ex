@@ -93,6 +93,7 @@ defmodule MBTAV3API.Repository.Impl do
   alias MBTAV3API.{JsonApi, RepositoryCache}
 
   @ttl :timer.hours(1)
+  @trip_ttl :timer.minutes(5)
 
   @impl true
   def alerts(params, opts \\ []), do: all(MBTAV3API.Alert, params, opts)
@@ -122,7 +123,18 @@ defmodule MBTAV3API.Repository.Impl do
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
 
   @impl true
-  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  @decorate cacheable(
+              cache: RepositoryCache,
+              match: fn
+                {:error, _} -> false
+                :error -> false
+                nil -> false
+                {:ok, %{data: []}} -> false
+                _ -> true
+              end,
+              on_error: :nothing,
+              opts: [ttl: @trip_ttl]
+            )
   def trips(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
 
   @spec all(module(), JsonApi.Params.t(), Keyword.t()) ::
