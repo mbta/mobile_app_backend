@@ -3,6 +3,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   import Ecto.Query
   alias MBTAV3API.Alert
   alias MBTAV3API.Store.Alerts
+  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Deliverer
   alias MobileAppBackend.Notifications.Engine
@@ -88,9 +89,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          now
        ) do
     Engine.notifications(subscriptions, alerts, now)
-    |> Enum.flat_map(fn {subscriptions, alert, type} ->
+    |> Enum.flat_map(fn {summary, alert, type} ->
       if DeliveredNotification.can_send?(user_id, alert.id, type) do
-        [{user, subscriptions, {alert, type}}]
+        [{user, summary, {alert, type}}]
       else
         []
       end
@@ -98,30 +99,21 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec enqueue_delivery([
-          {User.t(), [Subscription.t()], {Alert.t(), DeliveredNotification.type()}}
+          {User.t(), AlertSummary.t(), {Alert.t(), DeliveredNotification.type()}}
         ]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, subscriptions, {%Alert{} = alert, type}} ->
+    Enum.each(recipients, fn {%User{} = recipient, summary, {%Alert{} = alert, type}} ->
       {type, upstream_timestamp} =
         case type do
           {type, upstream_timestamp} -> {type, upstream_timestamp}
           type when is_atom(type) -> {type, nil}
         end
 
-      subscriptions =
-        Enum.map(subscriptions, fn %Subscription{
-                                     route_id: route_id,
-                                     stop_id: stop_id,
-                                     direction_id: direction_id
-                                   } ->
-          %{route: route_id, stop: stop_id, direction: direction_id}
-        end)
-
       %{
         user_id: recipient.id,
         alert_id: alert.id,
-        subscriptions: subscriptions,
+        summary: summary,
         upstream_timestamp: upstream_timestamp,
         type: type
       }

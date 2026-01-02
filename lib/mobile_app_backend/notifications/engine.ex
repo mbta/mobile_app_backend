@@ -2,13 +2,14 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Alert
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Stop
+  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
 
   @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
-          {[Subscription.t()], Alert.t(), DeliveredNotification.type()}
+          {AlertSummary.t(), Alert.t(), DeliveredNotification.type()}
         ]
   def notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
@@ -33,15 +34,15 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       case subscriptions_by_type do
         %{all_clear: subscriptions} ->
-          {subscriptions, alert, :all_clear}
+          {build_summary(alert, subscriptions, now, global_data), alert, :all_clear}
 
         %{notification: subscriptions} ->
-          {subscriptions, alert,
+          {build_summary(alert, subscriptions, now, global_data), alert,
            {:notification,
             alert.last_push_notification_timestamp || hd(alert.active_period).start}}
 
         %{reminder: subscriptions} ->
-          {subscriptions, alert, :reminder}
+          {build_summary(alert, subscriptions, now, global_data), alert, :reminder}
       end
     end)
   end
@@ -161,6 +162,86 @@ defmodule MobileAppBackend.Notifications.Engine do
           starts_in_hours = max(0, DateTime.diff(ap_start, now, :minute) / 60)
           min(starts_in_hours, next_active_in_hours)
         end
+    end
+  end
+
+  defp build_summary(alert, subscriptions, now, global_data) do
+    individual_summaries =
+      Enum.map(subscriptions, fn subscription ->
+        patterns =
+          global_data.route_patterns
+          |> Stream.map(fn {_, pattern} -> pattern end)
+          |> Enum.filter(fn pattern ->
+            (pattern.route_id == subscription.route_id or
+               global_data.routes[pattern.route_id].line_id == subscription.route_id) and
+              pattern.direction_id == subscription.direction_id and
+              Enum.any?(
+                global_data.trips[pattern.representative_trip_id].stop_ids,
+                &(&1 == subscription.stop_id or
+                    &1 in global_data.stops[subscription.stop_id].child_stop_ids)
+              )
+          end)
+
+        AlertSummary.summarizing(
+          alert,
+          subscription.stop_id,
+          subscription.direction_id,
+          patterns,
+          now,
+          global_data
+        )
+      end)
+
+    case individual_summaries do
+      [summary] ->
+        summary
+
+      _ ->
+        effect = alert.effect
+
+        location =
+          individual_summaries
+          |> Enum.map(& &1.location)
+          |> Enum.uniq()
+          |> deduplicate_locations()
+
+        timeframe =
+          individual_summaries
+          |> Enum.map(& &1.timeframe)
+          |> Enum.uniq()
+          |> case do
+            [timeframe] -> timeframe
+          end
+
+        %AlertSummary{effect: effect, location: location, timeframe: timeframe}
+    end
+  end
+
+  defp deduplicate_locations(locations) do
+    case locations do
+      [location] ->
+        location
+
+      [
+        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2},
+        %AlertSummary.Location.SuccessiveStops{start_stop_name: s2, end_stop_name: s1}
+      ] ->
+        [s1, s2] = Enum.sort([s1, s2])
+        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2}
+
+      [
+        %AlertSummary.Location.StopToDirection{start_stop_name: stop, direction: direction} =
+            location,
+        %AlertSummary.Location.DirectionToStop{
+          direction: opposite_direction,
+          end_stop_name: stop
+        }
+      ]
+      when opposite_direction.id == 1 - direction.id ->
+        location
+
+      _ ->
+        nil
     end
   end
 end

@@ -82,6 +82,7 @@ defmodule MBTAV3API.Stop do
 
   def parent_id(%__MODULE__{parent_station_id: nil} = stop), do: stop.id
   def parent_id(%__MODULE__{parent_station_id: parent_id}), do: parent_id
+  def parent_id(nil), do: nil
 
   @spec parent_if_exists(t(), %{id() => t()}) :: t()
   @spec parent_if_exists(nil, %{id() => t()}) :: nil

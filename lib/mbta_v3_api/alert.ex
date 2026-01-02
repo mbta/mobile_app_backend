@@ -186,9 +186,9 @@ defmodule MBTAV3API.Alert do
   def serialize_filter_value(:lifecycle, value), do: serialize_lifecycle!(value)
   def serialize_filter_value(_field, value), do: value
 
-  @spec active?(t(), DateTime.t()) :: boolean()
-  def active?(alert, now \\ DateTime.now!("America/New_York")) do
-    Enum.any?(alert.active_period, fn %ActivePeriod{start: ap_start, end: ap_end} ->
+  @spec current_period(t(), DateTime.t()) :: ActivePeriod.t() | nil
+  def current_period(alert, now) do
+    Enum.find(alert.active_period, fn %ActivePeriod{start: ap_start, end: ap_end} ->
       cond do
         DateTime.compare(now, ap_start) == :lt -> false
         is_nil(ap_end) -> true
@@ -196,6 +196,11 @@ defmodule MBTAV3API.Alert do
         true -> true
       end
     end)
+  end
+
+  @spec active?(t(), DateTime.t()) :: boolean()
+  def active?(alert, now \\ DateTime.now!("America/New_York")) do
+    current_period(alert, now) != nil
   end
 
   @spec parse!(JsonApi.Item.t()) :: t()

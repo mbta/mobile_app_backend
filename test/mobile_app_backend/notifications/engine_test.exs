@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   import Mox
   import Test.Support.Helpers
   alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Notifications.Engine
   alias MobileAppBackend.NotificationsFactory
 
@@ -23,10 +24,21 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "line-Green",
+        stop_id: "place-boyls",
+        direction_id: 0,
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{[^subscription], ^alert, _}] =
+    assert [
+             {%AlertSummary{
+                effect: :suspension,
+                location: %AlertSummary.Location.SuccessiveStops{
+                  start_stop_name: "Union Square",
+                  end_stop_name: "Riverside"
+                },
+                timeframe: nil
+              }, ^alert, _}
+           ] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -69,7 +81,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{[^subscription], ^alert, _}] =
+    assert [{_, ^alert, _}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -104,7 +116,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{[^subscription], ^alert, _}] =
+    assert [{_, ^alert, _}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -132,7 +144,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{[^subscription_including], ^alert, _}] =
+    assert [{_, ^alert, _}] =
              Engine.notifications([subscription_including], [alert], now)
 
     subscription_excluding =
@@ -159,6 +171,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
+        stop_id: "place-sstat",
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
@@ -168,7 +181,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription], ^alert, :all_clear}] =
+    assert [{_, ^alert, :all_clear}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -187,6 +200,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
+        stop_id: "place-sstat",
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
@@ -196,7 +210,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription], ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [{_, ^alert, {:notification, ^upstream_timestamp}}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -215,6 +229,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
+        stop_id: "place-sstat",
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
@@ -224,7 +239,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription], ^alert, {:notification, ^start_time}}] =
+    assert [{_, ^alert, {:notification, ^start_time}}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -243,6 +258,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
+        stop_id: "place-sstat",
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-2) |> DateTime.to_time(),
@@ -252,7 +268,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription], ^alert, :reminder}] =
+    assert [{_, ^alert, :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -297,6 +313,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     subscription =
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
+        stop_id: "place-sstat",
         windows: [
           NotificationsFactory.build(:window,
             start_time: now_plus_12h |> DateTime.add(-2) |> DateTime.to_time(),
@@ -306,7 +323,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription], ^alert, :reminder}] =
+    assert [{_, ^alert, :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -374,11 +391,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[^subscription_now], ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [{_, ^alert, {:notification, ^upstream_timestamp}}] =
              Engine.notifications([subscription_now, subscription_later], [alert], now)
   end
 
-  test "includes multiple subscriptions if all overlapping" do
+  test "keeps identical summary from multiple routes" do
     now = DateTime.now!("America/New_York")
     upstream_timestamp = DateTime.add(now, -2)
 
@@ -416,7 +433,103 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{[_, _], ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [
+             {%AlertSummary{
+                effect: :suspension,
+                location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
+                timeframe: nil
+              }, ^alert, {:notification, ^upstream_timestamp}}
+           ] =
+             Engine.notifications([subscription1, subscription2], [alert], now)
+  end
+
+  test "keeps successive stops if subscribed in both directions" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}]
+      )
+
+    subscription1 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "line-Green",
+        stop_id: "place-boyls",
+        direction_id: 0,
+        windows: [NotificationsFactory.build(:perpetual_window)]
+      )
+
+    subscription2 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "line-Green",
+        stop_id: "place-boyls",
+        direction_id: 1,
+        windows: [NotificationsFactory.build(:perpetual_window)]
+      )
+
+    assert [
+             {%AlertSummary{
+                effect: :suspension,
+                location: %AlertSummary.Location.SuccessiveStops{
+                  start_stop_name: "Riverside",
+                  end_stop_name: "Union Square"
+                },
+                timeframe: nil
+              }, ^alert, _}
+           ] =
+             Engine.notifications([subscription1, subscription2], [alert], now)
+  end
+
+  test "discards location if disagreements" do
+    now = DateTime.now!("America/New_York")
+    upstream_timestamp = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+        effect: :suspension,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], stop: "place-sstat"},
+          %Alert.InformedEntity{activities: [:board], stop: "place-brdwy"}
+        ],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription1 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    subscription2 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "CR-NewBedford",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [
+             {%AlertSummary{
+                effect: :suspension,
+                location: nil,
+                timeframe: nil
+              }, ^alert, {:notification, ^upstream_timestamp}}
+           ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
 end

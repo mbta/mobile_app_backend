@@ -32,4 +32,8 @@ defmodule MBTAV3API.Alert.ActivePeriod do
         [this_period]
     end
   end
+
+  def to_end_of_service?(%__MODULE__{end: %DateTime{hour: 3, minute: 0}}), do: true
+  def to_end_of_service?(%__MODULE__{end: %DateTime{hour: 2, minute: 59}}), do: true
+  def to_end_of_service?(%__MODULE__{}), do: false
 end
