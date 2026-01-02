@@ -12,6 +12,7 @@ defmodule MBTAV3API.PredictionTest do
                "arrival_time" => "2024-01-24T17:08:51-05:00",
                "departure_time" => nil,
                "direction_id" => 0,
+               "last_trip" => true,
                "schedule_relationship" => "ADDED",
                "status" => nil,
                "stop_sequence" => 440
@@ -27,6 +28,7 @@ defmodule MBTAV3API.PredictionTest do
              arrival_time: ~B[2024-01-24 17:08:51],
              departure_time: nil,
              direction_id: 0,
+             last_trip: true,
              revenue: true,
              schedule_relationship: :added,
              status: nil,
