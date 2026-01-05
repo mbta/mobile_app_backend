@@ -233,6 +233,18 @@ defmodule MBTAV3API.VehicleTest do
                attributes: Map.put(required_attributes, "carriages", [%{"label" => "3706"}])
              })
 
+    assert %Vehicle{decoration: nil} =
+             Vehicle.parse!(%JsonApi.Item{
+               id: "O-1",
+               attributes: Map.put(required_attributes, "carriages", nil)
+             })
+
+    assert %Vehicle{decoration: nil} =
+             Vehicle.parse!(%JsonApi.Item{
+               id: "G-1",
+               attributes: Map.put(required_attributes, "carriages", nil)
+             })
+
     assert %Vehicle{decoration: :winter_holiday} =
              Vehicle.parse!(%JsonApi.Item{
                id: "G-1",

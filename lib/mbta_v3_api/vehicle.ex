@@ -123,6 +123,9 @@ defmodule MBTAV3API.Vehicle do
   # CR locomotive 1035 will always have vehicle ID 1035
   defp parse_decoration("1035", _), do: :googly_eyes
 
+  # if carriages are nil and the vehicle id doesn't match a special case, return nil
+  defp parse_decoration(_, nil), do: nil
+
   # light rail vehicles will always have vehicle ID G-12345
   defp parse_decoration("G-" <> _, carriages) do
     Enum.find_value(carriages, fn %Carriage{label: label} ->
