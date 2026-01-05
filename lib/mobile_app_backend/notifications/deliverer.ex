@@ -12,7 +12,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         args: %{
           "user_id" => user_id,
           "alert_id" => alert_id,
-          "subscriptions" => subscriptions,
+          "summary" => summary,
           "upstream_timestamp" => upstream_timestamp,
           "type" => type
         }
@@ -36,7 +36,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     request_body = %FCM.Model.SendMessageRequest{
       message: %FCM.Model.Message{
-        data: %{alertId: alert_id, subscriptions: Jason.encode!(subscriptions)},
+        data: %{summary: summary},
         token: user.fcm_token
       }
     }

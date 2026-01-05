@@ -300,13 +300,21 @@ defmodule Util do
       iex> Util.datetime_to_gtfs(~B[2024-03-12 01:23:45])
       ~D[2024-03-11]
       iex> Util.datetime_to_gtfs(~B[2024-03-12 02:11:00])
+      ~D[2024-03-11]
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 03:00:00])
       ~D[2024-03-12]
+      iex> Util.datetime_to_gtfs(~B[2024-03-12 03:00:00], rounding: :backwards)
+      ~D[2024-03-11]
   """
-  @spec datetime_to_gtfs(DateTime.t()) :: Date.t()
-  def datetime_to_gtfs(%DateTime{hour: hour, time_zone: "America/New_York"} = datetime) do
+  @spec datetime_to_gtfs(DateTime.t(), rounding: :forwards | :backwards) :: Date.t()
+  def datetime_to_gtfs(
+        %DateTime{hour: hour, time_zone: "America/New_York"} = datetime,
+        opts \\ []
+      ) do
     date = DateTime.to_date(datetime)
+    rounding = Keyword.get(opts, :rounding, :forwards)
 
-    if hour in [0, 1] do
+    if hour in [0, 1, 2] or (rounding == :backwards and hour == 3 and datetime.minute == 0) do
       Date.add(date, -1)
     else
       date

@@ -6,6 +6,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   import Tesla.Test
   import Test.Support.Helpers
   alias MBTAV3API.Store.Alerts
+  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Factory
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -44,7 +45,11 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       perform_job(Notifications.Deliverer, %{
         user_id: user_id,
         alert_id: alert_id,
-        subscriptions: [%{route: "1", stop: "1", direction: 1}],
+        summary: %AlertSummary{
+          effect: :station_closure,
+          location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
+          timeframe: %AlertSummary.Timeframe.Tomorrow{}
+        },
         upstream_timestamp: upstream_timestamp,
         type: type
       })
@@ -65,12 +70,16 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
     assert %{
              message: %{
-               data: %{alertId: ^alert_id, subscriptions: subscriptions},
+               data: %{
+                 summary: %{
+                   effect: "station_closure",
+                   location: %{type: "single_stop", stop_name: "South Station"},
+                   timeframe: %{type: "tomorrow"}
+                 }
+               },
                token: ^fcm_token
              }
            } = Jason.decode!(received_body, keys: :atoms!)
-
-    assert [%{route: "1", stop: "1", direction: 1}] = Jason.decode!(subscriptions, keys: :atoms!)
 
     assert [] = received_opts
 
@@ -114,7 +123,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
-          subscriptions: [%{route: "1", stop: "1", direction: 1}],
+          summary: %AlertSummary{},
           upstream_timestamp: upstream_timestamp,
           type: type
         })
@@ -161,7 +170,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
-          subscriptions: [%{route: "1", stop: "1", direction: 1}],
+          summary: %AlertSummary{},
           upstream_timestamp: upstream_timestamp,
           type: type
         })
