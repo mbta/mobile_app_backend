@@ -71,15 +71,17 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert %{
              message: %{
                data: %{
-                 summary: %{
-                   effect: "station_closure",
-                   location: %{type: "single_stop", stop_name: "South Station"},
-                   timeframe: %{type: "tomorrow"}
-                 }
+                 summary: summary
                },
                token: ^fcm_token
              }
            } = Jason.decode!(received_body, keys: :atoms!)
+
+    assert %{
+             effect: "station_closure",
+             location: %{type: "single_stop", stop_name: "South Station"},
+             timeframe: %{type: "tomorrow"}
+           } = Jason.decode!(summary, keys: :atoms!)
 
     assert [] = received_opts
 

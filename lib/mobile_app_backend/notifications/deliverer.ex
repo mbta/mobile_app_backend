@@ -36,7 +36,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     request_body = %FCM.Model.SendMessageRequest{
       message: %FCM.Model.Message{
-        data: %{summary: summary},
+        data: %{summary: Jason.encode!(summary)},
         token: user.fcm_token
       }
     }
