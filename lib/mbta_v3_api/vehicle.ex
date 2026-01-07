@@ -39,7 +39,7 @@ defmodule MBTAV3API.Vehicle do
     :no_data_available
   )
 
-  @type decoration :: :pride | :winter_holiday | :googly_eyes
+  @type decoration :: :pride | :googly_eyes
 
   @derive Jason.Encoder
   defstruct [
@@ -131,18 +131,8 @@ defmodule MBTAV3API.Vehicle do
     Enum.find_value(carriages, fn %Carriage{label: label} ->
       cond do
         label == "3706" -> :pride
-        label in ["3908", "3917"] -> :winter_holiday
         label in ["3639", "3864", "3909", "3918"] -> :googly_eyes
         true -> nil
-      end
-    end)
-  end
-
-  # Orange Line vehicles will always have vehicle ID O-1234ABCD
-  defp parse_decoration("O-" <> _, carriages) do
-    Enum.find_value(carriages, fn %Carriage{label: label} ->
-      if label in ["1524", "1525", "1528", "1529", "1530", "1531"] do
-        :winter_holiday
       end
     end)
   end
