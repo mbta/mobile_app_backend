@@ -57,7 +57,7 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
              name: "Ashmont - Alewife",
              representative_trip_id: red_line_trip_id,
              route_id: "Red",
-             sort_order: 100_101_001
+             sort_order: 100_101_041
            } = red_line_pattern
 
     assert %{headsign: "Alewife", stop_ids: trip_stop_ids} = trips[red_line_trip_id]
