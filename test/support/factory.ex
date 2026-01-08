@@ -112,7 +112,8 @@ defmodule MobileAppBackend.Factory do
     %MBTAV3API.Trip{
       id: Uniq.UUID.uuid7(),
       direction_id: 0,
-      headsign: "Harvard via Allston"
+      headsign: "Harvard via Allston",
+      revenue: true
     }
   end
 
@@ -125,6 +126,7 @@ defmodule MobileAppBackend.Factory do
       latitude: 42.314917199,
       longitude: -71.06581559,
       occupancy_status: :many_seats_available,
+      revenue: true,
       updated_at: ~B[2024-03-20 16:41:01],
       route_id: "Green-D",
       stop_id: "7670",

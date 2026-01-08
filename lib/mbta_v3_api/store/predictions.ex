@@ -217,6 +217,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   defp upsert_data(data) do
     records_by_type =
       data
+      |> Stream.filter(& &1.revenue)
       |> Enum.group_by(
         fn data ->
           %data_type{} = data

@@ -155,6 +155,25 @@ defmodule MBTAV3API.Store.PredictionsTest do
       assert JsonApi.Object.to_full_map([prediction_66_2, trip_66_2, prediction_39, trip_39]) ==
                Store.Predictions.fetch_with_associations(stop_id: "12345")
     end
+
+    test "drops non-revenue predictions and trips", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      prediction_2 = %{prediction_2 | revenue: false}
+      trip_2 = %{trip_2 | revenue: false}
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
+
+      assert %{
+               predictions: predictions,
+               trips: trips
+             } = Store.Predictions.fetch_with_associations(stop_id: "12345")
+
+      assert predictions == %{"1" => prediction_1}
+      assert trips == %{"trip_1" => trip_1}
+    end
   end
 
   describe "fetch" do

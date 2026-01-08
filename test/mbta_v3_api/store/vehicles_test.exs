@@ -70,6 +70,16 @@ defmodule MBTAV3API.Store.VehiclesTest do
       assert to_full_map([vehicle_1_updated]) ==
                Store.Vehicles.fetch_with_associations([])
     end
+
+    test "drops non-revenue vehicles", %{
+      vehicle_1: vehicle_1,
+      vehicle_2: vehicle_2
+    } do
+      vehicle_2 = %{vehicle_2 | revenue: false}
+      Store.Vehicles.process_upsert(:add, [vehicle_1, vehicle_2])
+
+      assert to_full_map([vehicle_1]) == Store.Vehicles.fetch_with_associations([])
+    end
   end
 
   describe "fetch" do
