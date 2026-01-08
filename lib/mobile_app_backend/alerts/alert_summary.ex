@@ -332,12 +332,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   @spec alert_timeframe(Alert.t(), DateTime.t()) :: Timeframe.t() | nil
-  defp alert_timeframe(alert, at_time)
-
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _), do: nil
-
   defp alert_timeframe(alert, at_time) do
     case Alert.current_period(alert, at_time) do
+      _ when alert.duration_certainty == :estimated ->
+        nil
+
       %Alert.ActivePeriod{end: end_time} = current_period when not is_nil(end_time) ->
         service_date = Util.datetime_to_gtfs(at_time)
         end_date = Util.datetime_to_gtfs(end_time, rounding: :backwards)
