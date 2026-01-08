@@ -1,5 +1,5 @@
 defmodule MBTAV3API.Vehicle do
-  use MBTAV3API.JsonApi.Object
+  use MBTAV3API.JsonApi.Object, renames: %{revenue_status: :revenue}
   require Util
   alias MBTAV3API.Vehicle.Carriage
 
@@ -13,6 +13,7 @@ defmodule MBTAV3API.Vehicle do
           latitude: float(),
           longitude: float(),
           occupancy_status: occupancy_status(),
+          revenue: boolean(),
           updated_at: DateTime.t(),
           route_id: String.t() | nil,
           stop_id: String.t() | nil,
@@ -52,6 +53,7 @@ defmodule MBTAV3API.Vehicle do
     :latitude,
     :longitude,
     :occupancy_status,
+    :revenue,
     :updated_at,
     :route_id,
     :stop_id,
@@ -70,6 +72,7 @@ defmodule MBTAV3API.Vehicle do
       :latitude,
       :longitude,
       :occupancy_status,
+      :revenue_status,
       :updated_at
     ]
   end
@@ -98,6 +101,7 @@ defmodule MBTAV3API.Vehicle do
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       occupancy_status: parse_optional_occupancy(item.attributes["occupancy_status"]),
+      revenue: Util.parse_revenue_status(item.attributes["revenue_status"]),
       updated_at: Util.parse_datetime!(item.attributes["updated_at"]),
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),

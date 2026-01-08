@@ -1,10 +1,11 @@
 defmodule MBTAV3API.Trip do
-  use MBTAV3API.JsonApi.Object
+  use MBTAV3API.JsonApi.Object, renames: %{revenue_status: :revenue}
 
   @type t :: %__MODULE__{
           id: String.t(),
           direction_id: 0 | 1,
           headsign: String.t(),
+          revenue: boolean(),
           route_id: String.t(),
           route_pattern_id: String.t(),
           shape_id: String.t(),
@@ -12,9 +13,18 @@ defmodule MBTAV3API.Trip do
         }
 
   @derive Jason.Encoder
-  defstruct [:id, :direction_id, :headsign, :route_id, :route_pattern_id, :shape_id, :stop_ids]
+  defstruct [
+    :id,
+    :direction_id,
+    :headsign,
+    :revenue,
+    :route_id,
+    :route_pattern_id,
+    :shape_id,
+    :stop_ids
+  ]
 
-  def fields, do: [:direction_id, :headsign]
+  def fields, do: [:direction_id, :headsign, :revenue_status]
 
   def includes do
     %{
@@ -31,6 +41,7 @@ defmodule MBTAV3API.Trip do
       id: item.id,
       direction_id: item.attributes["direction_id"],
       headsign: item.attributes["headsign"],
+      revenue: Util.parse_revenue_status(item.attributes["revenue_status"]),
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       route_pattern_id: JsonApi.Object.get_one_id(item.relationships["route_pattern"]),
       shape_id: JsonApi.Object.get_one_id(item.relationships["shape"]),

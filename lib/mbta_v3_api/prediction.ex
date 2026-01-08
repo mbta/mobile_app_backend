@@ -73,7 +73,7 @@ defmodule MBTAV3API.Prediction do
       departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
       direction_id: item.attributes["direction_id"],
       last_trip: item.attributes["last_trip"],
-      revenue: parse_revenue_status(item.attributes["revenue_status"]),
+      revenue: Util.parse_revenue_status(item.attributes["revenue_status"]),
       schedule_relationship:
         parse_schedule_relationship(item.attributes["schedule_relationship"]),
       stop_sequence: item.attributes["stop_sequence"],
@@ -84,9 +84,4 @@ defmodule MBTAV3API.Prediction do
       vehicle_id: JsonApi.Object.get_one_id(item.relationships["vehicle"])
     }
   end
-
-  @spec parse_revenue_status(String.t() | nil) :: boolean()
-  defp parse_revenue_status("REVENUE"), do: true
-  defp parse_revenue_status("NON_REVENUE"), do: false
-  defp parse_revenue_status(nil), do: true
 end

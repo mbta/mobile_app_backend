@@ -122,7 +122,7 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
   end
 
   defp upsert_data(vehicles) do
-    records = Enum.map(vehicles, &to_record(&1))
+    records = vehicles |> Stream.filter(& &1.revenue) |> Enum.map(&to_record(&1))
 
     :ets.insert(@vehicles_table_name, records)
   end

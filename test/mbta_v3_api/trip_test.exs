@@ -9,6 +9,7 @@ defmodule MBTAV3API.TripTest do
              id: "60451275",
              direction_id: 0,
              headsign: "Wakefield Ave",
+             revenue: true,
              route_pattern_id: "24-2-0",
              stop_ids: ["334", "536"]
            } ==
@@ -16,7 +17,8 @@ defmodule MBTAV3API.TripTest do
                id: "60451275",
                attributes: %{
                  "direction_id" => 0,
-                 "headsign" => "Wakefield Ave"
+                 "headsign" => "Wakefield Ave",
+                 "revenue_status" => "REVENUE"
                },
                relationships: %{
                  "route_pattern" => %JsonApi.Reference{type: "route_pattern", id: "24-2-0"},

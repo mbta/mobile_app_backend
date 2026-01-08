@@ -320,4 +320,9 @@ defmodule Util do
       date
     end
   end
+
+  @spec parse_revenue_status(String.t() | nil) :: boolean()
+  def parse_revenue_status("REVENUE"), do: true
+  def parse_revenue_status("NON_REVENUE"), do: false
+  def parse_revenue_status(nil), do: true
 end
