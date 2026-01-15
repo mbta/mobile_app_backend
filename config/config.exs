@@ -23,7 +23,7 @@ config :mobile_app_backend, MBTAV3API.ResponseCache,
 
 config :mobile_app_backend, MBTAV3API.RepositoryCache,
   gc_interval: :timer.hours(2),
-  allocated_memory: 250_000_000
+  allocated_memory: 2_000_000_000
 
 config :mobile_app_backend, MobileAppBackend.Search.Algolia.Cache,
   gc_interval: :timer.hours(6),
