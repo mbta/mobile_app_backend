@@ -283,7 +283,26 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       defstruct [:time]
     end
 
-    @type t :: EndOfService.t() | Tomorrow.t() | LaterDate.t() | ThisWeek.t() | Time.t()
+    defmodule StartingTomorrow do
+      @type t :: %__MODULE__{}
+      @derive PolymorphicJson
+      defstruct []
+    end
+
+    defmodule StartingLaterToday do
+      @type t :: %__MODULE__{time: DateTime.t()}
+      @derive PolymorphicJson
+      defstruct [:time]
+    end
+
+    @type t ::
+            EndOfService.t()
+            | Tomorrow.t()
+            | LaterDate.t()
+            | ThisWeek.t()
+            | Time.t()
+            | StartingTomorrow.t()
+            | StartingLaterToday.t()
   end
 
   @type t :: %__MODULE__{effect: Alert.effect(), location: Location.t(), timeframe: Timeframe.t()}
@@ -337,30 +356,54 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   defp alert_timeframe(%Alert{duration_certainty: :estimated}, _), do: nil
 
   defp alert_timeframe(alert, at_time) do
+    service_date = Util.datetime_to_gtfs(at_time)
+
     case Alert.current_period(alert, at_time) do
       %Alert.ActivePeriod{end: end_time} = current_period when not is_nil(end_time) ->
-        service_date = Util.datetime_to_gtfs(at_time)
-        end_date = Util.datetime_to_gtfs(end_time, rounding: :backwards)
+        alert_timeframe_current(service_date, current_period)
 
-        cond do
-          service_date == end_date and Alert.ActivePeriod.to_end_of_service?(current_period) ->
-            %Timeframe.EndOfService{}
+      nil ->
+        case Alert.next_period(alert, at_time) do
+          %Alert.ActivePeriod{} = next_period ->
+            alert_timeframe_upcoming(service_date, next_period)
 
-          service_date == end_date ->
-            %Timeframe.Time{time: end_time}
-
-          Date.add(service_date, 1) == end_date ->
-            %Timeframe.Tomorrow{}
-
-          later_this_week(service_date, end_date) ->
-            %Timeframe.ThisWeek{time: end_time}
-
-          true ->
-            %Timeframe.LaterDate{time: end_time}
+          nil ->
+            nil
         end
 
       _ ->
         nil
+    end
+  end
+
+  defp alert_timeframe_current(service_date, %Alert.ActivePeriod{end: end_time} = current_period) do
+    end_date = Util.datetime_to_gtfs(end_time, rounding: :backwards)
+
+    cond do
+      service_date == end_date and Alert.ActivePeriod.to_end_of_service?(current_period) ->
+        %Timeframe.EndOfService{}
+
+      service_date == end_date ->
+        %Timeframe.Time{time: end_time}
+
+      Date.add(service_date, 1) == end_date ->
+        %Timeframe.Tomorrow{}
+
+      later_this_week(service_date, end_date) ->
+        %Timeframe.ThisWeek{time: end_time}
+
+      true ->
+        %Timeframe.LaterDate{time: end_time}
+    end
+  end
+
+  defp alert_timeframe_upcoming(service_date, %Alert.ActivePeriod{start: start_time}) do
+    start_service_date = Util.datetime_to_gtfs(start_time)
+
+    if start_service_date == service_date do
+      %Timeframe.StartingLaterToday{time: start_time}
+    else
+      %Timeframe.StartingTomorrow{}
     end
   end
 
