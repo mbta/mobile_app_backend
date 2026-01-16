@@ -316,7 +316,7 @@ defmodule MBTAV3API.AlertTest do
             _ -> nil
           end
 
-        actual_significance = Alert.significance(alert)
+        actual_significance = Alert.significance(alert, nil)
 
         assert actual_significance == expected_significance,
                Enum.join(
@@ -378,12 +378,29 @@ defmodule MBTAV3API.AlertTest do
         severity: 1
       )
 
-    assert Alert.significance(subway_delay_severe) == :minor
-    assert Alert.significance(cr_delay_severe) == :minor
-    assert Alert.significance(ferry_delay_severe) == :minor
-    assert Alert.significance(single_tracking_delay_info) == :minor
-    assert Alert.significance(subway_delay_not_severe) == nil
-    assert Alert.significance(bus_delay_severe) == nil
+    assert Alert.significance(subway_delay_severe, nil) == :minor
+    assert Alert.significance(cr_delay_severe, nil) == :minor
+    assert Alert.significance(ferry_delay_severe, nil) == :minor
+    assert Alert.significance(single_tracking_delay_info, nil) == :minor
+    assert Alert.significance(subway_delay_not_severe, nil) == nil
+    assert Alert.significance(bus_delay_severe, nil) == nil
+  end
+
+  test "alert significance limited for upcoming and past alerts" do
+    alert_start = DateTime.now!("America/New_York")
+    alert_end = DateTime.add(alert_start, 2, :hour)
+
+    alert =
+      build(:alert,
+        effect: :suspension,
+        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}]
+      )
+
+    assert Alert.significance(alert, nil) == :major
+    assert Alert.significance(alert, DateTime.add(alert_start, -25, :hour)) == nil
+    assert Alert.significance(alert, DateTime.add(alert_start, -12, :hour)) == :secondary
+    assert Alert.significance(alert, alert_start) == :major
+    assert Alert.significance(alert, DateTime.add(alert_end, 1, :minute)) == nil
   end
 
   test "filter filters alerts to matching stops routes and directions" do

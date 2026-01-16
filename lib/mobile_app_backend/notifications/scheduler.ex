@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     Enum.filter(alerts, fn %Alert{} = alert ->
       # to send anything, the alert must be significant
-      significant? = Alert.significance(alert) != nil
+      significant? = Alert.significance(alert, now) != nil
 
       # to send a reminder, the alert must be active at some point within the next 24h
       # to send a notification, the alert must be active right now

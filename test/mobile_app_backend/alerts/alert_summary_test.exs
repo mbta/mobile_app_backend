@@ -243,6 +243,17 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                type: "time",
                time: "2025-12-30T16:12:00-05:00"
              }
+
+      assert json_round_trip(%AlertSummary.Timeframe.StartingTomorrow{}) == %{
+               type: "starting_tomorrow"
+             }
+
+      assert json_round_trip(%AlertSummary.Timeframe.StartingLaterToday{
+               time: ~B[2026-01-15 13:03:00]
+             }) == %{
+               type: "starting_later_today",
+               time: "2026-01-15T13:03:00-05:00"
+             }
     end
   end
 
@@ -327,6 +338,28 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary{timeframe: %AlertSummary.Timeframe.LaterDate{time: ^end_time}} =
                AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
+    test "summary with starting tomorrow timeframe" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 23, :hour), end: nil}]
+        )
+
+      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.StartingTomorrow{}} =
+               AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
+    test "summary with starting later today timeframe" do
+      now = DateTime.now!("America/New_York")
+      later_today = DateTime.add(now, 1, :hour)
+      alert = build(:alert, active_period: [%Alert.ActivePeriod{start: later_today, end: nil}])
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^later_today}
+             } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
     end
 
     test "summary with single stop", %{now: now} do
