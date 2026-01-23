@@ -4,6 +4,7 @@ defmodule MBTAV3API.AlertTest do
   import Mox
   import MobileAppBackend.Factory
 
+  alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.{Alert, JsonApi}
   alias MobileAppBackend.GlobalDataCache
@@ -384,6 +385,68 @@ defmodule MBTAV3API.AlertTest do
     assert Alert.significance(single_tracking_delay_info, nil) == :minor
     assert Alert.significance(subway_delay_not_severe, nil) == nil
     assert Alert.significance(bus_delay_severe, nil) == nil
+  end
+
+  describe "recurrence_range/1" do
+    test "daily on all days" do
+      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
+      nine_pm = ~T[21:00:00]
+      end_of_service = ~T[03:00:00]
+
+      alert =
+        build(:alert,
+          active_period:
+            for days_forward <- 0..5 do
+              %ActivePeriod{
+                start: DateTime.new!(Date.add(today, days_forward), nine_pm, "America/New_York"),
+                end:
+                  DateTime.new!(
+                    Date.add(today, days_forward + 1),
+                    end_of_service,
+                    "America/New_York"
+                  )
+              }
+            end
+        )
+
+      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
+               start: DateTime.new!(today, nine_pm, "America/New_York"),
+               end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
+               days: MapSet.new(1..7)
+             }
+    end
+
+    test "selects specific days" do
+      selected_days = MapSet.new([1, 2])
+      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
+      nine_pm = ~T[21:00:00]
+      end_of_service = ~T[03:00:00]
+
+      alert =
+        build(:alert,
+          active_period:
+            0..14
+            |> Enum.map(&Date.add(today, &1))
+            |> Enum.filter(&MapSet.member?(selected_days, Date.day_of_week(&1)))
+            |> Enum.map(fn service_date ->
+              %ActivePeriod{
+                start: DateTime.new!(service_date, nine_pm, "America/New_York"),
+                end:
+                  DateTime.new!(
+                    Date.add(service_date, 1),
+                    end_of_service,
+                    "America/New_York"
+                  )
+              }
+            end)
+        )
+
+      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
+               start: List.first(alert.active_period).start,
+               end: List.last(alert.active_period).end,
+               days: selected_days
+             }
+    end
   end
 
   test "alert significance limited for upcoming and past alerts" do

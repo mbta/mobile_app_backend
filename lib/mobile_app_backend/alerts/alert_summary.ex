@@ -295,6 +295,33 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       defstruct [:time]
     end
 
+    defmodule TimeRange do
+      @type t :: %__MODULE__{start_time: start_time(), end_time: end_time()}
+      @derive PolymorphicJson
+      defstruct [:start_time, :end_time]
+
+      defmodule StartOfService do
+        @type t :: %__MODULE__{}
+        @derive PolymorphicJson
+        defstruct []
+      end
+
+      defmodule EndOfService do
+        @type t :: %__MODULE__{}
+        @derive PolymorphicJson
+        defstruct []
+      end
+
+      defmodule Time do
+        @type t :: %__MODULE__{time: DateTime.t()}
+        @derive PolymorphicJson
+        defstruct [:time]
+      end
+
+      @type start_time :: StartOfService.t() | Time.t()
+      @type end_time :: EndOfService.t() | Time.t()
+    end
+
     @type t ::
             EndOfService.t()
             | Tomorrow.t()
@@ -305,10 +332,33 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             | StartingLaterToday.t()
   end
 
-  @type t :: %__MODULE__{effect: Alert.effect(), location: Location.t(), timeframe: Timeframe.t()}
+  defmodule Recurrence do
+    @type end_day :: Timeframe.Tomorrow.t() | Timeframe.LaterDate.t() | Timeframe.ThisWeek.t()
+
+    defmodule Daily do
+      @type t :: %__MODULE__{ending: Recurrence.end_day()}
+      @derive PolymorphicJson
+      defstruct [:ending]
+    end
+
+    defmodule SomeDays do
+      @type t :: %__MODULE__{ending: Recurrence.end_day()}
+      @derive PolymorphicJson
+      defstruct [:ending]
+    end
+
+    @type t :: Daily.t() | SomeDays.t()
+  end
+
+  @type t :: %__MODULE__{
+          effect: Alert.effect(),
+          location: Location.t() | nil,
+          timeframe: Timeframe.t() | nil,
+          recurrence: Recurrence.t() | nil
+        }
   @derive JSON.Encoder
   @derive Jason.Encoder
-  defstruct [:effect, :location, :timeframe]
+  defstruct [:effect, :location, :timeframe, :recurrence]
 
   @spec summarizing(
           Alert.t(),
@@ -319,10 +369,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           GlobalDataCache.data()
         ) :: t()
   def summarizing(alert, stop_id, direction_id, patterns, at_time, global) do
+    recurrence = alert_recurrence(alert, at_time)
+
     %__MODULE__{
       effect: alert.effect,
       location: alert_location(alert, stop_id, direction_id, patterns, global),
-      timeframe: alert_timeframe(alert, at_time)
+      timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
+      recurrence: recurrence
     }
   end
 
@@ -350,17 +403,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  @spec alert_timeframe(Alert.t(), DateTime.t()) :: Timeframe.t() | nil
-  defp alert_timeframe(alert, at_time)
+  @spec alert_timeframe(Alert.t(), DateTime.t(), boolean()) :: Timeframe.t() | nil
+  defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
 
-  defp alert_timeframe(alert, at_time) do
+  defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
       %Alert.ActivePeriod{end: end_time} = current_period when not is_nil(end_time) ->
-        alert_timeframe_current(service_date, current_period)
+        if has_recurrence? do
+          alert_timeframe_range(current_period)
+        else
+          alert_timeframe_current(service_date, current_period)
+        end
 
       nil ->
         case Alert.next_period(alert, at_time) do
@@ -374,6 +431,24 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       _ ->
         nil
     end
+  end
+
+  defp alert_timeframe_range(%Alert.ActivePeriod{} = ap) do
+    start_time =
+      if DateTime.to_time(ap.start) == ~T[03:00:00] do
+        %Timeframe.TimeRange.StartOfService{}
+      else
+        %Timeframe.TimeRange.Time{time: ap.start}
+      end
+
+    end_time =
+      if Alert.ActivePeriod.to_end_of_service?(ap) do
+        %Timeframe.TimeRange.EndOfService{}
+      else
+        %Timeframe.TimeRange.Time{time: ap.end}
+      end
+
+    %Timeframe.TimeRange{start_time: start_time, end_time: end_time}
   end
 
   defp alert_timeframe_current(service_date, %Alert.ActivePeriod{end: end_time} = current_period) do
@@ -404,6 +479,34 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       %Timeframe.StartingLaterToday{time: start_time}
     else
       %Timeframe.StartingTomorrow{}
+    end
+  end
+
+  @spec alert_recurrence(Alert.t(), DateTime.t()) :: Recurrence.t() | nil
+  defp alert_recurrence(alert, at_time) do
+    with %Alert.RecurrenceInfo{end: last_period_end} = range <- Alert.recurrence_range(alert),
+         service_date = Util.datetime_to_gtfs(at_time),
+         last_service_date when last_service_date != service_date <-
+           Util.datetime_to_gtfs(last_period_end, rounding: :backwards) do
+      ending =
+        cond do
+          Date.add(service_date, 1) == last_service_date ->
+            %Timeframe.Tomorrow{}
+
+          later_this_week(service_date, last_service_date) ->
+            %Timeframe.ThisWeek{time: last_period_end}
+
+          true ->
+            %Timeframe.LaterDate{time: last_period_end}
+        end
+
+      if Alert.RecurrenceInfo.daily(range) do
+        %Recurrence.Daily{ending: ending}
+      else
+        %Recurrence.SomeDays{ending: ending}
+      end
+    else
+      _ -> nil
     end
   end
 
