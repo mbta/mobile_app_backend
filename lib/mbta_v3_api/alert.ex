@@ -230,7 +230,9 @@ defmodule MBTAV3API.Alert do
       effect: parse_effect(item.attributes["effect"]),
       effect_name: item.attributes["effect_name"],
       header: item.attributes["header"],
-      informed_entity: Enum.map(item.attributes["informed_entity"], &InformedEntity.parse!/1),
+      informed_entity:
+        Enum.map(item.attributes["informed_entity"], &InformedEntity.parse!/1)
+        |> InformedEntity.expand_route_type(),
       last_push_notification_timestamp:
         Util.parse_optional_datetime!(item.attributes["last_push_notification_timestamp"]),
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
