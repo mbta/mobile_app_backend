@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Alert.InformedEntity do
+  alias MobileAppBackend.GlobalDataCache
   require Util
 
   @type t :: %__MODULE__{
@@ -52,6 +53,27 @@ defmodule MBTAV3API.Alert.InformedEntity do
       stop: data["stop"],
       trip: data["trip"]
     }
+  end
+
+  @doc """
+  App versions 2.0.11 and earlier will treat any route as matching an informed entity with route nil,
+  even if the informed entity specifies a route type that does not match that route’s type.
+  To work around this, we fill in all the routes with the specified type.
+  """
+  @spec expand_route_type([t()]) :: [t()]
+  def expand_route_type(data) do
+    Enum.flat_map(data, fn
+      %__MODULE__{route: nil, route_type: type} = ie when not is_nil(type) ->
+        global = GlobalDataCache.get_data()
+
+        routes_of_type =
+          global.routes |> Map.filter(fn {_id, route} -> route.type == type end) |> Map.keys()
+
+        Enum.map(routes_of_type, &%__MODULE__{ie | route: &1})
+
+      ie ->
+        [ie]
+    end)
   end
 
   @spec matches?(term(), term()) :: boolean()
