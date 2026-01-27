@@ -183,7 +183,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert json_round_trip(%AlertSummary{
                effect: :station_closure,
                location: %AlertSummary.Location.SingleStop{stop_name: "Lechmere"},
-               timeframe: %AlertSummary.Timeframe.Tomorrow{}
+               timeframe: %AlertSummary.Timeframe.Tomorrow{},
+               recurrence: %AlertSummary.Recurrence.SomeDays{
+                 ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
+               }
              }) ==
                %{
                  effect: "station_closure",
@@ -191,7 +194,11 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                    type: "single_stop",
                    stop_name: "Lechmere"
                  },
-                 timeframe: %{type: "tomorrow"}
+                 timeframe: %{type: "tomorrow"},
+                 recurrence: %{
+                   type: "some_days",
+                   ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
+                 }
                }
     end
 
@@ -253,6 +260,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              }) == %{
                type: "starting_later_today",
                time: "2026-01-15T13:03:00-05:00"
+             }
+
+      assert json_round_trip(%AlertSummary.Timeframe.TimeRange{
+               start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ~B[2026-01-23 15:35:00]},
+               end_time: %AlertSummary.Timeframe.TimeRange.EndOfService{}
+             }) == %{
+               type: "time_range",
+               start_time: %{type: "time", time: "2026-01-23T15:35:00-05:00"},
+               end_time: %{type: "end_of_service"}
              }
     end
   end
@@ -798,6 +814,98 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  stops: Map.new(parent_stations ++ child_stops, &{&1.id, &1}),
                  trips: %{e_branch_trip.id => e_branch_trip}
                })
+    end
+
+    test "summary with daily recurrence ending on a later date", %{now: now} do
+      alert =
+        build(:alert,
+          effect: :suspension,
+          active_period:
+            Enum.map(0..30, fn days_forward ->
+              %Alert.ActivePeriod{
+                start: DateTime.add(now, days_forward, :day),
+                end: now |> DateTime.add(days_forward, :day) |> DateTime.add(1, :second)
+              }
+            end)
+        )
+
+      now_plus_one_second = DateTime.add(now, 1, :second)
+      end_time = now |> DateTime.add(30, :day) |> DateTime.add(1, :second)
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.TimeRange{
+                 start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now},
+                 end_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now_plus_one_second}
+               },
+               recurrence: %AlertSummary.Recurrence.Daily{
+                 ending: %AlertSummary.Timeframe.LaterDate{time: ^end_time}
+               }
+             } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
+    test "summary with MWF recurrence ending later this week" do
+      monday = ~D[2026-01-12]
+      tuesday = ~D[2026-01-13]
+      wednesday = ~D[2026-01-14]
+      thursday = ~D[2026-01-15]
+      friday = ~D[2026-01-16]
+      saturday = ~D[2026-01-17]
+      service_boundary = ~T[03:00:00]
+      noon = ~T[12:00:00]
+
+      alert =
+        build(:alert,
+          effect: :suspension,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.new!(monday, service_boundary, "America/New_York"),
+              end: DateTime.new!(tuesday, service_boundary, "America/New_York")
+            },
+            %Alert.ActivePeriod{
+              start: DateTime.new!(wednesday, service_boundary, "America/New_York"),
+              end: DateTime.new!(thursday, service_boundary, "America/New_York")
+            },
+            %Alert.ActivePeriod{
+              start: DateTime.new!(friday, service_boundary, "America/New_York"),
+              end: DateTime.new!(saturday, service_boundary, "America/New_York")
+            }
+          ]
+        )
+
+      expected_recurrence = %AlertSummary.Recurrence.SomeDays{
+        ending: %AlertSummary.Timeframe.ThisWeek{
+          time: DateTime.new!(saturday, service_boundary, "America/New_York")
+        }
+      }
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.TimeRange{
+                 start_time: %AlertSummary.Timeframe.TimeRange.StartOfService{},
+                 end_time: %AlertSummary.Timeframe.TimeRange.EndOfService{}
+               },
+               recurrence: ^expected_recurrence
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 "",
+                 0,
+                 [],
+                 DateTime.new!(monday, noon, "America/New_York"),
+                 %{}
+               )
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.StartingTomorrow{},
+               recurrence: ^expected_recurrence
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 "",
+                 0,
+                 [],
+                 DateTime.new!(tuesday, noon, "America/New_York"),
+                 %{}
+               )
     end
   end
 end

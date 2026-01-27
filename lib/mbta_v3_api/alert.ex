@@ -348,6 +348,50 @@ defmodule MBTAV3API.Alert do
     Enum.any?(alert.informed_entity, predicate)
   end
 
+  defmodule RecurrenceInfo do
+    @type t :: %__MODULE__{
+            start: DateTime.t(),
+            end: DateTime.t(),
+            days: MapSet.t(Calendar.day_of_week())
+          }
+    defstruct [:start, :end, :days]
+
+    @spec daily(t()) :: boolean()
+    def daily(%__MODULE__{days: days}), do: MapSet.size(days) == 7
+  end
+
+  @spec recurrence_range(t()) :: RecurrenceInfo.t() | nil
+  def recurrence_range(%__MODULE__{} = alert) do
+    with num_periods when num_periods > 1 <- length(alert.active_period),
+         first_period <- Enum.min_by(alert.active_period, & &1.start, DateTime),
+         last_period <- Enum.max_by(alert.active_period, & &1.end, DateTime),
+         true <-
+           Enum.all?(alert.active_period, fn %ActivePeriod{} = ap ->
+             Util.datetime_to_gtfs(ap.start) ==
+               Util.datetime_to_gtfs(ap.end, rounding: :backwards) and
+               DateTime.to_time(ap.start) == DateTime.to_time(first_period.start) and
+               DateTime.to_time(ap.end) == DateTime.to_time(last_period.end)
+           end) do
+      alert_days = Enum.map(alert.active_period, &Util.datetime_to_gtfs(&1.start))
+
+      all_alert_days_contiguous? =
+        alert_days
+        |> Enum.chunk_every(2, 1, :discard)
+        |> Enum.all?(fn [a, b] -> Date.diff(b, a) == 1 end)
+
+      days =
+        if all_alert_days_contiguous? do
+          MapSet.new(1..7)
+        else
+          MapSet.new(alert_days, &Date.day_of_week/1)
+        end
+
+      %RecurrenceInfo{start: first_period.start, end: last_period.end, days: days}
+    else
+      _ -> nil
+    end
+  end
+
   @spec applicable_alerts([t()], 0 | 1 | nil, [Route.id()], [Stop.id()] | nil, Trip.id() | nil) ::
           [t()]
   def applicable_alerts(alerts, direction_id, route_ids, stop_ids, trip_id) do
