@@ -8,6 +8,7 @@ defmodule MBTAV3API.AlertTest do
   alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.{Alert, JsonApi}
   alias MobileAppBackend.GlobalDataCache
+  import Test.Support.Helpers
   import Test.Support.Sigils
 
   setup :verify_on_exit!
@@ -118,6 +119,49 @@ defmodule MBTAV3API.AlertTest do
              severity: 7,
              updated_at: ~B[2024-02-12 11:49:00]
            }
+  end
+
+  test "expands route type alerts" do
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    bus_routes = build_list(5, :route, type: :bus)
+    lr_route = build(:route, type: :light_rail)
+    hr_route = build(:route, type: :heavy_rail)
+    cr_route = build(:route, type: :commuter_rail)
+    ferry_route = build(:route, type: :ferry)
+
+    GlobalDataCacheMock
+    |> expect(:default_key, fn -> :default_key end)
+    |> expect(:get_data, fn _ ->
+      %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes:
+          (bus_routes ++ [lr_route, hr_route, cr_route, ferry_route]) |> Map.new(&{&1.id, &1}),
+        route_patterns: %{},
+        stops: %{},
+        trips: %{}
+      }
+    end)
+
+    assert %Alert{informed_entity: ie} =
+             Alert.parse!(%JsonApi.Item{
+               attributes: %{
+                 "active_period" => [],
+                 "informed_entity" => [
+                   %{"activities" => ["BOARD", "EXIT", "RIDE"], "route_type" => 3}
+                 ],
+                 "lifecycle" => "NEW",
+                 "updated_at" => "2026-01-26T09:43:00-05:00"
+               }
+             })
+
+    assert ie |> Enum.map(& &1.route) |> Enum.sort() ==
+             bus_routes |> Enum.map(& &1.id) |> Enum.sort()
   end
 
   test "unexpected enum values fall back" do
