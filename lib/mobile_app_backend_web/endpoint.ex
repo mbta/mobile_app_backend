@@ -15,7 +15,8 @@ defmodule MobileAppBackendWeb.Endpoint do
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", MobileAppBackendWeb.UserSocket,
-    websocket: true,
+    # on iOS there appears to be a 1MiB limit on websocket frames
+    websocket: [max_frame_size: 1_000_000],
     longpoll: false
 
   # Serve at "/" the static files from "priv/static" directory.
