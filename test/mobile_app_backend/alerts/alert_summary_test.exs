@@ -186,7 +186,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                timeframe: %AlertSummary.Timeframe.Tomorrow{},
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
-               }
+               },
+               update: %AlertSummary.Update.Active{}
              }) ==
                %{
                  effect: "station_closure",
@@ -198,6 +199,9 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  recurrence: %{
                    type: "some_days",
                    ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
+                 },
+                 update: %{
+                   type: "active"
                  }
                }
     end
@@ -270,6 +274,11 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                start_time: %{type: "time", time: "2026-01-23T15:35:00-05:00"},
                end_time: %{type: "end_of_service"}
              }
+    end
+
+    test "can serialize all updates" do
+      assert json_round_trip(%AlertSummary.Update.Active{}) == %{type: "active"}
+      assert json_round_trip(%AlertSummary.Update.AllClear{}) == %{type: "all_clear"}
     end
   end
 
@@ -906,6 +915,36 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  DateTime.new!(tuesday, noon, "America/New_York"),
                  %{}
                )
+    end
+
+    test "summary with active update", %{now: now} do
+      end_time = DateTime.add(now, 1, :hour)
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}],
+          updated_at: DateTime.add(now, -4, :minute)
+        )
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
+               update: %AlertSummary.Update.Active{}
+             } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
+    test "summary with all_clear update", %{now: now} do
+      start_time = DateTime.add(now, -1, :hour)
+      end_time = DateTime.add(now, -30, :minute)
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: start_time, end: end_time}]
+        )
+
+      assert %AlertSummary{
+               timeframe: nil,
+               update: %AlertSummary.Update.AllClear{}
+             } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
     end
   end
 end
