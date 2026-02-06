@@ -350,15 +350,32 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @type t :: Daily.t() | SomeDays.t()
   end
 
+  defmodule Update do
+    defmodule Active do
+      @type t :: %__MODULE__{}
+      @derive PolymorphicJson
+      defstruct []
+    end
+
+    defmodule AllClear do
+      @type t :: %__MODULE__{}
+      @derive PolymorphicJson
+      defstruct []
+    end
+
+    @type t :: Active.t() | AllClear.t()
+  end
+
   @type t :: %__MODULE__{
           effect: Alert.effect(),
           location: Location.t() | nil,
           timeframe: Timeframe.t() | nil,
-          recurrence: Recurrence.t() | nil
+          recurrence: Recurrence.t() | nil,
+          update: Update.t() | nil
         }
   @derive JSON.Encoder
   @derive Jason.Encoder
-  defstruct [:effect, :location, :timeframe, :recurrence]
+  defstruct [:effect, :location, :timeframe, :recurrence, :update]
 
   @spec summarizing(
           Alert.t(),
@@ -375,7 +392,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       effect: alert.effect,
       location: alert_location(alert, stop_id, direction_id, patterns, global),
       timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
-      recurrence: recurrence
+      recurrence: recurrence,
+      update: alert_update(alert, at_time)
     }
   end
 
@@ -507,6 +525,38 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     else
       _ -> nil
+    end
+  end
+
+  @spec alert_update(Alert.t(), DateTime.t()) :: Update.t() | nil
+  defp alert_update(alert, at_time) do
+    update =
+      case Alert.current_period(alert, at_time) do
+        %Alert.ActivePeriod{start: start_time}
+        when not is_nil(alert.updated_at) ->
+          updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
+          five_minutes_ago = DateTime.add(at_time, -5, :minute)
+
+          updated_within_five_minutes =
+            DateTime.compare(alert.updated_at, five_minutes_ago) == :gt
+
+          updated_after_active and updated_within_five_minutes
+
+        _ ->
+          false
+      end
+
+    all_clear = Alert.all_clear?(alert, at_time)
+
+    cond do
+      update ->
+        %Update.Active{}
+
+      all_clear ->
+        %Update.AllClear{}
+
+      true ->
+        nil
     end
   end
 

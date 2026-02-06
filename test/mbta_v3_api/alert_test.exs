@@ -507,7 +507,21 @@ defmodule MBTAV3API.AlertTest do
     assert Alert.significance(alert, DateTime.add(alert_start, -25, :hour)) == nil
     assert Alert.significance(alert, DateTime.add(alert_start, -12, :hour)) == :secondary
     assert Alert.significance(alert, alert_start) == :major
-    assert Alert.significance(alert, DateTime.add(alert_end, 1, :minute)) == nil
+    assert Alert.significance(alert, DateTime.add(alert_end, 1, :minute)) == :major
+  end
+
+  test "alert all clear returns correctly" do
+    alert_start = DateTime.now!("America/New_York")
+    alert_end = DateTime.add(alert_start, 2, :hour)
+
+    alert =
+      build(:alert,
+        effect: :suspension,
+        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}]
+      )
+
+    assert Alert.all_clear?(alert, alert_start) == false
+    assert Alert.all_clear?(alert, DateTime.add(alert_end, 1, :minute)) == true
   end
 
   test "filter filters alerts to matching stops routes and directions" do

@@ -216,6 +216,14 @@ defmodule MBTAV3API.Alert do
     next_period(alert, now) != nil
   end
 
+  @spec all_clear?(t(), DateTime.t()) :: boolean()
+  def all_clear?(alert, at_time) do
+    Enum.all?(
+      alert.active_period,
+      &(not is_nil(&1.end) and DateTime.before?(&1.end, at_time))
+    )
+  end
+
   @spec parse!(JsonApi.Item.t()) :: t()
   def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
@@ -282,12 +290,9 @@ defmodule MBTAV3API.Alert do
         active_soon?(alert, at_time) ->
           :secondary
 
-        # all clear, hide completely until we have implemented the summary template
-        Enum.all?(
-          alert.active_period,
-          &(not is_nil(&1.end) and DateTime.before?(&1.end, at_time))
-        ) ->
-          nil
+        # all clear
+        all_clear?(alert, at_time) ->
+          :major
 
         # will be active later but not soon enough to show yet, hide completely
         true ->
