@@ -817,20 +817,26 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     test "summary with daily recurrence ending on a later date", %{now: now} do
+      today = DateTime.to_date(now)
+      time_start = DateTime.to_time(now)
+      time_end = Time.add(time_start, 1, :second)
+
       alert =
         build(:alert,
           effect: :suspension,
           active_period:
             Enum.map(0..30, fn days_forward ->
+              this_day = Date.add(today, days_forward)
+
               %Alert.ActivePeriod{
-                start: DateTime.add(now, days_forward, :day),
-                end: now |> DateTime.add(days_forward, :day) |> DateTime.add(1, :second)
+                start: DateTime.new!(this_day, time_start, "America/New_York"),
+                end: DateTime.new!(this_day, time_end, "America/New_York")
               }
             end)
         )
 
       now_plus_one_second = DateTime.add(now, 1, :second)
-      end_time = now |> DateTime.add(30, :day) |> DateTime.add(1, :second)
+      end_time = DateTime.new!(Date.add(today, 30), time_end, "America/New_York")
 
       assert %AlertSummary{
                timeframe: %AlertSummary.Timeframe.TimeRange{
