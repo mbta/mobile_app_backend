@@ -532,7 +532,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   defp alert_update(alert, at_time) do
     update =
       case Alert.current_period(alert, at_time) do
-        %Alert.ActivePeriod{start: start_time} = _current_period
+        %Alert.ActivePeriod{start: start_time}
         when not is_nil(alert.updated_at) ->
           updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
           five_minutes_ago = DateTime.add(at_time, -5, :minute)
