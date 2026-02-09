@@ -56,6 +56,7 @@ defmodule MobileAppBackendWeb.Router do
     get("/stop/map", StopController, :map)
     get("/trip", TripController, :trip)
     get("/trip/map", TripController, :map)
+    get("/trip/map-friendly", TripController, :map_friendly)
   end
 
   # Enable LiveDashboard in development
