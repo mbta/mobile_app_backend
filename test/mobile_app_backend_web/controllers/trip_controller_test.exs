@@ -168,6 +168,169 @@ defmodule MobileAppBackendWeb.TripControllerTest do
     end
   end
 
+  describe "GET /api/trip/map-friendly unit tests" do
+    setup do
+      verify_on_exit!()
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+    end
+
+    test "when trip found with related stops, returns shape and stop data",
+         %{conn: conn} do
+      route = build(:route, id: "66", type: :bus)
+      stop1 = build(:stop, id: "Harvard", parent_station_id: "Harvard", location_type: :stop)
+      stop2 = build(:stop, id: "Nubian", parent_station_id: "Nubian", location_type: :stop)
+      route_pattern = build(:route_pattern, %{id: "66-0-1", route_id: route.id})
+      shape = build(:shape, id: "66_shape", polyline: "66_shape_polyline")
+
+      trip =
+        build(:trip,
+          id: "trip_id",
+          route_id: route.id,
+          route_pattern_id: route_pattern.id,
+          direction_id: "1",
+          shape_id: shape.id,
+          stop_ids: [stop1.id, stop2.id]
+        )
+
+      pattern_trip =
+        build(:trip, %{
+          id: route_pattern.representative_trip_id,
+          shape_id: shape.id,
+          stop_ids: [stop1.id, stop2.id]
+        })
+
+      RepositoryMock
+      |> expect(:trips, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:id) do
+          "trip_id" ->
+            ok_response([trip], [shape, route, route_pattern, pattern_trip, stop1, stop2])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      conn =
+        get(conn, "/api/trip/map-friendly", %{"trip_id" => trip.id})
+
+      response = json_response(conn, 200)
+
+      assert %{
+               "map_friendly_route_shapes" => [
+                 %{
+                   "route_id" => "66",
+                   "route_shapes" => [
+                     %{
+                       "direction_id" => 0,
+                       "route_segments" => [
+                         %{
+                           "id" => "Harvard-Nubian",
+                           "other_patterns_by_stop_id" => %{},
+                           "source_route_id" => "66",
+                           "source_route_pattern_id" => "66-0-1",
+                           "stop_ids" => ["Harvard", "Nubian"]
+                         }
+                       ],
+                       "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
+                       "source_route_id" => "66",
+                       "source_route_pattern_id" => "66-0-1"
+                     }
+                   ]
+                 }
+               ]
+             } =
+               response
+    end
+
+    test "when trip found without related stops, falls back to route pattern stops",
+         %{conn: conn} do
+      route = build(:route, id: "66", type: :bus)
+      stop1 = build(:stop, id: "Harvard", parent_station_id: "Harvard", location_type: :stop)
+      stop2 = build(:stop, id: "Nubian", parent_station_id: "Nubian", location_type: :stop)
+      route_pattern = build(:route_pattern, %{id: "66-0-1", route_id: route.id})
+      shape = build(:shape, id: "66_shape", polyline: "66_shape_polyline")
+
+      trip =
+        build(:trip,
+          id: "trip_id",
+          route_id: route.id,
+          route_pattern_id: route_pattern.id,
+          direction_id: "1",
+          shape_id: shape.id,
+          stop_ids: []
+        )
+
+      pattern_trip =
+        build(:trip, %{
+          id: route_pattern.representative_trip_id,
+          shape_id: shape.id,
+          stop_ids: [stop1.id, stop2.id]
+        })
+
+      RepositoryMock
+      |> expect(:trips, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:id) do
+          "trip_id" ->
+            ok_response([trip], [shape, route, route_pattern, pattern_trip, stop1, stop2])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      conn =
+        get(conn, "/api/trip/map-friendly", %{"trip_id" => trip.id})
+
+      response = json_response(conn, 200)
+
+      assert %{
+               "map_friendly_route_shapes" => [
+                 %{
+                   "route_id" => "66",
+                   "route_shapes" => [
+                     %{
+                       "direction_id" => 0,
+                       "route_segments" => [
+                         %{
+                           "id" => "Harvard-Nubian",
+                           "other_patterns_by_stop_id" => %{},
+                           "source_route_id" => "66",
+                           "source_route_pattern_id" => "66-0-1",
+                           "stop_ids" => ["Harvard", "Nubian"]
+                         }
+                       ],
+                       "shape" => %{"id" => "66_shape", "polyline" => "66_shape_polyline"},
+                       "source_route_id" => "66",
+                       "source_route_pattern_id" => "66-0-1"
+                     }
+                   ]
+                 }
+               ]
+             } =
+               response
+    end
+
+    @tag capture_log: true
+    test "when trip not found, 404 error",
+         %{conn: conn} do
+      RepositoryMock
+      |> expect(:trips, 1, fn _params, _opts ->
+        ok_response([])
+      end)
+
+      conn =
+        get(conn, "/api/trip/map-friendly", %{"trip_id" => "unknown_trip_id"})
+
+      response = json_response(conn, 404)
+
+      assert %{"message" => "Trip not found: unknown_trip_id"} = response
+    end
+  end
+
   describe "GET /api/trip/map unit tests" do
     setup do
       verify_on_exit!()
