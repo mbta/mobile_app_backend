@@ -37,7 +37,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                   end_stop_name: "Riverside"
                 },
                 timeframe: nil
-              }, ^alert, _}
+              }, [^subscription], ^alert, _}
            ] =
              Engine.notifications([subscription], [alert], now)
   end
@@ -81,7 +81,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, ^alert, _}] =
+    assert [{_, [^subscription], ^alert, _}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -116,7 +116,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, ^alert, _}] =
+    assert [{_, [^subscription], ^alert, _}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -144,7 +144,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, ^alert, _}] =
+    assert [{_, [^subscription_including], ^alert, _}] =
              Engine.notifications([subscription_including], [alert], now)
 
     subscription_excluding =
@@ -181,7 +181,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, :all_clear}] =
+    assert [{_, [^subscription], ^alert, :all_clear}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -210,7 +210,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [{_, [^subscription], ^alert, {:notification, ^upstream_timestamp}}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -239,7 +239,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, {:notification, ^start_time}}] =
+    assert [{_, [^subscription], ^alert, {:notification, ^start_time}}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -268,7 +268,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, :reminder}] =
+    assert [{_, [^subscription], ^alert, :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -323,7 +323,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, :reminder}] =
+    assert [{_, [^subscription], ^alert, :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -391,7 +391,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [{_, [^subscription_now], ^alert, {:notification, ^upstream_timestamp}}] =
              Engine.notifications([subscription_now, subscription_later], [alert], now)
   end
 
@@ -438,7 +438,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                 effect: :suspension,
                 location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
                 timeframe: nil
-              }, ^alert, {:notification, ^upstream_timestamp}}
+              }, [_, _], ^alert, {:notification, ^upstream_timestamp}}
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
@@ -477,7 +477,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                   end_stop_name: "Union Square"
                 },
                 timeframe: nil
-              }, ^alert, _}
+              }, [^subscription1, ^subscription2], ^alert, _}
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
@@ -528,7 +528,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                 effect: :suspension,
                 location: nil,
                 timeframe: nil
-              }, ^alert, {:notification, ^upstream_timestamp}}
+              }, [^subscription1, ^subscription2], ^alert, {:notification, ^upstream_timestamp}}
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end

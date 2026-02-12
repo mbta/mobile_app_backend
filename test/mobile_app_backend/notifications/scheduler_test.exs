@@ -63,6 +63,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
             "time" => hd(alert.active_period).end |> DateTime.to_iso8601()
           }
         },
+        "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "upstream_timestamp" => alert.last_push_notification_timestamp
       }
     )
