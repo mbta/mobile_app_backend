@@ -89,9 +89,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          now
        ) do
     Engine.notifications(subscriptions, alerts, now)
-    |> Enum.flat_map(fn {summary, alert, type} ->
+    |> Enum.flat_map(fn {summary, subscriptions, alert, type} ->
       if DeliveredNotification.can_send?(user_id, alert.id, type) do
-        [{user, summary, {alert, type}}]
+        [{user, summary, subscriptions, {alert, type}}]
       else
         []
       end
@@ -99,21 +99,32 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec enqueue_delivery([
-          {User.t(), AlertSummary.t(), {Alert.t(), DeliveredNotification.type()}}
+          {User.t(), AlertSummary.t(), [Subscription.t()],
+           {Alert.t(), DeliveredNotification.type()}}
         ]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, summary, {%Alert{} = alert, type}} ->
+    Enum.each(recipients, fn {%User{} = recipient, summary, subscriptions,
+                              {%Alert{} = alert, type}} ->
       {type, upstream_timestamp} =
         case type do
           {type, upstream_timestamp} -> {type, upstream_timestamp}
           type when is_atom(type) -> {type, nil}
         end
 
+      subscriptions =
+        Enum.map(
+          subscriptions,
+          fn %Subscription{route_id: route_id, stop_id: stop_id, direction_id: direction_id} ->
+            %{route: route_id, stop: stop_id, direction: direction_id}
+          end
+        )
+
       %{
         user_id: recipient.id,
         alert_id: alert.id,
         summary: summary,
+        subscriptions: subscriptions,
         upstream_timestamp: upstream_timestamp,
         type: type
       }

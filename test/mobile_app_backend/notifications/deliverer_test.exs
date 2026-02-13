@@ -50,6 +50,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
           timeframe: %AlertSummary.Timeframe.Tomorrow{}
         },
+        subscriptions: [%{route: "1", stop: "1", direction: 1}],
         upstream_timestamp: upstream_timestamp,
         type: type
       })
@@ -71,7 +72,11 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert %{
              message: %{
                data: %{
-                 summary: summary
+                 summary: summary,
+                 alert_id: ^alert_id,
+                 subscriptions: subscriptions,
+                 notification_type: "notification",
+                 sent_at: sent_at
                },
                token: ^fcm_token
              }
@@ -82,6 +87,11 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
              location: %{type: "single_stop", stop_name: "South Station"},
              timeframe: %{type: "tomorrow"}
            } = Jason.decode!(summary, keys: :atoms!)
+
+    assert [%{route: "1", stop: "1", direction: 1}] =
+             Jason.decode!(subscriptions, keys: :atoms!)
+
+    assert {:ok, _, _} = DateTime.from_iso8601(sent_at)
 
     assert [] = received_opts
 
@@ -126,6 +136,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           user_id: user_id,
           alert_id: alert_id,
           summary: %AlertSummary{},
+          subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type
         })
@@ -173,6 +184,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           user_id: user_id,
           alert_id: alert_id,
           summary: %AlertSummary{},
+          subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type
         })

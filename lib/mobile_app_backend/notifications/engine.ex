@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.Window
 
   @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
-          {AlertSummary.t(), Alert.t(), DeliveredNotification.type()}
+          {AlertSummary.t(), [Subscription.t()], Alert.t(), DeliveredNotification.type()}
         ]
   def notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
@@ -34,15 +34,16 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       case subscriptions_by_type do
         %{all_clear: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), alert, :all_clear}
+          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert,
+           :all_clear}
 
         %{notification: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), alert,
+          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert,
            {:notification,
             alert.last_push_notification_timestamp || hd(alert.active_period).start}}
 
         %{reminder: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), alert, :reminder}
+          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert, :reminder}
       end
     end)
   end
