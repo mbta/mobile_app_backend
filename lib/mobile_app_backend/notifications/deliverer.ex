@@ -42,7 +42,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           alert_id: alert_id,
           subscriptions: Jason.encode!(subscriptions),
           notification_type: type,
-          sent_at: to_string(DateTime.utc_now())
+          sent_at: DateTime.to_iso8601(DateTime.utc_now())
         },
         token: user.fcm_token
       }

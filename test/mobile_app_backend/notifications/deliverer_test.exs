@@ -91,6 +91,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert [%{route: "1", stop: "1", direction: 1}] =
              Jason.decode!(subscriptions, keys: :atoms!)
 
+    # Elixir and Kotlin disagree about whether or not the T is optional
+    assert sent_at =~ "T"
     assert {:ok, _, _} = DateTime.from_iso8601(sent_at)
 
     assert [] = received_opts
