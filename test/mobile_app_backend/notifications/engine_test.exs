@@ -7,11 +7,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Notifications.Engine
+  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
+  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.NotificationsFactory
 
   setup :verify_on_exit!
 
-  test "matches Green Line subscription to individual routes" do
+  test "matches Green Line subscription to single branch" do
     now = DateTime.now!("America/New_York")
 
     alert =
@@ -30,14 +32,55 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [
-             {%AlertSummary{
-                effect: :suspension,
-                location: %AlertSummary.Location.SuccessiveStops{
-                  start_stop_name: "Union Square",
-                  end_stop_name: "Riverside"
-                },
-                timeframe: nil
-              }, [^subscription], ^alert, _}
+             %OutgoingNotification{
+               title: %NotificationTitle.BareLabel{label: "Green Line D"},
+               summary: %AlertSummary{
+                 effect: :suspension,
+                 location: %AlertSummary.Location.SuccessiveStops{
+                   start_stop_name: "Union Square",
+                   end_stop_name: "Riverside"
+                 },
+                 timeframe: nil
+               },
+               subscriptions: [^subscription],
+               alert: ^alert
+             }
+           ] =
+             Engine.notifications([subscription], [alert], now)
+  end
+
+  test "matches Green Line subscription to multiple branches" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+        effect: :suspension,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], route: "Green-D"},
+          %Alert.InformedEntity{activities: [:board], route: "Green-E"}
+        ]
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "line-Green",
+        stop_id: "place-boyls",
+        direction_id: 0,
+        windows: [NotificationsFactory.build(:perpetual_window)]
+      )
+
+    assert [
+             %OutgoingNotification{
+               title: %NotificationTitle.BareLabel{label: "Green Line"},
+               summary: %AlertSummary{
+                 effect: :suspension,
+                 location: nil,
+                 timeframe: nil
+               },
+               subscriptions: [^subscription],
+               alert: ^alert
+             }
            ] =
              Engine.notifications([subscription], [alert], now)
   end
@@ -57,7 +100,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       %{
         lines: %{},
         pattern_ids_by_stop: %{},
-        routes: %{},
+        routes: %{"Green-D" => %MBTAV3API.Route{}},
         route_patterns: %{},
         stops: %{
           "place-boyls" => %MBTAV3API.Stop{
@@ -77,11 +120,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     subscription =
       NotificationsFactory.build(:notification_subscription,
+        route_id: "Green-D",
         stop_id: "place-boyls",
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, [^subscription], ^alert, _}] =
+    assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -116,7 +160,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, [^subscription], ^alert, _}] =
+    assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -144,7 +188,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         windows: [NotificationsFactory.build(:perpetual_window)]
       )
 
-    assert [{_, [^subscription_including], ^alert, _}] =
+    assert [%OutgoingNotification{subscriptions: [^subscription_including], alert: ^alert}] =
              Engine.notifications([subscription_including], [alert], now)
 
     subscription_excluding =
@@ -181,7 +225,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription], ^alert, :all_clear}] =
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: :all_clear
+             }
+           ] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -210,7 +260,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription], ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -239,7 +295,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription], ^alert, {:notification, ^start_time}}] =
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^start_time}
+             }
+           ] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -268,7 +330,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription], ^alert, :reminder}] =
+    assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert, type: :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -323,7 +385,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription], ^alert, :reminder}] =
+    assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert, type: :reminder}] =
              Engine.notifications([subscription], [alert], now)
   end
 
@@ -391,7 +453,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [{_, [^subscription_now], ^alert, {:notification, ^upstream_timestamp}}] =
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription_now],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
              Engine.notifications([subscription_now, subscription_later], [alert], now)
   end
 
@@ -434,11 +502,16 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [
-             {%AlertSummary{
-                effect: :suspension,
-                location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
-                timeframe: nil
-              }, [_, _], ^alert, {:notification, ^upstream_timestamp}}
+             %OutgoingNotification{
+               summary: %AlertSummary{
+                 effect: :suspension,
+                 location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
+                 timeframe: nil
+               },
+               subscriptions: [_, _],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
@@ -470,14 +543,18 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [
-             {%AlertSummary{
-                effect: :suspension,
-                location: %AlertSummary.Location.SuccessiveStops{
-                  start_stop_name: "Riverside",
-                  end_stop_name: "Union Square"
-                },
-                timeframe: nil
-              }, [^subscription1, ^subscription2], ^alert, _}
+             %OutgoingNotification{
+               summary: %AlertSummary{
+                 effect: :suspension,
+                 location: %AlertSummary.Location.SuccessiveStops{
+                   start_stop_name: "Riverside",
+                   end_stop_name: "Union Square"
+                 },
+                 timeframe: nil
+               },
+               subscriptions: [^subscription1, ^subscription2],
+               alert: ^alert
+             }
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
@@ -524,11 +601,16 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [
-             {%AlertSummary{
-                effect: :suspension,
-                location: nil,
-                timeframe: nil
-              }, [^subscription1, ^subscription2], ^alert, {:notification, ^upstream_timestamp}}
+             %OutgoingNotification{
+               summary: %AlertSummary{
+                 effect: :suspension,
+                 location: nil,
+                 timeframe: nil
+               },
+               subscriptions: [^subscription1, ^subscription2],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
   end

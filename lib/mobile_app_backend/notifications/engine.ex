@@ -1,16 +1,27 @@
 defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Alert
   alias MBTAV3API.Alert.ActivePeriod
+  alias MBTAV3API.Line
   alias MBTAV3API.Stop
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.DeliveredNotification
+  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
 
-  @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
-          {AlertSummary.t(), [Subscription.t()], Alert.t(), DeliveredNotification.type()}
-        ]
+  defmodule OutgoingNotification do
+    @type t :: %__MODULE__{
+            title: NotificationTitle.t(),
+            summary: AlertSummary.t(),
+            subscriptions: [Subscription.t()],
+            alert: Alert.t(),
+            type: DeliveredNotification.type()
+          }
+    defstruct [:title, :summary, :subscriptions, :alert, :type]
+  end
+
+  @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [OutgoingNotification.t()]
   def notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
 
@@ -32,19 +43,27 @@ defmodule MobileAppBackend.Notifications.Engine do
           fn {_type, subscription} -> subscription end
         )
 
-      case subscriptions_by_type do
-        %{all_clear: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert,
-           :all_clear}
+      {subscriptions, type} =
+        case subscriptions_by_type do
+          %{all_clear: subscriptions} ->
+            {subscriptions, :all_clear}
 
-        %{notification: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert,
-           {:notification,
-            alert.last_push_notification_timestamp || hd(alert.active_period).start}}
+          %{notification: subscriptions} ->
+            {subscriptions,
+             {:notification,
+              alert.last_push_notification_timestamp || hd(alert.active_period).start}}
 
-        %{reminder: subscriptions} ->
-          {build_summary(alert, subscriptions, now, global_data), subscriptions, alert, :reminder}
-      end
+          %{reminder: subscriptions} ->
+            {subscriptions, :reminder}
+        end
+
+      %OutgoingNotification{
+        title: build_title(alert, subscriptions, global_data),
+        summary: build_summary(alert, subscriptions, now, global_data),
+        subscriptions: subscriptions,
+        alert: alert,
+        type: type
+      }
     end)
   end
 
@@ -164,6 +183,41 @@ defmodule MobileAppBackend.Notifications.Engine do
           min(starts_in_hours, next_active_in_hours)
         end
     end
+  end
+
+  defp build_title(alert, subscriptions, global_data) do
+    subscribed_line_or_route_ids = subscriptions |> Enum.map(& &1.route_id) |> Enum.uniq()
+
+    subscribed_lines_or_routes =
+      Enum.map(subscribed_line_or_route_ids, &(global_data.lines[&1] || global_data.routes[&1]))
+
+    title_lines_or_routes =
+      Enum.map(subscribed_lines_or_routes, fn
+        %Line{} = line ->
+          # we narrow a subscription to `line-Green` to a title of “Green Line B” if only one route is informed,
+          # but we use the full line if multiple routes within it are informed
+
+          informed_routes =
+            global_data.routes
+            |> Map.values()
+            |> Enum.filter(fn route ->
+              route.line_id == line.id and
+                Enum.any?(
+                  alert.informed_entity,
+                  &(&1.route == route.id or (&1.route == nil and &1.route_type == route.type))
+                )
+            end)
+
+          case informed_routes do
+            [route] -> route
+            _ -> line
+          end
+
+        route ->
+          route
+      end)
+
+    NotificationTitle.from_lines_or_routes(title_lines_or_routes)
   end
 
   defp build_summary(alert, subscriptions, now, global_data) do

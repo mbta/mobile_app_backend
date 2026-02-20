@@ -11,7 +11,7 @@ defmodule MBTAV3API.Route do
           listed_route: boolean(),
           long_name: String.t(),
           short_name: String.t(),
-          sort_order: String.t(),
+          sort_order: integer(),
           text_color: String.t(),
           line_id: String.t() | nil,
           route_pattern_ids: [String.t()]

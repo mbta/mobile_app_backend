@@ -3,7 +3,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   import Ecto.Query
   alias MBTAV3API.Alert
   alias MBTAV3API.Store.Alerts
-  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Deliverer
   alias MobileAppBackend.Notifications.Engine
@@ -77,7 +76,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec find_new_recipients([Alert.t()], [User.t()], DateTime.t()) :: [
-          {User.t(), [Subscription.t()], Alert.t()}
+          {User.t(), Engine.OutgoingNotification.t()}
         ]
   defp find_new_recipients(alerts, users, now) do
     Enum.flat_map(users, &new_notifications(&1, alerts, now))
@@ -89,32 +88,32 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          now
        ) do
     Engine.notifications(subscriptions, alerts, now)
-    |> Enum.flat_map(fn {summary, subscriptions, alert, type} ->
-      if DeliveredNotification.can_send?(user_id, alert.id, type) do
-        [{user, summary, subscriptions, {alert, type}}]
+    |> Enum.flat_map(fn outgoing_notification ->
+      if DeliveredNotification.can_send?(
+           user_id,
+           outgoing_notification.alert.id,
+           outgoing_notification.type
+         ) do
+        [{user, outgoing_notification}]
       else
         []
       end
     end)
   end
 
-  @spec enqueue_delivery([
-          {User.t(), AlertSummary.t(), [Subscription.t()],
-           {Alert.t(), DeliveredNotification.type()}}
-        ]) :: :ok
+  @spec enqueue_delivery([{User.t(), Engine.OutgoingNotification.t()}]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, summary, subscriptions,
-                              {%Alert{} = alert, type}} ->
+    Enum.each(recipients, fn {%User{} = recipient, %Engine.OutgoingNotification{} = notification} ->
       {type, upstream_timestamp} =
-        case type do
+        case notification.type do
           {type, upstream_timestamp} -> {type, upstream_timestamp}
           type when is_atom(type) -> {type, nil}
         end
 
       subscriptions =
         Enum.map(
-          subscriptions,
+          notification.subscriptions,
           fn %Subscription{route_id: route_id, stop_id: stop_id, direction_id: direction_id} ->
             %{route: route_id, stop: stop_id, direction: direction_id}
           end
@@ -122,8 +121,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
       %{
         user_id: recipient.id,
-        alert_id: alert.id,
-        summary: summary,
+        alert_id: notification.alert.id,
+        title: notification.title,
+        summary: notification.summary,
         subscriptions: subscriptions,
         upstream_timestamp: upstream_timestamp,
         type: type
