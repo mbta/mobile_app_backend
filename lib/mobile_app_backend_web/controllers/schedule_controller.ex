@@ -1,16 +1,18 @@
 defmodule MobileAppBackendWeb.ScheduleController do
   use MobileAppBackendWeb, :controller
   require Logger
+  alias MobileAppBackend.GlobalDataCache
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
 
-  def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time} = params) do
+  def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time_string} = params) do
     if stop_ids_concat == "" do
       json(conn, %{schedules: [], trips: %{}})
     else
       stop_ids = String.split(stop_ids_concat, ",")
 
-      service_date = parse_service_date(date_time)
+      date_time = Util.parse_datetime!(date_time_string)
+      service_date = Util.datetime_to_gtfs(date_time)
 
       filters = Enum.map(stop_ids, &get_filter(&1, service_date))
 
@@ -18,8 +20,8 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
       data =
         case filters do
-          [filter] -> fetch_schedules(filter)
-          filters -> fetch_schedules_parallel(filters, parallel_timeout)
+          [filter] -> fetch_schedules(filter, date_time)
+          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout)
         end
 
       case data do
@@ -58,25 +60,18 @@ defmodule MobileAppBackendWeb.ScheduleController do
     json(conn, response)
   end
 
-  @spec parse_service_date(String.t()) :: Date.t()
-  defp parse_service_date(date_string) do
-    date_string
-    |> Util.parse_datetime!()
-    |> Util.datetime_to_gtfs()
-  end
-
   @spec get_filter(String.t(), Date.t()) :: [JsonApi.Params.filter_param()]
   defp get_filter(stop_id, service_date) do
     [stop: stop_id, date: service_date]
   end
 
-  @spec fetch_schedules_parallel([[JsonApi.Params.filter_param()]], integer()) ::
+  @spec fetch_schedules_parallel([[JsonApi.Params.filter_param()]], DateTime.t(), integer()) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
-  defp fetch_schedules_parallel(filters, timeout) do
+  defp fetch_schedules_parallel(filters, date_time, timeout) do
     filters
     |> Task.async_stream(
       fn filter_params ->
-        {filter_params, fetch_schedules(filter_params)}
+        {filter_params, fetch_schedules(filter_params, date_time)}
       end,
       ordered: false,
       timeout: timeout
@@ -100,16 +95,42 @@ defmodule MobileAppBackendWeb.ScheduleController do
       :error
   end
 
-  @spec fetch_schedules([JsonApi.Params.filter_param()]) ::
+  @spec fetch_schedules([JsonApi.Params.filter_param()], DateTime.t()) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
           | :error
-  defp fetch_schedules(filter) do
+  defp fetch_schedules(filter, date_time) do
     case Repository.schedules(filter: filter, include: :trip) do
       {:ok, %{data: schedules, included: %{trips: trips}}} ->
-        %{schedules: schedules, trips: trips}
+        filter_past_schedules(schedules, trips, date_time)
 
       _ ->
         :error
     end
+  end
+
+  defp last_schedule_grouping(schedule, nil), do: {schedule.route_id, nil}
+  defp last_schedule_grouping(schedule, trip), do: {schedule.route_id, trip.direction_id}
+
+  @spec filter_past_schedules([MBTAV3API.Schedule.t()], JsonApi.Object.trip_map(), DateTime.t()) ::
+          %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
+  defp filter_past_schedules(schedules, trips, date_time) do
+    global_data = GlobalDataCache.get_data()
+
+    last_schedule_ids =
+      schedules
+      |> Enum.group_by(&last_schedule_grouping(&1, Map.get(trips, &1.trip_id)))
+      |> Enum.map(fn {_grouping, schedules} -> List.last(schedules) end)
+      |> Enum.filter(&(&1 != nil))
+      |> Enum.map(& &1.id)
+
+    relevant_schedules =
+      Enum.filter(schedules, fn schedule ->
+        global_data.routes[schedule.route_id].type in [:commuter_rail, :ferry] or
+          schedule.id in last_schedule_ids or
+          DateTime.compare(schedule.departure_time, DateTime.add(date_time, -1, :hour)) != :lt
+      end)
+
+    relevant_trips = Map.take(trips, Enum.map(relevant_schedules, & &1.trip_id))
+    %{schedules: relevant_schedules, trips: relevant_trips}
   end
 end
