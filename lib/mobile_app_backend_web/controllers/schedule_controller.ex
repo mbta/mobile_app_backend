@@ -114,6 +114,25 @@ defmodule MobileAppBackendWeb.ScheduleController do
   defp last_schedule_grouping(schedule, nil), do: {schedule.route_id, nil}
   defp last_schedule_grouping(schedule, trip), do: {schedule.route_id, trip.direction_id}
 
+  @spec compare_schedule_time(MBTAV3API.Schedule.t() | DateTime.t(), DateTime.t()) :: boolean()
+  defp compare_schedule_time(
+         %MBTAV3API.Schedule{departure_time: nil, arrival_time: nil},
+         _date_time
+       ),
+       do: true
+
+  defp compare_schedule_time(
+         %MBTAV3API.Schedule{departure_time: nil, arrival_time: arrival_time},
+         date_time
+       ),
+       do: compare_schedule_time(arrival_time, date_time)
+
+  defp compare_schedule_time(%MBTAV3API.Schedule{departure_time: departure_time}, date_time),
+    do: compare_schedule_time(departure_time, date_time)
+
+  defp compare_schedule_time(schedule_time, date_time),
+    do: DateTime.compare(schedule_time, DateTime.add(date_time, -1, :hour)) != :lt
+
   @spec filter_past_schedules([MBTAV3API.Schedule.t()], JsonApi.Object.trip_map(), DateTime.t()) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
   defp filter_past_schedules(schedules, trips, date_time) do
@@ -130,7 +149,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
       Enum.filter(schedules, fn schedule ->
         global_data.routes[schedule.route_id].type in [:commuter_rail, :ferry] or
           schedule.id in last_schedule_ids or
-          DateTime.compare(schedule.departure_time, DateTime.add(date_time, -1, :hour)) != :lt
+          compare_schedule_time(schedule, date_time)
       end)
 
     relevant_trips = Map.take(trips, Enum.map(relevant_schedules, & &1.trip_id))

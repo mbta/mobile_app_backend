@@ -420,7 +420,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
     s1 =
       %MBTAV3API.Schedule{
         id: "schedule-60565179-70159-90",
-        arrival_time: ~B[2024-03-13 08:07:00],
+        arrival_time: nil,
         departure_time: ~B[2024-03-13 08:07:00],
         drop_off_type: :regular,
         pick_up_type: :regular,
@@ -433,7 +433,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
     s2 = %MBTAV3API.Schedule{
       id: "schedule-60565145-70158-90",
       arrival_time: ~B[2024-03-13 08:15:00],
-      departure_time: ~B[2024-03-13 08:15:00],
+      departure_time: nil,
       drop_off_type: :regular,
       pick_up_type: :regular,
       stop_sequence: 90,
