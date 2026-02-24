@@ -11,6 +11,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
+  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.NotificationsFactory
   alias MobileAppBackend.User
 
@@ -45,6 +46,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       perform_job(Notifications.Deliverer, %{
         user_id: user_id,
         alert_id: alert_id,
+        title: %NotificationTitle.BareLabel{label: "Red Line"},
         summary: %AlertSummary{
           effect: :station_closure,
           location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
@@ -72,6 +74,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert %{
              message: %{
                data: %{
+                 title: title,
                  summary: summary,
                  alert_id: ^alert_id,
                  subscriptions: subscriptions,
@@ -81,6 +84,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                token: ^fcm_token
              }
            } = Jason.decode!(received_body, keys: :atoms!)
+
+    assert %{type: "bare_label", label: "Red Line"} = Jason.decode!(title, keys: :atoms!)
 
     assert %{
              effect: "station_closure",
@@ -137,6 +142,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
+          title: %NotificationTitle.BareLabel{label: "Red Line"},
           summary: %AlertSummary{},
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
@@ -185,6 +191,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
+          title: %NotificationTitle.BareLabel{label: "Red Line"},
           summary: %AlertSummary{},
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,

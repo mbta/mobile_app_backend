@@ -55,6 +55,11 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
+        "title" => %{
+          "type" => "mode_label",
+          "label" => "66",
+          "mode" => "bus"
+        },
         "summary" => %{
           "effect" => "suspension",
           "location" => nil,

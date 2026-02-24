@@ -325,4 +325,31 @@ defmodule Util do
   def parse_revenue_status("REVENUE"), do: true
   def parse_revenue_status("NON_REVENUE"), do: false
   def parse_revenue_status(nil), do: true
+
+  defprotocol PolymorphicJson do
+    @moduledoc """
+    Encodes a struct as JSON with a `type` field, for easy deserialization with Kotlin polymorphism.
+    """
+
+    @impl true
+    defmacro __deriving__(module, _options) do
+      type = module |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
+
+      quote do
+        defimpl Jason.Encoder, for: unquote(module) do
+          def encode(value, opts) do
+            value |> Map.from_struct() |> Map.put(:type, unquote(type)) |> Jason.Encode.map(opts)
+          end
+        end
+
+        defimpl JSON.Encoder, for: unquote(module) do
+          def encode(value, encoder) do
+            value |> Map.from_struct() |> Map.put(:type, unquote(type)) |> encoder.(encoder)
+          end
+        end
+      end
+    end
+
+    def ok(this)
+  end
 end

@@ -6,7 +6,7 @@ defmodule MBTAV3API.Line do
           color: String.t(),
           long_name: String.t(),
           short_name: String.t(),
-          sort_order: String.t(),
+          sort_order: integer(),
           text_color: String.t()
         }
 

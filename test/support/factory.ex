@@ -24,6 +24,17 @@ defmodule MobileAppBackend.Factory do
     }
   end
 
+  def line_factory do
+    %MBTAV3API.Line{
+      id: Uniq.UUID.uuid7(),
+      color: "7C878E",
+      long_name: "Silver Line SL1/SL2/SL3",
+      short_name: "",
+      sort_order: 10_051,
+      text_color: "FFFFFF"
+    }
+  end
+
   def prediction_factory do
     %MBTAV3API.Prediction{
       id: Uniq.UUID.uuid7(),

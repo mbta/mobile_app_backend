@@ -3,6 +3,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MobileAppBackend.GlobalDataCache
+  alias Util.PolymorphicJson
 
   defmodule Direction do
     alias MBTAV3API.Route
@@ -199,29 +200,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         {direction_id, stop_list}
       end)
     end
-  end
-
-  defprotocol PolymorphicJson do
-    @impl true
-    defmacro __deriving__(module, _options) do
-      type = module |> Module.split() |> List.last() |> Macro.underscore() |> String.to_atom()
-
-      quote do
-        defimpl Jason.Encoder, for: unquote(module) do
-          def encode(value, opts) do
-            value |> Map.from_struct() |> Map.put(:type, unquote(type)) |> Jason.Encode.map(opts)
-          end
-        end
-
-        defimpl JSON.Encoder, for: unquote(module) do
-          def encode(value, encoder) do
-            value |> Map.from_struct() |> Map.put(:type, unquote(type)) |> encoder.(encoder)
-          end
-        end
-      end
-    end
-
-    def ok(this)
   end
 
   defmodule Location do
