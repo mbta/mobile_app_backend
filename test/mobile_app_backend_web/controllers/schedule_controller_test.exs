@@ -415,4 +415,399 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
 
     assert %{"type" => "unknown"} = json_response(conn, 200)
   end
+
+  test "filters schedules in the past", %{conn: conn} do
+    s1 =
+      %MBTAV3API.Schedule{
+        id: "schedule-60565179-70159-90",
+        arrival_time: ~B[2024-03-13 08:07:00],
+        departure_time: ~B[2024-03-13 08:07:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 90,
+        route_id: "Green-C",
+        stop_id: "70158",
+        trip_id: "60565179"
+      }
+
+    s2 = %MBTAV3API.Schedule{
+      id: "schedule-60565145-70158-90",
+      arrival_time: ~B[2024-03-13 08:15:00],
+      departure_time: ~B[2024-03-13 08:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 90,
+      route_id: "Green-C",
+      stop_id: "70158",
+      trip_id: "60565145"
+    }
+
+    s3 = %MBTAV3API.Schedule{
+      id: "schedule-60565146-70158-90",
+      arrival_time: ~B[2024-03-13 10:15:00],
+      departure_time: ~B[2024-03-13 10:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 90,
+      route_id: "Green-C",
+      stop_id: "70158",
+      trip_id: "60565146"
+    }
+
+    s4 = %MBTAV3API.Schedule{
+      id: "schedule-60565147-70158-90",
+      arrival_time: ~B[2024-03-13 11:15:00],
+      departure_time: ~B[2024-03-13 11:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 90,
+      route_id: "Green-C",
+      stop_id: "70158",
+      trip_id: "60565147"
+    }
+
+    t1 = build(:trip, id: s1.trip_id)
+    t2 = build(:trip, id: s2.trip_id)
+    t3 = build(:trip, id: s3.trip_id)
+    t4 = build(:trip, id: s4.trip_id)
+
+    RepositoryMock
+    |> expect(:schedules, fn params, _opts ->
+      assert [
+               filter: [
+                 stop: "place-boyls",
+                 date: ~D[2024-03-13]
+               ],
+               include: :trip
+             ] = params
+
+      ok_response([s1, s2, s3, s4], [t1, t2, t3, t4])
+    end)
+
+    conn =
+      get(conn, "/api/schedules", %{
+        stop_ids: "place-boyls",
+        date_time: "2024-03-13T11:00:30-04:00"
+      })
+
+    assert %{
+             "schedules" => [
+               %{
+                 "arrival_time" => "2024-03-13T10:15:00-04:00",
+                 "departure_time" => "2024-03-13T10:15:00-04:00",
+                 "drop_off_type" => "regular",
+                 "id" => "schedule-60565146-70158-90",
+                 "pick_up_type" => "regular",
+                 "route_id" => "Green-C",
+                 "stop_id" => "70158",
+                 "stop_sequence" => 90,
+                 "trip_id" => "60565146"
+               },
+               %{
+                 "arrival_time" => "2024-03-13T11:15:00-04:00",
+                 "departure_time" => "2024-03-13T11:15:00-04:00",
+                 "drop_off_type" => "regular",
+                 "id" => "schedule-60565147-70158-90",
+                 "pick_up_type" => "regular",
+                 "route_id" => "Green-C",
+                 "stop_id" => "70158",
+                 "stop_sequence" => 90,
+                 "trip_id" => "60565147"
+               }
+             ],
+             "trips" => %{
+               "60565146" => %{},
+               "60565147" => %{}
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "does not filter ferry or cr schedules in the past", %{conn: conn} do
+    s1 =
+      %MBTAV3API.Schedule{
+        id: "schedule-1-cr-stop-0",
+        arrival_time: ~B[2024-03-13 08:07:00],
+        departure_time: ~B[2024-03-13 08:07:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 0,
+        route_id: "CR-NewBedford",
+        stop_id: "cr-stop",
+        trip_id: "1"
+      }
+
+    s2 = %MBTAV3API.Schedule{
+      id: "schedule-2-cr-stop-0",
+      arrival_time: ~B[2024-03-13 08:15:00],
+      departure_time: ~B[2024-03-13 08:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "CR-NewBedford",
+      stop_id: "cr-stop",
+      trip_id: "2"
+    }
+
+    s3 = %MBTAV3API.Schedule{
+      id: "schedule-3-ferry-stop-0",
+      arrival_time: ~B[2024-03-13 08:15:00],
+      departure_time: ~B[2024-03-13 08:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "Boat-F4",
+      stop_id: "ferry-stop",
+      trip_id: "3"
+    }
+
+    s4 = %MBTAV3API.Schedule{
+      id: "schedule-4-ferry-stop-0",
+      arrival_time: ~B[2024-03-13 08:30:00],
+      departure_time: ~B[2024-03-13 08:30:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "Boat-F4",
+      stop_id: "ferry-stop",
+      trip_id: "4"
+    }
+
+    t1 = build(:trip, id: s1.trip_id)
+    t2 = build(:trip, id: s2.trip_id)
+    t3 = build(:trip, id: s3.trip_id)
+    t4 = build(:trip, id: s4.trip_id)
+
+    RepositoryMock
+    |> expect(:schedules, 2, fn params, _opts ->
+      case params do
+        [
+          filter: [
+            stop: "cr-stop",
+            date: ~D[2024-03-13]
+          ],
+          include: :trip
+        ] ->
+          ok_response([s1, s2], [t1, t2])
+
+        [
+          filter: [
+            stop: "ferry-stop",
+            date: ~D[2024-03-13]
+          ],
+          include: :trip
+        ] ->
+          ok_response([s3, s4], [t3, t4])
+
+        _ ->
+          flunk("unexpected params: #{inspect(params)}")
+      end
+    end)
+
+    conn =
+      get(conn, "/api/schedules", %{
+        stop_ids: "cr-stop,ferry-stop",
+        date_time: "2024-03-13T11:00:30-04:00"
+      })
+
+    assert %{
+             "schedules" => [
+               %{
+                 "id" => "schedule-1-cr-stop-0",
+                 "arrival_time" => "2024-03-13T08:07:00-04:00",
+                 "departure_time" => "2024-03-13T08:07:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "CR-NewBedford",
+                 "stop_id" => "cr-stop",
+                 "trip_id" => "1"
+               },
+               %{
+                 "id" => "schedule-2-cr-stop-0",
+                 "arrival_time" => "2024-03-13T08:15:00-04:00",
+                 "departure_time" => "2024-03-13T08:15:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "CR-NewBedford",
+                 "stop_id" => "cr-stop",
+                 "trip_id" => "2"
+               },
+               %{
+                 "id" => "schedule-3-ferry-stop-0",
+                 "arrival_time" => "2024-03-13T08:15:00-04:00",
+                 "departure_time" => "2024-03-13T08:15:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "Boat-F4",
+                 "stop_id" => "ferry-stop",
+                 "trip_id" => "3"
+               },
+               %{
+                 "id" => "schedule-4-ferry-stop-0",
+                 "arrival_time" => "2024-03-13T08:30:00-04:00",
+                 "departure_time" => "2024-03-13T08:30:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "Boat-F4",
+                 "stop_id" => "ferry-stop",
+                 "trip_id" => "4"
+               }
+             ],
+             "trips" => %{
+               "1" => %{},
+               "2" => %{},
+               "3" => %{},
+               "4" => %{}
+             }
+           } = json_response(conn, 200)
+  end
+
+  test "does not filter the final trip for every unique route and direction combination", %{
+    conn: conn
+  } do
+    s1 =
+      %MBTAV3API.Schedule{
+        id: "schedule-1-1259-0",
+        arrival_time: ~B[2024-03-14 00:07:00],
+        departure_time: ~B[2024-03-14 00:07:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 0,
+        route_id: "66",
+        stop_id: "1259",
+        trip_id: "1"
+      }
+
+    s2 = %MBTAV3API.Schedule{
+      id: "schedule-2-1259-0",
+      arrival_time: ~B[2024-03-14 00:15:00],
+      departure_time: ~B[2024-03-14 00:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "66",
+      stop_id: "1259",
+      trip_id: "2"
+    }
+
+    s3 = %MBTAV3API.Schedule{
+      id: "schedule-3-1259-0",
+      arrival_time: ~B[2024-03-14 00:15:00],
+      departure_time: ~B[2024-03-14 00:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "66",
+      stop_id: "1259",
+      trip_id: "3"
+    }
+
+    s4 = %MBTAV3API.Schedule{
+      id: "schedule-4-1259-0",
+      arrival_time: ~B[2024-03-14 00:30:00],
+      departure_time: ~B[2024-03-14 00:30:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "66",
+      stop_id: "1259",
+      trip_id: "4"
+    }
+
+    s5 = %MBTAV3API.Schedule{
+      id: "schedule-5-1259-0",
+      arrival_time: ~B[2024-03-14 00:15:00],
+      departure_time: ~B[2024-03-14 00:15:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "44",
+      stop_id: "1259",
+      trip_id: "5"
+    }
+
+    s6 = %MBTAV3API.Schedule{
+      id: "schedule-6-1259-0",
+      arrival_time: ~B[2024-03-14 00:30:00],
+      departure_time: ~B[2024-03-14 00:30:00],
+      drop_off_type: :regular,
+      pick_up_type: :regular,
+      stop_sequence: 0,
+      route_id: "44",
+      stop_id: "1259",
+      trip_id: "6"
+    }
+
+    t1 = build(:trip, id: s1.trip_id, direction_id: 0)
+    t2 = build(:trip, id: s2.trip_id, direction_id: 0)
+    t3 = build(:trip, id: s3.trip_id, direction_id: 1)
+    t4 = build(:trip, id: s4.trip_id, direction_id: 1)
+    t5 = build(:trip, id: s5.trip_id, direction_id: 0)
+    t6 = build(:trip, id: s6.trip_id, direction_id: 0)
+
+    RepositoryMock
+    |> expect(:schedules, fn params, _opts ->
+      assert [
+               filter: [
+                 stop: "1259",
+                 date: ~D[2024-03-13]
+               ],
+               include: :trip
+             ] = params
+
+      ok_response([s1, s2, s3, s4, s5, s6], [t1, t2, t3, t4, t5, t6])
+    end)
+
+    conn =
+      get(conn, "/api/schedules", %{
+        stop_ids: "1259",
+        date_time: "2024-03-14T02:31:30-04:00"
+      })
+
+    assert %{
+             "schedules" => [
+               %{
+                 "id" => "schedule-2-1259-0",
+                 "arrival_time" => "2024-03-14T00:15:00-04:00",
+                 "departure_time" => "2024-03-14T00:15:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "66",
+                 "stop_id" => "1259",
+                 "trip_id" => "2"
+               },
+               %{
+                 "id" => "schedule-4-1259-0",
+                 "arrival_time" => "2024-03-14T00:30:00-04:00",
+                 "departure_time" => "2024-03-14T00:30:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "66",
+                 "stop_id" => "1259",
+                 "trip_id" => "4"
+               },
+               %{
+                 "id" => "schedule-6-1259-0",
+                 "arrival_time" => "2024-03-14T00:30:00-04:00",
+                 "departure_time" => "2024-03-14T00:30:00-04:00",
+                 "drop_off_type" => "regular",
+                 "pick_up_type" => "regular",
+                 "stop_sequence" => 0,
+                 "route_id" => "44",
+                 "stop_id" => "1259",
+                 "trip_id" => "6"
+               }
+             ],
+             "trips" => %{
+               "2" => %{},
+               "4" => %{},
+               "6" => %{}
+             }
+           } = json_response(conn, 200)
+  end
 end

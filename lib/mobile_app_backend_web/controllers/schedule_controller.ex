@@ -1,9 +1,10 @@
 defmodule MobileAppBackendWeb.ScheduleController do
   use MobileAppBackendWeb, :controller
   require Logger
-  alias MobileAppBackend.GlobalDataCache
+
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
+  alias MobileAppBackend.GlobalDataCache
 
   def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time_string} = params) do
     if stop_ids_concat == "" do
@@ -108,6 +109,8 @@ defmodule MobileAppBackendWeb.ScheduleController do
     end
   end
 
+  @spec last_schedule_grouping(MBTAV3API.Schedule.t(), MBTAV3API.Trip.t() | nil) ::
+          {String.t(), integer() | nil}
   defp last_schedule_grouping(schedule, nil), do: {schedule.route_id, nil}
   defp last_schedule_grouping(schedule, trip), do: {schedule.route_id, trip.direction_id}
 
@@ -131,6 +134,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
       end)
 
     relevant_trips = Map.take(trips, Enum.map(relevant_schedules, & &1.trip_id))
+
     %{schedules: relevant_schedules, trips: relevant_trips}
   end
 end
