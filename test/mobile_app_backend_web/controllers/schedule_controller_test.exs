@@ -150,36 +150,40 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
         date_time: "2024-03-13T01:06:30-04:00"
       })
 
+    response = json_response(conn, 200)
+    sorted_schedules = Enum.sort_by(response["schedules"], & &1["id"])
+
+    assert [
+             %{
+               "arrival_time" => "2024-03-13T01:15:00-04:00",
+               "departure_time" => "2024-03-13T01:15:00-04:00",
+               "drop_off_type" => "regular",
+               "id" => "schedule-60565145-70158-590",
+               "pick_up_type" => "regular",
+               "route_id" => "Green-C",
+               "stop_id" => "70158",
+               "stop_sequence" => 590,
+               "trip_id" => "60565145"
+             },
+             %{
+               "arrival_time" => "2024-03-13T01:07:00-04:00",
+               "departure_time" => "2024-03-13T01:07:00-04:00",
+               "drop_off_type" => "regular",
+               "id" => "schedule-60565179-70159-90",
+               "pick_up_type" => "regular",
+               "route_id" => "Green-B",
+               "stop_id" => "70159",
+               "stop_sequence" => 90,
+               "trip_id" => "60565179"
+             }
+           ] = sorted_schedules
+
     assert %{
-             "schedules" => [
-               %{
-                 "arrival_time" => "2024-03-13T01:07:00-04:00",
-                 "departure_time" => "2024-03-13T01:07:00-04:00",
-                 "drop_off_type" => "regular",
-                 "id" => "schedule-60565179-70159-90",
-                 "pick_up_type" => "regular",
-                 "route_id" => "Green-B",
-                 "stop_id" => "70159",
-                 "stop_sequence" => 90,
-                 "trip_id" => "60565179"
-               },
-               %{
-                 "arrival_time" => "2024-03-13T01:15:00-04:00",
-                 "departure_time" => "2024-03-13T01:15:00-04:00",
-                 "drop_off_type" => "regular",
-                 "id" => "schedule-60565145-70158-590",
-                 "pick_up_type" => "regular",
-                 "route_id" => "Green-C",
-                 "stop_id" => "70158",
-                 "stop_sequence" => 590,
-                 "trip_id" => "60565145"
-               }
-             ],
              "trips" => %{
                "60565145" => %{},
                "60565179" => %{}
              }
-           } = json_response(conn, 200)
+           } = response
   end
 
   @tag :capture_log
@@ -609,60 +613,64 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
         date_time: "2024-03-13T11:00:30-04:00"
       })
 
+    response = json_response(conn, 200)
+    sorted_schedules = Enum.sort_by(response["schedules"], & &1["id"])
+
+    assert [
+             %{
+               "id" => "schedule-1-cr-stop-0",
+               "arrival_time" => "2024-03-13T08:07:00-04:00",
+               "departure_time" => "2024-03-13T08:07:00-04:00",
+               "drop_off_type" => "regular",
+               "pick_up_type" => "regular",
+               "stop_sequence" => 0,
+               "route_id" => "CR-NewBedford",
+               "stop_id" => "cr-stop",
+               "trip_id" => "1"
+             },
+             %{
+               "id" => "schedule-2-cr-stop-0",
+               "arrival_time" => "2024-03-13T08:15:00-04:00",
+               "departure_time" => "2024-03-13T08:15:00-04:00",
+               "drop_off_type" => "regular",
+               "pick_up_type" => "regular",
+               "stop_sequence" => 0,
+               "route_id" => "CR-NewBedford",
+               "stop_id" => "cr-stop",
+               "trip_id" => "2"
+             },
+             %{
+               "id" => "schedule-3-ferry-stop-0",
+               "arrival_time" => "2024-03-13T08:15:00-04:00",
+               "departure_time" => "2024-03-13T08:15:00-04:00",
+               "drop_off_type" => "regular",
+               "pick_up_type" => "regular",
+               "stop_sequence" => 0,
+               "route_id" => "Boat-F4",
+               "stop_id" => "ferry-stop",
+               "trip_id" => "3"
+             },
+             %{
+               "id" => "schedule-4-ferry-stop-0",
+               "arrival_time" => "2024-03-13T08:30:00-04:00",
+               "departure_time" => "2024-03-13T08:30:00-04:00",
+               "drop_off_type" => "regular",
+               "pick_up_type" => "regular",
+               "stop_sequence" => 0,
+               "route_id" => "Boat-F4",
+               "stop_id" => "ferry-stop",
+               "trip_id" => "4"
+             }
+           ] = sorted_schedules
+
     assert %{
-             "schedules" => [
-               %{
-                 "id" => "schedule-1-cr-stop-0",
-                 "arrival_time" => "2024-03-13T08:07:00-04:00",
-                 "departure_time" => "2024-03-13T08:07:00-04:00",
-                 "drop_off_type" => "regular",
-                 "pick_up_type" => "regular",
-                 "stop_sequence" => 0,
-                 "route_id" => "CR-NewBedford",
-                 "stop_id" => "cr-stop",
-                 "trip_id" => "1"
-               },
-               %{
-                 "id" => "schedule-2-cr-stop-0",
-                 "arrival_time" => "2024-03-13T08:15:00-04:00",
-                 "departure_time" => "2024-03-13T08:15:00-04:00",
-                 "drop_off_type" => "regular",
-                 "pick_up_type" => "regular",
-                 "stop_sequence" => 0,
-                 "route_id" => "CR-NewBedford",
-                 "stop_id" => "cr-stop",
-                 "trip_id" => "2"
-               },
-               %{
-                 "id" => "schedule-3-ferry-stop-0",
-                 "arrival_time" => "2024-03-13T08:15:00-04:00",
-                 "departure_time" => "2024-03-13T08:15:00-04:00",
-                 "drop_off_type" => "regular",
-                 "pick_up_type" => "regular",
-                 "stop_sequence" => 0,
-                 "route_id" => "Boat-F4",
-                 "stop_id" => "ferry-stop",
-                 "trip_id" => "3"
-               },
-               %{
-                 "id" => "schedule-4-ferry-stop-0",
-                 "arrival_time" => "2024-03-13T08:30:00-04:00",
-                 "departure_time" => "2024-03-13T08:30:00-04:00",
-                 "drop_off_type" => "regular",
-                 "pick_up_type" => "regular",
-                 "stop_sequence" => 0,
-                 "route_id" => "Boat-F4",
-                 "stop_id" => "ferry-stop",
-                 "trip_id" => "4"
-               }
-             ],
              "trips" => %{
                "1" => %{},
                "2" => %{},
                "3" => %{},
                "4" => %{}
              }
-           } = json_response(conn, 200)
+           } = response
   end
 
   test "does not filter the final trip for every unique route and direction combination", %{
