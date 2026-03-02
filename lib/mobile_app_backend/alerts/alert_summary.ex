@@ -2,6 +2,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
+  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
@@ -376,15 +377,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           0 | 1,
           [RoutePattern.t()],
           DateTime.t(),
+          [Schedule.t()] | nil,
           GlobalDataCache.data()
         ) :: t()
-  def summarizing(alert, stop_id, direction_id, patterns, at_time, global) do
+  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
     recurrence = alert_recurrence(alert, at_time)
 
     %__MODULE__{
       effect: alert.effect,
       location: alert_location(alert, stop_id, direction_id, patterns, global),
-      timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
+      timeframe: alert_timeframe(alert, at_time, schedules, not is_nil(recurrence)),
       recurrence: recurrence,
       update: alert_update(alert, at_time)
     }
@@ -440,12 +442,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  @spec alert_timeframe(Alert.t(), DateTime.t(), boolean()) :: Timeframe.t() | nil
-  defp alert_timeframe(alert, at_time, has_recurrence?)
+  @spec alert_timeframe(Alert.t(), DateTime.t(), [Schedule.t()] | nil, boolean()) ::
+          Timeframe.t() | nil
+  defp alert_timeframe(alert, at_time, schedules, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _, _), do: nil
 
-  defp alert_timeframe(alert, at_time, has_recurrence?) do
+  defp alert_timeframe(alert, at_time, _schedules, has_recurrence?) do
     service_date = Util.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
