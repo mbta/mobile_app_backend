@@ -89,4 +89,14 @@ defmodule MBTAV3API.Route do
       route_pattern_ids: JsonApi.Object.get_many_ids(item.relationships["route_patterns"])
     }
   end
+
+  @spec label(t()) :: String.t()
+  def label(route)
+  def label(%__MODULE__{type: :bus, short_name: short_name}), do: short_name
+
+  def label(%__MODULE__{type: :commuter_rail, long_name: long_name}) do
+    String.replace(long_name, "/", " / ")
+  end
+
+  def label(%__MODULE__{long_name: long_name}), do: long_name
 end

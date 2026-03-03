@@ -434,7 +434,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         build(:alert,
           informed_entity:
             Enum.map(
-              stops,
+              successive_stops ++ [last_stop],
               &%Alert.InformedEntity{
                 activities: ~w(board exit ride)a,
                 route: route.id,
@@ -445,7 +445,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary{
                location: %AlertSummary.Location.SuccessiveStops{
-                 start_stop_name: "First Stop",
+                 start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
                  end_stop_name: "Last Stop"
                }
              } =
@@ -717,22 +717,25 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       kenmore = build(:stop, name: "Kenmore", child_stop_ids: ["70150"])
       blandford = build(:stop, name: "Blandford Street", child_stop_ids: ["70148"])
       saint_marys = build(:stop, name: "Saint Mary's Street", child_stop_ids: ["70212"])
+      c_branch_terminal = build(:stop, name: "Cleveland Circle", child_stop_ids: ["70237"])
 
       child_stops = [
         build(:stop, id: "70150", parent_station_id: kenmore.id),
         build(:stop, id: "70148", parent_station_id: blandford.id),
-        build(:stop, id: "70212", parent_station_id: saint_marys.id)
+        build(:stop, id: "70212", parent_station_id: saint_marys.id),
+        build(:stop, id: "70237", parent_station_id: c_branch_terminal.id)
       ]
 
       route =
         build(:route,
+          id: "Green-C",
           type: :light_rail,
           line_id: "line-Green",
           direction_names: ["Westbound", "Eastbound"],
           direction_destinations: ["", "Park St & North"]
         )
 
-      c_branch_trip = build(:trip, stop_ids: ["70212", "70150"])
+      c_branch_trip = build(:trip, stop_ids: ["70237", "70212", "70150"])
 
       c_branch =
         build(:route_pattern,
@@ -745,11 +748,11 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         build(:alert,
           informed_entity:
             Enum.map(
-              [kenmore, blandford, saint_marys | child_stops],
+              ["70150", "70148", "70212"],
               &%Alert.InformedEntity{
                 activities: ~w(board exit ride)a,
                 route: route.id,
-                stop: &1.id
+                stop: &1
               }
             )
         )
@@ -762,7 +765,11 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(alert, saint_marys.id, 1, [c_branch], now, %{
                  routes: %{route.id => route},
-                 stops: Map.new([kenmore, blandford, saint_marys | child_stops], &{&1.id, &1}),
+                 stops:
+                   Map.new(
+                     [kenmore, blandford, saint_marys, c_branch_terminal | child_stops],
+                     &{&1.id, &1}
+                   ),
                  trips: %{c_branch_trip.id => c_branch_trip}
                })
     end
@@ -951,6 +958,267 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                timeframe: nil,
                update: %AlertSummary.Update.AllClear{}
              } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
+    test "summary with whole route entity", %{now: now} do
+      route = build(:route, short_name: "Route Label", type: :bus)
+      pattern = build(:route_pattern, route_id: route.id, direction_id: 0)
+
+      alert =
+        build(:alert,
+          effect: :suspension,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: route.id,
+              route_type: route.type
+            }
+          ]
+        )
+
+      assert %AlertSummary{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Route Label",
+                 route_type: :bus
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(alert, "", 0, [pattern], now, %{
+                 routes: %{route.id => route}
+               })
+    end
+
+    test "summary with stop entities for every stop on a route", %{now: now} do
+      route = build(:route, long_name: "Route Label", type: :heavy_rail)
+      stop_ids = ["1", "2", "3", "4"]
+      stops = Map.new(stop_ids, &{&1, build(:stop, id: &1)})
+      trip = build(:trip, stop_ids: stop_ids)
+
+      pattern =
+        build(:route_pattern,
+          route_id: route.id,
+          direction_id: 0,
+          typicality: :typical,
+          representative_trip_id: trip.id
+        )
+
+      alert =
+        build(:alert,
+          effect: :suspension,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity:
+            Enum.map(
+              stop_ids,
+              &%Alert.InformedEntity{
+                activities: ~w(board exit ride)a,
+                route: route.id,
+                route_type: route.type,
+                stop: &1
+              }
+            )
+        )
+
+      assert %AlertSummary{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Route Label",
+                 route_type: :heavy_rail
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(alert, "", 0, [pattern], now, %{
+                 routes: %{route.id => route},
+                 stops: stops,
+                 trips: %{trip.id => trip}
+               })
+    end
+
+    test "summary with whole green line alert", %{now: now} do
+      green_route_ids = ~w(Green-B Green-C Green-D Green-E)
+
+      routes =
+        Map.new(green_route_ids, fn id ->
+          route = build(:route, id: id, type: :light_rail, line_id: "line-Green")
+          {id, route}
+        end)
+
+      patterns =
+        Enum.map(green_route_ids, fn id ->
+          build(:route_pattern,
+            route_id: id,
+            direction_id: 0,
+            typicality: :typical
+          )
+        end)
+
+      alert =
+        build(:alert,
+          effect: :stop_closure,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity:
+            Enum.map(
+              green_route_ids,
+              &%Alert.InformedEntity{
+                activities: ~w(board exit ride)a,
+                route: &1,
+                route_type: :light_rail
+              }
+            )
+        )
+
+      e_patterns = Enum.filter(patterns, &(&1.route_id == "Green-E"))
+
+      assert %AlertSummary{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green Line",
+                 route_type: :light_rail
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(alert, "stopId", 0, e_patterns, now, %{
+                 routes: routes
+               })
+    end
+
+    test "summary with stop entities for every stop on the green line", %{now: now} do
+      green_route_ids = ~w(Green-B Green-C Green-D Green-E)
+
+      routes =
+        Map.new(green_route_ids, fn id ->
+          route = build(:route, id: id, type: :light_rail, line_id: "line-Green")
+          {id, route}
+        end)
+
+      trunk_stop_ids = ["trunk1", "trunk2", "trunk3", "trunk4"]
+      trunk_stops = Map.new(trunk_stop_ids, &{&1, build(:stop, id: &1)})
+
+      {branch_stops, trips, patterns} =
+        Enum.reduce(green_route_ids, {%{}, %{}, []}, fn route_id,
+                                                        {stops_acc, trips_acc, pats_acc} ->
+          branch_ids = Enum.map(1..4, &"#{route_id}-stop-#{&1}")
+          branch_stop_map = Map.new(branch_ids, &{&1, build(:stop, id: &1)})
+          trip = build(:trip, stop_ids: branch_ids ++ trunk_stop_ids)
+
+          pattern =
+            build(:route_pattern,
+              route_id: route_id,
+              direction_id: 0,
+              typicality: :typical,
+              representative_trip_id: trip.id
+            )
+
+          {Map.merge(stops_acc, branch_stop_map), Map.put(trips_acc, trip.id, trip),
+           pats_acc ++ [pattern]}
+        end)
+
+      all_stops = Map.merge(branch_stops, trunk_stops)
+
+      branch_entities =
+        Enum.flat_map(green_route_ids, fn route_id ->
+          branch_ids = Enum.map(1..4, &"#{route_id}-stop-#{&1}")
+
+          Enum.map(
+            branch_ids,
+            &%Alert.InformedEntity{activities: ~w(board exit ride)a, route: route_id, stop: &1}
+          )
+        end)
+
+      trunk_entities =
+        Enum.flat_map(trunk_stop_ids, fn stop_id ->
+          Enum.map(green_route_ids, fn route_id ->
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: route_id,
+              stop: stop_id
+            }
+          end)
+        end)
+
+      alert =
+        build(:alert,
+          effect: :stop_closure,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity: branch_entities ++ trunk_entities
+        )
+
+      e_patterns = Enum.filter(patterns, &(&1.route_id == "Green-E"))
+
+      assert %AlertSummary{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green Line",
+                 route_type: :light_rail
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(alert, "stopId", 0, e_patterns, now, %{
+                 routes: routes,
+                 stops: all_stops,
+                 trips: trips,
+                 route_patterns: Map.new(patterns, &{&1.id, &1})
+               })
+    end
+
+    test "summary for whole other green line branch", %{now: now} do
+      green_route_ids = ~w(Green-B Green-C Green-D Green-E)
+
+      routes =
+        Map.new(green_route_ids, fn id ->
+          route = build(:route, id: id, long_name: id, type: :light_rail, line_id: "line-Green")
+          {id, route}
+        end)
+
+      stops =
+        Map.new(
+          Enum.flat_map(green_route_ids, fn id ->
+            ["#{id}-stop-1", "#{id}-stop-2"]
+            |> Enum.map(&{&1, build(:stop, id: &1)})
+          end)
+        )
+
+      trips =
+        Map.new(green_route_ids, fn id ->
+          trip = build(:trip, id: id, stop_ids: ["#{id}-stop-1", "#{id}-stop-2"])
+          {id, trip}
+        end)
+
+      patterns =
+        Enum.map(green_route_ids, fn id ->
+          build(:route_pattern,
+            route_id: id,
+            direction_id: 0,
+            typicality: :typical,
+            representative_trip_id: id
+          )
+        end)
+
+      alert =
+        build(:alert,
+          effect: :stop_closure,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: "Green-C",
+              route_type: :light_rail
+            }
+          ]
+        )
+
+      e_pattern = Enum.filter(patterns, &(&1.route_id == "Green-E"))
+
+      assert %AlertSummary{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green-C",
+                 route_type: :light_rail
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(alert, "stopId", 0, e_pattern, now, %{
+                 routes: routes,
+                 route_patterns: Map.new(patterns, &{&1.id, &1}),
+                 trips: trips,
+                 stops: stops
+               })
     end
   end
 end

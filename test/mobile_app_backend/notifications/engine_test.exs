@@ -36,9 +36,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                title: %NotificationTitle.BareLabel{label: "Green Line D"},
                summary: %AlertSummary{
                  effect: :suspension,
-                 location: %AlertSummary.Location.SuccessiveStops{
-                   start_stop_name: "Union Square",
-                   end_stop_name: "Riverside"
+                 location: %AlertSummary.Location.WholeRoute{
+                   route_label: "Green Line D",
+                   route_type: :light_rail
                  },
                  timeframe: nil
                },
@@ -519,11 +519,72 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   test "keeps successive stops if subscribed in both directions" do
     now = DateTime.now!("America/New_York")
 
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    green_route_ids = ~w(Green-B Green-C Green-D Green-E)
+
+    routes =
+      Map.new(green_route_ids, fn id ->
+        route = build(:route, id: id, type: :light_rail, line_id: "line-Green")
+        {id, route}
+      end)
+
+    patterns =
+      Enum.flat_map(green_route_ids, fn id ->
+        Enum.map(0..1, fn direction_id ->
+          build(:route_pattern,
+            route_id: id,
+            direction_id: direction_id,
+            typicality: :typical,
+            representative_trip_id: "#{id}-#{direction_id}-trip"
+          )
+        end)
+      end)
+
+    trips =
+      Enum.flat_map(green_route_ids, fn id ->
+        Enum.map(0..1, fn direction_id ->
+          build(:trip,
+            id: "#{id}-#{direction_id}-trip",
+            stop_ids:
+              if direction_id == 0 do
+                ["place-river", "place-unsq", "place-boyls"]
+              else
+                ["place-boyls", "place-unsq", "place-river"]
+              end
+          )
+        end)
+      end)
+
+    GlobalDataCacheMock
+    |> expect(:default_key, fn -> :default_key end)
+    |> expect(:get_data, fn _ ->
+      %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes: routes,
+        route_patterns: Map.new(patterns, &{&1.id, &1}),
+        stops: %{
+          "place-boyls" => build(:stop, id: "place-boyls", name: "Boylston"),
+          "place-river" => build(:stop, id: "place-river", name: "Riverside"),
+          "place-unsq" => build(:stop, id: "place-unsq", name: "Union Square")
+        },
+        trips: Map.new(trips, &{&1.id, &1})
+      }
+    end)
+
     alert =
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}]
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+          %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
+        ]
       )
 
     subscription1 =
@@ -547,8 +608,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary{
                  effect: :suspension,
                  location: %AlertSummary.Location.SuccessiveStops{
-                   start_stop_name: "Riverside",
-                   end_stop_name: "Union Square"
+                   start_stop_name: "Boylston",
+                   end_stop_name: "Riverside"
                  },
                  timeframe: nil
                },
