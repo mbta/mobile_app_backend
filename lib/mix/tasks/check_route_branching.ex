@@ -143,7 +143,7 @@ defmodule Mix.Tasks.CheckRouteBranching do
 
   defp run_single_case(route, direction, global_data) do
     caption =
-      "#{route_label(route)} (#{route.id}) #{Enum.at(route.direction_names, direction)} (#{direction}) to #{Enum.at(route.direction_destinations, direction)}"
+      "#{Route.label(route)} (#{route.id}) #{Enum.at(route.direction_names, direction)} (#{direction}) to #{Enum.at(route.direction_destinations, direction)}"
 
     {:ok, %{data: stops}} =
       Repository.stops(
@@ -199,16 +199,6 @@ defmodule Mix.Tasks.CheckRouteBranching do
       :ok
     end
   end
-
-  defp route_label(route)
-
-  defp route_label(%Route{type: :bus, short_name: short_name}), do: short_name
-
-  defp route_label(%Route{type: :commuter_rail, long_name: long_name}) do
-    String.replace(long_name, "/", " / ")
-  end
-
-  defp route_label(%Route{long_name: long_name}), do: long_name
 
   defp visualize_stop_graph_node({stop_id, stop_count}, %StopGraph.Node{
          stop: stop,
