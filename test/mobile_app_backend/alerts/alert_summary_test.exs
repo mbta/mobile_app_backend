@@ -283,6 +283,22 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   end
 
   describe "summarizing/6" do
+    test "summary with until further notice timeframe", %{now: now} do
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -1, :hour),
+              end: nil
+            }
+          ],
+          duration_certainty: :known
+        )
+
+      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
+               AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
     test "summary with later today timeframe", %{now: now} do
       end_time = DateTime.add(now, 1, :hour)
 
@@ -840,6 +856,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       alert =
         build(:alert,
           effect: :suspension,
+          duration_certainty: :known,
           active_period:
             Enum.map(0..30, fn days_forward ->
               this_day = Date.add(today, days_forward)
@@ -865,6 +882,39 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
     end
 
+    test "summary with daily recurrence until further notice", %{now: now} do
+      today = DateTime.to_date(now)
+      time_start = DateTime.to_time(now)
+      time_end = Time.add(time_start, 1, :second)
+
+      alert =
+        build(:alert,
+          effect: :suspension,
+          duration_certainty: :unknown,
+          active_period:
+            Enum.map(0..30, fn days_forward ->
+              this_day = Date.add(today, days_forward)
+
+              %Alert.ActivePeriod{
+                start: DateTime.new!(this_day, time_start, "America/New_York"),
+                end: DateTime.new!(this_day, time_end, "America/New_York")
+              }
+            end)
+        )
+
+      now_plus_one_second = DateTime.add(now, 1, :second)
+
+      assert %AlertSummary{
+               timeframe: %AlertSummary.Timeframe.TimeRange{
+                 start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now},
+                 end_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now_plus_one_second}
+               },
+               recurrence: %AlertSummary.Recurrence.Daily{
+                 ending: %AlertSummary.Timeframe.UntilFurtherNotice{}
+               }
+             } = AlertSummary.summarizing(alert, "", 0, [], now, %{})
+    end
+
     test "summary with MWF recurrence ending later this week" do
       monday = ~D[2026-01-12]
       tuesday = ~D[2026-01-13]
@@ -878,6 +928,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       alert =
         build(:alert,
           effect: :suspension,
+          duration_certainty: :known,
           active_period: [
             %Alert.ActivePeriod{
               start: DateTime.new!(monday, service_boundary, "America/New_York"),
@@ -982,7 +1033,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_label: "Route Label",
                  route_type: :bus
                },
-               timeframe: nil
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, %{
                  routes: %{route.id => route}
@@ -1024,7 +1075,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_label: "Route Label",
                  route_type: :heavy_rail
                },
-               timeframe: nil
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, %{
                  routes: %{route.id => route},
@@ -1073,7 +1124,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_label: "Green Line",
                  route_type: :light_rail
                },
-               timeframe: nil
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.summarizing(alert, "stopId", 0, e_patterns, now, %{
                  routes: routes
@@ -1148,7 +1199,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_label: "Green Line",
                  route_type: :light_rail
                },
-               timeframe: nil
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.summarizing(alert, "stopId", 0, e_patterns, now, %{
                  routes: routes,
@@ -1211,7 +1262,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_label: "Green-C",
                  route_type: :light_rail
                },
-               timeframe: nil
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.summarizing(alert, "stopId", 0, e_pattern, now, %{
                  routes: routes,

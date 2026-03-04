@@ -40,7 +40,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                    route_label: "Green Line D",
                    route_type: :light_rail
                  },
-                 timeframe: nil
+                 timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
                subscriptions: [^subscription],
                alert: ^alert
@@ -76,7 +76,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary{
                  effect: :suspension,
                  location: nil,
-                 timeframe: nil
+                 timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
                subscriptions: [^subscription],
                alert: ^alert
@@ -611,7 +611,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                    start_stop_name: "Boylston",
                    end_stop_name: "Riverside"
                  },
-                 timeframe: nil
+                 timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
                subscriptions: [^subscription1, ^subscription2],
                alert: ^alert

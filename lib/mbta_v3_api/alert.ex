@@ -357,9 +357,10 @@ defmodule MBTAV3API.Alert do
     @type t :: %__MODULE__{
             start: DateTime.t(),
             end: DateTime.t(),
-            days: MapSet.t(Calendar.day_of_week())
+            days: MapSet.t(Calendar.day_of_week()),
+            end_day_known: boolean()
           }
-    defstruct [:start, :end, :days]
+    defstruct [:start, :end, :days, :end_day_known]
 
     @spec daily(t()) :: boolean()
     def daily(%__MODULE__{days: days}), do: MapSet.size(days) == 7
@@ -391,7 +392,12 @@ defmodule MBTAV3API.Alert do
           MapSet.new(alert_days, &Date.day_of_week/1)
         end
 
-      %RecurrenceInfo{start: first_period.start, end: last_period.end, days: days}
+      %RecurrenceInfo{
+        start: first_period.start,
+        end: last_period.end,
+        days: days,
+        end_day_known: alert.duration_certainty == :known
+      }
     else
       _ -> nil
     end
