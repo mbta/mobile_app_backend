@@ -2,6 +2,8 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Alert
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Line
+  alias MBTAV3API.Repository
+  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
@@ -237,12 +239,15 @@ defmodule MobileAppBackend.Notifications.Engine do
               )
           end)
 
+        schedules = get_schedules(alert, subscriptions, global_data)
+
         AlertSummary.summarizing(
           alert,
           subscription.stop_id,
           subscription.direction_id,
           patterns,
           now,
+          schedules,
           global_data
         )
       end)
@@ -298,5 +303,63 @@ defmodule MobileAppBackend.Notifications.Engine do
       _ ->
         nil
     end
+  end
+
+  defp get_schedules(alert, subscriptions, global_data) do
+    trip_ids =
+      alert.informed_entity |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
+
+    case trip_ids do
+      [] ->
+        nil
+
+      trip_ids ->
+        {:ok, %{data: schedules, included: %{trips: trips}}} =
+          Repository.schedules(
+            filter: [trip: trip_ids],
+            include: :trip,
+            sort: {:stop_sequence, :asc}
+          )
+
+        schedules =
+          Enum.filter(schedules, fn schedule ->
+            Enum.any?(
+              subscriptions,
+              &schedule_matches_subscription?(schedule, &1, trips, global_data)
+            )
+          end)
+
+        schedules
+    end
+  end
+
+  defp schedule_matches_subscription?(
+         %Schedule{} = schedule,
+         %Subscription{} = subscription,
+         trips,
+         global_data
+       ) do
+    route_matches? =
+      schedule.route_id == subscription.route_id or
+        global_data.routes[schedule.route_id].line_id == subscription.route_id
+
+    stop_matches? =
+      schedule.stop_id == subscription.stop_id or
+        global_data.stops[schedule.stop_id].parent_station_id == subscription.stop_id
+
+    direction_matches? =
+      trips[schedule.trip_id].direction_id == subscription.direction_id
+
+    trip_time = schedule.departure_time || schedule.arrival_time
+    time = DateTime.to_time(trip_time)
+    day = Date.day_of_week(trip_time)
+
+    time_matches? =
+      Enum.any?(subscription.windows, fn %Window{} = window ->
+        Time.compare(window.start_time, time) != :gt and
+          Time.compare(time, window.end_time) != :gt and day in window.days_of_week
+      end)
+
+    route_matches? and stop_matches? and direction_matches? and time_matches?
   end
 end
