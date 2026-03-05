@@ -439,6 +439,7 @@ defmodule MBTAV3API.AlertTest do
 
       alert =
         build(:alert,
+          duration_certainty: :known,
           active_period:
             for days_forward <- 0..5 do
               %ActivePeriod{
@@ -456,7 +457,8 @@ defmodule MBTAV3API.AlertTest do
       assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
                start: DateTime.new!(today, nine_pm, "America/New_York"),
                end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
-               days: MapSet.new(1..7)
+               days: MapSet.new(1..7),
+               end_day_known: true
              }
     end
 
@@ -468,6 +470,7 @@ defmodule MBTAV3API.AlertTest do
 
       alert =
         build(:alert,
+          duration_certainty: :known,
           active_period:
             0..14
             |> Enum.map(&Date.add(today, &1))
@@ -488,7 +491,38 @@ defmodule MBTAV3API.AlertTest do
       assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
                start: List.first(alert.active_period).start,
                end: List.last(alert.active_period).end,
-               days: selected_days
+               days: selected_days,
+               end_day_known: true
+             }
+    end
+
+    test "recurrence range end unknown" do
+      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
+      nine_pm = ~T[21:00:00]
+      end_of_service = ~T[03:00:00]
+
+      alert =
+        build(:alert,
+          duration_certainty: :unknown,
+          active_period:
+            for days_forward <- 0..5 do
+              %ActivePeriod{
+                start: DateTime.new!(Date.add(today, days_forward), nine_pm, "America/New_York"),
+                end:
+                  DateTime.new!(
+                    Date.add(today, days_forward + 1),
+                    end_of_service,
+                    "America/New_York"
+                  )
+              }
+            end
+        )
+
+      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
+               start: DateTime.new!(today, nine_pm, "America/New_York"),
+               end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
+               days: MapSet.new(1..7),
+               end_day_known: false
              }
     end
   end
