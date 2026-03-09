@@ -355,32 +355,25 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @type t :: Daily.t() | SomeDays.t()
   end
 
-  defmodule Update do
-    defmodule Active do
-      @type t :: %__MODULE__{}
-      @derive PolymorphicJson
-      defstruct []
-    end
-
-    defmodule AllClear do
-      @type t :: %__MODULE__{}
-      @derive PolymorphicJson
-      defstruct []
-    end
-
-    @type t :: Active.t() | AllClear.t()
+  defmodule Standard do
+    @type t :: %__MODULE__{
+            effect: Alert.effect(),
+            location: Location.t() | nil,
+            timeframe: Timeframe.t() | nil,
+            recurrence: Recurrence.t() | nil,
+            is_update: boolean()
+          }
+    @derive PolymorphicJson
+    defstruct [:effect, :location, :timeframe, :recurrence, :is_update]
   end
 
-  @type t :: %__MODULE__{
-          effect: Alert.effect(),
-          location: Location.t() | nil,
-          timeframe: Timeframe.t() | nil,
-          recurrence: Recurrence.t() | nil,
-          update: Update.t() | nil
-        }
-  @derive JSON.Encoder
-  @derive Jason.Encoder
-  defstruct [:effect, :location, :timeframe, :recurrence, :update]
+  defmodule AllClear do
+    @type t :: %__MODULE__{location: Location.t() | nil}
+    @derive PolymorphicJson
+    defstruct [:location]
+  end
+
+  @type t :: Standard.t() | AllClear.t()
 
   @spec summarizing(
           Alert.t(),
@@ -392,15 +385,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           GlobalDataCache.data()
         ) :: t()
   def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
-    recurrence = alert_recurrence(alert, at_time)
+    if Alert.all_clear?(alert, at_time) do
+      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+    else
+      recurrence = alert_recurrence(alert, at_time)
 
-    %__MODULE__{
-      effect: alert.effect,
-      location: alert_location(alert, stop_id, direction_id, patterns, global),
-      timeframe: alert_timeframe(alert, at_time, schedules, not is_nil(recurrence)),
-      recurrence: recurrence,
-      update: alert_update(alert, at_time)
-    }
+      %Standard{
+        effect: alert.effect,
+        location: alert_location(alert, stop_id, direction_id, patterns, global),
+        timeframe: alert_timeframe(alert, at_time, schedules, not is_nil(recurrence)),
+        recurrence: recurrence,
+        is_update: alert_is_update?(alert, at_time)
+      }
+    end
   end
 
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
@@ -564,35 +561,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  @spec alert_update(Alert.t(), DateTime.t()) :: Update.t() | nil
-  defp alert_update(alert, at_time) do
-    update =
-      case Alert.current_period(alert, at_time) do
-        %Alert.ActivePeriod{start: start_time}
-        when not is_nil(alert.updated_at) ->
-          updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
-          five_minutes_ago = DateTime.add(at_time, -5, :minute)
+  @spec alert_is_update?(Alert.t(), DateTime.t()) :: boolean()
+  defp alert_is_update?(alert, at_time) do
+    case Alert.current_period(alert, at_time) do
+      %Alert.ActivePeriod{start: start_time}
+      when not is_nil(alert.updated_at) ->
+        updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
+        five_minutes_ago = DateTime.add(at_time, -5, :minute)
 
-          updated_within_five_minutes =
-            DateTime.compare(alert.updated_at, five_minutes_ago) == :gt
+        updated_within_five_minutes =
+          DateTime.compare(alert.updated_at, five_minutes_ago) == :gt
 
-          updated_after_active and updated_within_five_minutes
+        updated_after_active and updated_within_five_minutes
 
-        _ ->
-          false
-      end
-
-    all_clear = Alert.all_clear?(alert, at_time)
-
-    cond do
-      update ->
-        %Update.Active{}
-
-      all_clear ->
-        %Update.AllClear{}
-
-      true ->
-        nil
+      _ ->
+        false
     end
   end
 

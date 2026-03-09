@@ -35,7 +35,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     assert [
              %OutgoingNotification{
                title: %NotificationTitle.BareLabel{label: "Green Line D"},
-               summary: %AlertSummary{
+               summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: %AlertSummary.Location.WholeRoute{
                    route_label: "Green Line D",
@@ -74,7 +74,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     assert [
              %OutgoingNotification{
                title: %NotificationTitle.BareLabel{label: "Green Line"},
-               summary: %AlertSummary{
+               summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: nil,
                  timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
@@ -504,7 +504,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     assert [
              %OutgoingNotification{
-               summary: %AlertSummary{
+               summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
                  timeframe: nil
@@ -606,7 +606,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     assert [
              %OutgoingNotification{
-               summary: %AlertSummary{
+               summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: %AlertSummary.Location.SuccessiveStops{
                    start_stop_name: "Boylston",
@@ -664,7 +664,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     assert [
              %OutgoingNotification{
-               summary: %AlertSummary{
+               summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: nil,
                  timeframe: nil
