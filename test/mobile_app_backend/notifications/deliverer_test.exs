@@ -47,7 +47,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         user_id: user_id,
         alert_id: alert_id,
         title: %NotificationTitle.BareLabel{label: "Red Line"},
-        summary: %AlertSummary{
+        summary: %AlertSummary.Standard{
           effect: :station_closure,
           location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
           timeframe: %AlertSummary.Timeframe.Tomorrow{}
@@ -143,7 +143,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           user_id: user_id,
           alert_id: alert_id,
           title: %NotificationTitle.BareLabel{label: "Red Line"},
-          summary: %AlertSummary{},
+          summary: %AlertSummary.Standard{},
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type
@@ -192,7 +192,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           user_id: user_id,
           alert_id: alert_id,
           title: %NotificationTitle.BareLabel{label: "Red Line"},
-          summary: %AlertSummary{},
+          summary: %AlertSummary.Standard{},
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type

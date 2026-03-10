@@ -179,17 +179,18 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   describe "serialization" do
     defp json_round_trip(value), do: Jason.decode!(Jason.encode_to_iodata!(value), keys: :atoms!)
 
-    test "can serialize full summary" do
-      assert json_round_trip(%AlertSummary{
+    test "can serialize full standard summary" do
+      assert json_round_trip(%AlertSummary.Standard{
                effect: :station_closure,
                location: %AlertSummary.Location.SingleStop{stop_name: "Lechmere"},
                timeframe: %AlertSummary.Timeframe.Tomorrow{},
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
                },
-               update: %AlertSummary.Update.Active{}
+               is_update: true
              }) ==
                %{
+                 type: "standard",
                  effect: "station_closure",
                  location: %{
                    type: "single_stop",
@@ -200,10 +201,24 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                    type: "some_days",
                    ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
                  },
-                 update: %{
-                   type: "active"
-                 }
+                 is_update: true
                }
+    end
+
+    test "can serialize all clear summary" do
+      assert json_round_trip(%AlertSummary.AllClear{
+               location: %AlertSummary.Location.SuccessiveStops{
+                 start_stop_name: "Lechmere",
+                 end_stop_name: "Government Center"
+               }
+             }) == %{
+               type: "all_clear",
+               location: %{
+                 type: "successive_stops",
+                 start_stop_name: "Lechmere",
+                 end_stop_name: "Government Center"
+               }
+             }
     end
 
     test "can serialize all locations" do
@@ -275,11 +290,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                end_time: %{type: "end_of_service"}
              }
     end
-
-    test "can serialize all updates" do
-      assert json_round_trip(%AlertSummary.Update.Active{}) == %{type: "active"}
-      assert json_round_trip(%AlertSummary.Update.AllClear{}) == %{type: "all_clear"}
-    end
   end
 
   describe "summarizing/7" do
@@ -295,7 +305,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           duration_certainty: :known
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -307,7 +317,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.Time{time: ^end_time}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.Time{time: ^end_time}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -320,7 +330,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -333,7 +343,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -347,7 +357,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.Tomorrow{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.Tomorrow{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -362,7 +372,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.ThisWeek{time: ^end_time}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.ThisWeek{time: ^end_time}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -377,7 +387,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.LaterDate{time: ^end_time}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterDate{time: ^end_time}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -389,7 +399,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 23, :hour), end: nil}]
         )
 
-      assert %AlertSummary{timeframe: %AlertSummary.Timeframe.StartingTomorrow{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.StartingTomorrow{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -398,7 +408,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       later_today = DateTime.add(now, 1, :hour)
       alert = build(:alert, active_period: [%Alert.ActivePeriod{start: later_today, end: nil}])
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^later_today}
              } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
@@ -413,6 +423,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity: [
             %Alert.InformedEntity{
               activities: ~w(board exit ride)a,
@@ -422,7 +433,9 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           ]
         )
 
-      assert %AlertSummary{location: %AlertSummary.Location.SingleStop{stop_name: "Parent Name"}} =
+      assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.SingleStop{stop_name: "Parent Name"}
+             } =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
                  routes: %{route.id => route},
                  stops: %{stop.id => stop, child_stop.id => child_stop}
@@ -448,6 +461,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               successive_stops ++ [last_stop],
@@ -459,7 +473,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
                  end_stop_name: "Last Stop"
@@ -491,6 +505,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               stops,
@@ -502,7 +517,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{location: nil} =
+      assert %AlertSummary.Standard{location: nil} =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
                  routes: %{route.id => route},
                  stops: Map.new(stops, &{&1.id, &1}),
@@ -552,6 +567,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               [first_stop] ++ trunk_stops ++ branch1_stops ++ branch2_stops,
@@ -563,7 +579,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "First Stop",
                  direction: %Direction{name: "Inbound", destination: "A", id: 0}
@@ -631,6 +647,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               [last_stop] ++ trunk_stops ++ branch1_stops ++ branch2_stops,
@@ -642,7 +659,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.DirectionToStop{
                  direction: %Direction{name: "Outbound", destination: "Z", id: 1},
                  end_stop_name: "Last Stop"
@@ -707,6 +724,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               [kenmore, blandford, saint_marys | child_stops],
@@ -718,7 +736,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
                  direction: %Direction{name: "Westbound", destination: "", id: 0}
@@ -764,6 +782,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             Enum.map(
               ["70150", "70148", "70212"],
@@ -775,7 +794,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Saint Mary's Street",
                  end_stop_name: "Kenmore"
@@ -825,6 +844,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           informed_entity:
             [kenmore, blandford, saint_marys]
             |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
@@ -837,7 +857,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
                  direction: %Direction{name: "Westbound", destination: "Copley & West", id: 0}
@@ -873,7 +893,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       now_plus_one_second = DateTime.add(now, 1, :second)
       end_time = DateTime.new!(Date.add(today, 30), time_end, "America/New_York")
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.TimeRange{
                  start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now},
                  end_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now_plus_one_second}
@@ -906,7 +926,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       now_plus_one_second = DateTime.add(now, 1, :second)
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.TimeRange{
                  start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now},
                  end_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^now_plus_one_second}
@@ -953,7 +973,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         }
       }
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.TimeRange{
                  start_time: %AlertSummary.Timeframe.TimeRange.StartOfService{},
                  end_time: %AlertSummary.Timeframe.TimeRange.EndOfService{}
@@ -970,7 +990,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  %{}
                )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.StartingTomorrow{},
                recurrence: ^expected_recurrence
              } =
@@ -994,9 +1014,9 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           updated_at: DateTime.add(now, -4, :minute)
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
-               update: %AlertSummary.Update.Active{}
+               is_update: true
              } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
@@ -1009,10 +1029,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: start_time, end: end_time}]
         )
 
-      assert %AlertSummary{
-               timeframe: nil,
-               update: %AlertSummary.Update.AllClear{}
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
+      assert %AlertSummary.AllClear{location: nil} =
+               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{})
     end
 
     test "summary with whole route entity", %{now: now} do
@@ -1032,7 +1050,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           ]
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
                  route_label: "Route Label",
                  route_type: :bus
@@ -1074,7 +1092,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
                  route_label: "Route Label",
                  route_type: :heavy_rail
@@ -1123,7 +1141,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       e_patterns = Enum.filter(patterns, &(&1.route_id == "Green-E"))
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
                  route_label: "Green Line",
                  route_type: :light_rail
@@ -1198,7 +1216,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       e_patterns = Enum.filter(patterns, &(&1.route_id == "Green-E"))
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
                  route_label: "Green Line",
                  route_type: :light_rail
@@ -1261,7 +1279,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       e_pattern = Enum.filter(patterns, &(&1.route_id == "Green-E"))
 
-      assert %AlertSummary{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
                  route_label: "Green-C",
                  route_type: :light_rail

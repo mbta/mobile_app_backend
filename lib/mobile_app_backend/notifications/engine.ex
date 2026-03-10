@@ -273,7 +273,7 @@ defmodule MobileAppBackend.Notifications.Engine do
             [timeframe] -> timeframe
           end
 
-        %AlertSummary{effect: effect, location: location, timeframe: timeframe}
+        %AlertSummary.Standard{effect: effect, location: location, timeframe: timeframe}
     end
   end
 
