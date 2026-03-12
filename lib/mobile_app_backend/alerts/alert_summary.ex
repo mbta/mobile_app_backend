@@ -1,9 +1,11 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
+  alias MBTAV3API.Repository
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
@@ -373,7 +375,60 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     defstruct [:location]
   end
 
-  @type t :: Standard.t() | AllClear.t()
+  defmodule TripSpecific do
+    defmodule TripFrom do
+      @type t :: %__MODULE__{trip_time: DateTime.t(), stop_name: String.t()}
+      @derive PolymorphicJson
+      defstruct [:trip_time, :stop_name]
+    end
+
+    defmodule TripTo do
+      @type t :: %__MODULE__{trip_time: DateTime.t(), headsign: String.t()}
+      @derive PolymorphicJson
+      defstruct [:trip_time, :headsign]
+    end
+
+    defmodule MultipleTrips do
+      @type t :: %__MODULE__{}
+      @derive PolymorphicJson
+      defstruct []
+    end
+
+    @type trip_identity :: TripFrom.t() | TripTo.t() | MultipleTrips.t()
+
+    @type t :: %__MODULE__{
+            trip_identity: trip_identity(),
+            effect: Alert.effect(),
+            effect_stops: [String.t()] | nil,
+            is_today: boolean(),
+            cause: Alert.cause() | nil,
+            recurrence: Recurrence.t() | nil
+          }
+    @derive PolymorphicJson
+    defstruct [:trip_identity, :effect, :effect_stops, :is_today, :cause, :recurrence]
+  end
+
+  defmodule TripShuttle do
+    @type t :: %__MODULE__{
+            trip_time: DateTime.t(),
+            route_type: Route.type(),
+            is_today: boolean(),
+            current_stop_name: String.t(),
+            end_stop_name: String.t(),
+            recurrence: Recurrence.t() | nil
+          }
+    @derive PolymorphicJson
+    defstruct [
+      :trip_time,
+      :route_type,
+      :current_stop_name,
+      :end_stop_name,
+      :is_today,
+      :recurrence
+    ]
+  end
+
+  @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()
 
   @spec summarizing(
           Alert.t(),
@@ -385,17 +440,175 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           GlobalDataCache.data()
         ) :: t()
   def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
-    if Alert.all_clear?(alert, at_time) do
-      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
-    else
+    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global),
+         nil <-
+           trip_specific_summary(
+             alert,
+             stop_id,
+             direction_id,
+             patterns,
+             at_time,
+             schedules,
+             global
+           ) do
       recurrence = alert_recurrence(alert, at_time)
 
       %Standard{
         effect: alert.effect,
         location: alert_location(alert, stop_id, direction_id, patterns, global),
-        timeframe: alert_timeframe(alert, at_time, schedules, not is_nil(recurrence)),
+        timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
         recurrence: recurrence,
         is_update: alert_is_update?(alert, at_time)
+      }
+    end
+  end
+
+  @spec all_clear_summary(
+          Alert.t(),
+          Stop.id(),
+          0 | 1,
+          [RoutePattern.t()],
+          DateTime.t(),
+          GlobalDataCache.data()
+        ) :: AllClear.t() | nil
+  defp all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global) do
+    if Alert.all_clear?(alert, at_time) do
+      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+    end
+  end
+
+  @spec trip_specific_summary(
+          Alert.t(),
+          Stop.id(),
+          0 | 1,
+          [RoutePattern.t()],
+          DateTime.t(),
+          [Schedule.t()] | nil,
+          GlobalDataCache.data()
+        ) :: TripSpecific.t() | TripShuttle.t() | nil
+  defp trip_specific_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         at_time,
+         schedules,
+         global
+       ) do
+    informed_schedules =
+      Enum.filter(schedules || [], fn schedule ->
+        Enum.any?(alert.informed_entity, &(&1.trip == schedule.trip_id))
+      end)
+
+    case alert.effect do
+      :shuttle ->
+        trip_shuttle_summary(
+          alert,
+          stop_id,
+          direction_id,
+          patterns,
+          at_time,
+          informed_schedules,
+          global
+        )
+
+      :station_closure ->
+        trip_stop_bypass_summary(alert, at_time, informed_schedules, global)
+
+      _ ->
+        trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global)
+    end
+  end
+
+  defp trip_shuttle_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         at_time,
+         informed_schedules,
+         global
+       ) do
+    with [%Schedule{} = informed_schedule] <- informed_schedules,
+         trip_time when not is_nil(trip_time) <-
+           informed_schedule.departure_time || informed_schedule.arrival_time,
+         %Route{type: route_type} <- Enum.find_value(patterns, &global.routes[&1.route_id]),
+         %Stop{name: current_stop_name} <- global.stops[stop_id],
+         %Location.SuccessiveStops{end_stop_name: end_stop_name} <-
+           alert_location(alert, stop_id, direction_id, patterns, global) do
+      %TripShuttle{
+        trip_time: trip_time,
+        route_type: route_type,
+        current_stop_name: current_stop_name,
+        end_stop_name: end_stop_name,
+        is_today: Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time),
+        recurrence: alert_recurrence(alert, at_time)
+      }
+    else
+      _ -> nil
+    end
+  end
+
+  defp trip_stop_bypass_summary(alert, at_time, informed_schedules, global) do
+    with [%Schedule{} = informed_schedule] <- informed_schedules,
+         trip_time when not is_nil(trip_time) <-
+           informed_schedule.departure_time || informed_schedule.arrival_time,
+         {:ok, %{data: [%Trip{headsign: headsign}]}} <-
+           Repository.trips(filter: [id: informed_schedule.trip_id]) do
+      informed_stops =
+        alert.informed_entity
+        |> Enum.map(& &1.stop)
+        |> Enum.map(&global.stops[&1])
+        |> Enum.reject(&is_nil/1)
+        |> Enum.map(& &1.name)
+        |> Enum.uniq()
+
+      %TripSpecific{
+        trip_identity: %TripSpecific.TripTo{trip_time: trip_time, headsign: headsign},
+        effect: alert.effect,
+        effect_stops: informed_stops,
+        is_today: Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time),
+        cause: alert.cause,
+        recurrence: alert_recurrence(alert, at_time)
+      }
+    else
+      _ -> nil
+    end
+  end
+
+  defp trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global) do
+    {trip_identity, is_today} =
+      case informed_schedules do
+        [] ->
+          {nil, nil}
+
+        [%Schedule{} = informed_trip]
+        when not is_nil(informed_trip.departure_time) or
+               not is_nil(informed_trip.arrival_time) ->
+          trip_time = informed_trip.departure_time || informed_trip.arrival_time
+
+          {%TripSpecific.TripFrom{
+             trip_time: trip_time,
+             stop_name: global.stops[stop_id].name
+           }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
+
+        _ ->
+          {%TripSpecific.MultipleTrips{},
+           Enum.any?(
+             informed_schedules,
+             &(Util.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
+                 Util.datetime_to_gtfs(at_time))
+           )}
+      end
+
+    if trip_identity != nil do
+      %TripSpecific{
+        trip_identity: trip_identity,
+        effect: alert.effect,
+        effect_stops: nil,
+        is_today: is_today,
+        cause: alert.cause,
+        recurrence: alert_recurrence(alert, at_time)
       }
     end
   end
@@ -450,13 +663,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  @spec alert_timeframe(Alert.t(), DateTime.t(), [Schedule.t()] | nil, boolean()) ::
+  @spec alert_timeframe(Alert.t(), DateTime.t(), boolean()) ::
           Timeframe.t() | nil
-  defp alert_timeframe(alert, at_time, schedules, has_recurrence?)
+  defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
 
-  defp alert_timeframe(alert, at_time, _schedules, has_recurrence?) do
+  defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
