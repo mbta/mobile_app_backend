@@ -76,19 +76,33 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         )
 
       :station_closure ->
-        trip_stop_bypass_summary(alert, at_time, informed_schedules, global)
+        trip_stop_bypass_summary(alert, stop_id, at_time, informed_schedules, global)
 
       _ ->
         trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global)
     end
   end
 
-  defp trip_stop_bypass_summary(alert, at_time, informed_schedules, global) do
-    with [%Schedule{} = informed_schedule] <- informed_schedules,
-         trip_time when not is_nil(trip_time) <-
-           informed_schedule.departure_time || informed_schedule.arrival_time,
-         {:ok, %{data: [%Trip{headsign: headsign}]}} <-
-           Repository.trips(filter: [id: informed_schedule.trip_id]) do
+  defp trip_stop_bypass_summary(alert, stop_id, at_time, informed_schedules, global) do
+    {trip_identity, is_today} =
+      case trip_identity_is_today(stop_id, at_time, informed_schedules, global) do
+        {%TripFrom{trip_time: trip_time}, is_today} ->
+          # must be a single trip since there weren’t multiple trips
+          [informed_schedule] = informed_schedules
+
+          case Repository.trips(filter: [id: informed_schedule.trip_id]) do
+            {:ok, %{data: [%Trip{headsign: headsign}]}} ->
+              {%TripTo{trip_time: trip_time, headsign: headsign}, is_today}
+
+            _ ->
+              {nil, nil}
+          end
+
+        x ->
+          x
+      end
+
+    if trip_identity do
       informed_stops =
         alert.informed_entity
         |> Enum.map(& &1.stop)
@@ -98,15 +112,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         |> Enum.uniq()
 
       %__MODULE__{
-        trip_identity: %TripTo{trip_time: trip_time, headsign: headsign},
+        trip_identity: trip_identity,
         effect: alert.effect,
         effect_stops: informed_stops,
-        is_today: Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time),
+        is_today: is_today,
         cause: alert.cause,
         recurrence: AlertSummary.alert_recurrence(alert, at_time)
       }
-    else
-      _ -> nil
     end
   end
 
