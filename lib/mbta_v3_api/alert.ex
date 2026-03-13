@@ -329,7 +329,7 @@ defmodule MBTAV3API.Alert do
     end
   end
 
-  # in the frontend, we ignore cancellation alerts, since we show trips as cancelled directly,
+  # in the frontend, we treat cancellation alerts as minor, since we don’t want to show an icon in nearby transit
   # but in the backend, we still want to treat them as significant enough to be sent
   defp intrinsic_significance(%__MODULE__{effect: :cancellation}), do: :secondary
 

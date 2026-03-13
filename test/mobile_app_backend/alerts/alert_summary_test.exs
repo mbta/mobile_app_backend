@@ -1,12 +1,16 @@
 defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   use ExUnit.Case, async: true
   import MobileAppBackend.Factory
+  import Mox
+  import Test.Support.Helpers
   import Test.Support.Sigils
   require Jason.Sigil
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.Direction
   alias MobileAppBackend.GlobalDataCache
+
+  setup :verify_on_exit!
 
   setup do
     %{now: DateTime.now!("America/New_York")}
@@ -221,6 +225,61 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              }
     end
 
+    test "can serialize trip specific summary" do
+      assert json_round_trip(%AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{
+                 trip_time: ~B[2026-03-06 15:19:00],
+                 stop_name: "North Station"
+               },
+               effect: :suspension,
+               effect_stops: nil,
+               is_today: true,
+               cause: :holiday,
+               recurrence: %AlertSummary.Recurrence.Daily{
+                 ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-03-10 14:28:00]}
+               }
+             }) == %{
+               type: "trip_specific",
+               trip_identity: %{
+                 type: "trip_from",
+                 trip_time: "2026-03-06T15:19:00-05:00",
+                 stop_name: "North Station"
+               },
+               effect: "suspension",
+               effect_stops: nil,
+               is_today: true,
+               cause: "holiday",
+               recurrence: %{
+                 type: "daily",
+                 ending: %{type: "later_date", time: "2026-03-10T14:28:00-04:00"}
+               }
+             }
+    end
+
+    test "can serialize trip shuttle summary" do
+      assert json_round_trip(%AlertSummary.TripShuttle{
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ~B[2026-03-06 15:21:00],
+                 route_type: :commuter_rail
+               },
+               is_today: true,
+               current_stop_name: "Ruggles",
+               end_stop_name: "Forest Hills",
+               recurrence: nil
+             }) == %{
+               type: "trip_shuttle",
+               trip_identity: %{
+                 type: "single_trip",
+                 trip_time: "2026-03-06T15:21:00-05:00",
+                 route_type: "commuter_rail"
+               },
+               is_today: true,
+               current_stop_name: "Ruggles",
+               end_stop_name: "Forest Hills",
+               recurrence: nil
+             }
+    end
+
     test "can serialize all locations" do
       assert json_round_trip(%AlertSummary.Location.DirectionToStop{
                direction: %Direction{name: "East", destination: "Union Square", id: 1},
@@ -288,6 +347,30 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                type: "time_range",
                start_time: %{type: "time", time: "2026-01-23T15:35:00-05:00"},
                end_time: %{type: "end_of_service"}
+             }
+    end
+
+    test "can serialize all trip identities" do
+      assert json_round_trip(%AlertSummary.TripSpecific.TripFrom{
+               trip_time: ~B[2026-03-06 15:25:00],
+               stop_name: "Ruggles"
+             }) == %{
+               type: "trip_from",
+               trip_time: "2026-03-06T15:25:00-05:00",
+               stop_name: "Ruggles"
+             }
+
+      assert json_round_trip(%AlertSummary.TripSpecific.TripTo{
+               trip_time: ~B[2026-03-06 15:25:00],
+               headsign: "South Station"
+             }) == %{
+               type: "trip_to",
+               trip_time: "2026-03-06T15:25:00-05:00",
+               headsign: "South Station"
+             }
+
+      assert json_round_trip(%AlertSummary.TripSpecific.MultipleTrips{}) == %{
+               type: "multiple_trips"
              }
     end
   end
@@ -1291,6 +1374,305 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  route_patterns: Map.new(patterns, &{&1.id, &1}),
                  trips: trips,
                  stops: stops
+               })
+    end
+
+    test "trip specific suspension" do
+      now = ~B[2026-03-12 12:00:00]
+      stop = build(:stop, name: "Ruggles")
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{trip: trip.id}]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{
+                 trip_time: ^trip_time,
+                 stop_name: "Ruggles"
+               },
+               effect: :suspension,
+               effect_stops: nil,
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop.id => stop}
+               })
+    end
+
+    test "multiple trip cancellation" do
+      now = ~B[2026-03-12 12:00:00]
+      stop = build(:stop, name: "Blossom Street Pier")
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id)
+      [trip1, trip2] = build_pair(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :ice_in_harbor,
+          effect: :cancellation,
+          informed_entity: [
+            %Alert.InformedEntity{trip: trip1.id},
+            %Alert.InformedEntity{trip: trip2.id}
+          ]
+        )
+
+      schedule1 =
+        build(:schedule,
+          trip_id: trip1.id,
+          departure_time: ~B[2026-03-12 18:00:00]
+        )
+
+      schedule2 =
+        build(:schedule,
+          trip_id: trip1.id,
+          departure_time: ~B[2026-03-12 18:30:00]
+        )
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.MultipleTrips{},
+               effect: :cancellation,
+               effect_stops: nil,
+               is_today: true,
+               cause: :ice_in_harbor,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 stop.id,
+                 0,
+                 [pattern],
+                 now,
+                 [schedule1, schedule2],
+                 %{}
+               )
+    end
+
+    test "trip specific shuttle" do
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Forest Hills")
+      route = build(:route, type: :commuter_rail)
+      representative_trip = build(:trip, stop_ids: [build(:stop).id, stop1.id, stop2.id])
+
+      pattern =
+        build(:route_pattern, representative_trip_id: representative_trip.id, route_id: route.id)
+
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          effect: :shuttle,
+          informed_entity: [
+            %Alert.InformedEntity{stop: stop1.id, trip: trip.id},
+            %Alert.InformedEntity{stop: stop2.id, trip: trip.id}
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+
+      assert %AlertSummary.TripShuttle{
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ^trip_time,
+                 route_type: :commuter_rail
+               },
+               is_today: true,
+               current_stop_name: "Ruggles",
+               end_stop_name: "Forest Hills",
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 routes: %{route.id => route},
+                 stops: %{stop1.id => stop1, stop2.id => stop2},
+                 trips: %{representative_trip.id => representative_trip}
+               })
+    end
+
+    test "trip specific station bypass" do
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Back Bay")
+      route = build(:route, type: :commuter_rail)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, headsign: "Stoughton", route_pattern_id: pattern.id)
+      trip_id = trip.id
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          effect: :station_closure,
+          informed_entity: [
+            %Alert.InformedEntity{stop: stop2.id, trip: trip.id},
+            %Alert.InformedEntity{stop: stop1.id, trip: trip.id}
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+      RepositoryMock
+      |> expect(:trips, fn [filter: [id: ^trip_id]], _ ->
+        ok_response([trip])
+      end)
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripTo{
+                 trip_time: ^trip_time,
+                 headsign: "Stoughton"
+               },
+               effect: :station_closure,
+               effect_stops: ["Back Bay", "Ruggles"]
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2}
+               })
+    end
+
+    test "trip specific reminder" do
+      now = ~B[2026-03-12 12:00:00]
+      stop = build(:stop, name: "Ruggles")
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: now |> DateTime.add(1, :day) |> DateTime.add(-2, :hour),
+              end: now |> DateTime.add(1, :day) |> DateTime.add(2, :hour)
+            }
+          ],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{trip: trip.id}]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-13 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{
+                 trip_time: ^trip_time,
+                 stop_name: "Ruggles"
+               },
+               effect: :suspension,
+               is_today: false
+             } =
+               AlertSummary.summarizing(alert, stop.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop.id => stop}
+               })
+    end
+
+    test "trip shuttle recurrence" do
+      now = ~B[2026-03-09 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Forest Hills")
+      route = build(:route, type: :commuter_rail)
+      representative_trip = build(:trip, stop_ids: [build(:stop).id, stop1.id, stop2.id])
+
+      pattern =
+        build(:route_pattern, representative_trip_id: representative_trip.id, route_id: route.id)
+
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{start: ~B[2026-03-09 12:00:00], end: ~B[2026-03-09 14:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-10 12:00:00], end: ~B[2026-03-10 14:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-11 12:00:00], end: ~B[2026-03-11 14:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-12 12:00:00], end: ~B[2026-03-12 14:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-13 12:00:00], end: ~B[2026-03-13 14:00:00]}
+          ],
+          duration_certainty: :known,
+          effect: :shuttle,
+          informed_entity: [
+            %Alert.InformedEntity{stop: stop1.id, trip: trip.id},
+            %Alert.InformedEntity{stop: stop2.id, trip: trip.id}
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-09 13:00:00]
+        )
+
+      trip_time = schedule.departure_time
+      end_time = ~B[2026-03-13 14:00:00]
+
+      assert %AlertSummary.TripShuttle{
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ^trip_time,
+                 route_type: :commuter_rail
+               },
+               is_today: true,
+               current_stop_name: "Ruggles",
+               end_stop_name: "Forest Hills",
+               recurrence: %AlertSummary.Recurrence.Daily{
+                 ending: %AlertSummary.Timeframe.ThisWeek{time: ^end_time}
+               }
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 routes: %{route.id => route},
+                 stops: %{stop1.id => stop1, stop2.id => stop2},
+                 trips: %{representative_trip.id => representative_trip}
                })
     end
   end

@@ -4,6 +4,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
+  alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
+  alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
@@ -373,7 +375,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     defstruct [:location]
   end
 
-  @type t :: Standard.t() | AllClear.t()
+  @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()
 
   @spec summarizing(
           Alert.t(),
@@ -385,24 +387,46 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           GlobalDataCache.data()
         ) :: t()
   def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
-    if Alert.all_clear?(alert, at_time) do
-      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
-    else
+    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global),
+         nil <-
+           TripSpecific.summary(
+             alert,
+             stop_id,
+             direction_id,
+             patterns,
+             at_time,
+             schedules,
+             global
+           ) do
       recurrence = alert_recurrence(alert, at_time)
 
       %Standard{
         effect: alert.effect,
         location: alert_location(alert, stop_id, direction_id, patterns, global),
-        timeframe: alert_timeframe(alert, at_time, schedules, not is_nil(recurrence)),
+        timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
         recurrence: recurrence,
         is_update: alert_is_update?(alert, at_time)
       }
     end
   end
 
+  @spec all_clear_summary(
+          Alert.t(),
+          Stop.id(),
+          0 | 1,
+          [RoutePattern.t()],
+          DateTime.t(),
+          GlobalDataCache.data()
+        ) :: AllClear.t() | nil
+  defp all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global) do
+    if Alert.all_clear?(alert, at_time) do
+      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+    end
+  end
+
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
           Location.t() | nil
-  defp alert_location(alert, stop_id, direction_id, patterns, global) do
+  def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
     typical_routes =
@@ -450,13 +474,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  @spec alert_timeframe(Alert.t(), DateTime.t(), [Schedule.t()] | nil, boolean()) ::
+  @spec alert_timeframe(Alert.t(), DateTime.t(), boolean()) ::
           Timeframe.t() | nil
-  defp alert_timeframe(alert, at_time, schedules, has_recurrence?)
+  defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
 
-  defp alert_timeframe(alert, at_time, _schedules, has_recurrence?) do
+  defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
@@ -531,7 +555,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   @spec alert_recurrence(Alert.t(), DateTime.t()) :: Recurrence.t() | nil
-  defp alert_recurrence(alert, at_time) do
+  def alert_recurrence(alert, at_time) do
     with %Alert.RecurrenceInfo{end: last_period_end} = range <- Alert.recurrence_range(alert),
          service_date = Util.datetime_to_gtfs(at_time),
          last_service_date when last_service_date != service_date <-
