@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
+  alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
   alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
@@ -372,26 +373,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @type t :: %__MODULE__{location: Location.t() | nil}
     @derive PolymorphicJson
     defstruct [:location]
-  end
-
-  defmodule TripShuttle do
-    @type t :: %__MODULE__{
-            trip_time: DateTime.t(),
-            route_type: Route.type(),
-            is_today: boolean(),
-            current_stop_name: String.t(),
-            end_stop_name: String.t(),
-            recurrence: Recurrence.t() | nil
-          }
-    @derive PolymorphicJson
-    defstruct [
-      :trip_time,
-      :route_type,
-      :current_stop_name,
-      :end_stop_name,
-      :is_today,
-      :recurrence
-    ]
   end
 
   @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()

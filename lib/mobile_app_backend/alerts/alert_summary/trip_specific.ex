@@ -1,7 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   alias MBTAV3API.Alert
   alias MBTAV3API.Repository
-  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
@@ -66,7 +65,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
 
     case alert.effect do
       :shuttle ->
-        trip_shuttle_summary(
+        AlertSummary.TripShuttle.summary(
           alert,
           stop_id,
           direction_id,
@@ -81,35 +80,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
 
       _ ->
         trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global)
-    end
-  end
-
-  defp trip_shuttle_summary(
-         alert,
-         stop_id,
-         direction_id,
-         patterns,
-         at_time,
-         informed_schedules,
-         global
-       ) do
-    with [%Schedule{} = informed_schedule] <- informed_schedules,
-         trip_time when not is_nil(trip_time) <-
-           informed_schedule.departure_time || informed_schedule.arrival_time,
-         %Route{type: route_type} <- Enum.find_value(patterns, &global.routes[&1.route_id]),
-         %Stop{name: current_stop_name} <- global.stops[stop_id],
-         %AlertSummary.Location.SuccessiveStops{end_stop_name: end_stop_name} <-
-           AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global) do
-      %AlertSummary.TripShuttle{
-        trip_time: trip_time,
-        route_type: route_type,
-        current_stop_name: current_stop_name,
-        end_stop_name: end_stop_name,
-        is_today: Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time),
-        recurrence: AlertSummary.alert_recurrence(alert, at_time)
-      }
-    else
-      _ -> nil
     end
   end
 
@@ -142,28 +112,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
 
   defp trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global) do
     {trip_identity, is_today} =
-      case informed_schedules do
-        [] ->
-          {nil, nil}
-
-        [%Schedule{} = informed_trip]
-        when not is_nil(informed_trip.departure_time) or
-               not is_nil(informed_trip.arrival_time) ->
-          trip_time = informed_trip.departure_time || informed_trip.arrival_time
-
-          {%TripFrom{
-             trip_time: trip_time,
-             stop_name: global.stops[stop_id].name
-           }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
-
-        _ ->
-          {%MultipleTrips{},
-           Enum.any?(
-             informed_schedules,
-             &(Util.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
-                 Util.datetime_to_gtfs(at_time))
-           )}
-      end
+      trip_identity_is_today(stop_id, at_time, informed_schedules, global)
 
     if trip_identity != nil do
       %__MODULE__{
@@ -174,6 +123,30 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         cause: alert.cause,
         recurrence: AlertSummary.alert_recurrence(alert, at_time)
       }
+    end
+  end
+
+  defp trip_identity_is_today(stop_id, at_time, informed_schedules, global) do
+    case informed_schedules do
+      [] ->
+        {nil, nil}
+
+      [%Schedule{} = informed_trip]
+      when not is_nil(informed_trip.departure_time) or not is_nil(informed_trip.arrival_time) ->
+        trip_time = informed_trip.departure_time || informed_trip.arrival_time
+
+        {%TripFrom{
+           trip_time: trip_time,
+           stop_name: global.stops[stop_id].name
+         }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
+
+      _ ->
+        {%MultipleTrips{},
+         Enum.any?(
+           informed_schedules,
+           &(Util.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
+               Util.datetime_to_gtfs(at_time))
+         )}
     end
   end
 end

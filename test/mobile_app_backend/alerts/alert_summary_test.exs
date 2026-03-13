@@ -258,16 +258,21 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
     test "can serialize trip shuttle summary" do
       assert json_round_trip(%AlertSummary.TripShuttle{
-               trip_time: ~B[2026-03-06 15:21:00],
-               route_type: :commuter_rail,
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ~B[2026-03-06 15:21:00],
+                 route_type: :commuter_rail
+               },
                is_today: true,
                current_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
                recurrence: nil
              }) == %{
                type: "trip_shuttle",
-               trip_time: "2026-03-06T15:21:00-05:00",
-               route_type: "commuter_rail",
+               trip_identity: %{
+                 type: "single_trip",
+                 trip_time: "2026-03-06T15:21:00-05:00",
+                 route_type: "commuter_rail"
+               },
                is_today: true,
                current_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
@@ -1506,8 +1511,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       trip_time = schedule.departure_time
 
       assert %AlertSummary.TripShuttle{
-               trip_time: ^trip_time,
-               route_type: :commuter_rail,
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ^trip_time,
+                 route_type: :commuter_rail
+               },
                is_today: true,
                current_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
@@ -1651,8 +1658,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       end_time = ~B[2026-03-13 14:00:00]
 
       assert %AlertSummary.TripShuttle{
-               trip_time: ^trip_time,
-               route_type: :commuter_rail,
+               trip_identity: %AlertSummary.TripShuttle.SingleTrip{
+                 trip_time: ^trip_time,
+                 route_type: :commuter_rail
+               },
                is_today: true,
                current_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
