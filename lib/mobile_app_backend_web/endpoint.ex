@@ -15,8 +15,9 @@ defmodule MobileAppBackendWeb.Endpoint do
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   socket "/socket", MobileAppBackendWeb.UserSocket,
-    websocket: true,
-    longpoll: false
+    websocket: [compress: true],
+    longpoll: false,
+    compress: true
 
   # Serve at "/" the static files from "priv/static" directory.
   #
