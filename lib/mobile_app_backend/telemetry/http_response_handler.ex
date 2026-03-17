@@ -14,8 +14,9 @@ defmodule MobileAppBackend.Telemetry.HttpResponseHandler do
     Logger.info("""
     http_response_sent path=#{metadata.conn.request_path} \
     status=#{metadata.conn.status} \
-    compressed_size=#{Map.get(measurements, :resp_body_bytes, nil)} \
-    uncompressed_size=#{Map.get(measurements, :resp_uncompressed_body_bytes, nil)} \ duration_ms=#{System.convert_time_unit(measurements.duration, :native, :millisecond)}
+    size=#{Map.get(measurements, :resp_body_bytes, nil)} \
+    uncompressed_size=#{Map.get(measurements, :resp_uncompressed_body_bytes, nil)} \
+    duration_ms=#{System.convert_time_unit(measurements.duration, :native, :millisecond)}
     """)
   end
 end
