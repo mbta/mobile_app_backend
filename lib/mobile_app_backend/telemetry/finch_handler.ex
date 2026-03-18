@@ -1,4 +1,4 @@
-defmodule MobileAppBackend.FinchTelemetryLogger do
+defmodule MobileAppBackend.Telemetry.FinchHandler do
   require Logger
 
   def attach do

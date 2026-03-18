@@ -63,7 +63,10 @@ defmodule MobileAppBackend.Application do
           MobileAppBackendWeb.Endpoint
         ]
 
-    :ok = MobileAppBackend.FinchTelemetryLogger.attach()
+    :ok = MobileAppBackend.Telemetry.FinchHandler.attach()
+    :ok = MobileAppBackend.Telemetry.HttpResponseHandler.attach()
+    :ok = MobileAppBackend.Telemetry.WebsocketEventHandler.attach()
+
     :ok = Oban.Telemetry.attach_default_logger()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
