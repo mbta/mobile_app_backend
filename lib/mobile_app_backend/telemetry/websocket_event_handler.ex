@@ -20,8 +20,8 @@ defmodule MobileAppBackend.Telemetry.WebsocketEventHandler do
   def handle_event([:bandit, :websocket, :stop], measurements, _metadata, _config) do
     Logger.info("""
     socket_connection_closed \
-    send_text_frame_bytes=#{measurements.send_text_frame_bytes} \
-    send_text_frame_count=#{measurements.send_text_frame_count} \
+    send_text_frame_bytes=#{Map.get(measurements, :send_text_frame_bytes)} \
+    send_text_frame_count=#{Map.get(measurements, :send_text_frame_count)} \
     duration_ms=#{System.convert_time_unit(measurements.duration, :native, :millisecond)}
     """)
   end
