@@ -75,6 +75,10 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           :error
       end
 
+    Logger.info(
+      "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
+    )
+
     if result != :deleted do
       Repo.insert!(%DeliveredNotification{
         user_id: user_id,

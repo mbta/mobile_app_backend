@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
   use Oban.Worker, unique: [period: :infinity, states: :incomplete]
   import Ecto.Query
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Store.Alerts
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -62,17 +63,27 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     reminder_target_day_of_week = Date.day_of_week(reminder_target)
     reminder_target_time = DateTime.to_time(reminder_target)
 
-    Repo.all(
-      from u in User,
-        join: s in assoc(u, :notification_subscriptions),
-        join: w in assoc(s, :windows),
-        where:
-          (w.start_time <= ^current_time and ^current_time <= w.end_time and
-             ^current_day_of_week in w.days_of_week) or
-            (w.start_time <= ^reminder_target_time and ^reminder_target_time <= w.end_time and
-               ^reminder_target_day_of_week in w.days_of_week),
-        preload: [notification_subscriptions: {s, windows: w}]
-    )
+    {query_us, users_with_open_windows} =
+      :timer.tc(
+        fn ->
+          Repo.all(
+            from u in User,
+              join: s in assoc(u, :notification_subscriptions),
+              join: w in assoc(s, :windows),
+              where:
+                (w.start_time <= ^current_time and ^current_time <= w.end_time and
+                   ^current_day_of_week in w.days_of_week) or
+                  (w.start_time <= ^reminder_target_time and ^reminder_target_time <= w.end_time and
+                     ^reminder_target_day_of_week in w.days_of_week),
+              preload: [notification_subscriptions: {s, windows: w}]
+          )
+        end,
+        :microsecond
+      )
+
+    Logger.info("#{__MODULE__} open_windows_query duration=#{query_us}")
+
+    users_with_open_windows
   end
 
   @spec find_new_recipients([Alert.t()], [User.t()], DateTime.t()) :: [
@@ -87,8 +98,12 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          alerts,
          now
        ) do
-    Engine.notifications(subscriptions, alerts, now)
-    |> Enum.flat_map(fn outgoing_notification ->
+    {engine_us, outgoing_notifications} =
+      :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
+
+    Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
+
+    Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
       if DeliveredNotification.can_send?(
            user_id,
            outgoing_notification.alert.id,

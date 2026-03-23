@@ -26,24 +26,25 @@ defmodule MobileAppBackend.Health.Checker.Alerts.Impl do
     case Repository.alerts([]) do
       {:ok, %{data: repo_alerts}} ->
         repo_count = length(repo_alerts)
+        log_info = "stored_alert_count=#{store_count} backend_alert_count=#{repo_count}"
+        Logger.info("#{__MODULE__} #{log_info}")
 
         if store_count == repo_count do
           LastFreshStore.update_last_fresh_timestamp()
           :ok
         else
-          evaluate_alert_data_freshness(
-            "stored_alert_count=#{store_count} backend_alert_count=#{repo_count}"
-          )
+          evaluate_alert_data_freshness(log_info)
         end
 
       _ ->
+        log_info = "stored_alert_count=#{store_count} backend_alert_count=unable_to_fetch"
+        Logger.info("#{__MODULE__} #{log_info}")
+
         Logger.warning(
           "#{__MODULE__} V3 API request for alerts failed, couldn't check freshness of alerts in Store.Alerts"
         )
 
-        evaluate_alert_data_freshness(
-          "stored_alert_count=#{store_count} backend_alert_count=unable_to_fetch"
-        )
+        evaluate_alert_data_freshness(log_info)
     end
   end
 
