@@ -1,6 +1,5 @@
 defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Alert
-  alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Line
   alias MBTAV3API.Repository
   alias MBTAV3API.Schedule
@@ -155,35 +154,33 @@ defmodule MobileAppBackend.Notifications.Engine do
     Alert.elevator_alerts(alerts, target_stop_with_children)
   end
 
+  # this is not actually particularly complicated
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp alert_candidate(subscription, alert, now) do
     open_now? = Enum.any?(subscription.windows, &Window.open?(&1, now))
-    next_active_in_hours = next_active_in_hours(alert, now)
-    active_now? = next_active_in_hours == 0
+
+    next_overlap = Window.next_overlap(alert.active_period, subscription.windows, now)
+    next_overlap_in_hours = if next_overlap, do: DateTime.diff(next_overlap, now, :minute) / 60
+    active_now? = next_overlap_in_hours <= 0
 
     cond do
-      open_now? and not is_nil(alert.closed_timestamp) -> {alert, :all_clear, subscription}
-      open_now? and active_now? -> {alert, :notification, subscription}
-      open_now? and next_active_in_hours < 24 -> {alert, :reminder, subscription}
-      next_active_in_hours < 12 -> {alert, :reminder, subscription}
-      true -> nil
-    end
-  end
+      open_now? and not is_nil(alert.closed_timestamp) ->
+        {alert, :all_clear, subscription}
 
-  defp next_active_in_hours(alert, now) do
-    for %ActivePeriod{start: ap_start, end: ap_end} <- alert.active_period,
-        reduce: nil do
-      0 ->
-        0
+      is_nil(next_overlap) ->
+        nil
 
-      next_active_in_hours ->
-        already_ended? = not is_nil(ap_end) and DateTime.compare(ap_end, now) == :lt
+      open_now? and active_now? ->
+        {alert, :notification, subscription}
 
-        if already_ended? do
-          next_active_in_hours
-        else
-          starts_in_hours = max(0, DateTime.diff(ap_start, now, :minute) / 60)
-          min(starts_in_hours, next_active_in_hours)
-        end
+      open_now? and next_overlap_in_hours < 24 ->
+        {alert, :reminder, subscription}
+
+      next_overlap_in_hours < 12 ->
+        {alert, :reminder, subscription}
+
+      true ->
+        nil
     end
   end
 

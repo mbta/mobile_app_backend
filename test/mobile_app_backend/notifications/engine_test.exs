@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   import MobileAppBackend.Factory
   import Mox
   import Test.Support.Helpers
+  import Test.Support.Sigils
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
@@ -414,6 +415,36 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [] = Engine.notifications([subscription], [alert], now)
+  end
+
+  test "uses overlap time instead of just active time" do
+    friday_noon = ~B[2026-03-20 12:00:00]
+    sunday_noon = ~B[2026-03-22 12:00:00]
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: friday_noon, end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: ~T[12:00:00],
+            end_time: ~T[14:00:00],
+            days_of_week: [7]
+          )
+        ]
+      )
+
+    assert [] = Engine.notifications([subscription], [alert], friday_noon)
+
+    assert [%OutgoingNotification{type: :reminder}] =
+             Engine.notifications([subscription], [alert], DateTime.add(sunday_noon, -11, :hour))
   end
 
   test "picks notification over reminder based on windows" do
