@@ -460,6 +460,73 @@ defmodule MobileAppBackend.RouteBranchingTest do
               ]} = RouteBranching.calculate(route.id, 1, Enum.reverse(stop_ids), global_data)
     end
 
+    test "skipping same stop works" do
+      route = build(:route)
+      a = build(:stop, id: "a")
+      b = build(:stop, id: "b")
+      c = build(:stop, id: "c")
+      trip1 = build(:trip, stop_ids: [a.id, b.id, c.id])
+      trip2 = build(:trip, stop_ids: [b.id, b.id, c.id])
+
+      pattern1 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :typical,
+          representative_trip_id: trip1.id
+        )
+
+      pattern2 =
+        build(:route_pattern,
+          route_id: route.id,
+          typicality: :atypical,
+          representative_trip_id: trip2.id
+        )
+
+      objects =
+        Object.to_full_map([
+          route,
+          a,
+          b,
+          c,
+          trip1,
+          trip2,
+          pattern1,
+          pattern2
+        ])
+
+      {_, _, segments} =
+        RouteBranching.calculate(
+          route.id,
+          0,
+          [a.id, b.id, c.id],
+          objects
+        )
+
+      assert [
+               _,
+               %Segment{
+                 stops: [
+                   %BranchStop{stop_id: "b", stop_lane: :right, connections: atypical_connections}
+                 ],
+                 typical?: false
+               },
+               _
+             ] = segments
+
+      assert atypical_connections ==
+               forward(nil, "b", "b", :right) ++
+                 [
+                   %StickConnection{
+                     from_stop: "a",
+                     from_lane: :left,
+                     from_vpos: :top,
+                     to_stop: "b",
+                     to_lane: :left,
+                     to_vpos: :bottom
+                   }
+                 ]
+    end
+
     test "fallback works" do
       # simplest failure case is four branches
       route = build(:route)

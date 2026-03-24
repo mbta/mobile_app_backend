@@ -57,11 +57,12 @@ defmodule MobileAppBackend.RouteBranching.Segment do
         |> Enum.with_index(fn segment_id, segment_index ->
           {_, segment} = :digraph.vertex(segment_graph, segment_id)
 
-          Agent.update(connections_skipping_current, fn ssc ->
-            Enum.reject(ssc, &(&1.to_stop == elem(segment_id, 0)))
+          Agent.update(connections_skipping_current, fn csc ->
+            Enum.reject(csc, &(&1.to_segment == segment_id))
           end)
 
-          csc = Agent.get(connections_skipping_current, & &1)
+          csc =
+            Agent.get(connections_skipping_current, fn csc -> Enum.map(csc, & &1.connection) end)
 
           segment_lane = segment_lanes[segment_id]
 
@@ -357,7 +358,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
           [segment_id()],
           %{segment_id() => lane()},
           SegmentGraph.t()
-        ) :: [StickConnection.t()]
+        ) :: [%{connection: StickConnection.t(), to_segment: segment_id()}]
   defp connections_to_subsequent(
          segment_id,
          segment,
@@ -377,13 +378,16 @@ defmodule MobileAppBackend.RouteBranching.Segment do
 
         {to_stop, _} = to_segment
 
-        %StickConnection{
-          from_stop: from_stop,
-          to_stop: to_stop,
-          from_lane: lane,
-          to_lane: lane,
-          from_vpos: :top,
-          to_vpos: :bottom
+        %{
+          connection: %StickConnection{
+            from_stop: from_stop,
+            to_stop: to_stop,
+            from_lane: lane,
+            to_lane: lane,
+            from_vpos: :top,
+            to_vpos: :bottom
+          },
+          to_segment: to_segment
         }
       end
     )
