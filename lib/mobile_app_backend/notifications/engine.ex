@@ -130,13 +130,28 @@ defmodule MobileAppBackend.Notifications.Engine do
           [subscription.stop_id]
       end
 
-    alerts = filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children)
+    {trip_filter_duration_us, alerts} =
+      :timer.tc(
+        fn -> filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) end,
+        :microsecond
+      )
 
     applicable_alerts =
       applicable_alerts(alerts, subscription, route_ids, target_stop_with_children)
 
-    downstream_alerts =
-      downstream_alerts(alerts, route_ids, target_stop_with_children, global_data)
+    {applicable_duration_us, applicable_alerts} =
+      :timer.tc(
+        fn -> applicable_alerts(alerts, subscription_key, route_ids, target_stop_with_children) end,
+        :microsecond
+      )
+
+
+    {downstream_duration_us, downstream_alerts} =
+      :timer.tc(
+        fn -> downstream_alerts(alerts, route_ids, target_stop_with_children, global_data) end,
+        :microsecond
+      )
+
 
     elevator_alerts =
       if subscription.include_accessibility do
@@ -452,4 +467,5 @@ defmodule MobileAppBackend.Notifications.Engine do
       nil
     end
   end
+
 end
