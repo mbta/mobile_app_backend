@@ -21,9 +21,19 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
 
     count_after = Repo.aggregate(User, :count)
 
+    mock_subscriptions_by_route =
+      Repo.all(
+        from u in User,
+          where: like(u.fcm_token, "mock_user_%"),
+          preload: [:notification_subscriptions]
+      )
+      |> Enum.flat_map(& &1.notification_subscriptions)
+      |> Enum.frequencies_by(& &1.route_id)
+
     json(conn, %{
       count_before: count_before,
-      count_after: count_after
+      count_after: count_after,
+      subscriptions_by_route: mock_subscriptions_by_route
     })
   end
 
