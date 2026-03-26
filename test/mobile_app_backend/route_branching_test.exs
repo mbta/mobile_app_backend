@@ -460,7 +460,7 @@ defmodule MobileAppBackend.RouteBranchingTest do
               ]} = RouteBranching.calculate(route.id, 1, Enum.reverse(stop_ids), global_data)
     end
 
-    test "skipping same stop works" do
+    test "skipping same stop does not drop connection" do
       route = build(:route)
       a = build(:stop, id: "a")
       b = build(:stop, id: "b")
