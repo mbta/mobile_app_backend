@@ -59,6 +59,22 @@ defmodule MobileAppBackendWeb.Router do
     get("/trip/map-friendly", TripController, :map_friendly)
   end
 
+  scope "/dev", MobileAppBackendWeb do
+    pipe_through :browser
+
+    get(
+      "/load_testing/notifications/add_users",
+      LoadTesting.MockNotificationsController,
+      :add_users
+    )
+
+    get(
+      "/load_testing/notifications/delete_users",
+      LoadTesting.MockNotificationsController,
+      :delete_users
+    )
+  end
+
   # Enable LiveDashboard in development
   if Application.compile_env(:mobile_app_backend, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
