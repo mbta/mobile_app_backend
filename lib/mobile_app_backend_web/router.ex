@@ -77,6 +77,19 @@ defmodule MobileAppBackendWeb.Router do
     pipe_through [:browser, :fetch_current_user, :require_authenticated_user, :require_developer]
 
     get "/", DevController, :home
+
+    get(
+      "/load_testing/notifications/add_users",
+      LoadTesting.MockNotificationsController,
+      :add_users
+    )
+
+    get(
+      "/load_testing/notifications/delete_users",
+      LoadTesting.MockNotificationsController,
+      :delete_users
+    )
+
     live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
     oban_dashboard("/oban")
   end
