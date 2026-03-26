@@ -5,6 +5,7 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationControllerTest do
   import Test.Support.Helpers
 
   alias MobileAppBackend.Factory
+  alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.NotificationsFactory
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
@@ -28,9 +29,16 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationControllerTest do
           count: 100
         })
 
-      assert json_response(conn, :ok) == %{"count_before" => 1, "count_after" => 101}
+      assert %{
+               "count_before" => 1,
+               "count_after" => 101,
+               "subscriptions_by_route" => %{"Red" => red_count}
+             } = json_response(conn, :ok)
 
       assert 101 == Repo.aggregate(User, :count)
+      assert 100 == Repo.aggregate(Subscription, :count)
+
+      assert red_count > 1
 
       conn =
         get(conn, "/dev/load_testing/notifications/add_users", %{
