@@ -70,15 +70,16 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     }
 
     result =
-  # FCM.send(
-    #    gcp_token,
-    #    @fcm_project,
-    #    request_body
-    #  )
-    #  |> handle_fcm_response(user)
-
-
+      if String.starts_with?(user.fcm_token, "mock_user_") do
         Req.get("https://b7665c6f-b9ba-4689-8b87-6b88d4d9e8f7.mock.pstmn.io/mock/notifications")
+      else
+        FCM.send(
+          gcp_token,
+          @fcm_project,
+          request_body
+        )
+        |> handle_fcm_response(user)
+      end
       |> case do
         {:ok, _} ->
           user
@@ -97,6 +98,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
           :error
       end
+
     Logger.info(
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
