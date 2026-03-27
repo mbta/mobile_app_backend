@@ -70,13 +70,33 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     }
 
     result =
-      FCM.send(
-        gcp_token,
-        @fcm_project,
-        request_body
-      )
-      |> handle_fcm_response(user)
+  # FCM.send(
+    #    gcp_token,
+    #    @fcm_project,
+    #    request_body
+    #  )
+    #  |> handle_fcm_response(user)
 
+
+        Req.get("https://b7665c6f-b9ba-4689-8b87-6b88d4d9e8f7.mock.pstmn.io/mock/notifications")
+      |> case do
+        {:ok, _} ->
+          user
+          |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
+          |> Repo.update!()
+
+          :ok
+
+        {:error, %Tesla.Env{status: 404}} ->
+          # if an FCM token is deleted, it won’t be recreated later, so prune the user now
+          Repo.delete!(user)
+          :deleted
+
+        {:error, error} ->
+          Logger.error(inspect(error))
+          Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
+          :error
+      end
     Logger.info(
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
