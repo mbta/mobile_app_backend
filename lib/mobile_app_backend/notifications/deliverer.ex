@@ -51,14 +51,15 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     }
 
     result =
-     ##FCM.Api.Projects.fcm_projects_messages_send(
-     ##   connection,
-      ##  "projects/mbta-app-c574d",
-      ##  body: request_body
-     ## )
-
-
+      if String.starts_with?(user.fcm_token, "mock_user_") do
         Req.get("https://b7665c6f-b9ba-4689-8b87-6b88d4d9e8f7.mock.pstmn.io/mock/notifications")
+      else
+        FCM.Api.Projects.fcm_projects_messages_send(
+          connection,
+          "projects/mbta-app-c574d",
+          body: request_body
+        )
+      end
       |> case do
         {:ok, _} ->
           user
