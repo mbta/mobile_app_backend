@@ -1,5 +1,4 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
-  alias MobileAppBackend.Alerts.AlertSummary.Standard
   alias MBTAV3API.Alert
   alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
@@ -7,6 +6,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
+  alias MobileAppBackend.Alerts.AlertSummary.Standard
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 

@@ -461,28 +461,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}
 
       Enum.all?(summaries, fn summary ->
-        if Map.has_key?(summary, :trip_identity) do
-          %{trip_identity: %type{}} = summary
-
-          type in [__MODULE__.TripShuttle.SingleTrip, __MODULE__.TripShuttle.MultipleTrips]
-        else
-          false
-        end
+        %type{} = summary
+        match?(TripShuttle, type)
       end) ->
         __MODULE__.TripShuttle.combine(alert, summaries)
 
       Enum.all?(summaries, fn summary ->
-        if Map.has_key?(summary, :trip_identity) do
-          %{trip_identity: %type{}} = summary
-
-          type in [
-            __MODULE__.TripSpecific.TripFrom,
-            __MODULE__.TripSpecific.TripTo,
-            __MODULE__.TripSpecific.MultipleTrips
-          ]
-        else
-          false
-        end
+        %type{} = summary
+        match?(TripSpecific, type)
       end) ->
         __MODULE__.TripSpecific.combine(alert, summaries)
 
