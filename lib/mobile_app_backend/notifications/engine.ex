@@ -229,7 +229,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         summary_for_subscription(alert, subscription, now, global_data)
       end)
 
-    AlertSummary.combine_summaries(alert, individual_summaries, now)
+    AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
   defp summary_for_subscription(alert, subscription, now, global_data) do

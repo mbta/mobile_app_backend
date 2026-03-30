@@ -9,6 +9,14 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.Direction
   alias MobileAppBackend.Alerts.AlertSummary.Location
+  alias MobileAppBackend.Alerts.AlertSummary.Recurrence
+
+  alias MobileAppBackend.Alerts.AlertSummary.Timeframe
+
+  alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
+
+  alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
+
   alias MobileAppBackend.GlobalDataCache
 
   setup :verify_on_exit!
@@ -1678,7 +1686,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
   end
 
-  describe "combine_summaries/3" do
+  describe "combine_summaries/2" do
     test "keeps identical summary from multiple routes" do
       now = DateTime.now!("America/New_York")
 
@@ -1702,12 +1710,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       }
 
       assert summary1 ==
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "keeps successive stops if subscribed in both directions" do
-      now = DateTime.now!("America/New_York")
-
       alert =
         build(:alert,
           active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
@@ -1737,12 +1743,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       }
 
       assert summary1 ==
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "keeps stop to direction if given both directions" do
-      now = DateTime.now!("America/New_York")
-
       alert =
         build(:alert,
           active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
@@ -1772,7 +1776,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       }
 
       assert summary1 ==
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "discards location if disagreements" do
@@ -1805,7 +1809,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                location: nil,
                timeframe: nil
              } =
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "keeps timeframe if same" do
@@ -1843,7 +1847,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                location: nil,
                timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "returns a single all clear when multiple subscriptions match" do
@@ -1875,7 +1879,315 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.AllClear{
                location: nil
              } =
-               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip specific - same trip and stops" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{trip_time: now, stop_name: "South Station"},
+        effect: :suspension,
+        effect_stops: ["place-sstat", "place-rugg"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{trip_time: now, stop_name: "South Station"},
+        effect: :suspension,
+        effect_stops: ["place-sstat", "place-rugg"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert summary1 ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip specific - same stops different trips" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{trip_time: now, stop_name: "South Station"},
+        effect: :suspension,
+        effect_stops: ["place-sstat", "place-rugg"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{
+          trip_time: DateTime.add(now, 2),
+          stop_name: "Needham"
+        },
+        effect: :suspension,
+        effect_stops: ["place-sstat", "place-rugg"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %TripSpecific.MultipleTrips{},
+               effect: :suspension,
+               effect_stops: ["place-sstat", "place-rugg"],
+               is_today: true,
+               cause: nil,
+               recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip specific - different stops and trips" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{trip_time: now, stop_name: "South Station"},
+        effect: :suspension,
+        effect_stops: ["place-sstat"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{
+          trip_time: DateTime.add(now, 2),
+          stop_name: "Needham"
+        },
+        effect: :suspension,
+        effect_stops: ["place-rugg"],
+        is_today: true,
+        cause: nil,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip shuttle - same trip and stops" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
+        is_today: true,
+        current_stop_name: "South Station",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
+        is_today: true,
+        current_stop_name: "South Station",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert summary1 ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip shuttle - same stops different trips" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
+        is_today: true,
+        current_stop_name: "South Station",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: DateTime.add(now, 2),
+          route_type: :commuter_Rail
+        },
+        is_today: true,
+        current_stop_name: "South Station",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert %AlertSummary.TripShuttle{
+               trip_identity: %TripShuttle.MultipleTrips{},
+               is_today: true,
+               current_stop_name: "South Station",
+               end_stop_name: "Ruggles",
+               recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "trip shuttle - different stops and trips" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
+        is_today: true,
+        current_stop_name: "South Station",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: DateTime.add(now, 2),
+          route_type: :commuter_Rail
+        },
+        is_today: true,
+        current_stop_name: "Needham",
+        end_stop_name: "Ruggles",
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "unresolvably different summaries result in standard summary" do
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board],
+              stop: "place-sstat",
+              route: "CR-Franklin"
+            },
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Franklin"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat", route: "CR-Needham"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-rugg", route: "CR-Needham"}
+          ]
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+      }
+
+      summary2 = %AlertSummary.TripSpecific{
+        trip_identity: %TripShuttle.MultipleTrips{},
+        effect: :suspension,
+        effect_stops: ["place-sstat", "place-rugg"],
+        is_today: true,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.EndOfService{}}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               recurrence: nil
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
   end
 end

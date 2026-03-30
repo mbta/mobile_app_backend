@@ -416,35 +416,78 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   into a single summary. When possible, picks a descriptive location and timeframe that
   applies to all summaries. If not possible, those fields are nil in the result.
   """
-  @spec combine_summaries(Alert.t(), [t()], DateTime.t()) :: t()
+  @spec combine_summaries(Alert.t(), [t()]) :: t()
 
-  def combine_summaries(_alert, [summary], _now) do
+  def combine_summaries(_alert, [summary]) do
     summary
   end
 
-  def combine_summaries(alert, summaries, now) do
+  def combine_summaries(alert, summaries) do
     effect = alert.effect
 
-    location =
-      summaries
-      |> Enum.map(& &1.location)
-      |> Enum.uniq()
-      |> deduplicate_locations()
+    summaries = Enum.uniq(summaries)
 
-    if Alert.all_clear?(alert, now) do
-      %__MODULE__.AllClear{location: location}
-    else
-      timeframe =
-        summaries
-        |> Enum.map(& &1.timeframe)
-        |> Enum.uniq()
-        |> case do
-          # Timeframe should always be the same since it is a property of the alert itself, not something that is based on the subscription.
-          [timeframe] -> timeframe
-          _ -> nil
+    cond do
+      Enum.count(summaries) == 1 ->
+        List.first(summaries)
+
+      Enum.all?(summaries, &match?(%__MODULE__.AllClear{}, &1)) ->
+        location =
+          summaries
+          |> Enum.map(& &1.location)
+          |> Enum.uniq()
+          |> deduplicate_locations()
+
+        %__MODULE__.AllClear{location: location}
+
+      Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
+        location =
+          summaries
+          |> Enum.map(& &1.location)
+          |> Enum.uniq()
+          |> deduplicate_locations()
+
+        timeframe =
+          summaries
+          |> Enum.map(& &1.timeframe)
+          |> Enum.uniq()
+          |> case do
+            # Timeframe should always be the same since it is a property of the alert
+            # itself, not something that is based on the subscription.
+            [timeframe] -> timeframe
+            _ -> nil
+          end
+
+        %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}
+
+      Enum.all?(summaries, fn summary ->
+        if Map.has_key?(summary, :trip_identity) do
+          %{trip_identity: %type{}} = summary
+
+          type in [__MODULE__.TripShuttle.SingleTrip, __MODULE__.TripShuttle.MultipleTrips]
+        else
+          false
         end
+      end) ->
+        __MODULE__.TripShuttle.combine(alert, summaries)
 
-      %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}
+      Enum.all?(summaries, fn summary ->
+        if Map.has_key?(summary, :trip_identity) do
+          %{trip_identity: %type{}} = summary
+
+          type in [
+            __MODULE__.TripSpecific.TripFrom,
+            __MODULE__.TripSpecific.TripTo,
+            __MODULE__.TripSpecific.MultipleTrips
+          ]
+        else
+          false
+        end
+      end) ->
+        __MODULE__.TripSpecific.combine(alert, summaries)
+
+      true ->
+        %__MODULE__.Standard{effect: alert.effect}
     end
   end
 

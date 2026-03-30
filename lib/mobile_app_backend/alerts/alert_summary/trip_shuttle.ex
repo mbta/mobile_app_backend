@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
+  alias MobileAppBackend.Alerts.AlertSummary.Standard
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
@@ -70,6 +71,47 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
       }
     else
       _ -> nil
+    end
+  end
+
+  @doc """
+  Combine multiple trip-shuttle alerts into one.
+  If the  current & end stops are the same, combine
+  into one MultiTrip summary. Otherwise, return a standard summary.
+  """
+  @spec combine(Alert.t(), [t()]) :: t() | Standard.t()
+  def combine(alert, summaries) do
+    [first | _rest] = summaries
+
+    same_stops =
+      summaries
+      |> Enum.flat_map(&[&1.current_stop_name, &1.end_stop_name])
+      |> MapSet.new()
+      |> MapSet.size() == 2
+
+    if same_stops do
+      same_trip_id =
+        summaries
+        |> Enum.map(& &1.trip_identity)
+        |> Enum.uniq()
+        |> Enum.count() == 1
+
+      trip_identity =
+        if same_trip_id do
+          first.trip_identity
+        else
+          %__MODULE__.MultipleTrips{}
+        end
+
+      %__MODULE__{
+        trip_identity: trip_identity,
+        is_today: first.is_today,
+        current_stop_name: first.current_stop_name,
+        end_stop_name: first.end_stop_name,
+        recurrence: first.recurrence
+      }
+    else
+      %AlertSummary.Standard{effect: alert.effect, recurrence: first.recurrence}
     end
   end
 
