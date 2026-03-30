@@ -2008,7 +2008,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           stop_name: "Needham"
         },
         effect: :suspension,
-        effect_stops: ["place-rugg"],
+        effect_stops: nil,
         is_today: true,
         cause: nil,
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}

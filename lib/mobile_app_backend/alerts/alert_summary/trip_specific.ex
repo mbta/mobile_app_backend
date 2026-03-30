@@ -90,14 +90,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   """
   @spec combine(Alert.t(), [t()]) :: t() | Standard.t()
   def combine(alert, summaries) do
-    [first | _rest] = summaries
+    [first | rest] = summaries
 
-    all_effect_stops =
-      summaries
-      |> Enum.flat_map(& &1.effect_stops)
-      |> MapSet.new()
+    first_effect_stops =
+      first.effect_stops
+      |> List.wrap()
 
-    same_stops = all_effect_stops == MapSet.new(first.effect_stops)
+    MapSet.new()
+
+    same_stops = Enum.all?(rest, &(&1.effect_stops == first_effect_stops))
 
     if same_stops do
       same_trip_id =
