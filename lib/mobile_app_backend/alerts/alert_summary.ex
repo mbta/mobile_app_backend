@@ -19,6 +19,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @derive Jason.Encoder
     defstruct [:name, :destination, :id]
 
+    @spec new(0 | 1, any()) :: MobileAppBackend.Alerts.AlertSummary.Direction.t()
     @doc """
     This constructor is used to provide additional context to a Direction to allow for overriding
     the destination label in cases where a route or line has branching. We want to display a
@@ -438,7 +439,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         |> Enum.map(& &1.timeframe)
         |> Enum.uniq()
         |> case do
+          # Timeframe should always be the same since it is a property of the alert itself, not something that is based on the subscription.
           [timeframe] -> timeframe
+          _ -> nil
         end
 
       %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}

@@ -1701,11 +1701,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
       }
 
-      assert %AlertSummary.Standard{
-               effect: :suspension,
-               location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
-               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
-             } ==
+      assert summary1 ==
                AlertSummary.combine_summaries(alert, [summary1, summary2], now)
     end
 
@@ -1740,14 +1736,42 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
       }
 
-      assert %AlertSummary.Standard{
-               effect: :suspension,
-               location: %AlertSummary.Location.SuccessiveStops{
-                 start_stop_name: "Boylston",
-                 end_stop_name: "Riverside"
-               },
-               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
-             } ==
+      assert summary1 ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+    end
+
+    test "keeps stop to direction if given both directions" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
+          ]
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.StopToDirection{
+          start_stop_name: "North Station",
+          direction: %Direction{name: "Southbound", destination: "Forest Hills", id: 1}
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.DirectionToStop{
+          end_stop_name: "North Station",
+          direction: %Direction{name: "Northbound", destination: "Oak Grove", id: 0}
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      assert summary1 ==
                AlertSummary.combine_summaries(alert, [summary1, summary2], now)
     end
 
@@ -1780,6 +1804,44 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                effect: :suspension,
                location: nil,
                timeframe: nil
+             } =
+               AlertSummary.combine_summaries(alert, [summary1, summary2], now)
+    end
+
+    test "keeps timeframe if same" do
+      now = DateTime.now!("America/New_York")
+      upstream_timestamp = DateTime.add(now, -2)
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-brdwy"}
+          ],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %Location.SuccessiveStops{
+          start_stop_name: "A",
+          end_stop_name: "B"
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "C"},
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               location: nil,
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2], now)
     end
