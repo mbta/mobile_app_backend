@@ -229,31 +229,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         summary_for_subscription(alert, subscription, now, global_data)
       end)
 
-    combine_summaries(alert, individual_summaries, now)
-  end
-
-  defp combine_summaries(alert, summaries, now) do
-    effect = alert.effect
-
-    location =
-      summaries
-      |> Enum.map(& &1.location)
-      |> Enum.uniq()
-      |> deduplicate_locations()
-
-    if Alert.all_clear?(alert, now) do
-      %AlertSummary.AllClear{location: location}
-    else
-      timeframe =
-        summaries
-        |> Enum.map(& &1.timeframe)
-        |> Enum.uniq()
-        |> case do
-          [timeframe] -> timeframe
-        end
-
-      %AlertSummary.Standard{effect: effect, location: location, timeframe: timeframe}
-    end
+    AlertSummary.combine_summaries(alert, individual_summaries, now)
   end
 
   defp summary_for_subscription(alert, subscription, now, global_data) do
@@ -282,34 +258,6 @@ defmodule MobileAppBackend.Notifications.Engine do
       schedules,
       global_data
     )
-  end
-
-  defp deduplicate_locations(locations) do
-    case locations do
-      [location] ->
-        location
-
-      [
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2},
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s2, end_stop_name: s1}
-      ] ->
-        [s1, s2] = Enum.sort([s1, s2])
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2}
-
-      [
-        %AlertSummary.Location.StopToDirection{start_stop_name: stop, direction: direction} =
-            location,
-        %AlertSummary.Location.DirectionToStop{
-          direction: opposite_direction,
-          end_stop_name: stop
-        }
-      ]
-      when opposite_direction.id == 1 - direction.id ->
-        location
-
-      _ ->
-        nil
-    end
   end
 
   defp schedules_for_subscription(alert, subscription, global_data) do

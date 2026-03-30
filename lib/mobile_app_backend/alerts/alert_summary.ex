@@ -410,6 +410,69 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
+  @doc """
+  Combines multiple different summaries of an alert produced by different subscriptions
+  into a single summary. When possible, picks a descriptive location and timeframe that
+  applies to all summaries. If not possible, those fields are nil in the result.
+  """
+  @spec combine_summaries(Alert.t(), [t()], DateTime.t()) :: t()
+
+  def combine_summaries(_alert, [summary], _now) do
+    summary
+  end
+
+  def combine_summaries(alert, summaries, now) do
+    effect = alert.effect
+
+    location =
+      summaries
+      |> Enum.map(& &1.location)
+      |> Enum.uniq()
+      |> deduplicate_locations()
+
+    if Alert.all_clear?(alert, now) do
+      %__MODULE__.AllClear{location: location}
+    else
+      timeframe =
+        summaries
+        |> Enum.map(& &1.timeframe)
+        |> Enum.uniq()
+        |> case do
+          [timeframe] -> timeframe
+        end
+
+      %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}
+    end
+  end
+
+  defp deduplicate_locations(locations) do
+    case locations do
+      [location] ->
+        location
+
+      [
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2},
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s2, end_stop_name: s1}
+      ] ->
+        [s1, s2] = Enum.sort([s1, s2])
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2}
+
+      [
+        %__MODULE__.Location.StopToDirection{start_stop_name: stop, direction: direction} =
+            location,
+        %__MODULE__.Location.DirectionToStop{
+          direction: opposite_direction,
+          end_stop_name: stop
+        }
+      ]
+      when opposite_direction.id == 1 - direction.id ->
+        location
+
+      _ ->
+        nil
+    end
+  end
+
   @spec all_clear_summary(
           Alert.t(),
           Stop.id(),
