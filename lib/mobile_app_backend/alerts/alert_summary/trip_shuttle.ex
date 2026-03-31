@@ -6,7 +6,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
   alias MBTAV3API.Stop
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.Standard
-
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
