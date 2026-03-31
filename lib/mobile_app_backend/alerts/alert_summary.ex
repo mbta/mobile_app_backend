@@ -418,9 +418,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   """
   @spec combine_summaries(Alert.t(), [t()]) :: t()
 
-  def combine_summaries(_alert, [summary]) do
-    summary
-  end
+  def combine_summaries(_alert, [summary]), do: summary
 
   def combine_summaries(alert, summaries) do
     effect = alert.effect
