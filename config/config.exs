@@ -17,8 +17,7 @@ config :mobile_app_backend, alerts_broadcast_interval_ms: 500
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 
-config :mobile_app_backend, MBTAV3API.ResponseCache,
-  allocated_memory: 250_000_000
+config :mobile_app_backend, MBTAV3API.ResponseCache, allocated_memory: 250_000_000
 
 config :mobile_app_backend, MBTAV3API.RepositoryCache,
   gc_interval: :timer.hours(2),
