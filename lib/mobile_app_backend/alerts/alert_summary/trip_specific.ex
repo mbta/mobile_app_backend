@@ -97,7 +97,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
       |> List.wrap()
       |> MapSet.new()
 
-    same_stops = Enum.all?(rest, &(MapSet.new(&1.effect_stops) == first_effect_stops))
+    same_stops =
+      Enum.all?(
+        rest,
+        &(&1.effect_stops
+          |> List.wrap()
+          |> MapSet.new() == first_effect_stops)
+      )
 
     if same_stops do
       same_trip_id =
