@@ -77,7 +77,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
 
   @doc """
   Combine multiple trip-shuttle alerts into one.
-  If the  current & end stops are the same, combine
+  If the current & end stops are the same, combine
   into one MultiTrip summary. Otherwise, return a standard summary.
   """
   @spec combine(Alert.t(), [t()]) :: t() | Standard.t()
