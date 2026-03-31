@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Deliverer do
-  use Oban.Worker, unique: [period: :infinity]
+  use Oban.Worker, unique: [period: :infinity], max_attempts: 10
   require Logger
   alias GoogleApi.FCM.V1, as: FCM
   alias MobileAppBackend.Notifications.DeliveredNotification

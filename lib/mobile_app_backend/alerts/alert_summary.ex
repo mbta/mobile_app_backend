@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
   alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
   alias MobileAppBackend.GlobalDataCache
@@ -190,7 +191,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
     defp get_stop_list_for_pattern(pattern, global) do
       Enum.map(
-        global.trips[pattern.representative_trip_id].stop_ids,
+        case global.trips[pattern.representative_trip_id] do
+          %Trip{} = trip -> trip.stop_ids
+          _ -> []
+        end,
         &Stop.parent_id(global.stops[&1])
       )
     end
@@ -1103,8 +1107,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       patterns
       |> Enum.filter(&(&1.direction_id == direction_id))
       |> Enum.map(fn pattern ->
-        trip = global.trips[pattern.representative_trip_id]
-        {pattern, trip.stop_ids}
+        case global.trips[pattern.representative_trip_id] do
+          %Trip{} = trip -> {pattern, trip.stop_ids}
+          _ -> {pattern, []}
+        end
       end)
       |> Kernel.++(
         # Special casing to properly show when alerts affect multiple GL branches

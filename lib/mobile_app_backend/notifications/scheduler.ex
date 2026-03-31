@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
-  use Oban.Worker, unique: [period: :infinity, states: :incomplete]
+  use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 1
   import Ecto.Query
   require Logger
   alias MBTAV3API.Alert
@@ -29,26 +29,36 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   defp get_relevant_alerts(now) do
     alerts = Alerts.fetch([])
 
-    Enum.filter(alerts, fn %Alert{} = alert ->
-      # to send anything, the alert must be significant
-      significant? = Alert.significance(alert, now) != nil
+    Enum.filter(alerts, fn %Alert{} = alert -> filter_alert(alert, now) end)
+  end
 
-      # to send a reminder, the alert must be active at some point within the next 24h
-      # to send a notification, the alert must be active right now
-      active_now_or_soon? =
-        alert.active_period
-        |> Enum.any?(fn %Alert.ActivePeriod{start: active_start, end: active_end} ->
-          start_hours_away = DateTime.diff(now, active_start, :hour)
-          ends_in_future? = is_nil(active_end) or DateTime.compare(active_end, now) != :lt
+  @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
+  defp filter_alert(%Alert{} = alert, now) do
+    # to send anything, the alert must be significant
+    significant? = Alert.significance(alert, now) != nil
 
-          start_hours_away < 24 and ends_in_future?
-        end)
+    # to send a reminder, the alert must be active at some point within the next 24h
+    # to send a notification, the alert must be active right now
+    active_now_or_soon? =
+      alert.active_period
+      |> Enum.any?(fn %Alert.ActivePeriod{start: active_start, end: active_end} ->
+        start_hours_away = DateTime.diff(now, active_start, :hour)
+        ends_in_future? = is_nil(active_end) or DateTime.compare(active_end, now) != :lt
 
-      # to send an all clear, the alert must have an all clear timestamp
-      all_clear? = not is_nil(alert.closed_timestamp)
+        start_hours_away < 24 and ends_in_future?
+      end)
 
-      significant? and (active_now_or_soon? or all_clear?)
-    end)
+    # to send an all clear, the alert must have an all clear timestamp
+    all_clear? = not is_nil(alert.closed_timestamp)
+
+    significant? and (active_now_or_soon? or all_clear?)
+  catch
+    :exit, error ->
+      Logger.error(
+        "#{__MODULE__} failed to process alert alert=#{alert.id} error=#{inspect(error)}"
+      )
+
+      false
   end
 
   @spec get_open_windows(DateTime.t()) :: [User.t()]
@@ -104,47 +114,72 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
     Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
-      if DeliveredNotification.can_send?(
-           user_id,
-           outgoing_notification.alert.id,
-           outgoing_notification.type
-         ) do
-        [{user, outgoing_notification}]
-      else
-        []
+      try do
+        if DeliveredNotification.can_send?(
+             user_id,
+             outgoing_notification.alert.id,
+             outgoing_notification.type
+           ) do
+          [{user, outgoing_notification}]
+        else
+          []
+        end
+      catch
+        :exit, error ->
+          Logger.error(
+            "#{__MODULE__} failed to check notification sending for user_id=#{user_id} alert_id=#{outgoing_notification.alert.id} error=#{inspect(error)}"
+          )
+
+          []
       end
     end)
+  catch
+    :exit, error ->
+      Logger.error(
+        "#{__MODULE__} failed to find new notifications for user_id=#{user_id} error=#{inspect(error)}"
+      )
+
+      []
   end
 
   @spec enqueue_delivery([{User.t(), Engine.OutgoingNotification.t()}]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, fn {%User{} = recipient, %Engine.OutgoingNotification{} = notification} ->
-      {type, upstream_timestamp} =
-        case notification.type do
-          {type, upstream_timestamp} -> {type, upstream_timestamp}
-          type when is_atom(type) -> {type, nil}
+    Enum.each(recipients, &deliver_notification/1)
+  end
+
+  defp deliver_notification({%User{} = recipient, %Engine.OutgoingNotification{} = notification}) do
+    {type, upstream_timestamp} =
+      case notification.type do
+        {type, upstream_timestamp} -> {type, upstream_timestamp}
+        type when is_atom(type) -> {type, nil}
+      end
+
+    subscriptions =
+      Enum.map(
+        notification.subscriptions,
+        fn %Subscription{route_id: route_id, stop_id: stop_id, direction_id: direction_id} ->
+          %{route: route_id, stop: stop_id, direction: direction_id}
         end
+      )
 
-      subscriptions =
-        Enum.map(
-          notification.subscriptions,
-          fn %Subscription{route_id: route_id, stop_id: stop_id, direction_id: direction_id} ->
-            %{route: route_id, stop: stop_id, direction: direction_id}
-          end
-        )
+    %{
+      user_id: recipient.id,
+      alert_id: notification.alert.id,
+      title: notification.title,
+      summary: notification.summary,
+      subscriptions: subscriptions,
+      upstream_timestamp: upstream_timestamp,
+      type: type
+    }
+    |> Deliverer.new()
+    |> Oban.insert!()
+  catch
+    :exit, error ->
+      Logger.error(
+        "#{__MODULE__} failed to enqueue delivery for user_id=#{recipient.id} alert_id=#{notification.alert.id} error=#{inspect(error)}"
+      )
 
-      %{
-        user_id: recipient.id,
-        alert_id: notification.alert.id,
-        title: notification.title,
-        summary: notification.summary,
-        subscriptions: subscriptions,
-        upstream_timestamp: upstream_timestamp,
-        type: type
-      }
-      |> Deliverer.new()
-      |> Oban.insert!()
-    end)
+      :ok
   end
 end
