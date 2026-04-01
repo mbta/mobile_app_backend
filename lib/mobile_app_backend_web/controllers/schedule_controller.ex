@@ -15,7 +15,10 @@ defmodule MobileAppBackendWeb.ScheduleController do
       date_time = Util.parse_datetime!(date_time_string)
       service_date = Util.datetime_to_gtfs(date_time)
 
-      filters = Enum.map(stop_ids, &get_filter(&1, service_date))
+      filters =
+        stop_ids
+        |> Enum.uniq()
+        |> Enum.map(&get_filter(&1, service_date))
 
       parallel_timeout = String.to_integer(Map.get(params, "timeout", "5000"))
 
@@ -75,7 +78,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
         {filter_params, fetch_schedules(filter_params, date_time)}
       end,
       ordered: false,
-      max_concurrency: 20,
+      max_concurrency: 25,
       timeout: timeout
     )
     |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
