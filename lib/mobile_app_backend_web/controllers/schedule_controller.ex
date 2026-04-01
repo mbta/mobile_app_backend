@@ -15,8 +15,23 @@ defmodule MobileAppBackendWeb.ScheduleController do
       date_time = Util.parse_datetime!(date_time_string)
       service_date = Util.datetime_to_gtfs(date_time)
 
+      global_stops = GlobalDataCache.get_data().stops
+
       filters =
         stop_ids
+        |> Enum.map(fn stop_id ->
+          stop = Map.get(global_stops, stop_id)
+
+          if is_nil(stop) do
+            stop_id
+          else
+            if is_nil(stop.parent_station_id) do
+              stop_id
+            else
+              stop.parent_station_id
+            end
+          end
+        end)
         |> Enum.uniq()
         |> Enum.map(&get_filter(&1, service_date))
 
