@@ -23,7 +23,7 @@ defmodule MobileAppBackend.Application do
         {Finch,
          name: Finch.CustomPool,
          pools: %{
-           :default => [size: 200, count: 10, start_pool_metrics?: true]
+           :default => [size: 100, count: 5, start_pool_metrics?: true]
          }},
         {MBTAV3API.ResponseCache, []},
         {MBTAV3API.RepositoryCache, []},
