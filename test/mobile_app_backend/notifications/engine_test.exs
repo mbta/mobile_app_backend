@@ -708,6 +708,63 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              Engine.notifications([subscription1, subscription2], [alert], now)
   end
 
+  test "returns a single all clear when multiple subscriptions match" do
+    now = DateTime.now!("America/New_York")
+    upstream_timestamp = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: DateTime.add(now, -10), end: DateTime.add(now, -5)}
+        ],
+        closed_timestamp: upstream_timestamp,
+        effect: :suspension,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], stop: "place-sstat"},
+          %Alert.InformedEntity{activities: [:board], stop: "place-brdwy"}
+        ],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription1 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-20) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(20) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    subscription2 =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "CR-NewBedford",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-20) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(20) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [
+             %OutgoingNotification{
+               summary: %AlertSummary.AllClear{
+                 location: nil
+               },
+               subscriptions: [^subscription1, ^subscription2],
+               alert: ^alert,
+               type: :all_clear
+             }
+           ] =
+             Engine.notifications([subscription1, subscription2], [alert], now)
+  end
+
   test "retrieves schedules for specified trips" do
     now = DateTime.now!("America/New_York")
     upstream_timestamp = DateTime.add(now, -2)

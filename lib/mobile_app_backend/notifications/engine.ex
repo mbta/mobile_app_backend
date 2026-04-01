@@ -219,90 +219,48 @@ defmodule MobileAppBackend.Notifications.Engine do
     NotificationTitle.from_lines_or_routes(title_lines_or_routes)
   end
 
+  defp build_summary(alert, [subscription], now, global_data) do
+    summary_for_subscription(alert, subscription, now, global_data)
+  end
+
   defp build_summary(alert, subscriptions, now, global_data) do
     individual_summaries =
       Enum.map(subscriptions, fn subscription ->
-        patterns =
-          global_data.route_patterns
-          |> Stream.map(fn {_, pattern} -> pattern end)
-          |> Enum.filter(fn pattern ->
-            (pattern.route_id == subscription.route_id or
-               global_data.routes[pattern.route_id].line_id == subscription.route_id) and
-              pattern.direction_id == subscription.direction_id and
-              Enum.any?(
-                global_data.trips[pattern.representative_trip_id].stop_ids,
-                &(&1 == subscription.stop_id or
-                    &1 in global_data.stops[subscription.stop_id].child_stop_ids)
-              )
-          end)
-
-        schedules = get_schedules(alert, subscriptions, global_data)
-
-        AlertSummary.summarizing(
-          alert,
-          subscription.stop_id,
-          subscription.direction_id,
-          patterns,
-          now,
-          schedules,
-          global_data
-        )
+        summary_for_subscription(alert, subscription, now, global_data)
       end)
 
-    case individual_summaries do
-      [summary] ->
-        summary
-
-      _ ->
-        effect = alert.effect
-
-        location =
-          individual_summaries
-          |> Enum.map(& &1.location)
-          |> Enum.uniq()
-          |> deduplicate_locations()
-
-        timeframe =
-          individual_summaries
-          |> Enum.map(& &1.timeframe)
-          |> Enum.uniq()
-          |> case do
-            [timeframe] -> timeframe
-          end
-
-        %AlertSummary.Standard{effect: effect, location: location, timeframe: timeframe}
-    end
+    AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
-  defp deduplicate_locations(locations) do
-    case locations do
-      [location] ->
-        location
+  defp summary_for_subscription(alert, subscription, now, global_data) do
+    patterns =
+      global_data.route_patterns
+      |> Stream.map(fn {_, pattern} -> pattern end)
+      |> Enum.filter(fn pattern ->
+        (pattern.route_id == subscription.route_id or
+           global_data.routes[pattern.route_id].line_id == subscription.route_id) and
+          pattern.direction_id == subscription.direction_id and
+          Enum.any?(
+            global_data.trips[pattern.representative_trip_id].stop_ids,
+            &(&1 == subscription.stop_id or
+                &1 in global_data.stops[subscription.stop_id].child_stop_ids)
+          )
+      end)
 
-      [
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2},
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s2, end_stop_name: s1}
-      ] ->
-        [s1, s2] = Enum.sort([s1, s2])
-        %AlertSummary.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2}
+    schedules = schedules_for_subscription(alert, subscription, global_data)
 
-      [
-        %AlertSummary.Location.StopToDirection{start_stop_name: stop, direction: direction} =
-            location,
-        %AlertSummary.Location.DirectionToStop{
-          direction: opposite_direction,
-          end_stop_name: stop
-        }
-      ]
-      when opposite_direction.id == 1 - direction.id ->
-        location
-
-      _ ->
-        nil
-    end
+    AlertSummary.summarizing(
+      alert,
+      subscription.stop_id,
+      subscription.direction_id,
+      patterns,
+      now,
+      schedules,
+      global_data
+    )
   end
 
-  defp get_schedules(alert, subscriptions, global_data) do
+  defp schedules_for_subscription(alert, subscription, global_data) do
     trip_ids =
       alert.informed_entity |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
 
@@ -320,10 +278,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
         schedules =
           Enum.filter(schedules, fn schedule ->
-            Enum.any?(
-              subscriptions,
-              &schedule_matches_subscription?(schedule, &1, trips, global_data)
-            )
+            schedule_matches_subscription?(schedule, subscription, trips, global_data)
           end)
 
         schedules

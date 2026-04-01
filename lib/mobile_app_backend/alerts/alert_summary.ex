@@ -19,6 +19,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @derive Jason.Encoder
     defstruct [:name, :destination, :id]
 
+    @spec new(0 | 1, any()) :: MobileAppBackend.Alerts.AlertSummary.Direction.t()
     @doc """
     This constructor is used to provide additional context to a Direction to allow for overriding
     the destination label in cases where a route or line has branching. We want to display a
@@ -407,6 +408,98 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         recurrence: recurrence,
         is_update: alert_is_update?(alert, at_time)
       }
+    end
+  end
+
+  @doc """
+  Combines multiple different summaries of an alert produced by different subscriptions
+  into a single summary. When possible, picks a descriptive location and timeframe that
+  applies to all summaries. If not possible, those fields are nil in the result.
+  """
+  @spec combine_summaries(Alert.t(), [t()]) :: t()
+
+  def combine_summaries(_alert, [summary]), do: summary
+
+  def combine_summaries(alert, summaries) do
+    effect = alert.effect
+
+    summaries = Enum.uniq(summaries)
+
+    cond do
+      Enum.count(summaries) == 1 ->
+        List.first(summaries)
+
+      Enum.all?(summaries, &match?(%__MODULE__.AllClear{}, &1)) ->
+        location =
+          summaries
+          |> Enum.map(& &1.location)
+          |> Enum.uniq()
+          |> deduplicate_locations()
+
+        %__MODULE__.AllClear{location: location}
+
+      Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
+        location =
+          summaries
+          |> Enum.map(& &1.location)
+          |> Enum.uniq()
+          |> deduplicate_locations()
+
+        timeframe =
+          summaries
+          |> Enum.map(& &1.timeframe)
+          |> Enum.uniq()
+          |> case do
+            # Timeframe should always be the same since it is a property of the alert
+            # itself, not something that is based on the subscription.
+            [timeframe] -> timeframe
+            _ -> nil
+          end
+
+        %__MODULE__.Standard{effect: effect, location: location, timeframe: timeframe}
+
+      Enum.all?(summaries, fn summary ->
+        %type{} = summary
+        match?(TripShuttle, type)
+      end) ->
+        __MODULE__.TripShuttle.combine(alert, summaries)
+
+      Enum.all?(summaries, fn summary ->
+        %type{} = summary
+        match?(TripSpecific, type)
+      end) ->
+        __MODULE__.TripSpecific.combine(alert, summaries)
+
+      true ->
+        %__MODULE__.Standard{effect: alert.effect}
+    end
+  end
+
+  defp deduplicate_locations(locations) do
+    case locations do
+      [location] ->
+        location
+
+      [
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2},
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s2, end_stop_name: s1}
+      ] ->
+        [s1, s2] = Enum.sort([s1, s2])
+        %__MODULE__.Location.SuccessiveStops{start_stop_name: s1, end_stop_name: s2}
+
+      [
+        %__MODULE__.Location.StopToDirection{start_stop_name: stop, direction: direction} =
+            location,
+        %__MODULE__.Location.DirectionToStop{
+          direction: opposite_direction,
+          end_stop_name: stop
+        }
+      ]
+      when opposite_direction.id == 1 - direction.id ->
+        location
+
+      _ ->
+        nil
     end
   end
 
