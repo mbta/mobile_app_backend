@@ -150,14 +150,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         })
       end)
 
-    assert [
-             %DeliveredNotification{
-               user_id: ^user_id,
-               alert_id: ^alert_id,
-               upstream_timestamp: ^upstream_timestamp,
-               type: ^type
-             }
-           ] = Repo.all(DeliveredNotification)
+    assert [] = Repo.all(DeliveredNotification)
 
     assert user.fcm_last_verified == Repo.reload!(user).fcm_last_verified
   end

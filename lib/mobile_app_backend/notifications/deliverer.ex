@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Deliverer do
-  use Oban.Worker, unique: [period: :infinity]
+  use Oban.Worker, unique: [period: :infinity], max_attempts: 4
   require Logger
   alias GoogleApi.FCM.V1, as: FCM
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -79,7 +79,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
 
-    if result != :deleted do
+    if result == :ok do
       Repo.insert!(%DeliveredNotification{
         user_id: user_id,
         alert_id: alert_id,
