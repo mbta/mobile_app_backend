@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
-  use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 1
+  use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
   import Ecto.Query
   require Logger
   alias MBTAV3API.Alert
