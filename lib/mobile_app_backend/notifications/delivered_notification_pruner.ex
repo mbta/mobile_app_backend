@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.DeliveredNotificationPruner do
-  use Oban.Worker
+  use Oban.Worker, max_attempts: 10
   import Ecto.Query
   require Logger
   alias MBTAV3API.Store

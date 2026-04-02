@@ -953,4 +953,59 @@ defmodule MBTAV3API.AlertTest do
 
     assert northbound_downstream_alerts == [alewife_shuttle_alert]
   end
+
+  test "alertsDownstreamForPatterns returns empty list when representative trip is missing" do
+    Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+    global_data = GlobalDataCache.get_data()
+
+    route_pattern_ashmont = global_data.route_patterns["Red-1-0"]
+    route_pattern_braintree = global_data.route_patterns["Red-3-0"]
+
+    shawmut_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70091"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70092"}
+        ]
+      )
+
+    ashmont_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70093"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70094"}
+        ]
+      )
+
+    alewife_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70061"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "Alewife-01"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "Alewife-02"}
+        ]
+      )
+
+    park_shuttle_alert =
+      build(:alert,
+        effect: :shuttle,
+        informed_entity: [
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70075"},
+          %InformedEntity{activities: [:board, :ride], route: "Red", stop: "70076"}
+        ]
+      )
+
+    downstream_alerts =
+      Alert.alerts_downstream_for_patterns(
+        [ashmont_shuttle_alert, shawmut_shuttle_alert, park_shuttle_alert, alewife_shuttle_alert],
+        [route_pattern_ashmont, route_pattern_braintree],
+        ["place-pktrm", "70075", "70076"],
+        %{}
+      )
+
+    assert downstream_alerts == []
+  end
 end
