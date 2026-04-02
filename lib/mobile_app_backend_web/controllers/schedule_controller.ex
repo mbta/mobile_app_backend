@@ -107,7 +107,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
         end
       end)
 
-    "#{log_prefix} success"
+    Logger.info("#{log_prefix} success")
     result
   catch
     :exit, {:timeout, _} ->
