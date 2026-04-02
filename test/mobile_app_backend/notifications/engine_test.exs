@@ -204,7 +204,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     assert [] = Engine.notifications([subscription_excluding], [alert], now)
   end
 
-  test "sends all clear if closed" do
+  test "does not send all clear if closed without push notification" do
     now = DateTime.now!("America/New_York")
 
     alert =
@@ -212,6 +212,33 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         closed_timestamp: DateTime.add(now, -1),
         effect: :suspension,
         informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [] = Engine.notifications([subscription], [alert], now)
+  end
+
+  test "sends all clear if closed with push notification" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        closed_timestamp: DateTime.add(now, -1),
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: DateTime.add(now, -1)
       )
 
     subscription =
