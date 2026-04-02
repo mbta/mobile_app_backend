@@ -37,7 +37,7 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
         |> Plug.Conn.send_resp(200, data)
 
       assert Phoenix.ConnTest.json_response(conn, 200) == parsed_data
-      assert Plug.Conn.get_resp_header(conn, "etag") == [hashed_data]
+      assert Plug.Conn.get_resp_header(conn, "etag") == ["W/#{hashed_data}"]
     end
 
     @tag :capture_log
@@ -55,7 +55,7 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
         |> Plug.Conn.send_resp(200, data)
 
       assert Phoenix.ConnTest.json_response(conn, 200) == parsed_data
-      assert Plug.Conn.get_resp_header(conn, "etag") == [hashed_data]
+      assert Plug.Conn.get_resp_header(conn, "etag") == ["W/#{hashed_data}"]
     end
 
     @tag :capture_log
@@ -67,13 +67,13 @@ defmodule MobileAppBackendWeb.Plugs.EtagTest do
       conn =
         conn
         |> Etag.call([])
-        |> Plug.Conn.put_req_header("if-none-match", hashed_data)
+        |> Plug.Conn.put_req_header("if-none-match", "W/#{hashed_data}")
         |> Plug.Conn.put_resp_header("content-type", "application/json")
         |> Plug.Conn.send_resp(200, data)
 
       assert conn.status == 304
       assert conn.resp_body == ""
-      assert Plug.Conn.get_resp_header(conn, "etag") == [hashed_data]
+      assert Plug.Conn.get_resp_header(conn, "etag") == ["W/#{hashed_data}"]
     end
   end
 end

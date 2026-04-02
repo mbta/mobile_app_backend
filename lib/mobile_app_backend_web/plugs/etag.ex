@@ -21,7 +21,9 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
 
   defp handle_etag(conn) do
     hashed_body = hash_body(conn)
-    etag = hashed_body
+    etag = mark_as_weak_etag(hashed_body)
+    # Using a weak header so that the response can be compressed.
+    # https://github.com/mtrudel/bandit/pull/207
     conn = conn |> put_resp_header("etag", etag)
 
     if List.first(get_req_header(conn, "if-none-match")) == etag do
@@ -30,6 +32,8 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
       conn
     end
   end
+
+  defp mark_as_weak_etag(etag), do: "W/#{etag}"
 
   defp hash_body(conn) do
     :crypto.hash(:sha256, conn.resp_body)
