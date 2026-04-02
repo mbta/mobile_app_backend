@@ -165,7 +165,8 @@ defmodule MobileAppBackend.Notifications.Engine do
     active_now? = next_overlap_in_hours <= 0
 
     cond do
-      open_now? and not is_nil(alert.closed_timestamp) ->
+      open_now? and not is_nil(alert.closed_timestamp) and
+          alert.closed_timestamp == alert.last_push_notification_timestamp ->
         {alert, :all_clear, subscription}
 
       is_nil(next_overlap) ->
