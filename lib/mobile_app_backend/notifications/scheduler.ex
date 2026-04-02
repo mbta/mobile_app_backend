@@ -13,16 +13,14 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @impl Oban.Worker
   def perform(_) do
-    Repo.transact(fn ->
-      now = DateTime.now!("America/New_York")
-      relevant_alerts = get_relevant_alerts(now)
-      open_windows = get_open_windows(now)
+    now = DateTime.now!("America/New_York")
+    relevant_alerts = get_relevant_alerts(now)
+    open_windows = get_open_windows(now)
 
-      find_new_recipients(relevant_alerts, open_windows, now)
-      |> enqueue_delivery()
+    find_new_recipients(relevant_alerts, open_windows, now)
+    |> enqueue_delivery()
 
-      {:ok, nil}
-    end)
+    {:ok, nil}
   end
 
   @spec get_relevant_alerts(DateTime.t()) :: [Alert.t()]
