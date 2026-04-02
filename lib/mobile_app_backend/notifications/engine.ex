@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Repository
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -241,7 +242,12 @@ defmodule MobileAppBackend.Notifications.Engine do
            global_data.routes[pattern.route_id].line_id == subscription.route_id) and
           pattern.direction_id == subscription.direction_id and
           Enum.any?(
-            global_data.trips[pattern.representative_trip_id].stop_ids,
+            with trip_id when is_binary(trip_id) <- pattern.representative_trip_id,
+                 %Trip{} = trip <- global_data.trips[trip_id] do
+              trip.stop_ids
+            else
+              _ -> []
+            end,
             &(&1 == subscription.stop_id or
                 &1 in global_data.stops[subscription.stop_id].child_stop_ids)
           )

@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
   alias MobileAppBackend.GlobalDataCache
 
   @type disambiguated_stop_id :: {Stop.id(), count :: pos_integer()}
@@ -17,10 +18,14 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
   @spec pattern_stops(RoutePattern.t(), MapSet.t(Stop.id()), GlobalDataCache.data()) ::
           {RoutePattern.t(), [Stop.id()]}
   defp pattern_stops(pattern, canon_stops, global_data) do
-    trip = global_data.trips[pattern.representative_trip_id]
+    stop_ids =
+      case global_data.trips[pattern.representative_trip_id] do
+        %Trip{} = trip -> trip.stop_ids
+        _ -> []
+      end
 
     stops =
-      trip.stop_ids
+      stop_ids
       |> Enum.map(&stop_or_parent_if_canon(&1, canon_stops, global_data))
       |> Enum.reject(&is_nil/1)
 

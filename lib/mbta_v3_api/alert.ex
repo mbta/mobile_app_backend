@@ -478,10 +478,12 @@ defmodule MBTAV3API.Alert do
   def alerts_downstream_for_patterns(alerts, patterns, target_stop_with_children, trips_by_id) do
     patterns
     |> Enum.flat_map(fn pattern ->
-      if trip = trips_by_id[pattern.representative_trip_id] do
-        downstream_alerts(alerts, trip, target_stop_with_children)
-      else
-        []
+      case trips_by_id[pattern.representative_trip_id] do
+        %Trip{} = trip ->
+          downstream_alerts(alerts, trip, target_stop_with_children)
+
+        _ ->
+          []
       end
     end)
     |> Enum.uniq()
