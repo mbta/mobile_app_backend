@@ -4,6 +4,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
+  alias MBTAV3API.Stop
   alias MobileAppBackend.GlobalDataCache
 
   def schedules(conn, %{"stop_ids" => stop_ids_concat, "date_time" => date_time_string} = params) do
@@ -14,33 +15,23 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
       date_time = Util.parse_datetime!(date_time_string)
       service_date = Util.datetime_to_gtfs(date_time)
-
       global_stops = GlobalDataCache.get_data().stops
 
       filters =
         stop_ids
-        |> Enum.map(fn stop_id ->
-          stop = Map.get(global_stops, stop_id)
-
-          if is_nil(stop) do
-            stop_id
-          else
-            if is_nil(stop.parent_station_id) do
-              stop_id
-            else
-              stop.parent_station_id
-            end
-          end
-        end)
+        |> Enum.map(&Stop.parent_id_if_exists(&1, global_stops))
         |> Enum.uniq()
         |> Enum.map(&get_filter(&1, service_date))
 
       parallel_timeout = String.to_integer(Map.get(params, "timeout", "5000"))
 
+      log_prefix =
+        "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(filters)} "
+
       data =
         case filters do
           [filter] -> fetch_schedules(filter, date_time)
-          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout)
+          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
         end
 
       case data do
@@ -84,34 +75,43 @@ defmodule MobileAppBackendWeb.ScheduleController do
     [stop: stop_id, date: service_date]
   end
 
-  @spec fetch_schedules_parallel([[JsonApi.Params.filter_param()]], DateTime.t(), integer()) ::
+  @spec fetch_schedules_parallel(
+          [[JsonApi.Params.filter_param()]],
+          DateTime.t(),
+          integer(),
+          String.t()
+        ) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
-  defp fetch_schedules_parallel(filters, date_time, timeout) do
-    filters
-    |> Task.async_stream(
-      fn filter_params ->
-        {filter_params, fetch_schedules(filter_params, date_time)}
-      end,
-      ordered: false,
-      max_concurrency: 25,
-      timeout: timeout
-    )
-    |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
-      case result do
-        {:ok, {_params, %{schedules: schedules, trips: trips}}} ->
-          {:cont, %{schedules: acc.schedules ++ schedules, trips: Map.merge(acc.trips, trips)}}
+  defp fetch_schedules_parallel(filters, date_time, timeout, log_prefix) do
+    result =
+      filters
+      |> Task.async_stream(
+        fn filter_params ->
+          {filter_params, fetch_schedules(filter_params, date_time)}
+        end,
+        ordered: false,
+        max_concurrency: 25,
+        timeout: timeout
+      )
+      |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
+        case result do
+          {:ok, {_params, %{schedules: schedules, trips: trips}}} ->
+            {:cont, %{schedules: acc.schedules ++ schedules, trips: Map.merge(acc.trips, trips)}}
 
-        {_result_type, {params, _response}} ->
-          Logger.warning(
-            "#{__MODULE__} skipped returning schedules due to error. params=#{inspect(params)}"
-          )
+          {_result_type, {params, _response}} ->
+            Logger.warning(
+              "#{__MODULE__} skipped returning schedules due to error. params=#{inspect(params)}"
+            )
 
-          {:halt, :error}
-      end
-    end)
+            {:halt, :error}
+        end
+      end)
+
+    "#{log_prefix} success"
+    result
   catch
     :exit, {:timeout, _} ->
-      Logger.warning("#{__MODULE__} fetch_schedules_parallel timeout timeout=#{timeout}")
+      Logger.warning("#{log_prefix} timeout timeout=#{timeout}")
       :error
   end
 

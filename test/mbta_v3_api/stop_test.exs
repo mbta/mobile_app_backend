@@ -84,6 +84,26 @@ defmodule MBTAV3API.StopTest do
     end
   end
 
+  describe "parent_id_if_exists/2" do
+    test "when a child stop and parent is in the map then return the parent" do
+      child = build(:stop, parent_station_id: "parentId")
+      parent = build(:stop, id: child.parent_station_id, location_type: :station)
+
+      assert parent.id ==
+               Stop.parent_id_if_exists(child.id, %{parent.id => parent, child.id => child})
+    end
+
+    test "when a child stop and parent is in not in the map then return the child" do
+      child = build(:stop, parent_station_id: "parentId")
+      assert child.id == Stop.parent_if_exists(child.id, %{child.id => child})
+    end
+
+    test "when a child stop and no parent then return the child" do
+      child = build(:stop, parent_station_id: nil)
+      assert child.id == Stop.parent_if_exists(child.id, %{child.id => child})
+    end
+  end
+
   describe "stop_id_to_children/2" do
     test "returns only the given stop ids with their :stop children" do
       other_stop = build(:stop, id: "other")
