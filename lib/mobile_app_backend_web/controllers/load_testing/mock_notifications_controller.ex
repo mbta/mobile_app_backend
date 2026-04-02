@@ -72,7 +72,7 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
     remaining_routes =
       global_data.routes
       |> Map.values()
-      |> Enum.filter(&(&1.type in [:bus, :ferry, :commuter_rail]))
+      |> Enum.filter(&(&1.type in [:bus, :ferry, :commuter_rail] && !String.starts_with?(&1.id, "Shuttle-")))
 
     route_id =
       case :rand.uniform() do
