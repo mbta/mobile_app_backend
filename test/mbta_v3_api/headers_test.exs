@@ -19,4 +19,10 @@ defmodule MBTAV3API.HeadersTest do
              {"MBTA-Version", "3005-01-02"}
            ]
   end
+
+  test "derives an outgoing X-Request-Id from the current one" do
+    request_id = "1234567890"
+    Logger.metadata(request_id: request_id)
+    assert [{"X-Request-Id", ^request_id <> "/" <> _}] = Headers.build(nil)
+  end
 end
