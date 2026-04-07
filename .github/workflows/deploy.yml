@@ -58,7 +58,8 @@ jobs:
       - uses: docker/build-push-action@v7
         with:
           context: .
-          cache-from: type=gha
+          # cache-from: type=gha
+          no-cache: true
           tags: ${{ steps.calc-version.outputs.tag-list }}
           push: true
       - uses: mbta/actions/deploy-ecs@v2
