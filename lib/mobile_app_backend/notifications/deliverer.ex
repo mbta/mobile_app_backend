@@ -56,36 +56,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         "projects/mbta-app-c574d",
         body: request_body
       )
-      |> case do
-        {:ok, _} ->
-          user
-          |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
-          |> Repo.update()
-          |> case do
-            {:ok, _} ->
-              :ok
-
-            {:error, error} ->
-              Logger.error(inspect(error))
-              :error
-          end
-
-        {:error, %Tesla.Env{status: 404}} ->
-          # if an FCM token is deleted, it won’t be recreated later, so prune the user now
-          case Repo.delete(user) do
-            {:ok, _} ->
-              :deleted
-
-            {:error, error} ->
-              Logger.error(inspect(error))
-              :error
-          end
-
-        {:error, error} ->
-          Logger.error(inspect(error))
-          Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
-          :error
-      end
+      |> handle_fcm_response(user)
 
     Logger.info(
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
@@ -101,5 +72,37 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
 
     :ok
+  end
+
+  defp handle_fcm_response({:ok, _response}, user) do
+    user
+    |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
+    |> Repo.update()
+    |> case do
+      {:ok, _} ->
+        :ok
+
+      {:error, error} ->
+        Logger.error(inspect(error))
+        :error
+    end
+  end
+
+  defp handle_fcm_response({:error, %Tesla.Env{status: 404}}, user) do
+    # if an FCM token is deleted, it won’t be recreated later, so prune the user now
+    case Repo.delete(user) do
+      {:ok, _} ->
+        :deleted
+
+      {:error, error} ->
+        Logger.error(inspect(error))
+        :error
+    end
+  end
+
+  defp handle_fcm_response({:error, error}, _user) do
+    Logger.error(inspect(error))
+    Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
+    :error
   end
 end
