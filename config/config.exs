@@ -98,6 +98,10 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Filter FCM tokens from logs
+config :phoenix, :filter_parameters, ["fcm_token"]
+config :logster, :filter_parameters, ["fcm_token"]
+
 # Use Req for making HTTP requests
 config :mobile_app_backend, MobileAppBackend.HTTP, Req
 
