@@ -10,7 +10,7 @@ defmodule MobileAppBackend.User do
   """
 
   typed_schema "users" do
-    field(:fcm_token, :string, null: false)
+    field(:fcm_token, :string, null: false, redact: true)
     field(:fcm_last_verified, :utc_datetime, null: false)
 
     has_many(:notification_subscriptions, MobileAppBackend.Notifications.Subscription,
