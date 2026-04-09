@@ -83,10 +83,13 @@ defmodule MobileAppBackendWeb.ScheduleController do
         ) ::
           %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
   defp fetch_schedules_parallel(filters, date_time, timeout, log_prefix) do
+    metadata = Logger.metadata()
+
     result =
       filters
       |> Task.async_stream(
         fn filter_params ->
+          Logger.metadata(metadata)
           {filter_params, fetch_schedules(filter_params, date_time)}
         end,
         ordered: false,

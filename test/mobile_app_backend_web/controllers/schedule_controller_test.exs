@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.ScheduleControllerTest do
+  require Logger
   use MobileAppBackendWeb.ConnCase
   use HttpStub.Case
   import ExUnit.CaptureLog
@@ -781,6 +782,66 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  "6" => %{}
                }
              } = json_response(conn, 200)
+    end
+
+    test "propagates log metadata when fetching in parallel", %{conn: conn} do
+      request_id = "req1234"
+      user_agent = "userAgent"
+
+      conn =
+        conn
+        |> put_req_header("x-request-id", request_id)
+        |> put_req_header("user-agent", user_agent)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+
+      GlobalDataCacheMock
+      |> stub(:default_key, fn -> :default_key end)
+      |> stub(:get_data, fn _ ->
+        %{
+          lines: %{},
+          pattern_ids_by_stop: %{},
+          routes: %{},
+          route_patterns: %{},
+          stops: %{},
+          trips: %{}
+        }
+      end)
+
+      RepositoryMock
+      |> expect(:schedules, 2, fn params, _ ->
+        filter_stop = params[:filter][:stop]
+        Logger.warning("schedules stop=#{filter_stop} pid=#{inspect(self())}")
+        ok_response([])
+      end)
+
+      {conn, log} =
+        with_log(fn ->
+          get(conn, "/api/schedules", %{
+            stop_ids: "1,2",
+            date_time: "2026-04-07T16:15:00-04:00"
+          })
+        end)
+
+      request_id = get_resp_header(conn, "x-request-id")
+      log_lines = String.split(log, "\n")
+
+      stop1_line = Enum.find(log_lines, &(&1 =~ "stop=1"))
+      stop2_line = Enum.find(log_lines, &(&1 =~ "stop=2"))
+
+      assert stop1_line =~ "request_id=#{request_id}"
+      assert stop1_line =~ "user_agent=#{user_agent}"
+      assert stop2_line =~ "request_id=#{request_id}"
+      assert stop2_line =~ "user_agent=#{user_agent}"
+
+      # double check that parallel fetch was actually used
+      stop1_pid = stop1_line |> String.split(" ") |> Enum.find(&(&1 =~ "pid="))
+      stop2_pid = stop2_line |> String.split(" ") |> Enum.find(&(&1 =~ "pid="))
+      assert stop1_pid != stop2_pid
     end
   end
 
