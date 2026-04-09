@@ -60,14 +60,26 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         {:ok, _} ->
           user
           |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
-          |> Repo.update!()
+          |> Repo.update()
+          |> case do
+            {:ok, _} ->
+              :ok
 
-          :ok
+            {:error, error} ->
+              Logger.error(inspect(error))
+              :error
+          end
 
         {:error, %Tesla.Env{status: 404}} ->
           # if an FCM token is deleted, it won’t be recreated later, so prune the user now
-          Repo.delete!(user)
-          :deleted
+          case Repo.delete(user) do
+            {:ok, _} ->
+              :deleted
+
+            {:error, error} ->
+              Logger.error(inspect(error))
+              :error
+          end
 
         {:error, error} ->
           Logger.error(inspect(error))
