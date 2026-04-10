@@ -17,13 +17,15 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPruner do
     else
       one_week_ago = DateTime.utc_now(:second) |> DateTime.shift(week: -1)
 
-      {count, _} =
+      {count_pruned, _} =
         Repo.delete_all(
           from dn in DeliveredNotification,
             where: dn.alert_id not in ^current_alert_ids and dn.inserted_at < ^one_week_ago
         )
 
-      Logger.info("#{__MODULE__} pruned=#{count}")
+      count_remaining = Repo.aggregate(DeliveredNotification, :count, :id)
+
+      Logger.info("#{__MODULE__} pruned=#{count_pruned} remaining=#{count_remaining}")
       :ok
     end
   end
