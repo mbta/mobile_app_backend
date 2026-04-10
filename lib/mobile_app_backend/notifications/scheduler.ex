@@ -35,16 +35,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     # to send anything, the alert must be significant
     significant? = Alert.significance(alert, now) != nil
 
-    # to send a reminder, the alert must be active at some point within the next 24h
     # to send a notification, the alert must be active right now
-    active_now_or_soon? =
-      alert.active_period
-      |> Enum.any?(fn %Alert.ActivePeriod{start: active_start, end: active_end} ->
-        start_hours_away = DateTime.diff(active_start, now, :hour)
-        ends_in_future? = is_nil(active_end) or DateTime.compare(active_end, now) != :lt
-
-        start_hours_away < 24 and ends_in_future?
-      end)
+    # to send a reminder, the alert must be active at some point within the next 24h
+    active_now_or_soon? = Alert.active?(alert, now) or Alert.active_soon?(alert, now)
 
     # to send an all clear, the alert must have an all clear timestamp
     all_clear? = not is_nil(alert.closed_timestamp)
