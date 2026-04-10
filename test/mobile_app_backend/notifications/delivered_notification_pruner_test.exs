@@ -38,7 +38,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       end)
 
     assert Repo.all(DeliveredNotification) == []
-    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=1\n"
+    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=1 remaining=0\n"
   end
 
   test "does not remove old notifications for open alerts" do
@@ -63,7 +63,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       end)
 
     assert Repo.all(DeliveredNotification) == [dn]
-    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0\n"
+    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0 remaining=1\n"
   end
 
   test "does not remove recent notifications for closed alerts" do
@@ -86,7 +86,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       end)
 
     assert Repo.all(DeliveredNotification) == [dn]
-    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0\n"
+    assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0 remaining=1\n"
   end
 
   test "does not remove notifications if alerts feed is empty" do
