@@ -40,7 +40,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     active_now_or_soon? =
       alert.active_period
       |> Enum.any?(fn %Alert.ActivePeriod{start: active_start, end: active_end} ->
-        start_hours_away = DateTime.diff(now, active_start, :hour)
+        start_hours_away = DateTime.diff(active_start, now, :hour)
         ends_in_future? = is_nil(active_end) or DateTime.compare(active_end, now) != :lt
 
         start_hours_away < 24 and ends_in_future?
