@@ -32,17 +32,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
   defp filter_alert(%Alert{} = alert, now) do
-    # to send anything, the alert must be significant
-    significant? = Alert.significance(alert, now) != nil
-
-    # to send a notification, the alert must be active right now
-    # to send a reminder, the alert must be active at some point within the next 24h
-    active_now_or_soon? = Alert.active?(alert, now) or Alert.active_soon?(alert, now)
-
-    # to send an all clear, the alert must have an all clear timestamp
-    all_clear? = not is_nil(alert.closed_timestamp)
-
-    significant? and (active_now_or_soon? or all_clear?)
+    Alert.significance(alert, now) != nil
   catch
     :exit, error ->
       Logger.error(

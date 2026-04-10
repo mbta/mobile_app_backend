@@ -534,7 +534,8 @@ defmodule MBTAV3API.AlertTest do
     alert =
       build(:alert,
         effect: :suspension,
-        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}]
+        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}],
+        closed_timestamp: alert_end
       )
 
     assert Alert.significance(alert, nil) == :major
@@ -551,7 +552,8 @@ defmodule MBTAV3API.AlertTest do
     alert =
       build(:alert,
         effect: :suspension,
-        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}]
+        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}],
+        closed_timestamp: alert_end
       )
 
     assert Alert.all_clear?(alert, alert_start) == false

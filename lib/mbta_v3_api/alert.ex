@@ -220,10 +220,11 @@ defmodule MBTAV3API.Alert do
 
   @spec all_clear?(t(), DateTime.t()) :: boolean()
   def all_clear?(alert, at_time) do
-    Enum.all?(
-      alert.active_period,
-      &(not is_nil(&1.end) and DateTime.before?(&1.end, at_time))
-    )
+    not is_nil(alert.closed_timestamp) and
+      Enum.all?(
+        alert.active_period,
+        &(not is_nil(&1.end) and DateTime.before?(&1.end, at_time))
+      )
   end
 
   @spec parse!(JsonApi.Item.t()) :: t()
