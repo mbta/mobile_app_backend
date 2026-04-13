@@ -5,7 +5,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
-  @type type :: :notification | {:reminder, DateTime.t()} | :all_clear
+  @type type :: :reminder | {:notification, DateTime.t()} | :all_clear
 
   @primary_key {:id, :binary_id, autogenerate: true}
   typed_schema "delivered_notifications" do

@@ -1118,7 +1118,9 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       alert =
         build(:alert,
-          active_period: [%Alert.ActivePeriod{start: start_time, end: end_time}]
+          active_period: [%Alert.ActivePeriod{start: start_time, end: end_time}],
+          closed_timestamp: end_time,
+          last_push_notification_timestamp: end_time
         )
 
       assert %AlertSummary.AllClear{location: nil} =

@@ -218,12 +218,10 @@ defmodule MBTAV3API.Alert do
     next_period(alert, now) != nil
   end
 
-  @spec all_clear?(t(), DateTime.t()) :: boolean()
-  def all_clear?(alert, at_time) do
-    Enum.all?(
-      alert.active_period,
-      &(not is_nil(&1.end) and DateTime.before?(&1.end, at_time))
-    )
+  @spec all_clear?(t()) :: boolean()
+  def all_clear?(alert) do
+    not is_nil(alert.closed_timestamp) and
+      alert.closed_timestamp == alert.last_push_notification_timestamp
   end
 
   @spec parse!(JsonApi.Item.t()) :: t()
@@ -276,41 +274,20 @@ defmodule MBTAV3API.Alert do
     Enum.all?(alert.informed_entity, &(&1.stop != nil))
   end
 
-  @type significance :: :major | :secondary | :accessibility | :minor | nil
-
-  @spec significance(t(), DateTime.t() | nil) :: significance()
-  def significance(alert, at_time) do
-    intrinsic_significance = intrinsic_significance(alert)
-
-    max_significance =
-      cond do
-        # active now or checking intrinsic significance, use intrinsic
-        is_nil(at_time) or active?(alert, at_time) ->
-          :major
-
-        # upcoming, show as secondary if will be major later
-        active_soon?(alert, at_time) ->
-          :secondary
-
-        # all clear
-        all_clear?(alert, at_time) ->
-          :major
-
-        # will be active later but not soon enough to show yet, hide completely
-        true ->
-          nil
-      end
-
-    Enum.min([intrinsic_significance, max_significance], &(compare_significance(&1, &2) != :gt))
+  @spec can_notify?(t(), DateTime.t()) :: boolean()
+  def can_notify?(alert, now \\ DateTime.now!("America/New_York")) do
+    active?(alert, now) or active_soon?(alert, now) or all_clear?(alert)
   end
 
-  defp intrinsic_significance(alert)
+  @type significance :: :major | :secondary | :accessibility | :minor | nil
 
-  defp intrinsic_significance(%__MODULE__{effect: e}) when e in [:shuttle, :suspension],
+  def significance(alert)
+
+  def significance(%__MODULE__{effect: e}) when e in [:shuttle, :suspension],
     do: :major
 
-  defp intrinsic_significance(%__MODULE__{effect: e} = alert)
-       when e in [:station_closure, :stop_closure, :dock_closure, :detour, :snow_route] do
+  def significance(%__MODULE__{effect: e} = alert)
+      when e in [:station_closure, :stop_closure, :dock_closure, :detour, :snow_route] do
     if has_stops_specified(alert) do
       :major
     else
@@ -318,11 +295,11 @@ defmodule MBTAV3API.Alert do
     end
   end
 
-  defp intrinsic_significance(%__MODULE__{effect: :service_change}), do: :secondary
-  defp intrinsic_significance(%__MODULE__{effect: :elevator_closure}), do: :accessibility
-  defp intrinsic_significance(%__MODULE__{effect: :track_change}), do: :minor
+  def significance(%__MODULE__{effect: :service_change}), do: :secondary
+  def significance(%__MODULE__{effect: :elevator_closure}), do: :accessibility
+  def significance(%__MODULE__{effect: :track_change}), do: :minor
 
-  defp intrinsic_significance(%__MODULE__{effect: :delay} = alert) do
+  def significance(%__MODULE__{effect: :delay} = alert) do
     if (alert.severity >= 3 and Enum.any?(alert.informed_entity, &(&1.route_type != :bus))) or
          alert.cause == :single_tracking do
       :minor
@@ -333,9 +310,9 @@ defmodule MBTAV3API.Alert do
 
   # in the frontend, we treat cancellation alerts as minor, since we don’t want to show an icon in nearby transit
   # but in the backend, we still want to treat them as significant enough to be sent
-  defp intrinsic_significance(%__MODULE__{effect: :cancellation}), do: :secondary
+  def significance(%__MODULE__{effect: :cancellation}), do: :secondary
 
-  defp intrinsic_significance(_), do: nil
+  def significance(_), do: nil
 
   @spec compare_significance(significance(), significance()) :: :lt | :eq | :gt
   def compare_significance(s1, s2) do
@@ -438,7 +415,7 @@ defmodule MBTAV3API.Alert do
       Enum.filter(
         alerts,
         &(has_stops_specified(&1) and
-            compare_significance(significance(&1, nil), :accessibility) != :lt)
+            compare_significance(significance(&1), :accessibility) != :lt)
       )
 
     target_stop_alert_ids =

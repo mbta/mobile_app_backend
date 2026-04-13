@@ -392,7 +392,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           GlobalDataCache.data()
         ) :: t()
   def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
-    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global),
+    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, global),
          nil <-
            TripSpecific.summary(
              alert,
@@ -512,11 +512,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Stop.id(),
           0 | 1,
           [RoutePattern.t()],
-          DateTime.t(),
           GlobalDataCache.data()
         ) :: AllClear.t() | nil
-  defp all_clear_summary(alert, stop_id, direction_id, patterns, at_time, global) do
-    if Alert.all_clear?(alert, at_time) do
+  defp all_clear_summary(alert, stop_id, direction_id, patterns, global) do
+    if Alert.all_clear?(alert) do
       %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
     end
   end
