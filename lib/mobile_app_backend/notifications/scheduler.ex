@@ -32,7 +32,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
   defp filter_alert(%Alert{} = alert, now) do
-    Alert.significance(alert, now) != nil
+    Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
   catch
     :exit, error ->
       Logger.error(

@@ -361,7 +361,7 @@ defmodule MBTAV3API.AlertTest do
             _ -> nil
           end
 
-        actual_significance = Alert.significance(alert, nil)
+        actual_significance = Alert.significance(alert)
 
         assert actual_significance == expected_significance,
                Enum.join(
@@ -423,12 +423,12 @@ defmodule MBTAV3API.AlertTest do
         severity: 1
       )
 
-    assert Alert.significance(subway_delay_severe, nil) == :minor
-    assert Alert.significance(cr_delay_severe, nil) == :minor
-    assert Alert.significance(ferry_delay_severe, nil) == :minor
-    assert Alert.significance(single_tracking_delay_info, nil) == :minor
-    assert Alert.significance(subway_delay_not_severe, nil) == nil
-    assert Alert.significance(bus_delay_severe, nil) == nil
+    assert Alert.significance(subway_delay_severe) == :minor
+    assert Alert.significance(cr_delay_severe) == :minor
+    assert Alert.significance(ferry_delay_severe) == :minor
+    assert Alert.significance(single_tracking_delay_info) == :minor
+    assert Alert.significance(subway_delay_not_severe) == nil
+    assert Alert.significance(bus_delay_severe) == nil
   end
 
   describe "recurrence_range/1" do
@@ -527,22 +527,29 @@ defmodule MBTAV3API.AlertTest do
     end
   end
 
-  test "alert significance limited for upcoming and past alerts" do
+  test "alert can notify based on timeframe and closed status" do
     alert_start = DateTime.now!("America/New_York")
     alert_end = DateTime.add(alert_start, 2, :hour)
 
-    alert =
+    open_alert =
+      build(:alert,
+        effect: :suspension,
+        active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}]
+      )
+
+    closed_alert =
       build(:alert,
         effect: :suspension,
         active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}],
-        closed_timestamp: alert_end
+        closed_timestamp: alert_end,
+        last_push_notification_timestamp: alert_end
       )
 
-    assert Alert.significance(alert, nil) == :major
-    assert Alert.significance(alert, DateTime.add(alert_start, -25, :hour)) == nil
-    assert Alert.significance(alert, DateTime.add(alert_start, -12, :hour)) == :secondary
-    assert Alert.significance(alert, alert_start) == :major
-    assert Alert.significance(alert, DateTime.add(alert_end, 1, :minute)) == :major
+    assert Alert.can_notify?(open_alert, DateTime.add(alert_start, -25, :hour)) == false
+    assert Alert.can_notify?(open_alert, DateTime.add(alert_start, -12, :hour)) == true
+    assert Alert.can_notify?(open_alert, alert_start) == true
+    assert Alert.can_notify?(open_alert, DateTime.add(alert_end, 1, :minute)) == false
+    assert Alert.can_notify?(closed_alert, DateTime.add(alert_end, 1, :minute)) == true
   end
 
   test "alert all clear returns correctly" do
@@ -553,11 +560,11 @@ defmodule MBTAV3API.AlertTest do
       build(:alert,
         effect: :suspension,
         active_period: [%Alert.ActivePeriod{start: alert_start, end: alert_end}],
-        closed_timestamp: alert_end
+        closed_timestamp: alert_end,
+        last_push_notification_timestamp: alert_end
       )
 
-    assert Alert.all_clear?(alert, alert_start) == false
-    assert Alert.all_clear?(alert, DateTime.add(alert_end, 1, :minute)) == true
+    assert Alert.all_clear?(alert) == true
   end
 
   test "filter filters alerts to matching stops routes and directions" do
