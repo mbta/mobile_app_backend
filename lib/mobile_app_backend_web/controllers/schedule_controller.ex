@@ -4,6 +4,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Repository
+  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MobileAppBackend.GlobalDataCache
 
@@ -81,7 +82,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
           integer(),
           String.t()
         ) ::
-          %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
+          %{schedules: [Schedule.t()], trips: JsonApi.Object.trip_map()} | :error
   defp fetch_schedules_parallel(filters, date_time, timeout, log_prefix) do
     metadata = Logger.metadata()
 
@@ -119,44 +120,43 @@ defmodule MobileAppBackendWeb.ScheduleController do
   end
 
   @spec fetch_schedules([JsonApi.Params.filter_param()], DateTime.t()) ::
-          %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
+          %{schedules: [Schedule.t()], trips: JsonApi.Object.trip_map()}
           | :error
   defp fetch_schedules(filter, date_time) do
     case Repository.schedules(filter: filter, include: :trip) do
       {:ok, %{data: schedules, included: %{trips: trips}}} ->
-        filter_past_schedules(schedules, trips, date_time)
+        schedules
+        |> Enum.flat_map(&Schedule.expand_added_routes/1)
+        |> filter_past_schedules(trips, date_time)
 
       _ ->
         :error
     end
   end
 
-  @spec last_schedule_grouping(MBTAV3API.Schedule.t(), MBTAV3API.Trip.t() | nil) ::
+  @spec last_schedule_grouping(Schedule.t(), MBTAV3API.Trip.t() | nil) ::
           {String.t(), integer() | nil}
   defp last_schedule_grouping(schedule, nil), do: {schedule.route_id, nil}
   defp last_schedule_grouping(schedule, trip), do: {schedule.route_id, trip.direction_id}
 
-  @spec compare_schedule_time(MBTAV3API.Schedule.t() | DateTime.t(), DateTime.t()) :: boolean()
-  defp compare_schedule_time(
-         %MBTAV3API.Schedule{departure_time: nil, arrival_time: nil},
-         _date_time
-       ),
-       do: true
+  @spec compare_schedule_time(Schedule.t() | DateTime.t(), DateTime.t()) :: boolean()
+  defp compare_schedule_time(%Schedule{departure_time: nil, arrival_time: nil}, _date_time),
+    do: true
 
   defp compare_schedule_time(
-         %MBTAV3API.Schedule{departure_time: nil, arrival_time: arrival_time},
+         %Schedule{departure_time: nil, arrival_time: arrival_time},
          date_time
        ),
        do: compare_schedule_time(arrival_time, date_time)
 
-  defp compare_schedule_time(%MBTAV3API.Schedule{departure_time: departure_time}, date_time),
+  defp compare_schedule_time(%Schedule{departure_time: departure_time}, date_time),
     do: compare_schedule_time(departure_time, date_time)
 
   defp compare_schedule_time(schedule_time, date_time),
     do: DateTime.compare(schedule_time, DateTime.add(date_time, -1, :hour)) != :lt
 
-  @spec filter_past_schedules([MBTAV3API.Schedule.t()], JsonApi.Object.trip_map(), DateTime.t()) ::
-          %{schedules: [MBTAV3API.Schedule.t()], trips: JsonApi.Object.trip_map()}
+  @spec filter_past_schedules([Schedule.t()], JsonApi.Object.trip_map(), DateTime.t()) ::
+          %{schedules: [Schedule.t()], trips: JsonApi.Object.trip_map()}
   defp filter_past_schedules(schedules, trips, date_time) do
     global_data = GlobalDataCache.get_data()
 

@@ -17,6 +17,7 @@ defmodule MBTAV3API.ScheduleTest do
                "stop_sequence" => 90
              },
              relationships: %{
+               "added_routes" => [%JsonApi.Reference{type: "route", id: "1"}],
                "route" => %JsonApi.Reference{type: "route", id: "Green-D"},
                "stop" => %JsonApi.Reference{type: "stop", id: "70159"},
                "trip" => %JsonApi.Reference{type: "trip", id: "60565179"}
@@ -29,6 +30,7 @@ defmodule MBTAV3API.ScheduleTest do
              pick_up_type: :regular,
              stop_headsign: "abc",
              stop_sequence: 90,
+             added_route_ids: ["1"],
              route_id: "Green-D",
              stop_id: "70159",
              trip_id: "60565179"

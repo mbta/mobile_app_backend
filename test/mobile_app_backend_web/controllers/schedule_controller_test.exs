@@ -843,6 +843,129 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       stop2_pid = stop2_line |> String.split(" ") |> Enum.find(&(&1 =~ "pid="))
       assert stop1_pid != stop2_pid
     end
+
+    test "expands added routes", %{conn: conn} do
+      s1 =
+        %MBTAV3API.Schedule{
+          id: "schedule-60565179-70159-90",
+          arrival_time: ~B[2024-03-13 01:07:00],
+          departure_time: ~B[2024-03-13 01:07:00],
+          drop_off_type: :regular,
+          pick_up_type: :regular,
+          stop_sequence: 90,
+          added_route_ids: ["Green-C"],
+          route_id: "Green-B",
+          stop_id: "70159",
+          trip_id: "60565179"
+        }
+
+      s2 = %MBTAV3API.Schedule{
+        id: "schedule-60565145-70158-590",
+        arrival_time: "2024-03-13T01:15:00-04:00",
+        departure_time: "2024-03-13T01:15:00-04:00",
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 590,
+        added_route_ids: ["Green-B"],
+        route_id: "Green-C",
+        stop_id: "70158",
+        trip_id: "60565145"
+      }
+
+      t1 = build(:trip, id: s1.trip_id)
+      t2 = build(:trip, id: s2.trip_id)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+
+      GlobalDataCacheMock
+      |> expect(:default_key, 2, fn -> :default_key end)
+      |> expect(:get_data, 2, fn _ ->
+        %{
+          lines: %{},
+          pattern_ids_by_stop: %{},
+          routes: %{"Green-C" => %{type: :light_rail}, "Green-B" => %{type: :light_rail}},
+          route_patterns: %{},
+          stops: %{},
+          trips: %{}
+        }
+      end)
+
+      RepositoryMock
+      |> expect(:schedules, fn params, _opts ->
+        assert [
+                 filter: [
+                   stop: "place-boyls",
+                   date: ~D[2024-03-12]
+                 ],
+                 include: :trip
+               ] = params
+
+        ok_response([s1, s2], [t1, t2])
+      end)
+
+      conn =
+        get(conn, "/api/schedules", %{
+          stop_ids: "place-boyls",
+          date_time: "2024-03-13T01:06:30-04:00"
+        })
+
+      assert %{
+               "schedules" => [
+                 %{
+                   "arrival_time" => "2024-03-13T01:07:00-04:00",
+                   "departure_time" => "2024-03-13T01:07:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565179-70159-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-B",
+                   "stop_id" => "70159",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565179"
+                 },
+                 %{
+                   "arrival_time" => "2024-03-13T01:07:00-04:00",
+                   "departure_time" => "2024-03-13T01:07:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565179-70159-90+rGreen-C",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_id" => "70159",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565179"
+                 },
+                 %{
+                   "arrival_time" => "2024-03-13T01:15:00-04:00",
+                   "departure_time" => "2024-03-13T01:15:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565145-70158-590",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_id" => "70158",
+                   "stop_sequence" => 590,
+                   "trip_id" => "60565145"
+                 },
+                 %{
+                   "arrival_time" => "2024-03-13T01:15:00-04:00",
+                   "departure_time" => "2024-03-13T01:15:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565145-70158-590+rGreen-B",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-B",
+                   "stop_id" => "70158",
+                   "stop_sequence" => 590,
+                   "trip_id" => "60565145"
+                 }
+               ],
+               "trips" => %{
+                 "60565145" => %{},
+                 "60565179" => %{}
+               }
+             } = json_response(conn, 200)
+    end
   end
 
   describe "trip schedules" do
