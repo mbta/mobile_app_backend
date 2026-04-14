@@ -46,7 +46,9 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   def can_send?(user_id, alert_id, :all_clear) do
     Repo.aggregate(
       from(dn in __MODULE__,
-        where: dn.user_id == ^user_id and dn.alert_id == ^alert_id and dn.type == :notification
+        where:
+          dn.user_id == ^user_id and dn.alert_id == ^alert_id and
+            (dn.type == :notification or dn.type == :reminder)
       ),
       :count
     ) > 0 and

@@ -117,6 +117,20 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
       assert DeliveredNotification.can_send?(user.id, alert_id, :all_clear)
     end
 
+    test "all clear if reminded and not all clear" do
+      user = insert(:user)
+      alert_id = "3"
+
+      Repo.insert!(%DeliveredNotification{
+        user_id: user.id,
+        alert_id: alert_id,
+        upstream_timestamp: ~U[2025-12-04 13:11:00Z],
+        type: :reminder
+      })
+
+      assert DeliveredNotification.can_send?(user.id, alert_id, :all_clear)
+    end
+
     test "no all clear if already all clear" do
       user = insert(:user)
       alert_id = "3"
