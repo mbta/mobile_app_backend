@@ -63,7 +63,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         if Alert.any_informed_entity_satisfies(alert, fn ie ->
              ie.route == "131"
            end) do
-          %{fallback: "This is a fallback alert message", effect: "This is a fake effect"}
+          %{oops: "I don't know how to deliver this"}
         else
           build_summary(alert, subscriptions, now, global_data)
         end
