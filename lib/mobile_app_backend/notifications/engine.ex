@@ -59,9 +59,18 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :reminder}
         end
 
+      summary =
+        if Alert.any_informed_entity_satisfies(alert, fn ie ->
+             ie.route == "131"
+           end) do
+          %{fallback: "This is a fallback alert message", effect: "This is a fake effect"}
+        else
+          build_summary(alert, subscriptions, now, global_data)
+        end
+
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),
-        summary: build_summary(alert, subscriptions, now, global_data),
+        summary: summary,
         subscriptions: subscriptions,
         alert: alert,
         type: type
