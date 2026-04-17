@@ -86,44 +86,42 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          alerts,
          now
        ) do
-    try do
-      {engine_us, outgoing_notifications} =
-        :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
+    {engine_us, outgoing_notifications} =
+      :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
 
-      Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
+    Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
-      Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
-        try do
-          if DeliveredNotification.can_send?(
-               user_id,
-               outgoing_notification.alert.id,
-               outgoing_notification.type
-             ) do
-            [{user, outgoing_notification}]
-          else
-            []
-          end
-        rescue
-          error ->
-            log_exception(
-              "check_notification_sending",
-              "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
-              error
-            )
-
-            []
+    Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
+      try do
+        if DeliveredNotification.can_send?(
+             user_id,
+             outgoing_notification.alert.id,
+             outgoing_notification.type
+           ) do
+          [{user, outgoing_notification}]
+        else
+          []
         end
-      end)
-    rescue
-      error ->
-        log_exception(
-          "find_new_notifications",
-          "user_id=#{user_id}",
-          error
-        )
+      rescue
+        error ->
+          log_exception(
+            "check_notification_sending",
+            "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
+            error
+          )
 
-        []
-    end
+          []
+      end
+    end)
+  rescue
+    error ->
+      log_exception(
+        "find_new_notifications",
+        "user_id=#{user_id}",
+        error
+      )
+
+      []
   end
 
   @spec enqueue_delivery([{User.t(), Engine.OutgoingNotification.t()}]) :: :ok
