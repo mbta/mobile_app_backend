@@ -142,6 +142,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     end
 
+    @spec get_directions_for_line(any(), any(), any()) :: list()
     def get_directions_for_line(global, stop, patterns) do
       directions_by_route =
         patterns
@@ -750,6 +751,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   defp alert_location_for_multiple_stops(alert, stop_id, direction_id, patterns, routes, global) do
     # Map each pattern to its list of stops affected by this alert
+
+    Logger.info("#{__MODULE__} about to call alert_location_for_multiple_stops #{stop_id} #{alert} #{direction_id} #{patterns} #{routes}")
     affected_pattern_stops =
       map_patterns_to_affected_stops(
         alert,
@@ -1172,6 +1175,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     if Enum.any?(direction_stops, fn {_, branch_stops} ->
          Enum.any?(branch_stops, &(Stop.parent_id(global.stops[&1]) == stop_id))
        end) do
+        Logger.info("#{__MODULE__} skipping synthetic branch creation")
       []
     else
       Enum.map(direction_stops, fn {earlier, branched} ->
