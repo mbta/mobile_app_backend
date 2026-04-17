@@ -33,12 +33,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
   defp filter_alert(%Alert{} = alert, now) do
     Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to process alert alert=#{alert.id} error=#{inspect(error)}"
-      )
-
+  rescue
+    error ->
+      log_exception("process_alert", "alert=#{alert.id}", error)
       false
   end
 
@@ -89,38 +86,44 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          alerts,
          now
        ) do
-    {engine_us, outgoing_notifications} =
-      :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
+    try do
+      {engine_us, outgoing_notifications} =
+        :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
 
-    Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
+      Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
-    Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
-      try do
-        if DeliveredNotification.can_send?(
-             user_id,
-             outgoing_notification.alert.id,
-             outgoing_notification.type
-           ) do
-          [{user, outgoing_notification}]
-        else
-          []
+      Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
+        try do
+          if DeliveredNotification.can_send?(
+               user_id,
+               outgoing_notification.alert.id,
+               outgoing_notification.type
+             ) do
+            [{user, outgoing_notification}]
+          else
+            []
+          end
+        rescue
+          error ->
+            log_exception(
+              "check_notification_sending",
+              "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
+              error
+            )
+
+            []
         end
-      catch
-        :exit, error ->
-          Logger.error(
-            "#{__MODULE__} failed to check notification sending for user_id=#{user_id} alert_id=#{outgoing_notification.alert.id} error=#{inspect(error)}"
-          )
+      end)
+    rescue
+      error ->
+        log_exception(
+          "find_new_notifications",
+          "user_id=#{user_id}",
+          error
+        )
 
-          []
-      end
-    end)
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to find new notifications for user_id=#{user_id} error=#{inspect(error)}"
-      )
-
-      []
+        []
+    end
   end
 
   @spec enqueue_delivery([{User.t(), Engine.OutgoingNotification.t()}]) :: :ok
@@ -155,12 +158,18 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     }
     |> Deliverer.new()
     |> Oban.insert!()
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to enqueue delivery for user_id=#{recipient.id} alert_id=#{notification.alert.id} error=#{inspect(error)}"
+  rescue
+    error ->
+      log_exception(
+        "enqueue_delivery",
+        "user_id=#{recipient.id} alert_id=#{notification.alert.id}",
+        error
       )
 
       :ok
+  end
+
+  defp log_exception(step_name, metadata, error) do
+    Logger.error("#{__MODULE__} failed #{step_name} #{metadata} error=#{inspect(error)}")
   end
 end
