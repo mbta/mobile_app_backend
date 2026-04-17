@@ -10,6 +10,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
+  require Logger
+
   @gl_id "line-Green"
   @gl_label "Green Line"
   @gl_routes ~w(Green-B Green-C Green-D Green-E)
@@ -200,6 +202,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
 
     defp get_typical_stop_list_by_direction(patterns, global) do
+      # Hypothesis - something is missing a typical pattern. We'll have to think about what we want to do with that; hopefully it has a canonical?
+      Logger.info("#{__MODULE__} patterns: #{inspect(Enum.map(patterns, & &1.id))}")
       patterns
       |> Enum.group_by(& &1.direction_id)
       |> Map.new(fn {direction_id, direction_patterns} ->
