@@ -189,6 +189,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     end
 
+    @spec get_stop_list_for_pattern(RoutePattern.t(), GlobalDataCache.data()) :: [Stop.id()]
     defp get_stop_list_for_pattern(pattern, global) do
       Enum.map(
         case global.trips[pattern.representative_trip_id] do
@@ -199,15 +200,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       )
     end
 
+    @spec get_typical_stop_list_by_direction([RoutePattern.t()], GlobalDataCache.data()) :: %{integer() => [Stop.id()] | nil}
     defp get_typical_stop_list_by_direction(patterns, global) do
       patterns
       |> Enum.group_by(& &1.direction_id)
       |> Map.new(fn {direction_id, direction_patterns} ->
-        stop_list =
-          get_stop_list_for_pattern(
-            Enum.find(direction_patterns, &(&1.typicality == :typical)),
+        maybe_typical_patterns = Enum.find(direction_patterns, &(&1.typicality == :typical))
+
+        stop_list = if is_nil(maybe_typical_patterns) do
+        nil
+        else
+        get_stop_list_for_pattern(
+            maybe_typical_patterns,
             global
           )
+        end
 
         {direction_id, stop_list}
       end)
