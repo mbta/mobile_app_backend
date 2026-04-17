@@ -131,6 +131,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @spec get_directions(GlobalDataCache.data(), Stop.t(), Route.t(), [RoutePattern.t()]) :: [t()]
     def get_directions(global, stop, route, patterns) do
       if Map.has_key?(@special_cases, @id_overrides[route.id] || route.id) do
+        Logger.info("#{__MODULE__} get_typical_stop_list_by_direction #{stop} #{route} ")
         stop_list_by_direction = get_typical_stop_list_by_direction(patterns, global)
 
         Enum.map([0, 1], fn direction_id ->
@@ -204,6 +205,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     defp get_typical_stop_list_by_direction(patterns, global) do
       # Hypothesis - something is missing a typical pattern. We'll have to think about what we want to do with that; hopefully it has a canonical?
       Logger.info("#{__MODULE__} patterns: #{inspect(Enum.map(patterns, & &1.id))}")
+
       patterns
       |> Enum.group_by(& &1.direction_id)
       |> Map.new(fn {direction_id, direction_patterns} ->
