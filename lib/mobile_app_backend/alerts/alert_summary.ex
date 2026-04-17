@@ -131,7 +131,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @spec get_directions(GlobalDataCache.data(), Stop.t(), Route.t(), [RoutePattern.t()]) :: [t()]
     def get_directions(global, stop, route, patterns) do
       if Map.has_key?(@special_cases, @id_overrides[route.id] || route.id) do
-        Logger.info("#{__MODULE__} get_typical_stop_list_by_direction #{stop} #{route} ")
+        Logger.info("#{__MODULE__} get_typical_stop_list_by_direction #{inspect(stop)} #{inspect(route)} ")
         stop_list_by_direction = get_typical_stop_list_by_direction(patterns, global)
 
         Enum.map([0, 1], fn direction_id ->
@@ -752,7 +752,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   defp alert_location_for_multiple_stops(alert, stop_id, direction_id, patterns, routes, global) do
     # Map each pattern to its list of stops affected by this alert
 
-    Logger.info("#{__MODULE__} about to call alert_location_for_multiple_stops #{stop_id} #{alert} #{direction_id} #{patterns} #{routes}")
+    Logger.info("#{__MODULE__} about to call alert_location_for_multiple_stops #{stop_id} #{inspect(alert)} #{direction_id} #{inspect(patterns)} #{inspect(routes)}")
     affected_pattern_stops =
       map_patterns_to_affected_stops(
         alert,
