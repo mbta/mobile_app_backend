@@ -352,4 +352,24 @@ defmodule Util do
 
     def ok(this)
   end
+
+  @doc """
+  Checks if a language tag is a supported locale in the app.
+
+  Format should match iOS.
+
+  ## Examples
+
+      iex> Util.is_known_locale("en")
+      true
+      iex> Util.is_known_locale("pt-BR")
+      true
+      iex> Util.is_known_locale("zh-Hans-CN")
+      true
+      iex> Util.is_known_locale("tok")
+      false
+      iex> Util.is_known_locale("pt-PT")
+      false
+  """
+  defguard is_known_locale(locale) when locale in ~w(en es fr ht pt-BR vi zh-Hans-CN zh-Hant-TW)
 end
