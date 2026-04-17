@@ -68,6 +68,7 @@ defmodule MobileAppBackend.Application do
     :ok = MobileAppBackend.Telemetry.WebsocketEventHandler.attach()
 
     :ok = Oban.Telemetry.attach_default_logger()
+    :telemetry.attach("oban-errors", [:oban, :job, :exception], &ObanLogger.handle_event/4, nil)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
