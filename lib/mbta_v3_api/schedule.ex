@@ -10,6 +10,7 @@ defmodule MBTAV3API.Schedule do
           pick_up_type: stop_edge_type(),
           stop_headsign: String.t() | nil,
           stop_sequence: integer(),
+          added_route_ids: [String.t()] | nil,
           route_id: String.t(),
           stop_id: String.t() | nil,
           trip_id: String.t() | nil
@@ -30,6 +31,7 @@ defmodule MBTAV3API.Schedule do
     :pick_up_type,
     :stop_headsign,
     :stop_sequence,
+    :added_route_ids,
     :route_id,
     :stop_id,
     :trip_id
@@ -47,7 +49,14 @@ defmodule MBTAV3API.Schedule do
     ]
 
   @impl JsonApi.Object
-  def includes, do: %{route: MBTAV3API.Route, stop: MBTAV3API.Stop, trip: MBTAV3API.Trip}
+  def includes do
+    %{
+      added_routes: MBTAV3API.Route,
+      route: MBTAV3API.Route,
+      stop: MBTAV3API.Stop,
+      trip: MBTAV3API.Trip
+    }
+  end
 
   @spec parse!(JsonApi.Item.t()) :: t()
   def parse!(%JsonApi.Item{} = item) do
@@ -59,9 +68,23 @@ defmodule MBTAV3API.Schedule do
       pick_up_type: parse_stop_edge_type!(item.attributes["pickup_type"]),
       stop_headsign: item.attributes["stop_headsign"],
       stop_sequence: item.attributes["stop_sequence"],
+      added_route_ids: JsonApi.Object.get_many_ids(item.relationships["added_routes"]),
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"])
     }
+  end
+
+  @spec expand_added_routes(t()) :: [t()]
+  def expand_added_routes(%__MODULE__{} = schedule) do
+    [schedule] ++
+      for added_route_id <- schedule.added_route_ids || [] do
+        %__MODULE__{
+          schedule
+          | id: "#{schedule.id}+r#{added_route_id}",
+            route_id: added_route_id,
+            added_route_ids: []
+        }
+      end
   end
 end
