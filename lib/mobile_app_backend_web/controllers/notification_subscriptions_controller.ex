@@ -3,8 +3,6 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
 
   import Ecto.Query
 
-  require Util
-
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.WritePayload
   alias MobileAppBackend.Repo
@@ -14,11 +12,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     status =
       with {:ok, fcm_token} <- Map.fetch(params, "fcm_token"),
            {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
-        locale =
-          case Map.fetch(params, "locale") do
-            {:ok, locale} when Util.is_known_locale(locale) -> locale
-            _ -> nil
-          end
+        locale = params["locale"]
 
         now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
 

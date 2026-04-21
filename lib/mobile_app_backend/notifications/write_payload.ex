@@ -1,5 +1,4 @@
 defmodule MobileAppBackend.Notifications.WritePayload do
-  require Util
   alias Ecto.Changeset
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.User
@@ -117,11 +116,7 @@ defmodule MobileAppBackend.Notifications.WritePayload do
     %__MODULE__{
       fcm_token: fcm_token,
       subscriptions: MapSet.new(subscriptions, &Subscription.parse!/1),
-      locale:
-        case Map.fetch(payload, "locale") do
-          {:ok, locale} when Util.is_known_locale(locale) -> locale
-          _ -> nil
-        end
+      locale: payload["locale"]
     }
   end
 

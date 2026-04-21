@@ -81,21 +81,6 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert %User{locale: "en"} = Repo.reload(user)
     end
 
-    test "ignores unknown locale", %{conn: conn} do
-      user = insert(:user, locale: "en")
-      assert user.locale == "en"
-
-      conn =
-        post(conn, "/api/notifications/subscriptions/accessibility", %{
-          fcm_token: user.fcm_token,
-          include_accessibility: false,
-          locale: "tok"
-        })
-
-      assert json_response(conn, :ok) == nil
-      assert %User{locale: "en"} = Repo.reload(user)
-    end
-
     test "refreshes FCM verification", %{conn: conn, now: now} do
       user = insert(:user)
 
@@ -269,20 +254,6 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
         post(conn, "/api/notifications/subscriptions/write", %{
           fcm_token: user.fcm_token,
           subscriptions: []
-        })
-
-      assert json_response(conn, :ok) == nil
-      assert %User{locale: "en"} = Repo.reload(user)
-    end
-
-    test "ignores unknown locale", %{conn: conn} do
-      user = insert(:user, locale: "en")
-
-      conn =
-        post(conn, "/api/notifications/subscriptions/write", %{
-          fcm_token: user.fcm_token,
-          subscriptions: [],
-          locale: "tok"
         })
 
       assert json_response(conn, :ok) == nil
