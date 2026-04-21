@@ -52,6 +52,35 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert json_response(conn, :ok) == nil
     end
 
+    test "sets locale", %{conn: conn} do
+      user = insert(:user, locale: "en")
+      assert user.locale == "en"
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/accessibility", %{
+          fcm_token: user.fcm_token,
+          include_accessibility: false,
+          locale: "es"
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{locale: "es"} = Repo.reload(user)
+    end
+
+    test "does not clear locale", %{conn: conn} do
+      user = insert(:user, locale: "en")
+      assert user.locale == "en"
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/accessibility", %{
+          fcm_token: user.fcm_token,
+          include_accessibility: false
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{locale: "en"} = Repo.reload(user)
+    end
+
     test "refreshes FCM verification", %{conn: conn, now: now} do
       user = insert(:user)
 
@@ -65,6 +94,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert %User{fcm_last_verified: ^now} = Repo.reload(user)
     end
 
+    @tag :capture_log
     test "sends 400 on bad request", %{conn: conn} do
       conn =
         post(conn, "/api/notifications/subscriptions/accessibility", %{is_reasonable: false})
@@ -89,12 +119,13 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
                 %{start_time: "10:00", end_time: "17:00", days_of_week: [0, 7]}
               ]
             }
-          ]
+          ],
+          locale: "en"
         })
 
       assert json_response(conn, :ok) == nil
 
-      assert [%User{id: user_id, fcm_token: "fake_token", fcm_last_verified: ^now}] =
+      assert [%User{id: user_id, fcm_token: "fake_token", fcm_last_verified: ^now, locale: "en"}] =
                Repo.all(User)
 
       assert [
@@ -202,6 +233,34 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       end)
     end
 
+    test "sets locale", %{conn: conn} do
+      user = insert(:user, locale: "en")
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_token: user.fcm_token,
+          subscriptions: [],
+          locale: "es"
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{locale: "es"} = Repo.reload(user)
+    end
+
+    test "does not clear locale", %{conn: conn} do
+      user = insert(:user, locale: "en")
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_token: user.fcm_token,
+          subscriptions: []
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{locale: "en"} = Repo.reload(user)
+    end
+
+    @tag :capture_log
     test "sends 400 on bad request", %{conn: conn} do
       conn =
         post(conn, "/api/notifications/subscriptions/write", %{
