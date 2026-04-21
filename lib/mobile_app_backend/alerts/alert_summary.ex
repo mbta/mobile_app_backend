@@ -209,14 +209,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       patterns
       |> Enum.group_by(& &1.direction_id)
       |> Map.new(fn {direction_id, direction_patterns} ->
-        maybe_typical_patterns = Enum.find(direction_patterns, &(&1.typicality == :typical))
+        maybe_typical_pattern = Enum.find(direction_patterns, &(&1.typicality == :typical))
 
         stop_list =
-          if is_nil(maybe_typical_patterns) do
+          if is_nil(maybe_typical_pattern) do
             nil
           else
             get_stop_list_for_pattern(
-              maybe_typical_patterns,
+              maybe_typical_pattern,
               global
             )
           end
