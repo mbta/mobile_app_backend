@@ -131,9 +131,8 @@ jobs:
           context: .
           push: false
           load: true
-          no-cache: true
-          # cache-from: type=gha,scope=build-${{ github.ref_name }}
-          # cache-to: type=gha,scope=build-${{ github.ref_name }},mode=max
+          cache-from: type=gha,scope=build-${{ github.ref_name }}
+          cache-to: type=gha,scope=build-${{ github.ref_name }},mode=max
       - name: docker compose build
         run: docker compose build
       - name: docker compose up

@@ -20,8 +20,7 @@ jobs:
           context: .
           push: false
           load: true
-          no-cache: true
-          # cache-from: type=gha
+          cache-from: type=gha
       - name: docker compose build
         run: docker compose build
       - name: docker compose up
