@@ -36,7 +36,6 @@ defmodule MobileAppBackendWeb.Router do
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
     get("/global", GlobalController, :show)
-    get("/nearby", NearbyController, :show)
 
     post(
       "/notifications/subscriptions/accessibility",
