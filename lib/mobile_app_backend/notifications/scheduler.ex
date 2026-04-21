@@ -35,7 +35,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
   rescue
     error ->
-      log_exception("process_alert", "alert=#{alert.id}", error)
+      log_exception("process_alert", "alert=#{alert.id}", Exception.format(:error, error, __STACKTRACE__))
       false
   end
 
@@ -107,7 +107,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           log_exception(
             "check_notification_sending",
             "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
-            error
+            Exception.format(:error, error, __STACKTRACE__)
           )
 
           []
@@ -118,7 +118,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       log_exception(
         "find_new_notifications",
         "user_id=#{user_id}",
-        error
+        Exception.format(:error, error, __STACKTRACE__)
       )
 
       []
@@ -161,7 +161,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       log_exception(
         "enqueue_delivery",
         "user_id=#{recipient.id} alert_id=#{notification.alert.id}",
-        error
+        Exception.format(:error, error, __STACKTRACE__)
       )
 
       :ok
