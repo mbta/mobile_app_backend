@@ -35,7 +35,12 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
   rescue
     error ->
-      log_exception("process_alert", "alert=#{alert.id}", Exception.format(:error, error, __STACKTRACE__))
+      log_exception(
+        "process_alert",
+        "alert=#{alert.id}",
+        Exception.format(:error, error, __STACKTRACE__)
+      )
+
       false
   end
 
