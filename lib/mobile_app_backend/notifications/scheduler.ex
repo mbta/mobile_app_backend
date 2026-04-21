@@ -33,10 +33,12 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
   defp filter_alert(%Alert{} = alert, now) do
     Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to process alert alert=#{alert.id} error=#{inspect(error)}"
+  rescue
+    error ->
+      log_exception(
+        "process_alert",
+        "alert=#{alert.id}",
+        Exception.format(:error, error, __STACKTRACE__)
       )
 
       false
@@ -105,19 +107,23 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         else
           []
         end
-      catch
-        :exit, error ->
-          Logger.error(
-            "#{__MODULE__} failed to check notification sending for user_id=#{user_id} alert_id=#{outgoing_notification.alert.id} error=#{inspect(error)}"
+      rescue
+        error ->
+          log_exception(
+            "check_notification_sending",
+            "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
+            Exception.format(:error, error, __STACKTRACE__)
           )
 
           []
       end
     end)
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to find new notifications for user_id=#{user_id} error=#{inspect(error)}"
+  rescue
+    error ->
+      log_exception(
+        "find_new_notifications",
+        "user_id=#{user_id}",
+        Exception.format(:error, error, __STACKTRACE__)
       )
 
       []
@@ -155,12 +161,18 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     }
     |> Deliverer.new()
     |> Oban.insert!()
-  catch
-    :exit, error ->
-      Logger.error(
-        "#{__MODULE__} failed to enqueue delivery for user_id=#{recipient.id} alert_id=#{notification.alert.id} error=#{inspect(error)}"
+  rescue
+    error ->
+      log_exception(
+        "enqueue_delivery",
+        "user_id=#{recipient.id} alert_id=#{notification.alert.id}",
+        Exception.format(:error, error, __STACKTRACE__)
       )
 
       :ok
+  end
+
+  defp log_exception(step_name, metadata, error) do
+    Logger.error("#{__MODULE__} failed #{step_name} #{metadata} error=#{inspect(error)}")
   end
 end

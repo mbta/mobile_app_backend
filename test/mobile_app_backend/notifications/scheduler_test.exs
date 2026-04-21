@@ -2,6 +2,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
   use MobileAppBackend.DataCase, async: true
   use Oban.Testing, repo: MobileAppBackend.Repo
   use HttpStub.Case
+
+  import ExUnit.CaptureLog
   import MobileAppBackend.Factory
   alias MBTAV3API.Store
   alias MobileAppBackend.Notifications
@@ -183,6 +185,47 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "upstream_timestamp" => nil
       }
     )
+  end
+
+  test "doesn't crash if issue building notifications" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, 22, :hour),
+            end: DateTime.add(now, 27, :hour)
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          "this is bad"
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+
+    {result, log} =
+      with_log([level: :error], fn ->
+        perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+      end)
+
+    assert {:ok, nil} = result
+    assert log =~ "failed find_new_notifications"
+    assert log =~ "this is bad"
   end
 
   test "skips notifications over a day in the future" do

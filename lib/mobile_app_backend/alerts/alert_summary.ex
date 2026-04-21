@@ -139,6 +139,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     end
 
+    @spec get_directions_for_line(GlobalDataCache.data(), Stop.t(), [RoutePattern.t()]) :: [t()]
     def get_directions_for_line(global, stop, patterns) do
       directions_by_route =
         patterns
@@ -182,6 +183,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     # This is hacky, but seemed like the best way to handle this case, where the Green Line has multiple routes which
     # terminate mid-line at Gov Center, but since those routes are served at the stop, it has non-null Direction objects
     # with Gov Center destinations. This checks if we have this specific case, and returns the North direction if we do.
+    @spec gov_center_special_case(%{(String.t() | nil) => t()}) :: t() | nil
     defp gov_center_special_case(directions_by_destination) do
       if Enum.sort(Map.keys(directions_by_destination)) ==
            Enum.sort(["Government Center", @north_station_destination]) do
@@ -189,6 +191,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     end
 
+    @spec get_stop_list_for_pattern(RoutePattern.t(), GlobalDataCache.data()) :: [Stop.id()]
     defp get_stop_list_for_pattern(pattern, global) do
       Enum.map(
         case global.trips[pattern.representative_trip_id] do
@@ -199,15 +202,24 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       )
     end
 
+    @spec get_typical_stop_list_by_direction([RoutePattern.t()], GlobalDataCache.data()) :: %{
+            integer() => [Stop.id()] | nil
+          }
     defp get_typical_stop_list_by_direction(patterns, global) do
       patterns
       |> Enum.group_by(& &1.direction_id)
       |> Map.new(fn {direction_id, direction_patterns} ->
+        maybe_typical_pattern = Enum.find(direction_patterns, &(&1.typicality == :typical))
+
         stop_list =
-          get_stop_list_for_pattern(
-            Enum.find(direction_patterns, &(&1.typicality == :typical)),
-            global
-          )
+          if is_nil(maybe_typical_pattern) do
+            nil
+          else
+            get_stop_list_for_pattern(
+              maybe_typical_pattern,
+              global
+            )
+          end
 
         {direction_id, stop_list}
       end)
