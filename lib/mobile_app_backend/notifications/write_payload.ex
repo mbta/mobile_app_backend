@@ -99,8 +99,12 @@ defmodule MobileAppBackend.Notifications.WritePayload do
     end
   end
 
-  @type t :: %__MODULE__{fcm_token: String.t(), subscriptions: MapSet.t(Subscription.t())}
-  defstruct [:fcm_token, :subscriptions]
+  @type t :: %__MODULE__{
+          fcm_token: String.t(),
+          subscriptions: MapSet.t(Subscription.t()),
+          locale: Gettext.locale() | nil
+        }
+  defstruct [:fcm_token, :subscriptions, :locale]
 
   def parse(payload) do
     {:ok, parse!(payload)}
@@ -108,10 +112,11 @@ defmodule MobileAppBackend.Notifications.WritePayload do
     _ -> :error
   end
 
-  def parse!(%{"fcm_token" => fcm_token, "subscriptions" => subscriptions}) do
+  def parse!(%{"fcm_token" => fcm_token, "subscriptions" => subscriptions} = payload) do
     %__MODULE__{
       fcm_token: fcm_token,
-      subscriptions: MapSet.new(subscriptions, &Subscription.parse!/1)
+      subscriptions: MapSet.new(subscriptions, &Subscription.parse!/1),
+      locale: payload["locale"]
     }
   end
 
@@ -136,7 +141,11 @@ defmodule MobileAppBackend.Notifications.WritePayload do
         Subscription.changeset(current, desired)
       end)
 
+    user_changes = if is_nil(desired.locale), do: %{}, else: %{locale: desired.locale}
+
+    changeset
+    |> Changeset.cast(user_changes, [:locale])
     # put_assoc will automatically delete anything that wasn’t included
-    Changeset.put_assoc(changeset, :notification_subscriptions, subscriptions)
+    |> Changeset.put_assoc(:notification_subscriptions, subscriptions)
   end
 end

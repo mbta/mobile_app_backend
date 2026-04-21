@@ -12,10 +12,16 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     status =
       with {:ok, fcm_token} <- Map.fetch(params, "fcm_token"),
            {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
+        locale = params["locale"]
+
         now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
 
-        Repo.update_all(from(u in User, where: u.fcm_token == ^fcm_token),
-          set: [fcm_last_verified: now]
+        Repo.update_all(
+          from(u in User,
+            where: u.fcm_token == ^fcm_token,
+            update: [set: [fcm_last_verified: ^now, locale: coalesce(^locale, u.locale)]]
+          ),
+          []
         )
 
         Repo.update_all(
