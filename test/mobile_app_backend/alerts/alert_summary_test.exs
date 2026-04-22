@@ -207,7 +207,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  effect: "station_closure",
                  location: %{
                    type: "single_stop",
-                   stop_name: "Lechmere"
+                   stop_name: "Lechmere",
+                   downstream: nil
                  },
                  timeframe: %{type: "tomorrow"},
                  recurrence: %{
@@ -222,14 +223,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert json_round_trip(%AlertSummary.AllClear{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Lechmere",
-                 end_stop_name: "Government Center"
+                 end_stop_name: "Government Center",
+                 downstream: true
                }
              }) == %{
                type: "all_clear",
                location: %{
                  type: "successive_stops",
                  start_stop_name: "Lechmere",
-                 end_stop_name: "Government Center"
+                 end_stop_name: "Government Center",
+                 downstream: true
                }
              }
     end
@@ -292,34 +295,53 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "can serialize all locations" do
       assert json_round_trip(%AlertSummary.Location.DirectionToStop{
                direction: %Direction{name: "East", destination: "Union Square", id: 1},
-               end_stop_name: "Lechmere"
+               end_stop_name: "Lechmere",
+               downstream: false
              }) == %{
                type: "direction_to_stop",
                direction: %{name: "East", destination: "Union Square", id: 1},
-               end_stop_name: "Lechmere"
+               end_stop_name: "Lechmere",
+               downstream: false
              }
 
-      assert json_round_trip(%AlertSummary.Location.SingleStop{stop_name: "Lechmere"}) == %{
+      assert json_round_trip(%AlertSummary.Location.SingleStop{
+               stop_name: "Lechmere",
+               downstream: nil
+             }) == %{
                type: "single_stop",
-               stop_name: "Lechmere"
+               stop_name: "Lechmere",
+               downstream: nil
              }
 
       assert json_round_trip(%AlertSummary.Location.StopToDirection{
                start_stop_name: "Lechmere",
-               direction: %Direction{name: "West", destination: "Copley & West", id: 0}
+               direction: %Direction{name: "West", destination: "Copley & West", id: 0},
+               downstream: true
              }) == %{
                type: "stop_to_direction",
                start_stop_name: "Lechmere",
-               direction: %{name: "West", destination: "Copley & West", id: 0}
+               direction: %{name: "West", destination: "Copley & West", id: 0},
+               downstream: true
              }
 
       assert json_round_trip(%AlertSummary.Location.SuccessiveStops{
                start_stop_name: "Lechmere",
-               end_stop_name: "North Station"
+               end_stop_name: "North Station",
+               downstream: false
              }) == %{
                type: "successive_stops",
                start_stop_name: "Lechmere",
-               end_stop_name: "North Station"
+               end_stop_name: "North Station",
+               downstream: false
+             }
+
+      assert json_round_trip(%AlertSummary.Location.WholeRoute{
+               route_label: "Orange Line",
+               route_type: :heavy_rail
+             }) == %{
+               type: "whole_route",
+               route_label: "Orange Line",
+               route_type: "heavy_rail"
              }
     end
 
@@ -526,7 +548,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{
-               location: %AlertSummary.Location.SingleStop{stop_name: "Parent Name"}
+               location: %AlertSummary.Location.SingleStop{
+                 stop_name: "Parent Name",
+                 downstream: true
+               }
              } =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
                  routes: %{route.id => route},
@@ -568,14 +593,23 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
-                 end_stop_name: "Last Stop"
+                 end_stop_name: "Last Stop",
+                 downstream: false
                }
              } =
-               AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
-                 routes: %{route.id => route},
-                 stops: Map.new(stops, &{&1.id, &1}),
-                 trips: %{trip.id => trip}
-               })
+               AlertSummary.summarizing(
+                 alert,
+                 Enum.at(successive_stops, 2).id,
+                 0,
+                 [pattern],
+                 now,
+                 nil,
+                 %{
+                   routes: %{route.id => route},
+                   stops: Map.new(stops, &{&1.id, &1}),
+                   trips: %{trip.id => trip}
+                 }
+               )
     end
 
     test "summary with successive bus stops", %{now: now} do
@@ -674,7 +708,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "First Stop",
-                 direction: %Direction{name: "Inbound", destination: "A", id: 0}
+                 direction: %Direction{name: "Inbound", destination: "A", id: 0},
+                 downstream: true
                }
              } =
                AlertSummary.summarizing(
@@ -754,7 +789,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.DirectionToStop{
                  direction: %Direction{name: "Outbound", destination: "Z", id: 1},
-                 end_stop_name: "Last Stop"
+                 end_stop_name: "Last Stop",
+                 downstream: true
                }
              } =
                AlertSummary.summarizing(
@@ -831,7 +867,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
-                 direction: %Direction{name: "Westbound", destination: "", id: 0}
+                 direction: %Direction{name: "Westbound", destination: "", id: 0},
+                 downstream: false
                }
              } =
                AlertSummary.summarizing(alert, kenmore.id, 0, [b_branch, c_branch], now, nil, %{
