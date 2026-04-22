@@ -229,7 +229,10 @@ defmodule MBTAV3API.Alert do
     %__MODULE__{
       id: item.id,
       active_period:
-        if item.id == "1001897" do
+        # Temoporarily disable active period collapsing for GL alert 4/22-5/1
+        # Due to recurrence display issues
+        # https://mbta.slack.com/archives/C05QMG9GS9M/p1776863350368949
+        if item.id == "1001899" do
           Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
         else
           Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
