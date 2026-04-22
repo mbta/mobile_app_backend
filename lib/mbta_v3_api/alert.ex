@@ -229,8 +229,12 @@ defmodule MBTAV3API.Alert do
     %__MODULE__{
       id: item.id,
       active_period:
-        Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
-        |> ActivePeriod.collapse(),
+        if item.id == "1001897" do
+          Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
+        else
+          Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
+          |> ActivePeriod.collapse()
+        end,
       cause: parse_cause(item.attributes["cause"]),
       closed_timestamp: Util.parse_optional_datetime!(item.attributes["closed_timestamp"]),
       description: item.attributes["description"],
