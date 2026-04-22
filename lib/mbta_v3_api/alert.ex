@@ -228,9 +228,16 @@ defmodule MBTAV3API.Alert do
   def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
+      # Temoporarily disable active period collapsing for GL alert 4/22-5/1
+      # Due to recurrence display issues
+      # https://mbta.slack.com/archives/C05QMG9GS9M/p1776863350368949
       active_period:
-        Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
-        |> ActivePeriod.collapse(),
+        if item.id == "1001899" do
+          Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
+        else
+          Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
+          |> ActivePeriod.collapse()
+        end,
       cause: parse_cause(item.attributes["cause"]),
       closed_timestamp: Util.parse_optional_datetime!(item.attributes["closed_timestamp"]),
       description: item.attributes["description"],
