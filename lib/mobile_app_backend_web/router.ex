@@ -35,9 +35,7 @@ defmodule MobileAppBackendWeb.Router do
   # Other scopes may use custom stacks.
   scope "/api", MobileAppBackendWeb do
     pipe_through :api
-    get("/alerts", AlertsController, :show)
     get("/global", GlobalController, :show)
-    get("/nearby", NearbyController, :show)
 
     post(
       "/notifications/subscriptions/accessibility",
