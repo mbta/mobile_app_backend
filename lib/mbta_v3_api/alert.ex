@@ -357,25 +357,38 @@ defmodule MBTAV3API.Alert do
     with num_periods when num_periods > 1 <- length(alert.active_period),
          first_period <- Enum.min_by(alert.active_period, & &1.start, DateTime),
          last_period <- Enum.max_by(alert.active_period, & &1.end, DateTime),
-         true <-
-           Enum.all?(alert.active_period, fn %ActivePeriod{} = ap ->
-             Util.datetime_to_gtfs(ap.start) ==
-               Util.datetime_to_gtfs(ap.end, rounding: :backwards) and
-               DateTime.to_time(ap.start) == DateTime.to_time(first_period.start) and
-               DateTime.to_time(ap.end) == DateTime.to_time(last_period.end)
-           end) do
-      alert_days = Enum.map(alert.active_period, &Util.datetime_to_gtfs(&1.start))
+         false <- last_period.end == nil,
+         false <-
+           Util.datetime_to_gtfs(last_period.end, rounding: :backwards) ==
+             Util.datetime_to_gtfs(first_period.start) do
+      seen_days_of_week =
+        alert.active_period
+        |> Enum.flat_map(fn ap ->
+          ap.start
+          |> Util.datetime_to_gtfs()
+          |> Date.range(Util.datetime_to_gtfs(ap.end, rounding: :backwards))
+          |> Enum.map(&Date.day_of_week(&1))
+        end)
+        |> MapSet.new()
 
-      all_alert_days_contiguous? =
-        alert_days
-        |> Enum.chunk_every(2, 1, :discard)
-        |> Enum.all?(fn [a, b] -> Date.diff(b, a) == 1 end)
+      # If all the days in the range have been seen, then include all days.
+      # This indicates that the alert is "daily".
+      all_days_in_range_seen =
+        first_period.start
+        |> Util.datetime_to_gtfs()
+        |> Date.range(
+          Util.datetime_to_gtfs(last_period.end,
+            rounding: :backwards
+          )
+        )
+        |> Enum.map(&Date.day_of_week(&1))
+        |> MapSet.new() == seen_days_of_week
 
       days =
-        if all_alert_days_contiguous? do
+        if all_days_in_range_seen do
           MapSet.new(1..7)
         else
-          MapSet.new(alert_days, &Date.day_of_week/1)
+          seen_days_of_week
         end
 
       %RecurrenceInfo{
