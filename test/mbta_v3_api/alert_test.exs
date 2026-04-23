@@ -525,6 +525,33 @@ defmodule MBTAV3API.AlertTest do
                end_day_known: false
              }
     end
+
+    test "two sets of continuous week days" do
+      alert =
+        build(:alert,
+          duration_certainty: :known,
+          active_period: [
+            %ActivePeriod{
+              start:
+                DateTime.new!(Date.new!(2026, 4, 22), Time.new!(3, 0, 0), "America/New_York"),
+              end: DateTime.new!(Date.new!(2026, 4, 25), Time.new!(3, 0, 0), "America/New_York")
+            },
+            %ActivePeriod{
+              start:
+                DateTime.new!(Date.new!(2026, 4, 27), Time.new!(3, 0, 0), "America/New_York"),
+              end: DateTime.new!(Date.new!(2026, 5, 1), Time.new!(3, 0, 0), "America/New_York")
+            }
+          ]
+        )
+
+      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
+               start:
+                 DateTime.new!(Date.new!(2026, 4, 22), Time.new!(3, 0, 0), "America/New_York"),
+               end: DateTime.new!(Date.new!(2026, 5, 1), Time.new!(3, 0, 0), "America/New_York"),
+               days: MapSet.new(1..5),
+               end_day_known: true
+             }
+    end
   end
 
   test "alert can notify based on timeframe and closed status" do
