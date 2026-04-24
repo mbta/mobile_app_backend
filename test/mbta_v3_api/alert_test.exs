@@ -4,6 +4,7 @@ defmodule MBTAV3API.AlertTest do
   import Mox
   import MobileAppBackend.Factory
 
+  alias MBTAV3API.Alert.RecurrenceInfo
   alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.{Alert, JsonApi}
@@ -432,8 +433,12 @@ defmodule MBTAV3API.AlertTest do
   end
 
   describe "recurrence_range/1" do
-    test "daily on all days" do
-      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
+    test "daily on all days in range" do
+      today =
+        Date.new!(2026, 4, 13)
+        |> DateTime.new!(Time.new!(3, 0, 0), "America/New_York")
+        |> Util.datetime_to_gtfs()
+
       nine_pm = ~T[21:00:00]
       end_of_service = ~T[03:00:00]
 
@@ -454,12 +459,15 @@ defmodule MBTAV3API.AlertTest do
             end
         )
 
-      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
-               start: DateTime.new!(today, nine_pm, "America/New_York"),
-               end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
-               days: MapSet.new(1..7),
-               end_day_known: true
-             }
+      recurrence = %Alert.RecurrenceInfo{
+        start: DateTime.new!(today, nine_pm, "America/New_York"),
+        end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
+        days: MapSet.new(1..6),
+        end_day_known: true
+      }
+
+      assert Alert.recurrence_range(alert) == recurrence
+      assert RecurrenceInfo.daily(recurrence)
     end
 
     test "selects specific days" do
@@ -488,17 +496,24 @@ defmodule MBTAV3API.AlertTest do
             end)
         )
 
-      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
-               start: List.first(alert.active_period).start,
-               end: List.last(alert.active_period).end,
-               days: selected_days,
-               end_day_known: true
-             }
+      recurrence = %Alert.RecurrenceInfo{
+        start: List.first(alert.active_period).start,
+        end: List.last(alert.active_period).end,
+        days: selected_days,
+        end_day_known: true
+      }
+
+      assert Alert.recurrence_range(alert) == recurrence
+      refute RecurrenceInfo.daily(recurrence)
     end
 
     test "recurrence range end unknown" do
-      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
-      nine_pm = ~T[21:00:00]
+      today =
+        Date.new!(2026, 4, 13)
+        |> DateTime.new!(Time.new!(3, 0, 0), "America/New_York")
+        |> Util.datetime_to_gtfs()
+
+      nine_am = ~T[09:00:00]
       end_of_service = ~T[03:00:00]
 
       alert =
@@ -507,7 +522,7 @@ defmodule MBTAV3API.AlertTest do
           active_period:
             for days_forward <- 0..5 do
               %ActivePeriod{
-                start: DateTime.new!(Date.add(today, days_forward), nine_pm, "America/New_York"),
+                start: DateTime.new!(Date.add(today, days_forward), nine_am, "America/New_York"),
                 end:
                   DateTime.new!(
                     Date.add(today, days_forward + 1),
@@ -518,12 +533,15 @@ defmodule MBTAV3API.AlertTest do
             end
         )
 
-      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
-               start: DateTime.new!(today, nine_pm, "America/New_York"),
-               end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
-               days: MapSet.new(1..7),
-               end_day_known: false
-             }
+      recurrence = %Alert.RecurrenceInfo{
+        start: DateTime.new!(today, nine_am, "America/New_York"),
+        end: DateTime.new!(Date.add(today, 6), end_of_service, "America/New_York"),
+        days: MapSet.new(1..6),
+        end_day_known: false
+      }
+
+      assert Alert.recurrence_range(alert) == recurrence
+      assert RecurrenceInfo.daily(recurrence)
     end
 
     test "two sets of continuous week days" do
@@ -544,13 +562,15 @@ defmodule MBTAV3API.AlertTest do
           ]
         )
 
-      assert Alert.recurrence_range(alert) == %Alert.RecurrenceInfo{
-               start:
-                 DateTime.new!(Date.new!(2026, 4, 22), Time.new!(3, 0, 0), "America/New_York"),
-               end: DateTime.new!(Date.new!(2026, 5, 1), Time.new!(3, 0, 0), "America/New_York"),
-               days: MapSet.new(1..5),
-               end_day_known: true
-             }
+      recurrence = %Alert.RecurrenceInfo{
+        start: DateTime.new!(Date.new!(2026, 4, 22), Time.new!(3, 0, 0), "America/New_York"),
+        end: DateTime.new!(Date.new!(2026, 5, 1), Time.new!(3, 0, 0), "America/New_York"),
+        days: MapSet.new(1..5),
+        end_day_known: true
+      }
+
+      assert Alert.recurrence_range(alert) == recurrence
+      refute RecurrenceInfo.daily(recurrence)
     end
   end
 

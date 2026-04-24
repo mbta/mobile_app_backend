@@ -349,7 +349,17 @@ defmodule MBTAV3API.Alert do
     defstruct [:start, :end, :days, :end_day_known]
 
     @spec daily(t()) :: boolean()
-    def daily(%__MODULE__{days: days}), do: MapSet.size(days) == 7
+    def daily(recurrence_info) do
+      if recurrence_info.days <= 1 do
+        false
+      else
+        recurrence_info.start
+        |> Util.datetime_to_gtfs()
+        |> Date.range(Util.datetime_to_gtfs(recurrence_info.end, rounding: :backwards))
+        |> Enum.map(&Date.day_of_week(&1))
+        |> MapSet.new() == recurrence_info.days
+      end
+    end
   end
 
   @spec recurrence_range(t()) :: RecurrenceInfo.t() | nil
@@ -371,30 +381,10 @@ defmodule MBTAV3API.Alert do
         end)
         |> MapSet.new()
 
-      # If all the days in the range have been seen, then include all days.
-      # This indicates that the alert is "daily".
-      all_days_in_range_seen =
-        first_period.start
-        |> Util.datetime_to_gtfs()
-        |> Date.range(
-          Util.datetime_to_gtfs(last_period.end,
-            rounding: :backwards
-          )
-        )
-        |> Enum.map(&Date.day_of_week(&1))
-        |> MapSet.new() == seen_days_of_week
-
-      days =
-        if all_days_in_range_seen do
-          MapSet.new(1..7)
-        else
-          seen_days_of_week
-        end
-
       %RecurrenceInfo{
         start: first_period.start,
         end: last_period.end,
-        days: days,
+        days: seen_days_of_week,
         end_day_known: alert.duration_certainty == :known
       }
     else
