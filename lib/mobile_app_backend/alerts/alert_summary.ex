@@ -228,27 +228,39 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   defmodule Location do
     defmodule DirectionToStop do
-      @type t :: %__MODULE__{direction: Direction.t(), end_stop_name: String.t()}
+      @type t :: %__MODULE__{
+              direction: Direction.t(),
+              end_stop_name: String.t(),
+              downstream: boolean() | nil
+            }
       @derive PolymorphicJson
-      defstruct [:direction, :end_stop_name]
+      defstruct [:direction, :end_stop_name, :downstream]
     end
 
     defmodule SingleStop do
-      @type t :: %__MODULE__{stop_name: String.t()}
+      @type t :: %__MODULE__{stop_name: String.t(), downstream: boolean() | nil}
       @derive PolymorphicJson
-      defstruct [:stop_name]
+      defstruct [:stop_name, :downstream]
     end
 
     defmodule StopToDirection do
-      @type t :: %__MODULE__{start_stop_name: String.t(), direction: Direction.t()}
+      @type t :: %__MODULE__{
+              start_stop_name: String.t(),
+              direction: Direction.t(),
+              downstream: boolean() | nil
+            }
       @derive PolymorphicJson
-      defstruct [:start_stop_name, :direction]
+      defstruct [:start_stop_name, :direction, :downstream]
     end
 
     defmodule SuccessiveStops do
-      @type t :: %__MODULE__{start_stop_name: String.t(), end_stop_name: String.t()}
+      @type t :: %__MODULE__{
+              start_stop_name: String.t(),
+              end_stop_name: String.t(),
+              downstream: boolean() | nil
+            }
       @derive PolymorphicJson
-      defstruct [:start_stop_name, :end_stop_name]
+      defstruct [:start_stop_name, :end_stop_name, :downstream]
     end
 
     defmodule WholeRoute do
@@ -558,10 +570,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     with nil <- gl_whole_route_location,
          nil <- alert_location_for_whole_route(alert, direction_id, routes) do
       affected_stops = get_alert_affected_stops(global, alert, routes)
+      downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
       cond do
         length(affected_stops) == 1 ->
-          %Location.SingleStop{stop_name: hd(affected_stops).name}
+          %Location.SingleStop{stop_name: hd(affected_stops).name, downstream: downstream}
 
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
@@ -574,6 +587,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             direction_id,
             patterns,
             routes,
+            downstream,
             global
           )
       end
@@ -754,7 +768,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  defp alert_location_for_multiple_stops(alert, stop_id, direction_id, patterns, routes, global) do
+  defp alert_location_for_multiple_stops(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         routes,
+         downstream,
+         global
+       ) do
     # Map each pattern to its list of stops affected by this alert
     affected_pattern_stops =
       map_patterns_to_affected_stops(
@@ -778,7 +800,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
       _ ->
-        multi_stop_location(affected_pattern_stops, direction_id, global)
+        multi_stop_location(affected_pattern_stops, direction_id, downstream, global)
     end
   end
 
@@ -849,7 +871,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end)
   end
 
-  defp multi_stop_location(affected_pattern_stops, direction_id, global) do
+  defp multi_stop_location(affected_pattern_stops, direction_id, downstream, global) do
     # Compare the first stop list to all the others to determine if all patterns share the same disrupted stops,
     # or if multiple branches are disrupted
     first_stops = affected_pattern_stops |> Map.values() |> Enum.find(&(length(&1) > 1))
@@ -864,7 +886,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end) ->
         %Location.SuccessiveStops{
           start_stop_name: List.first(ordered_stops).name,
-          end_stop_name: List.last(ordered_stops).name
+          end_stop_name: List.last(ordered_stops).name,
+          downstream: downstream
         }
 
       Enum.all?(affected_pattern_stops, fn {_, stops} ->
@@ -881,7 +904,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         %Location.StopToDirection{
           start_stop_name: stop.name,
-          direction: Enum.at(directions, direction_id)
+          direction: Enum.at(directions, direction_id),
+          downstream: downstream
         }
 
       Enum.all?(affected_pattern_stops, fn {_, stops} ->
@@ -898,7 +922,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         %Location.DirectionToStop{
           direction: Enum.at(directions, 1 - direction_id),
-          end_stop_name: stop.name
+          end_stop_name: stop.name,
+          downstream: downstream
         }
 
       true ->

@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   alias MBTAV3API.Alert
   alias MBTAV3API.Repository
+  alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
@@ -10,16 +11,30 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
-  defmodule TripFrom do
-    @type t :: %__MODULE__{trip_time: DateTime.t(), stop_name: String.t()}
+  defmodule ThisTrip do
+    @type t :: %__MODULE__{route_type: Route.type()}
     @derive PolymorphicJson
-    defstruct [:trip_time, :stop_name]
+    defstruct [:route_type]
+  end
+
+  defmodule TripFrom do
+    @type t :: %__MODULE__{
+            trip_time: DateTime.t(),
+            route_type: Route.type(),
+            stop_name: String.t()
+          }
+    @derive PolymorphicJson
+    defstruct [:trip_time, :route_type, :stop_name]
   end
 
   defmodule TripTo do
-    @type t :: %__MODULE__{trip_time: DateTime.t(), headsign: String.t()}
+    @type t :: %__MODULE__{
+            trip_time: DateTime.t(),
+            route_type: Route.type(),
+            headsign: String.t()
+          }
     @derive PolymorphicJson
-    defstruct [:trip_time, :headsign]
+    defstruct [:trip_time, :route_type, :headsign]
   end
 
   defmodule MultipleTrips do
@@ -28,7 +43,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
     defstruct []
   end
 
-  @type trip_identity :: TripFrom.t() | TripTo.t() | MultipleTrips.t()
+  @type trip_identity :: ThisTrip.t() | TripFrom.t() | TripTo.t() | MultipleTrips.t()
 
   @type t :: %__MODULE__{
           trip_identity: trip_identity(),
@@ -76,11 +91,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
           global
         )
 
-      :station_closure ->
-        trip_stop_bypass_summary(alert, stop_id, at_time, informed_schedules, global)
+      effect when effect in [:station_closure, :stop_closure, :dock_closure] ->
+        trip_stop_bypass_summary(alert, stop_id, patterns, at_time, informed_schedules, global)
 
       _ ->
-        trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global)
+        trip_specific_other_summary(
+          alert,
+          stop_id,
+          direction_id,
+          patterns,
+          at_time,
+          informed_schedules,
+          global
+        )
     end
   end
 
@@ -132,16 +155,28 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
     end
   end
 
-  defp trip_stop_bypass_summary(alert, stop_id, at_time, informed_schedules, global) do
+  defp route_type_from_patterns(patterns, global) do
+    Enum.find_value(patterns, fn pattern ->
+      case global.routes[pattern.route_id] do
+        %Route{type: type} -> type
+        _ -> nil
+      end
+    end)
+  end
+
+  defp trip_stop_bypass_summary(alert, stop_id, patterns, at_time, informed_schedules, global) do
+    route_type = route_type_from_patterns(patterns, global)
+
     {trip_identity, is_today} =
-      case trip_identity_is_today(stop_id, at_time, informed_schedules, global) do
-        {%TripFrom{trip_time: trip_time}, is_today} ->
+      case trip_identity_is_today(stop_id, at_time, route_type, informed_schedules, global) do
+        {%TripFrom{trip_time: trip_time}, is_today} when route_type != nil ->
           # must be a single trip since there weren’t multiple trips
           [informed_schedule] = informed_schedules
 
           case Repository.trips(filter: [id: informed_schedule.trip_id]) do
             {:ok, %{data: [%Trip{headsign: headsign}]}} ->
-              {%TripTo{trip_time: trip_time, headsign: headsign}, is_today}
+              {%TripTo{trip_time: trip_time, route_type: route_type, headsign: headsign},
+               is_today}
 
             _ ->
               {nil, nil}
@@ -151,7 +186,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
           x
       end
 
-    if trip_identity do
+    if trip_identity != nil do
       informed_stops =
         alert.informed_entity
         |> Enum.map(& &1.stop)
@@ -171,15 +206,28 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
     end
   end
 
-  defp trip_specific_other_summary(alert, stop_id, at_time, informed_schedules, global) do
+  defp trip_specific_other_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         at_time,
+         informed_schedules,
+         global
+       ) do
+    route_type = route_type_from_patterns(patterns, global)
+
     {trip_identity, is_today} =
-      trip_identity_is_today(stop_id, at_time, informed_schedules, global)
+      trip_identity_is_today(stop_id, at_time, route_type, informed_schedules, global)
+
+    effect_stops =
+      trip_specific_effect_stops(alert, stop_id, direction_id, patterns, global)
 
     if trip_identity != nil do
       %__MODULE__{
         trip_identity: trip_identity,
         effect: alert.effect,
-        effect_stops: nil,
+        effect_stops: effect_stops,
         is_today: is_today,
         cause: alert.cause,
         recurrence: AlertSummary.alert_recurrence(alert, at_time)
@@ -187,9 +235,45 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
     end
   end
 
-  defp trip_identity_is_today(stop_id, at_time, informed_schedules, global) do
+  defp trip_specific_effect_stops(
+         %Alert{effect: :suspension} = alert,
+         stop_id,
+         direction_id,
+         patterns,
+         global
+       ) do
+    location =
+      AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global)
+
+    effect_stop =
+      case location do
+        %AlertSummary.Location.SingleStop{downstream: true, stop_name: stop_name} ->
+          stop_name
+
+        %AlertSummary.Location.SuccessiveStops{downstream: true, start_stop_name: stop_name} ->
+          stop_name
+
+        %AlertSummary.Location.StopToDirection{downstream: true, start_stop_name: stop_name} ->
+          stop_name
+
+        _ ->
+          nil
+      end
+
+    case effect_stop do
+      nil -> nil
+      stop_name -> [stop_name]
+    end
+  end
+
+  defp trip_specific_effect_stops(_, _, _, _, _), do: nil
+
+  defp trip_identity_is_today(stop_id, at_time, route_type, informed_schedules, global) do
     case informed_schedules do
       [] ->
+        {nil, nil}
+
+      [%Schedule{}] when is_nil(route_type) ->
         {nil, nil}
 
       [%Schedule{} = informed_trip]
@@ -198,6 +282,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
 
         {%TripFrom{
            trip_time: trip_time,
+           route_type: route_type,
            stop_name: global.stops[stop_id].name
          }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
 
