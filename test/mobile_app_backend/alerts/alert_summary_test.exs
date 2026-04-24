@@ -207,7 +207,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  effect: "station_closure",
                  location: %{
                    type: "single_stop",
-                   stop_name: "Lechmere"
+                   stop_name: "Lechmere",
+                   downstream: nil
                  },
                  timeframe: %{type: "tomorrow"},
                  recurrence: %{
@@ -222,14 +223,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert json_round_trip(%AlertSummary.AllClear{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Lechmere",
-                 end_stop_name: "Government Center"
+                 end_stop_name: "Government Center",
+                 downstream: true
                }
              }) == %{
                type: "all_clear",
                location: %{
                  type: "successive_stops",
                  start_stop_name: "Lechmere",
-                 end_stop_name: "Government Center"
+                 end_stop_name: "Government Center",
+                 downstream: true
                }
              }
     end
@@ -238,6 +241,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert json_round_trip(%AlertSummary.TripSpecific{
                trip_identity: %AlertSummary.TripSpecific.TripFrom{
                  trip_time: ~B[2026-03-06 15:19:00],
+                 route_type: :commuter_rail,
                  stop_name: "North Station"
                },
                effect: :suspension,
@@ -252,6 +256,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                trip_identity: %{
                  type: "trip_from",
                  trip_time: "2026-03-06T15:19:00-05:00",
+                 route_type: "commuter_rail",
                  stop_name: "North Station"
                },
                effect: "suspension",
@@ -269,10 +274,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert json_round_trip(%AlertSummary.TripShuttle{
                trip_identity: %AlertSummary.TripShuttle.SingleTrip{
                  trip_time: ~B[2026-03-06 15:21:00],
-                 route_type: :commuter_rail
+                 route_type: :commuter_rail,
+                 from_stop_name: "Route 128"
                },
-               is_today: true,
-               current_stop_name: "Ruggles",
+               start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
                recurrence: nil
              }) == %{
@@ -280,10 +285,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                trip_identity: %{
                  type: "single_trip",
                  trip_time: "2026-03-06T15:21:00-05:00",
-                 route_type: "commuter_rail"
+                 route_type: "commuter_rail",
+                 from_stop_name: "Route 128"
                },
-               is_today: true,
-               current_stop_name: "Ruggles",
+               start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
                recurrence: nil
              }
@@ -292,34 +297,53 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "can serialize all locations" do
       assert json_round_trip(%AlertSummary.Location.DirectionToStop{
                direction: %Direction{name: "East", destination: "Union Square", id: 1},
-               end_stop_name: "Lechmere"
+               end_stop_name: "Lechmere",
+               downstream: false
              }) == %{
                type: "direction_to_stop",
                direction: %{name: "East", destination: "Union Square", id: 1},
-               end_stop_name: "Lechmere"
+               end_stop_name: "Lechmere",
+               downstream: false
              }
 
-      assert json_round_trip(%AlertSummary.Location.SingleStop{stop_name: "Lechmere"}) == %{
+      assert json_round_trip(%AlertSummary.Location.SingleStop{
+               stop_name: "Lechmere",
+               downstream: nil
+             }) == %{
                type: "single_stop",
-               stop_name: "Lechmere"
+               stop_name: "Lechmere",
+               downstream: nil
              }
 
       assert json_round_trip(%AlertSummary.Location.StopToDirection{
                start_stop_name: "Lechmere",
-               direction: %Direction{name: "West", destination: "Copley & West", id: 0}
+               direction: %Direction{name: "West", destination: "Copley & West", id: 0},
+               downstream: true
              }) == %{
                type: "stop_to_direction",
                start_stop_name: "Lechmere",
-               direction: %{name: "West", destination: "Copley & West", id: 0}
+               direction: %{name: "West", destination: "Copley & West", id: 0},
+               downstream: true
              }
 
       assert json_round_trip(%AlertSummary.Location.SuccessiveStops{
                start_stop_name: "Lechmere",
-               end_stop_name: "North Station"
+               end_stop_name: "North Station",
+               downstream: false
              }) == %{
                type: "successive_stops",
                start_stop_name: "Lechmere",
-               end_stop_name: "North Station"
+               end_stop_name: "North Station",
+               downstream: false
+             }
+
+      assert json_round_trip(%AlertSummary.Location.WholeRoute{
+               route_label: "Orange Line",
+               route_type: :heavy_rail
+             }) == %{
+               type: "whole_route",
+               route_label: "Orange Line",
+               route_type: "heavy_rail"
              }
     end
 
@@ -362,19 +386,23 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "can serialize all trip identities" do
       assert json_round_trip(%AlertSummary.TripSpecific.TripFrom{
                trip_time: ~B[2026-03-06 15:25:00],
+               route_type: :commuter_rail,
                stop_name: "Ruggles"
              }) == %{
                type: "trip_from",
                trip_time: "2026-03-06T15:25:00-05:00",
+               route_type: "commuter_rail",
                stop_name: "Ruggles"
              }
 
       assert json_round_trip(%AlertSummary.TripSpecific.TripTo{
                trip_time: ~B[2026-03-06 15:25:00],
+               route_type: :commuter_rail,
                headsign: "South Station"
              }) == %{
                type: "trip_to",
                trip_time: "2026-03-06T15:25:00-05:00",
+               route_type: "commuter_rail",
                headsign: "South Station"
              }
 
@@ -526,7 +554,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{
-               location: %AlertSummary.Location.SingleStop{stop_name: "Parent Name"}
+               location: %AlertSummary.Location.SingleStop{
+                 stop_name: "Parent Name",
+                 downstream: true
+               }
              } =
                AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
                  routes: %{route.id => route},
@@ -568,14 +599,23 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
-                 end_stop_name: "Last Stop"
+                 end_stop_name: "Last Stop",
+                 downstream: false
                }
              } =
-               AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
-                 routes: %{route.id => route},
-                 stops: Map.new(stops, &{&1.id, &1}),
-                 trips: %{trip.id => trip}
-               })
+               AlertSummary.summarizing(
+                 alert,
+                 Enum.at(successive_stops, 2).id,
+                 0,
+                 [pattern],
+                 now,
+                 nil,
+                 %{
+                   routes: %{route.id => route},
+                   stops: Map.new(stops, &{&1.id, &1}),
+                   trips: %{trip.id => trip}
+                 }
+               )
     end
 
     test "summary with successive bus stops", %{now: now} do
@@ -674,7 +714,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "First Stop",
-                 direction: %Direction{name: "Inbound", destination: "A", id: 0}
+                 direction: %Direction{name: "Inbound", destination: "A", id: 0},
+                 downstream: true
                }
              } =
                AlertSummary.summarizing(
@@ -754,7 +795,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.DirectionToStop{
                  direction: %Direction{name: "Outbound", destination: "Z", id: 1},
-                 end_stop_name: "Last Stop"
+                 end_stop_name: "Last Stop",
+                 downstream: true
                }
              } =
                AlertSummary.summarizing(
@@ -831,7 +873,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
-                 direction: %Direction{name: "Westbound", destination: "", id: 0}
+                 direction: %Direction{name: "Westbound", destination: "", id: 0},
+                 downstream: false
                }
              } =
                AlertSummary.summarizing(alert, kenmore.id, 0, [b_branch, c_branch], now, nil, %{
@@ -1405,7 +1448,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           ],
           cause: :weather,
           effect: :suspension,
-          informed_entity: [%Alert.InformedEntity{trip: trip.id}]
+          informed_entity: [%Alert.InformedEntity{trip: trip.id, stop: stop.id}]
         )
 
       schedule =
@@ -1415,10 +1458,12 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       trip_time = schedule.departure_time
+      route_type = route.type
 
       assert %AlertSummary.TripSpecific{
                trip_identity: %AlertSummary.TripSpecific.TripFrom{
                  trip_time: ^trip_time,
+                 route_type: ^route_type,
                  stop_name: "Ruggles"
                },
                effect: :suspension,
@@ -1428,7 +1473,268 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: nil
              } =
                AlertSummary.summarizing(alert, stop.id, 0, [pattern], now, [schedule], %{
-                 stops: %{stop.id => stop}
+                 stops: %{stop.id => stop},
+                 routes: %{route.id => route}
+               })
+    end
+
+    test "trip specific suspension single stop downstream" do
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Back Bay")
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{trip: trip.id, stop: stop2.id}]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+      route_type = route.type
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{
+                 trip_time: ^trip_time,
+                 route_type: ^route_type,
+                 stop_name: "Ruggles"
+               },
+               effect: :suspension,
+               effect_stops: ["Back Bay"],
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2},
+                 routes: %{route.id => route}
+               })
+    end
+
+    test "trip specific suspension multi stop downstream" do
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Back Bay")
+      stop3 = build(:stop, name: "South Station")
+      route = build(:route, type: :commuter_rail)
+
+      representative_trip =
+        build(:trip, stop_ids: [build(:stop).id, stop1.id, stop2.id, stop3.id])
+
+      pattern =
+        build(:route_pattern,
+          representative_trip_id: representative_trip.id,
+          route_id: route.id,
+          typicality: :typical
+        )
+
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{trip: trip.id, stop: stop2.id},
+            %Alert.InformedEntity{trip: trip.id, stop: stop3.id}
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+      route_type = route.type
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{
+                 trip_time: ^trip_time,
+                 route_type: ^route_type,
+                 stop_name: "Ruggles"
+               },
+               effect: :suspension,
+               effect_stops: ["Back Bay"],
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2, stop3.id => stop3},
+                 routes: %{route.id => route},
+                 route_patterns: %{pattern.id => pattern},
+                 trips: %{representative_trip.id => representative_trip}
+               })
+    end
+
+    test "trip specific station closure" do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Ruggles")
+      stop2 = build(:stop, name: "Back Bay")
+      stop3 = build(:stop, name: "South Station")
+      route = build(:route, type: :commuter_rail)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id, headsign: stop3.name)
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/trips"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json([
+             %{
+               "attributes" => %{
+                 "headsign" => trip.headsign
+               },
+               "id" => trip.id,
+               "type" => "trip"
+             }
+           ])}
+        end
+      )
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :station_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              trip: trip.id,
+              stop: stop2.id
+            },
+            %Alert.InformedEntity{
+              trip: trip.id,
+              stop: stop3.id
+            }
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+      route_type = route.type
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripTo{
+                 trip_time: ^trip_time,
+                 route_type: ^route_type,
+                 headsign: "South Station"
+               },
+               effect: :station_closure,
+               effect_stops: ["Back Bay", "South Station"],
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2, stop3.id => stop3},
+                 routes: %{route.id => route}
+               })
+    end
+
+    test "trip specific dock closure" do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Hingham")
+      stop2 = build(:stop, name: "Hull")
+      stop3 = build(:stop, name: "Rowes Wharf")
+      route = build(:route, type: :ferry)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id, headsign: stop3.name)
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/trips"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json([
+             %{
+               "attributes" => %{
+                 "headsign" => trip.headsign
+               },
+               "id" => trip.id,
+               "type" => "trip"
+             }
+           ])}
+        end
+      )
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :dock_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              trip: trip.id,
+              stop: stop2.id
+            }
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+      route_type = route.type
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripTo{
+                 trip_time: ^trip_time,
+                 route_type: ^route_type,
+                 headsign: "Rowes Wharf"
+               },
+               effect: :dock_closure,
+               effect_stops: ["Hull"],
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2, stop3.id => stop3},
+                 routes: %{route.id => route}
                })
     end
 
@@ -1482,7 +1788,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  [pattern],
                  now,
                  [schedule1, schedule2],
-                 %{}
+                 %{routes: %{route.id => route}}
                )
     end
 
@@ -1524,10 +1830,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.TripShuttle{
                trip_identity: %AlertSummary.TripShuttle.SingleTrip{
                  trip_time: ^trip_time,
-                 route_type: :commuter_rail
+                 route_type: :commuter_rail,
+                 from_stop_name: nil
                },
-               is_today: true,
-               current_stop_name: "Ruggles",
+               start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
                recurrence: nil
              } =
@@ -1569,6 +1875,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       trip_time = schedule.departure_time
+      route_type = route.type
 
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
@@ -1580,13 +1887,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.TripSpecific{
                trip_identity: %AlertSummary.TripSpecific.TripTo{
                  trip_time: ^trip_time,
+                 route_type: ^route_type,
                  headsign: "Stoughton"
                },
                effect: :station_closure,
                effect_stops: ["Back Bay", "Ruggles"]
              } =
                AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
-                 stops: %{stop1.id => stop1, stop2.id => stop2}
+                 stops: %{stop1.id => stop1, stop2.id => stop2},
+                 routes: %{route.id => route}
                })
     end
 
@@ -1616,17 +1925,20 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       trip_time = schedule.departure_time
+      route_type = route.type
 
       assert %AlertSummary.TripSpecific{
                trip_identity: %AlertSummary.TripSpecific.TripFrom{
                  trip_time: ^trip_time,
+                 route_type: ^route_type,
                  stop_name: "Ruggles"
                },
                effect: :suspension,
                is_today: false
              } =
                AlertSummary.summarizing(alert, stop.id, 0, [pattern], now, [schedule], %{
-                 stops: %{stop.id => stop}
+                 stops: %{stop.id => stop},
+                 routes: %{route.id => route}
                })
     end
 
@@ -1671,10 +1983,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.TripShuttle{
                trip_identity: %AlertSummary.TripShuttle.SingleTrip{
                  trip_time: ^trip_time,
-                 route_type: :commuter_rail
+                 route_type: :commuter_rail,
+                 from_stop_name: nil
                },
-               is_today: true,
-               current_stop_name: "Ruggles",
+               start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.ThisWeek{time: ^end_time}
@@ -2043,17 +2355,23 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       summary1 = %AlertSummary.TripShuttle{
-        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
-        is_today: true,
-        current_stop_name: "South Station",
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: now,
+          route_type: :commuter_Rail,
+          from_stop_name: "Route 128"
+        },
+        start_stop_name: "South Station",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }
 
       summary2 = %AlertSummary.TripShuttle{
-        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
-        is_today: true,
-        current_stop_name: "South Station",
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: now,
+          route_type: :commuter_Rail,
+          from_stop_name: "Route 128"
+        },
+        start_stop_name: "South Station",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }
@@ -2082,9 +2400,12 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       summary1 = %AlertSummary.TripShuttle{
-        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
-        is_today: true,
-        current_stop_name: "South Station",
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: now,
+          route_type: :commuter_Rail,
+          from_stop_name: nil
+        },
+        start_stop_name: "South Station",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }
@@ -2092,18 +2413,17 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       summary2 = %AlertSummary.TripShuttle{
         trip_identity: %TripShuttle.SingleTrip{
           trip_time: DateTime.add(now, 2),
-          route_type: :commuter_Rail
+          route_type: :commuter_Rail,
+          from_stop_name: nil
         },
-        is_today: true,
-        current_stop_name: "South Station",
+        start_stop_name: "South Station",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }
 
       assert %AlertSummary.TripShuttle{
                trip_identity: %TripShuttle.MultipleTrips{},
-               is_today: true,
-               current_stop_name: "South Station",
+               start_stop_name: "South Station",
                end_stop_name: "Ruggles",
                recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
              } ==
@@ -2130,9 +2450,12 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       summary1 = %AlertSummary.TripShuttle{
-        trip_identity: %TripShuttle.SingleTrip{trip_time: now, route_type: :commuter_Rail},
-        is_today: true,
-        current_stop_name: "South Station",
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: now,
+          route_type: :commuter_Rail,
+          from_stop_name: nil
+        },
+        start_stop_name: "South Station",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }
@@ -2140,10 +2463,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       summary2 = %AlertSummary.TripShuttle{
         trip_identity: %TripShuttle.SingleTrip{
           trip_time: DateTime.add(now, 2),
-          route_type: :commuter_Rail
+          route_type: :commuter_Rail,
+          from_stop_name: nil
         },
-        is_today: true,
-        current_stop_name: "Needham",
+        start_stop_name: "Needham",
         end_stop_name: "Ruggles",
         recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
       }

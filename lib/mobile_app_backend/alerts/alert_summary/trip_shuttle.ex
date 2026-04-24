@@ -10,9 +10,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
   alias Util.PolymorphicJson
 
   defmodule SingleTrip do
-    @type t :: %__MODULE__{trip_time: DateTime.t(), route_type: Route.type()}
+    @type t :: %__MODULE__{
+            trip_time: DateTime.t(),
+            route_type: Route.type(),
+            from_stop_name: String.t() | nil
+          }
     @derive PolymorphicJson
-    defstruct [:trip_time, :route_type]
+    defstruct [:trip_time, :route_type, :from_stop_name]
+  end
+
+  defmodule ThisTrip do
+    @type t :: %__MODULE__{route_type: Route.type()}
+    @derive PolymorphicJson
+    defstruct [:route_type]
   end
 
   defmodule MultipleTrips do
@@ -21,20 +31,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
     defstruct []
   end
 
-  @type trip_identity :: SingleTrip.t() | MultipleTrips.t()
+  @type trip_identity :: SingleTrip.t() | ThisTrip.t() | MultipleTrips.t()
 
   @type t :: %__MODULE__{
           trip_identity: trip_identity(),
-          is_today: boolean(),
-          current_stop_name: String.t(),
+          start_stop_name: String.t(),
           end_stop_name: String.t(),
           recurrence: AlertSummary.Recurrence.t() | nil
         }
   @derive PolymorphicJson
   defstruct [
     :trip_identity,
-    :is_today,
-    :current_stop_name,
+    :start_stop_name,
     :end_stop_name,
     :recurrence
   ]
@@ -57,20 +65,40 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
         informed_schedules,
         global
       ) do
-    with {trip_identity, is_today} when not is_nil(trip_identity) <-
-           trip_identity_is_today(patterns, at_time, informed_schedules, global),
+    with %AlertSummary.Location.SuccessiveStops{
+           start_stop_name: location_start_stop_name,
+           end_stop_name: end_stop_name,
+           downstream: downstream
+         } <-
+           AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global),
          %Stop{name: current_stop_name} <- global.stops[stop_id],
-         %AlertSummary.Location.SuccessiveStops{end_stop_name: end_stop_name} <-
-           AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global) do
+         start_stop_name <-
+           resolve_start_stop_name(downstream, location_start_stop_name, current_stop_name),
+         identity_stop_name <- resolve_trip_identity_stop_name(downstream, current_stop_name),
+         trip_identity when not is_nil(trip_identity) <-
+           trip_identity(identity_stop_name, patterns, informed_schedules, global) do
       %__MODULE__{
         trip_identity: trip_identity,
-        is_today: is_today,
-        current_stop_name: current_stop_name,
+        start_stop_name: start_stop_name,
         end_stop_name: end_stop_name,
         recurrence: AlertSummary.alert_recurrence(alert, at_time)
       }
     else
       _ -> nil
+    end
+  end
+
+  defp resolve_start_stop_name(downstream, location_start_stop_name, current_stop_name) do
+    case downstream do
+      false -> current_stop_name
+      _ -> location_start_stop_name
+    end
+  end
+
+  defp resolve_trip_identity_stop_name(downstream, current_stop_name) do
+    case downstream do
+      false -> nil
+      _ -> current_stop_name
     end
   end
 
@@ -85,7 +113,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
 
     same_stops =
       summaries
-      |> Enum.flat_map(&[&1.current_stop_name, &1.end_stop_name])
+      |> Enum.flat_map(&[&1.start_stop_name, &1.end_stop_name])
       |> MapSet.new()
       |> MapSet.size() == 2
 
@@ -105,8 +133,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
 
       %__MODULE__{
         trip_identity: trip_identity,
-        is_today: first.is_today,
-        current_stop_name: first.current_stop_name,
+        start_stop_name: first.start_stop_name,
         end_stop_name: first.end_stop_name,
         recurrence: first.recurrence
       }
@@ -115,15 +142,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
     end
   end
 
-  defp trip_identity_is_today(
+  defp trip_identity(
+         current_stop_name,
          patterns,
-         at_time,
          informed_schedules,
          global
        ) do
     case informed_schedules do
       [] ->
-        {nil, nil}
+        nil
 
       [%Schedule{} = informed_trip]
       when not is_nil(informed_trip.departure_time) or not is_nil(informed_trip.arrival_time) ->
@@ -131,22 +158,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
 
         case Enum.find_value(patterns, &global.routes[&1.route_id]) do
           %Route{type: route_type} ->
-            {%SingleTrip{
-               trip_time: trip_time,
-               route_type: route_type
-             }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
+            %SingleTrip{
+              trip_time: trip_time,
+              route_type: route_type,
+              from_stop_name: current_stop_name
+            }
 
           _ ->
-            {nil, nil}
+            nil
         end
 
       _ ->
-        {%MultipleTrips{},
-         Enum.any?(
-           informed_schedules,
-           &(Util.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
-               Util.datetime_to_gtfs(at_time))
-         )}
+        %MultipleTrips{}
     end
   end
 end
