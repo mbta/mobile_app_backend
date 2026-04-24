@@ -4,9 +4,7 @@ defmodule MBTAV3API.AlertTest do
   import Mox
   import MobileAppBackend.Factory
 
-  alias MBTAV3API.Alert.RecurrenceInfo
-  alias MBTAV3API.Alert.ActivePeriod
-  alias MBTAV3API.Alert.InformedEntity
+  alias MBTAV3API.Alert.{ActivePeriod, InformedEntity, RecurrenceInfo}
   alias MBTAV3API.{Alert, JsonApi}
   alias MobileAppBackend.GlobalDataCache
   import Test.Support.Helpers
