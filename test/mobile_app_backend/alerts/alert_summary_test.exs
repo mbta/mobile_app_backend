@@ -1666,6 +1666,78 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                })
     end
 
+    test "trip specific dock closure" do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      now = ~B[2026-03-12 12:00:00]
+      stop1 = build(:stop, name: "Hingham")
+      stop2 = build(:stop, name: "Hull")
+      stop3 = build(:stop, name: "Rowes Wharf")
+      route = build(:route, type: :ferry)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id, headsign: stop3.name)
+
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        fn %Req.Request{url: %URI{path: "/trips"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json([
+             %{
+               "attributes" => %{
+                 "headsign" => trip.headsign
+               },
+               "id" => trip.id,
+               "type" => "trip"
+             }
+           ])}
+        end
+      )
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :weather,
+          effect: :dock_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              trip: trip.id,
+              stop: stop2.id
+            }
+          ]
+        )
+
+      schedule =
+        build(:schedule,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 12:13:00]
+        )
+
+      trip_time = schedule.departure_time
+      route_type = route.type
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripTo{
+                 trip_time: ^trip_time,
+                 route_type: ^route_type,
+                 headsign: "Rowes Wharf"
+               },
+               effect: :dock_closure,
+               effect_stops: ["Hull"],
+               is_today: true,
+               cause: :weather,
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(alert, stop1.id, 0, [pattern], now, [schedule], %{
+                 stops: %{stop1.id => stop1, stop2.id => stop2, stop3.id => stop3},
+                 routes: %{route.id => route}
+               })
+    end
+
     test "multiple trip cancellation" do
       now = ~B[2026-03-12 12:00:00]
       stop = build(:stop, name: "Blossom Street Pier")
