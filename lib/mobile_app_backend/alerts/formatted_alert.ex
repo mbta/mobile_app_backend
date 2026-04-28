@@ -47,7 +47,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       case alert_summary do
         %AlertSummary.AllClear{} ->
           gettext("**All clear:** Regular service%{location}",
-            location: summary_location(nil, location: alert_summary.location)
+            location: summary_location(nil, alert_summary.location)
           )
 
         %AlertSummary.Standard{} ->
@@ -111,7 +111,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     end)
   end
 
-  @spec summary_location(Alert.Effect.t() | nil, AlertSummary.Location.t() | nil) :: String.t()
+  @spec summary_location(Alert.effect() | nil, AlertSummary.Location.t() | nil) :: String.t()
   def summary_location(effect, location) do
     case location do
       %AlertSummary.Location.DirectionToStop{} ->
@@ -215,7 +215,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %AlertSummary.Timeframe.TimeRange.EndOfService{} -> gettext("end of service")
       ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
       ##   .formatted(date: .omitted, time: .shortened)
-      %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary)}"
+      %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary.time)}"
       _ -> nil
     end
   end
@@ -317,7 +317,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   end
 
   @spec summary_trip_effect(
-          AlertSummary.TripSpecfic.trip_identity(),
+          AlertSummary.TripSpecific.trip_identity(),
           Alert.effect(),
           [String.t()] | nil,
           bool()
