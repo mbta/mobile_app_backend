@@ -5,21 +5,55 @@ alias MobileAppBackend.Alerts.AlertSummary
 
       @type t :: %__MODULE__{
             alert: Alert.t() | nil,
-            alert_summary: AlertSummary.t()
+            alert_summary: AlertSummary.t(),
+
           }
-    @derive PolymorphicJson
-    defstruct [:trip_time, :route_type, :from_stop_name]
+    defstruct [:alert,
+    :alert_summary,
+    :effect]
+
+    @spec effect(__MODULE__.t()) :: String.t()
+    def effect(formatted_alert) do
+
+      effect = if formatted_alert.alert != nil do
+        formatted_alert.alert.effect
+      else if formatted_alert.alert_summary != nil do
+        formatted_alert.alert_summary.effect
+
+    else
+      :unknown
+      end
+
+      # TODO: effectString
+      "**%{effect}**"
+    end
+
+  end
 
 
+    @spec due_to_cause(__MODULE__.t()) :: String.t() | nil
+    def due_to_cause(formatted_alert) do
 
-  @spec summary(AlertSummary.t() | nil, ) :: String.t() | nil
-  def summary(alert_summary, locale) do
+      cause = cond do
+        formatted_alert.alert != nil && formatted_alert.alert.cause != nil -> formatted_alert.alert.cause
+        %AlertSummary.TripSpecific{cause: cause} = formatted_alert.alert_summary -> cause
+        _ -> nil
+      end
+
+      # TODO: cauesLowercaseString
+
+      cause
+
+  end
+
+  @spec summary(__MODULE__.t() | nil, ) :: String.t() | nil
+  def summary(%{alert_summary: alert_summary} = formatted_alert, locale) do
          case alert_summary do
         %AlertSummary.AllClear{} ->
           gettext("**All clear:** Regular service%{location}" , location: summary_location(nil, location: alert_summary.location))
 
-                %AlertSummary.Summary{} ->
-                  sentence_case_effect = "TODO"
+                %AlertSummary.Standard{} ->
+                  sentence_case_effect = alert_summary.effect # TODO: SENTENCE_CASE_EFFECT
                   summary_location = summary_location(alert_summary.effect, alert_summary.location)
                   summary_timeframe = summary_timeframe(alert_summary.timeframe)
                   summary_recurrence = summary_recurrence(alert_summary.recurrence)
@@ -31,25 +65,14 @@ alias MobileAppBackend.Alerts.AlertSummary
                   end
 
 
-        case let .tripSpecificAlertSummary(alertSummary): return AttributedString.tryMarkdown(String(
-                format: NSLocalizedString(
-                    "%1$@ %2$@%3$@%4$@",
-                    comment: """
-                    Alert summary in the format of “[trip identity] [is affected][due to cause][until recurrence]”, \
-                    ex “[12:13 PM from Ruggles] [is cancelled today][ due to a mechanical issue][ \
-                    some days until Wednesday]” or “[Multiple trips] [are suspended today][][]”
-                    """
-                ),
-                Self.summaryTripIdentity(tripIdentity: alertSummary.tripIdentity),
-                Self.summaryTripEffect(
-                    tripIdentity: alertSummary.tripIdentity,
-                    effect: alertSummary.effect,
-                    effectStops: alertSummary.effectStops,
-                    isToday: alertSummary.isToday
-                ),
-                summaryTripCause,
-                Self.summaryRecurrence(recurrence: alertSummary.recurrence)
-            ))
+        %AlertSumary.TripSpecific{} ->
+          gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
+          trip_identity: summary_trip_identity(alert_summary.trip_identity),
+          trip_effect: summary_trip_effect(alert_summary.trip_identity, alert_summary.effect, alert_summary.effect_stops, alert_summary.is_today),
+          cause: summary_trip_cause(),
+          recurrence: summary_recurrence())
+
+
         case let .tripShuttleAlertSummary(alertSummary): return AttributedString.tryMarkdown(String(
                 format: NSLocalizedString(
                     "Shuttle buses replace %1$@ %2$@ from **%3$@** to **%4$@**%5$@",
@@ -68,8 +91,10 @@ alias MobileAppBackend.Alerts.AlertSummary
                 alertSummary.endStopName,
                 Self.summaryRecurrence(recurrence: alertSummary.recurrence)
             ))
-        case let .unknown(alertSummary): return AttributedString(alertSummary.fallback)
-        case nil: return nil
+        %AlertSummary.Unknown{} ->  alert_summary.fallback
+         nil ->   nil
+
+                end
 
 
   end
@@ -191,7 +216,7 @@ alias MobileAppBackend.Alerts.AlertSummary
 
     @spec summary_recurrence_end_day(AlertSummary.Recurrence.end_day() | nil) :: String.t() | nil
        def summary_recurrence_end_day(end_day) -> String.t() | nil do
-        case end_day
+        case end_day do
          %AlertSummary.Timeframe.UntilFurtherNotice{} ->
             gettext(" until further notice")
      %AlertSummary.Timeframe.Tomorrow{} ->
@@ -209,5 +234,74 @@ alias MobileAppBackend.Alerts.AlertSummary
           _ -> nil
 
                              end
+                            end
+
+
+    @spec summary_trip_identity(AlertSummary.TripSpecific.trip_identity()) :: String.t()
+    def summary_trip_identity(trip_identity) do
+    case trip_identity do
+        %AlertSummary.TripSpecific.TripFrom{} ->
+                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##    .formatted(date: .omitted, time: .shortened)
+                gettext("**%{trip_time}** from **%{stop_name}**", trip_time: trip_identity.trip_time, stop_name: trip_identity.stop_name)
+
+            %AlertSummary.TripSpecific.TripTo{} ->
+                                  ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##    .formatted(date: .omitted, time: .shortened)
+                gettext("**%{trip_time}* to **%{headsign}**", trip_time: trip_identity.trip_time, headsign: trip_identity.headsign)
+
+         %AlertSummary.TripSpecific.MultipleTrips{} -> gettext("Multiple trips")
+    end
+    end
+
+    @spec summary_trip_effect(AlertSummary.TripSpecfic.trip_identity(), Alert.effect(), [String.t()] | nil, bool()) :: String.t()
+    def summary_trip_effect(trip_identity, effect, effect_stops, is_today) do
+      day = is_today ? gettext("today") : gettext("tomorrow")
+      is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
+        cond do
+        case effect == :cancellation && is_plural -> gettext("are cancelled %{day}", day: day)
+        case .cancellation: return String(format: NSLocalizedString(
+                "is cancelled %@",
+                comment: "Trip specific alert effect denoting cancellation, will specify “today” or “tomorrow”"
+            ), day)
+        case .stationClosure: if let effectStops {
+                return String(
+                    format: NSLocalizedString(
+                        "will not stop at %@ %@",
+                        comment: "Trip specific alert effect denoting station bypass, ex “will not stop at [Back Bay and Ruggles] [today]”"
+                    ),
+                    effectStops.map { "**\($0)**" }.reduce(nil) { lhs, rhs in
+                        if let lhs { String(
+                            format: NSLocalizedString(
+                                "%1$@ and %2$@",
+                                comment: "Joins two stops into a list, ex “[Back Bay] and [Ruggles]”"
+                            ),
+                            lhs,
+                            rhs
+                        ) } else { rhs }
+                    } ?? "",
+                    day
+                )
+            }
+        case .suspension where isPlural: return String(format: NSLocalizedString(
+                "are suspended %@",
+                comment: "Multiple trip specific alert effect denoting suspension, will specify “today” or “tomorrow”"
+            ), day)
+        case .suspension: return String(format: NSLocalizedString(
+                "is suspended %@",
+                comment: "Trip specific alert effect denoting suspension, will specify “today” or “tomorrow”"
+            ), day)
+        default:
+            break
+        }
+        return String(
+            format: NSLocalizedString(
+                "affected by %@ %@",
+                comment: "Trip specific alert effect fallback, ex “affected by [snow route] [today]”"
+            ),
+            effect.effectSentenceCaseString,
+            day
+        )
+    end
 
 end
