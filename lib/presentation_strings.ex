@@ -4,14 +4,10 @@ defmodule MobileAppBackend.PresentationStrings do
   alias MBTAV3API.Route
 
   @spec route_type_text(Route.type(), boolean()) :: String.t()
-  def route_type_text(route_type, is_only) do
-    cond do
-      route_type == :bus && is_only -> gettext("bus")
-      route_type == :bus && !is_only -> gettext("buses")
-      route_type in [:commuter_rail, :heavy_rail, :light_rail] && is_only -> gettext("train")
-      route_type in [:commuter_rail, :heavy_rail, :light_rail] && !is_only -> gettext("trains")
-      route_type == :ferry && is_only -> gettext("ferry")
-      route_type == :ferry && !is_only -> gettext("ferries")
-    end
-  end
+  def route_type_text(:bus, true), do: gettext("bus")
+  def route_type_text(:bus, false), do: gettext("buses")
+  def route_type_text(:ferry, true), do: gettext("ferry")
+  def route_type_text(:ferry, false), do: gettext("ferries")
+  def route_type_text(_subway, true), do: gettext("train")
+  def route_type_text(_subway, false), do: gettext("trains")
 end
