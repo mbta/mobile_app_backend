@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.PresentationStrings do
   use Gettext, backend: MobileAppBackend.Gettext
 
+  alias MBTAV3API.Alert
   alias MBTAV3API.Route
 
   @spec route_type_text(Route.type(), boolean()) :: String.t()
@@ -10,4 +11,84 @@ defmodule MobileAppBackend.PresentationStrings do
   def route_type_text(:ferry, false), do: gettext("ferries")
   def route_type_text(_subway, true), do: gettext("train")
   def route_type_text(_subway, false), do: gettext("trains")
+
+  @spec effect_sentence_case_string(Alert.effect()) :: String.t()
+  def effect_sentence_case_string(effect) do
+    case effect do
+      :access_issue -> gettext("Access issue")
+      :additional_service -> gettext("Additional service")
+      :amber_alert -> gettext("Amber alert")
+      :bike_issue -> gettext("Bike issue")
+      :cancellation -> gettext("Trip cancelled")
+      :delay -> gettext("Delay")
+      :detour -> gettext("Detour")
+      :dock_closure -> gettext("Dock closed")
+      :dock_issue -> gettext("Dock issue")
+      :elevator_closure -> gettext("Elevator closed")
+      :escalator_closure -> gettext("Escalator closed")
+      :extra_service -> gettext("Extra service")
+      :facility_issue -> gettext("Facility issue")
+      :modified_service -> gettext("Modified service")
+      :no_service -> gettext("No service")
+      :notice -> gettext("Notice")
+      :parking_closure -> gettext("Parking closed")
+      :parking_issue -> gettext("Parking issue")
+      :policy_change -> gettext("Policy change")
+      :schedule_change -> gettext("Schedule change")
+      :service_change -> gettext("Service change")
+      :shuttle -> gettext("Shuttle buses")
+      :snow_route -> gettext("Snow route")
+      :station_closure -> gettext("Station closed")
+      :station_issue -> gettext("Station issue")
+      :stop_closure -> gettext("Stop closed")
+      :stop_move -> gettext("Stop moved")
+      :stop_moved -> gettext("Stop moved")
+      :stop_shoveling -> gettext("Stop shoveling")
+      :summary -> gettext("Summary")
+      :suspension -> gettext("Service suspended")
+      :track_change -> gettext("Track change")
+      :other_effect -> gettext("Alert")
+      :unknown_effect -> gettext("Alert")
+    end
+  end
+
+  @spec effect_string(Alert.effect()) :: String.t()
+  def effect_string(effect) do
+    case effect do
+      :access_issue -> gettext("Access Issue")
+      :additional_service -> gettext("Additional Service")
+      :amber_alert -> gettext("Amber Alert")
+      :bike_issue -> gettext("Bike Issue")
+      :cancellation -> gettext("Cancellation")
+      :delay -> gettext("Delay")
+      :detour -> gettext("Detour")
+      :dock_closure -> gettext("Dock Closure")
+      :dock_issue -> gettext("Dock Issue")
+      :elevator_closure -> gettext("Elevator Closure")
+      :escalator_closure -> gettext("Escalator Closure")
+      :extra_service -> gettext("Extra Service")
+      :facility_issue -> gettext("Facility Issue")
+      :modified_service -> gettext("Modified Service")
+      :no_service -> gettext("No Service")
+      :notice -> gettext("Notice")
+      :parking_closure -> gettext("Parking Closure")
+      :parking_issue -> gettext("Parking Issue")
+      :policy_change -> gettext("Policy Change")
+      :schedule_change -> gettext("Schedule Change")
+      :service_change -> gettext("Service Change")
+      :shuttle -> gettext("Shuttle")
+      :snow_route -> gettext("Snow Route")
+      :station_closure -> gettext("Station Closure")
+      :station_issue -> gettext("Station Issue")
+      :stop_closure -> gettext("Stop Closure")
+      :stop_move -> gettext("Stop Moved")
+      :stop_moved -> gettext("Stop Moved")
+      :stop_shoveling -> gettext("Stop Shoveling")
+      :summary -> gettext("Summary")
+      :suspension -> gettext("Suspension")
+      :trackChange -> gettext("Track Change")
+      :other_effect -> gettext("Alert")
+      :unknown_effect -> gettext("Alert")
+    end
+  end
 end
