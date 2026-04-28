@@ -260,48 +260,31 @@ alias MobileAppBackend.Alerts.AlertSummary
       is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
         cond do
         case effect == :cancellation && is_plural -> gettext("are cancelled %{day}", day: day)
-        case .cancellation: return String(format: NSLocalizedString(
-                "is cancelled %@",
-                comment: "Trip specific alert effect denoting cancellation, will specify “today” or “tomorrow”"
-            ), day)
-        case .stationClosure: if let effectStops {
-                return String(
-                    format: NSLocalizedString(
-                        "will not stop at %@ %@",
-                        comment: "Trip specific alert effect denoting station bypass, ex “will not stop at [Back Bay and Ruggles] [today]”"
-                    ),
-                    effectStops.map { "**\($0)**" }.reduce(nil) { lhs, rhs in
-                        if let lhs { String(
-                            format: NSLocalizedString(
-                                "%1$@ and %2$@",
-                                comment: "Joins two stops into a list, ex “[Back Bay] and [Ruggles]”"
-                            ),
-                            lhs,
-                            rhs
-                        ) } else { rhs }
-                    } ?? "",
-                    day
-                )
-            }
-        case .suspension where isPlural: return String(format: NSLocalizedString(
-                "are suspended %@",
-                comment: "Multiple trip specific alert effect denoting suspension, will specify “today” or “tomorrow”"
-            ), day)
-        case .suspension: return String(format: NSLocalizedString(
-                "is suspended %@",
-                comment: "Trip specific alert effect denoting suspension, will specify “today” or “tomorrow”"
-            ), day)
-        default:
-            break
-        }
-        return String(
-            format: NSLocalizedString(
-                "affected by %@ %@",
-                comment: "Trip specific alert effect fallback, ex “affected by [snow route] [today]”"
-            ),
-            effect.effectSentenceCaseString,
-            day
-        )
+        case effect == :cancellation -> gettext("is cancelled %{day}", day: day)
+        case effect == :station_closure && effect_stops != nil ->
+           gettext("will not stop at %{stop_list} %{day}",
+           day: day,
+           stop_list: effect_stops
+           |> Enum.map(&"**#{&1}**")
+           |> Enum.reduce("", fn stop, acc ->
+            if acc == "" do
+              stop
+            else
+                          gettext("%{stop} and %{other_stops}", stop: stop, other_stops: acc)
+
+            end
+          end)
+        case effect == :suspension do
+        if is_plural do
+          gettext("are suspended %{day}", day: day)
+        else
+                    gettext("is suspended %{day}", day: day)
+
+        end
+        # TODO: sentence_case_string for effect
+        true -> gettext("affected by %{effect} %{day}", effect: effect.sentence_case_string, day: day)
     end
+
+    def summary_trip_cause
 
 end
