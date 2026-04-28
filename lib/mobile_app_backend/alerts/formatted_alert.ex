@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
+  alias MobileAppBackend.Alerts.DirectionLabel
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
 
@@ -28,10 +29,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         formatted_alert.alert != nil && formatted_alert.alert.cause != nil ->
           formatted_alert.alert.cause
 
-        %AlertSummary.TripSpecific{cause: cause} = formatted_alert.alert_summary ->
-          cause
+        match?(%AlertSummary.TripSpecific{}, formatted_alert.alert_summary) ->
+          formatted_alert.alert_summary.cause
 
-        _ ->
+        true ->
           nil
       end
 
@@ -40,79 +41,74 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     cause
   end
 
-  @spec summary(__MODULE__.t() | nil) :: String.t() | nil
+  @spec summary(__MODULE__.t() | nil, Gettext.locale()) :: String.t() | nil
   def summary(%{alert_summary: alert_summary} = formatted_alert, locale) do
-    case alert_summary do
-      %AlertSummary.AllClear{} ->
-        gettext("**All clear:** Regular service%{location}",
-          location: summary_location(nil, location: alert_summary.location)
-        )
-
-      %AlertSummary.Standard{} ->
-        # TODO: SENTENCE_CASE_EFFECT
-        sentence_case_effect = alert_summary.effect
-        summary_location = summary_location(alert_summary.effect, alert_summary.location)
-        summary_timeframe = summary_timeframe(alert_summary.timeframe)
-        summary_recurrence = summary_recurrence(alert_summary.recurrence)
-
-        if alert_summary.is_update do
-          gettext(
-            "**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-            sentence_case_effect: sentence_case_effect,
-            summary_location: summary_location,
-            summary_timeframe: summary_timeframe,
-            summary_recurrence: summary_recurrence
+    Gettext.with_locale(locale, fn ->
+      case alert_summary do
+        %AlertSummary.AllClear{} ->
+          gettext("**All clear:** Regular service%{location}",
+            location: summary_location(nil, location: alert_summary.location)
           )
-        else
-          gettext(
-            "**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-            sentence_case_effect: sentence_case_effect,
-            summary_location: summary_location,
-            summary_timeframe: summary_timeframe,
-            summary_recurrence: summary_recurrence
-          )
-        end
 
-      %AlertSummary.TripSpecific{} ->
-        gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
-          trip_identity: summary_trip_identity(alert_summary.trip_identity),
-          trip_effect:
-            summary_trip_effect(
-              alert_summary.trip_identity,
-              alert_summary.effect,
-              alert_summary.effect_stops,
-              alert_summary.is_today
-            ),
-          cause:
-            formatted_alert
-            |> due_to_cause()
-            |> summary_trip_cause(),
-          recurrence: summary_recurrence(alert_summary.recurrence)
-        )
+        %AlertSummary.Standard{} ->
+          # TODO: SENTENCE_CASE_EFFECT
+          sentence_case_effect = alert_summary.effect
+          summary_location = summary_location(alert_summary.effect, alert_summary.location)
+          summary_timeframe = summary_timeframe(alert_summary.timeframe)
+          summary_recurrence = summary_recurrence(alert_summary.recurrence)
 
-      %AlertSummary.TripShuttle{} ->
-        gettext(
-          "Shuttle buses replace %{trip_identity} %{day} from **%{current_stop}** to **%{end_stop}**%{recurrence}",
-          trip_identity:
-            summary_trip_shuttle_identity(trip_identity: alert_summary.trip_identity),
-          day:
-            if(
-              alert_summary.is_today(
-                do: gettext("today"),
-                else: gettext("tomorrow"),
-                current_stop: alert_summary.current_stop_name,
-                end_stop: alert_summary.end_stop_name,
-                recurrence: summary_recurrence(alert_summary.recurrence)
-              )
+          if alert_summary.is_update do
+            gettext(
+              "**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+              sentence_case_effect: sentence_case_effect,
+              summary_location: summary_location,
+              summary_timeframe: summary_timeframe,
+              summary_recurrence: summary_recurrence
             )
-        )
+          else
+            gettext(
+              "**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+              sentence_case_effect: sentence_case_effect,
+              summary_location: summary_location,
+              summary_timeframe: summary_timeframe,
+              summary_recurrence: summary_recurrence
+            )
+          end
 
-      %AlertSummary.Unknown{} ->
-        alert_summary.fallback
+        %AlertSummary.TripSpecific{} ->
+          gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
+            trip_identity: summary_trip_identity(alert_summary.trip_identity),
+            trip_effect:
+              summary_trip_effect(
+                alert_summary.trip_identity,
+                alert_summary.effect,
+                alert_summary.effect_stops,
+                alert_summary.is_today
+              ),
+            cause:
+              formatted_alert
+              |> due_to_cause()
+              |> summary_trip_cause(),
+            recurrence: summary_recurrence(alert_summary.recurrence)
+          )
 
-      _ ->
-        nil
-    end
+        %AlertSummary.TripShuttle{} ->
+          gettext(
+            "Shuttle buses replace %{trip_identity} %{day} from **%{current_stop}** to **%{end_stop}**%{recurrence}",
+            trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
+            day: if(alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")),
+            current_stop: alert_summary.current_stop_name,
+            end_stop: alert_summary.end_stop_name,
+            recurrence: summary_recurrence(alert_summary.recurrence)
+          )
+
+        %AlertSummary.Unknown{} ->
+          alert_summary.fallback
+
+        _ ->
+          nil
+      end
+    end)
   end
 
   @spec summary_location(Alert.Effect.t() | nil, AlertSummary.Location.t() | nil) :: String.t()
@@ -127,31 +123,28 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %AlertSummary.Location.SingleStop{} ->
         gettext(" at **%{stop_name}**", stop_name: location.stop_name)
 
-      %AlertSummary.StopToDirection{} ->
+      %AlertSummary.Location.StopToDirection{} ->
         gettext(" from **%{stop_name}** to **%{direction_name}** stops",
           stop_name: location.start_stop_name,
           direction_name: DirectionLabel.direction_name_formatted(location.direction)
         )
 
-      %AlertSummary.SuccessiveStops{} ->
+      %AlertSummary.Location.SuccessiveStops{} ->
         gettext(" from **%{start_stop}** to **%{end_stop}**",
           start_stop: location.start_stop_name,
           end_stop: location.end_stop_name
         )
 
-      %AlertSummary.WholeRoute{} ->
+      %AlertSummary.Location.WholeRoute{} ->
         if effect == :shuttle do
           gettext(" replacing **%{mode_label}**",
-            mode_label: AlertSummary.WholeRoute.mode_label(location)
+            mode_label: AlertSummary.Location.WholeRoute.mode_label(location)
           )
         else
           gettext(" on **%{mode_label}**",
-            mode_label: AlertSummary.WholeRoute.mode_label(location)
+            mode_label: AlertSummary.Location.WholeRoute.mode_label(location)
           )
         end
-
-      %AlertSummary.Unknown{} ->
-        ""
 
       _ ->
         ""
@@ -273,7 +266,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
         ##     formatted(.init().weekday(.wide)
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+          formatted_date: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards)
         )
 
       _ ->
@@ -305,6 +298,24 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     end
   end
 
+  @spec summary_trip_identity(AlertSummary.TripShuttle.trip_identity()) :: String.t()
+
+  def summary_trip_shuttle_identity(trip_identity) do
+    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+    ##    .formatted(date: .omitted, time: .shortened)
+    case trip_identity do
+      %AlertSummary.TripShuttle.SingleTrip{} ->
+        gettext("the **%{time}** %{vehicle}",
+          time: trip_identity.trip_time,
+          vehicle:
+            MobileAppBackend.PresentationStrings.route_type_text(trip_identity.route_type, true)
+        )
+
+      %AlertSummary.TripShuttle.MultipleTrips{} ->
+        gettext("multiple trips")
+    end
+  end
+
   @spec summary_trip_effect(
           AlertSummary.TripSpecfic.trip_identity(),
           Alert.effect(),
@@ -312,7 +323,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           bool()
         ) :: String.t()
   def summary_trip_effect(trip_identity, effect, effect_stops, is_today) do
-    day = if(is_today(do: gettext("today"), else: gettext("tomorrow")))
+    day = if is_today, do: gettext("today"), else: gettext("tomorrow")
     is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
 
     cond do
@@ -348,12 +359,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       true ->
         gettext("affected by %{effect} %{day}", effect: effect.sentence_case_string, day: day)
     end
-  end
-
-  @spec due_to_cause(Alert.cause()) :: String.t() | nil
-  def due_to_cause(cause) do
-    # TODO: causeLowercaseString
-    cause
   end
 
   @spec summary_trip_cause(String.t() | nil) :: String.t()

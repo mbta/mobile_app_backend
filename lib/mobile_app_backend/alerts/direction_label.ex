@@ -1,4 +1,4 @@
-defstruct MobileAppBackend.Alerts.DirectionLabel do
+defmodule MobileAppBackend.Alerts.DirectionLabel do
   use Gettext, backend: MobileAppBackend.Gettext
 
   def localized_direction_names do
@@ -13,6 +13,6 @@ defstruct MobileAppBackend.Alerts.DirectionLabel do
   end
 
   def direction_name_formatted(direction_name) do
-    Map.get(localized_direction_names, direction_name, gettext("Heading"))
+    Map.get(localized_direction_names(), direction_name, gettext("Heading"))
   end
 end
