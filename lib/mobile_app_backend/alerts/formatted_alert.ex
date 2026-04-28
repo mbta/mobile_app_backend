@@ -16,37 +16,21 @@ alias MobileAppBackend.Alerts.AlertSummary
   def summary(alert_summary, locale) do
          case alert_summary do
         %AlertSummary.AllClear{} ->
-          gettext("**All clear:** Regular service%{location}")
-                #), Self.summaryLocation(effect: nil, location: alertSummary.location)
+          gettext("**All clear:** Regular service%{location}" , location: summary_location(nil, location: alert_summary.location))
 
                 %AlertSummary.Summary{} ->
-            let args = [
-                sentenceCaseEffect,
-                Self.summaryLocation(effect: alertSummary.effect, location: alertSummary.location),
-                Self.summaryTimeframe(timeframe: alertSummary.timeframe),
-                Self.summaryRecurrence(recurrence: alertSummary.recurrence),
-            ]
-            if alertSummary.isUpdate {
-                return AttributedString.tryMarkdown(String(format:
-                    NSLocalizedString(
-                        "**Update:** %1$@%2$@%3$@%4$@",
-                        comment: """
-                        Alert summary in the format of "Update: [Alert effect][at location][through timeframe][until recurrence]", \
-                        ex "[Update][Stop closed][ at Haymarket][ through this Friday][]" or \
-                        "[Update][Service suspended][ from Alewife to Harvard][ through end of service][ daily until Friday]"
-                        """
-                    ), args.map { $0 as CVarArg }))
-            } else {
-                return AttributedString.tryMarkdown(String(format:
-                    NSLocalizedString(
-                        "**%1$@**%2$@%3$@%4$@",
-                        comment: """
-                        Alert summary in the format of "[Alert effect][at location][through timeframe][until recurrence]", \
-                        ex "[Stop closed][ at Haymarket][ through this Friday][]" or \
-                        "[Service suspended][ from Alewife to Harvard][ through end of service][ daily until Friday]"
-                        """
-                    ), args.map { $0 as CVarArg }))
-            }
+                  sentence_case_effect = "TODO"
+                  summary_location = summary_location(alert_summary.effect, alert_summary.location)
+                  summary_timeframe = summary_timeframe(alert_summary.timeframe)
+                  summary_recurrence = summary_recurrence(alert_summary.recurrence)
+
+                  if (alert_summary.is_update) do
+                    gettext("**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}", sentence_case_effect: sentence_case_effect, summary_location: summary_location, summary_timeframe: summary_timeframe, summary_recurrence: summary_recurrence)
+                  else
+                    gettext("**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}", sentence_case_effect: sentence_case_effect, summary_location: summary_location, summary_timeframe: summary_timeframe, summary_recurrence: summary_recurrence)
+                  end
+
+
         case let .tripSpecificAlertSummary(alertSummary): return AttributedString.tryMarkdown(String(
                 format: NSLocalizedString(
                     "%1$@ %2$@%3$@%4$@",
@@ -90,9 +74,8 @@ alias MobileAppBackend.Alerts.AlertSummary
 
   end
 
-alias MobileAppBackend.Alerts.AlertSummary
   @spec summary_location(Alert.Effect.t() | nil, AlertSummary.Location.t() | nil) :: String.t()
-    def summary_location(effect, location) -> String {
+    def summary_location(effect, location) do
         case location do
           %AlertSummary.Location.DirectionToStop{} ->
 
@@ -124,6 +107,64 @@ alias MobileAppBackend.Alerts.AlertSummary
 
           end
 
+          @spec summary_timeframe(AlertSummary.Timeframe.t() | nil) :: String.t()
+          def summary_timeframe(timeframe) do
+             static func summaryTimeframe(timeframe: AlertSummary.Timeframe?) -> String {
+        case timeframe do
+         %AlertSummary.Timeframe.UntilFurtherNotice{} ->
+          gettext(" until further notice")
+         %AlertSummary.Timeframe.EndOfService{} ->
+            gettext(" through end of service")
+         %AlertSummary.Timeframe.Tomorrow{} -> gettext(" through tomorrow")
+         %AlertSummary.Timeframe.LaterDate{} ->
+          ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##     .formatted(.init().month(.abbreviated).day()))
+          gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
 
+         %AlertSummary.Timeframe.ThisWeek{} ->
+                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##     formatted(.init().weekday(.wide)
+                    gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+
+         %AlertSummary.Timeframe.Time{} ->
+               ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##   .formatted(date: .omitted, time: .shortened))
+                              gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+
+         %AlertSummary.Timeframe.StartingTomorrow{} ->
+                         gettext(" starting tomorrow")
+
+         %AlertSummary.Timeframe.StartingLaterToday{} ->
+                         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##   .formatted(date: .omitted, time: .shortened))
+            gettext(" starting **%{formatted_time}** today", formatted_time: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)),
+         %AlertSummary.Timeframe.TimeRange{} ->
+          gettext(" from %{start_time} to %{end_time}", start_time: )
+            String(format:
+                NSLocalizedString(
+                    "",
+                    comment: """
+                    Alert summary timeframe with a range today that will recur in the future, \
+                    e.g. “from 9:00 PM to end of service”. The leading space should be retained.
+                    """
+                ), Self.timeRangeBoundary(timeframe.startTime),
+                Self.timeRangeBoundary(timeframe.endTime))
+        case .unknown: ""
+        case nil: ""
+
+          end
+        end
+
+          @spec time_range_boundary(AlertSummary.Timeframe.TimeRange.start_time() | AlertSummary.Timeframe.TimeRange.end_time()) :: String.t()
+       def time_range_boundary(boundary) do
+         case boundary do
+           %AlertSummary.Timeframe.TimeRange.StartOfService{} -> gettext("start of service")
+           %AlertSummary.Timeframe.TimeRange.EndOfService{} -> gettext("end of service")
+          ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##   .formatted(date: .omitted, time: .shortened)
+           %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary)}"
+          ## TODO: thi also has an unknown case in swift, seems unreachable?
+         end
+       end
 
 end
