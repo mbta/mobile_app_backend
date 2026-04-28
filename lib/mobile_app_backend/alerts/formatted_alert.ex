@@ -106,6 +106,7 @@ alias MobileAppBackend.Alerts.AlertSummary
          nil ->  ""
 
           end
+        end
 
           @spec summary_timeframe(AlertSummary.Timeframe.t() | nil) :: String.t()
           def summary_timeframe(timeframe) do
@@ -163,8 +164,50 @@ alias MobileAppBackend.Alerts.AlertSummary
           ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
           ##   .formatted(date: .omitted, time: .shortened)
            %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary)}"
-          ## TODO: thi also has an unknown case in swift, seems unreachable?
+         _ -> nil
          end
        end
+
+       @spec summary_recurrence(AlertSummary.Recurrence.t() | nil) :: String.t()
+          def summary_recurrence(recurrence) do
+        case recurrence do
+        %AlertSummary.Recurrence.Daily{} ->
+          summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
+
+          if summary_recurrence_end_day != nil do
+            gettext("daily%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
+          else
+            ""
+          end
+   %AlertSummary.Recurrence.SomeDays{} ->
+              summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
+              if summary_recurrence_end_day != nil do
+                gettext(" some days%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
+              else
+                nil
+              end
+        _ -> nil
+          end
+
+    @spec summary_recurrence_end_day(AlertSummary.Recurrence.end_day() | nil) :: String.t() | nil
+       def summary_recurrence_end_day(end_day) -> String.t() | nil do
+        case end_day
+         %AlertSummary.Timeframe.UntilFurtherNotice{} ->
+            gettext(" until further notice")
+     %AlertSummary.Timeframe.Tomorrow{} ->
+            gettext(" until tomorrow")
+     %AlertSummary.Timeframe.LaterDate{} ->
+                     ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##   .formatted(.init().month(.abbreviated).day())
+      gettext(" through %{date_formatted}", date_formatted: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards))
+         %AlertSummary.Timeframe.ThisWeek{} ->
+                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+          ##     formatted(.init().weekday(.wide)
+                    gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+
+                             %AlertSummary.Timeframe.ThisWeek{} ->
+          _ -> nil
+
+                             end
 
 end
