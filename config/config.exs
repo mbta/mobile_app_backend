@@ -78,6 +78,8 @@ config :mobile_app_backend, :logger, [
    }}
 ]
 
+config :gettext, plural_forms: MobileAppBackend.Gettext.Plural
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.27.3",
