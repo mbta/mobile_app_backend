@@ -1,290 +1,367 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
   alias MBTAV3API.Alert
-alias MobileAppBackend.Alerts.AlertSummary
+  alias MobileAppBackend.Alerts.AlertSummary
 
-      @type t :: %__MODULE__{
-            alert: Alert.t() | nil,
-            alert_summary: AlertSummary.t(),
+  @type t :: %__MODULE__{
+          alert: Alert.t() | nil,
+          alert_summary: AlertSummary.t()
+        }
+  defstruct [:alert, :alert_summary, :effect]
 
-          }
-    defstruct [:alert,
-    :alert_summary,
-    :effect]
-
-    @spec effect(__MODULE__.t()) :: String.t()
-    def effect(formatted_alert) do
-
-      effect = if formatted_alert.alert != nil do
-        formatted_alert.alert.effect
-      else if formatted_alert.alert_summary != nil do
-        formatted_alert.alert_summary.effect
-
-    else
-      :unknown
-      end
-
-      # TODO: effectString
-      "**%{effect}**"
+  @spec effect(__MODULE__.t()) :: String.t()
+  def effect(formatted_alert) do
+    cond do
+      formatted_alert.alert != nil -> formatted_alert.alert.effect
+      formatted_alert.alert_summary != nil -> formatted_alert.alert_summary.effect
+      true -> :unknown
     end
 
+    # TODO: effectString
+    "**%{effect}**"
   end
 
+  @spec due_to_cause(__MODULE__.t()) :: String.t() | nil
+  def due_to_cause(formatted_alert) do
+    cause =
+      cond do
+        formatted_alert.alert != nil && formatted_alert.alert.cause != nil ->
+          formatted_alert.alert.cause
 
-    @spec due_to_cause(__MODULE__.t()) :: String.t() | nil
-    def due_to_cause(formatted_alert) do
+        %AlertSummary.TripSpecific{cause: cause} = formatted_alert.alert_summary ->
+          cause
 
-      cause = cond do
-        formatted_alert.alert != nil && formatted_alert.alert.cause != nil -> formatted_alert.alert.cause
-        %AlertSummary.TripSpecific{cause: cause} = formatted_alert.alert_summary -> cause
-        _ -> nil
+        _ ->
+          nil
       end
 
-      # TODO: cauesLowercaseString
+    # TODO: cauesLowercaseString
 
-      cause
-
+    cause
   end
 
-  @spec summary(__MODULE__.t() | nil, ) :: String.t() | nil
+  @spec summary(__MODULE__.t() | nil) :: String.t() | nil
   def summary(%{alert_summary: alert_summary} = formatted_alert, locale) do
-         case alert_summary do
-        %AlertSummary.AllClear{} ->
-          gettext("**All clear:** Regular service%{location}" , location: summary_location(nil, location: alert_summary.location))
+    case alert_summary do
+      %AlertSummary.AllClear{} ->
+        gettext("**All clear:** Regular service%{location}",
+          location: summary_location(nil, location: alert_summary.location)
+        )
 
-                %AlertSummary.Standard{} ->
-                  sentence_case_effect = alert_summary.effect # TODO: SENTENCE_CASE_EFFECT
-                  summary_location = summary_location(alert_summary.effect, alert_summary.location)
-                  summary_timeframe = summary_timeframe(alert_summary.timeframe)
-                  summary_recurrence = summary_recurrence(alert_summary.recurrence)
+      %AlertSummary.Standard{} ->
+        # TODO: SENTENCE_CASE_EFFECT
+        sentence_case_effect = alert_summary.effect
+        summary_location = summary_location(alert_summary.effect, alert_summary.location)
+        summary_timeframe = summary_timeframe(alert_summary.timeframe)
+        summary_recurrence = summary_recurrence(alert_summary.recurrence)
 
-                  if (alert_summary.is_update) do
-                    gettext("**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}", sentence_case_effect: sentence_case_effect, summary_location: summary_location, summary_timeframe: summary_timeframe, summary_recurrence: summary_recurrence)
-                  else
-                    gettext("**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}", sentence_case_effect: sentence_case_effect, summary_location: summary_location, summary_timeframe: summary_timeframe, summary_recurrence: summary_recurrence)
-                  end
+        if alert_summary.is_update do
+          gettext(
+            "**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+            sentence_case_effect: sentence_case_effect,
+            summary_location: summary_location,
+            summary_timeframe: summary_timeframe,
+            summary_recurrence: summary_recurrence
+          )
+        else
+          gettext(
+            "**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+            sentence_case_effect: sentence_case_effect,
+            summary_location: summary_location,
+            summary_timeframe: summary_timeframe,
+            summary_recurrence: summary_recurrence
+          )
+        end
 
-
-        %AlertSumary.TripSpecific{} ->
-          gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
+      %AlertSummary.TripSpecific{} ->
+        gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
           trip_identity: summary_trip_identity(alert_summary.trip_identity),
-          trip_effect: summary_trip_effect(alert_summary.trip_identity, alert_summary.effect, alert_summary.effect_stops, alert_summary.is_today),
-          cause: summary_trip_cause(),
-          recurrence: summary_recurrence())
+          trip_effect:
+            summary_trip_effect(
+              alert_summary.trip_identity,
+              alert_summary.effect,
+              alert_summary.effect_stops,
+              alert_summary.is_today
+            ),
+          cause:
+            formatted_alert
+            |> due_to_cause()
+            |> summary_trip_cause(),
+          recurrence: summary_recurrence(alert_summary.recurrence)
+        )
 
+      %AlertSummary.TripShuttle{} ->
+        gettext(
+          "Shuttle buses replace %{trip_identity} %{day} from **%{current_stop}** to **%{end_stop}**%{recurrence}",
+          trip_identity:
+            summary_trip_shuttle_identity(trip_identity: alert_summary.trip_identity),
+          day:
+            if(
+              alert_summary.is_today(
+                do: gettext("today"),
+                else: gettext("tomorrow"),
+                current_stop: alert_summary.current_stop_name,
+                end_stop: alert_summary.end_stop_name,
+                recurrence: summary_recurrence(alert_summary.recurrence)
+              )
+            )
+        )
 
-        case let .tripShuttleAlertSummary(alertSummary): return AttributedString.tryMarkdown(String(
-                format: NSLocalizedString(
-                    "Shuttle buses replace %1$@ %2$@ from **%3$@** to **%4$@**%5$@",
-                    comment: """
-                    Alert summary in the format of “Shuttle buses replace [trip identity] [day] \
-                    from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [the 12:13 PM train] \
-                    [today] from [Ruggles] to [Forest Hills][ some days until Friday]”
-                    """
-                ),
-                Self.summaryTripShuttleIdentity(tripIdentity: alertSummary.tripIdentity),
-                alertSummary.isToday ? NSLocalizedString("today", comment: "") : NSLocalizedString(
-                    "tomorrow",
-                    comment: ""
-                ),
-                alertSummary.currentStopName,
-                alertSummary.endStopName,
-                Self.summaryRecurrence(recurrence: alertSummary.recurrence)
-            ))
-        %AlertSummary.Unknown{} ->  alert_summary.fallback
-         nil ->   nil
+      %AlertSummary.Unknown{} ->
+        alert_summary.fallback
 
-                end
-
-
+      _ ->
+        nil
+    end
   end
 
   @spec summary_location(Alert.Effect.t() | nil, AlertSummary.Location.t() | nil) :: String.t()
-    def summary_location(effect, location) do
-        case location do
-          %AlertSummary.Location.DirectionToStop{} ->
+  def summary_location(effect, location) do
+    case location do
+      %AlertSummary.Location.DirectionToStop{} ->
+        gettext(" from **%{direction_name}** stops to **%{end_stop_name}**",
+          direction_name: DirectionLabel.direction_name_formatted(location.direction),
+          end_stop_name: location.end_stop_name
+        )
 
-          gettext(" from **%{direction_name}** stops to **%{end_stop_name}**",
-          direction_name: DirectionLabel.direction_name_formatted(location.direction), end_stop_name: location.end_stop_name)
+      %AlertSummary.Location.SingleStop{} ->
+        gettext(" at **%{stop_name}**", stop_name: location.stop_name)
 
-        %AlertSummary.Location.SingleStop{} ->
+      %AlertSummary.StopToDirection{} ->
+        gettext(" from **%{stop_name}** to **%{direction_name}** stops",
+          stop_name: location.start_stop_name,
+          direction_name: DirectionLabel.direction_name_formatted(location.direction)
+        )
 
-          gettext(" at **%{stop_name}**", stop_name: location.stop_name)
+      %AlertSummary.SuccessiveStops{} ->
+        gettext(" from **%{start_stop}** to **%{end_stop}**",
+          start_stop: location.start_stop_name,
+          end_stop: location.end_stop_name
+        )
 
-        %AlertSummary.StopToDirection{} ->
-          gettext(" from **%{stop_name}** to **%{direction_name}** stops", stop_name: location.start_stop_name, direction_name: DirectionLabel.direction_name_formatted(location.direction))
-
-        %AlertSummary.SuccessiveStops{} ->
-            gettext(" from **%{start_stop}** to **%{end_stop}**", start_stop: location.start_stop_name, end_stop: location.end_stop_name),
-
-
-        %AlertSummary.WholeRoute{} ->
-            if effect == :shuttle do
-              gettext(" replacing **%{mode_label}**", mode_label: AlertSummary.WholeRoute.mode_label(location))
-            else
-              gettext(" on **%{mode_label}**", mode_label: AlertSummary.WholeRoute.mode_label(location))
-            end
-
-
-        case AlertSummary.Unknown ->  ""
-
-         nil ->  ""
-
-          end
+      %AlertSummary.WholeRoute{} ->
+        if effect == :shuttle do
+          gettext(" replacing **%{mode_label}**",
+            mode_label: AlertSummary.WholeRoute.mode_label(location)
+          )
+        else
+          gettext(" on **%{mode_label}**",
+            mode_label: AlertSummary.WholeRoute.mode_label(location)
+          )
         end
 
-          @spec summary_timeframe(AlertSummary.Timeframe.t() | nil) :: String.t()
-          def summary_timeframe(timeframe) do
-             static func summaryTimeframe(timeframe: AlertSummary.Timeframe?) -> String {
-        case timeframe do
-         %AlertSummary.Timeframe.UntilFurtherNotice{} ->
-          gettext(" until further notice")
-         %AlertSummary.Timeframe.EndOfService{} ->
-            gettext(" through end of service")
-         %AlertSummary.Timeframe.Tomorrow{} -> gettext(" through tomorrow")
-         %AlertSummary.Timeframe.LaterDate{} ->
-          ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##     .formatted(.init().month(.abbreviated).day()))
-          gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+      %AlertSummary.Unknown{} ->
+        ""
 
-         %AlertSummary.Timeframe.ThisWeek{} ->
-                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##     formatted(.init().weekday(.wide)
-                    gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+      _ ->
+        ""
+    end
+  end
 
-         %AlertSummary.Timeframe.Time{} ->
-               ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##   .formatted(date: .omitted, time: .shortened))
-                              gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+  @spec summary_timeframe(AlertSummary.Timeframe.t() | nil) :: String.t()
+  def summary_timeframe(timeframe) do
+    case timeframe do
+      %AlertSummary.Timeframe.UntilFurtherNotice{} ->
+        gettext(" until further notice")
 
-         %AlertSummary.Timeframe.StartingTomorrow{} ->
-                         gettext(" starting tomorrow")
+      %AlertSummary.Timeframe.EndOfService{} ->
+        gettext(" through end of service")
 
-         %AlertSummary.Timeframe.StartingLaterToday{} ->
-                         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##   .formatted(date: .omitted, time: .shortened))
-            gettext(" starting **%{formatted_time}** today", formatted_time: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)),
-         %AlertSummary.Timeframe.TimeRange{} ->
-          gettext(" from %{start_time} to %{end_time}", start_time: )
-            String(format:
-                NSLocalizedString(
-                    "",
-                    comment: """
-                    Alert summary timeframe with a range today that will recur in the future, \
-                    e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-                    """
-                ), Self.timeRangeBoundary(timeframe.startTime),
-                Self.timeRangeBoundary(timeframe.endTime))
-        case .unknown: ""
-        case nil: ""
+      %AlertSummary.Timeframe.Tomorrow{} ->
+        gettext(" through tomorrow")
 
-          end
+      %AlertSummary.Timeframe.LaterDate{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##     .formatted(.init().month(.abbreviated).day()))
+        gettext(" through %{formatted_date}",
+          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+        )
+
+      %AlertSummary.Timeframe.ThisWeek{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##     formatted(.init().weekday(.wide)
+        gettext(" through %{formatted_date}",
+          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+        )
+
+      %AlertSummary.Timeframe.Time{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##   .formatted(date: .omitted, time: .shortened))
+        gettext(" through %{formatted_date}",
+          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+        )
+
+      %AlertSummary.Timeframe.StartingTomorrow{} ->
+        gettext(" starting tomorrow")
+
+      %AlertSummary.Timeframe.StartingLaterToday{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##   .formatted(date: .omitted, time: .shortened))
+        gettext(" starting **%{formatted_time}** today",
+          formatted_time: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+        )
+
+      %AlertSummary.Timeframe.TimeRange{} ->
+        gettext(" from %{start_time} to %{end_time}",
+          start_time: time_range_boundary(timeframe.start_time),
+          end_time: time_range_boundary(timeframe.end_time)
+        )
+
+      _ ->
+        ""
+    end
+  end
+
+  @spec time_range_boundary(
+          AlertSummary.Timeframe.TimeRange.start_time()
+          | AlertSummary.Timeframe.TimeRange.end_time()
+        ) :: String.t()
+  def time_range_boundary(boundary) do
+    case boundary do
+      %AlertSummary.Timeframe.TimeRange.StartOfService{} -> gettext("start of service")
+      %AlertSummary.Timeframe.TimeRange.EndOfService{} -> gettext("end of service")
+      ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+      ##   .formatted(date: .omitted, time: .shortened)
+      %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary)}"
+      _ -> nil
+    end
+  end
+
+  @spec summary_recurrence(AlertSummary.Recurrence.t() | nil) :: String.t()
+  def summary_recurrence(recurrence) do
+    case recurrence do
+      %AlertSummary.Recurrence.Daily{} ->
+        summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
+
+        if summary_recurrence_end_day != nil do
+          gettext("daily%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
+        else
+          ""
         end
 
-          @spec time_range_boundary(AlertSummary.Timeframe.TimeRange.start_time() | AlertSummary.Timeframe.TimeRange.end_time()) :: String.t()
-       def time_range_boundary(boundary) do
-         case boundary do
-           %AlertSummary.Timeframe.TimeRange.StartOfService{} -> gettext("start of service")
-           %AlertSummary.Timeframe.TimeRange.EndOfService{} -> gettext("end of service")
-          ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##   .formatted(date: .omitted, time: .shortened)
-           %AlertSummary.Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary)}"
-         _ -> nil
-         end
-       end
+      %AlertSummary.Recurrence.SomeDays{} ->
+        summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
 
-       @spec summary_recurrence(AlertSummary.Recurrence.t() | nil) :: String.t()
-          def summary_recurrence(recurrence) do
-        case recurrence do
-        %AlertSummary.Recurrence.Daily{} ->
-          summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
+        if summary_recurrence_end_day != nil do
+          gettext(" some days%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
+        else
+          nil
+        end
 
-          if summary_recurrence_end_day != nil do
-            gettext("daily%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
-          else
-            ""
-          end
-   %AlertSummary.Recurrence.SomeDays{} ->
-              summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
-              if summary_recurrence_end_day != nil do
-                gettext(" some days%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
-              else
-                nil
-              end
-        _ -> nil
-          end
+      _ ->
+        nil
+    end
+  end
 
-    @spec summary_recurrence_end_day(AlertSummary.Recurrence.end_day() | nil) :: String.t() | nil
-       def summary_recurrence_end_day(end_day) -> String.t() | nil do
-        case end_day do
-         %AlertSummary.Timeframe.UntilFurtherNotice{} ->
-            gettext(" until further notice")
-     %AlertSummary.Timeframe.Tomorrow{} ->
-            gettext(" until tomorrow")
-     %AlertSummary.Timeframe.LaterDate{} ->
-                     ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##   .formatted(.init().month(.abbreviated).day())
-      gettext(" through %{date_formatted}", date_formatted: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards))
-         %AlertSummary.Timeframe.ThisWeek{} ->
-                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##     formatted(.init().weekday(.wide)
-                    gettext(" through %{formatted_date}", formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards))
+  @spec summary_recurrence_end_day(AlertSummary.Recurrence.end_day() | nil) :: String.t() | nil
+  def summary_recurrence_end_day(end_day) do
+    case end_day do
+      %AlertSummary.Timeframe.UntilFurtherNotice{} ->
+        gettext(" until further notice")
 
-                             %AlertSummary.Timeframe.ThisWeek{} ->
-          _ -> nil
+      %AlertSummary.Timeframe.Tomorrow{} ->
+        gettext(" until tomorrow")
 
-                             end
-                            end
+      %AlertSummary.Timeframe.LaterDate{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##   .formatted(.init().month(.abbreviated).day())
+        gettext(" through %{date_formatted}",
+          date_formatted: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards)
+        )
 
+      %AlertSummary.Timeframe.ThisWeek{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##     formatted(.init().weekday(.wide)
+        gettext(" through %{formatted_date}",
+          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+        )
 
-    @spec summary_trip_identity(AlertSummary.TripSpecific.trip_identity()) :: String.t()
-    def summary_trip_identity(trip_identity) do
+      _ ->
+        nil
+    end
+  end
+
+  @spec summary_trip_identity(AlertSummary.TripSpecific.trip_identity()) :: String.t()
+  def summary_trip_identity(trip_identity) do
     case trip_identity do
-        %AlertSummary.TripSpecific.TripFrom{} ->
-                    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##    .formatted(date: .omitted, time: .shortened)
-                gettext("**%{trip_time}** from **%{stop_name}**", trip_time: trip_identity.trip_time, stop_name: trip_identity.stop_name)
+      %AlertSummary.TripSpecific.TripFrom{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##    .formatted(date: .omitted, time: .shortened)
+        gettext("**%{trip_time}** from **%{stop_name}**",
+          trip_time: trip_identity.trip_time,
+          stop_name: trip_identity.stop_name
+        )
 
-            %AlertSummary.TripSpecific.TripTo{} ->
-                                  ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-          ##    .formatted(date: .omitted, time: .shortened)
-                gettext("**%{trip_time}* to **%{headsign}**", trip_time: trip_identity.trip_time, headsign: trip_identity.headsign)
+      %AlertSummary.TripSpecific.TripTo{} ->
+        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
+        ##    .formatted(date: .omitted, time: .shortened)
+        gettext("**%{trip_time}* to **%{headsign}**",
+          trip_time: trip_identity.trip_time,
+          headsign: trip_identity.headsign
+        )
 
-         %AlertSummary.TripSpecific.MultipleTrips{} -> gettext("Multiple trips")
+      %AlertSummary.TripSpecific.MultipleTrips{} ->
+        gettext("Multiple trips")
     end
-    end
+  end
 
-    @spec summary_trip_effect(AlertSummary.TripSpecfic.trip_identity(), Alert.effect(), [String.t()] | nil, bool()) :: String.t()
-    def summary_trip_effect(trip_identity, effect, effect_stops, is_today) do
-      day = is_today ? gettext("today") : gettext("tomorrow")
-      is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
-        cond do
-        case effect == :cancellation && is_plural -> gettext("are cancelled %{day}", day: day)
-        case effect == :cancellation -> gettext("is cancelled %{day}", day: day)
-        case effect == :station_closure && effect_stops != nil ->
-           gettext("will not stop at %{stop_list} %{day}",
-           day: day,
-           stop_list: effect_stops
-           |> Enum.map(&"**#{&1}**")
-           |> Enum.reduce("", fn stop, acc ->
-            if acc == "" do
-              stop
-            else
-                          gettext("%{stop} and %{other_stops}", stop: stop, other_stops: acc)
+  @spec summary_trip_effect(
+          AlertSummary.TripSpecfic.trip_identity(),
+          Alert.effect(),
+          [String.t()] | nil,
+          bool()
+        ) :: String.t()
+  def summary_trip_effect(trip_identity, effect, effect_stops, is_today) do
+    day = if(is_today(do: gettext("today"), else: gettext("tomorrow")))
+    is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
 
-            end
-          end)
-        case effect == :suspension do
+    cond do
+      effect == :cancellation && is_plural ->
+        gettext("are cancelled %{day}", day: day)
+
+      effect == :cancellation ->
+        gettext("is cancelled %{day}", day: day)
+
+      effect == :station_closure && effect_stops != nil ->
+        gettext("will not stop at %{stop_list} %{day}",
+          day: day,
+          stop_list:
+            effect_stops
+            |> Enum.map(&"**#{&1}**")
+            |> Enum.reduce("", fn stop, acc ->
+              if acc == "" do
+                stop
+              else
+                gettext("%{stop} and %{other_stops}", stop: stop, other_stops: acc)
+              end
+            end)
+        )
+
+      effect == :suspension ->
         if is_plural do
           gettext("are suspended %{day}", day: day)
         else
-                    gettext("is suspended %{day}", day: day)
-
+          gettext("is suspended %{day}", day: day)
         end
-        # TODO: sentence_case_string for effect
-        true -> gettext("affected by %{effect} %{day}", effect: effect.sentence_case_string, day: day)
+
+      # TODO: sentence_case_string for effect
+      true ->
+        gettext("affected by %{effect} %{day}", effect: effect.sentence_case_string, day: day)
     end
+  end
 
-    def summary_trip_cause
+  @spec due_to_cause(Alert.cause()) :: String.t() | nil
+  def due_to_cause(cause) do
+    # TODO: causeLowercaseString
+    cause
+  end
 
+  @spec summary_trip_cause(String.t() | nil) :: String.t()
+  def summary_trip_cause(due_to_cause) do
+    if due_to_cause != nil do
+      due_to_cause
+    else
+      ""
+    end
+  end
 end
