@@ -3,7 +3,6 @@
 
 defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
-  alias MBTAV3API.Route
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe, TripShuttle}
