@@ -1,4 +1,8 @@
+# credo:disable-for-this-file Credo.Check.Refactor.CyclomaticComplexity
 defmodule MobileAppBackend.PresentationStrings do
+  @moduledoc """
+  Localized string descriptions of pieces of data from MBTAV3API.
+  """
   use Gettext, backend: MobileAppBackend.Gettext
 
   alias MBTAV3API.Alert
