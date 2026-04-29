@@ -1,57 +1,241 @@
 defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   use ExUnit.Case, async: true
   import MobileAppBackend.Factory
-  import Mox
-  import Test.Support.Helpers
   import Test.Support.Sigils
   require Jason.Sigil
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.EndOfService
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.StartOfService
-  alias MobileAppBackend.Alerts.FormattedAlert
-  alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
-  alias MobileAppBackend.Alerts.AlertSummary.Direction
-  alias MobileAppBackend.Alerts.AlertSummary.Location
-  alias MobileAppBackend.Alerts.AlertSummary.Recurrence
 
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe
+  alias MobileAppBackend.Alerts.AlertSummary.{
+    Direction,
+    Location,
+    Recurrence,
+    Timeframe,
+    TripShuttle,
+    TripSpecific,
+    Unknown
+  }
 
-  alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
-
-  alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
+  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.{EndOfService, StartOfService}
+  alias MobileAppBackend.Alerts.FormattedAlert
 
   describe "summary/2 all_clear" do
+    test "all clear whole route" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"}
+      }
+
+      assert "All clear: Regular service on Red Line" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear successive stops" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        }
+      }
+
+      assert "All clear: Regular service from Oak Grove to North Station" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 standard" do
+    test "daily shuttle between stops until further notice" do
+      alert = build(:alert, effect: :shuttle)
+
+      alert_summary = %AlertSummary.Standard{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: %Recurrence.Daily{}
+      }
+
+      assert "Shuttle buses from Oak Grove to North Station until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    # TODO: time formatting
+    @tag :skip
+    test "update" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.Standard{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        },
+        recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}},
+        is_update: true
+      }
+
+      assert "Update: Service suspended from Oak Grove to North Station daily through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 trip-specific" do
+    # TODO: time format
+    @tag :skip
+    test "suspension" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{
+          trip_time: ~B[2026-04-29 10:31:00],
+          route_type: :commuter_rail,
+          stop_name: "North Station"
+        },
+        effect: :suspension,
+        effect_stops: ["A", "B", "C"],
+        is_today: false,
+        cause: :accident,
+        recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}}
+      }
+
+      assert "10:31 AM from North Station is suspended today due to accident daily through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 trip-shuttle" do
+    # TODO time format
+    @tag :skip
+    test "single trip shuttle" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: ~B[2026-04-29 10:31:00],
+          route_type: :commuter_rail,
+          from_stop_name: "North Station"
+        },
+        start_stop_name: "North Station",
+        end_stop_name: "Oak Grove",
+        recurrence: %Recurrence.SomeDays{
+          ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}
+        }
+      }
+
+      assert "the buses replace 10:31 AM train is replaced by shuttle buses from North Station to Oak Grove some days through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    # TODO time format
+    @tag :skip
+    test "multiple trip shuttle" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.MultipleTrips{},
+        start_stop_name: "North Station",
+        end_stop_name: "Oak Grove",
+        recurrence: %Recurrence.Daily{
+          ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}
+        }
+      }
+
+      assert "Shuttle buses replace multiple trips from North Station to Oak Grove daily through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 unknown" do
+    test "fallback" do
+      assert "test" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert_summary: %Unknown{fallback: "test"}},
+                 "en"
+               )
+    end
   end
 
   describe "summary_location/2" do
     test "direction to stop" do
+      assert " from **Northbound** stops to **Downtown Crossing**" ==
+               FormattedAlert.summary_location(:suspension, %Location.DirectionToStop{
+                 direction: %Direction{name: "North", destination: "Oak Grove"},
+                 end_stop_name: "Downtown Crossing"
+               })
     end
 
     test "single stop" do
+      assert " at **Downtown Crossing**" ==
+               FormattedAlert.summary_location(:suspension, %Location.SingleStop{
+                 stop_name: "Downtown Crossing",
+                 downstream: false
+               })
     end
 
     test "stop to direction" do
+      assert " from **Downtown Crossing** to **Northbound** stops" ==
+               FormattedAlert.summary_location(:suspension, %Location.StopToDirection{
+                 direction: %Direction{name: "North", destination: "Oak Grove"},
+                 start_stop_name: "Downtown Crossing"
+               })
     end
 
     test "successive stops" do
+      assert " from **Downtown Crossing** to **Oak Grove**" ==
+               FormattedAlert.summary_location(:suspension, %Location.SuccessiveStops{
+                 start_stop_name: "Downtown Crossing",
+                 end_stop_name: "Oak Grove"
+               })
     end
 
     test "whole route shuttle" do
+      assert " replacing **Red Line**" ==
+               FormattedAlert.summary_location(:shuttle, %Location.WholeRoute{
+                 route_label: "Red Line",
+                 route_type: :heavy_rail
+               })
     end
 
     test "whole route other" do
+      assert " on **Red Line**" ==
+               FormattedAlert.summary_location(:suspension, %Location.WholeRoute{
+                 route_label: "Red Line",
+                 route_type: :heavy_rail
+               })
+    end
+
+    test "whole route bus" do
+      assert " on **132 bus**" ==
+               FormattedAlert.summary_location(:suspension, %Location.WholeRoute{
+                 route_label: "132",
+                 route_type: :bus
+               })
     end
   end
 
@@ -130,7 +314,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary_recurrence/1" do
     test "daily until further notice" do
-      assert "daily until further notice" =
+      assert " daily until further notice" =
                FormattedAlert.summary_recurrence(%Recurrence.Daily{
                  ending: %Timeframe.UntilFurtherNotice{}
                })
@@ -306,7 +490,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         )
 
       # TODO: this should probably be lower case
-      assert "affected by modified service today" == summary
+      assert "affected by Modified service today" == summary
     end
   end
 end

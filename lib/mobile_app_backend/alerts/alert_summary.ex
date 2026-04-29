@@ -273,7 +273,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       @spec mode_label(t()) :: String.t()
       def mode_label(whole_route) do
         if whole_route.route_type == :bus do
-          gettext(" %{route_label} bus", route_label: whole_route.route_label)
+          gettext("%{route_label} bus", route_label: whole_route.route_label)
         else
           whole_route.route_label
         end

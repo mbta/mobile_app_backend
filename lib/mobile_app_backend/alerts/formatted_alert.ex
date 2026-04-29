@@ -5,7 +5,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
-  alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe}
+  alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe, TripShuttle}
   alias MobileAppBackend.Alerts.DirectionLabel
   alias MobileAppBackend.PresentationStrings
 
@@ -71,14 +71,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             )
 
           %AlertSummary.TripShuttle{} ->
-            gettext(
-              "Shuttle buses replace %{trip_identity} %{day} from **%{current_stop}** to **%{end_stop}**%{recurrence}",
-              trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
-              day: if(alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")),
-              current_stop: alert_summary.current_stop_name,
-              end_stop: alert_summary.end_stop_name,
-              recurrence: summary_recurrence(alert_summary.recurrence)
-            )
+            trip_shuttle_summary(alert_summary)
 
           %AlertSummary.Unknown{} ->
             alert_summary.fallback
@@ -100,7 +93,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     case location do
       %Location.DirectionToStop{} ->
         gettext(" from **%{direction_name}** stops to **%{end_stop_name}**",
-          direction_name: DirectionLabel.direction_name_formatted(location.direction),
+          direction_name: DirectionLabel.direction_name_formatted(location.direction.name),
           end_stop_name: location.end_stop_name
         )
 
@@ -110,7 +103,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %Location.StopToDirection{} ->
         gettext(" from **%{stop_name}** to **%{direction_name}** stops",
           stop_name: location.start_stop_name,
-          direction_name: DirectionLabel.direction_name_formatted(location.direction)
+          direction_name: DirectionLabel.direction_name_formatted(location.direction.name)
         )
 
       %Location.SuccessiveStops{} ->
@@ -211,7 +204,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         summary_recurrence_end_day = summary_recurrence_end_day(recurrence.ending)
 
         if summary_recurrence_end_day != nil do
-          gettext("daily%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
+          gettext(" daily%{recurrence_text}", recurrence_text: summary_recurrence_end_day)
         else
           ""
         end
@@ -243,14 +236,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
         ##   .formatted(.init().month(.abbreviated).day())
         gettext(" through %{date_formatted}",
-          date_formatted: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards)
+          date_formatted: Util.datetime_to_gtfs(end_day.time, rounding: :backwards)
         )
 
       %Timeframe.ThisWeek{} ->
         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
         ##     formatted(.init().weekday(.wide)
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(end_day.timeframe.time, rounding: :backwards)
+          formatted_date: Util.datetime_to_gtfs(end_day.time, rounding: :backwards)
         )
 
       _ ->
@@ -279,6 +272,28 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
       %AlertSummary.TripSpecific.MultipleTrips{} ->
         gettext("Multiple trips")
+    end
+  end
+
+  @spec trip_shuttle_summary(TripShuttle.t()) :: String.t()
+  def trip_shuttle_summary(alert_summary) do
+    if match?(%TripShuttle.SingleTrip{}, alert_summary.trip_identity) &&
+         alert_summary.trip_identity.from_stop_name != nil do
+      gettext(
+        "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}%{recurrence}}",
+        trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
+        start_stop: alert_summary.start_stop_name,
+        end_stop: alert_summary.end_stop_name,
+        recurrence: summary_recurrence(alert_summary.recurrence)
+      )
+    else
+      gettext(
+        "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}",
+        trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
+        start_stop: alert_summary.start_stop_name,
+        end_stop: alert_summary.end_stop_name,
+        recurrence: summary_recurrence(alert_summary.recurrence)
+      )
     end
   end
 

@@ -12,6 +12,7 @@ defmodule MobileAppBackend.Alerts.DirectionLabel do
     }
   end
 
+  @spec direction_name_formatted(String.t()) :: String.t()
   def direction_name_formatted(direction_name) do
     Map.get(localized_direction_names(), direction_name, gettext("Heading"))
   end
