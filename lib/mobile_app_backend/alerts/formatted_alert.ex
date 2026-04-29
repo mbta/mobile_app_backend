@@ -3,6 +3,7 @@
 
 defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
+  alias MobileAppBackend.PresentationStrings
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe}
@@ -14,16 +15,30 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         }
   defstruct [:alert, :alert_summary, :effect]
 
-  @spec effect(__MODULE__.t()) :: String.t()
-  def effect(formatted_alert) do
-    cond do
-      formatted_alert.alert != nil -> formatted_alert.alert.effect
-      formatted_alert.alert_summary != nil -> formatted_alert.alert_summary.effect
-      true -> :unknown
-    end
+  @spec resolved_effect(__MODULE__.t()) :: Alert.effect()
+  def resolved_effect(formatted_alert) do
+      cond do
+        formatted_alert.alert != nil -> formatted_alert.alert.effect
+        formatted_alert.alert_summary != nil -> formatted_alert.alert_summary.effect
+        true -> :unknown
+      end
+  end
 
-    # TODO: effectString
-    "**%{effect}**"
+  @spec effect_string(__MODULE__.t()) :: String.t()
+  def effect_string(formatted_alert) do
+    effect_string =
+      formatted_alert
+      |> resolved_effect()
+      |> PresentationStrings.effect()
+
+    "**#{effect_string}**"
+  end
+
+  @spec effect_sentence_case(__MODULE__.t()) :: String.t()
+  def effect_sentence_case(formatted_alert) do
+    formatted_alert
+    |> resolved_effect()
+    |> PresentationStrings.effect_sentence_case()
   end
 
   @spec due_to_cause(__MODULE__.t()) :: String.t() | nil
@@ -40,9 +55,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           nil
       end
 
-    # TODO: cauesLowercaseString
-
-    cause
+    PresentationStrings.cause_lower_case(cause)
   end
 
   @spec summary(__MODULE__.t() | nil, Gettext.locale()) :: String.t() | nil
@@ -55,24 +68,23 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           )
 
         %AlertSummary.Standard{} ->
-          # TODO: SENTENCE_CASE_EFFECT
-          sentence_case_effect = alert_summary.effect
+          effect_sentence_case = effect_sentence_case(formatted_alert)
           summary_location = summary_location(alert_summary.effect, alert_summary.location)
           summary_timeframe = summary_timeframe(alert_summary.timeframe)
           summary_recurrence = summary_recurrence(alert_summary.recurrence)
 
           if alert_summary.is_update do
             gettext(
-              "**Update:** %{sentence_case_effect}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-              sentence_case_effect: sentence_case_effect,
+              "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+              effect_sentence_case: effect_sentence_case,
               summary_location: summary_location,
               summary_timeframe: summary_timeframe,
               summary_recurrence: summary_recurrence
             )
           else
             gettext(
-              "**%{sentence_case_effect}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-              sentence_case_effect: sentence_case_effect,
+              "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+              effect_sentence_case: effect_sentence_case,
               summary_location: summary_location,
               summary_timeframe: summary_timeframe,
               summary_recurrence: summary_recurrence
@@ -311,8 +323,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %AlertSummary.TripShuttle.SingleTrip{} ->
         gettext("the **%{time}** %{vehicle}",
           time: trip_identity.trip_time,
-          vehicle:
-            MobileAppBackend.PresentationStrings.route_type_text(trip_identity.route_type, true)
+          vehicle: MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
         )
 
       %AlertSummary.TripShuttle.MultipleTrips{} ->
@@ -359,16 +370,18 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           gettext("is suspended %{day}", day: day)
         end
 
-      # TODO: sentence_case_string for effect
       true ->
-        gettext("affected by %{effect} %{day}", effect: effect.sentence_case_string, day: day)
+        gettext("affected by %{effect} %{day}",
+          effect: PresentationStrings.effect_sentence_case(effect),
+          day: day
+        )
     end
   end
 
   @spec summary_trip_cause(String.t() | nil) :: String.t()
   def summary_trip_cause(due_to_cause) do
     if due_to_cause != nil do
-      due_to_cause
+      gettext(" due to %{cause}", cause: due_to_cause)
     else
       ""
     end
