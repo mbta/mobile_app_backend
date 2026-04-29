@@ -13,6 +13,16 @@ config :mobile_app_backend,
 config :mobile_app_backend,
   generators: [timestamp_type: :utc_datetime]
 
+config :mobile_app_backend, :gettext_backend, MobileAppBackend.Gettext
+
+config :mobile_app_backend,
+  default_locale_code: "en",
+  locale_codes: ["es", "fr", "ht", "pt-BR", "vi", "zh-Hans-CN", "zh-Hant-TW"]
+
+config :ex_cldr,
+  default_locale: "en",
+  default_backend: MobileAppBackend.Cldr
+
 config :mobile_app_backend, alerts_broadcast_interval_ms: 500
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
