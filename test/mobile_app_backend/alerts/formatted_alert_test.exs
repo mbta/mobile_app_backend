@@ -74,7 +74,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "update" do
       alert = build(:alert, effect: :suspension)
 
@@ -98,7 +98,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary/2 trip-specific" do
     # TODO: time format
-    @tag :skip
     test "suspension" do
       alert = build(:alert, effect: :suspension)
 
@@ -109,8 +108,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           stop_name: "North Station"
         },
         effect: :suspension,
-        effect_stops: ["A", "B", "C"],
-        is_today: false,
+        effect_stops: [],
+        is_today: true,
         cause: :accident,
         recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}}
       }
@@ -121,11 +120,54 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "downstream suspension" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.TripFrom{
+          trip_time: ~B[2026-04-29 10:31:00],
+          route_type: :commuter_rail,
+          stop_name: "Concord"
+        },
+        effect: :suspension,
+        effect_stops: ["Porter"],
+        is_today: true,
+        cause: :weather,
+        recurrence: nil
+      }
+
+      assert "10:31 AM train from Concord will terminate at Porter today due to weather" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "this trip suspension" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.ThisTrip{
+          route_type: :commuter_rail
+        },
+        effect: :suspension,
+        effect_stops: nil,
+        is_today: true,
+        cause: :weather,
+        recurrence: nil
+      }
+
+      assert "This train is suspended today due to weather" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 trip-shuttle" do
     # TODO time format
-    @tag :skip
     test "single trip shuttle" do
       alert = build(:alert, effect: :suspension)
 
@@ -142,7 +184,70 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         }
       }
 
-      assert "the buses replace 10:31 AM train is replaced by shuttle buses from North Station to Oak Grove some days through Apr 29" ==
+      assert "the 10:31 AM train from North Station is replaced by shuttle buses from North Station to Oak Grove some days through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "single trip shuttle nil from stop " do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: ~B[2026-04-29 10:31:00],
+          route_type: :commuter_rail,
+          from_stop_name: nil
+        },
+        start_stop_name: "North Station",
+        end_stop_name: "Oak Grove",
+        recurrence: %Recurrence.SomeDays{
+          ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}
+        }
+      }
+
+      assert "Shuttle buses replace the 10:31 AM train from North Station to Oak Grove some days through Apr 29" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "downstream shuttle" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.SingleTrip{
+          trip_time: ~B[2026-04-29 10:31:00],
+          route_type: :commuter_rail,
+          from_stop_name: "Concord"
+        },
+        start_stop_name: "Porter",
+        end_stop_name: "North Station",
+        recurrence: nil
+      }
+
+      assert "10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "this trip shuttle" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.ThisTrip{
+          route_type: :commuter_rail
+        },
+        start_stop_name: "Porter",
+        end_stop_name: "North Station",
+        recurrence: nil
+      }
+
+      assert "Shuttle buses replace this train from Porter to North Station" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -150,7 +255,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO time format
-    @tag :skip
     test "multiple trip shuttle" do
       alert = build(:alert, effect: :suspension)
 
@@ -255,7 +359,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "later date" do
       assert " through Apr 29" ==
                FormattedAlert.summary_timeframe(%Timeframe.LaterDate{
@@ -264,7 +368,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "this week" do
       assert " through Wednesday" ==
                FormattedAlert.summary_timeframe(%Timeframe.ThisWeek{
@@ -273,7 +377,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "time" do
       assert " through 10:31 AM" ==
                FormattedAlert.summary_timeframe(%Timeframe.Time{time: ~B[2026-04-29 10:31:00]})
@@ -285,7 +389,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "starting later today" do
       assert " starting **10:31 AM**" ==
                FormattedAlert.summary_timeframe(%Timeframe.StartingLaterToday{
@@ -302,7 +406,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: time formatting
-    @tag :skip
+
     test "time range - time to time" do
       assert " from 10:31 AM to 2:31 PM" ==
                FormattedAlert.summary_timeframe(%Timeframe.TimeRange{
@@ -321,7 +425,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: Unskip w/ time formatting
-    @tag :skip
+
     test "some days until later date" do
       assert "some days through Apr 29" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
@@ -330,7 +434,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: Unskip w/ time formatting
-    @tag :skip
+
     test "some days through this week" do
       assert "some days through Wednesday" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
@@ -341,7 +445,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary_trip_identity/1" do
     # TODO: Unskip w/ time formatting
-    @tag :skip
+
     test "trip from" do
       assert "**10:31** from **Oak Grove**" =
                FormattedAlert.summary_trip_identity(%TripSpecific.TripFrom{
@@ -352,7 +456,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     # TODO: Unskip w/ time formatting
-    @tag :skip
 
     test "trip to" do
       assert "**10:31** to **North Station**" =
@@ -371,7 +474,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary_trip_shuttle_identity/1" do
     # TODO: Unskip w/ time formatting
-    @tag :skip
+
     test "one trip" do
       assert "the **10:30** train" ==
                FormattedAlert.summary_trip_shuttle_identity(%TripShuttle.SingleTrip{

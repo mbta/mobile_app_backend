@@ -3,6 +3,7 @@
 
 defmodule MobileAppBackend.Alerts.FormattedAlert do
   use Gettext, backend: MobileAppBackend.Gettext
+  alias MBTAV3API.Route
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe, TripShuttle}
@@ -254,19 +255,26 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   @spec summary_trip_identity(AlertSummary.TripSpecific.trip_identity()) :: String.t()
   def summary_trip_identity(trip_identity) do
     case trip_identity do
+      %AlertSummary.TripSpecific.ThisTrip{} ->
+        gettext("This %{route_type}",
+          route_type: PresentationStrings.route_type(trip_identity.route_type, true)
+        )
+
       %AlertSummary.TripSpecific.TripFrom{} ->
         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
         ##    .formatted(date: .omitted, time: .shortened)
-        gettext("**%{trip_time}** from **%{stop_name}**",
+        gettext("**%{trip_time}** %{route_type} from **%{stop_name}**",
           trip_time: trip_identity.trip_time,
+          route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           stop_name: trip_identity.stop_name
         )
 
       %AlertSummary.TripSpecific.TripTo{} ->
         ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
         ##    .formatted(date: .omitted, time: .shortened)
-        gettext("**%{trip_time}* to **%{headsign}**",
+        gettext("**%{trip_time}* %{route_type} to **%{headsign}**",
           trip_time: trip_identity.trip_time,
+          route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           headsign: trip_identity.headsign
         )
 
@@ -280,7 +288,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     if match?(%TripShuttle.SingleTrip{}, alert_summary.trip_identity) &&
          alert_summary.trip_identity.from_stop_name != nil do
       gettext(
-        "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}%{recurrence}}",
+        "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}%{recurrence}",
         trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
         start_stop: alert_summary.start_stop_name,
         end_stop: alert_summary.end_stop_name,
@@ -303,8 +311,23 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     ##    .formatted(date: .omitted, time: .shortened)
     case trip_identity do
       %AlertSummary.TripShuttle.SingleTrip{} ->
-        gettext("the **%{time}** %{vehicle}",
-          time: trip_identity.trip_time,
+        if trip_identity.from_stop_name != nil do
+          gettext("the **%{time}** %{vehicle} from %{from_stop}",
+            time: trip_identity.trip_time,
+            vehicle:
+              MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true),
+            from_stop: trip_identity.from_stop_name
+          )
+        else
+          gettext("the **%{time}* %{vehicle}",
+            time: trip_identity.trip_time,
+            vehicle:
+              MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
+          )
+        end
+
+      %AlertSummary.TripShuttle.ThisTrip{} ->
+        gettext("this %{vehicle}",
           vehicle: MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
         )
 
@@ -363,7 +386,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       effect == :cancellation ->
         gettext("is cancelled %{day}", day: day)
 
-      effect == :station_closure && effect_stops != nil ->
+      effect in [:station_closure, :stop_closure, :dock_closure] && effect_stops != nil ->
         gettext("will not stop at %{stop_list} %{day}",
           day: day,
           stop_list:
@@ -380,10 +403,23 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         )
 
       effect == :suspension ->
-        if is_plural do
-          gettext("are suspended %{day}", day: day)
-        else
-          gettext("is suspended %{day}", day: day)
+        first_effected_stop =
+          effect_stops
+          |> List.wrap()
+          |> List.first()
+
+        cond do
+          first_effected_stop != nil ->
+            gettext("will terminate at %{terminating_stop}, %{day}",
+              terminating_stop: first_effected_stop,
+              day: day
+            )
+
+          is_plural ->
+            gettext("are suspended %{day}", day: day)
+
+          true ->
+            gettext("is suspended %{day}", day: day)
         end
 
       true ->
