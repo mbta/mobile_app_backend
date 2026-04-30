@@ -22,7 +22,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -61,7 +62,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         informed_entity: [
           %Alert.InformedEntity{activities: [:board], route: "Green-D"},
           %Alert.InformedEntity{activities: [:board], route: "Green-E"}
-        ]
+        ],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -117,7 +119,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "70158"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "70158"}],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -151,7 +154,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
             route: "Orange",
             stop: "70005"
           }
-        ]
+        ],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -178,7 +182,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
             activities: [:using_wheelchair],
             stop: "place-chncl"
           }
-        ]
+        ],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription_including =
@@ -211,7 +216,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         closed_timestamp: DateTime.add(now, -1),
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: DateTime.add(now, -2)
       )
 
     subscription =
@@ -302,6 +308,42 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   test "sends notification with timestamp if open" do
     now = DateTime.now!("America/New_York")
     start_time = DateTime.add(now, -1)
+    notification_time = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: start_time, end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: notification_time
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: start_time |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^notification_time}
+             }
+           ] =
+             Engine.notifications([subscription], [alert], now)
+  end
+
+  test "skips notification if timestamp is nil" do
+    now = DateTime.now!("America/New_York")
+    start_time = DateTime.add(now, -1)
 
     alert =
       build(:alert,
@@ -324,14 +366,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [
-             %OutgoingNotification{
-               subscriptions: [^subscription],
-               alert: ^alert,
-               type: {:notification, ^start_time}
-             }
-           ] =
-             Engine.notifications([subscription], [alert], now)
+    assert [] = Engine.notifications([subscription], [alert], now)
   end
 
   test "sends reminder at 24h-1s if open before active" do
@@ -343,7 +378,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           %Alert.ActivePeriod{start: now |> DateTime.add(24, :hour) |> DateTime.add(-1), end: nil}
         ],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -398,7 +434,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: now_plus_12h |> DateTime.add(-1), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription =
@@ -452,7 +489,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: friday_noon, end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: friday_noon
       )
 
     subscription =
@@ -643,7 +681,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         informed_entity: [
           %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
           %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
-        ]
+        ],
+        last_push_notification_timestamp: now |> DateTime.add(-2)
       )
 
     subscription1 =
