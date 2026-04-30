@@ -225,11 +225,17 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert length(new_subscription.windows) == length(old_subscription.windows) - 1
 
       Enum.each(new_subscription.windows, fn actual_window ->
-        assert Enum.find(
-                 new_windows,
-                 &(Time.from_iso8601!(&1.start_time) == actual_window.start_time &&
-                     Time.from_iso8601!(&1.end_time) == actual_window.end_time)
-               ) != nil
+        matching_expected_window =
+          Enum.find(
+            new_windows,
+            &(Time.from_iso8601!(&1.start_time) == actual_window.start_time &&
+                Time.from_iso8601!(&1.end_time) == actual_window.end_time)
+          )
+
+        assert matching_expected_window != nil
+
+        assert Enum.sort(matching_expected_window.days_of_week) ==
+                 Enum.sort(actual_window.days_of_week)
       end)
     end
 
