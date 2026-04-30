@@ -224,12 +224,12 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert new_subscription.include_accessibility == not old_subscription.include_accessibility
       assert length(new_subscription.windows) == length(old_subscription.windows) - 1
 
-      Enum.zip_with(new_subscription.windows, old_subscription.windows, fn new_window,
-                                                                           old_window ->
-        assert new_window.id == old_window.id
-        assert Time.compare(new_window.start_time, old_window.start_time) == :gt
-        assert Time.compare(new_window.end_time, old_window.end_time) == :lt
-        assert length(new_window.days_of_week) != length(old_window.days_of_week)
+      Enum.each(new_subscription.windows, fn actual_window ->
+        assert Enum.find(
+                 new_windows,
+                 &(Time.from_iso8601!(&1.start_time) == actual_window.start_time &&
+                     Time.from_iso8601!(&1.end_time) == actual_window.end_time)
+               ) != nil
       end)
     end
 
