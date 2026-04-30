@@ -7,8 +7,8 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
-  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.Notifications.Engine.OutgoingNotification
+  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
 

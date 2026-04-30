@@ -1,10 +1,11 @@
 defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
-  alias MobileAppBackend.Notifications.DeliveredNotification
   alias MBTAV3API.Alert
-  alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.FormattedAlert
+  alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.NotificationTitle
+
+  alias MobileAppBackend.Notifications.Subscription
 
   @type t :: %__MODULE__{
           title: NotificationTitle.t(),
