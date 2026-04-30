@@ -155,4 +155,24 @@ defmodule MobileAppBackend.Notifications.NotificationTitleTest do
       assert NotificationTitle.from_lines_or_routes(routes) == %NotificationTitle.MultipleRoutes{}
     end
   end
+
+  describe "to_string/2" do
+    test "bare label" do
+      assert "Hello" ==
+               NotificationTitle.to_string(%NotificationTitle.BareLabel{label: "Hello"}, "en")
+    end
+
+    test "model label" do
+      assert "132 bus" ==
+               NotificationTitle.to_string(
+                 %NotificationTitle.ModeLabel{label: "132", mode: :bus},
+                 "en"
+               )
+    end
+
+    test "multiple routes" do
+      assert "Multiple routes" ==
+               NotificationTitle.to_string(%NotificationTitle.MultipleRoutes{}, "en")
+    end
+  end
 end

@@ -1,4 +1,7 @@
 defmodule MobileAppBackend.Notifications.NotificationTitle do
+  use Gettext, backend: MobileAppBackend.Gettext
+
+  alias MobileAppBackend.PresentationStrings
   alias MBTAV3API.Line
   alias MBTAV3API.Route
   alias Util.PolymorphicJson
@@ -47,5 +50,24 @@ defmodule MobileAppBackend.Notifications.NotificationTitle do
       _ ->
         %MultipleRoutes{}
     end
+  end
+
+  @spec to_string(__MODULE__.t(), Gettext.locale()) :: String.t()
+  def to_string(title, locale) do
+    Gettext.with_locale(locale, fn ->
+      case title do
+        %BareLabel{} ->
+          title.label
+
+        %ModeLabel{} ->
+          gettext("%{label} %{mode_label}",
+            label: title.label,
+            mode_label: PresentationStrings.route_type(title.mode, true)
+          )
+
+        %MultipleRoutes{} ->
+          gettext("Multiple routes")
+      end
+    end)
   end
 end
