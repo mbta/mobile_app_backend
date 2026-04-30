@@ -22,8 +22,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Green-D"}]
       )
 
     subscription =
@@ -62,8 +61,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         informed_entity: [
           %Alert.InformedEntity{activities: [:board], route: "Green-D"},
           %Alert.InformedEntity{activities: [:board], route: "Green-E"}
-        ],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        ]
       )
 
     subscription =
@@ -119,8 +117,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "70158"}],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "70158"}]
       )
 
     subscription =
@@ -154,8 +151,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
             route: "Orange",
             stop: "70005"
           }
-        ],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        ]
       )
 
     subscription =
@@ -182,8 +178,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
             activities: [:using_wheelchair],
             stop: "place-chncl"
           }
-        ],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        ]
       )
 
     subscription_including =
@@ -378,8 +373,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           %Alert.ActivePeriod{start: now |> DateTime.add(24, :hour) |> DateTime.add(-1), end: nil}
         ],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
       )
 
     subscription =
@@ -434,8 +428,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       build(:alert,
         active_period: [%Alert.ActivePeriod{start: now_plus_12h |> DateTime.add(-1), end: nil}],
         effect: :suspension,
-        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}]
       )
 
     subscription =
@@ -681,8 +674,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         informed_entity: [
           %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
           %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
-        ],
-        last_push_notification_timestamp: now |> DateTime.add(-2)
+        ]
       )
 
     subscription1 =
