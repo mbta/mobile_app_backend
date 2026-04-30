@@ -141,24 +141,24 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext(" through tomorrow")
 
       %Timeframe.LaterDate{} ->
-        gettext(" through %{formatted_date}",
-          formatted_date:
+        gettext("key/alert_summary_timeframe_later_date",
+          "1":
             timeframe.time
             |> Util.datetime_to_gtfs(rounding: :backwards)
             |> Util.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
-        gettext(" through %{formatted_date}",
-          formatted_date:
+        gettext("key/alert_summary_timeframe_this_week",
+          "1":
             timeframe.time
             |> Util.datetime_to_gtfs(rounding: :backwards)
             |> Util.datetime_to_string(:wide_weekday)
         )
 
       %Timeframe.Time{} ->
-        gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_string(timeframe.time, :short_time)
+        gettext("key/alert_summary_timeframe_time",
+          "1": Util.datetime_to_string(timeframe.time, :short_time)
         )
 
       %Timeframe.StartingTomorrow{} ->
@@ -236,16 +236,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext(" until tomorrow")
 
       %Timeframe.LaterDate{} ->
-        gettext(" through %{date_formatted}",
-          date_formatted:
+        gettext("key/alert_summary_recurrence_end_day_later_date",
+          "1":
             end_day.time
             |> Util.datetime_to_gtfs(rounding: :backwards)
             |> Util.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
-        gettext(" through %{formatted_date}",
-          formatted_date:
+        gettext("key/alert_summary_recurrence_end_day_this_week",
+          "1":
             end_day.time
             |> Util.datetime_to_gtfs(rounding: :backwards)
             |> Util.datetime_to_string(:wide_weekday)
@@ -288,7 +288,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     if match?(%TripShuttle.SingleTrip{}, alert_summary.trip_identity) &&
          alert_summary.trip_identity.from_stop_name != nil do
       gettext(
-        "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}%{recurrence}",
+        "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}",
         trip_identity: summary_trip_shuttle_identity(alert_summary.trip_identity),
         start_stop: alert_summary.start_stop_name,
         end_stop: alert_summary.end_stop_name,
@@ -310,7 +310,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     case trip_identity do
       %AlertSummary.TripShuttle.SingleTrip{} ->
         if trip_identity.from_stop_name != nil do
-          gettext("the **%{time}** %{vehicle} from %{from_stop}",
+          gettext("**%{time}** %{vehicle} from **%{from_stop}**",
             time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true),
