@@ -51,9 +51,7 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :all_clear}
 
           %{notification: subscriptions} ->
-            {subscriptions,
-             {:notification,
-              alert.last_push_notification_timestamp || hd(alert.active_period).start}}
+            {subscriptions, {:notification, alert.last_push_notification_timestamp}}
 
           %{reminder: subscriptions} ->
             {subscriptions, :reminder}
@@ -104,7 +102,9 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    relevant_alerts = Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    relevant_alerts =
+      Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+      |> Enum.filter(&(&1.last_push_notification_timestamp != nil))
 
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
       List.wrap(alert_candidate(subscription, alert, now))
