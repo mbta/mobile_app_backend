@@ -1,9 +1,9 @@
 defmodule MobileAppBackend.Notifications.NotificationTitle do
   use Gettext, backend: MobileAppBackend.Gettext
 
-  alias MobileAppBackend.PresentationStrings
   alias MBTAV3API.Line
   alias MBTAV3API.Route
+  alias MobileAppBackend.PresentationStrings
   alias Util.PolymorphicJson
 
   defmodule BareLabel do

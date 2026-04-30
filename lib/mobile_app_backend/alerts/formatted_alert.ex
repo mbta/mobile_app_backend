@@ -115,11 +115,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %Location.WholeRoute{} ->
         if effect == :shuttle do
           gettext(" replacing **%{mode_label}**",
-            mode_label: Location.WholeRoute.mode_label(location)
+            mode_label: PresentationStrings.mode_label(location.route_label, location.route_type)
           )
         else
           gettext(" on **%{mode_label}**",
-            mode_label: Location.WholeRoute.mode_label(location)
+            mode_label: PresentationStrings.mode_label(location.route_label, location.route_type)
           )
         end
 

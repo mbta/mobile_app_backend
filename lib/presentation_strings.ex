@@ -13,8 +13,17 @@ defmodule MobileAppBackend.PresentationStrings do
   def route_type(:bus, false), do: gettext("buses")
   def route_type(:ferry, true), do: gettext("ferry")
   def route_type(:ferry, false), do: gettext("ferries")
-  def route_type(_subway, true), do: gettext("train")
-  def route_type(_subway, false), do: gettext("trains")
+  def route_type(_train, true), do: gettext("train")
+  def route_type(_train, false), do: gettext("trains")
+
+  @spec mode_label(String.t(), Route.type()) :: String.t()
+  def mode_label(name, route_type) do
+    if route_type == :bus do
+      gettext("%{name} bus", name: name)
+    else
+      name
+    end
+  end
 
   @spec effect_sentence_case(Alert.effect()) :: String.t()
   def effect_sentence_case(effect) do
