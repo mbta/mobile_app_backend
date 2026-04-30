@@ -395,8 +395,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     test "time range - time to time" do
       assert " from 10:31 AM to 2:31 PM" ==
                FormattedAlert.summary_timeframe(%Timeframe.TimeRange{
-                 start_time: %Timeframe.Time{time: ~B[2026-04-29 10:31:00]},
-                 end_time: %Timeframe.Time{time: ~B[2026-04-29 14:31:00]}
+                 start_time: %Timeframe.TimeRange.Time{time: ~B[2026-04-29 10:31:00]},
+                 end_time: %Timeframe.TimeRange.Time{time: ~B[2026-04-29 14:31:00]}
                })
     end
   end

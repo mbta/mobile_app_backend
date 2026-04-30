@@ -192,7 +192,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %Timeframe.TimeRange.EndOfService{} ->
         gettext("end of service")
 
-      %Timeframe.Time{} ->
+      %Timeframe.TimeRange.Time{} ->
         Util.datetime_to_string(boundary.time, :short_time)
 
       _ ->
