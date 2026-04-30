@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
   import ExUnit.CaptureLog
   import MobileAppBackend.Factory
+
   alias MBTAV3API.Store
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -17,8 +18,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, -48, :hour),
-            end: DateTime.add(now, 10, :minute)
+            start: DateTime.add(now, -48, :hour)
           }
         ],
         effect: :suspension,
@@ -57,19 +57,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{
-            "type" => "time",
-            "time" => hd(alert.active_period).end |> DateTime.to_iso8601()
-          }
-        },
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "upstream_timestamp" => alert.last_push_notification_timestamp
       }
@@ -136,8 +125,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, 22, :hour),
-            end: DateTime.add(now, 27, :hour)
+            start: DateTime.add(now, 22, :hour)
           }
         ],
         effect: :suspension,
@@ -170,16 +158,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{"type" => "starting_tomorrow"}
-        },
+        "title" => "66 bus",
+        "body" => "Service suspended starting tomorrow",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "reminder",
         "upstream_timestamp" => nil
@@ -319,15 +299,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "type" => "all_clear",
-          "location" => nil
-        },
+        "title" => "66 bus",
+        "body" => "All clear: Regular service",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "all_clear",
         "upstream_timestamp" => nil

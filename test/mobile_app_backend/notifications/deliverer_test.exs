@@ -6,12 +6,10 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   import Tesla.Test
   import Test.Support.Helpers
   alias MBTAV3API.Store.Alerts
-  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Factory
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
-  alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.NotificationsFactory
   alias MobileAppBackend.User
 
@@ -28,6 +26,9 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     alert_id = alert.id
     upstream_timestamp = DateTime.utc_now(:second)
     type = :notification
+
+    title = "Notification title"
+    body = "Notification body"
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -46,12 +47,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       perform_job(Notifications.Deliverer, %{
         user_id: user_id,
         alert_id: alert_id,
-        title: %NotificationTitle.BareLabel{label: "Red Line"},
-        summary: %AlertSummary.Standard{
-          effect: :station_closure,
-          location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
-          timeframe: %AlertSummary.Timeframe.Tomorrow{}
-        },
+        title: title,
+        body: body,
         subscriptions: [%{route: "1", stop: "1", direction: 1}],
         upstream_timestamp: upstream_timestamp,
         type: type
@@ -73,32 +70,13 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
     assert %{
              message: %{
-               data: %{
-                 title: title,
-                 summary: summary,
-                 alert_id: ^alert_id,
-                 subscriptions: subscriptions,
-                 notification_type: "notification",
-                 sent_at: sent_at
+               notification: %{
+                 title: ^title,
+                 body: ^body
                },
                token: ^fcm_token
              }
            } = Jason.decode!(received_body, keys: :atoms!)
-
-    assert %{type: "bare_label", label: "Red Line"} = Jason.decode!(title, keys: :atoms!)
-
-    assert %{
-             effect: "station_closure",
-             location: %{type: "single_stop", stop_name: "South Station"},
-             timeframe: %{type: "tomorrow"}
-           } = Jason.decode!(summary, keys: :atoms!)
-
-    assert [%{route: "1", stop: "1", direction: 1}] =
-             Jason.decode!(subscriptions, keys: :atoms!)
-
-    # Elixir and Kotlin disagree about whether or not the T is optional
-    assert sent_at =~ "T"
-    assert {:ok, _, _} = DateTime.from_iso8601(sent_at)
 
     assert [] = received_opts
 
@@ -124,6 +102,9 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     upstream_timestamp = DateTime.utc_now(:second)
     type = :notification
 
+    title = "Notification title"
+    body = "Notification body"
+
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
       expires: ~U[9999-12-31 23:59:59Z]
@@ -142,8 +123,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
-          title: %NotificationTitle.BareLabel{label: "Red Line"},
-          summary: %AlertSummary.Standard{},
+          title: title,
+          body: body,
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type
@@ -184,8 +165,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,
           alert_id: alert_id,
-          title: %NotificationTitle.BareLabel{label: "Red Line"},
-          summary: %AlertSummary.Standard{},
+          title: "title",
+          body: "body",
           subscriptions: [%{route: "1", stop: "1", direction: 1}],
           upstream_timestamp: upstream_timestamp,
           type: type

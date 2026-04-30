@@ -7,21 +7,10 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
-  alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.NotificationTitle
+  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
-
-  defmodule OutgoingNotification do
-    @type t :: %__MODULE__{
-            title: NotificationTitle.t(),
-            summary: AlertSummary.t(),
-            subscriptions: [Subscription.t()],
-            alert: Alert.t(),
-            type: DeliveredNotification.type()
-          }
-    defstruct [:title, :summary, :subscriptions, :alert, :type]
-  end
 
   @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [OutgoingNotification.t()]
   def notifications(subscriptions, alerts, now) do

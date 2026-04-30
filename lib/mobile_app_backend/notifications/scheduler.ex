@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
+  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
   import Ecto.Query
   require Logger
@@ -10,6 +11,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
+
+  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
 
   @impl Oban.Worker
   def perform(_) do
@@ -80,14 +83,17 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec find_new_recipients([Alert.t()], [User.t()], DateTime.t()) :: [
-          {User.t(), Engine.OutgoingNotification.t()}
+          {User.t(), OutgoingNotification.Localized.t()}
         ]
   defp find_new_recipients(alerts, users, now) do
     Enum.flat_map(users, &new_notifications(&1, alerts, now))
   end
 
+  @spec new_notifications(User.t(), [Alert.t()], DateTime.t()) :: [
+          {User.t(), OutgoingNotification.Localized.t()}
+        ]
   defp new_notifications(
-         %User{id: user_id, notification_subscriptions: subscriptions} = user,
+         %User{id: user_id, notification_subscriptions: subscriptions, locale: locale} = user,
          alerts,
          now
        ) do
@@ -103,7 +109,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
              outgoing_notification.alert.id,
              outgoing_notification.type
            ) do
-          [{user, outgoing_notification}]
+          localized_notification =
+            OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
+
+          [{user, localized_notification}]
         else
           []
         end
@@ -129,13 +138,15 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       []
   end
 
-  @spec enqueue_delivery([{User.t(), Engine.OutgoingNotification.t()}]) :: :ok
+  @spec enqueue_delivery([{User.t(), OutgoingNotification.Localized.t()}]) :: :ok
   defp enqueue_delivery(recipients) do
     # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
     Enum.each(recipients, &deliver_notification/1)
   end
 
-  defp deliver_notification({%User{} = recipient, %Engine.OutgoingNotification{} = notification}) do
+  defp deliver_notification(
+         {%User{} = recipient, %OutgoingNotification.Localized{} = notification}
+       ) do
     {type, upstream_timestamp} =
       case notification.type do
         {type, upstream_timestamp} -> {type, upstream_timestamp}
@@ -152,9 +163,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     %{
       user_id: recipient.id,
-      alert_id: notification.alert.id,
+      alert_id: notification.alert_id,
       title: notification.title,
-      summary: notification.summary,
+      body: notification.body,
       subscriptions: subscriptions,
       upstream_timestamp: upstream_timestamp,
       type: type
@@ -165,7 +176,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     error ->
       log_exception(
         "enqueue_delivery",
-        "user_id=#{recipient.id} alert_id=#{notification.alert.id}",
+        "user_id=#{recipient.id} alert_id=#{notification.alert_id}",
         Exception.format(:error, error, __STACKTRACE__)
       )
 
