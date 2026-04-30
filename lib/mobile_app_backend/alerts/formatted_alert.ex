@@ -141,34 +141,32 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext(" through tomorrow")
 
       %Timeframe.LaterDate{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##     .formatted(.init().month(.abbreviated).day()))
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+          formatted_date:
+            timeframe.time
+            |> Util.datetime_to_gtfs(rounding: :backwards)
+            |> Util.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##     formatted(.init().weekday(.wide)
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+          formatted_date:
+            timeframe.time
+            |> Util.datetime_to_gtfs(rounding: :backwards)
+            |> Util.datetime_to_string(:wide_weekday)
         )
 
       %Timeframe.Time{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##   .formatted(date: .omitted, time: .shortened))
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+          formatted_date: Util.datetime_to_string(timeframe.time, :short_time)
         )
 
       %Timeframe.StartingTomorrow{} ->
         gettext(" starting tomorrow")
 
       %Timeframe.StartingLaterToday{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##   .formatted(date: .omitted, time: .shortened))
         gettext(" starting **%{formatted_time}** today",
-          formatted_time: Util.datetime_to_gtfs(timeframe.time, rounding: :backwards)
+          formatted_time: Util.datetime_to_string(timeframe.time, :short_time)
         )
 
       %Timeframe.TimeRange{} ->
@@ -188,12 +186,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         ) :: String.t()
   defp time_range_boundary(boundary) do
     case boundary do
-      %Timeframe.TimeRange.StartOfService{} -> gettext("start of service")
-      %Timeframe.TimeRange.EndOfService{} -> gettext("end of service")
-      ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-      ##   .formatted(date: .omitted, time: .shortened)
-      %Timeframe.TimeRange.Time{} -> "#{Util.datetime_to_gtfs(boundary.time)}"
-      _ -> nil
+      %Timeframe.TimeRange.StartOfService{} ->
+        gettext("start of service")
+
+      %Timeframe.TimeRange.EndOfService{} ->
+        gettext("end of service")
+
+      %Timeframe.Time{} ->
+        Util.datetime_to_string(boundary.time, :short_time)
+
+      _ ->
+        nil
     end
   end
 
@@ -233,17 +236,19 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext(" until tomorrow")
 
       %Timeframe.LaterDate{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##   .formatted(.init().month(.abbreviated).day())
         gettext(" through %{date_formatted}",
-          date_formatted: Util.datetime_to_gtfs(end_day.time, rounding: :backwards)
+          date_formatted:
+            end_day.time
+            |> Util.datetime_to_gtfs(rounding: :backwards)
+            |> Util.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##     formatted(.init().weekday(.wide)
         gettext(" through %{formatted_date}",
-          formatted_date: Util.datetime_to_gtfs(end_day.time, rounding: :backwards)
+          formatted_date:
+            end_day.time
+            |> Util.datetime_to_gtfs(rounding: :backwards)
+            |> Util.datetime_to_string(:wide_weekday)
         )
 
       _ ->
@@ -260,19 +265,15 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         )
 
       %AlertSummary.TripSpecific.TripFrom{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##    .formatted(date: .omitted, time: .shortened)
         gettext("**%{trip_time}** %{route_type} from **%{stop_name}**",
-          trip_time: trip_identity.trip_time,
+          trip_time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           stop_name: trip_identity.stop_name
         )
 
       %AlertSummary.TripSpecific.TripTo{} ->
-        ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-        ##    .formatted(date: .omitted, time: .shortened)
-        gettext("**%{trip_time}* %{route_type} to **%{headsign}**",
-          trip_time: trip_identity.trip_time,
+        gettext("**%{trip_time}** %{route_type} to **%{headsign}**",
+          trip_time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           headsign: trip_identity.headsign
         )
@@ -306,20 +307,18 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
   @spec summary_trip_shuttle_identity(AlertSummary.TripShuttle.trip_identity()) :: String.t()
   def summary_trip_shuttle_identity(trip_identity) do
-    ## ********************** TODO: KB COME BACK AND TRANSLATE THE DATE!!! **************************
-    ##    .formatted(date: .omitted, time: .shortened)
     case trip_identity do
       %AlertSummary.TripShuttle.SingleTrip{} ->
         if trip_identity.from_stop_name != nil do
           gettext("the **%{time}** %{vehicle} from %{from_stop}",
-            time: trip_identity.trip_time,
+            time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true),
             from_stop: trip_identity.from_stop_name
           )
         else
-          gettext("the **%{time}* %{vehicle}",
-            time: trip_identity.trip_time,
+          gettext("the **%{time}** %{vehicle}",
+            time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
           )
@@ -409,7 +408,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
         cond do
           first_effected_stop != nil ->
-            gettext("will terminate at %{terminating_stop}, %{day}",
+            gettext("will terminate at %{terminating_stop} %{day}",
               terminating_stop: first_effected_stop,
               day: day
             )

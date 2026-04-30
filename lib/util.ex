@@ -321,6 +321,42 @@ defmodule Util do
     end
   end
 
+  @spec datetime_to_string(Cldr.Calendar.any_date_time(), String.t() | atom()) :: String.t()
+
+  @doc """
+  Format the date in a localized string
+
+  ## Examples
+      iex> import Test.Support.Sigils
+      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :short_time)
+      "1:23 AM"
+      iex> Util.datetime_to_string(~B[2026-04-29 13:23:45], :short_time)
+      "1:23 PM"
+      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :short_month_day)
+      "Apr 29"
+      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :wide_weekday)
+      "Wednesday"
+      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], "h")
+      "1"
+
+  """
+  def datetime_to_string(datetime, :short_time) do
+    datetime_to_string(datetime, "h:mm a")
+  end
+
+  def datetime_to_string(datetime, :short_month_day) do
+    datetime_to_string(datetime, "MMM d")
+  end
+
+  def datetime_to_string(datetime, :wide_weekday) do
+    datetime_to_string(datetime, "EEEE")
+  end
+
+  def datetime_to_string(datetime, format) do
+    {:ok, formatted} = Cldr.DateTime.to_string(datetime, MobileAppBackend.Cldr, format: format)
+    formatted
+  end
+
   @spec parse_revenue_status(String.t() | nil) :: boolean()
   def parse_revenue_status("REVENUE"), do: true
   def parse_revenue_status("NON_REVENUE"), do: false

@@ -73,8 +73,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
-    # TODO: time formatting
-
     test "update" do
       alert = build(:alert, effect: :suspension)
 
@@ -97,7 +95,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary/2 trip-specific" do
-    # TODO: time format
     test "suspension" do
       alert = build(:alert, effect: :suspension)
 
@@ -114,7 +111,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}}
       }
 
-      assert "10:31 AM from North Station is suspended today due to accident daily through Apr 29" ==
+      assert "10:31 AM train from North Station is suspended today due to accident daily through Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -167,7 +164,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary/2 trip-shuttle" do
-    # TODO time format
     test "single trip shuttle" do
       alert = build(:alert, effect: :suspension)
 
@@ -228,7 +224,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: nil
       }
 
-      assert "10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
+      assert "the 10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -254,7 +250,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
-    # TODO time format
     test "multiple trip shuttle" do
       alert = build(:alert, effect: :suspension)
 
@@ -358,8 +353,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       assert " through tomorrow" == FormattedAlert.summary_timeframe(%Timeframe.Tomorrow{})
     end
 
-    # TODO: time formatting
-
     test "later date" do
       assert " through Apr 29" ==
                FormattedAlert.summary_timeframe(%Timeframe.LaterDate{
@@ -367,16 +360,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                })
     end
 
-    # TODO: time formatting
-
     test "this week" do
       assert " through Wednesday" ==
                FormattedAlert.summary_timeframe(%Timeframe.ThisWeek{
                  time: ~B[2026-04-29 10:31:00]
                })
     end
-
-    # TODO: time formatting
 
     test "time" do
       assert " through 10:31 AM" ==
@@ -388,10 +377,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                FormattedAlert.summary_timeframe(%Timeframe.StartingTomorrow{})
     end
 
-    # TODO: time formatting
-
     test "starting later today" do
-      assert " starting **10:31 AM**" ==
+      assert " starting **10:31 AM** today" ==
                FormattedAlert.summary_timeframe(%Timeframe.StartingLaterToday{
                  time: ~B[2026-04-29 10:31:00]
                })
@@ -405,13 +392,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                })
     end
 
-    # TODO: time formatting
-
     test "time range - time to time" do
       assert " from 10:31 AM to 2:31 PM" ==
                FormattedAlert.summary_timeframe(%Timeframe.TimeRange{
-                 start_time: ~B[2026-04-29 10:31:00],
-                 end_time: ~B[2026-04-29 14:31:00]
+                 start_time: %Timeframe.Time{time: ~B[2026-04-29 10:31:00]},
+                 end_time: %Timeframe.Time{time: ~B[2026-04-29 14:31:00]}
                })
     end
   end
@@ -424,19 +409,15 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                })
     end
 
-    # TODO: Unskip w/ time formatting
-
     test "some days until later date" do
-      assert "some days through Apr 29" =
+      assert " some days through Apr 29" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
                  ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}
                })
     end
 
-    # TODO: Unskip w/ time formatting
-
     test "some days through this week" do
-      assert "some days through Wednesday" =
+      assert " some days through Wednesday" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
                  ending: %Timeframe.ThisWeek{time: ~B[2026-04-29 10:31:00]}
                })
@@ -444,10 +425,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary_trip_identity/1" do
-    # TODO: Unskip w/ time formatting
-
     test "trip from" do
-      assert "**10:31** from **Oak Grove**" =
+      assert "**10:31 AM** train from **Oak Grove**" =
                FormattedAlert.summary_trip_identity(%TripSpecific.TripFrom{
                  trip_time: ~B[2026-04-29 10:31:00],
                  route_type: :commuter_rail,
@@ -455,10 +434,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                })
     end
 
-    # TODO: Unskip w/ time formatting
-
     test "trip to" do
-      assert "**10:31** to **North Station**" =
+      assert "**10:31 AM** train to **North Station**" =
                FormattedAlert.summary_trip_identity(%TripSpecific.TripTo{
                  trip_time: ~B[2026-04-29 10:31:00],
                  route_type: :commuter_rail,
@@ -473,10 +450,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary_trip_shuttle_identity/1" do
-    # TODO: Unskip w/ time formatting
-
     test "one trip" do
-      assert "the **10:30** train" ==
+      assert "the **10:31 AM** train from Oak Grove" ==
                FormattedAlert.summary_trip_shuttle_identity(%TripShuttle.SingleTrip{
                  trip_time: ~B[2026-04-29 10:31:00],
                  route_type: :commuter_rail,
