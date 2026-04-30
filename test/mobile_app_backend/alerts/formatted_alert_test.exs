@@ -92,6 +92,44 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "station bypass until further notice" do
+      alert = build(:alert, effect: :station_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :station_closure,
+        location: %Location.AffectedStops{
+          stops: ["Oak Grove", "North Station"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: %Recurrence.Daily{}
+      }
+
+      assert "Trains will not stop at Oak Grove and North Station until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "stop bypass until further notice" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay", "Ruggles"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: %Recurrence.Daily{}
+      }
+
+      assert "Buses will not stop at Back Bay and Ruggles until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 trip-specific" do
