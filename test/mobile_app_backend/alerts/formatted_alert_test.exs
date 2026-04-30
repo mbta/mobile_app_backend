@@ -180,7 +180,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         }
       }
 
-      assert "the 10:31 AM train from North Station is replaced by shuttle buses from North Station to Oak Grove some days until Apr 29" ==
+      assert "10:31 AM train from North Station is replaced by shuttle buses from North Station to Oak Grove some days until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -224,7 +224,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: nil
       }
 
-      assert "the 10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
+      assert "10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -451,7 +451,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary_trip_shuttle_identity/1" do
     test "one trip" do
-      assert "the **10:31 AM** train from Oak Grove" ==
+      assert "**10:31 AM** train from **Oak Grove**" ==
                FormattedAlert.summary_trip_shuttle_identity(%TripShuttle.SingleTrip{
                  trip_time: ~B[2026-04-29 10:31:00],
                  route_type: :commuter_rail,
