@@ -20,7 +20,8 @@ defmodule MobileAppBackend.Factory do
           route_type: :bus
         }
       ],
-      lifecycle: :new
+      lifecycle: :new,
+      last_push_notification_timestamp: ~B[2024-02-14T03:00:00]
     }
   end
 
