@@ -43,7 +43,7 @@ defmodule MobileAppBackendWeb do
         layouts: [html: MobileAppBackendWeb.Layouts]
 
       import Plug.Conn
-      import MobileAppBackendWeb.Gettext
+      import MobileAppBackend.Gettext
 
       unquote(verified_routes())
     end
@@ -85,7 +85,7 @@ defmodule MobileAppBackendWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import MobileAppBackendWeb.CoreComponents
-      import MobileAppBackendWeb.Gettext
+      import MobileAppBackend.Gettext
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

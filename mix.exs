@@ -61,6 +61,8 @@ defmodule MobileAppBackend.MixProject do
       {:ex_aws, "== 2.5.1"},
       {:ex_aws_rds, "== 2.0.2"},
       {:ex_aws_sts, "~> 2.3"},
+      {:ex_cldr, "~> 2.47.1"},
+      {:ex_cldr_dates_times, "~> 2.25.6"},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 0.20"},
       {:google_api_fcm, "~> 0.14.0"},

@@ -264,6 +264,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
 
     defmodule WholeRoute do
+      use Gettext, backend: MobileAppBackend.Gettext
+
       @type t :: %__MODULE__{route_label: String.t(), route_type: Route.type()}
       @derive PolymorphicJson
       defstruct [:route_label, :route_type]
@@ -402,6 +404,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @type t :: %__MODULE__{location: Location.t() | nil}
     @derive PolymorphicJson
     defstruct [:location]
+  end
+
+  defmodule Unknown do
+    @type t :: %__MODULE__{fallback: String.t()}
+    @derive PolymorphicJson
+    defstruct [:fallback]
   end
 
   @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()

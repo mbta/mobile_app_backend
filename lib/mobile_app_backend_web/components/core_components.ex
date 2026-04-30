@@ -16,7 +16,7 @@ defmodule MobileAppBackendWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  use Gettext, backend: MobileAppBackendWeb.Gettext
+  use Gettext, backend: MobileAppBackend.Gettext
 
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
@@ -661,9 +661,9 @@ defmodule MobileAppBackendWeb.CoreComponents do
     # with our gettext backend as first argument. Translations are
     # available in the errors.po file (as we use the "errors" domain).
     if count = opts[:count] do
-      Gettext.dngettext(MobileAppBackendWeb.Gettext, "errors", msg, msg, count, opts)
+      Gettext.dngettext(MobileAppBackend.Gettext, "errors", msg, msg, count, opts)
     else
-      Gettext.dgettext(MobileAppBackendWeb.Gettext, "errors", msg, opts)
+      Gettext.dgettext(MobileAppBackend.Gettext, "errors", msg, opts)
     end
   end
 
