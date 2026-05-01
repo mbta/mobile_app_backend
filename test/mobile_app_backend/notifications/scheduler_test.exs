@@ -65,6 +65,60 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     )
   end
 
+  test "schedules notification in user's locale" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -48, :hour)
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user, locale: "es")
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: now |> DateTime.add(-10, :minute) |> DateTime.to_time(),
+          end_time: now |> DateTime.add(10, :minute) |> DateTime.to_time(),
+          days_of_week: [Date.day_of_week(now)]
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 autobús",
+        "body" => "Servicio suspendido hasta nuevo aviso",
+        "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
+        "upstream_timestamp" => alert.last_push_notification_timestamp
+      }
+    )
+  end
+
   test "does not send duplicate notifications" do
     now = DateTime.now!("America/New_York")
 
