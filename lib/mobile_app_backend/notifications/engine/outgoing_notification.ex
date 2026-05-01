@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
     defstruct [:title, :body, :subscriptions, :alert_id, :type, :locale]
   end
 
-  @spec localize(__MODULE__.t(), Gettext.locale()) :: Localized.t()
+  @spec localize(t(), Gettext.locale()) :: Localized.t()
   @doc """
   Stringify the notification's title & body in the given locale
   """
