@@ -41,7 +41,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
                 gettext(
                   "%{mode} %{skipped_effect}",
                   mode: summary_mode,
-                  skipped_effect: summary_skipped_effect(summary_location, summary_timeframe)
+                  skipped_effect:
+                    summary_skipped_effect(
+                      summary_location,
+                      String.trim_leading(summary_timeframe)
+                    )
                 )
 
               alert_summary.is_update ->
@@ -398,7 +402,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext("is cancelled %{day}", day: day)
 
       effect in [:station_closure, :stop_closure, :dock_closure] && effect_stops != nil ->
-        summary_skipped_effect(summary_affected_stops(effect_stops), " " <> day)
+        summary_skipped_effect(summary_affected_stops(effect_stops), day)
 
       effect == :suspension ->
         first_effected_stop =
@@ -445,8 +449,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         stops
         |> Enum.map(&"**#{&1}**")
 
-      stop_list = Cldr.List.to_string!(formatted_stops)
-      gettext("%{stops}", stops: stop_list)
+      Cldr.List.to_string!(formatted_stops)
     end
   end
 
@@ -459,7 +462,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   end
 
   defp summary_skipped_effect(stops, timeframe) do
-    gettext("will not stop at %{stop_list}%{timeframe}",
+    gettext("will not stop at %{stop_list} %{timeframe}",
       timeframe: timeframe,
       stop_list: stops
     )
