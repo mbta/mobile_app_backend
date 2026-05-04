@@ -432,11 +432,13 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         stop_ids: ["FR-0201-02"]
       )
 
+    start_time = DateTime.add(now, 3, :hour)
+
     alert =
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, 3, :hour),
+            start: start_time,
             end: DateTime.add(now, 7, :hour)
           }
         ],
@@ -521,18 +523,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "bare_label",
-          "label" => "Fitchburg Line"
-        },
-        "summary" => %{
-          "effect" => "cancellation",
-          "location" => nil,
-          "timeframe" => %{
-            "type" => "starting_later_today",
-            "time" => DateTime.to_iso8601(DateTime.add(now, 3, :hour))
-          }
-        },
+        "title" => "Fitchburg Line",
+        "body" =>
+          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
         "subscriptions" => [
           %{"route" => route.id, "stop" => parent_stop.id, "direction" => 1}
         ],
