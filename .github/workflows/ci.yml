@@ -103,6 +103,8 @@ jobs:
         run: mix credo --strict
       - name: Check formatting
         run: mix format --check-formatted
+      - name: Check gettext.extract
+        run: mix gettext.extract --check-up-to-date
       - name: Run tests
         run: mix test --cover
       - name: Report test coverage

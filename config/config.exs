@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 config :mobile_app_backend,
   ecto_repos: [MobileAppBackend.Repo]
 
@@ -77,6 +79,8 @@ config :mobile_app_backend, :logger, [
      config: %{metadata: :all}
    }}
 ]
+
+config :gettext, plural_forms: MobileAppBackend.Gettext.Plural
 
 # Configure esbuild (the version is required)
 config :esbuild,

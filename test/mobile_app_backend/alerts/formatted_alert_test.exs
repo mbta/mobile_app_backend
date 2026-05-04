@@ -86,7 +86,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         is_update: true
       }
 
-      assert "Update: Service suspended from Oak Grove to North Station daily through Apr 29" ==
+      assert "Update: Service suspended from Oak Grove to North Station daily until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -149,7 +149,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}}
       }
 
-      assert "10:31 AM train from North Station is suspended today due to accident daily through Apr 29" ==
+      assert "10:31 AM train from North Station is suspended today due to accident daily until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -218,7 +218,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         }
       }
 
-      assert "the 10:31 AM train from North Station is replaced by shuttle buses from North Station to Oak Grove some days through Apr 29" ==
+      assert "10:31 AM train from North Station is replaced by shuttle buses from North Station to Oak Grove some days until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -241,7 +241,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         }
       }
 
-      assert "Shuttle buses replace the 10:31 AM train from North Station to Oak Grove some days through Apr 29" ==
+      assert "Shuttle buses replace the 10:31 AM train from North Station to Oak Grove some days until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -262,7 +262,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: nil
       }
 
-      assert "the 10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
+      assert "10:31 AM train from Concord is replaced by shuttle buses from Porter to North Station" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -300,7 +300,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         }
       }
 
-      assert "Shuttle buses replace multiple trips from North Station to Oak Grove daily through Apr 29" ==
+      assert "Shuttle buses replace multiple trips from North Station to Oak Grove daily until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -448,14 +448,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     test "some days until later date" do
-      assert " some days through Apr 29" =
+      assert " some days until Apr 29" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
                  ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}
                })
     end
 
     test "some days through this week" do
-      assert " some days through Wednesday" =
+      assert " some days until Wednesday" =
                FormattedAlert.summary_recurrence(%Recurrence.SomeDays{
                  ending: %Timeframe.ThisWeek{time: ~B[2026-04-29 10:31:00]}
                })
@@ -489,7 +489,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary_trip_shuttle_identity/1" do
     test "one trip" do
-      assert "the **10:31 AM** train from Oak Grove" ==
+      assert "**10:31 AM** train from **Oak Grove**" ==
                FormattedAlert.summary_trip_shuttle_identity(%TripShuttle.SingleTrip{
                  trip_time: ~B[2026-04-29 10:31:00],
                  route_type: :commuter_rail,

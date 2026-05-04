@@ -203,8 +203,7 @@ defmodule MBTAV3API.Alert do
   @spec next_period(t(), DateTime.t()) :: ActivePeriod.t() | nil
   def next_period(alert, now) do
     Enum.find(alert.active_period, fn %ActivePeriod{start: ap_start} ->
-      hours_in_future = DateTime.diff(ap_start, now, :hour)
-      hours_in_future > 0 and hours_in_future < 24
+      DateTime.after?(ap_start, now) and DateTime.diff(ap_start, now, :hour) < 24
     end)
   end
 

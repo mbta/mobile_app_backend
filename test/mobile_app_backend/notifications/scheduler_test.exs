@@ -5,6 +5,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
   import ExUnit.CaptureLog
   import MobileAppBackend.Factory
+  import Mox
+  import Test.Support.Helpers
   alias MBTAV3API.Store
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
@@ -17,8 +19,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, -48, :hour),
-            end: DateTime.add(now, 10, :minute)
+            start: DateTime.add(now, -48, :hour)
           }
         ],
         effect: :suspension,
@@ -57,19 +58,62 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{
-            "type" => "time",
-            "time" => hd(alert.active_period).end |> DateTime.to_iso8601()
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
+        "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
+        "upstream_timestamp" => alert.last_push_notification_timestamp
+      }
+    )
+  end
+
+  test "schedules notification in user's locale" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -48, :hour)
           }
-        },
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user, locale: "es")
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: now |> DateTime.add(-10, :minute) |> DateTime.to_time(),
+          end_time: now |> DateTime.add(10, :minute) |> DateTime.to_time(),
+          days_of_week: [Date.day_of_week(now)]
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 autobús",
+        "body" => "Servicio suspendido hasta nuevo aviso",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "upstream_timestamp" => alert.last_push_notification_timestamp
       }
@@ -136,8 +180,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, 22, :hour),
-            end: DateTime.add(now, 27, :hour)
+            start: DateTime.add(now, 22, :hour)
           }
         ],
         effect: :suspension,
@@ -170,16 +213,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{"type" => "starting_tomorrow"}
-        },
+        "title" => "66 bus",
+        "body" => "Service suspended starting tomorrow",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "reminder",
         "upstream_timestamp" => nil
@@ -319,15 +354,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "type" => "all_clear",
-          "location" => nil
-        },
+        "title" => "66 bus",
+        "body" => "All clear: Regular service",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "all_clear",
         "upstream_timestamp" => nil
@@ -383,5 +411,249 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
 
     refute_enqueued(worker: Notifications.Deliverer)
+  end
+
+  test "sends trip cancellation with future active period" do
+    now = DateTime.now!("America/New_York")
+
+    route =
+      build(:route,
+        id: "CR-Fitchburg",
+        line_id: "line-Fitchburg",
+        long_name: "Fitchburg Line",
+        type: :commuter_rail
+      )
+
+    trip =
+      build(:trip,
+        id: "ERMLTieJob-819597-438",
+        route_id: "CR-Fitchburg",
+        direction_id: 1,
+        stop_ids: ["FR-0201-02"]
+      )
+
+    start_time = DateTime.add(now, 3, :hour)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: start_time,
+            end: DateTime.add(now, 7, :hour)
+          }
+        ],
+        effect: :cancellation,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: route.id,
+            route_type: :commuter_rail,
+            direction_id: 1,
+            trip: trip.id
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    parent_stop = build(:stop, id: "place-FR-0201", name: "Concord")
+    stop = build(:stop, id: "FR-0201-02", name: "Concord", parent_station_id: parent_stop.id)
+
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(:schedules, fn _, _ ->
+      ok_response(
+        [
+          build(:schedule,
+            trip_id: trip.id,
+            stop_id: stop.id,
+            route_id: route.id
+          )
+        ],
+        [trip]
+      )
+    end)
+
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    GlobalDataCacheMock
+    |> expect(:default_key, fn -> :default_key end)
+    |> expect(:get_data, fn _ ->
+      %{
+        routes: %{route.id => route},
+        route_patterns: %{
+          "CR-Fitchburg-d82ea33a-1" =>
+            build(:route_pattern,
+              id: "CR-Fitchburg-d82ea33a-1",
+              route_id: route.id,
+              representative_trip_id: trip.id
+            )
+        },
+        trips: %{trip.id => trip},
+        stops: %{
+          parent_stop.id => parent_stop,
+          stop.id => stop
+        },
+        lines: %{
+          "line-Fitchburg" => build(:line, id: "line-Fitchburg")
+        }
+      }
+    end)
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: route.id,
+      stop_id: parent_stop.id,
+      direction_id: 1,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "Fitchburg Line",
+        "body" =>
+          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
+        "subscriptions" => [
+          %{"route" => route.id, "stop" => parent_stop.id, "direction" => 1}
+        ],
+        "type" => "reminder",
+        "upstream_timestamp" => nil
+      }
+    )
+  end
+
+  test "sends trip cancellation reminder with near future active period" do
+    now = DateTime.now!("America/New_York")
+
+    route =
+      build(:route,
+        id: "CR-Fitchburg",
+        line_id: "line-Fitchburg",
+        long_name: "Fitchburg Line",
+        type: :commuter_rail
+      )
+
+    trip =
+      build(:trip,
+        id: "ERMLTieJob-819597-438",
+        route_id: "CR-Fitchburg",
+        direction_id: 1,
+        stop_ids: ["FR-0201-02"]
+      )
+
+    start_time = DateTime.add(now, 20, :minute)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: start_time,
+            end: DateTime.add(now, 7, :hour)
+          }
+        ],
+        effect: :cancellation,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: route.id,
+            route_type: :commuter_rail,
+            direction_id: 1,
+            trip: trip.id
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    parent_stop = build(:stop, id: "place-FR-0201", name: "Concord")
+    stop = build(:stop, id: "FR-0201-02", name: "Concord", parent_station_id: parent_stop.id)
+
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(:schedules, fn _, _ ->
+      ok_response(
+        [
+          build(:schedule,
+            trip_id: trip.id,
+            stop_id: stop.id,
+            route_id: route.id
+          )
+        ],
+        [trip]
+      )
+    end)
+
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    GlobalDataCacheMock
+    |> expect(:default_key, fn -> :default_key end)
+    |> expect(:get_data, fn _ ->
+      %{
+        routes: %{route.id => route},
+        route_patterns: %{
+          "CR-Fitchburg-d82ea33a-1" =>
+            build(:route_pattern,
+              id: "CR-Fitchburg-d82ea33a-1",
+              route_id: route.id,
+              representative_trip_id: trip.id
+            )
+        },
+        trips: %{trip.id => trip},
+        stops: %{
+          parent_stop.id => parent_stop,
+          stop.id => stop
+        },
+        lines: %{
+          "line-Fitchburg" => build(:line, id: "line-Fitchburg")
+        }
+      }
+    end)
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: route.id,
+      stop_id: parent_stop.id,
+      direction_id: 1,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "Fitchburg Line",
+        "body" =>
+          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
+        "subscriptions" => [
+          %{"route" => route.id, "stop" => parent_stop.id, "direction" => 1}
+        ],
+        "type" => "reminder",
+        "upstream_timestamp" => nil
+      }
+    )
   end
 end

@@ -1,176 +1,176 @@
-## This file is a PO Template file.
-##
-## "msgid"s here are often extracted from source code.
-## Add new messages manually only if they're dynamic
-## messages that can't be statically extracted.
-##
-## Run "mix gettext.extract" to bring this file up to
-## date. Leave "msgstr"s empty as changing them here has no
-## effect: edit them in PO (.po) files instead.
-#
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
 msgid ""
 msgstr ""
+"Language: ht\n"
+"Plural-Forms: nplurals=3\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:101
 #, elixir-autogen, elixir-format
 msgid " at **%{stop_name}**"
-msgstr ""
+msgstr " nan **%{stop_name}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:210
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
-msgstr ""
+msgstr " chak jou%{recurrence_text}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:434
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
-msgstr ""
+msgstr " akòz %{cause}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:173
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
-msgstr ""
+msgstr " soti nan %{start_time} rive nan %{end_time}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:95
 #, elixir-autogen, elixir-format
 msgid " from **%{direction_name}** stops to **%{end_stop_name}**"
-msgstr ""
+msgstr " soti nan **%{direction_name}** sispann rive nan **%{end_stop_name}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:110
 #, elixir-autogen, elixir-format
 msgid " from **%{start_stop}** to **%{end_stop}**"
-msgstr ""
+msgstr " soti nan **%{start_stop}** a **%{end_stop}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:104
 #, elixir-autogen, elixir-format
 msgid " from **%{stop_name}** to **%{direction_name}** stops"
-msgstr ""
+msgstr " soti nan **%{stop_name}** rive nan **%{direction_name}** sispann"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:121
 #, elixir-autogen, elixir-format
 msgid " on **%{mode_label}**"
-msgstr ""
+msgstr " sou **%{mode_label}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:117
 #, elixir-autogen, elixir-format
 msgid " replacing **%{mode_label}**"
-msgstr ""
+msgstr " ranplase **%{mode_label}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:219
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
-msgstr ""
+msgstr " kèk jou%{recurrence_text}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:168
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
-msgstr ""
+msgstr " kòmanse **%{formatted_time}** jodi a"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:165
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
-msgstr ""
+msgstr " kòmanse demen"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:138
 #, elixir-autogen, elixir-format
 msgid " through end of service"
-msgstr ""
+msgstr " jiska fen sèvis la"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:141
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
-msgstr ""
+msgstr " jiska demen"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:135
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:233
 #, elixir-autogen, elixir-format
 msgid " until further notice"
-msgstr ""
+msgstr " jiskaske yo bay lòt avi"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:236
 #, elixir-autogen, elixir-format
 msgid " until tomorrow"
-msgstr ""
+msgstr " jiska demen"
 
 #: lib/mobile_app_backend/notifications/notification_title.ex:63
 #, elixir-autogen, elixir-format
 msgid "%{label} %{mode_label}"
-msgstr ""
+msgstr "%{label} %{mode_label}"
 
 #: lib/presentation_strings.ex:22
 #, elixir-autogen, elixir-format
 msgid "%{name} bus"
-msgstr ""
+msgstr "%{name} bis"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:398
 #, elixir-autogen, elixir-format
 msgid "%{stop} and %{other_stops}"
-msgstr ""
+msgstr "%{stop} ak %{other_stops}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:57
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{trip_effect}%{cause}%{recurrence}"
-msgstr ""
+msgstr "%{trip_identity} %{trip_effect}%{cause}%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:290
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr ""
+msgstr "Yo ranplase %{trip_identity} ak bis navèt soti **%{start_stop}** pou rive **%{end_stop}**%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:47
 #, elixir-autogen, elixir-format
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-msgstr ""
+msgstr "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:313
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
-msgstr ""
+msgstr "**%{time}** %{vehicle} soti nan **%{from_stop}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:268
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
-msgstr ""
+msgstr "**%{trip_time}** %{route_type} soti nan **%{stop_name}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:275
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
-msgstr ""
+msgstr "**%{trip_time}** %{route_type} pou rive nan **%{headsign}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:28
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Regular service%{location}"
-msgstr ""
+msgstr "**Tout bagay klè:** Sèvis regilye %{location}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:39
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-msgstr ""
+msgstr "**Mizajou:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 
 #: lib/presentation_strings.ex:71
 #, elixir-autogen, elixir-format
 msgid "Access Issue"
-msgstr ""
+msgstr "Pwoblèm Aksè"
 
 #: lib/presentation_strings.ex:31
 #, elixir-autogen, elixir-format
 msgid "Access issue"
-msgstr ""
+msgstr "Pwoblèm aksè"
 
 #: lib/presentation_strings.ex:174
 #, elixir-autogen, elixir-format
 msgid "Accident"
-msgstr ""
+msgstr "Aksidan"
 
 #: lib/presentation_strings.ex:72
 #, elixir-autogen, elixir-format
 msgid "Additional Service"
-msgstr ""
+msgstr "Plis Sèvis"
 
 #: lib/presentation_strings.ex:32
 #, elixir-autogen, elixir-format
 msgid "Additional service"
-msgstr ""
+msgstr "Plis sèvis"
 
 #: lib/presentation_strings.ex:63
 #: lib/presentation_strings.ex:64
@@ -178,1014 +178,1014 @@ msgstr ""
 #: lib/presentation_strings.ex:104
 #, elixir-autogen, elixir-format
 msgid "Alert"
-msgstr ""
+msgstr "Avètisman"
 
 #: lib/presentation_strings.ex:73
 #, elixir-autogen, elixir-format
 msgid "Amber Alert"
-msgstr ""
+msgstr "Avètisman Amber"
 
 #: lib/presentation_strings.ex:33
 #, elixir-autogen, elixir-format
 msgid "Amber alert"
-msgstr ""
+msgstr "Avètisman amber"
 
 #: lib/presentation_strings.ex:112
 #: lib/presentation_strings.ex:175
 #, elixir-autogen, elixir-format
 msgid "Amtrak"
-msgstr ""
+msgstr "Amtrak"
 
 #: lib/presentation_strings.ex:176
 #, elixir-autogen, elixir-format
 msgid "Amtrak Train Traffic"
-msgstr ""
+msgstr "Trafik tren Amtrak"
 
 #: lib/presentation_strings.ex:113
 #, elixir-autogen, elixir-format
 msgid "Amtrak train traffic"
-msgstr ""
+msgstr "Trafik tren Amtrak"
 
 #: lib/presentation_strings.ex:177
 #, elixir-autogen, elixir-format
 msgid "An Earlier Mechanical Problem"
-msgstr ""
+msgstr "Yon Pwoblèm Mekanik Ki Rive Pi Bonè"
 
 #: lib/presentation_strings.ex:178
 #, elixir-autogen, elixir-format
 msgid "An Earlier Signal Problem"
-msgstr ""
+msgstr "Yon Siyal Ki Rive Pi Bonè"
 
 #: lib/presentation_strings.ex:179
 #, elixir-autogen, elixir-format
 msgid "Autos Impeding Service"
-msgstr ""
+msgstr "Machin Ki Bloke Sèvis la"
 
 #: lib/presentation_strings.ex:74
 #, elixir-autogen, elixir-format
 msgid "Bike Issue"
-msgstr ""
+msgstr "Pwoblèm Bisiklèt"
 
 #: lib/presentation_strings.ex:34
 #, elixir-autogen, elixir-format
 msgid "Bike issue"
-msgstr ""
+msgstr "Pwoblèm bisiklèt"
 
 #: lib/presentation_strings.ex:75
 #, elixir-autogen, elixir-format
 msgid "Cancellation"
-msgstr ""
+msgstr "Anilasyon"
 
 #: lib/presentation_strings.ex:180
 #, elixir-autogen, elixir-format
 msgid "Coast Guard Restriction"
-msgstr ""
+msgstr "Gad Kot Mete Restriksyon"
 
 #: lib/presentation_strings.ex:117
 #, elixir-autogen, elixir-format
 msgid "Coast Guard restriction"
-msgstr ""
+msgstr "Restriksyon Gad Kòt"
 
 #: lib/presentation_strings.ex:181
 #, elixir-autogen, elixir-format
 msgid "Congestion"
-msgstr ""
+msgstr "Blokis"
 
 #: lib/presentation_strings.ex:182
 #, elixir-autogen, elixir-format
 msgid "Construction"
-msgstr ""
+msgstr "Konstriksyon"
 
 #: lib/presentation_strings.ex:183
 #, elixir-autogen, elixir-format
 msgid "Crossing Issue"
-msgstr ""
+msgstr "Pwoblèm nan Pasaj a Nivo yo"
 
 #: lib/presentation_strings.ex:184
 #, elixir-autogen, elixir-format
 msgid "Crossing Malfunction"
-msgstr ""
+msgstr "Pasaj a Nivo ki p ap Fonksyone"
 
 #: lib/presentation_strings.ex:36
 #: lib/presentation_strings.ex:76
 #, elixir-autogen, elixir-format
 msgid "Delay"
-msgstr ""
+msgstr "Reta"
 
 #: lib/presentation_strings.ex:185
 #, elixir-autogen, elixir-format
 msgid "Demonstration"
-msgstr ""
+msgstr "Demonstrasyon"
 
 #: lib/presentation_strings.ex:37
 #: lib/presentation_strings.ex:77
 #, elixir-autogen, elixir-format
 msgid "Detour"
-msgstr ""
+msgstr "Detou"
 
 #: lib/presentation_strings.ex:186
 #, elixir-autogen, elixir-format
 msgid "Disabled Bus"
-msgstr ""
+msgstr "Bis Ki Pa Aktif"
 
 #: lib/presentation_strings.ex:187
 #, elixir-autogen, elixir-format
 msgid "Disabled Train"
-msgstr ""
+msgstr "Tren Ki Pa Aktif"
 
 #: lib/presentation_strings.ex:78
 #, elixir-autogen, elixir-format
 msgid "Dock Closure"
-msgstr ""
+msgstr "Waf la Fèmen"
 
 #: lib/presentation_strings.ex:79
 #, elixir-autogen, elixir-format
 msgid "Dock Issue"
-msgstr ""
+msgstr "Pwoblèm Waf"
 
 #: lib/presentation_strings.ex:38
 #, elixir-autogen, elixir-format
 msgid "Dock closed"
-msgstr ""
+msgstr "Waf fèmen"
 
 #: lib/presentation_strings.ex:39
 #, elixir-autogen, elixir-format
 msgid "Dock issue"
-msgstr ""
+msgstr "Pwoblèm waf"
 
 #: lib/presentation_strings.ex:188
 #, elixir-autogen, elixir-format
 msgid "Drawbridge Being Raised"
-msgstr ""
+msgstr "Y ap Leve Pon ki ka Bouje a"
 
 #: lib/presentation_strings.ex:189
 #, elixir-autogen, elixir-format
 msgid "Drawbridge Issue"
-msgstr ""
+msgstr "Pwoblèm Pon Levab"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:8
 #, elixir-autogen, elixir-format
 msgid "Eastbound"
-msgstr ""
+msgstr "Pran direksyon lès"
 
 #: lib/presentation_strings.ex:190
 #, elixir-autogen, elixir-format
 msgid "Electrical Work"
-msgstr ""
+msgstr "Travay Elektrik"
 
 #: lib/presentation_strings.ex:80
 #, elixir-autogen, elixir-format
 msgid "Elevator Closure"
-msgstr ""
+msgstr "Fèmti Asansè"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
 msgid "Elevator closed"
-msgstr ""
+msgstr "Asansè a fèmen"
 
 #: lib/presentation_strings.ex:81
 #, elixir-autogen, elixir-format
 msgid "Escalator Closure"
-msgstr ""
+msgstr "Fèmti Eskalye"
 
 #: lib/presentation_strings.ex:41
 #, elixir-autogen, elixir-format
 msgid "Escalator closed"
-msgstr ""
+msgstr "Fèmti eskalye"
 
 #: lib/presentation_strings.ex:82
 #, elixir-autogen, elixir-format
 msgid "Extra Service"
-msgstr ""
+msgstr "Sèvis Anplis"
 
 #: lib/presentation_strings.ex:42
 #, elixir-autogen, elixir-format
 msgid "Extra service"
-msgstr ""
+msgstr "Sèvis anplis"
 
 #: lib/presentation_strings.ex:83
 #, elixir-autogen, elixir-format
 msgid "Facility Issue"
-msgstr ""
+msgstr "Pwoblèm Lokal"
 
 #: lib/presentation_strings.ex:43
 #, elixir-autogen, elixir-format
 msgid "Facility issue"
-msgstr ""
+msgstr "Pwoblèm lokal"
 
 #: lib/presentation_strings.ex:191
 #, elixir-autogen, elixir-format
 msgid "Fire"
-msgstr ""
+msgstr "Dife"
 
 #: lib/presentation_strings.ex:192
 #, elixir-autogen, elixir-format
 msgid "Fire Department Activity"
-msgstr ""
+msgstr "Aktivite Ponpye"
 
 #: lib/presentation_strings.ex:193
 #, elixir-autogen, elixir-format
 msgid "Flooding"
-msgstr ""
+msgstr "Inondasyon"
 
 #: lib/presentation_strings.ex:194
 #, elixir-autogen, elixir-format
 msgid "Fog"
-msgstr ""
+msgstr "Bwouya"
 
 #: lib/presentation_strings.ex:195
 #, elixir-autogen, elixir-format
 msgid "Freight Train Interference"
-msgstr ""
+msgstr "Blokaj Nan Tren Machandiz"
 
 #: lib/presentation_strings.ex:196
 #, elixir-autogen, elixir-format
 msgid "Hazmat Condition"
-msgstr ""
+msgstr "Eta Matyè Danjere"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:17
 #, elixir-autogen, elixir-format
 msgid "Heading"
-msgstr ""
+msgstr "Prale nan direksyon"
 
 #: lib/presentation_strings.ex:197
 #, elixir-autogen, elixir-format
 msgid "Heavy Ridership"
-msgstr ""
+msgstr "Anpil Moun Ap Pase la"
 
 #: lib/presentation_strings.ex:198
 #, elixir-autogen, elixir-format
 msgid "High Winds"
-msgstr ""
+msgstr "Gwo Van"
 
 #: lib/presentation_strings.ex:199
 #, elixir-autogen, elixir-format
 msgid "Holiday"
-msgstr ""
+msgstr "Vakans"
 
 #: lib/presentation_strings.ex:200
 #, elixir-autogen, elixir-format
 msgid "Hurricane"
-msgstr ""
+msgstr "Siklòn"
 
 #: lib/presentation_strings.ex:201
 #, elixir-autogen, elixir-format
 msgid "Ice In Harbor"
-msgstr ""
+msgstr "Glas Nan Pò a"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:10
 #, elixir-autogen, elixir-format
 msgid "Inbound"
-msgstr ""
+msgstr "Antran"
 
 #: lib/presentation_strings.ex:202
 #, elixir-autogen, elixir-format
 msgid "Maintenance"
-msgstr ""
+msgstr "Antretyen"
 
 #: lib/presentation_strings.ex:203
 #, elixir-autogen, elixir-format
 msgid "Mechanical Issue"
-msgstr ""
+msgstr "Pwoblèm Mekanik"
 
 #: lib/presentation_strings.ex:204
 #, elixir-autogen, elixir-format
 msgid "Mechanical Problem"
-msgstr ""
+msgstr "Pwoblèm Mekanik"
 
 #: lib/presentation_strings.ex:205
 #, elixir-autogen, elixir-format
 msgid "Medical Emergency"
-msgstr ""
+msgstr "Ijans Medikal"
 
 #: lib/presentation_strings.ex:84
 #, elixir-autogen, elixir-format
 msgid "Modified Service"
-msgstr ""
+msgstr "Sèvis Modifye"
 
 #: lib/presentation_strings.ex:44
 #, elixir-autogen, elixir-format
 msgid "Modified service"
-msgstr ""
+msgstr "Sèvis modifye"
 
 #: lib/mobile_app_backend/notifications/notification_title.ex:69
 #, elixir-autogen, elixir-format
 msgid "Multiple routes"
-msgstr ""
+msgstr "Plizyè wout"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:282
 #, elixir-autogen, elixir-format
 msgid "Multiple trips"
-msgstr ""
+msgstr "Plizyè vwayaj"
 
 #: lib/presentation_strings.ex:85
 #, elixir-autogen, elixir-format
 msgid "No Service"
-msgstr ""
+msgstr "Pa gen Sèvis"
 
 #: lib/presentation_strings.ex:45
 #, elixir-autogen, elixir-format
 msgid "No service"
-msgstr ""
+msgstr "Pa gen sèvis"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:6
 #, elixir-autogen, elixir-format
 msgid "Northbound"
-msgstr ""
+msgstr "Nan direksyon nò"
 
 #: lib/presentation_strings.ex:46
 #: lib/presentation_strings.ex:86
 #, elixir-autogen, elixir-format
 msgid "Notice"
-msgstr ""
+msgstr "Avi"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:11
 #, elixir-autogen, elixir-format
 msgid "Outbound"
-msgstr ""
+msgstr "Soti"
 
 #: lib/presentation_strings.ex:206
 #, elixir-autogen, elixir-format
 msgid "Parade"
-msgstr ""
+msgstr "Parad"
 
 #: lib/presentation_strings.ex:87
 #, elixir-autogen, elixir-format
 msgid "Parking Closure"
-msgstr ""
+msgstr "Fèmti Pakin"
 
 #: lib/presentation_strings.ex:88
 #, elixir-autogen, elixir-format
 msgid "Parking Issue"
-msgstr ""
+msgstr "Pwoblèm Pakin"
 
 #: lib/presentation_strings.ex:47
 #, elixir-autogen, elixir-format
 msgid "Parking closed"
-msgstr ""
+msgstr "Pakin fèmen"
 
 #: lib/presentation_strings.ex:48
 #, elixir-autogen, elixir-format
 msgid "Parking issue"
-msgstr ""
+msgstr "Pwoblèm pakin"
 
 #: lib/presentation_strings.ex:207
 #, elixir-autogen, elixir-format
 msgid "Police Action"
-msgstr ""
+msgstr "Aksyon Polis"
 
 #: lib/presentation_strings.ex:208
 #, elixir-autogen, elixir-format
 msgid "Police Activity"
-msgstr ""
+msgstr "Aktivite Polis"
 
 #: lib/presentation_strings.ex:89
 #, elixir-autogen, elixir-format
 msgid "Policy Change"
-msgstr ""
+msgstr "Chanjman Règleman"
 
 #: lib/presentation_strings.ex:49
 #, elixir-autogen, elixir-format
 msgid "Policy change"
-msgstr ""
+msgstr "Chanjman règleman"
 
 #: lib/presentation_strings.ex:209
 #, elixir-autogen, elixir-format
 msgid "Power Problem"
-msgstr ""
+msgstr "Pwoblèm Kouran"
 
 #: lib/presentation_strings.ex:210
 #, elixir-autogen, elixir-format
 msgid "Rail Defect"
-msgstr ""
+msgstr "Defo nan ray tren yo"
 
 #: lib/presentation_strings.ex:90
 #, elixir-autogen, elixir-format
 msgid "Schedule Change"
-msgstr ""
+msgstr "Chanjman Orè"
 
 #: lib/presentation_strings.ex:50
 #, elixir-autogen, elixir-format
 msgid "Schedule change"
-msgstr ""
+msgstr "Chanjman orè"
 
 #: lib/presentation_strings.ex:91
 #, elixir-autogen, elixir-format
 msgid "Service Change"
-msgstr ""
+msgstr "Chanjman Sèvis"
 
 #: lib/presentation_strings.ex:51
 #, elixir-autogen, elixir-format
 msgid "Service change"
-msgstr ""
+msgstr "Chanjman sèvis"
 
 #: lib/presentation_strings.ex:61
 #, elixir-autogen, elixir-format
 msgid "Service suspended"
-msgstr ""
+msgstr "Sèvis ki kanpe"
 
 #: lib/presentation_strings.ex:211
 #, elixir-autogen, elixir-format
 msgid "Severe Weather"
-msgstr ""
+msgstr "Move Tan"
 
 #: lib/presentation_strings.ex:92
 #, elixir-autogen, elixir-format
 msgid "Shuttle"
-msgstr ""
+msgstr "Navèt"
 
 #: lib/presentation_strings.ex:52
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses"
-msgstr ""
+msgstr "Otobis k ap fè lanavèt"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:298
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr ""
+msgstr "Otobis navèt yo ranplase %{trip_identity} soti **%{start_stop}** pou rive **%{end_stop}**%{recurrence}"
 
 #: lib/presentation_strings.ex:212
 #, elixir-autogen, elixir-format
 msgid "Signal Issue"
-msgstr ""
+msgstr "Pwoblèm Siyal"
 
 #: lib/presentation_strings.ex:213
 #, elixir-autogen, elixir-format
 msgid "Signal Problem"
-msgstr ""
+msgstr "Pwoblèm Siyal"
 
 #: lib/presentation_strings.ex:214
 #, elixir-autogen, elixir-format
 msgid "Single Tracking"
-msgstr ""
+msgstr "Yon sèl ray pou de direksyon"
 
 #: lib/presentation_strings.ex:215
 #, elixir-autogen, elixir-format
 msgid "Slippery Rail"
-msgstr ""
+msgstr "Ray ki Glise"
 
 #: lib/presentation_strings.ex:216
 #, elixir-autogen, elixir-format
 msgid "Snow"
-msgstr ""
+msgstr "Nèj"
 
 #: lib/presentation_strings.ex:93
 #, elixir-autogen, elixir-format
 msgid "Snow Route"
-msgstr ""
+msgstr "Wout denèjman"
 
 #: lib/presentation_strings.ex:53
 #, elixir-autogen, elixir-format
 msgid "Snow route"
-msgstr ""
+msgstr "Wout denèjman"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:7
 #, elixir-autogen, elixir-format
 msgid "Southbound"
-msgstr ""
+msgstr "Nan direksyon sid"
 
 #: lib/presentation_strings.ex:217
 #, elixir-autogen, elixir-format
 msgid "Special Event"
-msgstr ""
+msgstr "Evènman Espesyal"
 
 #: lib/presentation_strings.ex:218
 #, elixir-autogen, elixir-format
 msgid "Speed Restriction"
-msgstr ""
+msgstr "Limit Vitès"
 
 #: lib/presentation_strings.ex:94
 #, elixir-autogen, elixir-format
 msgid "Station Closure"
-msgstr ""
+msgstr "Estasyon Fèmen"
 
 #: lib/presentation_strings.ex:95
 #, elixir-autogen, elixir-format
 msgid "Station Issue"
-msgstr ""
+msgstr "Pwoblèm Estasyon"
 
 #: lib/presentation_strings.ex:54
 #, elixir-autogen, elixir-format
 msgid "Station closed"
-msgstr ""
+msgstr "Estasyon fèmen"
 
 #: lib/presentation_strings.ex:55
 #, elixir-autogen, elixir-format
 msgid "Station issue"
-msgstr ""
+msgstr "Pwoblèm estasyon"
 
 #: lib/presentation_strings.ex:96
 #, elixir-autogen, elixir-format
 msgid "Stop Closure"
-msgstr ""
+msgstr "Fèmti Arè"
 
 #: lib/presentation_strings.ex:97
 #: lib/presentation_strings.ex:98
 #, elixir-autogen, elixir-format
 msgid "Stop Moved"
-msgstr ""
+msgstr "Arè Fèmen"
 
 #: lib/presentation_strings.ex:99
 #, elixir-autogen, elixir-format
 msgid "Stop Shoveling"
-msgstr ""
+msgstr "Arè Denèjman"
 
 #: lib/presentation_strings.ex:56
 #, elixir-autogen, elixir-format
 msgid "Stop closed"
-msgstr ""
+msgstr "Arè a fèmen"
 
 #: lib/presentation_strings.ex:57
 #: lib/presentation_strings.ex:58
 #, elixir-autogen, elixir-format
 msgid "Stop moved"
-msgstr ""
+msgstr "Arè Fèmen"
 
 #: lib/presentation_strings.ex:59
 #, elixir-autogen, elixir-format
 msgid "Stop shoveling"
-msgstr ""
+msgstr "Arè denèjman"
 
 #: lib/presentation_strings.ex:219
 #, elixir-autogen, elixir-format
 msgid "Strike"
-msgstr ""
+msgstr "Grèv"
 
 #: lib/presentation_strings.ex:60
 #: lib/presentation_strings.ex:100
 #, elixir-autogen, elixir-format
 msgid "Summary"
-msgstr ""
+msgstr "Rezime"
 
 #: lib/presentation_strings.ex:101
 #, elixir-autogen, elixir-format
 msgid "Suspension"
-msgstr ""
+msgstr "Sispansyon"
 
 #: lib/presentation_strings.ex:220
 #, elixir-autogen, elixir-format
 msgid "Switch Issue"
-msgstr ""
+msgstr "Pwoblèm nan switch ray"
 
 #: lib/presentation_strings.ex:221
 #, elixir-autogen, elixir-format
 msgid "Switch Problem"
-msgstr ""
+msgstr "Pann nan switch ray"
 
 #: lib/presentation_strings.ex:222
 #, elixir-autogen, elixir-format
 msgid "Technical Problem"
-msgstr ""
+msgstr "Pwoblèm Teknik"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:263
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
-msgstr ""
+msgstr "Sa a %{route_type}"
 
 #: lib/presentation_strings.ex:223
 #, elixir-autogen, elixir-format
 msgid "Tie Replacement"
-msgstr ""
+msgstr "Ranplasman kòd"
 
 #: lib/presentation_strings.ex:102
 #, elixir-autogen, elixir-format
 msgid "Track Change"
-msgstr ""
+msgstr "Suiv Chanjman"
 
 #: lib/presentation_strings.ex:224
 #, elixir-autogen, elixir-format
 msgid "Track Problem"
-msgstr ""
+msgstr "Pwoblèm sou Ray"
 
 #: lib/presentation_strings.ex:225
 #, elixir-autogen, elixir-format
 msgid "Track Work"
-msgstr ""
+msgstr "Travay sou Ray"
 
 #: lib/presentation_strings.ex:62
 #, elixir-autogen, elixir-format
 msgid "Track change"
-msgstr ""
+msgstr "Suiv chanjman"
 
 #: lib/presentation_strings.ex:226
 #, elixir-autogen, elixir-format
 msgid "Traffic"
-msgstr ""
+msgstr "Sikilasyon"
 
 #: lib/presentation_strings.ex:227
 #, elixir-autogen, elixir-format
 msgid "Train Traffic"
-msgstr ""
+msgstr "Trafik tren"
 
 #: lib/presentation_strings.ex:35
 #, elixir-autogen, elixir-format
 msgid "Trip cancelled"
-msgstr ""
+msgstr "Vwayaj la anile"
 
 #: lib/presentation_strings.ex:228
 #, elixir-autogen, elixir-format
 msgid "Unruly Passenger"
-msgstr ""
+msgstr "Pasaje Ki Pa Respekte Règ"
 
 #: lib/presentation_strings.ex:229
 #, elixir-autogen, elixir-format
 msgid "Weather"
-msgstr ""
+msgstr "Tan"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:9
 #, elixir-autogen, elixir-format
 msgid "Westbound"
-msgstr ""
+msgstr "Pran direksyon lwès"
 
 #: lib/presentation_strings.ex:111
 #, elixir-autogen, elixir-format
 msgid "accident"
-msgstr ""
+msgstr "aksidan"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:424
 #, elixir-autogen, elixir-format
 msgid "affected by %{effect} %{day}"
-msgstr ""
+msgstr "afekte pa %{effect} %{day}"
 
 #: lib/presentation_strings.ex:114
 #, elixir-autogen, elixir-format
 msgid "an earlier mechanical problem"
-msgstr ""
+msgstr "yon pwoblèm mekanik ki te pase anvan"
 
 #: lib/presentation_strings.ex:115
 #, elixir-autogen, elixir-format
 msgid "an earlier signal problem"
-msgstr ""
+msgstr "yon pwoblèm siyal ki te pase anvan"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:382
 #, elixir-autogen, elixir-format
 msgid "are cancelled %{day}"
-msgstr ""
+msgstr "yo anile %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:417
 #, elixir-autogen, elixir-format
 msgid "are suspended %{day}"
-msgstr ""
+msgstr "yo sispann %{day}"
 
 #: lib/presentation_strings.ex:116
 #, elixir-autogen, elixir-format
 msgid "autos impeding service"
-msgstr ""
+msgstr "oto ap anpeche sèvis la"
 
 #: lib/presentation_strings.ex:12
 #, elixir-autogen, elixir-format
 msgid "bus"
-msgstr ""
+msgstr "bis"
 
 #: lib/presentation_strings.ex:13
 #, elixir-autogen, elixir-format
 msgid "buses"
-msgstr ""
+msgstr "bis yo"
 
 #: lib/presentation_strings.ex:118
 #, elixir-autogen, elixir-format
 msgid "congestion"
-msgstr ""
+msgstr "anbouteyaj"
 
 #: lib/presentation_strings.ex:119
 #, elixir-autogen, elixir-format
 msgid "construction"
-msgstr ""
+msgstr "konstriksyon"
 
 #: lib/presentation_strings.ex:120
 #, elixir-autogen, elixir-format
 msgid "crossing issue"
-msgstr ""
+msgstr "pwoblèm nan pasaj a nivo"
 
 #: lib/presentation_strings.ex:121
 #, elixir-autogen, elixir-format
 msgid "crossing malfunction"
-msgstr ""
+msgstr "malfonksyònman nan pasaj a nivo"
 
 #: lib/presentation_strings.ex:122
 #, elixir-autogen, elixir-format
 msgid "demonstration"
-msgstr ""
+msgstr "manifestasyon"
 
 #: lib/presentation_strings.ex:123
 #, elixir-autogen, elixir-format
 msgid "disabled bus"
-msgstr ""
+msgstr "otobis anpann"
 
 #: lib/presentation_strings.ex:124
 #, elixir-autogen, elixir-format
 msgid "disabled train"
-msgstr ""
+msgstr "tren anpann"
 
 #: lib/presentation_strings.ex:125
 #, elixir-autogen, elixir-format
 msgid "drawbridge being raised"
-msgstr ""
+msgstr "pon levasyon ap monte"
 
 #: lib/presentation_strings.ex:126
 #, elixir-autogen, elixir-format
 msgid "drawbridge issue"
-msgstr ""
+msgstr "pwoblèm pon leve"
 
 #: lib/presentation_strings.ex:127
 #, elixir-autogen, elixir-format
 msgid "electrical work"
-msgstr ""
+msgstr "travay elektrik"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:193
 #, elixir-autogen, elixir-format
 msgid "end of service"
-msgstr ""
+msgstr "fen sèvis"
 
 #: lib/presentation_strings.ex:15
 #, elixir-autogen, elixir-format
 msgid "ferries"
-msgstr ""
+msgstr "bato yo"
 
 #: lib/presentation_strings.ex:14
 #, elixir-autogen, elixir-format
 msgid "ferry"
-msgstr ""
+msgstr "bato"
 
 #: lib/presentation_strings.ex:128
 #, elixir-autogen, elixir-format
 msgid "fire"
-msgstr ""
+msgstr "dife"
 
 #: lib/presentation_strings.ex:129
 #, elixir-autogen, elixir-format
 msgid "fire department activity"
-msgstr ""
+msgstr "aktivite ponpye"
 
 #: lib/presentation_strings.ex:130
 #, elixir-autogen, elixir-format
 msgid "flooding"
-msgstr ""
+msgstr "inondasyon"
 
 #: lib/presentation_strings.ex:131
 #, elixir-autogen, elixir-format
 msgid "fog"
-msgstr ""
+msgstr "bwouya"
 
 #: lib/presentation_strings.ex:132
 #, elixir-autogen, elixir-format
 msgid "freight train interference"
-msgstr ""
+msgstr "entèferans tren machandiz"
 
 #: lib/presentation_strings.ex:133
 #, elixir-autogen, elixir-format
 msgid "hazmat condition"
-msgstr ""
+msgstr "kondisyon danje"
 
 #: lib/presentation_strings.ex:134
 #, elixir-autogen, elixir-format
 msgid "heavy ridership"
-msgstr ""
+msgstr "Anpil pasaje"
 
 #: lib/presentation_strings.ex:135
 #, elixir-autogen, elixir-format
 msgid "high winds"
-msgstr ""
+msgstr "gwo van"
 
 #: lib/presentation_strings.ex:136
 #, elixir-autogen, elixir-format
 msgid "holiday"
-msgstr ""
+msgstr "jou ferye"
 
 #: lib/presentation_strings.ex:137
 #, elixir-autogen, elixir-format
 msgid "hurricane"
-msgstr ""
+msgstr "siklòn"
 
 #: lib/presentation_strings.ex:138
 #, elixir-autogen, elixir-format
 msgid "ice in harbor"
-msgstr ""
+msgstr "glas nan pò"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:385
 #, elixir-autogen, elixir-format
 msgid "is cancelled %{day}"
-msgstr ""
+msgstr "anile %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:420
 #, elixir-autogen, elixir-format
 msgid "is suspended %{day}"
-msgstr ""
+msgstr "sispann %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:239
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
-msgstr ""
+msgstr " jiska %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:247
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
-msgstr ""
+msgstr " jiska %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:144
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
-msgstr ""
+msgstr " jiska %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:152
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
-msgstr ""
+msgstr " jiska %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:160
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
-msgstr ""
+msgstr " jiska %{1}"
 
 #: lib/presentation_strings.ex:139
 #, elixir-autogen, elixir-format
 msgid "maintenance"
-msgstr ""
+msgstr "antretyen"
 
 #: lib/presentation_strings.ex:140
 #, elixir-autogen, elixir-format
 msgid "mechanical issue"
-msgstr ""
+msgstr "pwoblèm mekanik"
 
 #: lib/presentation_strings.ex:141
 #, elixir-autogen, elixir-format
 msgid "mechanical problem"
-msgstr ""
+msgstr "pwoblèm mekanik"
 
 #: lib/presentation_strings.ex:142
 #, elixir-autogen, elixir-format
 msgid "medical emergency"
-msgstr ""
+msgstr "ijans medikal"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:333
 #, elixir-autogen, elixir-format
 msgid "multiple trips"
-msgstr ""
+msgstr "plizyè vwayaj"
 
 #: lib/presentation_strings.ex:143
 #, elixir-autogen, elixir-format
 msgid "parade"
-msgstr ""
+msgstr "parad"
 
 #: lib/presentation_strings.ex:144
 #, elixir-autogen, elixir-format
 msgid "police action"
-msgstr ""
+msgstr "aksyon lapolis"
 
 #: lib/presentation_strings.ex:145
 #, elixir-autogen, elixir-format
 msgid "police activity"
-msgstr ""
+msgstr "aktivite lapolis"
 
 #: lib/presentation_strings.ex:146
 #, elixir-autogen, elixir-format
 msgid "power problem"
-msgstr ""
+msgstr "pwoblèm kouran"
 
 #: lib/presentation_strings.ex:147
 #, elixir-autogen, elixir-format
 msgid "rail defect"
-msgstr ""
+msgstr "defo nan ray"
 
 #: lib/presentation_strings.ex:148
 #, elixir-autogen, elixir-format
 msgid "severe weather"
-msgstr ""
+msgstr "move tan"
 
 #: lib/presentation_strings.ex:149
 #, elixir-autogen, elixir-format
 msgid "signal issue"
-msgstr ""
+msgstr "pwoblèm siyal"
 
 #: lib/presentation_strings.ex:150
 #, elixir-autogen, elixir-format
 msgid "signal problem"
-msgstr ""
+msgstr "pann siyal"
 
 #: lib/presentation_strings.ex:151
 #, elixir-autogen, elixir-format
 msgid "single tracking"
-msgstr ""
+msgstr "yon sèl ray pou de direksyon"
 
 #: lib/presentation_strings.ex:152
 #, elixir-autogen, elixir-format
 msgid "slippery rail"
-msgstr ""
+msgstr "ray glise"
 
 #: lib/presentation_strings.ex:153
 #, elixir-autogen, elixir-format
 msgid "snow"
-msgstr ""
+msgstr "nèj"
 
 #: lib/presentation_strings.ex:154
 #, elixir-autogen, elixir-format
 msgid "special event"
-msgstr ""
+msgstr "evènman espesyal"
 
 #: lib/presentation_strings.ex:155
 #, elixir-autogen, elixir-format
 msgid "speed restriction"
-msgstr ""
+msgstr "restriksyon vitès"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:190
 #, elixir-autogen, elixir-format
 msgid "start of service"
-msgstr ""
+msgstr "kòmansman sèvis"
 
 #: lib/presentation_strings.ex:156
 #, elixir-autogen, elixir-format
 msgid "strike"
-msgstr ""
+msgstr "grèv"
 
 #: lib/presentation_strings.ex:157
 #, elixir-autogen, elixir-format
 msgid "switch issue"
-msgstr ""
+msgstr "pwoblèm nan switch ray"
 
 #: lib/presentation_strings.ex:158
 #, elixir-autogen, elixir-format
 msgid "switch problem"
-msgstr ""
+msgstr "pann nan switch ray"
 
 #: lib/presentation_strings.ex:159
 #, elixir-autogen, elixir-format
 msgid "technical problem"
-msgstr ""
+msgstr "pwoblèm teknik"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:320
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
-msgstr ""
+msgstr "**%{time}** %{vehicle} la"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:328
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
-msgstr ""
+msgstr "sa a %{vehicle}"
 
 #: lib/presentation_strings.ex:160
 #, elixir-autogen, elixir-format
 msgid "tie replacement"
-msgstr ""
+msgstr "ranplasman mare"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:377
 #, elixir-autogen, elixir-format
 msgid "today"
-msgstr ""
+msgstr "jodi a"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:377
 #, elixir-autogen, elixir-format
 msgid "tomorrow"
-msgstr ""
+msgstr "demen"
 
 #: lib/presentation_strings.ex:161
 #, elixir-autogen, elixir-format
 msgid "track problem"
-msgstr ""
+msgstr "pwoblèm sou ray"
 
 #: lib/presentation_strings.ex:162
 #, elixir-autogen, elixir-format
 msgid "track work"
-msgstr ""
+msgstr "travay ap fèt sou ray"
 
 #: lib/presentation_strings.ex:163
 #, elixir-autogen, elixir-format
 msgid "traffic"
-msgstr ""
+msgstr "trafik"
 
 #: lib/presentation_strings.ex:16
 #, elixir-autogen, elixir-format
 msgid "train"
-msgstr ""
+msgstr "tren"
 
 #: lib/presentation_strings.ex:164
 #, elixir-autogen, elixir-format
 msgid "train traffic"
-msgstr ""
+msgstr "trafik tren"
 
 #: lib/presentation_strings.ex:17
 #, elixir-autogen, elixir-format
 msgid "trains"
-msgstr ""
+msgstr "tren yo"
 
 #: lib/presentation_strings.ex:165
 #, elixir-autogen, elixir-format
 msgid "unruly passenger"
-msgstr ""
+msgstr "pasaje ap fè dezòd"
 
 #: lib/presentation_strings.ex:166
 #, elixir-autogen, elixir-format
 msgid "weather"
-msgstr ""
+msgstr "move tan"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:388
 #, elixir-autogen, elixir-format
 msgid "will not stop at %{stop_list} %{day}"
-msgstr ""
+msgstr "p ap rete nan %{stop_list} %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:411
 #, elixir-autogen, elixir-format
 msgid "will terminate at %{terminating_stop} %{day}"
-msgstr ""
+msgstr "ap fini nan %{terminating_stop} %{day}"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:484
 #, elixir-autogen, elixir-format, import-optional

@@ -559,7 +559,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     alert =
       build(:alert,
-        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
         effect: :suspension,
         informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "place-sstat"}],
         last_push_notification_timestamp: upstream_timestamp
@@ -596,7 +596,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: %AlertSummary.Location.SingleStop{stop_name: "South Station"},
-                 timeframe: nil
+                 timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
                subscriptions: [_, _],
                alert: ^alert,
@@ -716,7 +716,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
     alert =
       build(:alert,
-        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
         effect: :suspension,
         informed_entity: [
           %Alert.InformedEntity{activities: [:board], stop: "place-sstat"},
@@ -756,7 +756,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: nil,
-                 timeframe: nil
+                 timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
                subscriptions: [^subscription1, ^subscription2],
                alert: ^alert,
