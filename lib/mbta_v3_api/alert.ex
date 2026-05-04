@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Alert do
+  require Logger
   use MBTAV3API.JsonApi.Object
   require Util
   alias MBTAV3API.Alert.ActivePeriod
@@ -204,6 +205,11 @@ defmodule MBTAV3API.Alert do
   def next_period(alert, now) do
     Enum.find(alert.active_period, fn %ActivePeriod{start: ap_start} ->
       hours_in_future = DateTime.diff(ap_start, now, :hour)
+
+      Logger.info(
+        "Scheduler alert next period alert_id=#{alert.id} hours_in_future=#{hours_in_future} ap_start=#{ap_start} now=#{now}"
+      )
+
       hours_in_future > 0 and hours_in_future < 24
     end)
   end

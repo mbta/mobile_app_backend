@@ -18,10 +18,31 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   def perform(_) do
     now = DateTime.now!("America/New_York")
     relevant_alerts = get_relevant_alerts(now)
+
+    Logger.info(
+      "#{__MODULE__} relevant alerts alerts=#{Enum.map_join(relevant_alerts, ",", & &1.id)} count=#{length(relevant_alerts)}"
+    )
+
     open_windows = get_open_windows(now)
 
-    find_new_recipients(relevant_alerts, open_windows, now)
-    |> enqueue_delivery()
+    new_recipients = find_new_recipients(relevant_alerts, open_windows, now)
+
+    recipient_logs =
+      Enum.map_join(new_recipients, ",", fn {user, notification} ->
+        type =
+          case notification.type do
+            {type, _} -> type
+            type -> type
+          end
+
+        "#{user.id}:#{type}:#{notification.alert_id}"
+      end)
+
+    Logger.info(
+      "#{__MODULE__} new recipients recipients=#{recipient_logs} count=#{length(new_recipients)}"
+    )
+
+    enqueue_delivery(new_recipients)
 
     {:ok, nil}
   end
@@ -29,6 +50,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   @spec get_relevant_alerts(DateTime.t()) :: [Alert.t()]
   defp get_relevant_alerts(now) do
     alerts = Alerts.fetch([])
+
+    Logger.info(
+      "#{__MODULE__} fetched alerts alerts=#{Enum.map_join(alerts, ",", & &1.id)} count=#{length(alerts)}"
+    )
 
     Enum.filter(alerts, fn %Alert{} = alert -> filter_alert(alert, now) end)
   end
