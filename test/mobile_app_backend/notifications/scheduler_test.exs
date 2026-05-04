@@ -19,8 +19,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, -48, :hour),
-            end: DateTime.add(now, 10, :minute)
+            start: DateTime.add(now, -48, :hour)
           }
         ],
         effect: :suspension,
@@ -59,19 +58,62 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{
-            "type" => "time",
-            "time" => hd(alert.active_period).end |> DateTime.to_iso8601()
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
+        "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
+        "upstream_timestamp" => alert.last_push_notification_timestamp
+      }
+    )
+  end
+
+  test "schedules notification in user's locale" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -48, :hour)
           }
-        },
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user, locale: "es")
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: now |> DateTime.add(-10, :minute) |> DateTime.to_time(),
+          end_time: now |> DateTime.add(10, :minute) |> DateTime.to_time(),
+          days_of_week: [Date.day_of_week(now)]
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 autobús",
+        "body" => "Servicio suspendido hasta nuevo aviso",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "upstream_timestamp" => alert.last_push_notification_timestamp
       }
@@ -138,8 +180,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, 22, :hour),
-            end: DateTime.add(now, 27, :hour)
+            start: DateTime.add(now, 22, :hour)
           }
         ],
         effect: :suspension,
@@ -172,16 +213,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "effect" => "suspension",
-          "location" => nil,
-          "timeframe" => %{"type" => "starting_tomorrow"}
-        },
+        "title" => "66 bus",
+        "body" => "Service suspended starting tomorrow",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "reminder",
         "upstream_timestamp" => nil
@@ -321,15 +354,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "mode_label",
-          "label" => "66",
-          "mode" => "bus"
-        },
-        "summary" => %{
-          "type" => "all_clear",
-          "location" => nil
-        },
+        "title" => "66 bus",
+        "body" => "All clear: Regular service",
         "subscriptions" => [%{"route" => "66", "stop" => "1", "direction" => 0}],
         "type" => "all_clear",
         "upstream_timestamp" => nil
@@ -406,11 +432,13 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         stop_ids: ["FR-0201-02"]
       )
 
+    start_time = DateTime.add(now, 3, :hour)
+
     alert =
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: DateTime.add(now, 3, :hour),
+            start: start_time,
             end: DateTime.add(now, 7, :hour)
           }
         ],
@@ -495,18 +523,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       args: %{
         "user_id" => user.id,
         "alert_id" => alert.id,
-        "title" => %{
-          "type" => "bare_label",
-          "label" => "Fitchburg Line"
-        },
-        "summary" => %{
-          "effect" => "cancellation",
-          "location" => nil,
-          "timeframe" => %{
-            "type" => "starting_later_today",
-            "time" => DateTime.to_iso8601(DateTime.add(now, 3, :hour))
-          }
-        },
+        "title" => "Fitchburg Line",
+        "body" =>
+          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
         "subscriptions" => [
           %{"route" => route.id, "stop" => parent_stop.id, "direction" => 1}
         ],
