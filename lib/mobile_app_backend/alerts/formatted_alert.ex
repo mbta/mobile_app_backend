@@ -39,7 +39,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             cond do
               alert_summary.effect in [:station_closure, :stop_closure] ->
                 gettext(
-                  "%{mode}%{skipped_effect}",
+                  "%{mode} %{skipped_effect}",
                   mode: summary_mode,
                   skipped_effect: summary_skipped_effect(summary_location, summary_timeframe)
                 )
@@ -438,22 +438,22 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   end
 
   defp summary_affected_stops(stops) do
-    stops
-    |> Enum.map(&"**#{&1}**")
-    |> Enum.reverse()
-    |> Enum.reduce("", fn stop, acc ->
-      if acc == "" do
-        stop
-      else
-        gettext("%{stop} and %{other_stops}", stop: stop, other_stops: acc)
-      end
-    end)
+    if length(stops) > 3 do
+      gettext("**multiple stops**")
+    else
+      formatted_stops =
+        stops
+        |> Enum.map(&"**#{&1}**")
+
+      stop_list = Cldr.List.to_string!(formatted_stops)
+      gettext("%{stops}", stops: stop_list)
+    end
   end
 
   defp summary_affected_mode(effect) do
     case effect do
-      :station_closure -> gettext("Trains") <> " "
-      :stop_closure -> gettext("Buses") <> " "
+      :station_closure -> gettext("Trains")
+      :stop_closure -> gettext("Buses")
       _ -> ""
     end
   end
