@@ -345,6 +345,13 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                route_label: "Orange Line",
                route_type: "heavy_rail"
              }
+
+      assert json_round_trip(%AlertSummary.Location.AffectedStops{
+               stops: ["Lechmere", "North Station"]
+             }) == %{
+               type: "affected_stops",
+               stops: ["Lechmere", "North Station"]
+             }
     end
 
     test "can serialize all timeframes" do

@@ -271,12 +271,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       defstruct [:route_label, :route_type]
     end
 
+    defmodule AffectedStops do
+      @type t :: %__MODULE__{stops: [String.t()] | nil}
+      @derive PolymorphicJson
+      defstruct [:stops]
+    end
+
     @type t ::
             DirectionToStop.t()
             | SingleStop.t()
             | StopToDirection.t()
             | SuccessiveStops.t()
             | WholeRoute.t()
+            | AffectedStops.t()
   end
 
   defmodule Timeframe do
@@ -581,6 +588,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
       cond do
+        alert.effect in [:station_closure, :stop_closure] and
+            length(affected_stops) > 0 ->
+          %Location.AffectedStops{
+            stops: Enum.map(affected_stops, fn stop -> stop.name end)
+          }
+
         length(affected_stops) == 1 ->
           %Location.SingleStop{stop_name: hd(affected_stops).name, downstream: downstream}
 

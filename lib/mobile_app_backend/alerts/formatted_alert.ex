@@ -34,23 +34,37 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             summary_location = summary_location(alert_summary.effect, alert_summary.location)
             summary_timeframe = summary_timeframe(alert_summary.timeframe)
             summary_recurrence = summary_recurrence(alert_summary.recurrence)
+            summary_mode = summary_affected_mode(alert_summary.effect)
 
-            if alert_summary.is_update do
-              gettext(
-                "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-                effect_sentence_case: effect_sentence_case,
-                summary_location: summary_location,
-                summary_timeframe: summary_timeframe,
-                summary_recurrence: summary_recurrence
-              )
-            else
-              gettext(
-                "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-                effect_sentence_case: effect_sentence_case,
-                summary_location: summary_location,
-                summary_timeframe: summary_timeframe,
-                summary_recurrence: summary_recurrence
-              )
+            cond do
+              alert_summary.effect in [:station_closure, :stop_closure] ->
+                gettext(
+                  "%{mode} %{skipped_effect}",
+                  mode: summary_mode,
+                  skipped_effect:
+                    summary_skipped_effect(
+                      summary_location,
+                      String.trim_leading(summary_timeframe)
+                    )
+                )
+
+              alert_summary.is_update ->
+                gettext(
+                  "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+                  effect_sentence_case: effect_sentence_case,
+                  summary_location: summary_location,
+                  summary_timeframe: summary_timeframe,
+                  summary_recurrence: summary_recurrence
+                )
+
+              true ->
+                gettext(
+                  "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+                  effect_sentence_case: effect_sentence_case,
+                  summary_location: summary_location,
+                  summary_timeframe: summary_timeframe,
+                  summary_recurrence: summary_recurrence
+                )
             end
 
           %AlertSummary.TripSpecific{} ->
@@ -122,6 +136,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             mode_label: PresentationStrings.mode_label(location.route_label, location.route_type)
           )
         end
+
+      %Location.AffectedStops{} ->
+        summary_affected_stops(location.stops)
 
       _ ->
         ""
@@ -385,20 +402,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext("is cancelled %{day}", day: day)
 
       effect in [:station_closure, :stop_closure, :dock_closure] && effect_stops != nil ->
-        gettext("will not stop at %{stop_list} %{day}",
-          day: day,
-          stop_list:
-            effect_stops
-            |> Enum.map(&"**#{&1}**")
-            |> Enum.reverse()
-            |> Enum.reduce("", fn stop, acc ->
-              if acc == "" do
-                stop
-              else
-                gettext("%{stop} and %{other_stops}", stop: stop, other_stops: acc)
-              end
-            end)
-        )
+        summary_skipped_effect(summary_affected_stops(effect_stops), day)
 
       effect == :suspension ->
         first_effected_stop =
@@ -435,5 +439,32 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     else
       ""
     end
+  end
+
+  defp summary_affected_stops(stops) do
+    if length(stops) > 3 do
+      gettext("**multiple stops**")
+    else
+      formatted_stops =
+        stops
+        |> Enum.map(&"**#{&1}**")
+
+      Cldr.List.to_string!(formatted_stops)
+    end
+  end
+
+  defp summary_affected_mode(effect) do
+    case effect do
+      :station_closure -> gettext("Trains")
+      :stop_closure -> gettext("Buses")
+      _ -> ""
+    end
+  end
+
+  defp summary_skipped_effect(stops, timeframe) do
+    gettext("will not stop at %{stop_list} %{timeframe}",
+      timeframe: timeframe,
+      stop_list: stops
+    )
   end
 end

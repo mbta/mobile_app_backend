@@ -92,6 +92,44 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "station bypass until further notice" do
+      alert = build(:alert, effect: :station_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :station_closure,
+        location: %Location.AffectedStops{
+          stops: ["Oak Grove", "North Station"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: %Recurrence.Daily{}
+      }
+
+      assert "Trains will not stop at Oak Grove and North Station until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "stop bypass until further notice" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay", "Ruggles"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: %Recurrence.Daily{}
+      }
+
+      assert "Buses will not stop at Back Bay and Ruggles until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 trip-specific" do
@@ -507,7 +545,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           false
         )
 
-      assert "will not stop at **A** and **B** and **C** tomorrow" == summary
+      assert "will not stop at **A**, **B**, and **C** tomorrow" == summary
     end
 
     test "one stop closed" do
@@ -569,6 +607,80 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
       # TODO: this should probably be lower case
       assert "affected by Modified service today" == summary
+    end
+  end
+
+  describe "summary standard stops skipped" do
+    test "one stops skipped" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      assert "Buses will not stop at Back Bay until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "two stops skipped" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay", "Ruggles"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      assert "Buses will not stop at Back Bay and Ruggles until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "three stops skipped" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay", "Ruggles", "Hyde Park"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      assert "Buses will not stop at Back Bay, Ruggles, and Hyde Park until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "multiple stops skipped" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.AffectedStops{
+          stops: ["Back Bay", "Ruggles", "Hyde Park", "Readville"]
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      assert "Buses will not stop at multiple stops until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
     end
   end
 end
