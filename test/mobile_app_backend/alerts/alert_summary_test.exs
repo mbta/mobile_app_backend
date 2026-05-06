@@ -2203,6 +2203,99 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    test "all clear doesn't return affected stops for closure alerts" do
+      first_stop = build(:stop, name: "First Stop")
+      successive_stops = build_list(4, :stop)
+      last_stop = build(:stop, name: "Last Stop")
+
+      stops = [first_stop] ++ successive_stops ++ [last_stop]
+
+      route = build(:route, type: :light_rail)
+      trip = build(:trip, stop_ids: Enum.map(stops, & &1.id))
+
+      pattern =
+        build(:route_pattern,
+          route_id: route.id,
+          direction_id: 0,
+          representative_trip_id: trip.id
+        )
+
+      now = DateTime.now!("America/New_York")
+      upstream_timestamp = DateTime.add(now, -2)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{start: DateTime.add(now, -10), end: DateTime.add(now, -5)}
+          ],
+          closed_timestamp: upstream_timestamp,
+          effect: :stop_closure,
+          informed_entity:
+            Enum.map(
+              successive_stops ++ [last_stop],
+              &%Alert.InformedEntity{
+                activities: ~w(board exit ride)a,
+                route: route.id,
+                stop: &1.id
+              }
+            ),
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      assert %AlertSummary.AllClear{
+               location: %AlertSummary.Location.SuccessiveStops{
+                 start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
+                 end_stop_name: "Last Stop",
+                 downstream: false
+               }
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 Enum.at(successive_stops, 2).id,
+                 0,
+                 [pattern],
+                 now,
+                 nil,
+                 %{
+                   routes: %{route.id => route},
+                   stops: Map.new(stops, &{&1.id, &1}),
+                   trips: %{trip.id => trip}
+                 }
+               )
+    end
+
+    test "stop closure returns affected stops when active", %{now: now} do
+      stop = build(:stop, name: "Parent Name")
+      child_stop = build(:stop, parent_station_id: stop.id)
+      stop = put_in(stop.child_stop_ids, [child_stop.id])
+
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id, direction_id: 0)
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :stop_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: route.id,
+              stop: child_stop.id
+            }
+          ]
+        )
+
+      assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.AffectedStops{
+                 stops: ["Parent Name"]
+               }
+             } =
+               AlertSummary.summarizing(alert, "", 0, [pattern], now, nil, %{
+                 routes: %{route.id => route},
+                 stops: %{stop.id => stop, child_stop.id => child_stop}
+               })
+    end
+
     test "trip specific - same trip and stops" do
       now = DateTime.now!("America/New_York")
 

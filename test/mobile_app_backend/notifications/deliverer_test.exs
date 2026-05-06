@@ -29,6 +29,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
     title = "Notification title"
     body = "Notification body"
+    deep_link_path = "/a/#{alert_id}/r/1/s/1"
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -49,7 +50,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         alert_id: alert_id,
         title: title,
         body: body,
-        subscriptions: [%{route: "1", stop: "1", direction: 1}],
+        deep_link_path: deep_link_path,
         upstream_timestamp: upstream_timestamp,
         type: type
       })
@@ -68,15 +69,15 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
              body: received_body
            } = received_env
 
-    assert %{
+    assert Jason.decode!(received_body, keys: :atoms!) == %{
              message: %{
-               notification: %{
-                 title: ^title,
-                 body: ^body
-               },
-               token: ^fcm_token
+               token: fcm_token,
+               notification: %{title: title, body: body},
+               data: %{deep_link_path: deep_link_path},
+               android: %{notification: %{tag: alert_id, sound: "default"}},
+               apns: %{payload: %{aps: %{sound: "default"}}}
              }
-           } = Jason.decode!(received_body, keys: :atoms!)
+           }
 
     assert [] = received_opts
 
@@ -104,6 +105,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
     title = "Notification title"
     body = "Notification body"
+    deep_link_path = "/a/#{alert_id}/r/1/s/1"
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -125,7 +127,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           alert_id: alert_id,
           title: title,
           body: body,
-          subscriptions: [%{route: "1", stop: "1", direction: 1}],
+          deep_link_path: deep_link_path,
           upstream_timestamp: upstream_timestamp,
           type: type
         })
@@ -167,7 +169,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           alert_id: alert_id,
           title: "title",
           body: "body",
-          subscriptions: [%{route: "1", stop: "1", direction: 1}],
+          deep_link_path: "/a/#{alert_id}/r/1/s/1",
           upstream_timestamp: upstream_timestamp,
           type: type
         })
