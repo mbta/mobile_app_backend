@@ -14,6 +14,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           "alert_id" => alert_id,
           "title" => title,
           "body" => body,
+          "deep_link_path" => deep_link_path,
           "upstream_timestamp" => upstream_timestamp,
           "type" => type
         }
@@ -35,11 +36,29 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     gcp_token = GCPToken.get_token()
     connection = FCM.Connection.new(gcp_token)
 
+    # in Android, a notification with a tag will replace an old notification with the same tag
+    tag =
+      case type do
+        :all_clear -> "#{alert_id}-all-clear"
+        _ -> alert_id
+      end
+
     request_body = %FCM.Model.SendMessageRequest{
       message: %FCM.Model.Message{
         notification: %{
           title: title,
           body: body
+        },
+        data: %{deep_link_path: deep_link_path},
+        android: %FCM.Model.AndroidConfig{
+          notification: %FCM.Model.AndroidNotification{
+            # TODO why does this not cause sound to play
+            sound: "default",
+            tag: tag
+          }
+        },
+        apns: %FCM.Model.ApnsConfig{
+          payload: %{aps: %{sound: "default"}}
         },
         token: user.fcm_token
       }

@@ -166,7 +166,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       alert_id: notification.alert_id,
       title: notification.title,
       body: notification.body,
-      subscriptions: subscriptions,
+      deep_link_path: deep_link_path(notification.alert_id, subscriptions),
       upstream_timestamp: upstream_timestamp,
       type: type
     }
@@ -181,6 +181,41 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       )
 
       :ok
+  end
+
+  @spec deep_link_path(Alert.id(), [
+          %{route: MBTAV3API.Route.id(), stop: MBTAV3API.Stop.id(), direction: 0 | 1}
+        ]) :: String.t()
+  defp deep_link_path(alert_id, subscriptions) do
+    stop_piece =
+      subscriptions
+      |> Enum.uniq_by(& &1.stop)
+      |> case do
+        [%{stop: stop}] -> "/s/#{stop}"
+        _ -> ""
+      end
+
+    route_piece =
+      subscriptions
+      |> Enum.uniq_by(& &1.route)
+      |> case do
+        [%{route: route}] -> "/r/#{route}"
+        _ -> ""
+      end
+
+    direction_piece =
+      subscriptions
+      |> Enum.uniq_by(& &1.direction)
+      |> case do
+        [%{direction: direction}] -> "/d/#{direction}"
+        _ -> ""
+      end
+
+    if stop_piece != "" do
+      stop_piece <> route_piece <> direction_piece
+    else
+      "/a/#{alert_id}" <> route_piece <> stop_piece
+    end
   end
 
   defp log_exception(step_name, metadata, error) do
