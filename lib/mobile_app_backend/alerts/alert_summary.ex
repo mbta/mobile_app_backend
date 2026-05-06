@@ -589,7 +589,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       cond do
         alert.effect in [:station_closure, :stop_closure] and
-            length(affected_stops) > 0 ->
+          length(affected_stops) > 0 and Alert.active?(alert) ->
           %Location.AffectedStops{
             stops: Enum.map(affected_stops, fn stop -> stop.name end)
           }
