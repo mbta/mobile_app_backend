@@ -211,10 +211,8 @@ defmodule Test.Support.Data do
 
   def handle_call(:warn_untouched, _from, %State{} = state) do
     unless state.updating_test_data? do
-      for {req, resp} <- state.data do
-        unless resp.touched do
-          Logger.warning("Unused test data #{resp.id} for #{req}")
-        end
+      for {req, resp} <- state.data, not resp.touched do
+        Logger.warning("Unused test data #{resp.id} for #{req}")
       end
     end
 

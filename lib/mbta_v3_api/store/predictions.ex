@@ -188,31 +188,30 @@ defmodule MBTAV3API.Store.Predictions.Impl do
 
   @impl true
   def process_remove(references) do
-    for reference <- references do
-      case reference do
-        %{type: "prediction", id: id} ->
-          Logger.info("#{__MODULE__} process_remove type=prediction id=#{id}")
-          :ets.delete(@predictions_table_name, id)
-
-        %{type: "trip", id: id} ->
-          exsiting_predictions_for_trip = fetch(trip_id: id)
-
-          if Enum.empty?(exsiting_predictions_for_trip) do
-            Logger.info("#{__MODULE__} process_remove type=trip id=#{id}")
-            :ets.delete(@trips_table_name, id)
-          else
-            Logger.info(
-              "#{__MODULE__} process_remove skipping removal type=trip id=#{id} remaining_prediction_count=#{length(exsiting_predictions_for_trip)}"
-            )
-          end
-
-        _ ->
-          :ok
-      end
-    end
+    Enum.each(references, &process_one_remove/1)
 
     :ok
   end
+
+  defp process_one_remove(%{type: "prediction", id: id}) do
+    Logger.info("#{__MODULE__} process_remove type=prediction id=#{id}")
+    :ets.delete(@predictions_table_name, id)
+  end
+
+  defp process_one_remove(%{type: "trip", id: id}) do
+    existing_predictions_for_trip = fetch(trip_id: id)
+
+    if Enum.empty?(existing_predictions_for_trip) do
+      Logger.info("#{__MODULE__} process_remove type=trip id=#{id}")
+      :ets.delete(@trips_table_name, id)
+    else
+      Logger.info(
+        "#{__MODULE__} process_remove skipping removal type=trip id=#{id} remaining_prediction_count=#{length(existing_predictions_for_trip)}"
+      )
+    end
+  end
+
+  defp process_one_remove(_), do: :ok
 
   defp upsert_data(data) do
     records_by_type =

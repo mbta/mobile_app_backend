@@ -561,7 +561,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   defp alert_location_closure(alert, affected_stops) do
     alert.effect in [:station_closure, :stop_closure] and
-      length(affected_stops) > 0 and Alert.active?(alert)
+      affected_stops != [] and Alert.active?(alert)
   end
 
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::

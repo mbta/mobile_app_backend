@@ -3,8 +3,9 @@ defmodule MBTAV3APITest do
 
   import Mox
   import Test.Support.Helpers
+  alias MBTAV3API.JsonApi
   alias MBTAV3API.JsonApi.Reference
-  alias MBTAV3API.{JsonApi, ResponseCache}
+  alias MBTAV3API.ResponseCache
   alias Test.Support.SSEStub
 
   setup _ do

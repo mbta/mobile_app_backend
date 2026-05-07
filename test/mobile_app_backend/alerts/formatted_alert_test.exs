@@ -622,7 +622,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           true
         )
 
-      # TODO: this should probably be lower case
       assert "affected by Modified service today" == summary
     end
   end

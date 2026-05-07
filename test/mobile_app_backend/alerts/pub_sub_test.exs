@@ -1,8 +1,10 @@
 defmodule MobileAppBackend.Alerts.PubSubTests do
   use ExUnit.Case
 
+  alias MBTAV3API.Alert
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.{Alert, Store, Stream}
+  alias MBTAV3API.Store
+  alias MBTAV3API.Stream
   alias MobileAppBackend.Alerts.PubSub
   import Mox
   import Test.Support.Helpers

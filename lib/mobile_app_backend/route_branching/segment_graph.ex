@@ -21,41 +21,46 @@ defmodule MobileAppBackend.RouteBranching.SegmentGraph do
         if MapSet.member?(seen, vertex) do
           seen
         else
-          {new_segment_node_ids, new_segment_neighbors} = full_segment(stop_graph, [vertex])
-
-          new_segment_stop_nodes =
-            new_segment_node_ids
-            |> Enum.map(fn vertex ->
-              {_, label} = :digraph.vertex(stop_graph, vertex)
-              label
-            end)
-
-          new_segment_stops = new_segment_stop_nodes |> Enum.map(& &1.stop)
-
-          new_segment_typicalities =
-            new_segment_stop_nodes
-            |> Enum.map(& &1.typicalities)
-            |> Enum.reduce(MapSet.new(), &MapSet.union/2)
-
-          :digraph.add_vertex(result, vertex, %Node{
-            stops: new_segment_stops,
-            typicalities: new_segment_typicalities
-          })
-
-          for neighbor <- new_segment_neighbors do
-            if :digraph.vertex(result, neighbor) == false do
-              :digraph.add_vertex(result, neighbor, nil)
-            end
-
-            {^vertex, ^neighbor} =
-              :digraph.add_edge(result, {vertex, neighbor}, vertex, neighbor, nil)
-          end
-
-          MapSet.union(seen, MapSet.new(new_segment_node_ids))
+          build_segment(stop_graph, vertex, seen, result)
         end
     end
 
     result
+  end
+
+  @spec build_segment(StopGraph.t(), StopGraph.vertex_id(), MapSet.t(), t()) :: seen :: MapSet.t()
+  defp build_segment(stop_graph, vertex, seen, result) do
+    {new_segment_node_ids, new_segment_neighbors} = full_segment(stop_graph, [vertex])
+
+    new_segment_stop_nodes =
+      new_segment_node_ids
+      |> Enum.map(fn vertex ->
+        {_, label} = :digraph.vertex(stop_graph, vertex)
+        label
+      end)
+
+    new_segment_stops = new_segment_stop_nodes |> Enum.map(& &1.stop)
+
+    new_segment_typicalities =
+      new_segment_stop_nodes
+      |> Enum.map(& &1.typicalities)
+      |> Enum.reduce(MapSet.new(), &MapSet.union/2)
+
+    :digraph.add_vertex(result, vertex, %Node{
+      stops: new_segment_stops,
+      typicalities: new_segment_typicalities
+    })
+
+    for neighbor <- new_segment_neighbors do
+      if :digraph.vertex(result, neighbor) == false do
+        :digraph.add_vertex(result, neighbor, nil)
+      end
+
+      {^vertex, ^neighbor} =
+        :digraph.add_edge(result, {vertex, neighbor}, vertex, neighbor, nil)
+    end
+
+    MapSet.union(seen, MapSet.new(new_segment_node_ids))
   end
 
   @spec full_segment(StopGraph.t(), [StopGraph.vertex_id()]) ::

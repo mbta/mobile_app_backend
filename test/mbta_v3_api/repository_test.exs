@@ -3,9 +3,15 @@ defmodule MBTAV3API.RepositoryTest do
 
   import Mox
 
+  alias MBTAV3API.Alert
+  alias MBTAV3API.Facility
   alias MBTAV3API.JsonApi
   alias MBTAV3API.JsonApi.Object
-  alias MBTAV3API.{Alert, Facility, Repository, Route, RoutePattern, Schedule, Stop}
+  alias MBTAV3API.Repository
+  alias MBTAV3API.Route
+  alias MBTAV3API.RoutePattern
+  alias MBTAV3API.Schedule
+  alias MBTAV3API.Stop
 
   setup :verify_on_exit!
 

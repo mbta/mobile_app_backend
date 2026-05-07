@@ -20,8 +20,10 @@ defmodule MobileAppBackend.Alerts.PubSub do
     broadcast_interval_ms:
       Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
 
-  alias MBTAV3API.{JsonApi, Store, Stream}
-  alias MBTAV3API.{Alert, JsonApi, Store, Stream}
+  alias MBTAV3API.Alert
+  alias MBTAV3API.JsonApi
+  alias MBTAV3API.Store
+  alias MBTAV3API.Stream
   alias MobileAppBackend.Alerts.PubSub
 
   @behaviour PubSub.Behaviour
