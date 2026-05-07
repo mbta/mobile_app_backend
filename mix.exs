@@ -87,7 +87,7 @@ defmodule MobileAppBackend.MixProject do
       {:polyline, "~> 1.4", only: :test},
       {:postgrex, ">= 0.0.0"},
       {:req, "~> 0.3"},
-      {:sentry, "~> 11.0"},
+      {:sentry, "~> 13.0"},
       {:server_sent_event_stage, "~> 1.2"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
       {:tailwind, "~> 0.3.0", runtime: Mix.env() == :dev},
