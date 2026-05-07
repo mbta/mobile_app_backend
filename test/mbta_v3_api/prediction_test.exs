@@ -15,7 +15,8 @@ defmodule MBTAV3API.PredictionTest do
                "last_trip" => true,
                "schedule_relationship" => "ADDED",
                "status" => nil,
-               "stop_sequence" => 440
+               "stop_sequence" => 440,
+               "trip_headsign" => "Kenmore"
              },
              relationships: %{
                "route" => %JsonApi.Reference{id: "Green-C", type: "route"},
@@ -33,6 +34,7 @@ defmodule MBTAV3API.PredictionTest do
              schedule_relationship: :added,
              status: nil,
              stop_sequence: 440,
+             trip_headsign: "Kenmore",
              route_id: "Green-C",
              stop_id: "70237",
              trip_id: "ADDED-1591587107",

@@ -12,6 +12,7 @@ defmodule MBTAV3API.Prediction do
           schedule_relationship: schedule_relationship(),
           status: String.t(),
           stop_sequence: integer() | nil,
+          trip_headsign: String.t() | nil,
           route_id: String.t(),
           stop_id: String.t(),
           trip_id: String.t(),
@@ -37,6 +38,7 @@ defmodule MBTAV3API.Prediction do
     :schedule_relationship,
     :status,
     :stop_sequence,
+    :trip_headsign,
     :route_id,
     :stop_id,
     :trip_id,
@@ -52,7 +54,8 @@ defmodule MBTAV3API.Prediction do
       :revenue_status,
       :schedule_relationship,
       :status,
-      :stop_sequence
+      :stop_sequence,
+      :trip_headsign
     ]
   end
 
@@ -77,6 +80,7 @@ defmodule MBTAV3API.Prediction do
       schedule_relationship:
         parse_schedule_relationship(item.attributes["schedule_relationship"]),
       stop_sequence: item.attributes["stop_sequence"],
+      trip_headsign: item.attributes["trip_headsign"],
       status: item.attributes["status"],
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
