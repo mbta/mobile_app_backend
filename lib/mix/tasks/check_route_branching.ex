@@ -162,39 +162,34 @@ defmodule Mix.Tasks.CheckRouteBranching do
       Logger.warning("#{caption} took #{us / 1000.0}ms")
     end
 
-    if is_nil(segment_graph) or
-         (:digraph.no_edges(stop_graph) > 0 and :digraph.no_vertices(segment_graph) > 1) do
-      output_path = Path.join(["route-branching", route.id, "#{direction}"])
-      File.mkdir_p!(output_path)
+    output_path = Path.join(["route-branching", route.id, "#{direction}"])
+    File.mkdir_p!(output_path)
 
-      stop_graph
-      |> render_dot(Path.join(output_path, "stopGraph.png"), &visualize_stop_graph_node/2)
+    stop_graph
+    |> render_dot(Path.join(output_path, "stopGraph.png"), &visualize_stop_graph_node/2)
 
-      segment_names = RouteBranching.get_name_candidates(route, direction)
+    segment_names = RouteBranching.get_name_candidates(route, direction)
 
-      if is_nil(segment_graph) do
-        Logger.error("segment_graph nil")
-      else
-        segment_graph
-        |> render_dot(
-          Path.join(output_path, "segmentGraph.png"),
-          &visualize_segment_graph_node(&1, &2, segment_names)
-        )
-      end
+    if is_nil(segment_graph) do
+      Logger.error("segment_graph nil")
+    else
+      segment_graph
+      |> render_dot(
+        Path.join(output_path, "segmentGraph.png"),
+        &visualize_segment_graph_node(&1, &2, segment_names)
+      )
+    end
 
-      if is_nil(segments) do
-        Logger.error("segments nil")
-      else
-        output_path
-        |> Path.join("out.txt")
-        |> File.write!([caption, "\n", visualize_segments(segments, global_data), "\n"])
-      end
+    if is_nil(segments) do
+      Logger.error("segments nil")
+    else
+      output_path
+      |> Path.join("out.txt")
+      |> File.write!([caption, "\n", visualize_segments(segments, global_data), "\n"])
+    end
 
-      if is_nil(segment_graph) or is_nil(segments) do
-        :error
-      else
-        :ok
-      end
+    if is_nil(segment_graph) or is_nil(segments) do
+      :error
     else
       :ok
     end
