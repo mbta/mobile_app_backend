@@ -52,7 +52,6 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         data: %{deep_link_path: deep_link_path},
         android: %FCM.Model.AndroidConfig{
           notification: %FCM.Model.AndroidNotification{
-            # TODO why does this not cause sound to play
             sound: "default",
             tag: tag
           }

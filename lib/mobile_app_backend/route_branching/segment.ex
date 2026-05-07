@@ -55,75 +55,15 @@ defmodule MobileAppBackend.RouteBranching.Segment do
       result =
         segment_order
         |> Enum.with_index(fn segment_id, segment_index ->
-          {_, segment} = :digraph.vertex(segment_graph, segment_id)
-
-          Agent.update(connections_skipping_current, fn csc ->
-            Enum.reject(csc, &(&1.to_segment == segment_id))
-          end)
-
-          csc =
-            Agent.get(connections_skipping_current, fn csc -> Enum.map(csc, & &1.connection) end)
-
-          segment_lane = segment_lanes[segment_id]
-
-          lanes_with_conflicts = get_lanes_with_conflict(csc, segment_id, segment_lane)
-
-          if map_size(lanes_with_conflicts) > 0 do
-            {:error,
-             "Multiple segments on the same lane at the same time: #{inspect(lanes_with_conflicts)}"}
-          else
-            children = :digraph.out_neighbours(segment_graph, segment_id)
-
-            incoming_from_parents =
-              segment_neighbor_stops(
-                segment_id,
-                segment_lanes,
-                segment_graph,
-                &:digraph.in_neighbours/2,
-                &List.last/1,
-                &{&1, segment_id}
-              )
-
-            outgoing_to_children =
-              segment_neighbor_stops(
-                segment_id,
-                segment_lanes,
-                segment_graph,
-                &:digraph.out_neighbours/2,
-                &List.first/1,
-                &{segment_id, &1}
-              )
-
-            next_segment_id = Enum.at(segment_order, segment_index + 1)
-            subsequent_segments = Enum.reject(children, &(&1 == next_segment_id))
-
-            segment_stops =
-              build_segment_stops(
-                segment.stops,
-                segment_lane,
-                incoming_from_parents,
-                outgoing_to_children,
-                csc
-              )
-
-            Agent.update(
-              connections_skipping_current,
-              &(&1 ++
-                  connections_to_subsequent(
-                    segment_id,
-                    segment,
-                    subsequent_segments,
-                    segment_lanes,
-                    segment_graph
-                  ))
-            )
-
-            %__MODULE__{
-              stops: segment_stops,
-              name: get_segment_name(segment.stops, segment_name_candidates),
-              typical?: MapSet.member?(segment.typicalities, :typical)
-            }
-          end
+          build_segment(
+            segment_id,
+            segment_index,
+            segment_lanes,
+            connections_skipping_current,
+            segment_order,
+            segment_graph,
+            segment_name_candidates
+          )
         end)
 
       Agent.stop(connections_skipping_current)
@@ -224,6 +164,95 @@ defmodule MobileAppBackend.RouteBranching.Segment do
              {vertex, _} -> {vertex, :right}
            end)}
       end
+    end
+  end
+
+  @spec build_segment(
+          segment_id(),
+          non_neg_integer(),
+          %{segment_id() => lane()},
+          Agent.agent(),
+          [segment_id()],
+          SegmentGraph.t(),
+          [String.t()]
+        ) :: t() | {:error, String.t()}
+  defp build_segment(
+         segment_id,
+         segment_index,
+         segment_lanes,
+         connections_skipping_current,
+         segment_order,
+         segment_graph,
+         segment_name_candidates
+       ) do
+    {_, segment} = :digraph.vertex(segment_graph, segment_id)
+
+    Agent.update(connections_skipping_current, fn csc ->
+      Enum.reject(csc, &(&1.to_segment == segment_id))
+    end)
+
+    csc =
+      Agent.get(connections_skipping_current, fn csc -> Enum.map(csc, & &1.connection) end)
+
+    segment_lane = segment_lanes[segment_id]
+
+    lanes_with_conflicts = get_lanes_with_conflict(csc, segment_id, segment_lane)
+
+    if map_size(lanes_with_conflicts) > 0 do
+      {:error,
+       "Multiple segments on the same lane at the same time: #{inspect(lanes_with_conflicts)}"}
+    else
+      children = :digraph.out_neighbours(segment_graph, segment_id)
+
+      incoming_from_parents =
+        segment_neighbor_stops(
+          segment_id,
+          segment_lanes,
+          segment_graph,
+          &:digraph.in_neighbours/2,
+          &List.last/1,
+          &{&1, segment_id}
+        )
+
+      outgoing_to_children =
+        segment_neighbor_stops(
+          segment_id,
+          segment_lanes,
+          segment_graph,
+          &:digraph.out_neighbours/2,
+          &List.first/1,
+          &{segment_id, &1}
+        )
+
+      next_segment_id = Enum.at(segment_order, segment_index + 1)
+      subsequent_segments = Enum.reject(children, &(&1 == next_segment_id))
+
+      segment_stops =
+        build_segment_stops(
+          segment.stops,
+          segment_lane,
+          incoming_from_parents,
+          outgoing_to_children,
+          csc
+        )
+
+      Agent.update(
+        connections_skipping_current,
+        &(&1 ++
+            connections_to_subsequent(
+              segment_id,
+              segment,
+              subsequent_segments,
+              segment_lanes,
+              segment_graph
+            ))
+      )
+
+      %__MODULE__{
+        stops: segment_stops,
+        name: get_segment_name(segment.stops, segment_name_candidates),
+        typical?: MapSet.member?(segment.typicalities, :typical)
+      }
     end
   end
 

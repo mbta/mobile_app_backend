@@ -1,9 +1,10 @@
 defmodule MobileAppBackend.GlobalDataCache do
   use GenServer
+  alias MBTAV3API.JsonApi
+  alias MBTAV3API.JsonApi.Object
+  alias MBTAV3API.Repository
   alias MBTAV3API.Route
   alias MBTAV3API.Stop
-  alias MBTAV3API.{JsonApi, Repository}
-  alias MBTAV3API.JsonApi.Object
 
   @typedoc """
   A key to disambiguate other persistent_term entries from the one owned by this cache instance.
