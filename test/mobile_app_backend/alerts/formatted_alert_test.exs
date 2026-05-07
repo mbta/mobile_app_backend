@@ -50,6 +50,23 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "all clear single stop" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SingleStop{
+          stop_name: "Ruggles",
+          downstream: false
+        }
+      }
+
+      assert "All clear: Regular service at Ruggles" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 standard" do
