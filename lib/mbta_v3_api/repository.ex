@@ -88,7 +88,8 @@ end
 defmodule MBTAV3API.Repository.Impl do
   @behaviour MBTAV3API.Repository
 
-  use Nebulex.Caching.Decorators
+  use Nebulex.Caching.Decorators,
+    default_key_generator: &RepositoryCache.generate/3
 
   alias MBTAV3API.{JsonApi, RepositoryCache}
 

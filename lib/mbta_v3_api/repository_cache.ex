@@ -4,12 +4,8 @@ defmodule MBTAV3API.RepositoryCache do
   """
   use Nebulex.Cache,
     otp_app: :mobile_app_backend,
-    adapter: Nebulex.Adapters.Local,
-    default_key_generator: __MODULE__
+    adapter: Nebulex.Adapters.Local
 
-  @behaviour Nebulex.Caching.KeyGenerator
-
-  @impl Nebulex.Caching.KeyGenerator
   def generate(mod, fun, []) do
     "#{mod}|#{fun}"
   end

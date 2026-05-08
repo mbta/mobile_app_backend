@@ -77,6 +77,7 @@ defmodule MobileAppBackend.MixProject do
       {:logster, "~> 1.1"},
       {:mox, "~> 1.0", only: :test},
       {:nebulex, "~> 3.0.4"},
+      {:nebulex_local, "~> 3.0"},
       {:oban, "~> 2.20"},
       {:oban_web, "~> 2.11"},
       {:phoenix_html, "~> 4.0"},

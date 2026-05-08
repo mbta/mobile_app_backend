@@ -18,14 +18,17 @@ defmodule MobileAppBackend.Health.Cache do
 
   @impl true
   def handle_info(:check, %{cache: cache} = state) do
-    case cache.stats() do
+    case cache.info() do
       nil ->
         Logger.info("#{__MODULE__} cache=#{cache} cache stats disabled")
 
-      %Nebulex.Stats{measurements: %{hits: cache_hits, misses: cache_misses}} ->
+      {:ok, %{stats: %{hits: cache_hits, misses: cache_misses}}} ->
         Logger.info(
           "#{__MODULE__} cache=#{cache} cache_health hits=#{cache_hits} misses=#{cache_misses} hit_rate=#{cache_hits / max(cache_hits + cache_misses, 1)}"
         )
+
+      {:error, error} ->
+        Logger.warning("#{__MODULE__} error reading cache data #{inspect(error)}")
     end
 
     Process.send_after(self(), :check, @interval)
