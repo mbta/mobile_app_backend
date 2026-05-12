@@ -15,7 +15,7 @@ defmodule MBTAV3API do
 
     body = ""
 
-    cached_response =
+    {:ok, cached_response} =
       url
       |> MBTAV3API.ResponseCache.cache_key(params)
       |> MBTAV3API.ResponseCache.get()

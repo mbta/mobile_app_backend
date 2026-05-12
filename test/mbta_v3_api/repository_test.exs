@@ -16,7 +16,7 @@ defmodule MBTAV3API.RepositoryTest do
   setup :verify_on_exit!
 
   setup do
-    MBTAV3API.RepositoryCache.flush()
+    MBTAV3API.RepositoryCache.delete_all()
     :ok
   end
 
@@ -520,7 +520,7 @@ defmodule MBTAV3API.RepositoryTest do
               }} = Repository.schedules([])
     end
 
-        test "uses configured cache key" do
+    test "uses configured cache key" do
       expect(
         MobileAppBackend.HTTPMock,
         :request,
@@ -589,7 +589,6 @@ defmodule MBTAV3API.RepositoryTest do
                 included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
               }} = Repository.schedules([])
     end
-
 
     test "makes new request when new params passed" do
       expect(
