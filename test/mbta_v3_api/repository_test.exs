@@ -520,7 +520,7 @@ defmodule MBTAV3API.RepositoryTest do
               }} = Repository.schedules([])
     end
 
-    test "uses configured cache key" do
+    test "cache key is configured properly" do
       expect(
         MobileAppBackend.HTTPMock,
         :request,
@@ -579,15 +579,9 @@ defmodule MBTAV3API.RepositoryTest do
                 included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
               }} = Repository.schedules([])
 
-      assert {:ok,
-              %{
-                data: [
-                  %Schedule{
-                    id: "sched_1"
-                  }
-                ],
-                included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
-              }} = Repository.schedules([])
+      assert MBTAV3API.RepositoryCache.has_key?(
+               "Elixir.MBTAV3API.Repository.Impl|schedules|[[], []]"
+             )
     end
 
     test "makes new request when new params passed" do
