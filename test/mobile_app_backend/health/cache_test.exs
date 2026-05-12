@@ -7,7 +7,7 @@ defmodule MobileAppBackend.Health.CacheTest do
   describe "handle_info/1" do
     test "when stats disabled, logs" do
       defmodule StatslessCache do
-        def stats, do: nil
+        def info, do: nil
       end
 
       set_log_level(:info)
@@ -22,8 +22,8 @@ defmodule MobileAppBackend.Health.CacheTest do
 
     test "when stats found, logs stats" do
       defmodule Cache do
-        def stats do
-          %Nebulex.Stats{measurements: %{hits: 4, misses: 4}}
+        def info do
+          {:ok, %{stats: %{hits: 4, misses: 4}}}
         end
       end
 

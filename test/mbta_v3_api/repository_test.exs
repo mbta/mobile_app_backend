@@ -16,7 +16,7 @@ defmodule MBTAV3API.RepositoryTest do
   setup :verify_on_exit!
 
   setup do
-    MBTAV3API.RepositoryCache.flush()
+    MBTAV3API.RepositoryCache.delete_all()
     :ok
   end
 
@@ -518,6 +518,70 @@ defmodule MBTAV3API.RepositoryTest do
                 ],
                 included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
               }} = Repository.schedules([])
+    end
+
+    test "cache key is configured properly" do
+      expect(
+        MobileAppBackend.HTTPMock,
+        :request,
+        # Only called once because first response is cached
+        1,
+        fn %Req.Request{url: %URI{path: "/schedules"}, options: %{params: _params}} ->
+          {:ok,
+           Req.Response.json(%{
+             data: [
+               %{
+                 "attributes" => %{
+                   "arrival_time" => "2024-03-13T01:07:00-04:00",
+                   "departure_time" => "2024-03-13T01:07:00-04:00",
+                   "drop_off_type" => 0,
+                   "id" => "schedule-60565179-70159-90",
+                   "pickup_type" => 0,
+                   "route_id" => "Green-B",
+                   "stop_headsign" => nil,
+                   "stop_id" => "70159",
+                   "stop_sequence" => 90,
+                   "trip_id" => "trip_1"
+                 },
+                 "id" => "sched_1",
+                 "relationships" => %{
+                   "trip" => %{
+                     "data" => %{
+                       "id" => "trip_1",
+                       "type" => "trip"
+                     }
+                   }
+                 },
+                 "type" => "schedule"
+               }
+             ],
+             included: [
+               %{
+                 "attributes" => %{
+                   "headsign" => "Headsign",
+                   "direction_id" => 1
+                 },
+                 "id" => "trip_1",
+                 "type" => "trip"
+               }
+             ]
+           })}
+        end
+      )
+
+      assert {:ok,
+              %{
+                data: [
+                  %Schedule{
+                    id: "sched_1"
+                  }
+                ],
+                included: %{trips: %{"trip_1" => %{id: "trip_1"}}}
+              }} = Repository.schedules([])
+
+      assert MBTAV3API.RepositoryCache.has_key?(
+               "Elixir.MBTAV3API.Repository.Impl|schedules|[[], []]"
+             )
     end
 
     test "makes new request when new params passed" do
