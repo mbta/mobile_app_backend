@@ -5,7 +5,8 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
-  @type type :: :reminder | {:notification, DateTime.t()} | :all_clear
+  @type provisional_type :: :reminder | {:notification_or_update, DateTime.t()} | :all_clear
+  @type final_type :: :reminder | {:notification | :update, DateTime.t()} | :all_clear
 
   @primary_key {:id, :binary_id, autogenerate: true}
   typed_schema "delivered_notifications" do
@@ -15,14 +16,34 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
 
     field(:type, Ecto.Enum,
       default: :notification,
-      values: [:notification, :reminder, :all_clear],
+      values: [:notification, :update, :reminder, :all_clear],
       null: false
     )
 
     timestamps(type: :utc_datetime)
   end
 
-  @spec can_send?(User.id(), Alert.id(), type()) :: boolean()
+  @spec finalize_type(User.id(), Alert.id(), provisional_type()) :: final_type()
+  def finalize_type(user_id, alert_id, type)
+
+  def finalize_type(user_id, alert_id, {:notification_or_update, upstream_timestamp}) do
+    already_notified? =
+      Repo.aggregate(
+        from(dn in __MODULE__,
+          where:
+            dn.user_id == ^user_id and dn.alert_id == ^alert_id and
+              dn.type in [:notification, :update]
+        ),
+        :count
+      ) > 0
+
+    type_itself = if already_notified?, do: :update, else: :notification
+    {type_itself, upstream_timestamp}
+  end
+
+  def finalize_type(_user_id, _alert_id, type), do: type
+
+  @spec can_send?(User.id(), Alert.id(), provisional_type()) :: boolean()
   def can_send?(user_id, alert_id, type)
 
   def can_send?(user_id, alert_id, :reminder) do
@@ -32,12 +53,12 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     ) == 0
   end
 
-  def can_send?(user_id, alert_id, {:notification, upstream_timestamp}) do
+  def can_send?(user_id, alert_id, {:notification_or_update, upstream_timestamp}) do
     Repo.aggregate(
       from(dn in __MODULE__,
         where:
           dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            dn.upstream_timestamp == ^upstream_timestamp and dn.type == :notification
+            dn.upstream_timestamp == ^upstream_timestamp and dn.type in [:notification, :update]
       ),
       :count
     ) == 0
@@ -48,7 +69,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
       from(dn in __MODULE__,
         where:
           dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            (dn.type == :notification or dn.type == :reminder)
+            dn.type in [:reminder, :notification, :update]
       ),
       :count
     ) > 0 and

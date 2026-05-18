@@ -39,8 +39,8 @@ defmodule MobileAppBackend.Notifications.Engine do
           %{all_clear: subscriptions} ->
             {subscriptions, :all_clear}
 
-          %{notification: subscriptions} ->
-            {subscriptions, {:notification, alert.last_push_notification_timestamp}}
+          %{notification_or_update: subscriptions} ->
+            {subscriptions, {:notification_or_update, alert.last_push_notification_timestamp}}
 
           %{reminder: subscriptions} ->
             {subscriptions, :reminder}
@@ -161,7 +161,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         nil
 
       open_now? and active_now? ->
-        {alert, :notification, subscription}
+        {alert, :notification_or_update, subscription}
 
       open_now? and next_overlap_in_hours < 24 ->
         {alert, :reminder, subscription}

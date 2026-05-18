@@ -294,7 +294,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              %OutgoingNotification{
                subscriptions: [^subscription],
                alert: ^alert,
-               type: {:notification, ^upstream_timestamp}
+               type: {:notification_or_update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription], [alert], now)
@@ -330,7 +330,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              %OutgoingNotification{
                subscriptions: [^subscription],
                alert: ^alert,
-               type: {:notification, ^notification_time}
+               type: {:notification_or_update, ^notification_time}
              }
            ] =
              Engine.notifications([subscription], [alert], now)
@@ -547,7 +547,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              %OutgoingNotification{
                subscriptions: [^subscription_now],
                alert: ^alert,
-               type: {:notification, ^upstream_timestamp}
+               type: {:notification_or_update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription_now, subscription_later], [alert], now)
@@ -600,7 +600,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                },
                subscriptions: [_, _],
                alert: ^alert,
-               type: {:notification, ^upstream_timestamp}
+               type: {:notification_or_update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
@@ -760,7 +760,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                },
                subscriptions: [^subscription1, ^subscription2],
                alert: ^alert,
-               type: {:notification, ^upstream_timestamp}
+               type: {:notification_or_update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription1, subscription2], [alert], now)
@@ -868,7 +868,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              %OutgoingNotification{
                subscriptions: [^subscription],
                alert: ^alert,
-               type: {:notification, ^upstream_timestamp}
+               type: {:notification_or_update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription], [alert], now)
