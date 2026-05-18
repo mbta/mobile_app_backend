@@ -30,6 +30,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     title = "Notification title"
     body = "Notification body"
     deep_link_path = "/a/#{alert_id}/r/1/s/1"
+    analytics_label = "route=1;effect=delay;type=notification"
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -52,7 +53,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         body: body,
         deep_link_path: deep_link_path,
         upstream_timestamp: upstream_timestamp,
-        type: type
+        type: type,
+        analytics_label: analytics_label
       })
 
     assert_received_tesla_call(received_env, received_opts, adapter: TeslaMockAdapter)
@@ -75,7 +77,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                notification: %{title: title, body: body},
                data: %{deep_link_path: deep_link_path},
                android: %{notification: %{tag: alert_id, sound: "default"}},
-               apns: %{payload: %{aps: %{sound: "default"}}}
+               apns: %{payload: %{aps: %{sound: "default"}}},
+               fcmOptions: %{analyticsLabel: analytics_label}
              }
            }
 
@@ -106,6 +109,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     title = "Notification title"
     body = "Notification body"
     deep_link_path = "/a/#{alert_id}/r/1/s/1"
+    analytics_label = "route=1;effect=delay;type=notification"
 
     reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
       token: "gcp_token",
@@ -129,7 +133,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           body: body,
           deep_link_path: deep_link_path,
           upstream_timestamp: upstream_timestamp,
-          type: type
+          type: type,
+          analytics_label: analytics_label
         })
       end)
 
@@ -171,7 +176,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
           body: "body",
           deep_link_path: "/a/#{alert_id}/r/1/s/1",
           upstream_timestamp: upstream_timestamp,
-          type: type
+          type: type,
+          analytics_label: "route=1;effect=delay;type=notification"
         })
       end)
 

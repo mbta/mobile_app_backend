@@ -16,7 +16,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           "body" => body,
           "deep_link_path" => deep_link_path,
           "upstream_timestamp" => upstream_timestamp,
-          "type" => type
+          "type" => type,
+          "analytics_label" => analytics_label
         }
       }) do
     upstream_timestamp =
@@ -58,6 +59,9 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         },
         apns: %FCM.Model.ApnsConfig{
           payload: %{aps: %{sound: "default"}}
+        },
+        fcmOptions: %FCM.Model.FcmOptions{
+          analyticsLabel: analytics_label
         },
         token: user.fcm_token
       }

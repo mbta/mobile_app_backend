@@ -61,7 +61,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "title" => "66 bus",
         "body" => "Service suspended until further notice",
         "deep_link_path" => "/s/1/r/66/d/0",
-        "upstream_timestamp" => alert.last_push_notification_timestamp
+        "upstream_timestamp" => alert.last_push_notification_timestamp,
+        "type" => "notification",
+        "analytics_label" => "route=66;effect=suspension;type=notification"
       }
     )
   end
@@ -115,7 +117,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "title" => "66 autobús",
         "body" => "Servicio suspendido hasta nuevo aviso",
         "deep_link_path" => "/s/1/r/66/d/0",
-        "upstream_timestamp" => alert.last_push_notification_timestamp
+        "upstream_timestamp" => alert.last_push_notification_timestamp,
+        "type" => "notification",
+        "analytics_label" => "route=66;effect=suspension;type=notification"
       }
     )
   end
@@ -217,7 +221,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "body" => "Service suspended starting tomorrow",
         "deep_link_path" => "/s/1/r/66/d/0",
         "type" => "reminder",
-        "upstream_timestamp" => nil
+        "upstream_timestamp" => nil,
+        "analytics_label" => "route=66;effect=suspension;type=reminder"
       }
     )
   end
@@ -358,7 +363,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "body" => "All clear: Regular service",
         "deep_link_path" => "/s/1/r/66/d/0",
         "type" => "all_clear",
-        "upstream_timestamp" => nil
+        "upstream_timestamp" => nil,
+        "analytics_label" => "route=66;effect=suspension;type=all_clear"
       }
     )
   end
@@ -528,7 +534,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
           "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
-        "upstream_timestamp" => nil
+        "upstream_timestamp" => nil,
+        "analytics_label" => "route=CR-Fitchburg;effect=cancellation;type=reminder"
       }
     )
   end
@@ -648,7 +655,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
           "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
-        "upstream_timestamp" => nil
+        "upstream_timestamp" => nil,
+        "analytics_label" => "route=CR-Fitchburg;effect=cancellation;type=reminder"
       }
     )
   end
@@ -824,7 +832,10 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
       assert_enqueued(
         worker: Notifications.Deliverer,
-        args: %{"deep_link_path" => "/s/1"}
+        args: %{
+          "deep_link_path" => "/s/1",
+          "analytics_label" => "route=66,68;effect=suspension;type=notification"
+        }
       )
     end
 
