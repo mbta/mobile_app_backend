@@ -109,8 +109,19 @@ defmodule MobileAppBackend.Notifications.Scheduler do
              outgoing_notification.alert.id,
              outgoing_notification.type
            ) do
+          final_type =
+            DeliveredNotification.finalize_type(
+              user_id,
+              outgoing_notification.alert.id,
+              outgoing_notification.type
+            )
+
           localized_notification =
-            OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
+            OutgoingNotification.localize(
+              outgoing_notification,
+              locale || @default_locale,
+              final_type
+            )
 
           [{user, localized_notification}]
         else
