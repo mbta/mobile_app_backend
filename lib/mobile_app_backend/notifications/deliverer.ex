@@ -50,7 +50,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           title: title,
           body: body
         },
-        data: %{deep_link_path: deep_link_path},
+        data: %{deep_link_path: deep_link_path, analytics_label: analytics_label},
         android: %FCM.Model.AndroidConfig{
           notification: %FCM.Model.AndroidNotification{
             sound: "default",

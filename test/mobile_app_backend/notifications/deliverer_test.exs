@@ -75,7 +75,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
              message: %{
                token: fcm_token,
                notification: %{title: title, body: body},
-               data: %{deep_link_path: deep_link_path},
+               data: %{deep_link_path: deep_link_path, analytics_label: analytics_label},
                android: %{notification: %{tag: alert_id, sound: "default"}},
                apns: %{payload: %{aps: %{sound: "default"}}},
                fcmOptions: %{analyticsLabel: analytics_label}
