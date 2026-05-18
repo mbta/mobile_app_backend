@@ -22,10 +22,11 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
             body: String.t(),
             subscriptions: [Subscription.t()],
             alert_id: Alert.id(),
+            alert_effect: Alert.effect(),
             type: DeliveredNotification.type(),
             locale: Gettext.locale()
           }
-    defstruct [:title, :body, :subscriptions, :alert_id, :type, :locale]
+    defstruct [:title, :body, :subscriptions, :alert_id, :alert_effect, :type, :locale]
   end
 
   @spec localize(t(), Gettext.locale()) :: Localized.t()
@@ -45,6 +46,7 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
         ),
       subscriptions: outgoing_notification.subscriptions,
       alert_id: outgoing_notification.alert.id,
+      alert_effect: outgoing_notification.alert.effect,
       type: outgoing_notification.type,
       locale: locale
     }

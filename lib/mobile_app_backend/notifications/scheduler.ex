@@ -168,7 +168,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       body: notification.body,
       deep_link_path: deep_link_path(notification.alert_id, subscriptions),
       upstream_timestamp: upstream_timestamp,
-      type: type
+      type: type,
+      analytics_label: analytics_label(subscriptions, notification.alert_effect, type)
     }
     |> Deliverer.new()
     |> Oban.insert!()
@@ -216,6 +217,16 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     else
       "/a/#{alert_id}" <> route_piece <> stop_piece
     end
+  end
+
+  @spec analytics_label(
+          [%{route: MBTAV3API.Route.id(), stop: MBTAV3API.Stop.id(), direction: 0 | 1}],
+          Alert.effect(),
+          atom()
+        ) :: String.t()
+  defp analytics_label(subscriptions, alert_effect, type) do
+    route_ids = subscriptions |> Enum.map(& &1.route) |> Enum.uniq() |> Enum.join(",")
+    "route=#{route_ids};effect=#{alert_effect};type=#{type}"
   end
 
   defp log_exception(step_name, metadata, error) do
