@@ -177,7 +177,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       user = insert(:user)
 
       old_subscription =
-        insert(:notification_subscription, user: user, windows: build_list(3, :window))
+        insert(:notification_subscription, user_id: user.id, windows: build_list(3, :window))
 
       new_windows =
         old_subscription.windows

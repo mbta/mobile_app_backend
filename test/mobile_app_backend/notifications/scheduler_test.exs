@@ -135,6 +135,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
             end: DateTime.add(now, 10, :minute)
           }
         ],
+        effect: :suspension,
         informed_entity: [
           %MBTAV3API.Alert.InformedEntity{
             activities: [:board, :exit, :ride],
@@ -657,6 +658,73 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "type" => "reminder",
         "upstream_timestamp" => nil,
         "analytics_label" => "route=CR-Fitchburg;effect=cancellation;type=reminder"
+      }
+    )
+  end
+
+  test "sends updates" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -10, :minute),
+            end: nil
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: now
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user.id,
+      alert_id: alert.id,
+      upstream_timestamp:
+        alert.last_push_notification_timestamp
+        |> DateTime.add(-1, :minute)
+        |> DateTime.shift_zone!("Etc/UTC")
+        |> DateTime.truncate(:second)
+    })
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: now |> DateTime.add(-10, :minute) |> DateTime.to_time(),
+          end_time: now |> DateTime.add(10, :minute) |> DateTime.to_time(),
+          days_of_week: [Date.day_of_week(now)]
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
+        "deep_link_path" => "/s/1/r/66/d/0",
+        "upstream_timestamp" => alert.last_push_notification_timestamp,
+        "type" => "update",
+        "analytics_label" => "route=66;effect=suspension;type=update"
       }
     )
   end

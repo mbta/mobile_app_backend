@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.EngineTest do
-  use ExUnit.Case, async: false
+  use MobileAppBackend.DataCase, async: false
   use HttpStub.Case
   import MobileAppBackend.Factory
   import Mox
@@ -8,6 +8,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Engine
   alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.NotificationTitle
@@ -295,6 +296,54 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                subscriptions: [^subscription],
                alert: ^alert,
                type: {:notification, ^upstream_timestamp}
+             }
+           ] =
+             Engine.notifications([subscription], [alert], now)
+  end
+
+  test "sends update if notified previously" do
+    now = DateTime.now!("America/New_York")
+    upstream_timestamp = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        user_id: user.id,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user.id,
+      alert_id: alert.id,
+      upstream_timestamp:
+        alert.last_push_notification_timestamp
+        |> DateTime.add(-1, :minute)
+        |> DateTime.shift_zone!("Etc/UTC")
+        |> DateTime.truncate(:second)
+    })
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:update, ^upstream_timestamp}
              }
            ] =
              Engine.notifications([subscription], [alert], now)

@@ -146,7 +146,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   test "deletes user if FCM returns 404" do
     start_link_supervised!(Alerts)
     user = NotificationsFactory.insert(:user)
-    NotificationsFactory.insert(:notification_subscription, user: user)
+    NotificationsFactory.insert(:notification_subscription, user_id: user.id)
     user_id = user.id
     alert = Factory.build(:alert)
     Alerts.process_reset([alert], [])

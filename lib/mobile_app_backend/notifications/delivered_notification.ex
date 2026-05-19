@@ -5,7 +5,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
-  @type type :: :reminder | {:notification, DateTime.t()} | :all_clear
+  @type type :: :reminder | {:notification | :update, DateTime.t()} | :all_clear
 
   @primary_key {:id, :binary_id, autogenerate: true}
   typed_schema "delivered_notifications" do
@@ -15,7 +15,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
 
     field(:type, Ecto.Enum,
       default: :notification,
-      values: [:notification, :reminder, :all_clear],
+      values: [:notification, :update, :reminder, :all_clear],
       null: false
     )
 
@@ -32,12 +32,21 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     ) == 0
   end
 
-  def can_send?(user_id, alert_id, {:notification, upstream_timestamp}) do
+  def can_send?(user_id, alert_id, {:notification, _upstream_timestamp}) do
+    Repo.aggregate(
+      from(dn in __MODULE__,
+        where: dn.user_id == ^user_id and dn.alert_id == ^alert_id and dn.type == :notification
+      ),
+      :count
+    ) == 0
+  end
+
+  def can_send?(user_id, alert_id, {:update, upstream_timestamp}) do
     Repo.aggregate(
       from(dn in __MODULE__,
         where:
           dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            dn.upstream_timestamp == ^upstream_timestamp and dn.type == :notification
+            dn.upstream_timestamp == ^upstream_timestamp and dn.type in [:notification, :update]
       ),
       :count
     ) == 0
@@ -48,7 +57,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
       from(dn in __MODULE__,
         where:
           dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            (dn.type == :notification or dn.type == :reminder)
+            dn.type in [:reminder, :notification, :update]
       ),
       :count
     ) > 0 and

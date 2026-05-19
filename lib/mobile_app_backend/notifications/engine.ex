@@ -7,6 +7,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.Notifications.Subscription
@@ -41,6 +42,9 @@ defmodule MobileAppBackend.Notifications.Engine do
 
           %{notification: subscriptions} ->
             {subscriptions, {:notification, alert.last_push_notification_timestamp}}
+
+          %{update: subscriptions} ->
+            {subscriptions, {:update, alert.last_push_notification_timestamp}}
 
           %{reminder: subscriptions} ->
             {subscriptions, :reminder}
@@ -161,7 +165,15 @@ defmodule MobileAppBackend.Notifications.Engine do
         nil
 
       open_now? and active_now? ->
-        {alert, :notification, subscription}
+        if DeliveredNotification.can_send?(
+             subscription.user_id,
+             alert.id,
+             {:notification, alert.last_push_notification_timestamp}
+           ) do
+          {alert, :notification, subscription}
+        else
+          {alert, :update, subscription}
+        end
 
       open_now? and next_overlap_in_hours < 24 ->
         {alert, :reminder, subscription}
