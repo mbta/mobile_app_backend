@@ -12,7 +12,7 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
           summary: AlertSummary.t(),
           subscriptions: [Subscription.t()],
           alert: Alert.t(),
-          type: DeliveredNotification.provisional_type()
+          type: DeliveredNotification.type()
         }
   defstruct [:title, :summary, :subscriptions, :alert, :type]
 
@@ -23,17 +23,17 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
             subscriptions: [Subscription.t()],
             alert_id: Alert.id(),
             alert_effect: Alert.effect(),
-            type: DeliveredNotification.final_type(),
+            type: DeliveredNotification.type(),
             locale: Gettext.locale()
           }
     defstruct [:title, :body, :subscriptions, :alert_id, :alert_effect, :type, :locale]
   end
 
-  @spec localize(t(), Gettext.locale(), DeliveredNotification.final_type()) :: Localized.t()
+  @spec localize(t(), Gettext.locale()) :: Localized.t()
   @doc """
   Stringify the notification's title & body in the given locale
   """
-  def localize(outgoing_notification, locale, final_type) do
+  def localize(outgoing_notification, locale) do
     %Localized{
       title: NotificationTitle.to_string(outgoing_notification.title, locale),
       body:
@@ -47,7 +47,7 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
       subscriptions: outgoing_notification.subscriptions,
       alert_id: outgoing_notification.alert.id,
       alert_effect: outgoing_notification.alert.effect,
-      type: final_type,
+      type: outgoing_notification.type,
       locale: locale
     }
   end

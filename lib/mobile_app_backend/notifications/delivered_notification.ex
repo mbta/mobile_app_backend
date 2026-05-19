@@ -5,8 +5,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
-  @type provisional_type :: :reminder | {:notification_or_update, DateTime.t()} | :all_clear
-  @type final_type :: :reminder | {:notification | :update, DateTime.t()} | :all_clear
+  @type type :: :reminder | {:notification | :update, DateTime.t()} | :all_clear
 
   @primary_key {:id, :binary_id, autogenerate: true}
   typed_schema "delivered_notifications" do
@@ -23,27 +22,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     timestamps(type: :utc_datetime)
   end
 
-  @spec finalize_type(User.id(), Alert.id(), provisional_type()) :: final_type()
-  def finalize_type(user_id, alert_id, type)
-
-  def finalize_type(user_id, alert_id, {:notification_or_update, upstream_timestamp}) do
-    already_notified? =
-      Repo.aggregate(
-        from(dn in __MODULE__,
-          where:
-            dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-              dn.type in [:notification, :update]
-        ),
-        :count
-      ) > 0
-
-    type_itself = if already_notified?, do: :update, else: :notification
-    {type_itself, upstream_timestamp}
-  end
-
-  def finalize_type(_user_id, _alert_id, type), do: type
-
-  @spec can_send?(User.id(), Alert.id(), provisional_type()) :: boolean()
+  @spec can_send?(User.id(), Alert.id(), type()) :: boolean()
   def can_send?(user_id, alert_id, type)
 
   def can_send?(user_id, alert_id, :reminder) do
@@ -53,7 +32,16 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     ) == 0
   end
 
-  def can_send?(user_id, alert_id, {:notification_or_update, upstream_timestamp}) do
+  def can_send?(user_id, alert_id, {:notification, _upstream_timestamp}) do
+    Repo.aggregate(
+      from(dn in __MODULE__,
+        where: dn.user_id == ^user_id and dn.alert_id == ^alert_id and dn.type == :notification
+      ),
+      :count
+    ) == 0
+  end
+
+  def can_send?(user_id, alert_id, {:update, upstream_timestamp}) do
     Repo.aggregate(
       from(dn in __MODULE__,
         where:

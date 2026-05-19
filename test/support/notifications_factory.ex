@@ -3,6 +3,7 @@ defmodule MobileAppBackend.NotificationsFactory do
 
   def notification_subscription_factory do
     %MobileAppBackend.Notifications.Subscription{
+      user_id: -1,
       route_id: sequence("route"),
       stop_id: sequence("stop"),
       direction_id: sequence(:direction, [0, 1]),
