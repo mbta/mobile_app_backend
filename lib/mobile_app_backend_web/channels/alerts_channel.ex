@@ -36,9 +36,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   # Hardcoded list of long term alerts that we expect affected riders to be aware
   # of. Used to limit cases where the alert is shown to reduce noise.
   defp add_stale_alert_list(data) do
-    data
-    |> Map.from_struct()
     # TODO: remove this fake alert
-    |> Map.put(:stale_alerts, ["1002418"])
+    Map.put(data, :stale_alerts, ["1002418"])
   end
 end

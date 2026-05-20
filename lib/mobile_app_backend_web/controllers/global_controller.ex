@@ -11,10 +11,7 @@ defmodule MobileAppBackendWeb.GlobalController do
   # Hardcoded list of stops that should still be shown on the map, but omitted in places
   # like nearby trasit. For example, due to a long term planned closure.
   defp add_stop_blocklist(data) do
-    data
-    |> Map.from_struct()
     # TODO: remove this stop
-
-    |> Map.put(:stop_blocklist, ["place-cool"])
+    Map.put(data, :stop_blocklist, ["place-cool"])
   end
 end
