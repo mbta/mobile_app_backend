@@ -1,5 +1,6 @@
 defmodule MobileAppBackendWeb.TripController do
   alias MBTAV3API.Repository
+  alias MBTAV3API.Trip
   alias MobileAppBackendWeb.ShapesController
   use MobileAppBackendWeb, :controller
 
@@ -44,6 +45,11 @@ defmodule MobileAppBackendWeb.TripController do
 
   def map_friendly(conn, %{"trip_id" => trip_id}) do
     case get_trip_shape_data(trip_id) do
+      {:ok, %{trip: %Trip{route_pattern_id: nil}}} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{message: "Missing route pattern for trip #{trip_id}"})
+
       {:ok, data} ->
         json(conn, get_map_friendly_shapes(data))
 
