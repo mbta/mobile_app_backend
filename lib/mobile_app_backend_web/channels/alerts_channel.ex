@@ -32,5 +32,4 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     :ok = push(socket, "stream_data", data)
     {:noreply, socket}
   end
-
 end
