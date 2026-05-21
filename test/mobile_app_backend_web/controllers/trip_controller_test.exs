@@ -314,6 +314,41 @@ defmodule MobileAppBackendWeb.TripControllerTest do
                response
     end
 
+    test "when trip found without route pattern, returns 404 error",
+         %{conn: conn} do
+      trip =
+        build(:trip,
+          id: "trip_id",
+          route_id: "66",
+          route_pattern_id: nil,
+          direction_id: "1",
+          shape_id: "66_shape",
+          stop_ids: []
+        )
+
+      shape = build(:shape, id: trip.shape_id, polyline: "66_shape_polyline")
+
+      RepositoryMock
+      |> expect(:trips, 1, fn params, _opts ->
+        case params
+             |> Keyword.get(:filter)
+             |> Keyword.get(:id) do
+          "trip_id" ->
+            ok_response([trip], [shape])
+
+          _ ->
+            ok_response([])
+        end
+      end)
+
+      conn =
+        get(conn, "/api/trip/map-friendly", %{"trip_id" => trip.id})
+
+      response = json_response(conn, 404)
+
+      assert %{"message" => "Missing route pattern for trip trip_id"} = response
+    end
+
     @tag capture_log: true
     test "when trip not found, 404 error",
          %{conn: conn} do
