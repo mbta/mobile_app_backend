@@ -24,19 +24,13 @@ defmodule MobileAppBackendWeb.AlertsChannel do
       )
 
     data = pubsub_module.subscribe(legacy_compatibility: false)
-    {:ok, add_stale_alert_list(data), socket}
+    {:ok, data, socket}
   end
 
   @impl true
   def handle_info({:new_alerts, data}, socket) do
-    :ok = push(socket, "stream_data", add_stale_alert_list(data))
+    :ok = push(socket, "stream_data", data)
     {:noreply, socket}
   end
 
-  # Hardcoded list of long term alerts that we expect affected riders to be aware
-  # of. Used to limit cases where the alert is shown to reduce noise.
-  defp add_stale_alert_list(data) do
-    # TODO: remove this fake alert
-    Map.put(data, :stale_alerts, ["1002418"])
-  end
 end
