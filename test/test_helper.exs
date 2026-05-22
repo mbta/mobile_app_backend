@@ -9,6 +9,7 @@ Mox.defmock(PredictionsPubSubMock, for: MobileAppBackend.Predictions.PubSub.Beha
 Mox.defmock(PredictionsStoreMock, for: MBTAV3API.Store)
 Mox.defmock(RepositoryMock, for: MBTAV3API.Repository)
 Mox.defmock(StaticInstanceMock, for: MBTAV3API.Stream.StaticInstance)
+Mox.defmock(StopBlocklistMock, for: MobileAppBackend.StopBlocklist)
 Mox.defmock(StreamSubscriberMock, for: MobileAppBackend.Predictions.StreamSubscriber)
 Mox.defmock(TeslaMockAdapter, for: Tesla.Adapter)
 Mox.defmock(VehiclesPubSubMock, for: MobileAppBackend.Vehicles.PubSub.Behaviour)

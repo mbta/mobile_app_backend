@@ -21,7 +21,8 @@ defmodule MobileAppBackend.GlobalDataCache do
           routes: Object.route_map(),
           route_patterns: Object.route_pattern_map(),
           stops: Object.stop_map(),
-          trips: Object.trip_map()
+          trips: Object.trip_map(),
+          stop_blocklist: [String.t()]
         }
 
   defmodule State do
@@ -177,7 +178,8 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
       routes: routes,
       route_patterns: route_patterns,
       stops: stops,
-      trips: trips
+      trips: trips,
+      stop_blocklist: MobileAppBackend.StopBlocklist.get()
     }
 
     :persistent_term.put(key, data)

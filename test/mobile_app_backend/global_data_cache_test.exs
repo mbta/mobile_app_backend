@@ -1,10 +1,22 @@
 defmodule MobileAppBackend.GlobalDataCacheTest do
   use HttpStub.Case
   import MobileAppBackend.Factory
+  import Mox
+  import Test.Support.Helpers
+
   alias MobileAppBackend.GlobalDataCache
 
   test "gets data" do
     cache_key = make_ref()
+
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.StopBlocklist,
+      StopBlocklistMock
+    )
+
+    StopBlocklistMock
+    |> expect(:get, fn -> ["1234"] end)
 
     start_link_supervised!({GlobalDataCache, key: cache_key})
 
@@ -17,7 +29,8 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
              routes: routes,
              route_patterns: route_patterns,
              stops: stops,
-             trips: trips
+             trips: trips,
+             stop_blocklist: ["1234"]
            } = retrieved_data
 
     park_st_station = stops["place-pktrm"]
