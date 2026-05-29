@@ -63,6 +63,7 @@ config :mobile_app_backend, Oban,
     {Oban.Plugins.Cron,
      crontab: [
        {"@daily", MobileAppBackend.Notifications.DeliveredNotificationPruner},
+       {"* * * * *", MobileAppBackend.Notifications.StatsReporter}, # TODO: Set to daily after testing in dev-orange
        {"* * * * *", MobileAppBackend.Notifications.Scheduler}
      ],
      timezone: "America/New_York"},
