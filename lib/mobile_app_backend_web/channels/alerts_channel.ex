@@ -10,7 +10,12 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
-    data = pubsub_module.subscribe(legacy_compatibility: true)
+    data =
+      pubsub_module.subscribe(
+        legacy_compatibility: true,
+        include_summaries: false
+      )
+
     {:ok, data, socket}
   end
 
@@ -23,7 +28,30 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
-    data = pubsub_module.subscribe(legacy_compatibility: false)
+    data =
+      pubsub_module.subscribe(
+        legacy_compatibility: false,
+        include_summaries: false
+      )
+
+    {:ok, data, socket}
+  end
+
+  @impl true
+  def join("alerts:v3", _payload, socket) do
+    pubsub_module =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.Alerts.PubSub,
+        MobileAppBackend.Alerts.PubSub
+      )
+
+    data =
+      pubsub_module.subscribe(
+        legacy_compatibility: false,
+        include_summaries: true
+      )
+
     {:ok, data, socket}
   end
 

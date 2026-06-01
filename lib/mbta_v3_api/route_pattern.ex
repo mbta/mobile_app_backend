@@ -1,5 +1,6 @@
 defmodule MBTAV3API.RoutePattern do
   alias MBTAV3API.Trip
+  alias MobileAppBackend.GlobalDataCache
   use MBTAV3API.JsonApi.Object
   require Util
 
@@ -95,7 +96,7 @@ defmodule MBTAV3API.RoutePattern do
 
   @spec canonical_or_most_typical([t()]) :: [t()]
   # Filter the list of route patterns to include only the canonical or most typical patterns
-  defp canonical_or_most_typical(route_patterns) do
+  def canonical_or_most_typical(route_patterns) do
     canonical_patterns = Enum.filter(route_patterns, & &1.canonical)
 
     case canonical_patterns do
@@ -126,5 +127,32 @@ defmodule MBTAV3API.RoutePattern do
     route_patterns
     |> Enum.map(& &1.route)
     |> Map.new(&{&1.id, &1})
+  end
+
+  @spec get_relevant_patterns(
+          String.t() | nil,
+          String.t() | nil,
+          integer() | nil,
+          GlobalDataCache.data()
+        ) :: [t()]
+  def get_relevant_patterns(route_id, stop_id, direction_id, global_data) do
+    global_data.route_patterns
+    |> Stream.map(fn {_, pattern} -> pattern end)
+    |> Enum.filter(fn pattern ->
+      (route_id == nil or pattern.route_id == route_id or
+         global_data.routes[pattern.route_id].line_id == route_id) and
+        (direction_id == nil or pattern.direction_id == direction_id) and
+        (stop_id == nil or
+           Enum.any?(
+             with trip_id when is_binary(trip_id) <- pattern.representative_trip_id,
+                  %Trip{} = trip <- global_data.trips[trip_id] do
+               trip.stop_ids
+             else
+               _ -> []
+             end,
+             &(&1 == stop_id or
+                 &1 in global_data.stops[stop_id].child_stop_ids)
+           ))
+    end)
   end
 end

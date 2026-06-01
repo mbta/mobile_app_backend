@@ -25,6 +25,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
   alias MBTAV3API.Store
   alias MBTAV3API.Stream
   alias MobileAppBackend.Alerts.PubSub
+  alias MobileAppBackend.Alerts.SummaryEntityBuilder
 
   @behaviour PubSub.Behaviour
 
@@ -48,15 +49,25 @@ defmodule MobileAppBackend.Alerts.PubSub do
   The legacy alert channel needs to filter out any references to new alert causes,
   they will break old versions of the app entirely if they're sent to the frontend.
   """
-  @spec map_data([Alert.t()], boolean()) :: [Alert.t()]
-  def map_data(data, legacy_compatibility) do
-    Enum.map(data, fn alert ->
-      if legacy_compatibility && MapSet.member?(Alert.v2_causes(), alert.cause) do
-        %Alert{alert | cause: :unknown_cause}
-      else
-        alert
-      end
-    end)
+  @spec map_data([Alert.t()], boolean(), boolean()) :: [Alert.t()]
+  def map_data(data, legacy_compatibility, include_summaries) do
+    summaries_by_alert = if include_summaries, do: SummaryEntityBuilder.build_all(data), else: nil
+
+    legacy_map = fn alert ->
+      if MapSet.member?(Alert.v2_causes(), alert.cause),
+        do: %Alert{alert | cause: :unknown_cause},
+        else: alert
+    end
+
+    summary_map = fn alert ->
+      %Alert{alert | summaries: Map.get(summaries_by_alert, alert.id, [])}
+    end
+
+    cond do
+      legacy_compatibility -> data |> Enum.map(legacy_map)
+      include_summaries -> data |> Enum.map(summary_map)
+      true -> data
+    end
   end
 
   @impl true
@@ -65,7 +76,10 @@ defmodule MobileAppBackend.Alerts.PubSub do
 
     format_fn = fn data ->
       data
-      |> map_data(Keyword.get(opts, :legacy_compatibility, true))
+      |> map_data(
+        Keyword.get(opts, :legacy_compatibility, true),
+        Keyword.get(opts, :include_summaries, false)
+      )
       |> JsonApi.Object.to_full_map()
     end
 
