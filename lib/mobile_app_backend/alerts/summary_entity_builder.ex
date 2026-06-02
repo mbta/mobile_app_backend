@@ -11,28 +11,31 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   alias MobileAppBackend.Alerts.SummaryEntity
   alias MobileAppBackend.GlobalDataCache
 
-  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
 
   @doc """
   Given a list of alerts and global data, produces a list of summary entites keyed by alert id
   """
-  @spec build_all([Alert.t()], DateTime.t(), GlobalDataCache.data()) :: %{
+  @spec build_all([Alert.t()], DateTime.t(), String.t(), GlobalDataCache.data()) :: %{
           String.t() => [SummaryEntity.t()]
         }
-  def build_all(alerts, at_time, global) do
-    Map.new(Enum.map(alerts, fn alert -> {alert.id, build_for_alert(alert, at_time, global)} end))
+  def build_all(alerts, at_time, locale, global) do
+    Map.new(
+      Enum.map(alerts, fn alert -> {alert.id, build_for_alert(alert, at_time, locale, global)} end)
+    )
   end
 
-  @spec build_all([Alert.t()]) :: %{String.t() => [SummaryEntity.t()]}
-  def build_all(alerts) do
+  @spec build_all([Alert.t()], String.t()) :: %{String.t() => [SummaryEntity.t()]}
+  def build_all(alerts, locale) do
     at_time = DateTime.now!("America/New_York")
     global = GlobalDataCache.get_data()
 
-    build_all(alerts, at_time, global)
+    build_all(alerts, at_time, locale, global)
   end
 
-  @spec build_for_alert(Alert.t(), DateTime.t(), GlobalDataCache.data()) :: [SummaryEntity.t()]
-  defp build_for_alert(alert, at_time, global) do
+  @spec build_for_alert(Alert.t(), DateTime.t(), String.t(), GlobalDataCache.data()) :: [
+          SummaryEntity.t()
+        ]
+  defp build_for_alert(alert, at_time, locale, global) do
     # Fetch schedules once for the whole alert for any trips included in the informed entities
     {schedules, trips} = fetch_schedules_for_alert(alert)
 
@@ -40,7 +43,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     stops = fetch_all_stops()
 
     combinations = relevant_combinations(alert, stops, global)
-    locale = @default_locale
 
     combinations
     |> Enum.flat_map(fn {route_id, stop_id, trip_id, direction_id} ->

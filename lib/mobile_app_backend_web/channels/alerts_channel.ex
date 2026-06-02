@@ -46,10 +46,13 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
+    locale = socket.assigns[:locale]
+
     data =
       pubsub_module.subscribe(
         legacy_compatibility: false,
-        include_summaries: true
+        include_summaries: true,
+        locale: locale
       )
 
     {:ok, data, socket}

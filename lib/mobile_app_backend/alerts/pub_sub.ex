@@ -29,6 +29,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
 
   @behaviour PubSub.Behaviour
 
+  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
   @fetch_registry_key :fetch_registry_key
 
   @type state :: %{last_dispatched_table_name: atom()}
@@ -49,9 +50,10 @@ defmodule MobileAppBackend.Alerts.PubSub do
   The legacy alert channel needs to filter out any references to new alert causes,
   they will break old versions of the app entirely if they're sent to the frontend.
   """
-  @spec map_data([Alert.t()], boolean(), boolean()) :: [Alert.t()]
-  def map_data(data, legacy_compatibility, include_summaries) do
-    summaries_by_alert = if include_summaries, do: SummaryEntityBuilder.build_all(data), else: nil
+  @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: [Alert.t()]
+  def map_data(data, legacy_compatibility, include_summaries, locale) do
+    summaries_by_alert =
+      if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
 
     legacy_map = fn alert ->
       if MapSet.member?(Alert.v2_causes(), alert.cause),
@@ -78,7 +80,8 @@ defmodule MobileAppBackend.Alerts.PubSub do
       data
       |> map_data(
         Keyword.get(opts, :legacy_compatibility, true),
-        Keyword.get(opts, :include_summaries, false)
+        Keyword.get(opts, :include_summaries, false),
+        Keyword.get(opts, :locale, @default_locale)
       )
       |> JsonApi.Object.to_full_map()
     end
