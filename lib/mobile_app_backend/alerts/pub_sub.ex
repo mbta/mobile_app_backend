@@ -1,10 +1,17 @@
 defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
-  alias MBTAV3API.JsonApi.Object
+  alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.AlertWithSummaries
 
   @doc """
   Subscribe to updates for all alerts
   """
-  @callback subscribe(legacy_compatibility: boolean()) :: Object.full_map()
+  @callback subscribe(
+              legacy_compatibility: boolean(),
+              include_summaries: boolean(),
+              locale: String.t()
+            ) :: %{
+              alerts: %{String.t() => Alert.t() | AlertWithSummaries.t()}
+            }
 end
 
 defmodule MobileAppBackend.Alerts.PubSub do
