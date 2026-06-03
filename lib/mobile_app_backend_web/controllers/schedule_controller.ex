@@ -30,7 +30,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
         "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(filters)} "
 
       # Temporary code to return 6/13 schedules on 6/14
-      if DateTime.to_date(date_time) == Date.from_iso8601("2026-06-14") do
+      if Date.compare(DateTime.to_date(date_time), Date.from_iso8601!("2026-06-14")) == :eq do
         yesterdays_date_time = DateTime.add(date_time, -1, :day)
 
         yesterdays_data =
@@ -53,13 +53,12 @@ defmodule MobileAppBackendWeb.ScheduleController do
             filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
           end
 
-        data = yesterdays_data ++ todays_data
-
-        if Enum.any?(data, &(&1 == :error)) do
+        if yesterdays_data == :error or todays_data == :error do
           conn
           |> put_status(:internal_server_error)
           |> json(%{error: "fetch_failed"})
         else
+          data = yesterdays_data ++ todays_data
           json(conn, data)
         end
       else
