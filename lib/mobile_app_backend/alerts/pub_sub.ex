@@ -66,6 +66,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
     format_fn = fn data ->
       data
       |> map_data(Keyword.get(opts, :legacy_compatibility, true))
+      |> filter_upcoming_single_tracking_alerts()
       |> JsonApi.Object.to_full_map()
     end
 
@@ -78,6 +79,13 @@ defmodule MobileAppBackend.Alerts.PubSub do
     fetch_keys
     |> Store.Alerts.fetch()
     |> format_fn.()
+  end
+
+  # Temporary patch because upcoming single tracking alerts are displayed
+  # incorrectly in the app. Remove any single tracking alerts that aren't happening
+  # right now.
+  defp filter_upcoming_single_tracking_alerts(alerts) do
+    Enum.filter(alerts, &(!(&1.cause == :single_tracking && !Alert.active?(&1))))
   end
 
   @impl GenServer
