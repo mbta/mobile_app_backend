@@ -7,7 +7,6 @@ defmodule MBTAV3API.Alert do
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
-  alias MobileAppBackend.Alerts.SummaryEntity
 
   @type t :: %__MODULE__{
           id: String.t(),
@@ -23,7 +22,6 @@ defmodule MBTAV3API.Alert do
           last_push_notification_timestamp: DateTime.t() | nil,
           lifecycle: lifecycle(),
           severity: integer(),
-          summaries: [SummaryEntity.t()] | nil,
           updated_at: DateTime.t()
         }
 
@@ -160,7 +158,6 @@ defmodule MBTAV3API.Alert do
     :last_push_notification_timestamp,
     :lifecycle,
     :severity,
-    :summaries,
     :updated_at
   ]
 
@@ -179,7 +176,6 @@ defmodule MBTAV3API.Alert do
       :last_push_notification_timestamp,
       :lifecycle,
       :severity,
-      :summaries,
       :updated_at
     ]
   end

@@ -21,9 +21,9 @@ defmodule MobileAppBackend.Alerts.PubSub do
       Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
 
   alias MBTAV3API.Alert
-  alias MBTAV3API.JsonApi
   alias MBTAV3API.Store
   alias MBTAV3API.Stream
+  alias MobileAppBackend.Alerts.AlertWithSummaries
   alias MobileAppBackend.Alerts.PubSub
   alias MobileAppBackend.Alerts.SummaryEntityBuilder
 
@@ -50,7 +50,9 @@ defmodule MobileAppBackend.Alerts.PubSub do
   The legacy alert channel needs to filter out any references to new alert causes,
   they will break old versions of the app entirely if they're sent to the frontend.
   """
-  @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: [Alert.t()]
+  @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: %{
+          String.t() => Alert.t() | AlertWithSummaries.t()
+        }
   def map_data(data, legacy_compatibility, include_summaries, locale) do
     summaries_by_alert =
       if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
@@ -62,7 +64,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
     end
 
     summary_map = fn alert ->
-      %Alert{alert | summaries: Map.get(summaries_by_alert, alert.id, [])}
+      AlertWithSummaries.from_alert(alert, Map.get(summaries_by_alert, alert.id, []))
     end
 
     cond do
@@ -70,6 +72,8 @@ defmodule MobileAppBackend.Alerts.PubSub do
       include_summaries -> data |> Enum.map(summary_map)
       true -> data
     end
+    |> Enum.map(fn alert -> {alert.id, alert} end)
+    |> Map.new()
   end
 
   @impl true
@@ -77,13 +81,15 @@ defmodule MobileAppBackend.Alerts.PubSub do
     fetch_keys = []
 
     format_fn = fn data ->
-      data
-      |> map_data(
-        Keyword.get(opts, :legacy_compatibility, true),
-        Keyword.get(opts, :include_summaries, false),
-        Keyword.get(opts, :locale, @default_locale)
-      )
-      |> JsonApi.Object.to_full_map()
+      %{
+        alerts:
+          data
+          |> map_data(
+            Keyword.get(opts, :legacy_compatibility, true),
+            Keyword.get(opts, :include_summaries, false),
+            Keyword.get(opts, :locale, @default_locale)
+          )
+      }
     end
 
     Registry.register(

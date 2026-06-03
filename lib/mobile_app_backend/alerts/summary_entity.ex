@@ -8,5 +8,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntity do
           summary: String.t() | nil
         }
 
+  @derive Jason.Encoder
   defstruct [:alert_id, :route_id, :stop_id, :trip_id, :direction_id, :summary]
 end

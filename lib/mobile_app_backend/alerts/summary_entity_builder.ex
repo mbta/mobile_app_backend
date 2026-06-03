@@ -221,10 +221,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
           GlobalDataCache.data()
         ) :: String.t() | nil
   defp resolve_stop_id(stop_id, trip_id, patterns, trips, stops, global) do
+    # If a stop ID is provided in the informed entities, we can return it directly,
+    # but if not, we need to determine a relevant stop from the pattern or trip
     stop_id ||
       stop_parent_id(
         case trip_id do
           nil ->
+            # We need to provide a specific stop ID to AlertSummary.summarizing, but if the informed entity
+            # only specifies a route ID without a stop or trip, the only way for us to get a relevant stop ID
+            # is to pull one from a pattern's representative trip, since the summary shouldn't be different across stops
             RoutePattern.canonical_or_most_typical(patterns)
             |> List.first()
             |> case do
@@ -236,6 +241,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
             end
 
           _ ->
+            # If a trip ID is provided, we can pull a stop ID from the trip's stop list
             trips[trip_id].stop_ids |> List.first()
         end,
         stops
