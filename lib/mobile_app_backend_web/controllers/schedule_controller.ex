@@ -58,7 +58,11 @@ defmodule MobileAppBackendWeb.ScheduleController do
           |> put_status(:internal_server_error)
           |> json(%{error: "fetch_failed"})
         else
-          data = yesterdays_data ++ todays_data
+          data = %{
+            schedules: yesterdays_data.schedules ++ todays_data.schedules,
+            trips: Map.merge(yesterdays_data.trips, todays_data.trips)
+          }
+
           json(conn, data)
         end
       else
