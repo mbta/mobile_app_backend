@@ -29,20 +29,50 @@ defmodule MobileAppBackendWeb.ScheduleController do
       log_prefix =
         "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(filters)} "
 
-      data =
-        case filters do
-          [filter] -> fetch_schedules(filter, date_time)
-          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
-        end
+      # Temporary code to return 6/13 schedules on 6/14
+      if date_time == DateTime.from_iso8601("2026-06-14") do
+        yesterdays_date = DateTime.add(date_time, -1, :day)
 
-      case data do
-        :error ->
+        yesterdays_data =
+          case filters do
+            [filter] ->
+              fetch_schedules(filter, yesterdays_date)
+
+            filters ->
+              fetch_schedules_parallel(filters, yesterdays_date, parallel_timeout, log_prefix)
+          end
+
+        todays_data =
+          case filters do
+            [filter] -> fetch_schedules(filter, date_time)
+            filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
+          end
+
+        data = yesterdays_data ++ todays_data
+
+        if Enum.any?(data, &(&1 == :error)) do
           conn
           |> put_status(:internal_server_error)
           |> json(%{error: "fetch_failed"})
-
-        data ->
+        else
           json(conn, data)
+        end
+      else
+        data =
+          case filters do
+            [filter] -> fetch_schedules(filter, date_time)
+            filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
+          end
+
+        case data do
+          :error ->
+            conn
+            |> put_status(:internal_server_error)
+            |> json(%{error: "fetch_failed"})
+
+          data ->
+            json(conn, data)
+        end
       end
     end
   end
