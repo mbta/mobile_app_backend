@@ -18,8 +18,6 @@ defmodule MobileAppBackendWeb.UserSocket do
   channel "vehicles:*", MobileAppBackendWeb.VehiclesForRouteChannel
   channel "vehicle:id:*", MobileAppBackendWeb.VehicleChannel
 
-  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
-
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
   # verification, you can put default assigns into
@@ -41,7 +39,7 @@ defmodule MobileAppBackendWeb.UserSocket do
 
   @impl true
   def connect(_params, socket, _connect_info) do
-    {:ok, assign(socket, :locale, @default_locale)}
+    {:ok, socket}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

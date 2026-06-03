@@ -5,6 +5,9 @@ defmodule MobileAppBackend.Application do
 
   use Application
 
+  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
+  def default_locale, do: @default_locale
+
   @impl true
   def start(_type, _args) do
     Logger.add_handlers(:mobile_app_backend)

@@ -1,6 +1,6 @@
 defmodule MobileAppBackend.Cldr do
   use Cldr,
-    default_locale: Application.compile_env!(:mobile_app_backend, :default_locale_code),
+    default_locale: MobileAppBackend.Application.default_locale(),
     gettext: Application.compile_env!(:mobile_app_backend, :gettext_backend),
     json_library: Jason,
     locales: Application.compile_env!(:mobile_app_backend, :locale_codes),

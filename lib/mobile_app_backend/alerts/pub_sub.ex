@@ -29,7 +29,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
 
   @behaviour PubSub.Behaviour
 
-  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
+  @default_locale MobileAppBackend.Application.default_locale()
   @fetch_registry_key :fetch_registry_key
 
   @type state :: %{last_dispatched_table_name: atom()}
