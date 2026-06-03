@@ -139,20 +139,37 @@ defmodule MBTAV3API.RoutePattern do
     global_data.route_patterns
     |> Stream.map(fn {_, pattern} -> pattern end)
     |> Enum.filter(fn pattern ->
-      (route_id == nil or pattern.route_id == route_id or
-         global_data.routes[pattern.route_id].line_id == route_id) and
-        (direction_id == nil or pattern.direction_id == direction_id) and
-        (stop_id == nil or
-           Enum.any?(
-             with trip_id when is_binary(trip_id) <- pattern.representative_trip_id,
-                  %Trip{} = trip <- global_data.trips[trip_id] do
-               trip.stop_ids
-             else
-               _ -> []
-             end,
-             &(&1 == stop_id or
-                 &1 in global_data.stops[stop_id].child_stop_ids)
-           ))
+      match_pattern_route?(pattern, route_id, global_data) and
+        match_pattern_stop?(pattern, stop_id, global_data) and
+        match_pattern_direction?(pattern, direction_id)
     end)
+  end
+
+  defp match_pattern_route?(
+         %__MODULE__{route_id: pattern_route_id},
+         route_id,
+         global
+       ) do
+    route_id == nil or pattern_route_id == route_id or
+      global.routes[pattern_route_id].line_id == route_id
+  end
+
+  defp match_pattern_stop?(
+         %__MODULE__{representative_trip_id: representative_trip_id},
+         stop_id,
+         global
+       ) do
+    stop_id == nil or
+      with trip_id when is_binary(trip_id) <- representative_trip_id,
+           %Trip{} = trip <- global.trips[trip_id] do
+        trip.stop_ids
+      else
+        _ -> []
+      end
+      |> Enum.any?(&(&1 == stop_id or &1 in global.stops[stop_id].child_stop_ids))
+  end
+
+  defp match_pattern_direction?(%__MODULE__{direction_id: pattern_direction_id}, direction_id) do
+    direction_id == nil or pattern_direction_id == direction_id
   end
 end
