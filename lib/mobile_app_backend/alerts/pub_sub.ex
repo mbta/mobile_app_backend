@@ -96,6 +96,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
             Keyword.get(opts, :include_summaries, false),
             Keyword.get(opts, :locale, @default_locale)
           )
+          |> filter_upcoming_single_tracking_alerts()
       }
     end
 
@@ -108,6 +109,15 @@ defmodule MobileAppBackend.Alerts.PubSub do
     fetch_keys
     |> Store.Alerts.fetch()
     |> format_fn.()
+  end
+
+  # Temporary patch because upcoming single tracking alerts are displayed
+  # incorrectly in the app. Remove any single tracking alerts that aren't happening
+  # right now.
+  defp filter_upcoming_single_tracking_alerts(alerts) do
+    Map.filter(alerts, fn {_key, alert} ->
+      !(alert.cause == :single_tracking && !Alert.active?(alert))
+    end)
   end
 
   @impl GenServer

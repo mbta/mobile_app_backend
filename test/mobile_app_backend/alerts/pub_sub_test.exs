@@ -7,6 +7,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
   alias MobileAppBackend.Alerts.PubSub
   import Mox
   import Test.Support.Helpers
+  import Test.Support.Sigils
   import MobileAppBackend.Factory
 
   setup do
@@ -72,7 +73,18 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
     end
 
     test ":broadcast sends message to subscribed pid", state do
-      alert_1 = build(:alert, id: "a_1", cause: :single_tracking)
+      alert_1 =
+        build(:alert,
+          id: "a_1",
+          cause: :single_tracking,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: ~B[2024-02-12 09:44:04],
+              end: nil
+            }
+          ]
+        )
+
       alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
 
       AlertsStoreMock
@@ -102,6 +114,46 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       assert_receive {:new_alerts, new_alerts}
 
       assert to_alert_map([alert_1]) == new_alerts
+    end
+
+    test ":broadcast filters out upcoming single tracking alerts", state do
+      single_tracking_future =
+        build(:alert,
+          id: "a_1",
+          cause: :single_tracking,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(DateTime.now!("America/New_York"), 10, :minute),
+              end: nil
+            }
+          ]
+        )
+
+      single_tracking_now =
+        build(:alert,
+          id: "a_2",
+          cause: :single_tracking,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(DateTime.now!("America/New_York"), -10, :minute),
+              end: nil
+            }
+          ]
+        )
+
+      AlertsStoreMock
+      # Subscribe & first broadcast
+      |> expect(:fetch, fn _ -> [single_tracking_future, single_tracking_now] end)
+      |> expect(:fetch, fn _ -> [single_tracking_future] end)
+
+      assert to_alert_map([single_tracking_now]) ==
+               PubSub.subscribe(legacy_compatibility: false)
+
+      PubSub.handle_info(:broadcast, state)
+
+      assert_receive {:new_alerts, new_alerts}
+
+      assert to_alert_map([]) == new_alerts
     end
 
     test "legacy compatibility converts v2 alert causes", state do
