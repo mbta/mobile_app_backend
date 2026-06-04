@@ -49,44 +49,56 @@ defmodule MobileAppBackendWeb.ScheduleController do
     stop_ids = String.split(stop_ids_concat, ",")
 
     date_time = Util.parse_datetime!(date_time_string)
-    service_date = Util.datetime_to_gtfs(date_time)
     global_stops = GlobalDataCache.get_data().stops
 
-    filters =
+    parent_stop_ids =
       stop_ids
       |> Enum.map(&Stop.parent_id_if_exists(&1, global_stops))
       |> Enum.uniq()
-      |> Enum.map(&get_filter(&1, service_date))
 
     parallel_timeout = String.to_integer(Map.get(params, "timeout", "5000"))
 
     log_prefix =
-      "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(filters)} "
+      "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(parent_stop_ids)} "
 
     if Date.compare(DateTime.to_date(date_time), Date.from_iso8601!("2026-06-14")) == :eq do
       handle_special_schedule_fetch(
         conn,
-        filters,
+        parent_stop_ids,
         date_time,
         parallel_timeout,
         log_prefix
       )
     else
-      handle_general_schedule_fetch(conn, filters, date_time, parallel_timeout, log_prefix)
+      handle_general_schedule_fetch(
+        conn,
+        parent_stop_ids,
+        date_time,
+        parallel_timeout,
+        log_prefix
+      )
     end
   end
 
   defp handle_special_schedule_fetch(
          conn,
-         filters,
+         parent_stop_ids,
          date_time,
          parallel_timeout,
          log_prefix
        ) do
     yesterdays_date_time = DateTime.add(date_time, -1, :day)
 
+    yesterdays_filters =
+      parent_stop_ids
+      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(yesterdays_date_time)))
+
+    todays_filters =
+      parent_stop_ids
+      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(date_time)))
+
     yesterdays_data =
-      case filters do
+      case yesterdays_filters do
         [filter] ->
           fetch_schedules(filter, yesterdays_date_time)
 
@@ -100,7 +112,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
       end
 
     todays_data =
-      case filters do
+      case todays_filters do
         [filter] -> fetch_schedules(filter, date_time)
         filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
       end
@@ -119,7 +131,17 @@ defmodule MobileAppBackendWeb.ScheduleController do
     end
   end
 
-  defp handle_general_schedule_fetch(conn, filters, date_time, parallel_timeout, log_prefix) do
+  defp handle_general_schedule_fetch(
+         conn,
+         parent_stop_ids,
+         date_time,
+         parallel_timeout,
+         log_prefix
+       ) do
+    filters =
+      parent_stop_ids
+      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(date_time)))
+
     data =
       case filters do
         [filter] -> fetch_schedules(filter, date_time)
