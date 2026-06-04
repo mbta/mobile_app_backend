@@ -123,7 +123,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   @spec relevant_combinations(Alert.t(), %{String.t() => Stop.t()}, GlobalDataCache.data()) :: [
           Combination.t()
         ]
-  defp relevant_combinations(alert, stops, global) do
+  def relevant_combinations(alert, stops, global) do
     combinations =
       alert.informed_entity
       |> Enum.flat_map(&combination_from_entity(&1, global))
@@ -138,12 +138,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
       |> Enum.uniq()
 
     # Filter out any combinations that are already covered by another wildcard in the list
-    # We don't need to check nil direction wildcards because any nils in the input will have been
-    # expanded to both directions
     Enum.reject(combinations, fn combination ->
-      redundant_combination?(combination, :route, combinations) and
-        redundant_combination?(combination, :stop, combinations) and
-        redundant_combination?(combination, :trip, combinations)
+      redundant_combination?(combination, combinations)
     end)
   end
 
@@ -157,7 +153,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
       %Alert.InformedEntity{route_type: route_type, route: nil, stop: nil, direction_id: nil}
       when not is_nil(route_type) ->
         global.routes
-        |> Enum.filter(fn route -> route.type == Route.parse_type!(route_type) end)
+        |> Enum.filter(fn {_id, route} -> route.type == Route.parse_type!(route_type) end)
         |> Enum.map(fn {route_id, _} -> %Combination{route: route_id} end)
 
       %Alert.InformedEntity{
@@ -185,24 +181,23 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     end
   end
 
-  # A combination is redundant if there exists another combination in the list that matches it
-  # on all non-nil fields except for the field at the given index, where the other combination has nil.
+  # A combination is redundant if there exists another combination in the list where
+  # all fields are either nil if a non-nil field exists in the redundant one or equal
   @spec redundant_combination?(
           Combination.t(),
-          :route | :stop | :trip,
           [Combination.t()]
         ) :: boolean()
-  defp redundant_combination?(combination, key, combinations) do
-    match_key? = fn combination, other, check_key ->
-      if check_key == key,
-        do: is_nil(Map.get(other, check_key)),
-        else: Map.get(other, check_key) == Map.get(combination, check_key)
-    end
+  defp redundant_combination?(combination, combinations) do
+    keys = %Combination{} |> Map.from_struct() |> Map.keys()
 
-    not is_nil(Map.get(combination, key)) and
-      Enum.any?(combinations, fn other ->
-        Enum.all?(Map.keys(combination), &match_key?.(combination, other, &1))
-      end)
+    Enum.any?(combinations, fn other ->
+      combination != other and
+        Enum.all?(
+          keys,
+          &((not is_nil(Map.get(combination, &1)) and is_nil(Map.get(other, &1))) or
+              Map.get(combination, &1) == Map.get(other, &1))
+        )
+    end)
   end
 
   defp fetch_all_stops do
@@ -322,9 +317,9 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
 
   # Collapse entities where both directions produce identical summaries
   @spec dedup_summaries([SummaryEntity.t()]) :: [SummaryEntity.t()]
-  defp dedup_summaries(entities) do
+  def dedup_summaries(entities) do
     entities
-    |> Enum.group_by(&{&1.alert_id, &1.route_id, &1.trip_id, &1.stop_id})
+    |> Enum.group_by(&{&1.alert_id, &1.route_id, &1.stop_id, &1.trip_id})
     |> Enum.flat_map(fn {_key, grouped} ->
       case grouped do
         [a, b] when a.summary == b.summary ->
