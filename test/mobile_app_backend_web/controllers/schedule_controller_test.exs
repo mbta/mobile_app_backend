@@ -1255,5 +1255,164 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                }
              } = json_response(conn, 200)
     end
+
+    test "world cup special case", %{conn: conn} do
+      s1 =
+        %MBTAV3API.Schedule{
+          id: "schedule-60565179-70159-90",
+          arrival_time: nil,
+          departure_time: ~B[2026-06-13 08:07:00],
+          drop_off_type: :regular,
+          pick_up_type: :regular,
+          stop_sequence: 90,
+          route_id: "Green-C",
+          stop_id: "70158",
+          trip_id: "60565179"
+        }
+
+      s2 = %MBTAV3API.Schedule{
+        id: "schedule-60565145-70158-90",
+        arrival_time: ~B[2026-06-13 08:15:00],
+        departure_time: nil,
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 90,
+        route_id: "Green-C",
+        stop_id: "70158",
+        trip_id: "60565145"
+      }
+
+      s3 = %MBTAV3API.Schedule{
+        id: "schedule-60565146-70158-90",
+        arrival_time: ~B[2026-06-14 10:15:00],
+        departure_time: ~B[2026-06-14 10:15:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 90,
+        route_id: "Green-C",
+        stop_id: "70158",
+        trip_id: "60565146"
+      }
+
+      s4 = %MBTAV3API.Schedule{
+        id: "schedule-60565147-70158-90",
+        arrival_time: ~B[2026-06-14 11:15:00],
+        departure_time: ~B[2024-06-14 11:15:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 90,
+        route_id: "Green-C",
+        stop_id: "70158",
+        trip_id: "60565147"
+      }
+
+      t1 = build(:trip, id: s1.trip_id)
+      t2 = build(:trip, id: s2.trip_id)
+      t3 = build(:trip, id: s3.trip_id)
+      t4 = build(:trip, id: s4.trip_id)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+
+      GlobalDataCacheMock
+      |> expect(:default_key, 2, fn -> :default_key end)
+      |> expect(:get_data, 2, fn _ ->
+        %{
+          lines: %{},
+          pattern_ids_by_stop: %{},
+          routes: %{
+            "Green-C" => build(:route, id: "Green-C", type: :light_rail)
+          },
+          route_patterns: %{},
+          stops: %{},
+          trips: %{}
+        }
+      end)
+
+      RepositoryMock
+      |> expect(:schedules, fn params, _opts ->
+        assert [
+                 filter: [
+                   stop: "place-boyls",
+                   date: ~D[2024-06-14]
+                 ],
+                 include: :trip
+               ] = params
+
+        ok_response([s1, s2, s3, s4], [t1, t2, t3, t4])
+      end)
+
+      conn =
+        get(conn, "/api/schedules", %{
+          stop_ids: "place-boyls",
+          date_time: "2024-06-14T11:00:30-04:00"
+        })
+
+      assert %{
+               "schedules" => [
+                 %{
+                   "added_route_ids" => nil,
+                   "arrival_time" => nil,
+                   "departure_time" => "2026-06-13T08:07:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565179-70159-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_headsign" => nil,
+                   "stop_id" => "70158",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565179"
+                 },
+                 %{
+                   "added_route_ids" => nil,
+                   "arrival_time" => "2026-06-13T08:15:00-04:00",
+                   "departure_time" => nil,
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565145-70158-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_headsign" => nil,
+                   "stop_id" => "70158",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565145"
+                 },
+                 %{
+                   "added_route_ids" => nil,
+                   "arrival_time" => "2026-06-14T10:15:00-04:00",
+                   "departure_time" => "2026-06-14T10:15:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565146-70158-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_headsign" => nil,
+                   "stop_id" => "70158",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565146"
+                 },
+                 %{
+                   "added_route_ids" => nil,
+                   "arrival_time" => "2026-06-14T11:15:00-04:00",
+                   "departure_time" => "2024-06-14T11:15:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565147-70158-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "Green-C",
+                   "stop_headsign" => nil,
+                   "stop_id" => "70158",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565147"
+                 }
+               ],
+               "trips" => %{
+                 "60565179" => %{},
+                 "60565145" => %{},
+                 "60565146" => %{},
+                 "60565147" => %{}
+               }
+             } = json_response(conn, 200)
+    end
   end
 end
