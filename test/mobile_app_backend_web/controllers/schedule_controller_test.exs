@@ -1297,7 +1297,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       s4 = %MBTAV3API.Schedule{
         id: "schedule-60565147-70158-90",
         arrival_time: ~B[2026-06-14 11:15:00],
-        departure_time: ~B[2024-06-14 11:15:00],
+        departure_time: ~B[2026-06-14 11:15:00],
         drop_off_type: :regular,
         pick_up_type: :regular,
         stop_sequence: 90,
@@ -1318,8 +1318,8 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       )
 
       GlobalDataCacheMock
-      |> expect(:default_key, 2, fn -> :default_key end)
-      |> expect(:get_data, 2, fn _ ->
+      |> expect(:default_key, 3, fn -> :default_key end)
+      |> expect(:get_data, 3, fn _ ->
         %{
           lines: %{},
           pattern_ids_by_stop: %{},
@@ -1333,22 +1333,33 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
       end)
 
       RepositoryMock
-      |> expect(:schedules, fn params, _opts ->
+      |> expect(:schedules, fn params, _ ->
         assert [
                  filter: [
                    stop: "place-boyls",
-                   date: ~D[2024-06-14]
+                   date: ~D[2026-06-13]
                  ],
                  include: :trip
                ] = params
 
-        ok_response([s1, s2, s3, s4], [t1, t2, t3, t4])
+        ok_response([s1, s2], [t1, t2])
+      end)
+      |> expect(:schedules, fn params, _ ->
+        assert [
+                 filter: [
+                   stop: "place-boyls",
+                   date: ~D[2026-06-14]
+                 ],
+                 include: :trip
+               ] = params
+
+        ok_response([s3, s4], [t3, t4])
       end)
 
       conn =
         get(conn, "/api/schedules", %{
           stop_ids: "place-boyls",
-          date_time: "2024-06-14T11:00:30-04:00"
+          date_time: "2026-06-14T07:00:30-04:00"
         })
 
       assert %{
@@ -1395,7 +1406,7 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                  %{
                    "added_route_ids" => nil,
                    "arrival_time" => "2026-06-14T11:15:00-04:00",
-                   "departure_time" => "2024-06-14T11:15:00-04:00",
+                   "departure_time" => "2026-06-14T11:15:00-04:00",
                    "drop_off_type" => "regular",
                    "id" => "schedule-60565147-70158-90",
                    "pick_up_type" => "regular",
