@@ -12,7 +12,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
-  @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
+  @default_locale MobileAppBackend.Application.default_locale()
 
   @impl Oban.Worker
   def perform(_) do

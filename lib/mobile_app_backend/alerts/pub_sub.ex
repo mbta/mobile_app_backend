@@ -1,10 +1,17 @@
 defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
-  alias MBTAV3API.JsonApi.Object
+  alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.AlertWithSummaries
 
   @doc """
   Subscribe to updates for all alerts
   """
-  @callback subscribe(legacy_compatibility: boolean()) :: Object.full_map()
+  @callback subscribe(
+              legacy_compatibility: boolean(),
+              include_summaries: boolean(),
+              locale: String.t()
+            ) :: %{
+              alerts: %{String.t() => Alert.t() | AlertWithSummaries.t()}
+            }
 end
 
 defmodule MobileAppBackend.Alerts.PubSub do
@@ -21,13 +28,15 @@ defmodule MobileAppBackend.Alerts.PubSub do
       Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
 
   alias MBTAV3API.Alert
-  alias MBTAV3API.JsonApi
   alias MBTAV3API.Store
   alias MBTAV3API.Stream
+  alias MobileAppBackend.Alerts.AlertWithSummaries
   alias MobileAppBackend.Alerts.PubSub
+  alias MobileAppBackend.Alerts.SummaryEntityBuilder
 
   @behaviour PubSub.Behaviour
 
+  @default_locale MobileAppBackend.Application.default_locale()
   @fetch_registry_key :fetch_registry_key
 
   @type state :: %{last_dispatched_table_name: atom()}
@@ -48,15 +57,30 @@ defmodule MobileAppBackend.Alerts.PubSub do
   The legacy alert channel needs to filter out any references to new alert causes,
   they will break old versions of the app entirely if they're sent to the frontend.
   """
-  @spec map_data([Alert.t()], boolean()) :: [Alert.t()]
-  def map_data(data, legacy_compatibility) do
-    Enum.map(data, fn alert ->
-      if legacy_compatibility && MapSet.member?(Alert.v2_causes(), alert.cause) do
-        %Alert{alert | cause: :unknown_cause}
-      else
-        alert
-      end
-    end)
+  @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: %{
+          String.t() => Alert.t() | AlertWithSummaries.t()
+        }
+  def map_data(data, legacy_compatibility, include_summaries, locale) do
+    summaries_by_alert =
+      if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
+
+    legacy_map = fn alert ->
+      if MapSet.member?(Alert.v2_causes(), alert.cause),
+        do: %Alert{alert | cause: :unknown_cause},
+        else: alert
+    end
+
+    summary_map = fn alert ->
+      AlertWithSummaries.from_alert(alert, Map.get(summaries_by_alert, alert.id, []))
+    end
+
+    cond do
+      legacy_compatibility -> data |> Enum.map(legacy_map)
+      include_summaries -> data |> Enum.map(summary_map)
+      true -> data
+    end
+    |> Enum.map(fn alert -> {alert.id, alert} end)
+    |> Map.new()
   end
 
   @impl true
@@ -64,10 +88,16 @@ defmodule MobileAppBackend.Alerts.PubSub do
     fetch_keys = []
 
     format_fn = fn data ->
-      data
-      |> map_data(Keyword.get(opts, :legacy_compatibility, true))
-      |> filter_upcoming_single_tracking_alerts()
-      |> JsonApi.Object.to_full_map()
+      %{
+        alerts:
+          data
+          |> map_data(
+            Keyword.get(opts, :legacy_compatibility, true),
+            Keyword.get(opts, :include_summaries, false),
+            Keyword.get(opts, :locale, @default_locale)
+          )
+          |> filter_upcoming_single_tracking_alerts()
+      }
     end
 
     Registry.register(
@@ -85,7 +115,9 @@ defmodule MobileAppBackend.Alerts.PubSub do
   # incorrectly in the app. Remove any single tracking alerts that aren't happening
   # right now.
   defp filter_upcoming_single_tracking_alerts(alerts) do
-    Enum.filter(alerts, &(!(&1.cause == :single_tracking && !Alert.active?(&1))))
+    Map.filter(alerts, fn {_key, alert} ->
+      !(alert.cause == :single_tracking && !Alert.active?(alert))
+    end)
   end
 
   @impl GenServer

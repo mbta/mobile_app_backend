@@ -2,7 +2,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   use MobileAppBackendWeb, :channel
 
   @impl true
-  def join("alerts", _payload, socket) do
+  def join("alerts" = topic, _payload, socket) do
     pubsub_module =
       Application.get_env(
         :mobile_app_backend,
@@ -10,12 +10,12 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
-    data = pubsub_module.subscribe(legacy_compatibility: true)
+    data = pubsub_module.subscribe(get_opts(topic, socket))
     {:ok, data, socket}
   end
 
   @impl true
-  def join("alerts:v2", _payload, socket) do
+  def join("alerts:v2" = topic, _payload, socket) do
     pubsub_module =
       Application.get_env(
         :mobile_app_backend,
@@ -23,8 +23,40 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.PubSub
       )
 
-    data = pubsub_module.subscribe(legacy_compatibility: false)
+    data = pubsub_module.subscribe(get_opts(topic, socket))
     {:ok, data, socket}
+  end
+
+  @impl true
+  def join("alerts:v3" = topic, _payload, socket) do
+    pubsub_module =
+      Application.get_env(
+        :mobile_app_backend,
+        MobileAppBackend.Alerts.PubSub,
+        MobileAppBackend.Alerts.PubSub
+      )
+
+    data = pubsub_module.subscribe(get_opts(topic, socket))
+    {:ok, data, socket}
+  end
+
+  defp get_opts(topic, socket) do
+    case topic do
+      "alerts" ->
+        [legacy_compatibility: true, include_summaries: false]
+
+      "alerts:v2" ->
+        [legacy_compatibility: false, include_summaries: false]
+
+      "alerts:v3" ->
+        Keyword.merge(
+          [legacy_compatibility: false, include_summaries: true],
+          case Map.get(socket.assigns, :locale) do
+            nil -> []
+            locale -> [locale: locale]
+          end
+        )
+    end
   end
 
   @impl true

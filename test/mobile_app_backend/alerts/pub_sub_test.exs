@@ -2,7 +2,6 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
   use ExUnit.Case
 
   alias MBTAV3API.Alert
-  alias MBTAV3API.JsonApi.Object
   alias MBTAV3API.Store
   alias MBTAV3API.Stream
   alias MobileAppBackend.Alerts.PubSub
@@ -19,6 +18,15 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
 
   # make sure mocks are globally accessible, including from the PubSub genserver
   setup :set_mox_from_context
+
+  defp to_alert_map(alerts) do
+    %{
+      alerts:
+        alerts
+        |> Enum.map(&{&1.id, &1})
+        |> Map.new()
+    }
+  end
 
   describe "init/1" do
     test "subscribes to alert events" do
@@ -41,7 +49,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
         [alert_1]
       end)
 
-      assert Object.to_full_map([alert_1]) == PubSub.subscribe()
+      assert to_alert_map([alert_1]) == PubSub.subscribe()
     end
 
     test "returns empty list when no alerts" do
@@ -49,7 +57,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
         []
       end)
 
-      assert Object.to_full_map([]) == PubSub.subscribe()
+      assert to_alert_map([]) == PubSub.subscribe()
     end
   end
 
@@ -93,7 +101,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
 
       assert_receive {:new_alerts, new_alerts}
 
-      assert Object.to_full_map([alert_2]) == new_alerts
+      assert to_alert_map([alert_2]) == new_alerts
 
       # Doesn't re-send the same alerts that have already been seen
       PubSub.handle_info(:broadcast, state)
@@ -105,7 +113,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
 
       assert_receive {:new_alerts, new_alerts}
 
-      assert Object.to_full_map([alert_1]) == new_alerts
+      assert to_alert_map([alert_1]) == new_alerts
     end
 
     test ":broadcast filters out upcoming single tracking alerts", state do
@@ -138,14 +146,14 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       |> expect(:fetch, fn _ -> [single_tracking_future, single_tracking_now] end)
       |> expect(:fetch, fn _ -> [single_tracking_future] end)
 
-      assert Object.to_full_map([single_tracking_now]) ==
+      assert to_alert_map([single_tracking_now]) ==
                PubSub.subscribe(legacy_compatibility: false)
 
       PubSub.handle_info(:broadcast, state)
 
       assert_receive {:new_alerts, new_alerts}
 
-      assert Object.to_full_map([]) == new_alerts
+      assert to_alert_map([]) == new_alerts
     end
 
     test "legacy compatibility converts v2 alert causes", state do
@@ -160,12 +168,12 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       |> expect(:fetch, fn _ -> [alert_2, alert_3] end)
 
       initial_alerts = PubSub.subscribe(legacy_compatibility: true)
-      assert Object.to_full_map([%Alert{alert_1 | cause: :unknown_cause}]) == initial_alerts
+      assert to_alert_map([%Alert{alert_1 | cause: :unknown_cause}]) == initial_alerts
 
       PubSub.handle_info(:broadcast, state)
 
       assert_receive {:new_alerts, new_alerts}
-      assert Object.to_full_map([%Alert{alert_2 | cause: :unknown_cause}, alert_3]) == new_alerts
+      assert to_alert_map([%Alert{alert_2 | cause: :unknown_cause}, alert_3]) == new_alerts
     end
   end
 end

@@ -14,6 +14,7 @@ defmodule MobileAppBackendWeb.UserSocket do
   channel "predictions:trip:*", MobileAppBackendWeb.PredictionsForTripChannel
   channel "alerts", MobileAppBackendWeb.AlertsChannel
   channel "alerts:v2", MobileAppBackendWeb.AlertsChannel
+  channel "alerts:v3", MobileAppBackendWeb.AlertsChannel
   channel "vehicles:*", MobileAppBackendWeb.VehiclesForRouteChannel
   channel "vehicle:id:*", MobileAppBackendWeb.VehicleChannel
 
@@ -31,6 +32,11 @@ defmodule MobileAppBackendWeb.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
+  @impl true
+  def connect(%{"locale" => locale}, socket, _connect_info) do
+    {:ok, assign(socket, :locale, locale)}
+  end
+
   @impl true
   def connect(_params, socket, _connect_info) do
     {:ok, socket}

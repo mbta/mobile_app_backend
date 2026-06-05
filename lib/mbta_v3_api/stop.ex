@@ -90,8 +90,8 @@ defmodule MBTAV3API.Stop do
   If the stop has a parent station and that parent is present in the map of stops, return the parent.
   Otherwise, returns the stop as-is.
   """
-  def parent_if_exists(%__MODULE__{parent_station_id: nil} = child_stop, _stops_by_id) do
-    child_stop
+  def parent_if_exists(%__MODULE__{parent_station_id: nil} = parent_stop, _stops_by_id) do
+    parent_stop
   end
 
   def parent_if_exists(
