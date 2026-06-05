@@ -33,42 +33,46 @@ jobs:
       contents: read
     environment: ${{ inputs.env }}
     steps:
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Get versions
         id: calc-version
         run: |
           git_hash_tag="${{ secrets.DOCKER_REPO }}:git-$(git rev-parse --short HEAD)"
-          latest_env_tag="${{ secrets.DOCKER_REPO }}:latest-${{ inputs.env }}"
-          if [ -n "${{ inputs.version-name }}" ]; then
-            version_tag="${{ secrets.DOCKER_REPO }}:${{ inputs.version-name }}"
+          latest_env_tag="${{ secrets.DOCKER_REPO }}:latest-${INPUTS_ENV}"
+          if [ -n "${INPUTS_VERSION_NAME}" ]; then
+            version_tag="${{ secrets.DOCKER_REPO }}:${INPUTS_VERSION_NAME}"
             echo "deploy-tag=$version_tag" | tee -a $GITHUB_OUTPUT
             printf "tag-list=%s,%s,%s\n" "$git_hash_tag" "$latest_env_tag" "$version_tag" | tee -a $GITHUB_OUTPUT
           else
             echo "deploy-tag=$git_hash_tag" | tee -a $GITHUB_OUTPUT
             printf "tag-list=%s,%s\n" "$git_hash_tag" "$latest_env_tag" | tee -a $GITHUB_OUTPUT
           fi
-      - uses: aws-actions/amazon-ecr-login@v2
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/build-push-action@v7
+        env:
+          INPUTS_ENV: ${{ inputs.env }}
+          INPUTS_VERSION_NAME: ${{ inputs.version-name }}
+      - uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
+      - uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+      - uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           # cache-from: type=gha
           no-cache: true
           tags: ${{ steps.calc-version.outputs.tag-list }}
           push: true
-      - uses: mbta/actions/deploy-ecs@v2
+      - uses: mbta/actions/deploy-ecs@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           ecs-cluster: mobile-app-backend
           ecs-service: mobile-app-backend-${{ inputs.env }}
           docker-tag: ${{ steps.calc-version.outputs.deploy-tag }}
-      - uses: mbta/actions/notify-slack-deploy@v2
+      - uses: mbta/actions/notify-slack-deploy@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
         if: ${{ !cancelled() }}
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
