@@ -98,4 +98,26 @@ defmodule Util.DateTime do
     {:ok, formatted} = Cldr.DateTime.to_string(datetime, MobileAppBackend.Cldr, format: format)
     formatted
   end
+
+  @doc """
+    Make a new date, safely handling daylight savings issues. Always returns the later
+    time at a daylight savings boundary.
+  ## Examples
+
+      iex> Util.DateTime.new_safe(~D[2027-03-14], ~T[02:00:00])
+      #DateTime<2027-03-14 03:00:00-04:00 EDT America/New_York>
+      iex> Util.DateTime.new_safe(~D[2027-11-27], ~T[02:00:00])
+      #DateTime<2027-11-27 02:00:00-05:00 EST America/New_York>
+      iex> Util.DateTime.new_safe(~D[2027-03-15], ~T[02:00:00])
+      #DateTime<2027-03-15 02:00:00-04:00 EDT America/New_York>
+  """
+  @spec new_safe(Date.t(), Time.t()) :: DateTime.t()
+  def new_safe(date, time) do
+    case DateTime.new(date, time, "America/New_York") do
+      {:ok, date_time} -> date_time
+      {:ambiguous, _first_dt, second_dt} -> second_dt
+      {:gap, _first_dt, second_dt} -> second_dt
+      {:error, _error} -> DateTime.new!(date, ~T[23:59:59], "America/New_York")
+    end
+  end
 end
