@@ -124,6 +124,8 @@ defmodule MBTAV3API.Vehicle do
   defp parse_decoration(id, carriages)
   # bus 1833 will always have vehicle ID y1833
   defp parse_decoration("y1833", _), do: :pride
+  # bus 1843 will always have vehicle ID y1843
+  defp parse_decoration("y1843", _), do: :pride
   # CR locomotive 1035 will always have vehicle ID 1035
   defp parse_decoration("1035", _), do: :googly_eyes
 
