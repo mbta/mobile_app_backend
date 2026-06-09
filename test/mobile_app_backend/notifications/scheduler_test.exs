@@ -532,7 +532,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "alert_id" => alert.id,
         "title" => "Fitchburg Line",
         "body" =>
-          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
+          "Trip cancelled starting #{Util.DateTime.datetime_to_string(start_time, :short_time)} today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
         "upstream_timestamp" => nil,
@@ -653,7 +653,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "alert_id" => alert.id,
         "title" => "Fitchburg Line",
         "body" =>
-          "Trip cancelled starting #{Util.datetime_to_string(start_time, :short_time)} today",
+          "Trip cancelled starting #{Util.DateTime.datetime_to_string(start_time, :short_time)} today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
         "upstream_timestamp" => nil,

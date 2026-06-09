@@ -449,7 +449,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     test "summary with end of service timeframe", %{now: now} do
-      tomorrow = Util.datetime_to_gtfs(now) |> Date.add(1)
+      tomorrow = Util.DateTime.datetime_to_gtfs(now) |> Date.add(1)
       end_time = DateTime.new!(tomorrow, ~T[02:59:00], "America/New_York")
 
       alert =
@@ -462,7 +462,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     test "summary with alt end of service timeframe", %{now: now} do
-      tomorrow = Util.datetime_to_gtfs(now) |> Date.add(1)
+      tomorrow = Util.DateTime.datetime_to_gtfs(now) |> Date.add(1)
       end_time = DateTime.new!(tomorrow, ~T[03:00:00], "America/New_York")
 
       alert =
@@ -476,7 +476,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
     test "summary with tomorrow timeframe", %{now: now} do
       # Set to tomorrow's end of service, with a date of 2 days from now
-      tomorrow = Util.datetime_to_gtfs(now) |> Date.add(2)
+      tomorrow = Util.DateTime.datetime_to_gtfs(now) |> Date.add(2)
       end_time = DateTime.new!(tomorrow, ~T[03:00:00], "America/New_York")
 
       alert =
@@ -491,7 +491,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "summary with this week timeframe" do
       # Fixed time so we can have a specific day of the week (wed)
       now = ~B[2025-04-02 09:00:00]
-      saturday = Util.datetime_to_gtfs(now) |> Date.add(3)
+      saturday = Util.DateTime.datetime_to_gtfs(now) |> Date.add(3)
       end_time = DateTime.new!(saturday, ~T[05:00:00], "America/New_York")
 
       alert =
@@ -506,7 +506,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "summary with later date timeframe" do
       # Fixed time so we can have a specific day of the week (wed)
       now = ~B[2025-04-02 09:00:00]
-      monday = Util.datetime_to_gtfs(now) |> Date.add(5)
+      monday = Util.DateTime.datetime_to_gtfs(now) |> Date.add(5)
       end_time = DateTime.new!(monday, ~T[05:00:00], "America/New_York")
 
       alert =

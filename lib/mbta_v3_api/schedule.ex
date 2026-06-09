@@ -62,8 +62,8 @@ defmodule MBTAV3API.Schedule do
   def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      arrival_time: Util.parse_optional_datetime!(item.attributes["arrival_time"]),
-      departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
+      arrival_time: Util.DateTime.parse_optional_datetime!(item.attributes["arrival_time"]),
+      departure_time: Util.DateTime.parse_optional_datetime!(item.attributes["departure_time"]),
       drop_off_type: parse_stop_edge_type!(item.attributes["drop_off_type"]),
       pick_up_type: parse_stop_edge_type!(item.attributes["pickup_type"]),
       stop_headsign: item.attributes["stop_headsign"],

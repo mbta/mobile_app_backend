@@ -118,6 +118,19 @@ defmodule MobileAppBackend.Notifications.WindowTest do
       assert Window.next_overlap(period, window, now) == ~B[2026-03-20 16:21:00]
     end
 
+    test "window start when window starts after period starts daylight savings" do
+      period = %Alert.ActivePeriod{start: ~B[2027-03-14 00:00:00], end: nil}
+
+      window = %Window{
+        start_time: ~T[02:00:00],
+        end_time: ~T[17:00:00],
+        days_of_week: Enum.to_list(1..7)
+      }
+
+      now = ~B[2026-03-20 16:10:00]
+      assert Window.next_overlap(period, window, now) == ~B[2027-03-14 03:00:00]
+    end
+
     test "checks all windows and periods" do
       p1 = %Alert.ActivePeriod{start: ~B[2026-03-20 16:23:00], end: ~B[2026-03-20 16:25:00]}
       p2 = %Alert.ActivePeriod{start: ~B[2026-03-20 16:28:00], end: ~B[2026-03-20 16:30:00]}

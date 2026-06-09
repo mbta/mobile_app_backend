@@ -44,8 +44,8 @@ defmodule MobileAppBackend.Notifications.Window do
     period_open_days = Stream.filter(period_days, &(Date.day_of_week(&1) in window.days_of_week))
 
     Enum.find_value(period_open_days, fn date ->
-      window_start = DateTime.new!(date, window.start_time, "America/New_York")
-      window_end = DateTime.new!(date, window.end_time, "America/New_York")
+      window_start = Util.DateTime.new_safe(date, window.start_time)
+      window_end = Util.DateTime.new_safe(date, window.end_time)
 
       cond do
         DateTime.compare(window_end, period_start) == :lt ->

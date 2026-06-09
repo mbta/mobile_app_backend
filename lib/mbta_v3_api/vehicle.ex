@@ -102,7 +102,7 @@ defmodule MBTAV3API.Vehicle do
       longitude: item.attributes["longitude"],
       occupancy_status: parse_optional_occupancy(item.attributes["occupancy_status"]),
       revenue: Util.parse_revenue_status(item.attributes["revenue_status"]),
-      updated_at: Util.parse_datetime!(item.attributes["updated_at"]),
+      updated_at: Util.DateTime.parse_datetime!(item.attributes["updated_at"]),
       route_id: JsonApi.Object.get_one_id(item.relationships["route"]),
       stop_id: JsonApi.Object.get_one_id(item.relationships["stop"]),
       trip_id: JsonApi.Object.get_one_id(item.relationships["trip"]),

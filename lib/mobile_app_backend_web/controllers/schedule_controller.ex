@@ -48,7 +48,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
   defp fetch_schedules_and_combine_data(conn, stop_ids_concat, date_time_string, params) do
     stop_ids = String.split(stop_ids_concat, ",")
 
-    date_time = Util.parse_datetime!(date_time_string)
+    date_time = Util.DateTime.parse_datetime!(date_time_string)
     global_stops = GlobalDataCache.get_data().stops
 
     parent_stop_ids =
@@ -91,11 +91,11 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
     yesterdays_filters =
       parent_stop_ids
-      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(yesterdays_date_time)))
+      |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(yesterdays_date_time)))
 
     todays_filters =
       parent_stop_ids
-      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(date_time)))
+      |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(date_time)))
 
     yesterdays_data =
       case yesterdays_filters do
@@ -140,7 +140,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
        ) do
     filters =
       parent_stop_ids
-      |> Enum.map(&get_filter(&1, Util.datetime_to_gtfs(date_time)))
+      |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(date_time)))
 
     data =
       case filters do
