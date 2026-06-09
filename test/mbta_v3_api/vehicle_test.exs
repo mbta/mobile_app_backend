@@ -221,6 +221,9 @@ defmodule MBTAV3API.VehicleTest do
              Vehicle.parse!(%JsonApi.Item{id: "y1833", attributes: required_attributes})
 
     assert %Vehicle{decoration: :pride} =
+             Vehicle.parse!(%JsonApi.Item{id: "y1843", attributes: required_attributes})
+
+    assert %Vehicle{decoration: :pride} =
              Vehicle.parse!(%JsonApi.Item{
                id: "G-1",
                attributes:
