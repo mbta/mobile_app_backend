@@ -7,6 +7,8 @@ on:
       - released
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   deploy:
     name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Prod
@@ -15,4 +17,7 @@ jobs:
       env: prod
       deploy-desc: ${{ github.ref_type }} ${{ github.ref_name }}
       version-name: ${{ github.ref_name }}
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

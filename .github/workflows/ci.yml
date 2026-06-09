@@ -12,7 +12,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
+  zizmor:
+    uses: ./.github/workflows/zizmor.yml
   setup:
     name: asdf and Elixir dependencies
     timeout-minutes: 30
@@ -21,7 +25,9 @@ jobs:
       cache-key-asdf: ${{ steps.cache-keys.outputs.asdf }}
       cache-key-mix: ${{ steps.cache-keys.outputs.mix }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Set cache keys
         id: cache-keys
         run: |
@@ -30,16 +36,16 @@ jobs:
           echo "mix-restore=cache-mix-${{ hashFiles('.tool-versions') }}-" >> $GITHUB_OUTPUT
           echo "mix=cache-mix-${{ hashFiles('.tool-versions') }}-${{ hashFiles('**/mix.lock') }}" >> $GITHUB_OUTPUT
       - name: asdf cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.asdf
           key: ${{ steps.cache-keys.outputs.asdf }}
           restore-keys: ${{ steps.cache-keys.outputs.asdf-restore }}
         id: asdf-cache
-      - uses: asdf-vm/actions/install@v4
+      - uses: asdf-vm/actions/install@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
         if: steps.asdf-cache.outputs.cache-hit != 'true'
       - name: Setup asdf environment
-        uses: mbta/actions/reshim-asdf@v2
+        uses: mbta/actions/reshim-asdf@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
       - name: mix rebar and hex
         run: |
           mix local.rebar --force
@@ -47,7 +53,7 @@ jobs:
         if: steps.asdf-cache.outputs.cache-hit != 'true'
       - name: Mix cache
         id: deps-cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             deps
@@ -74,7 +80,7 @@ jobs:
       DATABASE_DISABLE_SSL: insecure-yes
     services:
       postgres:
-        image: postgres
+        image: postgres:18.4@sha256:8ff36f3c66371cba71d20ceedccfc3de9669a68737607888c4ef0af93abe8e39
         ports:
           - 5432:5432
         env:
@@ -84,15 +90,17 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: asdf cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.asdf
           key: ${{ needs.setup.outputs.cache-key-asdf }}
       - name: Setup asdf environment
-        uses: mbta/actions/reshim-asdf@v2
-      - uses: actions/checkout@v6
+        uses: mbta/actions/reshim-asdf@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Restore Mix cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             deps
@@ -111,12 +119,12 @@ jobs:
       - name: Report test coverage
         # Disabled due to dependency issues
         if: false
-        uses: mbta/github-actions-report-lcov@v1
+        uses: mbta/github-actions-report-lcov@9116c86aa5f59c26775d3b84c79ec5b2312301e5 # v1.4.1
         with:
           coverage-files: cover/lcov.info
           artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mbta/actions/dialyzer@v2
+      - uses: mbta/actions/dialyzer@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
       - name: Check for unused dependencies
         run: mix deps.unlock --check-unused
 
@@ -125,11 +133,13 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
       - name: docker build
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: .
           push: false
@@ -155,13 +165,17 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Read asdf versions
         id: asdf
         run: cat load_testing/.tool-versions | sed 's/ /=/' | tee -a "$GITHUB_OUTPUT"
       - name: Install poetry
-        run: pipx install poetry==${{steps.asdf.outputs.poetry}}
-      - uses: actions/setup-python@v6
+        run: pipx install poetry==${STEPS_ASDF_OUTPUTS_POETRY}
+        env:
+          STEPS_ASDF_OUTPUTS_POETRY: ${{steps.asdf.outputs.poetry}}
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{steps.asdf.outputs.python}}
           cache: poetry

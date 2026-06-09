@@ -16,6 +16,8 @@ on:
   schedule:
     - cron: "45 16 * * MON"
 
+permissions: {}
+
 jobs:
   check:
     name: Check if build is necessary
@@ -44,4 +46,7 @@ jobs:
     with:
       env: dev-orange
       deploy-desc: ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
-    secrets: inherit
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      DOCKER_REPO: ${{ secrets.DOCKER_REPO }}
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
