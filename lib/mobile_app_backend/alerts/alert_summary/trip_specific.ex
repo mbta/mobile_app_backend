@@ -284,14 +284,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
            trip_time: trip_time,
            route_type: route_type,
            stop_name: global.stops[stop_id].name
-         }, Util.datetime_to_gtfs(trip_time) == Util.datetime_to_gtfs(at_time)}
+         }, Util.DateTime.datetime_to_gtfs(trip_time) == Util.DateTime.datetime_to_gtfs(at_time)}
 
       _ ->
         {%MultipleTrips{},
          Enum.any?(
            informed_schedules,
-           &(Util.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
-               Util.datetime_to_gtfs(at_time))
+           &(Util.DateTime.datetime_to_gtfs(&1.departure_time || &1.arrival_time) ==
+               Util.DateTime.datetime_to_gtfs(at_time))
          )}
     end
   end

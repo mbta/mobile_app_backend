@@ -438,7 +438,7 @@ defmodule MBTAV3API.AlertTest do
       today =
         Date.new!(2026, 4, 13)
         |> DateTime.new!(Time.new!(3, 0, 0), "America/New_York")
-        |> Util.datetime_to_gtfs()
+        |> Util.DateTime.datetime_to_gtfs()
 
       nine_pm = ~T[21:00:00]
       end_of_service = ~T[03:00:00]
@@ -473,7 +473,7 @@ defmodule MBTAV3API.AlertTest do
 
     test "selects specific days" do
       selected_days = MapSet.new([1, 2])
-      today = "America/New_York" |> DateTime.now!() |> Util.datetime_to_gtfs()
+      today = "America/New_York" |> DateTime.now!() |> Util.DateTime.datetime_to_gtfs()
       nine_pm = ~T[21:00:00]
       end_of_service = ~T[03:00:00]
 
@@ -512,7 +512,7 @@ defmodule MBTAV3API.AlertTest do
       today =
         Date.new!(2026, 4, 13)
         |> DateTime.new!(Time.new!(3, 0, 0), "America/New_York")
-        |> Util.datetime_to_gtfs()
+        |> Util.DateTime.datetime_to_gtfs()
 
       nine_am = ~T[09:00:00]
       end_of_service = ~T[03:00:00]

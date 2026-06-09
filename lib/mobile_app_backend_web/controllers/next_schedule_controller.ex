@@ -13,8 +13,8 @@ defmodule MobileAppBackendWeb.NextScheduleController do
 
     service_date =
       date_time
-      |> Util.parse_datetime!()
-      |> Util.datetime_to_gtfs()
+      |> Util.DateTime.parse_datetime!()
+      |> Util.DateTime.datetime_to_gtfs()
 
     # as an optimization, skip loading the services if there is a schedule tomorrow
     next_schedule =

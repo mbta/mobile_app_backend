@@ -628,7 +628,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
 
   defp alert_timeframe(alert, at_time, has_recurrence?) do
-    service_date = Util.datetime_to_gtfs(at_time)
+    service_date = Util.DateTime.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
       %Alert.ActivePeriod{end: nil} ->
@@ -671,7 +671,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defp alert_timeframe_current(service_date, %Alert.ActivePeriod{end: end_time} = current_period) do
-    end_date = Util.datetime_to_gtfs(end_time, rounding: :backwards)
+    end_date = Util.DateTime.datetime_to_gtfs(end_time, rounding: :backwards)
 
     cond do
       service_date == end_date and Alert.ActivePeriod.to_end_of_service?(current_period) ->
@@ -692,7 +692,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defp alert_timeframe_upcoming(service_date, %Alert.ActivePeriod{start: start_time}) do
-    start_service_date = Util.datetime_to_gtfs(start_time)
+    start_service_date = Util.DateTime.datetime_to_gtfs(start_time)
 
     if start_service_date == service_date do
       %Timeframe.StartingLaterToday{time: start_time}
@@ -704,9 +704,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @spec alert_recurrence(Alert.t(), DateTime.t()) :: Recurrence.t() | nil
   def alert_recurrence(alert, at_time) do
     with %Alert.RecurrenceInfo{end: last_period_end} = range <- Alert.recurrence_range(alert),
-         service_date = Util.datetime_to_gtfs(at_time),
+         service_date = Util.DateTime.datetime_to_gtfs(at_time),
          last_service_date when last_service_date != service_date <-
-           Util.datetime_to_gtfs(last_period_end, rounding: :backwards) do
+           Util.DateTime.datetime_to_gtfs(last_period_end, rounding: :backwards) do
       ending =
         cond do
           !range.end_day_known ->

@@ -231,7 +231,8 @@ defmodule MBTAV3API.Alert do
         Enum.map(item.attributes["active_period"], &ActivePeriod.parse!/1)
         |> ActivePeriod.collapse(),
       cause: parse_cause(item.attributes["cause"]),
-      closed_timestamp: Util.parse_optional_datetime!(item.attributes["closed_timestamp"]),
+      closed_timestamp:
+        Util.DateTime.parse_optional_datetime!(item.attributes["closed_timestamp"]),
       description: item.attributes["description"],
       duration_certainty: parse_duration_certainty(item.attributes["duration_certainty"]),
       effect: parse_effect(item.attributes["effect"]),
@@ -241,10 +242,12 @@ defmodule MBTAV3API.Alert do
         Enum.map(item.attributes["informed_entity"], &InformedEntity.parse!/1)
         |> InformedEntity.expand_route_type(),
       last_push_notification_timestamp:
-        Util.parse_optional_datetime!(item.attributes["last_push_notification_timestamp"]),
+        Util.DateTime.parse_optional_datetime!(
+          item.attributes["last_push_notification_timestamp"]
+        ),
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
       severity: item.attributes["severity"],
-      updated_at: Util.parse_datetime!(item.attributes["updated_at"])
+      updated_at: Util.DateTime.parse_datetime!(item.attributes["updated_at"])
     }
   end
 
@@ -346,8 +349,8 @@ defmodule MBTAV3API.Alert do
         false
       else
         recurrence_info.start
-        |> Util.datetime_to_gtfs()
-        |> Date.range(Util.datetime_to_gtfs(recurrence_info.end, rounding: :backwards))
+        |> Util.DateTime.datetime_to_gtfs()
+        |> Date.range(Util.DateTime.datetime_to_gtfs(recurrence_info.end, rounding: :backwards))
         |> Enum.map(&Date.day_of_week(&1))
         |> MapSet.new() == recurrence_info.days
       end
@@ -361,14 +364,14 @@ defmodule MBTAV3API.Alert do
          last_period <- Enum.max_by(alert.active_period, & &1.end, DateTime),
          false <- last_period.end == nil,
          false <-
-           Util.datetime_to_gtfs(last_period.end, rounding: :backwards) ==
-             Util.datetime_to_gtfs(first_period.start) do
+           Util.DateTime.datetime_to_gtfs(last_period.end, rounding: :backwards) ==
+             Util.DateTime.datetime_to_gtfs(first_period.start) do
       seen_days_of_week =
         alert.active_period
         |> Enum.flat_map(fn ap ->
           ap.start
-          |> Util.datetime_to_gtfs()
-          |> Date.range(Util.datetime_to_gtfs(ap.end, rounding: :backwards))
+          |> Util.DateTime.datetime_to_gtfs()
+          |> Date.range(Util.DateTime.datetime_to_gtfs(ap.end, rounding: :backwards))
           |> Enum.map(&Date.day_of_week(&1))
         end)
         |> MapSet.new()

@@ -72,8 +72,8 @@ defmodule MBTAV3API.Prediction do
   def parse!(%JsonApi.Item{} = item) do
     %__MODULE__{
       id: item.id,
-      arrival_time: Util.parse_optional_datetime!(item.attributes["arrival_time"]),
-      departure_time: Util.parse_optional_datetime!(item.attributes["departure_time"]),
+      arrival_time: Util.DateTime.parse_optional_datetime!(item.attributes["arrival_time"]),
+      departure_time: Util.DateTime.parse_optional_datetime!(item.attributes["departure_time"]),
       direction_id: item.attributes["direction_id"],
       last_trip: item.attributes["last_trip"],
       revenue: Util.parse_revenue_status(item.attributes["revenue_status"]),

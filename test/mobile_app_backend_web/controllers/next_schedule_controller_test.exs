@@ -69,7 +69,7 @@ defmodule MobileAppBackendWeb.NextScheduleControllerTest do
 
   test "checks tomorrow before loading service to find later date", %{conn: conn} do
     now = DateTime.now!("America/New_York")
-    today = Util.datetime_to_gtfs(now)
+    today = Util.DateTime.datetime_to_gtfs(now)
     tomorrow = Date.add(today, 1)
     schedule = build(:schedule)
 
@@ -107,7 +107,7 @@ defmodule MobileAppBackendWeb.NextScheduleControllerTest do
 
   test "returns null if no future service", %{conn: conn} do
     now = DateTime.now!("America/New_York")
-    today = Util.datetime_to_gtfs(now)
+    today = Util.DateTime.datetime_to_gtfs(now)
     tomorrow = Date.add(today, 1)
 
     route = "CR-Foxboro"

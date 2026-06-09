@@ -235,36 +235,6 @@ defmodule Util do
   end
 
   @doc """
-  Parses a value as an `America/New_York` datetime.
-
-  ## Examples
-
-      iex> Util.parse_datetime!("2024-02-02T10:45:52-05:00")
-      #DateTime<2024-02-02 10:45:52-05:00 EST America/New_York>
-  """
-  @spec parse_datetime!(String.t()) :: DateTime.t()
-  def parse_datetime!(data) do
-    {:ok, datetime, _} = DateTime.from_iso8601(data)
-    DateTime.shift_zone!(datetime, "America/New_York")
-  end
-
-  @doc """
-  Parses an optional value as an `America/New_York` datetime.
-
-  ## Examples
-
-      iex> Util.parse_optional_datetime!(nil)
-      nil
-
-      iex> Util.parse_optional_datetime!("2024-02-02T10:45:52-05:00")
-      #DateTime<2024-02-02 10:45:52-05:00 EST America/New_York>
-  """
-  @spec parse_optional_datetime!(String.t() | nil) :: DateTime.t() | nil
-  def parse_optional_datetime!(data)
-  def parse_optional_datetime!(nil), do: nil
-  def parse_optional_datetime!(data), do: parse_datetime!(data)
-
-  @doc """
   Constructs a union out of a list of types.
 
   ## Examples
@@ -285,76 +255,6 @@ defmodule Util do
     args
     |> Enum.reverse()
     |> Enum.reduce(fn t, acc -> quote(do: unquote(t) | unquote(acc)) end)
-  end
-
-  @doc """
-  Converts a local time into a GTFS {service date, HH:MM}.
-
-  ## Examples
-
-      iex> import Test.Support.Sigils
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 10:55:39])
-      ~D[2024-03-12]
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 00:19:03])
-      ~D[2024-03-11]
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 01:23:45])
-      ~D[2024-03-11]
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 02:11:00])
-      ~D[2024-03-11]
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 03:00:00])
-      ~D[2024-03-12]
-      iex> Util.datetime_to_gtfs(~B[2024-03-12 03:00:00], rounding: :backwards)
-      ~D[2024-03-11]
-  """
-  @spec datetime_to_gtfs(DateTime.t(), rounding: :forwards | :backwards) :: Date.t()
-  def datetime_to_gtfs(
-        %DateTime{hour: hour, time_zone: "America/New_York"} = datetime,
-        opts \\ []
-      ) do
-    date = DateTime.to_date(datetime)
-    rounding = Keyword.get(opts, :rounding, :forwards)
-
-    if hour in [0, 1, 2] or (rounding == :backwards and hour == 3 and datetime.minute == 0) do
-      Date.add(date, -1)
-    else
-      date
-    end
-  end
-
-  @spec datetime_to_string(Cldr.Calendar.any_date_time(), String.t() | atom()) :: String.t()
-
-  @doc """
-  Format the date in a localized string
-
-  ## Examples
-      iex> import Test.Support.Sigils
-      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :short_time)
-      "1:23 AM"
-      iex> Util.datetime_to_string(~B[2026-04-29 13:23:45], :short_time)
-      "1:23 PM"
-      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :short_month_day)
-      "Apr 29"
-      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], :wide_weekday)
-      "Wednesday"
-      iex> Util.datetime_to_string(~B[2026-04-29 01:23:45], "h")
-      "1"
-
-  """
-  def datetime_to_string(datetime, :short_time) do
-    datetime_to_string(datetime, "h:mm a")
-  end
-
-  def datetime_to_string(datetime, :short_month_day) do
-    datetime_to_string(datetime, "MMM d")
-  end
-
-  def datetime_to_string(datetime, :wide_weekday) do
-    datetime_to_string(datetime, "EEEE")
-  end
-
-  def datetime_to_string(datetime, format) do
-    {:ok, formatted} = Cldr.DateTime.to_string(datetime, MobileAppBackend.Cldr, format: format)
-    formatted
   end
 
   @spec parse_revenue_status(String.t() | nil) :: boolean()

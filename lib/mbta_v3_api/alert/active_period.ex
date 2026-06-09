@@ -7,8 +7,8 @@ defmodule MBTAV3API.Alert.ActivePeriod do
   @spec parse!(map()) :: t()
   def parse!(data) when is_map(data) do
     %__MODULE__{
-      start: Util.parse_datetime!(data["start"]),
-      end: Util.parse_optional_datetime!(data["end"])
+      start: Util.DateTime.parse_datetime!(data["start"]),
+      end: Util.DateTime.parse_optional_datetime!(data["end"])
     }
   end
 

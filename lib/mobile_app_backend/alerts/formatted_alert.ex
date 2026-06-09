@@ -161,21 +161,21 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext("key/alert_summary_timeframe_later_date",
           "1":
             timeframe.time
-            |> Util.datetime_to_gtfs(rounding: :backwards)
-            |> Util.datetime_to_string(:short_month_day)
+            |> Util.DateTime.datetime_to_gtfs(rounding: :backwards)
+            |> Util.DateTime.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
         gettext("key/alert_summary_timeframe_this_week",
           "1":
             timeframe.time
-            |> Util.datetime_to_gtfs(rounding: :backwards)
-            |> Util.datetime_to_string(:wide_weekday)
+            |> Util.DateTime.datetime_to_gtfs(rounding: :backwards)
+            |> Util.DateTime.datetime_to_string(:wide_weekday)
         )
 
       %Timeframe.Time{} ->
         gettext("key/alert_summary_timeframe_time",
-          "1": Util.datetime_to_string(timeframe.time, :short_time)
+          "1": Util.DateTime.datetime_to_string(timeframe.time, :short_time)
         )
 
       %Timeframe.StartingTomorrow{} ->
@@ -183,7 +183,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
       %Timeframe.StartingLaterToday{} ->
         gettext(" starting **%{formatted_time}** today",
-          formatted_time: Util.datetime_to_string(timeframe.time, :short_time)
+          formatted_time: Util.DateTime.datetime_to_string(timeframe.time, :short_time)
         )
 
       %Timeframe.TimeRange{} ->
@@ -210,7 +210,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext("end of service")
 
       %Timeframe.TimeRange.Time{} ->
-        Util.datetime_to_string(boundary.time, :short_time)
+        Util.DateTime.datetime_to_string(boundary.time, :short_time)
 
       _ ->
         nil
@@ -256,16 +256,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         gettext("key/alert_summary_recurrence_end_day_later_date",
           "1":
             end_day.time
-            |> Util.datetime_to_gtfs(rounding: :backwards)
-            |> Util.datetime_to_string(:short_month_day)
+            |> Util.DateTime.datetime_to_gtfs(rounding: :backwards)
+            |> Util.DateTime.datetime_to_string(:short_month_day)
         )
 
       %Timeframe.ThisWeek{} ->
         gettext("key/alert_summary_recurrence_end_day_this_week",
           "1":
             end_day.time
-            |> Util.datetime_to_gtfs(rounding: :backwards)
-            |> Util.datetime_to_string(:wide_weekday)
+            |> Util.DateTime.datetime_to_gtfs(rounding: :backwards)
+            |> Util.DateTime.datetime_to_string(:wide_weekday)
         )
 
       _ ->
@@ -283,14 +283,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
       %AlertSummary.TripSpecific.TripFrom{} ->
         gettext("**%{trip_time}** %{route_type} from **%{stop_name}**",
-          trip_time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
+          trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           stop_name: trip_identity.stop_name
         )
 
       %AlertSummary.TripSpecific.TripTo{} ->
         gettext("**%{trip_time}** %{route_type} to **%{headsign}**",
-          trip_time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
+          trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type: PresentationStrings.route_type(trip_identity.route_type, true),
           headsign: trip_identity.headsign
         )
@@ -328,14 +328,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %AlertSummary.TripShuttle.SingleTrip{} ->
         if trip_identity.from_stop_name != nil do
           gettext("**%{time}** %{vehicle} from **%{from_stop}**",
-            time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
+            time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true),
             from_stop: trip_identity.from_stop_name
           )
         else
           gettext("the **%{time}** %{vehicle}",
-            time: Util.datetime_to_string(trip_identity.trip_time, :short_time),
+            time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
           )
