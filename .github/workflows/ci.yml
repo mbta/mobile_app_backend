@@ -119,7 +119,7 @@ jobs:
       - name: Report test coverage
         # Disabled due to dependency issues
         if: false
-        uses: mbta/github-actions-report-lcov@9116c86aa5f59c26775d3b84c79ec5b2312301e5 # v1.4.1
+        uses: mbta/github-actions-report-lcov@44a478dc20d1b62bf0f8f13951f3dc20bacbda19 # v4.0.1
         with:
           coverage-files: cover/lcov.info
           artifact-name: code-coverage-report
