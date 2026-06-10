@@ -64,7 +64,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
     summaries_by_alert =
       if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
 
-    legacy_map = fn alert ->
+    legacy_map = fn %Alert{} = alert ->
       if MapSet.member?(Alert.v2_causes(), alert.cause),
         do: %Alert{alert | cause: :unknown_cause},
         else: alert
