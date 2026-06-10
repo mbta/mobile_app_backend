@@ -60,6 +60,9 @@ defmodule MobileAppBackend.Alerts.PubSub do
   @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: %{
           String.t() => Alert.t() | AlertWithSummaries.t()
         }
+  # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
+  # can be removed after elixir 1.20.1
+  @dialyzer {:no_opaque, map_data: 4}
   def map_data(data, legacy_compatibility, include_summaries, locale) do
     summaries_by_alert =
       if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
