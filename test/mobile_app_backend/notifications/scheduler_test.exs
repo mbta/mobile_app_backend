@@ -10,7 +10,11 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
   alias MBTAV3API.Store
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
+  alias MobileAppBackend.Notifications.GCPToken
   alias MobileAppBackend.NotificationsFactory
+
+  setup :set_mox_from_context
+  setup :verify_on_exit!
 
   test "sends notifications" do
     now = DateTime.now!("America/New_York")
@@ -725,6 +729,92 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "upstream_timestamp" => alert.last_push_notification_timestamp,
         "type" => "update",
         "analytics_label" => "route=66;effect=suspension;type=update"
+      }
+    )
+  end
+
+  test "retries if previous send failed" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -48, :hour)
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: now |> DateTime.add(-10, :minute) |> DateTime.to_time(),
+          end_time: now |> DateTime.add(10, :minute) |> DateTime.to_time(),
+          days_of_week: [Date.day_of_week(now)]
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+
+    reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
+      token: "gcp_token",
+      expires: ~U[9999-12-31 23:59:59Z]
+    })
+
+    reassign_env(:tesla, :adapter, TeslaMockAdapter)
+
+    Tesla.Test.expect_tesla_call(
+      times: 1,
+      returns: %Tesla.Env{status: 418} |> Tesla.Test.json(%{}),
+      adapter: TeslaMockAdapter
+    )
+
+    with_log(fn ->
+      MobileAppBackend.Notifications.Deliverer.new(%{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
+        "deep_link_path" => "/s/1/r/66/d/0",
+        "upstream_timestamp" => alert.last_push_notification_timestamp,
+        "type" => "notification",
+        "analytics_label" => "route=66;effect=suspension;type=notification"
+      })
+      |> Oban.insert!()
+
+      Oban.drain_queue(queue: :default)
+    end)
+
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => alert.id,
+        "title" => "66 bus",
+        "body" => "Service suspended until further notice",
+        "deep_link_path" => "/s/1/r/66/d/0",
+        "upstream_timestamp" => alert.last_push_notification_timestamp,
+        "type" => "notification",
+        "analytics_label" => "route=66;effect=suspension;type=notification"
       }
     )
   end
