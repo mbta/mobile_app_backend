@@ -124,7 +124,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       adapter: TeslaMockAdapter
     )
 
-    {:ok, _} =
+    {{:cancel, :error}, _} =
       with_log(fn ->
         perform_job(Notifications.Deliverer, %{
           user_id: user_id,

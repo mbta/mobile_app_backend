@@ -79,16 +79,27 @@ defmodule MobileAppBackend.Notifications.Deliverer do
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
 
-    if result == :ok do
-      Repo.insert!(%DeliveredNotification{
-        user_id: user_id,
-        alert_id: alert_id,
-        upstream_timestamp: upstream_timestamp,
-        type: type
-      })
-    end
+    case result do
+      :ok ->
+        Repo.insert!(%DeliveredNotification{
+          user_id: user_id,
+          alert_id: alert_id,
+          upstream_timestamp: upstream_timestamp,
+          type: type
+        })
 
-    :ok
+        :ok
+
+      :deleted ->
+        :ok
+
+      :error ->
+        # if we let Oban own the retry, the notification may not still be
+        # worth sending by the time it succeeds, so we leave it to the
+        # scheduler to retry the notification, and we mark this job as
+        # cancelled so the retry doesn’t count as a duplicate
+        {:cancel, :error}
+    end
   end
 
   defp handle_fcm_response({:ok, _response}, user) do
