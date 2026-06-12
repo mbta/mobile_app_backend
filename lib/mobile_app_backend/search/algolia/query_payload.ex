@@ -55,14 +55,14 @@ defmodule MobileAppBackend.Search.Algolia.QueryPayload do
     }
   end
 
-  defp with_hit_size(query_payload, hitSize) do
+  defp with_hit_size(%__MODULE__{} = query_payload, hitSize) do
     %__MODULE__{
       query_payload
       | params: Map.put(query_payload.params, "hitsPerPage", hitSize)
     }
   end
 
-  defp with_facet_filter(query_payload, facets) do
+  defp with_facet_filter(%__MODULE__{} = query_payload, facets) do
     %__MODULE__{
       query_payload
       | filters:

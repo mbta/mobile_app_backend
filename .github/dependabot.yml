@@ -17,3 +17,11 @@ updates:
     open-pull-requests-limit: 10
     cooldown:
       default-days: 7
+  - package-ecosystem: pip
+    directory: "/load_testing"
+    schedule:
+      interval: daily
+      time: "09:00"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7

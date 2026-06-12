@@ -18,7 +18,7 @@ defmodule Mix.Tasks.ImportLocalizations do
     for locale <- Application.fetch_env!(:mobile_app_backend, :locale_codes) do
       Mix.Task.rerun("gettext.merge", [gettext_backend_dir, "--locale", locale, "--no-fuzzy"])
       po_path = [gettext_backend_dir, locale, "LC_MESSAGES", "default.po"] |> Path.join()
-      po_contents = Expo.PO.parse_file!(po_path)
+      %Expo.Messages{} = po_contents = Expo.PO.parse_file!(po_path)
 
       new_messages =
         Enum.map(po_contents.messages, &rewrite_message(&1, locale, localizable_xcstrings_json))
