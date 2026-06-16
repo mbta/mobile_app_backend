@@ -43,6 +43,9 @@ jobs:
     needs: check
     if: ${{ needs.check.outputs.should-run == 'true' }}
     uses: ./.github/workflows/deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: dev-orange
       deploy-desc: ${{ github.event_name == 'pull_request' && 'PR' || github.ref_type }} ${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
