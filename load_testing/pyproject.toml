@@ -7,7 +7,7 @@ locust = "^2.44.1"
 websockets = "^16.0.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.12.9"
+ruff = "^0.15.16"
 mypy = "^1.17.1"
 types-requests = "^2.33.0.20260518"
 types-gevent = "^24.11.0.20241221"
