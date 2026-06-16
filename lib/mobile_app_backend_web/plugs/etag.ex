@@ -27,7 +27,11 @@ defmodule MobileAppBackendWeb.Plugs.Etag do
     conn = conn |> put_resp_header("etag", etag)
 
     if List.first(get_req_header(conn, "if-none-match")) == etag do
-      conn |> put_status(:not_modified) |> then(&%Plug.Conn{&1 | resp_body: ""})
+      conn
+      |> put_status(:not_modified)
+      |> then(fn %Plug.Conn{} = conn ->
+        %Plug.Conn{conn | resp_body: ""}
+      end)
     else
       conn
     end
