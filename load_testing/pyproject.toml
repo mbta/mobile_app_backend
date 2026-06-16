@@ -9,7 +9,7 @@ websockets = "^15.0.1"
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.12.9"
 mypy = "^1.17.1"
-types-requests = "^2.32.0.20241016"
+types-requests = "^2.33.0.20260518"
 types-gevent = "^24.11.0.20241221"
 
 [tool.ruff]
