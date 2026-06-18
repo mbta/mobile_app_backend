@@ -27,8 +27,8 @@ all_routes: list[dict] = requests.get(
     {},
 ).json()["data"]
 
-initial_global_headers = {}
-initial_rail_headers = {}
+initial_global_headers: dict[str, str] = {}
+initial_rail_headers: dict[str, str] = {}
 
 
 @events.test_start.add_listener
