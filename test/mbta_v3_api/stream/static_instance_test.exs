@@ -116,8 +116,7 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
       topic = "predictions:route:#{Uniq.UUID.uuid7()}"
       refute Stream.Registry.find_pid(topic)
       assert {:ok, _} = Stream.StaticInstance.ensure_stream_started(topic)
-      pid =  Stream.Registry.find_pid(topic)
-      assert pid
+      assert Stream.Registry.find_pid(topic)
     end
 
     test "when include_current_data is false, skips returning latest data" do
