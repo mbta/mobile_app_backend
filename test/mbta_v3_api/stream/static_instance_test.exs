@@ -91,7 +91,7 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
     end
 
     test "launches new instance if not already running" do
-      topic = "predictions:route:fake-route-that-won't-already-exist"
+      topic = "predictions:route:#{Uniq.UUID.uuid7()}"
       refute Stream.Registry.find_pid(topic)
       assert {:ok, _} = Stream.StaticInstance.subscribe(topic)
       assert Stream.Registry.find_pid(topic)
@@ -113,10 +113,11 @@ defmodule MBTAV3API.Stream.StaticInstanceTest do
     end
 
     test "launches new instance if not already running" do
-      topic = "predictions:route:fake-route"
+      topic = "predictions:route:#{Uniq.UUID.uuid7()}"
       refute Stream.Registry.find_pid(topic)
       assert {:ok, _} = Stream.StaticInstance.ensure_stream_started(topic)
-      assert Stream.Registry.find_pid(topic)
+      pid =  Stream.Registry.find_pid(topic)
+      assert pid
     end
 
     test "when include_current_data is false, skips returning latest data" do
