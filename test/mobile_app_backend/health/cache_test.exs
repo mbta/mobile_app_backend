@@ -5,13 +5,13 @@ defmodule MobileAppBackend.Health.CacheTest do
   import Test.Support.Helpers
 
   defmodule Cache do
-    def stats do
-      %Nebulex.Stats{measurements: %{hits: 4, misses: 4}}
+    def info do
+      {:ok, %{stats: %{hits: 4, misses: 4}}}
     end
   end
 
   defmodule StatslessCache do
-    def stats, do: nil
+    def info, do: nil
   end
 
   describe "handle_info/1" do
