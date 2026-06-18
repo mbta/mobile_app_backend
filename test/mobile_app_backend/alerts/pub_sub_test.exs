@@ -65,6 +65,7 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
     setup do
       _dispatched_table = :ets.new(:test_last_dispatched, [:set, :named_table])
       {:ok, %{last_dispatched_table_name: :test_last_dispatched}}
+      reassign_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 10_000)
     end
 
     test "broadcasts on :reset_event" do
