@@ -13,6 +13,9 @@ jobs:
   deploy:
     name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Prod
     uses: ./.github/workflows/deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     with:
       env: prod
       deploy-desc: ${{ github.ref_type }} ${{ github.ref_name }}
