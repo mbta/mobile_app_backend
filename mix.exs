@@ -83,7 +83,7 @@ defmodule MobileAppBackend.MixProject do
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_dashboard, "~> 0.8.2"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 1.1.0"},
+      {:phoenix_live_view, "~> 1.2.0"},
       {:phoenix, "~> 1.8.0"},
       {:polyline, "~> 1.4", only: :test},
       {:postgrex, "~> 0.22"},
