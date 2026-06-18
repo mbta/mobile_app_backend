@@ -36,7 +36,7 @@ defmodule MobileAppBackend.MixProject do
   end
 
   def cli do
-    [preferred_envs: [update_test_data: :test]]
+    [preferred_envs: [update_test_data: :test, generate_alert_summary_table: :test]]
   end
 
   # Specifies which paths to compile per environment.
