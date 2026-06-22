@@ -54,7 +54,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         android: %FCM.Model.AndroidConfig{
           notification: %FCM.Model.AndroidNotification{
             sound: "default",
-            tag: tag
+            tag: tag,
+            visibility: "public"
           }
         },
         apns: %FCM.Model.ApnsConfig{
