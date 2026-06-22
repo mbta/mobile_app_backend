@@ -91,7 +91,7 @@ defmodule MobileAppBackend.MixProject do
       {:sentry, "~> 13.0"},
       {:server_sent_event_stage, "~> 1.2"},
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
-      {:tailwind, "~> 0.4.1", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.5.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:typed_ecto_schema, "~> 0.4.3"},
