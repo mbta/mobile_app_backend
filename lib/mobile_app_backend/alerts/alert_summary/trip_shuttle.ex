@@ -54,7 +54,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
           [RoutePattern.t()],
           DateTime.t(),
           [Schedule.t()] | nil,
-          GlobalDataCache.data()
+          GlobalDataCache.data(),
+          AlertSummary.context()
         ) :: t() | nil
   def summary(
         alert,
@@ -63,7 +64,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
         patterns,
         at_time,
         informed_schedules,
-        global
+        global,
+        context
       ) do
     with %AlertSummary.Location.SuccessiveStops{
            start_stop_name: location_start_stop_name,
@@ -76,7 +78,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
            resolve_start_stop_name(downstream, location_start_stop_name, current_stop_name),
          identity_stop_name <- resolve_trip_identity_stop_name(downstream, current_stop_name),
          trip_identity when not is_nil(trip_identity) <-
-           trip_identity(identity_stop_name, patterns, informed_schedules, global) do
+           trip_identity(identity_stop_name, patterns, informed_schedules, global, context) do
       %__MODULE__{
         trip_identity: trip_identity,
         start_stop_name: start_stop_name,
@@ -146,26 +148,30 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
          current_stop_name,
          patterns,
          informed_schedules,
-         global
+         global,
+         context
        ) do
+    route_type = Enum.find_value(patterns, &global.routes[&1.route_id].type)
+
     case informed_schedules do
       [] ->
         nil
+
+      _ when context == :card ->
+        if route_type do
+          %ThisTrip{route_type: route_type}
+        end
 
       [%Schedule{} = informed_trip]
       when not is_nil(informed_trip.departure_time) or not is_nil(informed_trip.arrival_time) ->
         trip_time = informed_trip.departure_time || informed_trip.arrival_time
 
-        case Enum.find_value(patterns, &global.routes[&1.route_id]) do
-          %Route{type: route_type} ->
-            %SingleTrip{
-              trip_time: trip_time,
-              route_type: route_type,
-              from_stop_name: current_stop_name
-            }
-
-          _ ->
-            nil
+        if route_type do
+          %SingleTrip{
+            trip_time: trip_time,
+            route_type: route_type,
+            from_stop_name: current_stop_name
+          }
         end
 
       _ ->

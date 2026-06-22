@@ -252,7 +252,8 @@ defmodule MobileAppBackend.Notifications.Engine do
       patterns,
       now,
       schedules,
-      global_data
+      global_data,
+      :notification
     )
   end
 

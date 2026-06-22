@@ -24,27 +24,38 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   @doc """
   Given a list of alerts and global data, produces a list of summary entites keyed by alert id
   """
-  @spec build_all([Alert.t()], DateTime.t(), String.t(), GlobalDataCache.data()) :: %{
-          String.t() => [SummaryEntity.t()]
-        }
-  def build_all(alerts, at_time, locale, global) do
+  @spec build_all(
+          [Alert.t()],
+          DateTime.t(),
+          String.t(),
+          GlobalDataCache.data(),
+          AlertSummary.context()
+        ) :: %{String.t() => [SummaryEntity.t()]}
+  def build_all(alerts, at_time, locale, global, context) do
     Map.new(
-      Enum.map(alerts, fn alert -> {alert.id, build_for_alert(alert, at_time, locale, global)} end)
+      Enum.map(alerts, fn alert ->
+        {alert.id, build_for_alert(alert, at_time, locale, global, context)}
+      end)
     )
   end
 
-  @spec build_all([Alert.t()], String.t()) :: %{String.t() => [SummaryEntity.t()]}
-  def build_all(alerts, locale) do
+  @spec build_all([Alert.t()], String.t(), AlertSummary.context()) ::
+          %{String.t() => [SummaryEntity.t()]}
+  def build_all(alerts, locale, context) do
     at_time = DateTime.now!("America/New_York")
     global = GlobalDataCache.get_data()
 
-    build_all(alerts, at_time, locale, global)
+    build_all(alerts, at_time, locale, global, context)
   end
 
-  @spec build_for_alert(Alert.t(), DateTime.t(), String.t(), GlobalDataCache.data()) :: [
-          SummaryEntity.t()
-        ]
-  defp build_for_alert(alert, at_time, locale, global) do
+  @spec build_for_alert(
+          Alert.t(),
+          DateTime.t(),
+          String.t(),
+          GlobalDataCache.data(),
+          AlertSummary.context()
+        ) :: [SummaryEntity.t()]
+  defp build_for_alert(alert, at_time, locale, global, context) do
     # Fetch schedules once for the whole alert for any trips included in the informed entities
     {schedules, trips} = fetch_schedules_for_alert(alert)
 
@@ -55,7 +66,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
 
     Enum.flat_map(
       combinations,
-      &combination_to_summaries(&1, alert, at_time, locale, schedules, trips, stops, global)
+      &combination_to_summaries(
+        &1,
+        alert,
+        at_time,
+        locale,
+        {schedules, trips, stops},
+        global,
+        context
+      )
     )
     |> dedup_summaries()
   end
@@ -70,10 +89,9 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
          alert,
          at_time,
          locale,
-         schedules,
-         trips,
-         stops,
-         global
+         {schedules, trips, stops},
+         global,
+         context
        ) do
     RoutePattern.get_relevant_patterns(route_id, stop_id, direction_id, global)
     |> Enum.group_by(&{&1.route_id, &1.direction_id})
@@ -99,7 +117,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
           patterns,
           at_time,
           resolved_schedules,
-          global
+          global,
+          context
         )
 
       formatted =
