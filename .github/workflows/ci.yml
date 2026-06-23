@@ -45,7 +45,7 @@ jobs:
       - uses: asdf-vm/actions/install@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
         if: steps.asdf-cache.outputs.cache-hit != 'true'
       - name: Setup asdf environment
-        uses: mbta/actions/reshim-asdf@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+        uses: mbta/actions/reshim-asdf@3cefce8df1bddb7ff8c164779d628ac2ba7bbb83 # v2.19
       - name: mix rebar and hex
         run: |
           mix local.rebar --force
@@ -95,7 +95,7 @@ jobs:
           path: ~/.asdf
           key: ${{ needs.setup.outputs.cache-key-asdf }}
       - name: Setup asdf environment
-        uses: mbta/actions/reshim-asdf@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+        uses: mbta/actions/reshim-asdf@3cefce8df1bddb7ff8c164779d628ac2ba7bbb83 # v2.19
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
@@ -124,7 +124,7 @@ jobs:
           coverage-files: cover/lcov.info
           artifact-name: code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mbta/actions/dialyzer@6cff1d5eef7e0d780190353278bc84fdf6177dab # v2.18
+      - uses: mbta/actions/dialyzer@3cefce8df1bddb7ff8c164779d628ac2ba7bbb83 # v2.19
       - name: Check for unused dependencies
         run: mix deps.unlock --check-unused
 
