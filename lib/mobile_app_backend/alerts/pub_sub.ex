@@ -65,7 +65,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
   @dialyzer {:no_opaque, map_data: 4}
   def map_data(data, legacy_compatibility, include_summaries, locale) do
     summaries_by_alert =
-      if include_summaries, do: SummaryEntityBuilder.build_all(data, locale), else: nil
+      if include_summaries, do: SummaryEntityBuilder.build_all(data, locale, :card), else: nil
 
     legacy_map = fn %Alert{} = alert ->
       if MapSet.member?(Alert.v2_causes(), alert.cause),

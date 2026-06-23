@@ -227,7 +227,20 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    summary: "Service suspended on Red Line"
                  }
                ]
-             } = SummaryEntityBuilder.build_all([alert], now, "en", global)
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
+
+      assert %{
+               ^alert_id => [
+                 %SummaryEntity{
+                   alert_id: ^alert_id,
+                   route_id: ^route_id,
+                   stop_id: nil,
+                   trip_id: nil,
+                   direction_id: 0,
+                   summary: "Service suspended on Red Line"
+                 }
+               ]
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
     end
 
     test "build trip alert" do
@@ -301,7 +314,20 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                      "4:41 PM train from Harvard Sq @ Garden St - Dawes Island is suspended tomorrow due to maintenance"
                  }
                ]
-             } = SummaryEntityBuilder.build_all([alert], now, "en", global)
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
+
+      assert %{
+               ^alert_id => [
+                 %SummaryEntity{
+                   alert_id: ^alert_id,
+                   route_id: ^route_id,
+                   stop_id: nil,
+                   trip_id: ^trip_id,
+                   direction_id: 0,
+                   summary: "This train is suspended tomorrow due to maintenance"
+                 }
+               ]
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
     end
 
     test "build stop alert" do
@@ -363,7 +389,20 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    summary: "Service suspended at Harvard Sq @ Garden St - Dawes Island"
                  }
                ]
-             } = SummaryEntityBuilder.build_all([alert], now, "en", global)
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
+
+      assert %{
+               ^alert_id => [
+                 %SummaryEntity{
+                   alert_id: ^alert_id,
+                   route_id: ^route_id,
+                   stop_id: ^stop_id,
+                   trip_id: nil,
+                   direction_id: 0,
+                   summary: "Service suspended at Harvard Sq @ Garden St - Dawes Island"
+                 }
+               ]
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
     end
 
     test "build route type alert" do
@@ -431,7 +470,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
 
       assert %{
                ^alert_id => summary_entities
-             } = SummaryEntityBuilder.build_all([alert], now, "en", global)
+             } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
 
       assert [
                %SummaryEntity{

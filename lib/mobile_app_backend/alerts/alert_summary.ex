@@ -421,6 +421,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()
 
+  @type context :: :notification | :card
+
   @spec summarizing(
           Alert.t(),
           Stop.id(),
@@ -428,9 +430,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           [RoutePattern.t()],
           DateTime.t(),
           [Schedule.t()] | nil,
-          GlobalDataCache.data()
+          GlobalDataCache.data(),
+          context()
         ) :: t()
-  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global) do
+  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global, context) do
     with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, global),
          nil <-
            TripSpecific.summary(
@@ -440,7 +443,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
              patterns,
              at_time,
              schedules,
-             global
+             global,
+             context
            ) do
       recurrence = alert_recurrence(alert, at_time)
 
