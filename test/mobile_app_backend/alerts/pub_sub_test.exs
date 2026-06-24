@@ -11,6 +11,8 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
   import MobileAppBackend.Factory
 
   setup do
+    reassign_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 10_000)
+
     verify_on_exit!()
     reassign_env(:mobile_app_backend, Store.Alerts, AlertsStoreMock)
     :ok

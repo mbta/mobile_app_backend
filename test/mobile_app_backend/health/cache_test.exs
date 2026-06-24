@@ -4,12 +4,18 @@ defmodule MobileAppBackend.Health.CacheTest do
   import ExUnit.CaptureLog
   import Test.Support.Helpers
 
+  defmodule Cache do
+    def info do
+      {:ok, %{stats: %{hits: 4, misses: 4}}}
+    end
+  end
+
+  defmodule StatslessCache do
+    def info, do: nil
+  end
+
   describe "handle_info/1" do
     test "when stats disabled, logs" do
-      defmodule StatslessCache do
-        def info, do: nil
-      end
-
       set_log_level(:info)
 
       msg =
@@ -21,12 +27,6 @@ defmodule MobileAppBackend.Health.CacheTest do
     end
 
     test "when stats found, logs stats" do
-      defmodule Cache do
-        def info do
-          {:ok, %{stats: %{hits: 4, misses: 4}}}
-        end
-      end
-
       set_log_level(:info)
 
       msg =
