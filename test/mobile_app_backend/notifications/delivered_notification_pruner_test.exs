@@ -36,6 +36,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       capture_log([level: :info], fn ->
         :ok = perform_job(DeliveredNotificationPruner, %{})
       end)
+      |> String.replace(~r/\e\[[0-9;]*[mK]/, "")
 
     assert Repo.all(DeliveredNotification) == []
     assert log =~ "[info] #{DeliveredNotificationPruner} pruned=1 remaining=0\n"
@@ -61,6 +62,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       capture_log([level: :info], fn ->
         :ok = perform_job(DeliveredNotificationPruner, %{})
       end)
+      |> String.replace(~r/\e\[[0-9;]*[mK]/, "")
 
     assert Repo.all(DeliveredNotification) == [dn]
     assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0 remaining=1\n"
@@ -84,6 +86,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationPrunerTest do
       capture_log([level: :info], fn ->
         :ok = perform_job(DeliveredNotificationPruner, %{})
       end)
+      |> String.replace(~r/\e\[[0-9;]*[mK]/, "")
 
     assert Repo.all(DeliveredNotification) == [dn]
     assert log =~ "[info] #{DeliveredNotificationPruner} pruned=0 remaining=1\n"

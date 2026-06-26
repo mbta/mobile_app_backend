@@ -154,8 +154,8 @@ defmodule Test.Support.Data do
       nil ->
         {:reply, nil, state}
 
-      result ->
-        result = %Response{result | touched: true}
+      %Response{} = result ->
+        result = %{result | touched: true}
         state = put_in(state.data[request], result)
         {:reply, result, state}
     end
@@ -165,7 +165,7 @@ defmodule Test.Support.Data do
     state =
       update_in(state.data[request], fn
         nil -> %Response{id: Uniq.UUID.uuid7(), new_data: data, touched: true}
-        resp -> %Response{resp | new_data: data, touched: true}
+        %Response{} = resp -> %{resp | new_data: data, touched: true}
       end)
 
     {:reply, :ok, state}

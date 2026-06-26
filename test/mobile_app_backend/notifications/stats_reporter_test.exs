@@ -67,6 +67,7 @@ defmodule MobileAppBackend.Notifications.StatsReporterTest do
       capture_log([level: :info], fn ->
         :ok = perform_job(StatsReporter, %{})
       end)
+      |> String.replace(~r/\e\[[0-9;]*[mK]/, "")
 
     assert log =~ "[info] #{StatsReporter} users_by_route route_id=66 count=1\n"
     assert log =~ "[info] #{StatsReporter} users_by_route route_id=Red count=2\n"
