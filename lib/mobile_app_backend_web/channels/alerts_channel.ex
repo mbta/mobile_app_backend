@@ -1,10 +1,12 @@
 defmodule MobileAppBackendWeb.AlertsChannel do
   use MobileAppBackendWeb, :channel
+  alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.AlertWithSummaries
 
   defmodule AlertUpdate do
     @type t :: %__MODULE__{
             remove: [String.t()],
-            update: %{String.t() => Alert.t() | AlertWithSummaries.t()}
+            update: %{String.t() => AlertWithSummaries.t()}
           }
     @derive Jason.Encoder
     defstruct [:remove, :update]
@@ -115,6 +117,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     assign(socket, :last_alerts, current_hashes)
   end
 
+  @spec alert_hashes(%{String.t() => Alert.t()}) :: %{String.t() => String.t()}
   defp alert_hashes(alert_map) do
     Map.new(alert_map, fn {key, val} ->
       {key,
