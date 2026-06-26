@@ -937,14 +937,14 @@ files = [
 
 [[package]]
 name = "locust"
-version = "2.44.3"
+version = "2.44.4"
 description = "Developer-friendly load testing framework"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "locust-2.44.3-py3-none-any.whl", hash = "sha256:6d266d8f69ff2a4ebc26ab2211c8af24a6e39f7cf8c19f562c584506b12140bc"},
-    {file = "locust-2.44.3.tar.gz", hash = "sha256:bf3c82843dfebf684c968b5778b8132e9c1f1abd400d25a91c63ea65200b7f29"},
+    {file = "locust-2.44.4-py3-none-any.whl", hash = "sha256:3a600f2162e79d47f2bf2bf29cd7d4c066684a89f814b33d6fa68147a89a2b02"},
+    {file = "locust-2.44.4.tar.gz", hash = "sha256:9115530e33ca9591c02d9f970d92991739d50b775785b954103d5794ce299c3f"},
 ]
 
 [package.dependencies]
@@ -1865,4 +1865,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "86e276b4e3eb90cecf9a0aec3c4ec95d8f89ae73f95d48dd8ce37f3200e9c755"
+content-hash = "36631c6274583726767f7490653ac820a7c12fdc6eb0a274e8a77323be5e04ad"

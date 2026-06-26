@@ -3,7 +3,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.13"
-locust = "^2.44.3"
+locust = "^2.44.4"
 websockets = "^16.0.0"
 
 [tool.poetry.group.dev.dependencies]
