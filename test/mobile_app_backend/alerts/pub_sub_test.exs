@@ -157,9 +157,9 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
     end
 
     test "legacy compatibility converts v2 alert causes", state do
-      alert_1 = build(:alert, id: "a_1", cause: :single_tracking)
-      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
-      alert_3 = build(:alert, id: "a_3", cause: :shuttle)
+      %MBTAV3API.Alert{} = alert_1 = build(:alert, id: "a_1", cause: :single_tracking)
+      %MBTAV3API.Alert{} = alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
+      %MBTAV3API.Alert{} = alert_3 = build(:alert, id: "a_3", cause: :shuttle)
 
       AlertsStoreMock
       # Subscribe
@@ -168,12 +168,12 @@ defmodule MobileAppBackend.Alerts.PubSubTests do
       |> expect(:fetch, fn _ -> [alert_2, alert_3] end)
 
       initial_alerts = PubSub.subscribe(legacy_compatibility: true)
-      assert to_alert_map([%Alert{alert_1 | cause: :unknown_cause}]) == initial_alerts
+      assert to_alert_map([%{alert_1 | cause: :unknown_cause}]) == initial_alerts
 
       PubSub.handle_info(:broadcast, state)
 
       assert_receive {:new_alerts, new_alerts}
-      assert to_alert_map([%Alert{alert_2 | cause: :unknown_cause}, alert_3]) == new_alerts
+      assert to_alert_map([%{alert_2 | cause: :unknown_cause}, alert_3]) == new_alerts
     end
   end
 end

@@ -12,8 +12,8 @@ defmodule MobileAppBackend.ThrottlerTest do
     throttler = start_link_supervised!({Throttler, target: self(), cast: :message, ms: @timeout})
 
     if last_cast_ms_ago = ctx[:last_cast_ms_ago] do
-      :sys.replace_state(throttler, fn state ->
-        %Throttler.State{
+      :sys.replace_state(throttler, fn %Throttler.State{} = state ->
+        %{
           state
           | last_cast: System.monotonic_time(:millisecond) - last_cast_ms_ago
         }
