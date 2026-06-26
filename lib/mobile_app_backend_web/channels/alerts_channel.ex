@@ -115,6 +115,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     assign(socket, :last_alerts, current_hashes)
   end
 
+  @spec alert_hashes(%{String.t() => Alert.t()}) :: %{String.t() => String.t()}
   defp alert_hashes(alert_map) do
     Map.new(alert_map, fn {key, val} ->
       {key,
