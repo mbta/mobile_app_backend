@@ -139,6 +139,11 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
                    fn ->
                      Code.compile_quoted(bad_module)
                    end
+
+      on_exit(fn ->
+        :code.purge(BadModule)
+        :code.delete(BadModule)
+      end)
     end
 
     test "accepts renames" do
@@ -158,6 +163,11 @@ defmodule MBTAV3API.JsonApi.ObjectTest do
         end
 
       assert [{GoodModule, _}] = Code.compile_quoted(good_module)
+
+      on_exit(fn ->
+        :code.purge(GoodModule)
+        :code.delete(GoodModule)
+      end)
     end
   end
 
