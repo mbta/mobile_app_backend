@@ -256,7 +256,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
 
           _ ->
             # If a trip ID is provided, we can pull a stop ID from the trip's stop list
-            trips[trip_id].stop_ids |> List.first()
+            Map.get(trips, trip_id, %{stop_ids: []}).stop_ids |> List.first()
         end,
         stops
       )
