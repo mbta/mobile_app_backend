@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Recurrence do
+  alias MobileAppBackend.Alerts.AlertSummary.Timeframe
   alias Util.PolymorphicJson
 
   @type end_day ::
@@ -8,12 +9,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Recurrence do
           | Timeframe.UntilFurtherNotice.t()
 
   defmodule Daily do
+    alias MobileAppBackend.Alerts.AlertSummary.Recurrence
     @type t :: %__MODULE__{ending: Recurrence.end_day()}
     @derive PolymorphicJson
     defstruct [:ending]
   end
 
   defmodule SomeDays do
+    alias MobileAppBackend.Alerts.AlertSummary.Recurrence
     @type t :: %__MODULE__{ending: Recurrence.end_day()}
     @derive PolymorphicJson
     defstruct [:ending]

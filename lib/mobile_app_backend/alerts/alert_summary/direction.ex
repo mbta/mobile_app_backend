@@ -1,6 +1,9 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Direction do
+  alias MBTAV3API.Route
+  alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
+  alias MobileAppBackend.GlobalDataCache
 
   @type t :: %__MODULE__{name: String.t() | nil, destination: String.t() | nil, id: 0 | 1}
   @derive JSON.Encoder

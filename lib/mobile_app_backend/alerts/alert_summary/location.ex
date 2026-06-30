@@ -1,4 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Location do
+  alias MBTAV3API.Route
+  alias MobileAppBackend.Alerts.AlertSummary.Direction
   alias Util.PolymorphicJson
 
   defmodule DirectionToStop do
