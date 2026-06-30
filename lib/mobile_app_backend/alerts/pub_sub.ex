@@ -1,17 +1,10 @@
 defmodule MobileAppBackend.Alerts.PubSub.Behaviour do
   alias MBTAV3API.Alert
-  alias MobileAppBackend.Alerts.AlertWithSummaries
 
   @doc """
   Subscribe to updates for all alerts
   """
-  @callback subscribe(
-              legacy_compatibility: boolean(),
-              include_summaries: boolean(),
-              locale: String.t()
-            ) :: %{
-              alerts: %{String.t() => Alert.t() | AlertWithSummaries.t()}
-            }
+  @callback subscribe(legacy_compatibility: boolean()) :: %{alerts: %{Alert.id() => Alert.t()}}
 end
 
 defmodule MobileAppBackend.Alerts.PubSub do
@@ -30,13 +23,10 @@ defmodule MobileAppBackend.Alerts.PubSub do
   alias MBTAV3API.Alert
   alias MBTAV3API.Store
   alias MBTAV3API.Stream
-  alias MobileAppBackend.Alerts.AlertWithSummaries
   alias MobileAppBackend.Alerts.PubSub
-  alias MobileAppBackend.Alerts.SummaryEntityBuilder
 
   @behaviour PubSub.Behaviour
 
-  @default_locale MobileAppBackend.Application.default_locale()
   @fetch_registry_key :fetch_registry_key
 
   @type state :: %{last_dispatched_table_name: atom()}
@@ -57,33 +47,23 @@ defmodule MobileAppBackend.Alerts.PubSub do
   The legacy alert channel needs to filter out any references to new alert causes,
   they will break old versions of the app entirely if they're sent to the frontend.
   """
-  @spec map_data([Alert.t()], boolean(), boolean(), String.t()) :: %{
-          String.t() => Alert.t() | AlertWithSummaries.t()
-        }
+  @spec map_data([Alert.t()], boolean()) :: %{Alert.id() => Alert.t()}
   # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
   # can be removed after elixir 1.20.1
-  @dialyzer {:no_opaque, map_data: 4}
-  def map_data(data, legacy_compatibility, include_summaries, locale) do
-    summaries_by_alert =
-      if include_summaries, do: SummaryEntityBuilder.build_all(data, locale, :card), else: nil
-
+  @dialyzer {:no_opaque, map_data: 2}
+  def map_data(data, legacy_compatibility) do
     legacy_map = fn %Alert{} = alert ->
       if MapSet.member?(Alert.v2_causes(), alert.cause),
         do: %Alert{alert | cause: :unknown_cause},
         else: alert
     end
 
-    summary_map = fn alert ->
-      AlertWithSummaries.from_alert(alert, Map.get(summaries_by_alert, alert.id, []))
+    if legacy_compatibility do
+      data |> Enum.map(legacy_map)
+    else
+      data
     end
-
-    cond do
-      legacy_compatibility -> data |> Enum.map(legacy_map)
-      include_summaries -> data |> Enum.map(summary_map)
-      true -> data
-    end
-    |> Enum.map(fn alert -> {alert.id, alert} end)
-    |> Map.new()
+    |> Map.new(fn alert -> {alert.id, alert} end)
   end
 
   @impl true
@@ -94,11 +74,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
       %{
         alerts:
           data
-          |> map_data(
-            Keyword.get(opts, :legacy_compatibility, true),
-            Keyword.get(opts, :include_summaries, false),
-            Keyword.get(opts, :locale, @default_locale)
-          )
+          |> map_data(Keyword.get(opts, :legacy_compatibility, true))
           |> filter_upcoming_single_tracking_alerts()
       }
     end
