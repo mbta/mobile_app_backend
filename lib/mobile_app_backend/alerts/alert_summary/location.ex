@@ -1,4 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Location do
+  alias Util.PolymorphicJson
+
   defmodule DirectionToStop do
     @type t :: %__MODULE__{
             direction: Direction.t(),

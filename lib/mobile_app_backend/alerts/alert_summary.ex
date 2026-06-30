@@ -5,8 +5,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
-  alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
-  alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
+
+  alias MobileAppBackend.Alerts.AlertSummary.{
+    Direction,
+    Location,
+    Recurrence,
+    Timeframe,
+    TripShuttle,
+    TripSpecific
+  }
+
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
 
@@ -41,7 +49,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @type t :: Standard.t() | AllClear.t() | TripSpecific.t() | TripShuttle.t()
 
   @type context :: :notification | :card
-
 
   @spec summarizing(
           Alert.t(),

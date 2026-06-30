@@ -1,7 +1,11 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Direction do
+  alias MBTAV3API.Stop
+  alias MBTAV3API.Trip
+
   @type t :: %__MODULE__{name: String.t() | nil, destination: String.t() | nil, id: 0 | 1}
   @derive JSON.Encoder
   @derive Jason.Encoder
+
   defstruct [:name, :destination, :id]
 
   @spec new(0 | 1, any()) :: MobileAppBackend.Alerts.AlertSummary.Direction.t()

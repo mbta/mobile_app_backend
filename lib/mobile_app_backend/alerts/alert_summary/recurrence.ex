@@ -1,4 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Recurrence do
+  alias Util.PolymorphicJson
+
   @type end_day ::
           Timeframe.Tomorrow.t()
           | Timeframe.LaterDate.t()

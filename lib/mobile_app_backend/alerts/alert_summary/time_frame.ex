@@ -1,4 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.Timeframe do
+  alias Util.PolymorphicJson
+
   defmodule EndOfService do
     @type t :: %__MODULE__{}
     @derive PolymorphicJson
