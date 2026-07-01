@@ -190,9 +190,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  defp alert_location_closure(alert, affected_stops) do
-    alert.effect in [:station_closure, :stop_closure] and
-      affected_stops != [] and Alert.active?(alert)
+  defp alert_location_is_closure?(alert, affected_stops) do
+    alert.effect in [:dock_closure, :station_closure, :stop_closure] and
+      affected_stops != [] and (Alert.active?(alert) or Alert.active_soon?(alert))
   end
 
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
@@ -224,7 +224,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
       cond do
-        alert_location_closure(alert, affected_stops) ->
+        alert_location_is_closure?(alert, affected_stops) ->
           %Location.AffectedStops{
             stops: Enum.map(affected_stops, fn stop -> stop.name end)
           }

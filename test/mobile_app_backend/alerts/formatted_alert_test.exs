@@ -699,4 +699,22 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
   end
+
+  test "one stops skipped upcoming" do
+    alert = build(:alert, effect: :dock_closure)
+
+    alert_summary = %AlertSummary.Standard{
+      effect: :dock_closure,
+      location: %Location.AffectedStops{
+        stops: ["Long Wharf"]
+      },
+      timeframe: %Timeframe.StartingTomorrow{}
+    }
+
+    assert "Ferries will not stop at Long Wharf starting tomorrow" ==
+             FormattedAlert.summary(
+               %FormattedAlert{alert: alert, alert_summary: alert_summary},
+               "en"
+             )
+  end
 end

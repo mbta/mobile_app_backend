@@ -94,7 +94,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
           context
         )
 
-      effect when effect in [:station_closure, :stop_closure, :dock_closure] ->
+      effect when effect in [:dock_closure, :station_closure, :stop_closure] ->
         trip_stop_bypass_summary(
           alert,
           stop_id,
