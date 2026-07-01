@@ -37,7 +37,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             summary_mode = summary_affected_mode(alert_summary.effect)
 
             cond do
-              alert_summary.effect in [:station_closure, :stop_closure] ->
+              alert_summary.effect in [:dock_closure, :station_closure, :stop_closure] ->
                 gettext(
                   "%{mode} %{skipped_effect}",
                   mode: summary_mode,
@@ -401,7 +401,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       effect == :cancellation ->
         gettext("is cancelled %{day}", day: day)
 
-      effect in [:station_closure, :stop_closure, :dock_closure] && effect_stops != nil ->
+      effect in [:dock_closure, :station_closure, :stop_closure] && effect_stops != nil ->
         summary_skipped_effect(summary_affected_stops(effect_stops), day)
 
       effect == :suspension ->
@@ -455,6 +455,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
   defp summary_affected_mode(effect) do
     case effect do
+      :dock_closure -> gettext("Ferries")
       :station_closure -> gettext("Trains")
       :stop_closure -> gettext("Buses")
       _ -> ""

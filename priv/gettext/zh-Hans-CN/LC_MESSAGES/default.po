@@ -1193,22 +1193,27 @@ msgstr ""
 msgid "%{mode} %{skipped_effect}"
 msgstr "%{mode} %{skipped_effect}"
 
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:460
+#, elixir-autogen, elixir-format
+msgid "Buses"
+msgstr "公交车"
+
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:459
+#, elixir-autogen, elixir-format
+msgid "Trains"
+msgstr "火车"
+
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:458
+#, elixir-autogen, elixir-format
+msgid "Ferries"
+msgstr "渡轮"
+
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:446
 #, elixir-autogen, elixir-format
 msgid "**multiple stops**"
 msgstr "**多站停靠**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:459
-#, elixir-autogen, elixir-format
-msgid "Buses"
-msgstr "公交车"
-
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:458
-#, elixir-autogen, elixir-format
-msgid "Trains"
-msgstr "火车"
-
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:465
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:466
 #, elixir-autogen, elixir-format
 msgid "will not stop at %{stop_list} %{timeframe}"
 msgstr "不会止步于 %{stop_list} %{timeframe}"

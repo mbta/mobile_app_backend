@@ -2481,6 +2481,50 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    test "stop closure returns affected stops when upcoming", %{now: now} do
+      stop = build(:stop, name: "Parent Name")
+      child_stop = build(:stop, parent_station_id: stop.id)
+      stop = put_in(stop.child_stop_ids, [child_stop.id])
+
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id, direction_id: 0)
+
+      later_today = DateTime.add(now, 1)
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: later_today, end: nil}],
+          effect: :stop_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: route.id,
+              stop: child_stop.id
+            }
+          ]
+        )
+
+      assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.AffectedStops{
+                 stops: ["Parent Name"]
+               },
+               timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^later_today}
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 "",
+                 0,
+                 [pattern],
+                 now,
+                 nil,
+                 %{
+                   routes: %{route.id => route},
+                   stops: %{stop.id => stop, child_stop.id => child_stop}
+                 },
+                 :notification
+               )
+    end
+
     test "trip specific - same trip and stops" do
       now = DateTime.now!("America/New_York")
 
