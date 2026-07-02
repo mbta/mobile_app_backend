@@ -53,14 +53,14 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       alert_1 = build(:alert, id: "a_1")
 
       ets_table = :ets.new(nil, [:set])
-      :ets.insert(ets_table, {:all_summaries, %{{"en", :card} => %{alert_1.id => alert_1}}})
+      :ets.insert(ets_table, {:all_summaries, %{"en" => %{alert_1.id => alert_1}}})
 
       assert to_alert_map([alert_1]) == WithSummaryPubSub.subscribe(ets_table: ets_table)
     end
 
     test "returns empty list when no alerts" do
       ets_table = :ets.new(nil, [:set])
-      :ets.insert(ets_table, {:all_summaries, %{{"en", :card} => %{}}})
+      :ets.insert(ets_table, {:all_summaries, %{"en" => %{}}})
 
       assert to_alert_map([]) == WithSummaryPubSub.subscribe(ets_table: ets_table)
     end

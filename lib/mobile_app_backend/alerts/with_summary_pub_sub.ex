@@ -58,7 +58,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
       %{
         alerts_with_summaries:
           data
-          |> Map.get({locale, :card}, %{})
+          |> Map.get(locale, %{})
           |> filter_upcoming_single_tracking_alerts()
       }
     end
@@ -143,7 +143,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   end
 
   @typep alerts_with_summaries :: %{Alert.id() => AlertWithSummaries.t()}
-  @typep summary_key :: {locale :: String.t(), :notification | :card}
+  @typep summary_key :: locale :: String.t()
   @typep all_summaries :: %{summary_key() => alerts_with_summaries()}
 
   defp recalculate(ets_table, all_alerts \\ nil) do
@@ -158,17 +158,16 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
     alerts_by_id = Map.new(alerts, &{&1.id, &1})
 
     for locale <- Application.get_env(:mobile_app_backend, :locale_codes),
-        context <- [:notification, :card],
         into: %{} do
       alerts_with_summaries =
-        SummaryEntityBuilder.build_all(alerts, locale, context)
+        SummaryEntityBuilder.build_all(alerts, locale, :card)
         |> Map.new(fn {alert_id, summary_entities} ->
           alert = alerts_by_id[alert_id]
           value = AlertWithSummaries.from_alert(alert, summary_entities)
           {alert_id, value}
         end)
 
-      {{locale, context}, alerts_with_summaries}
+      {locale, alerts_with_summaries}
     end
   end
 end
