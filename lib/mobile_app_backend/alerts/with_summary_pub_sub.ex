@@ -96,7 +96,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
     upstream = Application.get_env(:mobile_app_backend, Alerts.PubSub, Alerts.PubSub)
 
     upstream.subscribe(legacy_compatibility: false)
-    broadcast_timer(50)
+    broadcast_initial_timer()
 
     create_table_fn =
       Keyword.get(opts, :create_table_fn, fn ->

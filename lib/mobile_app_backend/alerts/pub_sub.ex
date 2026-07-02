@@ -102,7 +102,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
   @impl GenServer
   def init(opts \\ []) do
     Stream.StaticInstance.subscribe("alerts:to_store")
-    broadcast_timer(50)
+    broadcast_initial_timer()
 
     create_table_fn =
       Keyword.get(opts, :create_table_fn, fn ->
