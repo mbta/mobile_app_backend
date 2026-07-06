@@ -2,7 +2,9 @@
 
 Load testing for the backend, built with [Locust](https://locust.io).
 
-## Basic Local Usage
+## 1. Run Locust
+
+### Basic Local Usage
 
 With `mix phx.server` up in another terminal:
 
@@ -15,6 +17,16 @@ $ poetry run locust --host http://localhost:4000 --processes -1
 # Can also run a specified number of workers.
 # See https://docs.locust.io/en/stable/running-distributed.html#single-machine for more options.
 ```
+
+### Dev Orange Usage
+``` 
+$ cd load_testing/
+$ asdf install
+$ poetry install
+$ poetry run locust -H https://mobile-app-backend-dev-orange.mbtace.com -u 1 -t 1m
+```
+
+## 2.Open Locust UI
 
 You should see the following output
 
