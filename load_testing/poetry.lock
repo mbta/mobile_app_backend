@@ -1584,19 +1584,19 @@ docs = ["sphinx"]
 
 [[package]]
 name = "types-gevent"
-version = "24.11.0.20250401"
+version = "26.4.0.20260518"
 description = "Typing stubs for gevent"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_gevent-24.11.0.20250401-py3-none-any.whl", hash = "sha256:6764faf861ea99250c38179c58076392c44019ac3393029f71b06c4a15e8c1d1"},
-    {file = "types_gevent-24.11.0.20250401.tar.gz", hash = "sha256:1443f796a442062698e67d818fca50aa88067dee4021d457a7c0c6bedd6f46ca"},
+    {file = "types_gevent-26.4.0.20260518-py3-none-any.whl", hash = "sha256:c28a087073da74dd70ccf4ecfbd15e659413c4cb154f0181b9dbd3e8438fad32"},
+    {file = "types_gevent-26.4.0.20260518.tar.gz", hash = "sha256:69634c49d5d973170d6fb3dc8292ab4c19bc2500143434d0804d92bb8574a1ec"},
 ]
 
 [package.dependencies]
 types-greenlet = "*"
-types-psutil = "*"
+types-psutil = ">=7.2.0"
 
 [[package]]
 name = "types-greenlet"
@@ -1612,14 +1612,14 @@ files = [
 
 [[package]]
 name = "types-psutil"
-version = "7.0.0.20250801"
+version = "7.2.2.20260518"
 description = "Typing stubs for psutil"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "types_psutil-7.0.0.20250801-py3-none-any.whl", hash = "sha256:751842baf9e0efa31b3a7722a38a3f9afeb5a7132b146a1960cd472db362faa0"},
-    {file = "types_psutil-7.0.0.20250801.tar.gz", hash = "sha256:0230b56234252cc6f59c361dccbaaa08f3088ea3569367abe6900485d388c97d"},
+    {file = "types_psutil-7.2.2.20260518-py3-none-any.whl", hash = "sha256:6a3d697665754a60d7b5a41d5a2cff12b53f5e0676d77810cd28ba5e14cb4049"},
+    {file = "types_psutil-7.2.2.20260518.tar.gz", hash = "sha256:9f825f631463a5b4d26f19f63aebc9ec25f01140d655026f3ad8a67841f9b331"},
 ]
 
 [[package]]
@@ -1865,4 +1865,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "8502a88aa924fdc24d236e8d73cb4fa2ae10b16613bfb095c89806c287ac9df3"
+content-hash = "adf00e92782b804bc1064948bb3b9b7d11ed204d51921c4fad19c49c144dc350"
