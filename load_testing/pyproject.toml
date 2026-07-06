@@ -10,7 +10,7 @@ websockets = "^16.0.0"
 ruff = "^0.15.20"
 mypy = "^2.1.0"
 types-requests = "^2.33.0.20260518"
-types-gevent = "^24.11.0.20241221"
+types-gevent = "^26.4.0.20260518"
 
 [tool.ruff]
 target-version = "py313"
