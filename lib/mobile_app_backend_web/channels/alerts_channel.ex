@@ -47,8 +47,8 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     pubsub_module =
       Application.get_env(
         :mobile_app_backend,
-        MobileAppBackend.Alerts.PubSub,
-        MobileAppBackend.Alerts.PubSub
+        MobileAppBackend.Alerts.WithSummaryPubSub,
+        MobileAppBackend.Alerts.WithSummaryPubSub
       )
 
     %{alerts: alerts} = pubsub_module.subscribe(get_opts(socket))
@@ -60,19 +60,16 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   defp get_opts(socket) do
     case socket.topic do
       "alerts" ->
-        [legacy_compatibility: true, include_summaries: false]
+        [legacy_compatibility: true]
 
       "alerts:v2" ->
-        [legacy_compatibility: false, include_summaries: false]
+        [legacy_compatibility: false]
 
       "alerts:v3" ->
-        Keyword.merge(
-          [legacy_compatibility: false, include_summaries: true],
-          case Map.get(socket.assigns, :locale) do
-            nil -> []
-            locale -> [locale: locale]
-          end
-        )
+        case Map.get(socket.assigns, :locale) do
+          nil -> []
+          locale -> [locale: locale]
+        end
     end
   end
 

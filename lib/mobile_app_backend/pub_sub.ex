@@ -111,6 +111,8 @@ defmodule MobileAppBackend.PubSub do
         {:noreply, state, :hibernate}
       end
 
+      defp broadcast_initial_timer, do: broadcast_timer(50)
+
       defp broadcast_timer(interval) do
         Process.send_after(self(), :timed_broadcast, interval)
       end

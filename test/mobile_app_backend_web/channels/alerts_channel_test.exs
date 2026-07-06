@@ -12,6 +12,12 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
   setup do
     reassign_env(:mobile_app_backend, MobileAppBackend.Alerts.PubSub, AlertsPubSubMock)
 
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.Alerts.WithSummaryPubSub,
+      AlertsWithSummaryPubSubMock
+    )
+
     {:ok, socket} = connect(MobileAppBackendWeb.UserSocket, %{})
 
     %{socket: socket}
@@ -179,7 +185,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_alert_map([alert1, alert2, alert3])
 
-    expect(AlertsPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
+    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
 
     {:ok,
      %AlertsChannel.AlertUpdate{
@@ -243,7 +249,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_alert_map([alert1, alert2])
 
-    expect(AlertsPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
+    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
 
     {:ok,
      %AlertsChannel.AlertUpdate{

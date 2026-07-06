@@ -86,7 +86,7 @@ defmodule MobileAppBackend.Vehicles.PubSub do
   def init(opts \\ []) do
     Stream.StaticInstance.subscribe("vehicles:to_store")
 
-    broadcast_timer(50)
+    broadcast_initial_timer()
 
     create_table_fn =
       Keyword.get(opts, :create_table_fn, fn ->

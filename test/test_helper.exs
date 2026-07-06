@@ -1,5 +1,6 @@
 Mox.defmock(AlertsCheckerMock, for: MobileAppBackend.Health.Checker)
 Mox.defmock(AlertsPubSubMock, for: MobileAppBackend.Alerts.PubSub.Behaviour)
+Mox.defmock(AlertsWithSummaryPubSubMock, for: MobileAppBackend.Alerts.WithSummaryPubSub.Behaviour)
 Mox.defmock(AlertsStoreMock, for: MBTAV3API.Store)
 Mox.defmock(GlobalDataCacheCheckerMock, for: MobileAppBackend.Health.Checker)
 Mox.defmock(GlobalDataCacheMock, for: MobileAppBackend.GlobalDataCache)
