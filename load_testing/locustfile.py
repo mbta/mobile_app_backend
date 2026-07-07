@@ -4,7 +4,7 @@ from hashlib import sha256
 from zoneinfo import ZoneInfo
 
 import requests
-from locust import HttpUser, between, events, task
+from locust import FastHttpUser, between, events, task
 
 from phoenix_channel import PhoenixChannel, PhoenixChannelUser
 
@@ -30,7 +30,11 @@ all_routes: list[dict] = requests.get(
 initial_global_headers: dict[str, str] = {}
 initial_rail_headers: dict[str, str] = {}
 
-
+"""
+When doing load testing, we want to simulate production current load the following 
+Splunk query provides the maximum requests per 5 min within the time period
+https://mbta.splunkcloud.com/en-US/app/search/search?earliest=1780876800&latest=1783468800&q=search%20index%3Dmobile-app-backend-prod-application%20%2Fapi%20status%3D%22200%22%20%7C%20bucket%20_time%20span%3D5m%20%7C%20stats%20count%20as%20api_count%20by%20path%2C%20_time%20%7C%20stats%20max(api_count)%20as%20max_5min_count%20by%20path%20%7C%20sort%20by%20max_5min_count%20desc&display.page.search.mode=fast&dispatch.sample_ratio=1&display.general.type=visualizations&workload_pool=&display.page.search.tab=visualizations&display.visualizations.charting.chart=pie&sid=1783436141.18936
+"""
 @events.test_start.add_listener
 def on_init(environment, **_kwargs):
     # Assume some % of users have already loaded global data before.
@@ -54,7 +58,7 @@ def on_init(environment, **_kwargs):
 def _(parser):
     parser.add_argument("--api-key", type=str, env_var="V3_API_KEY", default=None, help="API Key for the V3 API. Set to avoid rate limiting.")
 
-class MobileAppUser(HttpUser, PhoenixChannelUser):
+class MobileAppUser(FastHttpUser, PhoenixChannelUser):
     wait_time = between(5, 60)
     socket_path = "/socket"
 
@@ -73,8 +77,6 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     global_headers: dict = {}
     rail_headers: dict = {}
     v3_api_headers: dict = {} 
-
-   
 
 
     def on_start(self):
