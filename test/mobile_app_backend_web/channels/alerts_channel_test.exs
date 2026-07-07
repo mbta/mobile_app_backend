@@ -185,7 +185,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_alert_map([alert1, alert2, alert3])
 
-    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
+    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts_with_summaries: data1} end)
 
     {:ok,
      %AlertsChannel.AlertUpdate{
@@ -197,7 +197,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
     data2 = to_alert_map([%{alert1 | description: "different description"}])
 
     AlertsChannel.handle_info(
-      {:new_alerts, %{alerts: Map.merge(data2, %{alert3.id => alert3})}},
+      {:new_alerts, %{alerts_with_summaries: Map.merge(data2, %{alert3.id => alert3})}},
       socket
     )
 
@@ -249,7 +249,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     data1 = to_alert_map([alert1, alert2])
 
-    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts: data1} end)
+    expect(AlertsWithSummaryPubSubMock, :subscribe, 1, fn _ -> %{alerts_with_summaries: data1} end)
 
     {:ok,
      %AlertsChannel.AlertUpdate{
@@ -259,7 +259,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
       subscribe_and_join(socket, "alerts:v3")
 
     AlertsChannel.handle_info(
-      {:new_alerts, %{alerts: data1}},
+      {:new_alerts, %{alerts_with_summaries: data1}},
       socket
     )
 

@@ -51,7 +51,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
         MobileAppBackend.Alerts.WithSummaryPubSub
       )
 
-    %{alerts: alerts} = pubsub_module.subscribe(get_opts(socket))
+    %{alerts_with_summaries: alerts} = pubsub_module.subscribe(get_opts(socket))
     socket = assign(socket, :last_alerts, alert_hashes(alerts))
 
     {:ok, %AlertUpdate{remove: [], update: alerts}, socket}
@@ -85,7 +85,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     end
   end
 
-  defp handle_info_v3({:new_alerts, %{alerts: alerts}}, socket) do
+  defp handle_info_v3({:new_alerts, %{alerts_with_summaries: alerts}}, socket) do
     current_hashes = alert_hashes(alerts)
     old_hashes = socket.assigns.last_alerts
 
