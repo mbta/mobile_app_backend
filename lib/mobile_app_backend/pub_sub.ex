@@ -64,7 +64,7 @@ defmodule MobileAppBackend.PubSub do
          {fetch_keys, _format_fn} = registry_value,
          last_dispatched_table_name
        ) do
-    Logger.info("#{__MODULE__} broadcasting to pids len=#{length(pids)}")
+    Logger.debug("#{__MODULE__} broadcasting to pids len=#{length(pids)}")
 
     {time_micros, _result} =
       :timer.tc(__MODULE__, :broadcast_to_pids, [
@@ -73,7 +73,7 @@ defmodule MobileAppBackend.PubSub do
         broadcast_message_name
       ])
 
-    Logger.info(
+    Logger.debug(
       "#{__MODULE__} broadcast_to_pids fetch_keys=#{inspect(fetch_keys)} duration=#{time_micros / 1000}"
     )
 

@@ -194,7 +194,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   end
 
   defp process_one_remove(%{type: "prediction", id: id}) do
-    Logger.info("#{__MODULE__} process_remove type=prediction id=#{id}")
+    Logger.debug("#{__MODULE__} process_remove type=prediction id=#{id}")
     :ets.delete(@predictions_table_name, id)
   end
 
@@ -202,10 +202,10 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     existing_predictions_for_trip = fetch(trip_id: id)
 
     if Enum.empty?(existing_predictions_for_trip) do
-      Logger.info("#{__MODULE__} process_remove type=trip id=#{id}")
+      Logger.debug("#{__MODULE__} process_remove type=trip id=#{id}")
       :ets.delete(@trips_table_name, id)
     else
-      Logger.info(
+      Logger.debug(
         "#{__MODULE__} process_remove skipping removal type=trip id=#{id} remaining_prediction_count=#{length(existing_predictions_for_trip)}"
       )
     end
