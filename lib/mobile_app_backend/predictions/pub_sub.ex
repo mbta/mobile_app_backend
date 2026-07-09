@@ -97,7 +97,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
         stop_ids ++ child_stop_ids
       ])
 
-    Logger.info(
+    Logger.debug(
       "#{__MODULE__} subscribe_for_stops stop_id=#{inspect(stop_ids)} duration=#{time_micros / 1000} "
     )
 
@@ -129,7 +129,7 @@ defmodule MobileAppBackend.Predictions.PubSub do
   def subscribe_for_trip(trip_id) do
     case :timer.tc(MobileAppBackend.Predictions.StreamSubscriber, :subscribe_for_trip, [trip_id]) do
       {time_micros, :ok} ->
-        Logger.info(
+        Logger.debug(
           "#{__MODULE__} subscribe_for_trip trip_id=#{trip_id} duration=#{time_micros / 1000} "
         )
 

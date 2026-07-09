@@ -137,6 +137,8 @@ defmodule MBTAV3API do
           params: params,
           compressed: true,
           decode_body: false,
+          retry_delay: fn _ -> 300 end,
+          max_retries: 2,
           pool_timeout: timeout,
           receive_timeout: timeout
         )
@@ -194,7 +196,7 @@ defmodule MBTAV3API do
     [
       base_url: Application.get_env(:mobile_app_backend, :base_url),
       api_key: Application.get_env(:mobile_app_backend, :api_key),
-      timeout: 10_000
+      timeout: 7_000
     ]
   end
 

@@ -96,10 +96,10 @@ defmodule MBTAV3API.Store.VehiclesTest do
     end
 
     test "logs duration", %{vehicle_1: vehicle_1} do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       Store.Vehicles.process_upsert(:add, [vehicle_1])
-      msg = capture_log([level: :info], fn -> Store.Vehicles.fetch(id: "v_1") end)
+      msg = capture_log([level: :debug], fn -> Store.Vehicles.fetch(id: "v_1") end)
 
       assert msg =~
                "fetch table_name=vehicles_from_stream fetch_keys=[id: \"v_1\"] duration="

@@ -53,7 +53,7 @@ defmodule MBTAV3API.Store do
 
     time_ms = time_micros / 1000
 
-    Logger.info(
+    Logger.debug(
       "#{__MODULE__} fetch table_name=#{table_name} #{log_metadata} duration=#{time_ms}"
     )
 
