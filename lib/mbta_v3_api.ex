@@ -137,6 +137,8 @@ defmodule MBTAV3API do
           params: params,
           compressed: true,
           decode_body: false,
+          retry_delay: fn _ -> 300 end,
+          max_retries: 2,
           pool_timeout: timeout,
           receive_timeout: timeout
         )
