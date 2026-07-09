@@ -5,6 +5,18 @@ defmodule MBTAV3API do
   alias MBTAV3API.JsonApi
 
   @type params :: %{String.t() => String.t()}
+  @client Req.new(
+      finch: Finch.CustomPool,
+      method: :get,
+      # base_url: Application.get_env(:mobile_app_backend, :base_url),
+      # method: :get,
+      compressed: true,
+      decode_body: false,
+      # retry_delay: fn _ -> 300 end,
+      max_retries: 2,
+      pool_timeout: 10_000,
+      receive_timeout: 10_000
+    )
 
   @spec get_json(String.t(), params(), Keyword.t()) :: JsonApi.t() | {:error, any}
   def get_json(url, params \\ %{}, opts \\ []) do
@@ -118,31 +130,20 @@ defmodule MBTAV3API do
 
   defp timed_get(url, params, opts) do
     api_key = Keyword.fetch!(opts, :api_key)
-    base_url = Keyword.fetch!(opts, :base_url)
 
     headers =
       Keyword.get(opts, :headers, []) ++
         [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
 
-    timeout = Keyword.fetch!(opts, :timeout)
 
     {time, response} =
       :timer.tc(fn ->
-        Req.new(
-          finch: Finch.CustomPool,
-          method: :get,
-          base_url: base_url,
+        MobileAppBackend.HTTP.get(@client,
+          base_url: Keyword.fetch!(opts, :base_url),
           url: URI.encode(url),
           headers: headers,
-          params: params,
-          compressed: true,
-          decode_body: false,
-          retry_delay: fn _ -> 300 end,
-          max_retries: 2,
-          pool_timeout: timeout,
-          receive_timeout: timeout
+          params: params
         )
-        |> MobileAppBackend.HTTP.request()
       end)
 
     {time, response}
