@@ -71,12 +71,12 @@ defmodule MBTAV3API.Store.PredictionsTest do
       trip_1: trip_1,
       trip_2: trip_2
     } do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
 
       msg =
-        capture_log([level: :info], fn ->
+        capture_log([level: :debug], fn ->
           Store.Predictions.process_remove([
             %Reference{type: "prediction", id: prediction_1.id},
             %Reference{type: "trip", id: trip_1.id}
@@ -97,7 +97,7 @@ defmodule MBTAV3API.Store.PredictionsTest do
       trip_1: trip_1,
       trip_2: trip_2
     } do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       trip_1_prediction_other_route = %{
         prediction_1
@@ -114,7 +114,7 @@ defmodule MBTAV3API.Store.PredictionsTest do
       ])
 
       msg =
-        capture_log([level: :info], fn ->
+        capture_log([level: :debug], fn ->
           Store.Predictions.process_remove([
             %Reference{type: "prediction", id: prediction_1.id},
             %Reference{type: "trip", id: trip_1.id}
@@ -208,11 +208,11 @@ defmodule MBTAV3API.Store.PredictionsTest do
     end
 
     test "logs duration" do
-      set_log_level(:info)
+      set_log_level(:debug)
       prediction_1 = build(:prediction, id: "1", stop_id: "12345")
 
       Store.Predictions.process_upsert(:add, [prediction_1])
-      msg = capture_log([level: :info], fn -> Store.Predictions.fetch(stop_id: "12345") end)
+      msg = capture_log([level: :debug], fn -> Store.Predictions.fetch(stop_id: "12345") end)
 
       assert msg =~
                "fetch table_name=predictions_from_streams fetch_keys=[stop_id: \"12345\"] duration="

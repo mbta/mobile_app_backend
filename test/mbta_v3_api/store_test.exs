@@ -27,11 +27,11 @@ defmodule MBTAV3API.StoreTest do
 
   describe "timed_fetch/3" do
     test "returns matches & logs duration" do
-      set_log_level(:info)
+      set_log_level(:debug)
       :ets.insert(:test_table, [{"key", "value"}, {"other", "other_value"}])
 
       {results, log} =
-        with_log([level: :info], fn ->
+        with_log([level: :debug], fn ->
           Store.timed_fetch(:test_table, [{{"key", :"$1"}, [], [:"$1"]}], "other_field=true")
         end)
 

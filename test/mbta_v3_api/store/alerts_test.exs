@@ -75,10 +75,10 @@ defmodule MBTAV3API.Store.AlertsTest do
     end
 
     test "logs duration", %{alert_1: alert_1} do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       Store.Alerts.process_upsert(:add, [alert_1])
-      msg = capture_log([level: :info], fn -> Store.Alerts.fetch(id: "a_1") end)
+      msg = capture_log([level: :debug], fn -> Store.Alerts.fetch(id: "a_1") end)
 
       assert msg =~
                "fetch table_name=alerts_from_stream fetch_keys=[id: \"a_1\"] duration="
