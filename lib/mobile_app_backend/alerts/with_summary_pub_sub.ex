@@ -15,12 +15,17 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
 
   This broadcasts the latest state of the world (if it has changed) to
   registered consumers in two circumstances:
-  1. Regularly scheduled interval - configured by `:alerts_broadcast_interval_ms`
+  1. Regularly scheduled interval - configured by
+  `:alerts_with_summaries_broadcast_interval_ms`
   2. When there is a reset event of the underlying alert stream.
   """
   use MobileAppBackend.PubSub,
     broadcast_interval_ms:
-      Application.compile_env(:mobile_app_backend, :alerts_broadcast_interval_ms, 500)
+      Application.compile_env(
+        :mobile_app_backend,
+        :alerts_with_summaries_broadcast_interval_ms,
+        60_000
+      )
 
   alias MBTAV3API.Alert
   alias MBTAV3API.Store
