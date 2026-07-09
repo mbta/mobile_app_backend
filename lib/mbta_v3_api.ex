@@ -19,6 +19,8 @@ defmodule MBTAV3API do
     )
 
   @spec get_json(String.t(), params(), Keyword.t()) :: JsonApi.t() | {:error, any}
+  @spec get_json(binary(), %{optional(binary()) => binary()}) ::
+          {:error, any()} | MBTAV3API.JsonApi.t()
   def get_json(url, params \\ %{}, opts \\ []) do
     _ =
       Logger.debug(fn ->
@@ -130,16 +132,18 @@ defmodule MBTAV3API do
 
   defp timed_get(url, params, opts) do
     api_key = Keyword.fetch!(opts, :api_key)
+    base_url = Keyword.fetch!(opts, :base_url)
 
     headers =
       Keyword.get(opts, :headers, []) ++
         [{"accept", "application/vnd.api+json"} | MBTAV3API.Headers.build(api_key)]
 
+    Logger.info("MBTAV3API.get_json tony base_url=#{base_url}")
 
     {time, response} =
       :timer.tc(fn ->
         MobileAppBackend.HTTP.get(@client,
-          base_url: Keyword.fetch!(opts, :base_url),
+          base_url: base_url,
           url: URI.encode(url),
           headers: headers,
           params: params
