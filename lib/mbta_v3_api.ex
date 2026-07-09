@@ -6,17 +6,17 @@ defmodule MBTAV3API do
 
   @type params :: %{String.t() => String.t()}
   @client Req.new(
-      finch: Finch.CustomPool,
-      method: :get,
-      # base_url: Application.get_env(:mobile_app_backend, :base_url),
-      # method: :get,
-      compressed: true,
-      decode_body: false,
-      # retry_delay: fn _ -> 300 end,
-      max_retries: 2,
-      pool_timeout: 10_000,
-      receive_timeout: 10_000
-    )
+            finch: Finch.CustomPool,
+            method: :get,
+            # base_url: Application.get_env(:mobile_app_backend, :base_url),
+            # method: :get,
+            compressed: true,
+            decode_body: false,
+            # retry_delay: fn _ -> 300 end,
+            max_retries: 2,
+            pool_timeout: 10_000,
+            receive_timeout: 10_000
+          )
 
   @spec get_json(String.t(), params(), Keyword.t()) :: JsonApi.t() | {:error, any}
   @spec get_json(binary(), %{optional(binary()) => binary()}) ::
