@@ -26,6 +26,7 @@ config :ex_cldr,
   default_backend: MobileAppBackend.Cldr
 
 config :mobile_app_backend, alerts_broadcast_interval_ms: 500
+config :mobile_app_backend, alerts_with_summaries_broadcast_interval_ms: 60_000
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 
