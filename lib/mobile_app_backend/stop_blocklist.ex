@@ -21,6 +21,6 @@ defmodule MobileAppBackend.StopBlocklist.Impl do
   @behaviour StopBlocklist
 
   def get do
-    []
+    ["place-symcl"]
   end
 end
