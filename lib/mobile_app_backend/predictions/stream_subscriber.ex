@@ -66,7 +66,8 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
   @impl true
   def subscribe_for_trip(trip_id) do
     with {:ok, %{data: [trip]}} <- MBTAV3API.Repository.trips(filter: [id: trip_id]),
-         route_id <- trip.route_id,
+         {:ok, route_id} <-
+           if(trip.route_id, do: {:ok, trip.route_id}, else: {:error, :missing_route_id}),
          {:ok, _data} <-
            StaticInstance.ensure_stream_started("predictions:route:to_store:#{route_id}",
              include_current_data: false
@@ -75,8 +76,29 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
            StaticInstance.ensure_stream_started("vehicles:to_store", include_current_data: false) do
       :ok
     else
+      {:ok, %{data: []}} ->
+        Logger.warning(
+          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id} not found."
+        )
+
+        :error
+
+      {:error, :missing_route_id} ->
+        Logger.warning(
+          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id} is missing route_id."
+        )
+
+        :error
+
+      {:error, reason} ->
+        Logger.warning(
+          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id}. Reason: #{inspect(reason)}"
+        )
+
+        :error
+
       _ ->
-        Logger.warning("#{__MODULE__} failed to fetch trip from repository for #{trip_id}")
+        Logger.warning("#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id}")
         :error
     end
   end
