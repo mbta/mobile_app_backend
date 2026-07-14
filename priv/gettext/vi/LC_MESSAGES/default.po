@@ -24,7 +24,7 @@ msgstr " hằng ngày%{recurrence_text}"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:438
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
-msgstr " bởi vì %{cause}"
+msgstr " do %{cause}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:190
 #, elixir-autogen, elixir-format
@@ -492,7 +492,7 @@ msgstr "Về hướng bắc"
 #: lib/presentation_strings.ex:86
 #, elixir-autogen, elixir-format
 msgid "Notice"
-msgstr "Để ý"
+msgstr "Thông báo"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:11
 #, elixir-autogen, elixir-format
@@ -1110,12 +1110,12 @@ msgstr "vấn đề kỹ thuật"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:337
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
-msgstr "cái **%{time}** %{vehicle}"
+msgstr "**%{time}** %{vehicle}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:345
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
-msgstr "cái này %{vehicle}"
+msgstr "%{vehicle} này"
 
 #: lib/presentation_strings.ex:160
 #, elixir-autogen, elixir-format
@@ -1125,12 +1125,12 @@ msgstr "thay tà vẹt"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:394
 #, elixir-autogen, elixir-format
 msgid "today"
-msgstr "Hôm nay"
+msgstr "hôm nay"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:394
 #, elixir-autogen, elixir-format
 msgid "tomorrow"
-msgstr "Ngày mai"
+msgstr "ngày mai"
 
 #: lib/presentation_strings.ex:161
 #, elixir-autogen, elixir-format
@@ -1201,7 +1201,7 @@ msgstr "Xe buýt"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:459
 #, elixir-autogen, elixir-format
 msgid "Trains"
-msgstr "Tàu hỏa"
+msgstr "Tàu"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:458
 #, elixir-autogen, elixir-format

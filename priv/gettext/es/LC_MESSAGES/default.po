@@ -54,7 +54,7 @@ msgstr " en **%{mode_label}**"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:131
 #, elixir-autogen, elixir-format
 msgid " replacing **%{mode_label}**"
-msgstr " reemplazando **%{mode_label}**"
+msgstr " en reemplazo de **%{mode_label}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:236
 #, elixir-autogen, elixir-format
@@ -64,7 +64,7 @@ msgstr " algunos días%{recurrence_text}"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:185
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
-msgstr " comenzando **%{formatted_time}** hoy"
+msgstr " a partir de la(s) **%{formatted_time}** de hoy"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:182
 #, elixir-autogen, elixir-format
@@ -110,7 +110,7 @@ msgstr "%{trip_identity} %{trip_effect}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:307
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "%{trip_identity} se reemplaza por autobuses lanzadera desde **%{start_stop}** hasta **%{end_stop}**%{recurrence}"
+msgstr "%{trip_identity} se reemplaza por autobuses de enlace desde **%{start_stop}** hasta **%{end_stop}**%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:61
 #, elixir-autogen, elixir-format
@@ -316,7 +316,7 @@ msgstr "Puente levadizo en elevación"
 #: lib/presentation_strings.ex:189
 #, elixir-autogen, elixir-format
 msgid "Drawbridge Issue"
-msgstr "Problema del puente levadizo"
+msgstr "Problema con el puente levadizo"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:8
 #, elixir-autogen, elixir-format
@@ -466,12 +466,12 @@ msgstr "Servicio modificado"
 #: lib/mobile_app_backend/notifications/notification_title.ex:69
 #, elixir-autogen, elixir-format
 msgid "Multiple routes"
-msgstr "Múltiples rutas"
+msgstr "Varias rutas"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:299
 #, elixir-autogen, elixir-format
 msgid "Multiple trips"
-msgstr "Múltiples viajes"
+msgstr "Varios viajes"
 
 #: lib/presentation_strings.ex:85
 #, elixir-autogen, elixir-format
@@ -597,7 +597,7 @@ msgstr "Autobuses de enlace"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:315
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "Los autobuses lanzadera reemplazan a %{trip_identity} desde **%{start_stop}** hasta **%{end_stop}**%{recurrence}"
+msgstr "Los autobuses de enlace reemplazan el servicio de %{trip_identity} desde **%{start_stop}** hasta **%{end_stop}**%{recurrence}"
 
 #: lib/presentation_strings.ex:212
 #, elixir-autogen, elixir-format
@@ -815,7 +815,7 @@ msgstr "un problema de señal anterior"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:399
 #, elixir-autogen, elixir-format
 msgid "are cancelled %{day}"
-msgstr "se cancelan %{day}"
+msgstr "están cancelados %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:421
 #, elixir-autogen, elixir-format
@@ -880,7 +880,7 @@ msgstr "puente levadizo levantado"
 #: lib/presentation_strings.ex:126
 #, elixir-autogen, elixir-format
 msgid "drawbridge issue"
-msgstr "problema del puente levadizo"
+msgstr "problema con el puente levadizo"
 
 #: lib/presentation_strings.ex:127
 #, elixir-autogen, elixir-format
@@ -960,7 +960,7 @@ msgstr "hielo en el puerto"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:402
 #, elixir-autogen, elixir-format
 msgid "is cancelled %{day}"
-msgstr "se cancela %{day}"
+msgstr "está cancelado %{day}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:424
 #, elixir-autogen, elixir-format
@@ -1015,7 +1015,7 @@ msgstr "emergencia médica"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:350
 #, elixir-autogen, elixir-format
 msgid "multiple trips"
-msgstr "múltiples viajes"
+msgstr "varios viajes"
 
 #: lib/presentation_strings.ex:143
 #, elixir-autogen, elixir-format
@@ -1175,7 +1175,7 @@ msgstr "clima"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:415
 #, elixir-autogen, elixir-format
 msgid "will terminate at %{terminating_stop} %{day}"
-msgstr "finalizará en %{terminating_stop} %{day}"
+msgstr "terminará su recorrido en %{terminating_stop} %{day}"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:484
 #, elixir-autogen, elixir-format, import-optional

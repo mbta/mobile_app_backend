@@ -135,7 +135,7 @@ msgstr "**%{trip_time}** %{route_type} pou rive nan **%{headsign}**"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:28
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Regular service%{location}"
-msgstr "**Tout bagay klè:** Sèvis regilye %{location}"
+msgstr "**Tout bagay nòmal:** Sèvis regilye %{location}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:52
 #, elixir-autogen, elixir-format
@@ -1115,7 +1115,7 @@ msgstr "**%{time}** %{vehicle} la"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:345
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
-msgstr "sa a %{vehicle}"
+msgstr "%{vehicle} sa a"
 
 #: lib/presentation_strings.ex:160
 #, elixir-autogen, elixir-format
