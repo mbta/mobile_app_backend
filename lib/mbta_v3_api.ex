@@ -140,17 +140,10 @@ defmodule MBTAV3API do
           retry_delay: fn _ -> 300 end,
           max_retries: 2,
           pool_timeout: timeout,
-          receive_timeout: timeout,
-          connect_options: [
-            protocols: [:http1]
-          ]
+          receive_timeout: timeout
         )
         |> MobileAppBackend.HTTP.request()
       end)
-
-    Logger.info(fn ->
-      "Content-Encoding: #{Req.Response.get_header(response, "content-encoding")}"
-    end)
 
     {time, response}
   end
