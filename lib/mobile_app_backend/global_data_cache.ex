@@ -112,26 +112,22 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
   def route_ids_for_stops(stop_ids, key \\ default_key()) do
     data = :persistent_term.get(key, nil) || update_data(key)
 
-    if is_nil(data) do
-      :error
-    else
-      %{pattern_ids_by_stop: pattern_ids_by_stop, route_patterns: route_patterns} =
-        data
+    %{pattern_ids_by_stop: pattern_ids_by_stop, route_patterns: route_patterns} =
+      data
 
-      route_pattern_ids =
-        pattern_ids_by_stop
-        |> Map.take(stop_ids)
-        |> Enum.flat_map(fn {_stop_id, pattern_ids} -> pattern_ids end)
-        |> Enum.uniq()
+    route_pattern_ids =
+      pattern_ids_by_stop
+      |> Map.take(stop_ids)
+      |> Enum.flat_map(fn {_stop_id, pattern_ids} -> pattern_ids end)
+      |> Enum.uniq()
 
-      routes =
-        route_patterns
-        |> Map.take(route_pattern_ids)
-        |> Enum.map(fn {_route_pattern_id, pattern} -> pattern.route_id end)
-        |> Enum.uniq()
+    routes =
+      route_patterns
+      |> Map.take(route_pattern_ids)
+      |> Enum.map(fn {_route_pattern_id, pattern} -> pattern.route_id end)
+      |> Enum.uniq()
 
-      routes
-    end
+    routes
   end
 
   @impl GenServer

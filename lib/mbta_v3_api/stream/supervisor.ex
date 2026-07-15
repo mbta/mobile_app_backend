@@ -1,7 +1,6 @@
 defmodule MBTAV3API.Stream.Supervisor do
   use DynamicSupervisor
 
-  require Logger
   alias MBTAV3API.Stream.Instance
 
   def start_link(_) do

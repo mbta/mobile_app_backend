@@ -155,9 +155,6 @@ defmodule MobileAppBackend.RouteSegment do
           [t()]
         ) ::
           [t()]
-  # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
-  # can be removed after elixir 1.20.1
-  @dialyzer {:no_opaque, build_non_overlapping_segments: 4}
   # Build the list of RouteSegments. For each route pattern, consider only the stops on that route pattern
   # Which have not been included on an earlier RouteSegment.
   defp build_non_overlapping_segments(
