@@ -48,6 +48,9 @@ defmodule MobileAppBackend.Alerts.PubSub do
   they will break old versions of the app entirely if they're sent to the frontend.
   """
   @spec map_data([Alert.t()], boolean()) :: %{Alert.id() => Alert.t()}
+  # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
+  # this was still not resolved as of elixir 1.21.2
+  @dialyzer {:no_opaque, map_data: 2}
   def map_data(data, legacy_compatibility) do
     legacy_map = fn %Alert{} = alert ->
       if MapSet.member?(Alert.v2_causes(), alert.cause),
