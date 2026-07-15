@@ -135,7 +135,7 @@ msgstr "**%{trip_time}** %{route_type} à **%{headsign}**"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:28
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Regular service%{location}"
-msgstr "**Tout est clair :** Service normal %{location}"
+msgstr "**Alerte levé :** Service régulier %{location}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:52
 #, elixir-autogen, elixir-format
@@ -492,7 +492,7 @@ msgstr "En direction du nord"
 #: lib/presentation_strings.ex:86
 #, elixir-autogen, elixir-format
 msgid "Notice"
-msgstr "Avis"
+msgstr "Avertissement"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:11
 #, elixir-autogen, elixir-format
@@ -970,7 +970,7 @@ msgstr "est suspendu %{day}"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:256
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
-msgstr " jusqu’à %{1}"
+msgstr " jusqu’au %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:264
 #, elixir-autogen, elixir-format
