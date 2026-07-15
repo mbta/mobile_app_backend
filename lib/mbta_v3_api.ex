@@ -140,10 +140,17 @@ defmodule MBTAV3API do
           retry_delay: fn _ -> 300 end,
           max_retries: 2,
           pool_timeout: timeout,
-          receive_timeout: timeout
+          receive_timeout: timeout,
+          connect_options: [
+            protocols: [:http1]
+          ]
         )
         |> MobileAppBackend.HTTP.request()
       end)
+
+    Logger.info(fn ->
+      "Content-Encoding: #{Req.Response.get_header(response, "content-encoding")}"
+    end)
 
     {time, response}
   end
@@ -185,7 +192,11 @@ defmodule MBTAV3API do
   end
 
   defp log_body({:ok, response}) do
-    "status=#{response.status} content_length=#{byte_size(response.body)}"
+    if byte_size(response.body) > 100 do
+      ~s(status=#{response.status} content_length=#{byte_size(response.body)})
+    else
+      ~s(status=#{response.status} content_length=#{byte_size(response.body)} body=#{String.slice(response.body, 0, 100)})
+    end
   end
 
   defp log_body({:error, error}) do
