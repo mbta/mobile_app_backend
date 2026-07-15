@@ -1,5 +1,8 @@
 # --- Set up Elixir build ---
-ARG ELIXIR_VERSION=1.19.5
+
+# renovate: datasource=github-releases depName=elixir-lang/elixir
+ARG ELIXIR_VERSION=1.20.2
+# renovate: datasource=github-releases depName=erlang/otp
 ARG ERLANG_VERSION=28.5
 ARG ALPINE_VERSION=3.23.4
 

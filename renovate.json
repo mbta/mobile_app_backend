@@ -1,9 +1,43 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    ":prConcurrentLimit10"
-  ],
+  "extends": ["config:recommended", ":prConcurrentLimit10"],
   "minimumReleaseAge": "7 days",
-  "minimumReleaseAgeBehaviour": "timestamp-optional"
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n(?:ENV|ARG)\\s+.*?_VERSION=(?<currentValue>.*)\\s"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Bump the Elixir version in .tool-versions, leaving the existing -otp-N suffix untouched",
+      "managerFilePatterns": ["/(^|/)\\.tool-versions$/"],
+      "matchStrings": [
+        "elixir (?<currentValue>\\d+\\.\\d+\\.\\d+)-otp-(?<otpSuffix>\\d+)\\n"
+      ],
+      "depNameTemplate": "elixir",
+      "datasourceTemplate": "github-releases",
+      "packageNameTemplate": "elixir-lang/elixir",
+      "extractVersionTemplate": "^v(?<version>.*)$",
+      "autoReplaceStringTemplate": "elixir {{{newValue}}}-otp-{{{otpSuffix}}}\n"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchDepNames": ["elixir", "elixir-lang/elixir"],
+      "groupName": "elixir"
+    },
+    {
+      "matchDepNames": ["erlang", "erlang/otp"],
+      "groupName": "erlang"
+    },
+    {
+      "matchManagers": ["asdf"],
+      "matchDepNames": ["elixir"],
+      "enabled": false
+    }
+  ]
 }
