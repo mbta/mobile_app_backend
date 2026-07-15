@@ -45,7 +45,6 @@ defmodule MobileAppBackend.Application do
         if Application.get_env(:mobile_app_backend, :start_pub_subs?, true) do
           [
             MobileAppBackend.Alerts.PubSub,
-            MobileAppBackend.Alerts.WithSummaryPubSub,
             MobileAppBackend.Vehicles.PubSub,
             MobileAppBackend.Predictions.PubSub
           ]
