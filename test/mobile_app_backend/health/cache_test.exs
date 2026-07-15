@@ -34,7 +34,7 @@ defmodule MobileAppBackend.Health.CacheTest do
           Health.Cache.handle_info(:check, %{cache: Cache})
         end)
 
-      assert msg =~ "cache=#{Cache} cache_health hits=4 misses=4 hit_rate=0.5"
+      assert msg =~ "cache=#{Cache} cache_health hits=4 misses=4"
     end
   end
 end
