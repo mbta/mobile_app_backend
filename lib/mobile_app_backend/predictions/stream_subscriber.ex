@@ -77,29 +77,29 @@ defmodule MobileAppBackend.Predictions.StreamSubscriber.Impl do
       :ok
     else
       {:ok, %{data: []}} ->
-        Logger.warning(
-          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id} not found."
-        )
+        log_failed_trip_fetch(trip_id, :trip_not_found)
 
         :error
 
       {:error, :missing_route_id} ->
-        Logger.warning(
-          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id} is missing route_id."
-        )
+        log_failed_trip_fetch(trip_id, :missing_route_id)
 
         :error
 
       {:error, reason} ->
-        Logger.warning(
-          "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id}. Reason: #{inspect(reason)}"
-        )
+        log_failed_trip_fetch(trip_id, reason)
 
         :error
 
       _ ->
-        Logger.warning("#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id}")
+        log_failed_trip_fetch(trip_id, :unknown_error)
         :error
     end
+  end
+
+  defp log_failed_trip_fetch(trip_id, reason) do
+    Logger.warning(
+      "#{__MODULE__} failed to fetch trip from repository for trip=#{trip_id}. Reason: #{inspect(reason)}"
+    )
   end
 end
