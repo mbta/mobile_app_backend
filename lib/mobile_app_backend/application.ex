@@ -26,7 +26,12 @@ defmodule MobileAppBackend.Application do
         {Finch,
          name: Finch.CustomPool,
          pools: %{
-           :default => [size: 100, count: 5, start_pool_metrics?: true]
+           :default => [
+             size: 30,
+             count: 2, # Matching the amount of cores
+             start_pool_metrics?: true,
+             conn_opts: Application.get_env(:mobile_app_backend, :conn_buffer, [transport_opts: [recbuf: 8_388_608, buffer: 8_388_608]])
+           ]
          }},
         {MBTAV3API.ResponseCache, []},
         {MBTAV3API.RepositoryCache, []},

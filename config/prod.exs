@@ -17,6 +17,8 @@ config :logger, level: :info
 
 config :ehmon, :report_mf, {:ehmon, :info_report}
 
+config :mobile_app_backend, conn_buffer: [transport_opts: []]
+
 # diskusage_logger calls disksup,
 # which by default uses df flags that aren't available on alpine's busybox.
 # this tells disksup to use different df flags
