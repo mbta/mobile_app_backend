@@ -31,10 +31,8 @@ defmodule MobileAppBackend.Application do
              # Matching the amount of cores
              count: 2,
              start_pool_metrics?: true,
-             conn_opts:
-               Application.get_env(:mobile_app_backend, :conn_buffer,
-                 transport_opts: [recbuf: 8_388_608, buffer: 8_388_608]
-               )
+             #  protocols: [:http2],
+             conn_opts: [transport_opts: [recbuf: 8_388_608, buffer: 8_388_608]]
            ]
          }},
         {MBTAV3API.ResponseCache, []},
