@@ -177,7 +177,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
           {filter_params, fetch_schedules(filter_params, date_time)}
         end,
         ordered: false,
-        max_concurrency: 25,
+        max_concurrency: 10,
         timeout: timeout
       )
       |> Enum.reduce_while(%{schedules: [], trips: %{}}, fn result, acc ->
