@@ -36,7 +36,16 @@ defmodule MobileAppBackend.Application do
         {Ecto.Migrator, repos: Application.fetch_env!(:mobile_app_backend, :ecto_repos)},
         {Oban, Application.fetch_env!(:mobile_app_backend, Oban)},
         {MobileAppBackend.Search.Algolia.Cache, []},
-        {MobileAppBackend.Health.Cache, cache: MobileAppBackend.Search.Algolia.Cache},
+        Supervisor.child_spec(
+          {MobileAppBackend.Health.Cache, cache: MobileAppBackend.Search.Algolia.Cache},
+          id: :search_cache_stats
+        ),
+        Supervisor.child_spec({MobileAppBackend.Health.Cache, cache: MBTAV3API.RepositoryCache},
+          id: :repo_cache_stats
+        ),
+        Supervisor.child_spec({MobileAppBackend.Health.Cache, cache: MBTAV3API.ResponseCache},
+          id: :response_cache_stats
+        ),
         MobileAppBackend.MapboxTokenRotator,
         MobileAppBackend.Alerts.Registry,
         MobileAppBackend.Predictions.Registry,

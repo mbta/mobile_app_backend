@@ -22,9 +22,9 @@ defmodule MobileAppBackend.Health.Cache do
       nil ->
         Logger.info("#{__MODULE__} cache=#{cache} cache stats disabled")
 
-      {:ok, %{stats: %{hits: cache_hits, misses: cache_misses}}} ->
+      {:ok, %{stats: stats}} ->
         Logger.info(
-          "#{__MODULE__} cache=#{cache} cache_health hits=#{cache_hits} misses=#{cache_misses} hit_rate=#{cache_hits / max(cache_hits + cache_misses, 1)}"
+          "#{__MODULE__} cache=#{cache} cache_health #{Enum.map_join(stats, " ", fn {key, val} -> "#{key}=#{val}" end)}}"
         )
 
       {:error, error} ->
