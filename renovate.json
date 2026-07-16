@@ -44,5 +44,8 @@
       "matchDepNames": ["elixir", "erlang"],
       "prBodyNotes": "If the \"Check elixir/erlang OTP version sync\" step is failing in CI, the erlang major version has changed, and the OTP suffix for elixir in `.tool-version` must be updated to match it.\nIf the Docker build step is failing, it's possible that an image does not exist for the combination of elixir, erlang, and alpine versions in the Dockerfile. Check https://hub.docker.com/r/hexpm/elixir/tags for available images, and update versions as necessary."
     }
-  ]
+  ],
+  "constraints": {
+    "erlang": ">=29.0.0"
+  }
 }
