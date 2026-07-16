@@ -14,6 +14,14 @@
     },
     {
       "customType": "regex",
+      "description": "Update the Elixir version in mix.exs so compilation fails if it doesn't match the version in asdf/Docker.",
+      "managerFilePatterns": ["/(^|\\/)mix\\.exs$/"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n\\s*elixir:\\s*\"(?<currentValue>.*)\",?"
+      ]
+    },
+    {
+      "customType": "regex",
       "description": "Bump the Elixir version in .tool-versions, leaving the existing -otp-N suffix untouched",
       "managerFilePatterns": ["/(^|\\/)\\.tool-versions$/"],
       "matchStrings": [
