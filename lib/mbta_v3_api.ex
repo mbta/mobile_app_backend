@@ -7,42 +7,89 @@ defmodule MBTAV3API do
   @type params :: %{String.t() => String.t()}
 
   @spec get_json(String.t(), params(), Keyword.t()) :: JsonApi.t() | {:error, any}
+  @doc """
+  Fetch from the V3API using `if-modified-since` header with optional time-based caching.
+  Options:
+  `:ttl_minutes` - optional ttl for the cached response (defaults to 0).
+    If the ttl has expired, will re-fetch from the api using the `if-modified-since` header and will reset the ttl if the data has not changed.
+  `:now` - value of now to use when evaluating `:ttl_minutes` (defaults to `DateTime.utc_now()`)
+  `:base_url` - defaults to read from config
+  `:api_key` - defaults to read from config
+  `:timeout` - defaults to 7_000ms
+
+  """
   def get_json(url, params \\ %{}, opts \\ []) do
     _ =
       Logger.debug(fn ->
         "MBTAV3API.get_json url=#{url} params=#{params |> Jason.encode!()}"
       end)
 
-    body = ""
-
-    {:ok, cached_response} =
+    {:ok, cache_value} =
       url
       |> MBTAV3API.ResponseCache.cache_key(params)
       |> MBTAV3API.ResponseCache.get()
 
-    cache_headers =
-      if is_nil(cached_response) do
-        []
+    if is_nil(cache_value) do
+      fetch_on_cache_miss(url, params, opts)
+    else
+      {_last_modified, expires_at, data} = cache_value
+
+      if DateTime.before?(Keyword.get(opts, :now, DateTime.utc_now()), expires_at) do
+        data
       else
-        [{"if-modified-since", elem(cached_response, 0)}]
+        fetch_on_cache_hit(url, params, cache_value, opts)
       end
+    end
+  end
+
+  defp fetch_on_cache_miss(url, params, opts) do
+    url
+    |> fetch(params, opts)
+    |> parse_response(url, params, opts)
+  end
+
+  # Fetch using the if-modified-since header. If the response is a 304, bump the expiration time
+  # on the cache & return the cached response. Otherwise, process the response and update the cached value
+  defp fetch_on_cache_hit(url, params, {last_modified, _expires_at, cached_data}, opts) do
+    opts =
+      opts
+      |> Keyword.merge(headers: [{"if-modified-since", last_modified}])
+      |> Keyword.put_new(:ttl_minutes, 0)
+
+    response = fetch(url, params, opts)
+
+    case response do
+      %{status: 304} ->
+        Logger.info("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
+
+        update_cached_response(
+          url,
+          params,
+          cached_data,
+          [{"last-modified", [last_modified]}],
+          opts
+        )
+
+        cached_data
+
+      _ ->
+        parse_response(response, url, params, opts)
+    end
+  end
+
+  defp fetch(url, params, opts) do
+    body = ""
 
     opts =
       default_options()
       |> Keyword.merge(opts)
-      |> Keyword.merge(headers: cache_headers)
+      |> Keyword.put_new(:ttl_minutes, 0)
+      |> Keyword.put_new(:now, DateTime.utc_now())
 
     with {time, response} <- timed_get(url, params, opts),
          :ok <- log_response(url, params, time, response),
-         {:ok, %Req.Response{status: status} = response_content} <- response do
-      case status do
-        304 ->
-          Logger.info("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
-          elem(cached_response, 1)
-
-        _other ->
-          parse_response(response_content, url, params)
-      end
+         {:ok, %Req.Response{status: _status} = response_content} <- response do
+      response_content
     else
       {:error, error} ->
         _ = log_response_error(url, params, body)
@@ -54,7 +101,11 @@ defmodule MBTAV3API do
     end
   end
 
-  defp parse_response(%{body: body, headers: headers}, url, params) do
+  defp parse_response({:error, error}, _, _, _) do
+    {:error, error}
+  end
+
+  defp parse_response(%{body: body, headers: headers}, url, params, opts) do
     parsed_response =
       body
       |> JsonApi.parse()
@@ -65,21 +116,28 @@ defmodule MBTAV3API do
         {:error, error}
 
       valid_parsed_response ->
-        update_cached_response(url, params, valid_parsed_response, headers)
+        update_cached_response(url, params, valid_parsed_response, headers, opts)
         valid_parsed_response
     end
   end
 
-  def update_cached_response(url, params, response, headers) do
+  defp update_cached_response(url, params, response, headers, opts) do
     date =
       headers
       |> Enum.into(%{})
       |> Map.get("last-modified", [])
       |> List.first()
 
+    expires_at =
+      DateTime.add(
+        Keyword.get(opts, :now, DateTime.utc_now()),
+        Keyword.get(opts, :ttl_minutes, 0),
+        :minute
+      )
+
     url
     |> MBTAV3API.ResponseCache.cache_key(params)
-    |> MBTAV3API.ResponseCache.put({date, response})
+    |> MBTAV3API.ResponseCache.put({date, expires_at, response})
   end
 
   @spec start_stream(String.t(), %{String.t() => String.t()}, Keyword.t()) ::

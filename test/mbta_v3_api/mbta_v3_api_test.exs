@@ -130,16 +130,16 @@ defmodule MBTAV3APITest do
       response = MBTAV3API.get_json("/normal_response")
       assert %JsonApi{} = response
 
-      assert {_time, ^response} =
+      assert {_time, _expires_at, ^response} =
                ResponseCache.get!(ResponseCache.cache_key("/normal_response", %{}))
     end
 
-    test "when response in the cache and new data, stores new data" do
+    test "when response in the cache has expired and there is new data, stores new data" do
       cache_key = ResponseCache.cache_key("/normal_response", %{})
 
       ResponseCache.put(
         cache_key,
-        {"last_modified",
+        {"last_modified", DateTime.add(DateTime.utc_now(), -10, :second),
          %{
            data: [%{"type" => "prediction", "id" => "p_1"}]
          }}
@@ -160,21 +160,26 @@ defmodule MBTAV3APITest do
         end
       )
 
-      response = MBTAV3API.get_json("/normal_response")
+      now = DateTime.utc_now()
+      new_expires_at = DateTime.add(now, 5, :minute)
+
+      response = MBTAV3API.get_json("/normal_response", %{}, now: now, ttl_minutes: 5)
       assert %JsonApi{data: [%Reference{type: "prediction", id: "p_2"}]} = response
 
-      assert {"new_last_modified", ^response} =
+      assert {"new_last_modified", ^new_expires_at, ^response} =
                ResponseCache.get!(cache_key)
     end
 
-    test "when response in the cache and 304, returns cached data" do
+    test "when response in the cache expired and 304, returns cached data and updates expiration" do
       cache_key = ResponseCache.cache_key("/normal_response", %{})
 
       old_data = %JsonApi{
         data: [%Reference{type: "prediction", id: "p_1"}]
       }
 
-      ResponseCache.put(cache_key, {"last_modified", old_data})
+      now = DateTime.utc_now()
+
+      ResponseCache.put(cache_key, {"last_modified", DateTime.add(now, -10, :second), old_data})
 
       expect(
         MobileAppBackend.HTTPMock,
@@ -188,9 +193,26 @@ defmodule MBTAV3APITest do
         end
       )
 
-      assert ^old_data = MBTAV3API.get_json("/normal_response")
+      assert ^old_data = MBTAV3API.get_json("/normal_response", %{}, now: now)
 
-      assert {"last_modified", ^old_data} = ResponseCache.get!(cache_key)
+      assert {"last_modified", ^now, ^old_data} = ResponseCache.get!(cache_key)
+    end
+
+    test "when response in the cache has not expired, returns the data without re-fetching" do
+      cache_key = ResponseCache.cache_key("/normal_response", %{})
+
+      old_data = %JsonApi{
+        data: [%Reference{type: "prediction", id: "p_1"}]
+      }
+
+      now = DateTime.utc_now()
+      expires_at = DateTime.add(now, 1, :hour)
+
+      ResponseCache.put(cache_key, {"last_modified", expires_at, old_data})
+
+      assert ^old_data = MBTAV3API.get_json("/normal_response", %{}, now: now)
+
+      assert {"last_modified", ^expires_at, ^old_data} = ResponseCache.get!(cache_key)
     end
 
     test "when error, returns error" do
@@ -200,7 +222,7 @@ defmodule MBTAV3APITest do
         data: [%Reference{type: "prediction", id: "p_1"}]
       }
 
-      ResponseCache.put(cache_key, {"last_modified", old_data})
+      ResponseCache.put(cache_key, {"last_modified", DateTime.utc_now(), old_data})
 
       expect(
         MobileAppBackend.HTTPMock,
