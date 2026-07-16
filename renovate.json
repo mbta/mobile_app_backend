@@ -7,7 +7,7 @@
     {
       "customType": "regex",
       "description": "Renovate can't automatically detect the composed version tag in Dockerfiles, so we use a regex to extract it from comments and ARG lines.",
-      "fileMatch": ["(^|\\/)Dockerfile$"],
+      "managerFilePatterns": ["/(^|\\/)Dockerfile$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n(?:ENV|ARG)\\s+.*?_VERSION=(?<currentValue>.*)\\s"
       ]
@@ -15,7 +15,7 @@
     {
       "customType": "regex",
       "description": "Bump the Elixir version in .tool-versions, leaving the existing -otp-N suffix untouched",
-      "managerFilePatterns": ["(^|\\/)\\.tool-versions$"],
+      "managerFilePatterns": ["/(^|\\/)\\.tool-versions$/"],
       "matchStrings": [
         "elixir (?<currentValue>\\d+\\.\\d+\\.\\d+)-otp-(?<otpSuffix>\\d+)\\n"
       ],
