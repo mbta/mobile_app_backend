@@ -6,6 +6,7 @@
   "customManagers": [
     {
       "customType": "regex",
+      "description": "Renovate can't automatically detect the composed version tag in Dockerfiles, so we use a regex to extract it from comments and ARG lines.",
       "fileMatch": ["(^|/)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n(?:ENV|ARG)\\s+.*?_VERSION=(?<currentValue>.*)\\s"
@@ -38,6 +39,10 @@
       "matchManagers": ["asdf"],
       "matchDepNames": ["elixir"],
       "enabled": false
+    },
+    {
+      "matchDepNames": ["elixir", "erlang"],
+      "prBodyNotes": "If the \"Check elixir/erlang OTP version sync\" step is failing in CI, the erlang major version has changed, and the OTP suffix for elixir in `.tool-version` must be updated to match it."
     }
   ]
 }
