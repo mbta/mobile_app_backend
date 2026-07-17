@@ -21,11 +21,14 @@ defmodule MobileAppBackendWeb.PredictionsForTripChannel do
 
     case :timer.tc(fn -> pubsub_module.subscribe_for_trip(trip_id) end) do
       {time_micros, :error} ->
-        Logger.warning("#{__MODULE__} failed join duration=#{time_micros / 1000}")
+        Logger.warning(
+          "#{__MODULE__} failed join trip_id=#{trip_id} duration=#{time_micros / 1000}"
+        )
+
         {:error, %{code: :subscribe_failed}}
 
       {time_micros, initial_data} ->
-        Logger.info("#{__MODULE__} join duration=#{time_micros / 1000}")
+        Logger.info("#{__MODULE__} join trip_id=#{trip_id} duration=#{time_micros / 1000}")
 
         {:ok, initial_data, socket}
     end
