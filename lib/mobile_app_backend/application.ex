@@ -75,6 +75,7 @@ defmodule MobileAppBackend.Application do
           MobileAppBackendWeb.Endpoint
         ]
 
+    :ok = MobileAppBackend.Telemetry.CacheHandler.attach()
     :ok = MobileAppBackend.Telemetry.FinchHandler.attach()
     :ok = MobileAppBackend.Telemetry.HttpResponseHandler.attach()
     :ok = MobileAppBackend.Telemetry.WebsocketEventHandler.attach()
