@@ -5,8 +5,7 @@ defmodule MobileAppBackend.MixProject do
     [
       app: :mobile_app_backend,
       version: "0.1.0",
-      # renovate: datasource=github-releases depName=elixir-lang/elixir
-      elixir: "1.20.2",
+      elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
