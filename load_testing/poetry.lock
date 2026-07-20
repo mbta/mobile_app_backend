@@ -937,14 +937,14 @@ files = [
 
 [[package]]
 name = "locust"
-version = "2.44.4"
+version = "2.46.0"
 description = "Developer-friendly load testing framework"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "locust-2.44.4-py3-none-any.whl", hash = "sha256:3a600f2162e79d47f2bf2bf29cd7d4c066684a89f814b33d6fa68147a89a2b02"},
-    {file = "locust-2.44.4.tar.gz", hash = "sha256:9115530e33ca9591c02d9f970d92991739d50b775785b954103d5794ce299c3f"},
+    {file = "locust-2.46.0-py3-none-any.whl", hash = "sha256:f5a90bb191d28f7e524bb52ddc702d84b2408a2c72e62dab6a9580f5bf5b0b3c"},
+    {file = "locust-2.46.0.tar.gz", hash = "sha256:59629035d26cc70a1d8a94085cf71f115bb80785a1577931b44ed9999305713f"},
 ]
 
 [package.dependencies]
