@@ -7,23 +7,15 @@
     {
       "customType": "regex",
       "description": "Renovate can't automatically detect the composed version tag in Dockerfiles, so we use a regex to extract it from comments and ARG lines.",
-      "managerFilePatterns": ["/(^|\\/)Dockerfile$/"],
+      "fileMatch": ["(^|\\/)Dockerfile$"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n(?:ENV|ARG)\\s+.*?_VERSION=(?<currentValue>.*)\\s"
       ]
     },
     {
       "customType": "regex",
-      "description": "Update the Elixir version in mix.exs so compilation fails if it doesn't match the version in asdf/Docker.",
-      "managerFilePatterns": ["/(^|\\/)mix\\.exs$/"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n\\s*elixir:\\s*\"(?<currentValue>.*)\",?"
-      ]
-    },
-    {
-      "customType": "regex",
       "description": "Bump the Elixir version in .tool-versions, leaving the existing -otp-N suffix untouched",
-      "managerFilePatterns": ["/(^|\\/)\\.tool-versions$/"],
+      "managerFilePatterns": ["(^|\\/)\\.tool-versions$"],
       "matchStrings": [
         "elixir (?<currentValue>\\d+\\.\\d+\\.\\d+)-otp-(?<otpSuffix>\\d+)\\n"
       ],
@@ -52,8 +44,5 @@
       "matchDepNames": ["elixir", "erlang"],
       "prBodyNotes": "If the \"Check elixir/erlang OTP version sync\" step is failing in CI, the erlang major version has changed, and the OTP suffix for elixir in `.tool-version` must be updated to match it.\nIf the Docker build step is failing, it's possible that an image does not exist for the combination of elixir, erlang, and alpine versions in the Dockerfile. Check https://hub.docker.com/r/hexpm/elixir/tags for available images, and update versions as necessary."
     }
-  ],
-  "constraints": {
-    "erlang": ">=29.0.0"
-  }
+  ]
 }
