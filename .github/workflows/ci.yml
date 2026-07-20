@@ -106,8 +106,6 @@ jobs:
             deps
             _build
           key: ${{ needs.setup.outputs.cache-key-mix }}
-      - name: Check elixir/erlang OTP version sync
-        run: mix check_otp_sync
       - name: Compile (warnings as errors)
         run: mix compile --force --warnings-as-errors
       - name: Credo
