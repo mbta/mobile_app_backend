@@ -31,13 +31,16 @@ config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 
 config :mobile_app_backend, MBTAV3API.ResponseCache,
-  allocated_memory: 250_000_000,
-  stats: true
+  gc_interval: :timer.hours(12),
+  allocated_memory: 2_000_000_000,
+  stats: true,
+  telemetry_prefix: [:mbtav3api, :response_cache]
 
 config :mobile_app_backend, MBTAV3API.RepositoryCache,
   gc_interval: :timer.hours(2),
   allocated_memory: 2_000_000_000,
-  stats: true
+  stats: true,
+  telemetry_prefix: [:mbtav3api, :repository_cache]
 
 config :mobile_app_backend, MobileAppBackend.Search.Algolia.Cache,
   gc_interval: :timer.hours(6),
