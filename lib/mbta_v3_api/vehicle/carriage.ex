@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Vehicle.Carriage do
+  require Util
   alias MBTAV3API.Vehicle
 
   @type t :: %__MODULE__{

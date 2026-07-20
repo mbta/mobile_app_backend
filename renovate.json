@@ -1,48 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":prConcurrentLimit10"],
-  "minimumReleaseAge": "7 days",
-  "minimumReleaseAgeBehaviour": "timestamp-optional",
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Renovate can't automatically detect the composed version tag in Dockerfiles, so we use a regex to extract it from comments and ARG lines.",
-      "fileMatch": ["(^|\\/)Dockerfile$"],
-      "matchStrings": [
-        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)\\s*\\n(?:ENV|ARG)\\s+.*?_VERSION=(?<currentValue>.*)\\s"
-      ]
-    },
-    {
-      "customType": "regex",
-      "description": "Bump the Elixir version in .tool-versions, leaving the existing -otp-N suffix untouched",
-      "managerFilePatterns": ["(^|\\/)\\.tool-versions$"],
-      "matchStrings": [
-        "elixir (?<currentValue>\\d+\\.\\d+\\.\\d+)-otp-(?<otpSuffix>\\d+)\\n"
-      ],
-      "depNameTemplate": "elixir",
-      "datasourceTemplate": "github-releases",
-      "packageNameTemplate": "elixir-lang/elixir",
-      "extractVersionTemplate": "^v(?<version>.*)$",
-      "autoReplaceStringTemplate": "elixir {{{newValue}}}-otp-{{{otpSuffix}}}\n"
-    }
+  "extends": [
+    "config:recommended",
+    ":prConcurrentLimit10"
   ],
-  "packageRules": [
-    {
-      "matchDepNames": ["elixir", "elixir-lang/elixir"],
-      "groupName": "elixir"
-    },
-    {
-      "matchDepNames": ["erlang", "erlang/otp"],
-      "groupName": "erlang"
-    },
-    {
-      "matchManagers": ["asdf"],
-      "matchDepNames": ["elixir"],
-      "enabled": false
-    },
-    {
-      "matchDepNames": ["elixir", "erlang"],
-      "prBodyNotes": "If the \"Check elixir/erlang OTP version sync\" step is failing in CI, the erlang major version has changed, and the OTP suffix for elixir in `.tool-version` must be updated to match it.\nIf the Docker build step is failing, it's possible that an image does not exist for the combination of elixir, erlang, and alpine versions in the Dockerfile. Check https://hub.docker.com/r/hexpm/elixir/tags for available images, and update versions as necessary."
-    }
-  ]
+  "minimumReleaseAge": "7 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional"
 }

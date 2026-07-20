@@ -1,10 +1,7 @@
 # --- Set up Elixir build ---
-
-# renovate: datasource=github-releases depName=elixir-lang/elixir
-ARG ELIXIR_VERSION=1.20.2
-# renovate: datasource=github-releases depName=erlang/otp
-ARG ERLANG_VERSION=29.0.3
-ARG ALPINE_VERSION=3.24.1
+ARG ELIXIR_VERSION=1.19.5
+ARG ERLANG_VERSION=28.5
+ARG ALPINE_VERSION=3.23.4
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${ERLANG_VERSION}-alpine-${ALPINE_VERSION} AS elixir-builder
 

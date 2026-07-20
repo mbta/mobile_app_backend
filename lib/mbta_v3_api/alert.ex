@@ -258,6 +258,9 @@ defmodule MBTAV3API.Alert do
   causes can be added here as well.
   """
   @spec v2_causes :: MapSet.t(cause())
+  # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
+  # can be removed after elixir 1.20.1
+  @dialyzer {:no_opaque, v2_causes: 0}
   def v2_causes do
     MapSet.new([
       :amtrak_train_traffic,
