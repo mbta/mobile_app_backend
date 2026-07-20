@@ -65,13 +65,13 @@ jobs:
           cache-from: type=gha
           tags: ${{ steps.calc-version.outputs.tag-list }}
           push: true
-      - uses: mbta/actions/deploy-ecs@d37877022d4ae12e96663d2e0a970a5214a2e232 # v2.20
+      - uses: mbta/actions/deploy-ecs@2c88be6542aa1b129d6a273cae070af9b1e7c076 # v2.22
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           ecs-cluster: mobile-app-backend
           ecs-service: mobile-app-backend-${{ inputs.env }}
           docker-tag: ${{ steps.calc-version.outputs.deploy-tag }}
-      - uses: mbta/actions/notify-slack-deploy@d37877022d4ae12e96663d2e0a970a5214a2e232 # v2.20
+      - uses: mbta/actions/notify-slack-deploy@2c88be6542aa1b129d6a273cae070af9b1e7c076 # v2.22
         if: ${{ !cancelled() }}
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK }}
