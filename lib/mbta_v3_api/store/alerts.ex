@@ -1,7 +1,6 @@
 defmodule MBTAV3API.Store.Alerts do
   use GenServer
   use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Alerts.Impl
-  require Logger
   alias MBTAV3API.Alert
 end
 
@@ -11,7 +10,6 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   and can be read in parallel by other processes.
   """
   use GenServer
-  require Logger
   alias MBTAV3API.Alert
 
   alias MBTAV3API.JsonApi

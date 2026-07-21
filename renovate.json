@@ -5,5 +5,8 @@
     ":prConcurrentLimit10"
   ],
   "minimumReleaseAge": "7 days",
-  "minimumReleaseAgeBehaviour": "timestamp-optional"
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "constraints": {
+    "erlang": ">=28.5"
+  }
 }

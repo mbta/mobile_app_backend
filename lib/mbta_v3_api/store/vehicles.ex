@@ -1,7 +1,6 @@
 defmodule MBTAV3API.Store.Vehicles do
   use GenServer
   use MBTAV3API.Store, implementation_module: MBTAV3API.Store.Vehicles.Impl
-  require Logger
   alias MBTAV3API.Vehicle
 end
 
@@ -11,7 +10,6 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
   and can be read in parallel by other processes.
   """
   use GenServer
-  require Logger
   alias MBTAV3API.JsonApi
   alias MBTAV3API.Store
   alias MBTAV3API.Vehicle
