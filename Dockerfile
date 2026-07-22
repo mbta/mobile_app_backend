@@ -1,7 +1,7 @@
 # --- Set up Elixir build ---
 ARG ELIXIR_VERSION=1.19.5
 ARG ERLANG_VERSION=28.5
-ARG ALPINE_VERSION=3.23.4
+ARG ALPINE_VERSION=3.24.1
 
 FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${ERLANG_VERSION}-alpine-${ALPINE_VERSION} AS elixir-builder
 
