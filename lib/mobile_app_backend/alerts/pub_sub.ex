@@ -49,7 +49,7 @@ defmodule MobileAppBackend.Alerts.PubSub do
   """
   @spec map_data([Alert.t()], boolean()) :: %{Alert.id() => Alert.t()}
   # https://github.com/elixir-lang/elixir/issues/14837#issuecomment-3419664245
-  # can be removed after elixir 1.20.1
+  # can be removed eventually, hopefully
   @dialyzer {:no_opaque, map_data: 2}
   def map_data(data, legacy_compatibility) do
     legacy_map = fn %Alert{} = alert ->

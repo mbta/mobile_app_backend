@@ -4,7 +4,7 @@ defprotocol MBTAV3API.JsonApi.FilterValue do
   If a serializer is given, it will be called on each value of a list, or on an individual value.
   """
   @spec filter_value_string(t(), (t() -> t()) | nil) :: String.t()
-  def filter_value_string(data, serializer \\ nil)
+  def filter_value_string(data, serializer)
 end
 
 defimpl MBTAV3API.JsonApi.FilterValue, for: BitString do
