@@ -61,74 +61,13 @@ defmodule MobileAppBackendWeb.ScheduleController do
     log_prefix =
       "#{__MODULE__} fetch_schedules_parallel given_stop_count=#{Enum.count(stop_ids)} resolved_stop_count=#{Enum.count(parent_stop_ids)} "
 
-    if Date.compare(DateTime.to_date(date_time), Date.from_iso8601!("2026-06-14")) == :eq do
-      handle_special_schedule_fetch(
-        conn,
-        parent_stop_ids,
-        date_time,
-        parallel_timeout,
-        log_prefix
-      )
-    else
-      handle_general_schedule_fetch(
-        conn,
-        parent_stop_ids,
-        date_time,
-        parallel_timeout,
-        log_prefix
-      )
-    end
-  end
-
-  defp handle_special_schedule_fetch(
-         conn,
-         parent_stop_ids,
-         date_time,
-         parallel_timeout,
-         log_prefix
-       ) do
-    yesterdays_date_time = DateTime.add(date_time, -1, :day)
-
-    yesterdays_filters =
-      parent_stop_ids
-      |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(yesterdays_date_time)))
-
-    todays_filters =
-      parent_stop_ids
-      |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(date_time)))
-
-    yesterdays_data =
-      case yesterdays_filters do
-        [filter] ->
-          fetch_schedules(filter, yesterdays_date_time)
-
-        filters ->
-          fetch_schedules_parallel(
-            filters,
-            yesterdays_date_time,
-            parallel_timeout,
-            log_prefix
-          )
-      end
-
-    todays_data =
-      case todays_filters do
-        [filter] -> fetch_schedules(filter, date_time)
-        filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
-      end
-
-    if yesterdays_data == :error or todays_data == :error do
-      conn
-      |> put_status(:internal_server_error)
-      |> json(%{error: "fetch_failed"})
-    else
-      data = %{
-        schedules: yesterdays_data.schedules ++ todays_data.schedules,
-        trips: Map.merge(yesterdays_data.trips, todays_data.trips)
-      }
-
-      json(conn, data)
-    end
+    handle_general_schedule_fetch(
+      conn,
+      parent_stop_ids,
+      date_time,
+      parallel_timeout,
+      log_prefix
+    )
   end
 
   defp handle_general_schedule_fetch(
