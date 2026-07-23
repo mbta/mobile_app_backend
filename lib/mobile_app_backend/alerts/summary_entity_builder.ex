@@ -11,14 +11,28 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   alias MobileAppBackend.Alerts.SummaryEntity
   alias MobileAppBackend.GlobalDataCache
 
-  defmodule Combination do
+  defmodule BroadCombination do
+    @moduledoc "a route, direction, and optional trip that an InformedEntity applies to"
     @type t :: %__MODULE__{
-            route: String.t() | nil,
-            stop: String.t() | nil,
-            trip: String.t() | nil,
-            direction: 0 | 1 | nil
+            route: Route.id(),
+            direction: 0 | 1,
+            trip: Trip.id() | nil
           }
-    defstruct [:route, :stop, :trip, :direction]
+    @enforce_keys [:route, :direction, :trip]
+    defstruct [:route, :direction, :trip]
+  end
+
+  defmodule Combination do
+    @moduledoc "specific parameters for an individual summary"
+    @type t :: %__MODULE__{
+            route: Route.id(),
+            stop: Stop.id() | nil,
+            direction: 0 | 1,
+            trip: Trip.id() | nil,
+            patterns: [RoutePattern.t()]
+          }
+    @enforce_keys [:route, :stop, :direction, :trip, :patterns]
+    defstruct [:route, :stop, :direction, :trip, :patterns]
   end
 
   @doc """
@@ -62,11 +76,11 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     # The global stops don't include all child stops, so we need to fetch them separately
     stops = fetch_all_stops()
 
-    combinations = relevant_combinations(alert, stops, global)
+    combinations = relevant_combinations(alert, {stops, trips, global})
 
-    Enum.flat_map(
+    Enum.map(
       combinations,
-      &combination_to_summaries(
+      &combination_to_summary(
         &1,
         alert,
         at_time,
@@ -79,12 +93,22 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     |> dedup_summaries()
   end
 
-  defp combination_to_summaries(
+  @spec combination_to_summary(
+          Combination.t(),
+          Alert.t(),
+          DateTime.t(),
+          String.t(),
+          {[Schedule.t()] | nil, %{Trip.id() => Trip.t()} | nil, %{Stop.id() => Stop.t()}},
+          GlobalDataCache.data(),
+          AlertSummary.context()
+        ) :: SummaryEntity.t()
+  defp combination_to_summary(
          %Combination{
            route: route_id,
            stop: stop_id,
+           direction: direction_id,
            trip: trip_id,
-           direction: direction_id
+           patterns: patterns
          },
          alert,
          at_time,
@@ -93,130 +117,191 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
          global,
          context
        ) do
-    RoutePattern.get_relevant_patterns(route_id, stop_id, direction_id, global)
-    |> Enum.group_by(&{&1.route_id, &1.direction_id})
-    |> Enum.map(fn {{resolved_route_id, resolved_direction_id}, patterns} ->
-      resolved_stop_id = resolve_stop_id(stop_id, trip_id, patterns, trips, stops, global)
+    resolved_stop_id = resolve_stop_id(stop_id, trip_id, patterns, trips, stops, global)
 
-      resolved_schedules =
-        filter_schedules(
-          schedules,
-          trips,
-          resolved_route_id,
-          resolved_stop_id,
-          resolved_direction_id,
-          stops,
-          global
-        )
+    resolved_schedules =
+      filter_schedules(
+        schedules,
+        trips,
+        route_id,
+        resolved_stop_id,
+        direction_id,
+        stops,
+        global
+      )
 
-      summary =
-        AlertSummary.summarizing(
-          alert,
-          resolved_stop_id,
-          resolved_direction_id,
-          patterns,
-          at_time,
-          resolved_schedules,
-          global,
-          context
-        )
+    summary =
+      AlertSummary.summarizing(
+        alert,
+        resolved_stop_id,
+        direction_id,
+        patterns,
+        at_time,
+        resolved_schedules,
+        global,
+        context
+      )
 
-      formatted =
-        FormattedAlert.summary(
-          %FormattedAlert{alert: alert, alert_summary: summary},
-          locale
-        )
+    formatted =
+      FormattedAlert.summary(
+        %FormattedAlert{alert: alert, alert_summary: summary},
+        locale
+      )
 
-      %SummaryEntity{
-        alert_id: alert.id,
-        route_id: resolved_route_id,
-        stop_id: stop_id,
-        trip_id: trip_id,
-        direction_id: resolved_direction_id,
-        summary: formatted
-      }
-    end)
+    %SummaryEntity{
+      route_id: route_id,
+      stop_id: stop_id,
+      trip_id: trip_id,
+      direction_id: direction_id,
+      summary: formatted
+    }
   end
 
   # Get the route, stop, trip, and direction combinations relevant to the alert based on its informed_entity list
-  @spec relevant_combinations(Alert.t(), %{String.t() => Stop.t()}, GlobalDataCache.data()) :: [
-          Combination.t()
-        ]
-  def relevant_combinations(alert, stops, global) do
-    combinations =
-      alert.informed_entity
-      |> Enum.flat_map(&combination_from_entity(&1, global))
-      |> Enum.map(fn %Combination{route: route, stop: stop, trip: trip, direction: direction} ->
+  @spec relevant_combinations(
+          Alert.t(),
+          {%{Stop.id() => Stop.t()}, %{Trip.id() => Trip.t()}, GlobalDataCache.data()}
+        ) ::
+          [Combination.t()]
+  def relevant_combinations(alert, {all_child_stops, trips, global}) do
+    alert.informed_entity
+    |> Enum.flat_map(&combination_from_entity(&1, {all_child_stops, trips, global}))
+    |> Enum.uniq()
+    |> Enum.flat_map(&expand_combination(&1, global))
+  end
+
+  @spec combination_from_entity(
+          Alert.InformedEntity.t(),
+          {all_child_stops :: %{Stop.id() => Stop.t()}, trips :: %{Trip.id() => Trip.t()},
+           global :: GlobalDataCache.data()}
+        ) ::
+          [BroadCombination.t()]
+  defp combination_from_entity(entity, extra_context)
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{
+           route_type: route_type,
+           route: nil,
+           direction_id: nil
+         },
+         {_all_child_stops, _trips, global}
+       )
+       when not is_nil(route_type) do
+    # Expand route type entities into a combination for each route of that type,
+    # since each route will have a different summary
+    global.routes
+    |> Enum.filter(fn {_id, route} -> route.type == route_type end)
+    |> Enum.flat_map(fn {route_id, _} ->
+      [
+        %BroadCombination{route: route_id, direction: 0, trip: nil},
+        %BroadCombination{route: route_id, direction: 1, trip: nil}
+      ]
+    end)
+  end
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{route: route_id, trip: trip_id, direction_id: direction_id},
+         _extra_context
+       )
+       when not is_nil(trip_id) and not is_nil(direction_id) do
+    [%BroadCombination{route: route_id, direction: direction_id, trip: trip_id}]
+  end
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{route: route_id, trip: trip_id, direction_id: nil},
+         {_all_child_stops, trips, _global}
+       )
+       when not is_nil(trip_id) do
+    direction = trips[trip_id].direction_id
+    [%BroadCombination{route: route_id, direction: direction, trip: trip_id}]
+  end
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{route: route_id, direction_id: nil},
+         _extra_context
+       )
+       when not is_nil(route_id) do
+    [
+      %BroadCombination{route: route_id, direction: 0, trip: nil},
+      %BroadCombination{route: route_id, direction: 1, trip: nil}
+    ]
+  end
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{route: route_id, direction_id: direction_id},
+         _extra_context
+       )
+       when not is_nil(route_id) do
+    [%BroadCombination{route: route_id, direction: direction_id, trip: nil}]
+  end
+
+  defp combination_from_entity(
+         %Alert.InformedEntity{stop: stop_id},
+         {all_child_stops, _trips, global}
+       )
+       when not is_nil(stop_id) do
+    # check all the patterns at this stop to find their routes and directions
+    parent_stop = global.stops[stop_parent_id(stop_id, all_child_stops)]
+    all_stop_ids = [parent_stop | parent_stop.child_stop_ids || []]
+
+    all_stop_ids
+    |> Enum.flat_map(&(global.pattern_ids_by_stop[&1] || []))
+    |> Enum.map(fn pattern_id ->
+      pattern = global.route_patterns[pattern_id]
+      %BroadCombination{route: pattern.route_id, direction: pattern.direction_id, trip: nil}
+    end)
+    |> Enum.uniq()
+  end
+
+  defp combination_from_entity(entity, _extra_context) do
+    raise "uhhh what is a #{inspect(entity)}"
+    []
+  end
+
+  @spec expand_combination(BroadCombination.t(), GlobalDataCache.data()) ::
+          [Combination.t()]
+  defp expand_combination(
+         %BroadCombination{route: route, direction: direction, trip: trip},
+         global
+       ) do
+    patterns = RoutePattern.get_relevant_patterns(route, nil, direction, global)
+
+    # we don’t actually need to look at each stop separately if
+    # 1. this isn’t a trip-specific alert
+    # 2. this isn’t on the Green Line
+    # 3. there’s only one pattern in this direction, so all the stops are on it
+    should_expand_stops? =
+      not is_nil(trip) or String.starts_with?(route, "Green-") or length(patterns) > 1
+
+    if should_expand_stops? do
+      patterns
+      |> Enum.flat_map(fn pattern ->
+        pattern_stop_ids = global.trips[pattern.representative_trip_id].stop_ids
+        Enum.map(pattern_stop_ids, &{Stop.parent_id_if_exists(&1, global.stops), pattern})
+      end)
+      |> Enum.group_by(fn {stop_id, _pattern} -> stop_id end, fn {_stop_id, pattern} ->
+        pattern
+      end)
+      |> Enum.map(fn {stop_id, patterns} ->
         %Combination{
           route: route,
-          stop: stop_parent_id(stop, stops),
+          stop: stop_id,
+          direction: direction,
           trip: trip,
-          direction: direction
+          patterns: patterns
         }
       end)
-      |> Enum.uniq()
-
-    # Filter out any combinations that are already covered by another wildcard in the list
-    Enum.reject(combinations, fn combination ->
-      redundant_combination?(combination, combinations)
-    end)
-  end
-
-  @spec combination_from_entity(Alert.InformedEntity.t(), GlobalDataCache.data()) :: [
-          {String.t() | nil, String.t() | nil, String.t() | nil, 0 | 1 | nil}
-        ]
-  defp combination_from_entity(entity, global) do
-    case entity do
-      # Expand route type entities into a combination for each route of that type,
-      # since each route will have a different summary
-      %Alert.InformedEntity{route_type: route_type, route: nil, stop: nil, direction_id: nil}
-      when not is_nil(route_type) ->
-        global.routes
-        |> Enum.filter(fn {_id, route} -> route.type == Route.parse_type!(route_type) end)
-        |> Enum.map(fn {route_id, _} -> %Combination{route: route_id} end)
-
-      %Alert.InformedEntity{
-        route: route_id,
-        stop: stop_id,
-        trip: trip_id,
-        direction_id: direction_id
-      }
-      when not is_nil(trip_id) ->
-        [%Combination{route: route_id, stop: stop_id, trip: trip_id, direction: direction_id}]
-
-      %Alert.InformedEntity{route: route_id, stop: stop_id, direction_id: nil}
-      when not is_nil(stop_id) or not is_nil(route_id) ->
-        [
-          %Combination{route: route_id, stop: stop_id, direction: 0},
-          %Combination{route: route_id, stop: stop_id, direction: 1}
-        ]
-
-      %Alert.InformedEntity{route: route_id, stop: stop_id, direction_id: direction_id}
-      when not is_nil(stop_id) or not is_nil(route_id) ->
-        [%Combination{route: route_id, stop: stop_id, direction: direction_id}]
-
-      _ ->
-        []
+    else
+      [
+        %Combination{
+          route: route,
+          stop: nil,
+          direction: direction,
+          trip: trip,
+          patterns: patterns
+        }
+      ]
     end
-  end
-
-  # A combination is redundant if there exists another combination in the list where
-  # all fields are either nil if a non-nil field exists in the redundant one or equal
-  @spec redundant_combination?(
-          Combination.t(),
-          [Combination.t()]
-        ) :: boolean()
-  defp redundant_combination?(combination, combinations) do
-    keys = %Combination{} |> Map.from_struct() |> Map.keys()
-
-    Enum.any?(combinations, fn other ->
-      combination != other and
-        Enum.all?(
-          keys,
-          &((not is_nil(Map.get(combination, &1)) and is_nil(Map.get(other, &1))) or
-              Map.get(combination, &1) == Map.get(other, &1))
-        )
-    end)
   end
 
   defp fetch_all_stops do
@@ -337,16 +422,28 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   # Collapse entities where both directions produce identical summaries
   @spec dedup_summaries([SummaryEntity.t()]) :: [SummaryEntity.t()]
   def dedup_summaries(entities) do
-    entities
-    |> Enum.group_by(&{&1.alert_id, &1.route_id, &1.stop_id, &1.trip_id})
-    |> Enum.flat_map(fn {_key, grouped} ->
-      case grouped do
-        [a, b] when a.summary == b.summary ->
-          [%{a | direction_id: nil}]
+    # sorted from least desirable to split by to most desirable to split by
+    all_keys = [:stop_id, :trip_id, :direction_id, :route_id]
 
-        _ ->
-          grouped
-      end
-    end)
+    for split_key <- all_keys, reduce: entities do
+      entities ->
+        other_keys = all_keys -- [split_key]
+        # we can drop this key if the other keys are sufficient to uniquely determine the summary
+        summaries_by_other_keys =
+          Enum.group_by(
+            entities,
+            fn entity -> Map.take(entity, other_keys) end,
+            fn entity -> entity.summary end
+          )
+
+        can_drop_split_key? =
+          summaries_by_other_keys |> Map.values() |> Enum.all?(&(length(Enum.uniq(&1)) == 1))
+
+        if can_drop_split_key? do
+          entities |> Enum.map(&Map.put(&1, split_key, nil)) |> Enum.uniq()
+        else
+          entities
+        end
+    end
   end
 end

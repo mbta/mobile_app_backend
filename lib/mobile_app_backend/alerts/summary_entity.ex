@@ -1,6 +1,5 @@
 defmodule MobileAppBackend.Alerts.SummaryEntity do
   @type t :: %__MODULE__{
-          alert_id: String.t(),
           route_id: String.t() | nil,
           stop_id: String.t() | nil,
           trip_id: String.t() | nil,
@@ -9,5 +8,5 @@ defmodule MobileAppBackend.Alerts.SummaryEntity do
         }
 
   @derive Jason.Encoder
-  defstruct [:alert_id, :route_id, :stop_id, :trip_id, :direction_id, :summary]
+  defstruct [:route_id, :stop_id, :trip_id, :direction_id, :summary]
 end
