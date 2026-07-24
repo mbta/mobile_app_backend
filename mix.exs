@@ -58,7 +58,7 @@ defmodule MobileAppBackend.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:ex_aws, "== 2.6.1"},
+      {:ex_aws, "== 2.7.0"},
       {:ex_aws_rds, "== 2.0.2"},
       {:ex_aws_sts, "~> 2.3"},
       {:ex_cldr, "~> 2.47.1"},
@@ -70,6 +70,8 @@ defmodule MobileAppBackend.MixProject do
       {:google_api_iam_credentials, "~> 0.15.0"},
       {:google_api_sts, "~> 0.9.2"},
       {:goth, "~> 1.4"},
+      # remove hackney override when tzdata moves past 1.1.4
+      {:hackney, "~> 4.0", override: true},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.11"},
       {:lazy_html, ">= 0.0.0", only: :test},
