@@ -2,7 +2,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   use ExUnit.Case, async: true
   import MobileAppBackend.Factory
   import Test.Support.Sigils
-  require Jason.Sigil
   alias MobileAppBackend.Alerts.AlertSummary
 
   alias MobileAppBackend.Alerts.AlertSummary.{

@@ -66,9 +66,6 @@ defmodule MobileAppBackend.MixProject do
       {:ex_cldr_lists, "~> 2.12"},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 1.0"},
-      {:google_api_fcm, "~> 0.14.0"},
-      {:google_api_iam_credentials, "~> 0.15.0"},
-      {:google_api_sts, "~> 0.9.2"},
       {:goth, "~> 1.4"},
       # remove hackney override when tzdata moves past 1.1.4
       {:hackney, "~> 4.0", override: true},

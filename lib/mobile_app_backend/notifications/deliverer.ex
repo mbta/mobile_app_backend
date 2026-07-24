@@ -1,11 +1,11 @@
 defmodule MobileAppBackend.Notifications.Deliverer do
   use Oban.Worker, unique: [period: :infinity], max_attempts: 4
   require Logger
-  alias GoogleApi.FCM.V1, as: FCM
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
+  alias Util.GCP.FCM
 
   @impl true
   def perform(%Oban.Job{
@@ -35,7 +35,6 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     user = Repo.get!(User, user_id)
 
     gcp_token = GCPToken.get_token()
-    connection = FCM.Connection.new(gcp_token)
 
     # in Android, a notification with a tag will replace an old notification with the same tag
     tag =
@@ -44,35 +43,35 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         _ -> alert_id
       end
 
-    request_body = %FCM.Model.SendMessageRequest{
-      message: %FCM.Model.Message{
-        notification: %{
+    request_body = %{
+      message: %FCM.Message{
+        notification: %FCM.Notification{
           title: title,
           body: body
         },
-        data: %{deep_link_path: deep_link_path, analytics_label: analytics_label},
-        android: %FCM.Model.AndroidConfig{
-          notification: %FCM.Model.AndroidNotification{
+        data: %{"deep_link_path" => deep_link_path, "analytics_label" => analytics_label},
+        android: %FCM.AndroidConfig{
+          notification: %FCM.AndroidNotification{
             sound: "default",
             tag: tag,
-            visibility: "public"
+            visibility: :public
           }
         },
-        apns: %FCM.Model.ApnsConfig{
+        apns: %FCM.ApnsConfig{
           payload: %{aps: %{sound: "default"}}
         },
-        fcmOptions: %FCM.Model.FcmOptions{
-          analyticsLabel: analytics_label
+        fcm_options: %FCM.FcmOptions{
+          analytics_label: analytics_label
         },
         token: user.fcm_token
       }
     }
 
     result =
-      FCM.Api.Projects.fcm_projects_messages_send(
-        connection,
+      FCM.send(
+        gcp_token,
         "projects/mbta-app-c574d",
-        body: request_body
+        request_body
       )
       |> handle_fcm_response(user)
 
@@ -103,7 +102,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
   end
 
-  defp handle_fcm_response({:ok, _response}, user) do
+  defp handle_fcm_response({:ok, %Req.Response{status: status}}, user) when status in 200..299 do
     user
     |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
     |> Repo.update()
@@ -117,7 +116,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
   end
 
-  defp handle_fcm_response({:error, %Tesla.Env{status: 404}}, user) do
+  defp handle_fcm_response({:ok, %Req.Response{status: 404}}, user) do
     # if an FCM token is deleted, it won’t be recreated later, so prune the user now
     case Repo.delete(user) do
       {:ok, _} ->
@@ -129,7 +128,16 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
   end
 
-  defp handle_fcm_response({:error, error}, _user) do
+  defp handle_fcm_response(result, _user) do
+    error =
+      case result do
+        {:ok, %Req.Response{status: status, body: body}} ->
+          {"HTTP #{status} #{Plug.Conn.Status.reason_phrase(status)}", body}
+
+        {:error, error} ->
+          error
+      end
+
     Logger.error(inspect(error))
     Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
     :error

@@ -38,3 +38,5 @@ config :mobile_app_backend, MobileAppBackend.Search.Algolia,
 
 # Use server-sent events stub instead of real connections
 config :mobile_app_backend, MobileAppBackend.SSE, Test.Support.SSEStub
+
+config :mobile_app_backend, Util.GCP, plug: {Req.Test, Util.GCP}
