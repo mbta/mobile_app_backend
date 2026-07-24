@@ -70,6 +70,8 @@ defmodule MobileAppBackend.MixProject do
       {:google_api_iam_credentials, "~> 0.15.0"},
       {:google_api_sts, "~> 0.9.2"},
       {:goth, "~> 1.4"},
+      # remove hackney override when tzdata moves past 1.1.4
+      {:hackney, "~> 4.0", override: true},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.11"},
       {:lazy_html, ">= 0.0.0", only: :test},
