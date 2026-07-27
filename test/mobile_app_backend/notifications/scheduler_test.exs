@@ -15,6 +15,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
   setup :set_mox_from_context
   setup :verify_on_exit!
+  setup {Req.Test, :verify_on_exit!}
 
   test "sends notifications" do
     now = DateTime.now!("America/New_York")
@@ -778,13 +779,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
-    reassign_env(:tesla, :adapter, TeslaMockAdapter)
-
-    Tesla.Test.expect_tesla_call(
-      times: 1,
-      returns: %Tesla.Env{status: 418} |> Tesla.Test.json(%{}),
-      adapter: TeslaMockAdapter
-    )
+    Req.Test.expect(Util.GCP, fn conn ->
+      conn |> Plug.Conn.put_status(418) |> Req.Test.json(%{})
+    end)
 
     with_log(fn ->
       MobileAppBackend.Notifications.Deliverer.new(%{

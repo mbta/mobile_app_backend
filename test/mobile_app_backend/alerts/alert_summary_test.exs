@@ -4,7 +4,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   import Mox
   import Test.Support.Helpers
   import Test.Support.Sigils
-  require Jason.Sigil
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.Direction

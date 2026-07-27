@@ -5,8 +5,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
   """
   @type key :: term()
 
-  alias GoogleApi.IAMCredentials.V1, as: IAMCredentials
-  alias GoogleApi.STS.V1, as: STS
+  alias Util.GCP
 
   defmodule StoredToken do
     @type t :: %__MODULE__{token: String.t(), expires: DateTime.t()}
@@ -67,7 +66,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
     stored_token.token
   end
 
-  @spec get_gcp_sts_token(String.t()) :: STS.Model.GoogleIdentityStsV1ExchangeTokenResponse.t()
+  @spec get_gcp_sts_token(String.t()) :: GCP.STS.TokenResponse.t()
   defp get_gcp_sts_token(gcp_provider_name) do
     # unfortunately, ExAws.request/2 will include content-type and content-encoding headers,
     # which will cause GCP to reject the request, so we have to do this manually
@@ -108,7 +107,7 @@ defmodule MobileAppBackend.Notifications.GCPToken do
       headers: Enum.map(sig_headers, fn {key, value} -> %{key: key, value: value} end)
     }
 
-    gcp_sts_request = %STS.Model.GoogleIdentityStsV1ExchangeTokenRequest{
+    gcp_sts_request = %GCP.STS.TokenRequest{
       audience: "//iam.googleapis.com/#{gcp_provider_name}",
       grantType: "urn:ietf:params:oauth:grant-type:token-exchange",
       requestedTokenType: "urn:ietf:params:oauth:token-type:access_token",
@@ -117,31 +116,20 @@ defmodule MobileAppBackend.Notifications.GCPToken do
       subjectTokenType: "urn:ietf:params:aws:token-type:aws4_request"
     }
 
-    gcp_sts_connection = STS.Connection.new()
-
-    {:ok, gcp_sts_response} =
-      STS.Api.V1.sts_token(gcp_sts_connection, body: gcp_sts_request)
-
-    gcp_sts_response
+    GCP.STS.token!(gcp_sts_request)
   end
 
   defp get_gcp_iam_credentials(gcp_sts_response, gcp_service_account_id) do
-    gcp_iam_credentials_connection =
-      IAMCredentials.Connection.new(gcp_sts_response.access_token)
-
-    gcp_iam_credentials_request = %IAMCredentials.Model.GenerateAccessTokenRequest{
+    gcp_iam_credentials_request = %GCP.IAMCredentials.AccessTokenRequest{
       scope: [
         "https://www.googleapis.com/auth/firebase.messaging"
       ]
     }
 
-    {:ok, gcp_iam_credentials_response} =
-      IAMCredentials.Api.Projects.iamcredentials_projects_service_accounts_generate_access_token(
-        gcp_iam_credentials_connection,
-        "projects/-/serviceAccounts/#{gcp_service_account_id}",
-        body: gcp_iam_credentials_request
-      )
-
-    gcp_iam_credentials_response
+    GCP.IAMCredentials.generate_access_token!(
+      gcp_sts_response.access_token,
+      "projects/-/serviceAccounts/#{gcp_service_account_id}",
+      gcp_iam_credentials_request
+    )
   end
 end

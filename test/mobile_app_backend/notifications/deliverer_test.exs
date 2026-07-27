@@ -3,7 +3,6 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   use Oban.Testing, repo: MobileAppBackend.Repo
   import ExUnit.CaptureLog
   import Mox
-  import Tesla.Test
   import Test.Support.Helpers
   alias MBTAV3API.Store.Alerts
   alias MobileAppBackend.Factory
@@ -15,6 +14,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
   setup :set_mox_from_context
   setup :verify_on_exit!
+  setup {Req.Test, :verify_on_exit!}
 
   test "delivers notification via FCM and marks notification as delivered" do
     start_link_supervised!(Alerts)
@@ -37,13 +37,41 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
-    reassign_env(:tesla, :adapter, TeslaMockAdapter)
+    Req.Test.expect(Util.GCP, fn conn ->
+      assert conn.method == "POST"
 
-    expect_tesla_call(
-      times: 1,
-      returns: %Tesla.Env{status: 200} |> json(%{}),
-      adapter: TeslaMockAdapter
-    )
+      assert Plug.Conn.request_url(conn) ==
+               "https://fcm.googleapis.com/v1/projects/mbta-app-c574d/messages:send"
+
+      assert [
+               {"accept", "application/json"},
+               {"authorization", "Bearer gcp_token"},
+               {"content-type", "application/json"},
+               {"user-agent", "req/" <> _}
+             ] = Enum.sort(conn.req_headers)
+
+      assert conn.body_params == %{
+               "message" => %{
+                 "token" => fcm_token,
+                 "notification" => %{"title" => title, "body" => body},
+                 "data" => %{
+                   "deep_link_path" => deep_link_path,
+                   "analytics_label" => analytics_label
+                 },
+                 "android" => %{
+                   "notification" => %{
+                     "tag" => alert_id,
+                     "sound" => "default",
+                     "visibility" => "public"
+                   }
+                 },
+                 "apns" => %{"payload" => %{"aps" => %{"sound" => "default"}}},
+                 "fcm_options" => %{"analytics_label" => analytics_label}
+               }
+             }
+
+      Req.Test.json(conn, %{})
+    end)
 
     :ok =
       perform_job(Notifications.Deliverer, %{
@@ -56,33 +84,6 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
         type: type,
         analytics_label: analytics_label
       })
-
-    assert_received_tesla_call(received_env, received_opts, adapter: TeslaMockAdapter)
-
-    assert %Tesla.Env{
-             method: :post,
-             url: "https://fcm.googleapis.com/v1/projects/mbta-app-c574d/messages:send",
-             headers: [
-               {"x-goog-api-client", _},
-               {"authorization", "Bearer gcp_token"},
-               {"accept-encoding", "gzip, deflate, identity"},
-               {"content-type", "application/json"}
-             ],
-             body: received_body
-           } = received_env
-
-    assert Jason.decode!(received_body, keys: :atoms!) == %{
-             message: %{
-               token: fcm_token,
-               notification: %{title: title, body: body},
-               data: %{deep_link_path: deep_link_path, analytics_label: analytics_label},
-               android: %{notification: %{tag: alert_id, sound: "default", visibility: "public"}},
-               apns: %{payload: %{aps: %{sound: "default"}}},
-               fcmOptions: %{analyticsLabel: analytics_label}
-             }
-           }
-
-    assert [] = received_opts
 
     assert [
              %DeliveredNotification{
@@ -116,13 +117,9 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
-    reassign_env(:tesla, :adapter, TeslaMockAdapter)
-
-    expect_tesla_call(
-      times: 1,
-      returns: %Tesla.Env{status: 418} |> json(%{}),
-      adapter: TeslaMockAdapter
-    )
+    Req.Test.expect(Util.GCP, fn conn ->
+      conn |> Plug.Conn.put_status(418) |> Req.Test.json(%{})
+    end)
 
     {{:cancel, :error}, _} =
       with_log(fn ->
@@ -159,13 +156,9 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
-    reassign_env(:tesla, :adapter, TeslaMockAdapter)
-
-    expect_tesla_call(
-      times: 1,
-      returns: %Tesla.Env{status: 404} |> json(%{}),
-      adapter: TeslaMockAdapter
-    )
+    Req.Test.expect(Util.GCP, fn conn ->
+      conn |> Plug.Conn.put_status(:not_found) |> Req.Test.json(%{})
+    end)
 
     {:ok, _} =
       with_log(fn ->
