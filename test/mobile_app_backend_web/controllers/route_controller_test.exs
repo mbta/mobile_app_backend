@@ -53,7 +53,7 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                    },
                    %{
                      "connections" =>
-                       forward.("place-bbsta", "place-rugg", "place-NEC-2203", "center"),
+                       forward.("place-bbsta", "place-rugg", "place-forhl", "center"),
                      "stop_id" => "place-rugg",
                      "stop_lane" => "center"
                    }
@@ -65,7 +65,13 @@ defmodule MobileAppBackendWeb.RouteControllerTest do
                  "stops" => [
                    %{
                      "connections" =>
-                       forward.("place-rugg", "place-NEC-2203", "place-DB-0095", "center"),
+                       forward.("place-rugg", "place-forhl", "place-NEC-2203", "center"),
+                     "stop_id" => "place-forhl",
+                     "stop_lane" => "center"
+                   },
+                   %{
+                     "connections" =>
+                       forward.("place-forhl", "place-NEC-2203", "place-DB-0095", "center"),
                      "stop_id" => "place-NEC-2203",
                      "stop_lane" => "center"
                    },

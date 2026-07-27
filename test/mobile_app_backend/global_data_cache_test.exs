@@ -18,8 +18,6 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
     StopBlocklistMock
     |> expect(:get, fn -> ["1234"] end)
 
-    start_link_supervised!({GlobalDataCache, key: cache_key})
-
     # makes HTTP requests from the current process, so Mox will behave correctly automatically
     retrieved_data = GlobalDataCache.get_data(cache_key)
 
@@ -39,8 +37,8 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
              id: "place-pktrm",
              name: "Park Street",
              location_type: :station,
-             latitude: 42.356395,
-             longitude: -71.062424,
+             latitude: 42.3563946,
+             longitude: -71.0624242,
              child_stop_ids: child_ids,
              connecting_stop_ids: connecting_ids
            } = park_st_station
@@ -70,7 +68,7 @@ defmodule MobileAppBackend.GlobalDataCacheTest do
              name: "Ashmont - Alewife",
              representative_trip_id: red_line_trip_id,
              route_id: "Red",
-             sort_order: 100_101_041
+             sort_order: 100_101_001
            } = red_line_pattern
 
     assert %{headsign: "Alewife", stop_ids: trip_stop_ids} = trips[red_line_trip_id]
