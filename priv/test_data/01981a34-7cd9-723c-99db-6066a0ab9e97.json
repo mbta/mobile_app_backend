@@ -122,6 +122,30 @@
     },
     {
       "attributes": {},
+      "id": "place-forhl",
+      "links": {
+        "self": "/stops/place-forhl"
+      },
+      "relationships": {
+        "facilities": {
+          "links": {
+            "related": "/facilities/?filter[stop]=place-forhl"
+          }
+        },
+        "parent_station": {
+          "data": null
+        },
+        "zone": {
+          "data": {
+            "id": "CR-zone-1A",
+            "type": "zone"
+          }
+        }
+      },
+      "type": "stop"
+    },
+    {
+      "attributes": {},
       "id": "place-NEC-2173",
       "links": {
         "self": "/stops/place-NEC-2173"

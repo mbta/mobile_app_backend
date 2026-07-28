@@ -279,12 +279,15 @@ defmodule Test.Support.Data do
         "POST" -> request.body
       end
 
+    compressed? = {"accept-encoding", "gzip"} in conn.req_headers
+
     %Req.Response{status: 200, body: actual_response} =
       Req.new(
         url: Plug.Conn.request_url(conn),
         method: conn.method,
         headers: conn.req_headers,
-        body: body
+        body: body,
+        compressed: compressed?
       )
       |> Req.request!()
 
