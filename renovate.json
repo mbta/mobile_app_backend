@@ -7,6 +7,113 @@
   "minimumReleaseAge": "7 days",
   "minimumReleaseAgeBehaviour": "timestamp-optional",
   "rebaseWhen": "conflicted",
+  "packageRules": [
+    {
+      "description": "manage erlang/elixir/alpine version directly from hexpm docker image",
+      "matchPackageNames": [
+        "erlang",
+        "elixir",
+        "alpine"
+      ],
+      "matchManagers": [
+        "asdf",
+        "dockerfile"
+      ],
+      "enabled": false
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "erlang in asdf",
+      "customType": "regex",
+      "managerFilePatterns": [
+        ".tool-versions"
+      ],
+      "matchStrings": [
+        "^erlang\\s+(?<currentValue>[\\d.]+)$"
+      ],
+      "depNameTemplate": "erlang",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^[\\d.]+-erlang-(?<version>[\\d.]+)-alpine-[\\d.]+$",
+      "versioningTemplate": "loose"
+    },
+    {
+      "description": "erlang major version for elixir in asdf",
+      "customType": "regex",
+      "managerFilePatterns": [
+        ".tool-versions"
+      ],
+      "matchStrings": [
+        "-otp-(?<currentValue>\\d+)"
+      ],
+      "depNameTemplate": "erlang",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^[\\d.]+-erlang-(?<version>\\d+)[\\d.]+-alpine-[\\d.]+$",
+      "versioningTemplate": "loose"
+    },
+    {
+      "description": "erlang in docker",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "Dockerfile"
+      ],
+      "matchStrings": [
+        "^ARG ERLANG_VERSION=(?<currentValue>[\\d.]+)$"
+      ],
+      "depNameTemplate": "erlang",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^[\\d.]+-erlang-(?<version>[\\d.]+)-alpine-[\\d.]+$",
+      "versioningTemplate": "loose"
+    },
+    {
+      "description": "elixir in asdf",
+      "customType": "regex",
+      "managerFilePatterns": [
+        ".tool-versions"
+      ],
+      "matchStrings": [
+        "^elixir\\s+(?<currentValue>[\\d.]+-otp-\\d+$"
+      ],
+      "depNameTemplate": "elixir",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^(?<version>[\\d.]+)-erlang-[\\d.]+-alpine-[\\d.]+$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "elixir in docker",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "Dockerfile"
+      ],
+      "matchStrings": [
+        "^ARG ELIXIR_VERSION=(?<currentValue>[\\d.]+)$"
+      ],
+      "depNameTemplate": "elixir",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^(?<version>[\\d.]+)-erlang-[\\d.]+-alpine-[\\d.]+$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "description": "alpine in docker",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "Dockerfile"
+      ],
+      "matchStrings": [
+        "^ARG ALPINE_VERSION=(?<currentValue>[\\d.]+)$"
+      ],
+      "depNameTemplate": "alpine",
+      "packageNameTemplate": "hexpm/elixir",
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^[\\d.]+-erlang-[\\d.]+-alpine-(?<version>[\\d.]+)$",
+      "versioningTemplate": "semver"
+    }
+  ],
   "constraints": {
     "erlang": ">=28.5"
   }
