@@ -80,7 +80,7 @@ defmodule MBTAV3API.Schedule do
   def expand_added_routes(%__MODULE__{} = schedule) do
     # Don't expand shuttle schedules onto the routes they cover so that we don't attempt
     # to show them on subway stop pages
-    if Route.is_shuttle(schedule.route_id) do
+    if Route.shuttle?(schedule.route_id) do
       [schedule]
     else
       [schedule] ++
