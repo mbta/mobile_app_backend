@@ -1255,5 +1255,84 @@ defmodule MobileAppBackendWeb.ScheduleControllerTest do
                }
              } = json_response(conn, 200)
     end
+
+    test "logs warning if route is missing for some reason", %{conn: conn} do
+      s1 = %MBTAV3API.Schedule{
+        id: "schedule-60565147-70158-90",
+        arrival_time: ~B[2024-03-13 11:15:00],
+        departure_time: ~B[2024-03-13 11:15:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_sequence: 90,
+        route_id: "MISSING",
+        stop_id: "70158",
+        trip_id: "60565147"
+      }
+
+      t1 = build(:trip, id: s1.trip_id)
+
+      reassign_env(
+        :mobile_app_backend,
+        MobileAppBackend.GlobalDataCache.Module,
+        GlobalDataCacheMock
+      )
+
+      GlobalDataCacheMock
+      |> expect(:default_key, 2, fn -> :default_key end)
+      |> expect(:get_data, 2, fn _ ->
+        %{
+          lines: %{},
+          pattern_ids_by_stop: %{},
+          routes: %{},
+          route_patterns: %{},
+          stops: %{},
+          trips: %{}
+        }
+      end)
+
+      RepositoryMock
+      |> expect(:schedules, fn params, _opts ->
+        assert [
+                 filter: [
+                   stop: "place-boyls",
+                   date: ~D[2024-03-13]
+                 ],
+                 include: :trip
+               ] = params
+
+        ok_response([s1], [t1])
+      end)
+
+      set_log_level(:warning)
+
+      {conn, log} =
+        with_log(fn ->
+          get(conn, "/api/schedules", %{
+            stop_ids: "place-boyls",
+            date_time: "2024-03-13T11:00:30-04:00"
+          })
+        end)
+
+      assert %{
+               "schedules" => [
+                 %{
+                   "arrival_time" => "2024-03-13T11:15:00-04:00",
+                   "departure_time" => "2024-03-13T11:15:00-04:00",
+                   "drop_off_type" => "regular",
+                   "id" => "schedule-60565147-70158-90",
+                   "pick_up_type" => "regular",
+                   "route_id" => "MISSING",
+                   "stop_id" => "70158",
+                   "stop_sequence" => 90,
+                   "trip_id" => "60565147"
+                 }
+               ],
+               "trips" => %{
+                 "60565147" => %{}
+               }
+             } = json_response(conn, 200)
+
+      assert log =~ "global data is missing route MISSING"
+    end
   end
 end

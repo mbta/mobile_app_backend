@@ -191,7 +191,15 @@ defmodule MobileAppBackendWeb.ScheduleController do
 
     relevant_schedules =
       Enum.filter(schedules, fn schedule ->
-        global_data.routes[schedule.route_id].type in [:commuter_rail, :ferry] or
+        route = global_data.routes[schedule.route_id]
+
+        if route == nil do
+          Logger.warning(
+            "#{__MODULE__} global data is missing route #{schedule.route_id} for schedule id=#{schedule.id} stop_id=#{schedule.stop_id} trip_id=#{schedule.trip_id}"
+          )
+        end
+
+        is_nil(route) or route.type in [:commuter_rail, :ferry] or
           schedule.id in last_schedule_ids or
           compare_schedule_time(schedule, date_time)
       end)
