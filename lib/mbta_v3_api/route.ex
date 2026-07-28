@@ -99,4 +99,8 @@ defmodule MBTAV3API.Route do
   end
 
   def label(%__MODULE__{long_name: long_name}), do: long_name
+
+  @spec is_shuttle(t() | String.t()) :: boolean()
+  def is_shuttle(%__MODULE__{id: id}), do: is_shuttle(id)
+  def is_shuttle(id), do: String.starts_with?(id, "Shuttle")
 end

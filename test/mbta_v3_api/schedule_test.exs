@@ -36,4 +36,44 @@ defmodule MBTAV3API.ScheduleTest do
              trip_id: "60565179"
            }
   end
+
+  describe "expand_added_routes" do
+    test "expands for regular route" do
+      sched = %Schedule{
+        id: "schedule-60565179-70159-90",
+        arrival_time: ~B[2024-03-13 01:07:00],
+        departure_time: ~B[2024-03-13 01:07:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_headsign: "abc",
+        stop_sequence: 90,
+        added_route_ids: ["1"],
+        route_id: "Green-D",
+        stop_id: "70159",
+        trip_id: "60565179"
+      }
+
+      expanded = %Schedule{sched | id: "#{sched.id}+r1", route_id: "1", added_route_ids: []}
+
+      assert [sched, expanded] == Schedule.expand_added_routes(sched)
+    end
+
+    test "doesn't expand for shuttle route" do
+      sched = %Schedule{
+        id: "schedule-60565179-70159-90",
+        arrival_time: ~B[2024-03-13 01:07:00],
+        departure_time: ~B[2024-03-13 01:07:00],
+        drop_off_type: :regular,
+        pick_up_type: :regular,
+        stop_headsign: "abc",
+        stop_sequence: 90,
+        added_route_ids: ["Green-D"],
+        route_id: "Shuttle-Green-D",
+        stop_id: "70159",
+        trip_id: "60565179"
+      }
+
+      assert [sched] == Schedule.expand_added_routes(sched)
+    end
+  end
 end
