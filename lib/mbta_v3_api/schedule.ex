@@ -1,5 +1,6 @@
 defmodule MBTAV3API.Schedule do
   use MBTAV3API.JsonApi.Object, renames: %{pickup_type: :pick_up_type}
+  alias MBTAV3API.Route
   require Util
 
   @type t :: %__MODULE__{
@@ -77,14 +78,20 @@ defmodule MBTAV3API.Schedule do
 
   @spec expand_added_routes(t()) :: [t()]
   def expand_added_routes(%__MODULE__{} = schedule) do
-    [schedule] ++
-      for added_route_id <- schedule.added_route_ids || [] do
-        %__MODULE__{
-          schedule
-          | id: "#{schedule.id}+r#{added_route_id}",
-            route_id: added_route_id,
-            added_route_ids: []
-        }
-      end
+    # Don't expand shuttle schedules onto the routes they cover so that we don't attempt
+    # to show them on subway stop pages
+    if Route.shuttle?(schedule.route_id) do
+      [schedule]
+    else
+      [schedule] ++
+        for added_route_id <- schedule.added_route_ids || [] do
+          %__MODULE__{
+            schedule
+            | id: "#{schedule.id}+r#{added_route_id}",
+              route_id: added_route_id,
+              added_route_ids: []
+          }
+        end
+    end
   end
 end
