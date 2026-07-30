@@ -30,6 +30,8 @@ config :mobile_app_backend, alerts_with_summaries_broadcast_interval_ms: 60_000
 config :mobile_app_backend, predictions_broadcast_interval_ms: 5_000
 config :mobile_app_backend, vehicles_broadcast_interval_ms: 500
 
+config :mobile_app_backend, :redirect_http?, false
+
 config :mobile_app_backend, MBTAV3API.ResponseCache,
   gc_interval: :timer.hours(12),
   allocated_memory: 2_000_000_000,
@@ -129,6 +131,28 @@ config :mobile_app_backend, MobileAppBackend.HTTP, Req
 
 # Use ServerSentEventStage for making SSE requests
 config :mobile_app_backend, MobileAppBackend.SSE, ServerSentEventStage
+
+# 48 hours in seconds
+max_session_time = 48 * 60 * 60
+
+config :mobile_app_backend, MobileAppBackendWeb.UserAuth,
+  max_session_time: max_session_time,
+  # 8 hours in seconds
+  idle_time: 8 * 60 * 60
+
+# Use Ueberauth for keycloak authentication
+config :ueberauth, Ueberauth,
+  providers: [
+    keycloak: {
+      Ueberauth.Strategy.Oidcc,
+      issuer: :keycloak_issuer,
+      userinfo: true,
+      uid_field: "email",
+      scopes: ~w(openid profile email),
+      authorization_params: %{max_age: "#{max_session_time}"},
+      authorization_params_passthrough: ~w(prompt login_hint)
+    }
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

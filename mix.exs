@@ -93,6 +93,8 @@ defmodule MobileAppBackend.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:typed_ecto_schema, "~> 0.4.3"},
       {:tzdata, "~> 1.1"},
+      {:ueberauth, "~> 0.10"},
+      {:ueberauth_oidcc, "~> 0.4"},
       {:uniq, "~> 0.6", only: :test}
     ]
   end
