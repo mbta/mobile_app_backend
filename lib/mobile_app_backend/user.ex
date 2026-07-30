@@ -10,7 +10,8 @@ defmodule MobileAppBackend.User do
   """
 
   typed_schema "users" do
-    field(:fcm_token, :string, null: false, redact: true)
+    field(:fcm_token, :string, null: true, redact: true)
+    field(:fcm_installation_id, :string, null: true, redact: true)
     field(:fcm_last_verified, :utc_datetime, null: false)
     # should be a BCP 47 language tag like iOS’s
     field(:locale, :string, null: true) :: Gettext.locale() | nil
