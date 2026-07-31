@@ -33,8 +33,6 @@ defmodule MobileAppBackendWeb.Router do
   end
 
   scope "/", MobileAppBackendWeb do
-    pipe_through [:redirect_prod_http]
-
     get("/_health", HealthController, :index)
 
     get(
@@ -79,6 +77,7 @@ defmodule MobileAppBackendWeb.Router do
   scope "/dev", MobileAppBackendWeb do
     pipe_through [:browser, :require_authenticated_user, :require_developer]
 
+    get "/", DevController, :home
     live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
     oban_dashboard("/oban")
   end

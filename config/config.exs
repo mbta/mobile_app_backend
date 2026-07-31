@@ -132,8 +132,8 @@ config :mobile_app_backend, MobileAppBackend.HTTP, Req
 # Use ServerSentEventStage for making SSE requests
 config :mobile_app_backend, MobileAppBackend.SSE, ServerSentEventStage
 
-# 48 hours in seconds
-max_session_time = 48 * 60 * 60
+# 24 hours in seconds
+max_session_time = 24 * 60 * 60
 
 config :mobile_app_backend, MobileAppBackendWeb.UserAuth,
   max_session_time: max_session_time,
