@@ -93,7 +93,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
       ]
 
       route_id = "Red"
-      trip = build(:trip, route_id: route_id, stop_ids: stops)
+
+      trip =
+        build(:trip,
+          direction_id: 1,
+          route_id: route_id,
+          route_pattern_id: "Red-3-1",
+          stop_ids: stops
+        )
+
       trip_id = trip.id
 
       schedules =
@@ -146,13 +154,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                },
                %SummaryEntity{
                  route_id: nil,
-                 stop_id: "place-asmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
                  stop_id: "place-brdwy",
                  direction_id: nil,
                  trip_id: nil,
@@ -193,13 +194,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                  trip_id: nil,
                  summary:
                    "12:09 PM train from Downtown Crossing is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-fldcr",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
                },
                %SummaryEntity{
                  route_id: nil,
@@ -260,20 +254,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                },
                %SummaryEntity{
                  route_id: nil,
-                 stop_id: "place-shmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-smmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
                  stop_id: "place-sstat",
                  direction_id: nil,
                  trip_id: nil,
@@ -295,154 +275,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
       assert Enum.sort_by(entities, &{&1.route_id, &1.stop_id, &1.direction_id, &1.trip_id}) == [
                %SummaryEntity{
                  route_id: nil,
-                 stop_id: "place-alfcl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-andrw",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-asmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-brdwy",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-brntn",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-chmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-cntsq",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-davis",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-dwnxg",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-fldcr",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-harsq",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-jfk",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-knncl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-nqncy",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-pktrm",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-portr",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-qamnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-qnctr",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-shmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-smmnl",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "Service suspended on Red Line"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-sstat",
-                 direction_id: nil,
-                 trip_id: nil,
-                 summary: "This train is suspended today due to maintenance"
-               },
-               %SummaryEntity{
-                 route_id: nil,
-                 stop_id: "place-wlsta",
+                 stop_id: nil,
                  direction_id: nil,
                  trip_id: nil,
                  summary: "This train is suspended today due to maintenance"
@@ -648,10 +481,36 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
     test "trip entities set trip" do
       route_id = "Red"
       stop_id = "place-wlsta"
-      trip = build(:trip, direction_id: 1)
+
+      trip =
+        build(:trip,
+          direction_id: 1,
+          route_pattern_id: "Red-3-1",
+          stop_ids: [
+            "place-brntn",
+            "place-qamnl",
+            "place-qnctr",
+            "place-wlsta",
+            "place-nqncy",
+            "place-jfk",
+            "place-andrw",
+            "place-brdwy",
+            "place-sstat",
+            "place-dwnxg",
+            "place-pktrm",
+            "place-chmnl",
+            "place-knncl",
+            "place-cntsq",
+            "place-harsq",
+            "place-portr",
+            "place-davis",
+            "place-alfcl"
+          ]
+        )
 
       global = GlobalDataCache.get_data()
 
+      pattern = global.route_patterns[trip.route_pattern_id]
       trip_id = trip.id
 
       alert =
@@ -667,14 +526,12 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
         for stop <- [
               "alfcl",
               "andrw",
-              "asmnl",
               "brdwy",
               "brntn",
               "chmnl",
               "cntsq",
               "davis",
               "dwnxg",
-              "fldcr",
               "harsq",
               "jfk",
               "knncl",
@@ -683,8 +540,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
               "portr",
               "qamnl",
               "qnctr",
-              "shmnl",
-              "smmnl",
               "sstat",
               "wlsta"
             ] do
@@ -693,7 +548,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
             stop: "place-" <> stop,
             direction: 1,
             trip: trip.id,
-            patterns: RoutePattern.get_relevant_patterns(route_id, "place-" <> stop, 1, global)
+            patterns: [pattern]
           }
         end
 

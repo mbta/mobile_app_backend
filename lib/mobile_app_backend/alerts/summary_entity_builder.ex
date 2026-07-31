@@ -163,7 +163,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     alert.informed_entity
     |> Enum.flat_map(&expand_entity(&1, {all_child_stops, trips, global}))
     |> Enum.uniq()
-    |> Enum.flat_map(&combinations_from_entity(&1, global))
+    |> Enum.flat_map(&combinations_from_entity(&1, trips, global))
     |> Enum.uniq()
   end
 
@@ -248,50 +248,68 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
 
   @spec combinations_from_entity(
           Alert.InformedEntity.t(),
+          %{Trip.id() => Trip.t()},
           GlobalDataCache.data()
         ) ::
           [Combination.t()]
   defp combinations_from_entity(
-         %Alert.InformedEntity{direction_id: direction, route: route, trip: trip},
+         %Alert.InformedEntity{direction_id: direction_id, route: route_id, trip: trip_id},
+         trips,
          global
        ) do
-    patterns = RoutePattern.get_relevant_patterns(route, nil, direction, global)
+    patterns = RoutePattern.get_relevant_patterns(route_id, nil, direction_id, global)
 
-    # we don’t actually need to look at each stop separately if
-    # 1. this isn’t a trip-specific alert
-    # 2. this isn’t on the Green Line
-    # 3. there’s only one pattern in this direction, so all the stops are on it
-    should_expand_stops? =
-      not is_nil(trip) or String.starts_with?(route, "Green-") or length(patterns) > 1
+    cond do
+      not is_nil(trip_id) ->
+        # for trip-specific alerts, we usually need the stop id for trip identity,
+        # and we only want the stops the trip will actually visit
+        trip = trips[trip_id]
+        pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
+        stop_ids = trip.stop_ids
 
-    if should_expand_stops? do
-      patterns
-      |> Enum.flat_map(fn pattern ->
-        pattern_stop_ids = global.trips[pattern.representative_trip_id].stop_ids
-        Enum.map(pattern_stop_ids, &{Stop.parent_id_if_exists(&1, global.stops), pattern})
-      end)
-      |> Enum.group_by(fn {stop_id, _pattern} -> stop_id end, fn {_stop_id, pattern} ->
-        pattern
-      end)
-      |> Enum.map(fn {stop_id, patterns} ->
-        %Combination{
-          route: route,
-          stop: stop_id,
-          direction: direction,
-          trip: trip,
-          patterns: patterns
-        }
-      end)
-    else
-      [
-        %Combination{
-          route: route,
-          stop: nil,
-          direction: direction,
-          trip: trip,
-          patterns: patterns
-        }
-      ]
+        Enum.map(stop_ids, fn stop_id ->
+          stop_id = Stop.parent_id_if_exists(stop_id, global.stops)
+
+          %Combination{
+            route: route_id,
+            stop: stop_id,
+            direction: direction_id,
+            trip: trip_id,
+            patterns: [pattern]
+          }
+        end)
+
+      String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
+        # for branching routes or the Green Line, the summary may differ by stop id
+        patterns
+        |> Enum.flat_map(fn pattern ->
+          pattern_stop_ids = global.trips[pattern.representative_trip_id].stop_ids
+          Enum.map(pattern_stop_ids, &{Stop.parent_id_if_exists(&1, global.stops), pattern})
+        end)
+        |> Enum.group_by(fn {stop_id, _pattern} -> stop_id end, fn {_stop_id, pattern} ->
+          pattern
+        end)
+        |> Enum.map(fn {stop_id, patterns} ->
+          %Combination{
+            route: route_id,
+            stop: stop_id,
+            direction: direction_id,
+            trip: nil,
+            patterns: patterns
+          }
+        end)
+
+      true ->
+        # in all other cases, the stop id doesn’t matter
+        [
+          %Combination{
+            route: route_id,
+            stop: nil,
+            direction: direction_id,
+            trip: nil,
+            patterns: patterns
+          }
+        ]
     end
   end
 
