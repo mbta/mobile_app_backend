@@ -11,7 +11,6 @@ defmodule MobileAppBackendWeb.UserAuth do
   import Phoenix.Controller
 
   alias MobileAppBackend.KeycloakUser
-  alias Oidcc.{ClientContext, Token}
   alias Plug.Conn
 
   @doc """
@@ -267,26 +266,4 @@ defmodule MobileAppBackendWeb.UserAuth do
   defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/dev"
-
-  @spec get_authorization_token(Conn.t()) :: {:ok, String.t()} | {:error, String.t()}
-  defp get_authorization_token(conn) do
-    case get_req_header(conn, "authorization") do
-      ["Bearer " <> token] -> {:ok, token}
-      _ -> {:error, "No token"}
-    end
-  end
-
-  @spec keycloak_issuer :: atom()
-  defp keycloak_issuer do
-    {_, base_opts} = Application.get_env(:ueberauth, Ueberauth)[:providers][:keycloak]
-    base_opts[:issuer]
-  end
-
-  @spec keycloak_client_id :: String.t()
-  defp keycloak_client_id,
-    do: Application.get_env(:ueberauth_oidcc, :providers)[:keycloak][:client_id]
-
-  @spec keycloak_client_secret :: String.t()
-  defp keycloak_client_secret,
-    do: Application.get_env(:ueberauth_oidcc, :providers)[:keycloak][:client_secret]
 end
