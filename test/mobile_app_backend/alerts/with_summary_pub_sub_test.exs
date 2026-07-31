@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
   alias MBTAV3API.Store
   alias MobileAppBackend.Alerts
   alias MobileAppBackend.Alerts.AlertWithSummaries
+  alias MobileAppBackend.Alerts.SummaryEntity
   alias MobileAppBackend.Alerts.WithSummaryPubSub
   import Mox
   import Test.Support.Helpers
@@ -113,7 +114,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
 
       assert_receive {:new_alerts, new_alerts}
 
-      assert to_alert_map([AlertWithSummaries.from_alert(alert_1, [])]) == new_alerts
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(alert_1, [
+                 %SummaryEntity{summary: "Delay until further notice"}
+               ])
+             ]) == new_alerts
 
       # Doesn't re-send the same alerts that have already been seen
       WithSummaryPubSub.handle_info(:broadcast, state)
@@ -125,10 +130,14 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
 
       assert_receive {:new_alerts, new_alerts}
 
-      assert to_alert_map([AlertWithSummaries.from_alert(alert_2, [])]) == new_alerts
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(alert_2, [%SummaryEntity{summary: "Delay"}])
+             ]) == new_alerts
     end
 
     test ":broadcast filters out upcoming single tracking alerts", state do
+      route = build(:route)
+
       single_tracking_future =
         build(:alert,
           id: "a_1",
@@ -138,7 +147,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
               start: DateTime.add(DateTime.now!("America/New_York"), 10, :minute),
               end: nil
             }
-          ]
+          ],
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
         )
 
       single_tracking_now =
@@ -150,7 +160,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
               start: DateTime.add(DateTime.now!("America/New_York"), -10, :minute),
               end: nil
             }
-          ]
+          ],
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
         )
 
       AlertsStoreMock
@@ -161,14 +172,18 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       GlobalDataCacheMock
       |> stub(:default_key, fn -> :default_key end)
       |> stub(:get_data, fn _ ->
-        %{route_patterns: %{}}
+        %{route: %{route.id => route}, route_patterns: %{}}
       end)
 
       RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
 
       WithSummaryPubSub.handle_info(:broadcast, state)
 
-      assert to_alert_map([AlertWithSummaries.from_alert(single_tracking_now, [])]) ==
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(single_tracking_now, [
+                 %SummaryEntity{summary: "Delay until further notice"}
+               ])
+             ]) ==
                WithSummaryPubSub.subscribe(ets_table: state.last_dispatched_table_name)
 
       WithSummaryPubSub.handle_info(:broadcast, state)
