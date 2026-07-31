@@ -75,7 +75,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "^elixir\\s+(?<currentValue>[\\d.]+-otp-\\d+$"
+        "^elixir\\s+(?<currentValue>[\\d.]+)-otp-\\d+$"
       ],
       "depNameTemplate": "elixir",
       "packageNameTemplate": "hexpm/elixir",
