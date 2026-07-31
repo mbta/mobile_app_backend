@@ -30,7 +30,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "^erlang\\s+(?<currentValue>[\\d.]+)$"
+        "(^|\\n)erlang\\s+(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -45,7 +45,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "-otp-(?<currentValue>\\d+)"
+        "-otp-(?<currentValue>\\d+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -60,7 +60,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ERLANG_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ERLANG_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -75,7 +75,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "^elixir\\s+(?<currentValue>[\\d.]+)-otp-\\d+$"
+        "(^|\\n)elixir\\s+(?<currentValue>[\\d.]+)-otp-\\d+(\\n|$)"
       ],
       "depNameTemplate": "elixir",
       "packageNameTemplate": "hexpm/elixir",
@@ -90,7 +90,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ELIXIR_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ELIXIR_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "elixir",
       "packageNameTemplate": "hexpm/elixir",
@@ -105,7 +105,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ALPINE_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ALPINE_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "alpine",
       "packageNameTemplate": "hexpm/elixir",
