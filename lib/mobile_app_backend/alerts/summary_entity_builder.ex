@@ -26,7 +26,13 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   end
 
   @doc """
-  Given a list of alerts and global data, produces a list of summary entites keyed by alert id
+  Given a list of alerts and global data, produces a list of summary entities keyed by alert id.
+
+  Includes summaries for stops that are not directly affected, so that the frontend can correctly
+  display downstream alerts where needed.
+  Note that summary entities may match routes/stops/directions/trips where the alert itself
+  should not be displayed: the frontend will still decide whether or not to actually show the
+  alert, and the summary entity only determines which summary text will be displayed.
   """
   @spec build_all(
           [Alert.t()],
@@ -404,10 +410,10 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     end)
   end
 
-  # Collapse entities where both directions produce identical summaries
+  # Discard specifiers that aren’t necessary to distinguish between summaries
   @spec dedup_summaries([SummaryEntity.t()]) :: [SummaryEntity.t()]
   def dedup_summaries(entities) do
-    # sorted from least desirable to split by to most desirable to split by
+    # sorted from most desirable to collapse into wildcards to least desirable
     all_keys = [:stop_id, :trip_id, :direction_id, :route_id]
 
     for split_key <- all_keys, reduce: entities do
