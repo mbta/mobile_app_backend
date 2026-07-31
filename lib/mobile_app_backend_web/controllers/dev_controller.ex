@@ -8,9 +8,8 @@ defmodule MobileAppBackendWeb.DevController do
 
   plug(Ueberauth)
 
-  @spec home(Conn.t(), any) :: Conn.t()
-  def home(conn, _params) do
-    redirect(conn, to: "/dev/dashboard")
+  def home(conn, params) do
+    render(conn, :dev_home, params)
   end
 
   @spec not_found(Conn.t(), any) :: Conn.t()
