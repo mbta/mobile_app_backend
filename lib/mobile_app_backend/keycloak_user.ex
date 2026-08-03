@@ -3,7 +3,6 @@ defmodule MobileAppBackend.KeycloakUser do
   The User schema. All data comes from Keycloak
   """
   use MobileAppBackend.Schema
-  import Ecto.Changeset
 
   @type id :: Ecto.UUID
   @type role :: :developer
@@ -23,14 +22,6 @@ defmodule MobileAppBackend.KeycloakUser do
     field :roles, {:array, Ecto.Enum}, virtual: true, values: [:developer]
 
     timestamps()
-  end
-
-  @doc false
-  def changeset(user, attrs) do
-    user
-    |> cast(attrs, [:email, :keycloak_id, :first_name, :last_name])
-    |> validate_required([:email, :first_name, :last_name])
-    |> unique_constraint(:email)
   end
 
   @doc """

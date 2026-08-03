@@ -20,7 +20,6 @@ defmodule MobileAppBackendWeb.Router do
     plug :put_root_layout, html: {MobileAppBackendWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug :fetch_current_user
   end
 
   pipeline :api do
@@ -75,7 +74,7 @@ defmodule MobileAppBackendWeb.Router do
   end
 
   scope "/dev", MobileAppBackendWeb do
-    pipe_through [:browser, :require_authenticated_user, :require_developer]
+    pipe_through [:browser, :fetch_current_user, :require_authenticated_user, :require_developer]
 
     get "/", DevController, :home
     live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
@@ -83,7 +82,7 @@ defmodule MobileAppBackendWeb.Router do
   end
 
   scope "/dev", MobileAppBackendWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :fetch_current_user]
 
     get "/*_", DevController, :not_found
   end
