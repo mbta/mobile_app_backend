@@ -10,9 +10,10 @@
   "packageRules": [
     {
       "description": "manage erlang/elixir/alpine version directly from hexpm docker image",
-      "matchPackageNames": [
+      "matchDepNames": [
         "erlang",
         "elixir",
+        "hexpm/elixir",
         "alpine"
       ],
       "matchManagers": [
@@ -20,6 +21,66 @@
         "dockerfile"
       ],
       "enabled": false
+    },
+    {
+      "description": "propose erlang/elixir/alpine updates at separate levels in parallel",
+      "matchDepNames": [
+        "erlang",
+        "elixir",
+        "alpine"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "separateMajorMinor": true,
+      "separateMinorPatch": true,
+      "separateMultipleMajor": true,
+      "separateMultipleMinor": true
+    },
+    {
+      "description": "group erlang/elixir/alpine patch updates together",
+      "matchDepNames": [
+        "erlang",
+        "elixir",
+        "alpine"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "erlang/elixir/alpine"
+    },
+    {
+      "description": "link to erlang release notes",
+      "matchDepNames": [
+        "erlang"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "changelogUrl": "https://www.erlang.org/patches/OTP-{{ newVersion }}"
+    },
+    {
+      "description": "link to elixir release notes",
+      "matchDepNames": [
+        "elixir"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "changelogUrl": "https://github.com/elixir-lang/elixir/releases/tag/v{{ newVersion }}"
+    },
+    {
+      "description": "link to alpine news page",
+      "matchDepNames": [
+        "alpine"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "changelogUrl": "https://alpinelinux.org/posts/"
     }
   ],
   "customManagers": [
@@ -30,7 +91,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "^erlang\\s+(?<currentValue>[\\d.]+)$"
+        "(^|\\n)erlang\\s+(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -45,7 +106,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "-otp-(?<currentValue>\\d+)"
+        "-otp-(?<currentValue>\\d+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -60,7 +121,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ERLANG_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ERLANG_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "erlang",
       "packageNameTemplate": "hexpm/elixir",
@@ -75,7 +136,7 @@
         ".tool-versions"
       ],
       "matchStrings": [
-        "^elixir\\s+(?<currentValue>[\\d.]+)-otp-\\d+$"
+        "(^|\\n)elixir\\s+(?<currentValue>[\\d.]+)-otp-\\d+(\\n|$)"
       ],
       "depNameTemplate": "elixir",
       "packageNameTemplate": "hexpm/elixir",
@@ -90,7 +151,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ELIXIR_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ELIXIR_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "elixir",
       "packageNameTemplate": "hexpm/elixir",
@@ -105,7 +166,7 @@
         "Dockerfile"
       ],
       "matchStrings": [
-        "^ARG ALPINE_VERSION=(?<currentValue>[\\d.]+)$"
+        "(^|\\n)ARG ALPINE_VERSION=(?<currentValue>[\\d.]+)(\\n|$)"
       ],
       "depNameTemplate": "alpine",
       "packageNameTemplate": "hexpm/elixir",

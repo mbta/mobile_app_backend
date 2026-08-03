@@ -137,6 +137,23 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  if keycloak_issuer = System.get_env("KEYCLOAK_ISSUER") do
+    keycloak_base_opts = [
+      issuer: :keycloak_issuer,
+      client_id: System.fetch_env!("KEYCLOAK_CLIENT_ID"),
+      client_secret: System.fetch_env!("KEYCLOAK_CLIENT_SECRET")
+    ]
+
+    config :ueberauth_oidcc,
+      issuers: [
+        %{
+          name: :keycloak_issuer,
+          issuer: keycloak_issuer
+        }
+      ],
+      providers: [keycloak: keycloak_base_opts]
+  end
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key
