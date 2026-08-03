@@ -10,9 +10,10 @@
   "packageRules": [
     {
       "description": "manage erlang/elixir/alpine version directly from hexpm docker image",
-      "matchPackageNames": [
+      "matchDepNames": [
         "erlang",
         "elixir",
+        "hexpm/elixir",
         "alpine"
       ],
       "matchManagers": [
@@ -20,6 +21,36 @@
         "dockerfile"
       ],
       "enabled": false
+    },
+    {
+      "description": "propose erlang/elixir/alpine updates at separate levels in parallel",
+      "matchDepNames": [
+        "erlang",
+        "elixir",
+        "alpine"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "separateMajorMinor": true,
+      "separateMinorPatch": true,
+      "separateMultipleMajor": true,
+      "separateMultipleMinor": true
+    },
+    {
+      "description": "group erlang/elixir/alpine patch updates together",
+      "matchDepNames": [
+        "erlang",
+        "elixir",
+        "alpine"
+      ],
+      "matchManagers": [
+        "regex"
+      ],
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "groupName": "runtime (patch)"
     }
   ],
   "customManagers": [
