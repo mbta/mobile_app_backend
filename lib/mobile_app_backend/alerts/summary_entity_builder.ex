@@ -264,20 +264,26 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         # for trip-specific alerts, we usually need the stop id for trip identity,
         # and we only want the stops the trip will actually visit
         trip = trips[trip_id]
-        pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
-        stop_ids = trip.stop_ids
 
-        Enum.map(stop_ids, fn stop_id ->
-          stop_id = Stop.parent_id_if_exists(stop_id, global.stops)
+        if is_nil(trip) do
+          Logger.error("unknown trip #{trip_id} for route #{route_id} direction #{direction_id}")
+          []
+        else
+          pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
+          stop_ids = trip.stop_ids
 
-          %Combination{
-            route: route_id,
-            stop: stop_id,
-            direction: direction_id,
-            trip: trip_id,
-            patterns: [pattern]
-          }
-        end)
+          Enum.map(stop_ids, fn stop_id ->
+            stop_id = Stop.parent_id_if_exists(stop_id, global.stops)
+
+            %Combination{
+              route: route_id,
+              stop: stop_id,
+              direction: direction_id,
+              trip: trip_id,
+              patterns: [pattern]
+            }
+          end)
+        end
 
       String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
         # for branching routes or the Green Line, the summary may differ by stop id
@@ -388,8 +394,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
                include: [trip: :stops],
                sort: {:stop_sequence, :asc}
              ) do
-          {:ok, %{data: schedules, included: %{trips: trips}}} -> {schedules, trips}
-          _ -> {nil, nil}
+          {:ok, %{data: schedules, included: %{trips: trips}}} ->
+            {schedules, trips}
+
+          response ->
+            Logger.error(
+              "failed to fetch schedules for trip_ids #{inspect(trip_ids)} response=#{inspect(response)}"
+            )
+
+            {nil, nil}
         end
     end
   end
