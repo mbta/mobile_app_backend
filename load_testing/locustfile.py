@@ -42,12 +42,12 @@ def on_init(environment, **_kwargs):
     initial_global_response = requests.get(f"{host}/api/global")
     initial_global_headers = {}
     if initial_global_response.status_code == 200:
-        initial_global_headers = {"if-none-match": sha256(initial_global_response.text.encode()).hexdigest()}
+        initial_global_headers = {"if-none-match": initial_global_response.headers.get("etag", "")}
 
     initial_rail_response = requests.get(f"{host}/api/shapes/map-friendly/rail")
     initial_rail_headers = {}
     if initial_rail_response.status_code == 200:
-        initial_rail_headers = {"if-none-match": sha256(initial_rail_response.text.encode()).hexdigest()}
+        initial_rail_headers = {"if-none-match": initial_rail_response.headers.get("etag", "")}
 
 
 @events.init_command_line_parser.add_listener
@@ -90,11 +90,11 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
     def app_reload(self):
         global_response = self.client.get("/api/global", headers=self.global_headers)
         if global_response.status_code == 200:
-            self.global_headers = {"if-none-match": sha256(global_response.text.encode()).hexdigest()}
+            self.global_headers = {"if-none-match": global_response.headers.get("etag", "")}
         
         rail_response = self.client.get("/api/shapes/map-friendly/rail", headers=self.rail_headers)
         if rail_response.status_code == 200:
-            self.rail_headers = {"if-none-match": sha256(rail_response.text.encode()).hexdigest()}
+            self.rail_headers = {"if-none-match": global_response.headers.get("etag", "")}
 
         if self.alerts_channel is not None:
                 self.alerts_channel.leave()
@@ -169,7 +169,12 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
             self.stop_id = random.choice(all_stations_and_bus)
         predictions_for_stop = requests.get(
             "https://api-v3.mbta.com/predictions", 
-            params={"stop": self.stop_id}, headers=self.v3_api_headers).json()["data"]
+            params={"stop": self.stop_id}, headers=self.v3_api_headers).json()
+        if predictions_for_stop is not None and "data" in predictions_for_stop:
+            predictions_for_stop = predictions_for_stop["data"]
+        else:
+            print(f"Predictions fetch fail - stop={self.stop_id} response={predictions_for_stop}")
+            predictions_for_stop = []
         if (len(predictions_for_stop) != 0):
             prediction = predictions_for_stop[0]
             trip_id = prediction["relationships"]["trip"]["data"]["id"]
