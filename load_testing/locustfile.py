@@ -1,6 +1,5 @@
 import datetime
 import random
-from hashlib import sha256
 from zoneinfo import ZoneInfo
 
 import requests
