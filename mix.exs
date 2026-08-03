@@ -21,7 +21,7 @@ defmodule MobileAppBackend.MixProject do
   #
   # Type `mix help compile.app` for more information.
   def application do
-    extra_applications = [:logger, :runtime_tools]
+    extra_applications = [:logger, :runtime_tools, :os_mon]
 
     extra_applications =
       if(Mix.env() == :prod,
@@ -56,6 +56,7 @@ defmodule MobileAppBackend.MixProject do
       {:diskusage_logger, "~> 0.2", only: :prod},
       {:dns_cluster, "~> 0.2.0"},
       {:ecto_sql, "~> 3.0"},
+      {:ecto_psql_extras, "~> 0.6"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:ex_aws, "== 2.6.1"},
@@ -93,6 +94,8 @@ defmodule MobileAppBackend.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:typed_ecto_schema, "~> 0.4.3"},
       {:tzdata, "~> 1.1"},
+      {:ueberauth, "~> 0.10"},
+      {:ueberauth_oidcc, "~> 0.4"},
       {:uniq, "~> 0.6", only: :test}
     ]
   end

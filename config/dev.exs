@@ -69,3 +69,8 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Include HEEx debug annotations as HTML comments in rendered markup
 config :phoenix_live_view, debug_heex_annotations: true, debug_attributes: true
+
+config :ueberauth, Ueberauth,
+  providers: [
+    keycloak: {Ueberauth.Strategy.FakeKeycloak, [issuer: :keycloak_issuer]}
+  ]

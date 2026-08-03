@@ -1,8 +1,20 @@
 defmodule MobileAppBackendWeb.Router do
   use MobileAppBackendWeb, :router
+  import Oban.Web.Router
+  import Phoenix.LiveDashboard.Router
+  import MobileAppBackendWeb.UserAuth
+
+  @redirect_http Application.compile_env(:mobile_app_backend, :redirect_http?)
+
+  pipeline :redirect_prod_http do
+    if @redirect_http do
+      plug(Plug.SSL, rewrite_on: [:x_forwarded_proto])
+    end
+  end
 
   pipeline :browser do
     plug :accepts, ["html"]
+    plug :redirect_prod_http
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {MobileAppBackendWeb.Layouts, :root}
@@ -13,6 +25,10 @@ defmodule MobileAppBackendWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
     plug(MobileAppBackendWeb.Plugs.Etag)
+  end
+
+  pipeline :require_developer do
+    plug :require_roles, required_roles: [:developer]
   end
 
   scope "/", MobileAppBackendWeb do
@@ -57,22 +73,30 @@ defmodule MobileAppBackendWeb.Router do
     get("/trip/map-friendly", TripController, :map_friendly)
   end
 
-  # Enable LiveDashboard in development
-  if Application.compile_env(:mobile_app_backend, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Oban.Web.Router
-    import Phoenix.LiveDashboard.Router
+  scope "/dev", MobileAppBackendWeb do
+    pipe_through [:browser, :fetch_current_user, :require_authenticated_user, :require_developer]
 
-    scope "/dev" do
-      pipe_through :browser
+    get "/", DevController, :home
+    live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
+    oban_dashboard("/oban")
+  end
 
-      live_dashboard "/dashboard", metrics: MobileAppBackendWeb.Telemetry
-      oban_dashboard("/oban")
-    end
+  scope "/dev", MobileAppBackendWeb do
+    pipe_through [:browser, :fetch_current_user]
+
+    get "/*_", DevController, :not_found
+  end
+
+  scope "/auth", MobileAppBackendWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/:provider", AuthController, :request
+  end
+
+  scope "/auth", MobileAppBackendWeb do
+    pipe_through [:browser]
+
+    get "/:provider/callback", AuthController, :callback
   end
 
   scope "/", MobileAppBackendWeb do
