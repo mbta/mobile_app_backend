@@ -283,6 +283,106 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
              ]
     end
 
+    # This is the current behavior, which I think we'll want to change, but leaving it here
+    # so we have a test to make sure the future change works as expected.
+     test "build trip alert for a trip not scheduled today" do
+      now = ~B[2026-06-03 12:00:00]
+
+      global = GlobalDataCache.get_data()
+      all_child_stops = MBTAV3API.Repository.stops(include: [:child_stops])
+
+      stops = [
+        "place-brntn",
+        "place-qamnl",
+        "place-qnctr",
+        "place-wlsta",
+        "place-nqncy",
+        "place-jfk",
+        "place-andrw",
+        "place-brdwy",
+        "place-sstat",
+        "place-dwnxg",
+        "place-pktrm",
+        "place-chmnl",
+        "place-knncl",
+        "place-cntsq",
+        "place-harsq",
+        "place-portr",
+        "place-davis",
+        "place-alfcl"
+      ]
+
+      route_id = "Red"
+
+      trip =
+        build(:trip,
+          direction_id: 1,
+          route_id: route_id,
+          route_pattern_id: "Red-3-1",
+          stop_ids: stops
+        )
+
+      trip_id = trip.id
+
+      tomorrow = DateTime.add(now, 1, :day)
+
+      _schedules =
+        for {stop, index} <- Enum.with_index(stops) do
+          build(:schedule,
+            departure_time: DateTime.add(tomorrow, index, :minute),
+            trip_id: trip_id,
+            route_id: route_id,
+            stop_id: stop
+          )
+        end
+
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+      expect(RepositoryMock, :schedules, 2, fn
+        [filter: [trip: [^trip_id]], include: [trip: :stops], sort: {:stop_sequence, :asc}], [] ->
+          ok_response([], [trip])
+      end)
+
+      stub(RepositoryMock, :stops, fn [include: [:child_stops]], [] -> all_child_stops end)
+
+      alert =
+        build(:alert,
+          cause: :maintenance,
+          effect: :suspension,
+          informed_entity: [
+            %InformedEntity{route: route_id, trip: trip_id, direction_id: trip.direction_id}
+          ]
+        )
+
+      alert_id = alert.id
+
+      assert %{^alert_id => entities} =
+               SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
+
+      assert Enum.sort_by(entities, &{&1.route_id, &1.stop_id, &1.direction_id, &1.trip_id}) == [
+                      %MobileAppBackend.Alerts.SummaryEntity{
+                direction_id: nil,
+                route_id: nil,
+                stop_id: nil,
+                summary: "Service suspended on Red Line",
+                trip_id: nil
+              }
+             ]
+
+      assert %{^alert_id => entities} =
+               SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
+
+      assert Enum.sort_by(entities, &{&1.route_id, &1.stop_id, &1.direction_id, &1.trip_id}) == [
+           %MobileAppBackend.Alerts.SummaryEntity{
+                direction_id: nil,
+                route_id: nil,
+                stop_id: nil,
+                summary: "Service suspended on Red Line",
+                trip_id: nil
+              }
+             ]
+    end
+
     test "build stop alert" do
       now = DateTime.now!("America/New_York")
       stop_id = "place-wlsta"
