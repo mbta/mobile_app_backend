@@ -260,30 +260,38 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     patterns = RoutePattern.get_relevant_patterns(route_id, nil, direction_id, global)
 
     cond do
-      not is_nil(trip_id) ->
+      not is_nil(trip_id) && not is_nil(trips[trip_id]) ->
         # for trip-specific alerts, we usually need the stop id for trip identity,
         # and we only want the stops the trip will actually visit
         trip = trips[trip_id]
 
-        if is_nil(trip) do
-          Logger.error("unknown trip #{trip_id} for route #{route_id} direction #{direction_id}")
-          []
-        else
-          pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
-          stop_ids = trip.stop_ids
+        pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
+        stop_ids = trip.stop_ids
 
-          Enum.map(stop_ids, fn stop_id ->
-            stop_id = Stop.parent_id_if_exists(stop_id, global.stops)
+        Enum.map(stop_ids, fn stop_id ->
+          stop_id = Stop.parent_id_if_exists(stop_id, global.stops)
 
-            %Combination{
-              route: route_id,
-              stop: stop_id,
-              direction: direction_id,
-              trip: trip_id,
-              patterns: List.wrap(pattern)
-            }
-          end)
-        end
+          %Combination{
+            route: route_id,
+            stop: stop_id,
+            direction: direction_id,
+            trip: trip_id,
+            patterns: List.wrap(pattern)
+          }
+        end)
+
+      not is_nil(trip_id) && is_nil(trips[trip_id]) ->
+        Logger.error("unknown trip #{trip_id} for route #{route_id} direction #{direction_id}")
+
+        [
+          %Combination{
+            route: route_id,
+            stop: nil,
+            direction: direction_id,
+            trip: trip_id,
+            patterns: []
+          }
+        ]
 
       String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
         # for branching routes or the Green Line, the summary may differ by stop id

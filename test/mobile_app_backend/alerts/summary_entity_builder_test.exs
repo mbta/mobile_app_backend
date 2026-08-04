@@ -285,7 +285,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
 
     # This is the current behavior, which I think we'll want to change, but leaving it here
     # so we have a test to make sure the future change works as expected.
-     test "build trip alert for a trip not scheduled today" do
+    test "build trip alert for a trip not scheduled today" do
       now = ~B[2026-06-03 12:00:00]
 
       global = GlobalDataCache.get_data()
@@ -360,26 +360,26 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
 
       assert Enum.sort_by(entities, &{&1.route_id, &1.stop_id, &1.direction_id, &1.trip_id}) == [
-                      %MobileAppBackend.Alerts.SummaryEntity{
-                direction_id: nil,
-                route_id: nil,
-                stop_id: nil,
-                summary: "Service suspended on Red Line",
-                trip_id: nil
-              }
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: nil,
+                 summary: "Service suspended on Red Line",
+                 trip_id: nil
+               }
              ]
 
       assert %{^alert_id => entities} =
                SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
 
       assert Enum.sort_by(entities, &{&1.route_id, &1.stop_id, &1.direction_id, &1.trip_id}) == [
-           %MobileAppBackend.Alerts.SummaryEntity{
-                direction_id: nil,
-                route_id: nil,
-                stop_id: nil,
-                summary: "Service suspended on Red Line",
-                trip_id: nil
-              }
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: nil,
+                 summary: "Service suspended on Red Line",
+                 trip_id: nil
+               }
              ]
     end
 
