@@ -99,7 +99,7 @@ class MobileAppUser(HttpUser, PhoenixChannelUser):
                 self.alerts_channel.leave()
                 self.alerts_channel = None
         
-        self.alerts_channel = self.socket.channel("alerts")
+        self.alerts_channel = self.socket.channel("alerts:v3")
         self.alerts_channel.join()
     
     def fetch_schedules_for_stops(self, stop_ids):
