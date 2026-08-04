@@ -280,7 +280,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
               stop: stop_id,
               direction: direction_id,
               trip: trip_id,
-              patterns: [pattern]
+              patterns: List.wrap(pattern)
             }
           end)
         end
