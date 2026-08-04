@@ -264,7 +264,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         # for trip-specific alerts, we usually need the stop id for trip identity,
         # and we only want the stops the trip will actually visit
         trip = trips[trip_id]
-
         pattern = Enum.find(patterns, &(&1.id == trip.route_pattern_id))
         stop_ids = trip.stop_ids
 
