@@ -117,10 +117,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   @impl GenServer
   def handle_info(:broadcast, %{last_dispatched_table_name: last_dispatched} = state) do
     Logger.info("#{__MODULE__} handle :broadcast started")
+    now = Map.get(state, :now, DateTime.now!("America/New_York"))
 
     {time_micros, _results} =
       :timer.tc(fn ->
-        all_summaries = recalculate(last_dispatched)
+        all_summaries = recalculate(last_dispatched, now)
 
         perform_broadcast(last_dispatched, all_summaries)
       end)
@@ -136,10 +137,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
         %{last_dispatched_table_name: last_dispatched} = state
       ) do
     Logger.info("#{__MODULE__} handle :new_alerts started")
+    now = Map.get(state, :now, DateTime.now!("America/New_York"))
 
     {time_micros, _results} =
       :timer.tc(fn ->
-        all_summaries = recalculate(last_dispatched, Map.values(all_alerts))
+        all_summaries = recalculate(last_dispatched, now, Map.values(all_alerts))
 
         perform_broadcast(last_dispatched, all_summaries)
       end)
@@ -171,24 +173,74 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   @typep summary_key :: locale :: String.t()
   @typep all_summaries :: %{summary_key() => alerts_with_summaries()}
 
-  defp recalculate(ets_table, all_alerts \\ nil) do
+  defp recalculate(ets_table, now, all_alerts \\ nil) do
+    old_summaries_by_locale =
+      case :ets.lookup(ets_table, :all_summaries) do
+        [{:all_summaries, all_summaries}] -> all_summaries
+        [] -> %{}
+      end
+
     all_alerts = all_alerts || Store.Alerts.fetch([])
-    all_summaries = build_all_summaries(all_alerts)
+
+    changed_alerts =
+      alerts_to_recalculate(
+        Map.get(old_summaries_by_locale, @default_locale, %{}),
+        all_alerts,
+        now
+      )
+
+    {time_micros, alerts_with_changed_summaries_by_locale} =
+      :timer.tc(fn -> build_all_summaries(changed_alerts, now) end)
+
+    Logger.info(
+      "#{__MODULE__} recalculated summaries recalculated=#{length(changed_alerts)} total=#{length(all_alerts)} duration=#{time_micros / 1_000}"
+    )
+
+    all_summaries =
+      Map.merge(old_summaries_by_locale, alerts_with_changed_summaries_by_locale, fn _locale,
+                                                                                     old_alerts_with_summaries,
+                                                                                     new_alerts_with_summaries ->
+        ids_to_remove =
+          MapSet.difference(
+            MapSet.new(Map.keys(old_alerts_with_summaries)),
+            MapSet.new(Enum.map(all_alerts, & &1.id))
+          )
+
+        old_alerts_with_summaries
+        |> Map.drop(MapSet.to_list(ids_to_remove))
+        |> Map.merge(new_alerts_with_summaries)
+      end)
+
     :ets.insert(ets_table, {:all_summaries, all_summaries})
     all_summaries
   end
 
-  @spec build_all_summaries([Alert.t()]) :: all_summaries()
-  defp build_all_summaries(alerts) do
+  @spec alerts_to_recalculate(%{Alert.id() => AlertWithSummaries.t()}, [Alert.t()], DateTime.t()) ::
+          [Alert.t()]
+  defp alerts_to_recalculate(old_summary_map, new_alerts, now) do
+    new_alerts
+    |> Enum.filter(fn alert ->
+      old_alert_with_summaries = Map.get(old_summary_map, alert.id)
+
+      if old_alert_with_summaries do
+        AlertWithSummaries.should_recalculate_summaries?(old_alert_with_summaries, alert, now)
+      else
+        true
+      end
+    end)
+  end
+
+  @spec build_all_summaries([Alert.t()], DateTime.t()) :: all_summaries()
+  defp build_all_summaries(alerts, now) do
     alerts_by_id = Map.new(alerts, &{&1.id, &1})
 
     for locale <- Application.get_env(:mobile_app_backend, :locale_codes),
         into: %{} do
       alerts_with_summaries =
-        SummaryEntityBuilder.build_all(alerts, locale, :card)
+        SummaryEntityBuilder.build_all(alerts, now, locale, :card)
         |> Map.new(fn {alert_id, summary_entities} ->
           alert = alerts_by_id[alert_id]
-          value = AlertWithSummaries.from_alert(alert, summary_entities)
+          value = AlertWithSummaries.from_alert(alert, summary_entities, now)
           {alert_id, value}
         end)
 
