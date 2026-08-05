@@ -260,7 +260,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     patterns = RoutePattern.get_relevant_patterns(route_id, nil, direction_id, global)
 
     cond do
-      not is_nil(trip_id) ->
+      not is_nil(trip_id) && not is_nil(trips[trip_id]) ->
         # for trip-specific alerts, we usually need the stop id for trip identity,
         # and we only want the stops the trip will actually visit
         trip = trips[trip_id]
@@ -275,9 +275,22 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
             stop: stop_id,
             direction: direction_id,
             trip: trip_id,
-            patterns: [pattern]
+            patterns: List.wrap(pattern)
           }
         end)
+
+      not is_nil(trip_id) && is_nil(trips[trip_id]) ->
+        Logger.error("unknown trip #{trip_id} for route #{route_id} direction #{direction_id}")
+
+        [
+          %Combination{
+            route: route_id,
+            stop: nil,
+            direction: direction_id,
+            trip: trip_id,
+            patterns: []
+          }
+        ]
 
       String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
         # for branching routes or the Green Line, the summary may differ by stop id
@@ -388,8 +401,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
                include: [trip: :stops],
                sort: {:stop_sequence, :asc}
              ) do
-          {:ok, %{data: schedules, included: %{trips: trips}}} -> {schedules, trips}
-          _ -> {nil, nil}
+          {:ok, %{data: schedules, included: %{trips: trips}}} ->
+            {schedules, trips}
+
+          response ->
+            Logger.error(
+              "failed to fetch schedules for trip_ids #{inspect(trip_ids)} response=#{inspect(response)}"
+            )
+
+            {nil, nil}
         end
     end
   end

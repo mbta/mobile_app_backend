@@ -2114,6 +2114,48 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    # This test specifies the current behavior that should be changed.
+    test "trip specific reminder no schedules today" do
+      now = ~B[2026-03-12 12:00:00]
+      stop = build(:stop, name: "Ruggles")
+      route = build(:route)
+      pattern = build(:route_pattern, route_id: route.id)
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: now |> DateTime.add(1, :day) |> DateTime.add(-2, :hour),
+              end: now |> DateTime.add(1, :day) |> DateTime.add(2, :hour)
+            }
+          ],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{trip: trip.id}]
+        )
+
+      assert %MobileAppBackend.Alerts.AlertSummary.Standard{
+               effect: :suspension,
+               is_update: false,
+               location: nil,
+               recurrence: nil,
+               timeframe: %MobileAppBackend.Alerts.AlertSummary.Timeframe.StartingTomorrow{}
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 stop.id,
+                 0,
+                 [pattern],
+                 now,
+                 [],
+                 %{
+                   stops: %{stop.id => stop},
+                   routes: %{route.id => route}
+                 },
+                 :notification
+               )
+    end
+
     test "trip shuttle recurrence" do
       now = ~B[2026-03-09 12:00:00]
       stop1 = build(:stop, name: "Ruggles")
