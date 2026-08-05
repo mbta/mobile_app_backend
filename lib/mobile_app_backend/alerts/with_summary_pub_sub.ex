@@ -33,6 +33,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   alias MobileAppBackend.Alerts.AlertWithSummaries
   alias MobileAppBackend.Alerts.SummaryEntityBuilder
 
+  require Logger
+
   @behaviour __MODULE__.Behaviour
 
   @default_locale MobileAppBackend.Application.default_locale()
@@ -114,10 +116,18 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
 
   @impl GenServer
   def handle_info(:broadcast, %{last_dispatched_table_name: last_dispatched} = state) do
-    all_summaries = recalculate(last_dispatched)
+    Logger.info("#{__MODULE__} handle :broadcast started")
 
-    perform_broadcast(last_dispatched, all_summaries)
+    {time_micros, _results} =
+      :timer.tc(fn ->
+        all_summaries = recalculate(last_dispatched)
 
+        perform_broadcast(last_dispatched, all_summaries)
+      end)
+
+    time_ms = time_micros / 1000
+
+    Logger.info("#{__MODULE__} handle :broadcast completed duration=#{time_ms}")
     {:noreply, state, :hibernate}
   end
 
@@ -125,8 +135,18 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
         {:new_alerts, %{alerts: all_alerts}},
         %{last_dispatched_table_name: last_dispatched} = state
       ) do
-    all_summaries = recalculate(last_dispatched, Map.values(all_alerts))
-    perform_broadcast(last_dispatched, all_summaries)
+    Logger.info("#{__MODULE__} handle :new_alerts started")
+
+    {time_micros, _results} =
+      :timer.tc(fn ->
+        all_summaries = recalculate(last_dispatched, Map.values(all_alerts))
+
+        perform_broadcast(last_dispatched, all_summaries)
+      end)
+
+    time_ms = time_micros / 1000
+    Logger.info("#{__MODULE__} handle :new_alerts completed duration=#{time_ms}")
+
     {:noreply, state}
   end
 

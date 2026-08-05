@@ -93,6 +93,7 @@ defmodule MobileAppBackend.PubSub do
   defmacro __using__(opts) do
     quote location: :keep, bind_quoted: [opts: opts] do
       use GenServer
+      require Logger
 
       @broadcast_interval_ms Keyword.fetch!(opts, :broadcast_interval_ms)
 
@@ -101,11 +102,14 @@ defmodule MobileAppBackend.PubSub do
       # consumers don't have to wait `:broadcast_interval_ms` to receive their first message.
       @impl true
       def handle_info(:reset_event, state) do
+        Logger.info("#{__MODULE__} broadcasting on :reset_event")
         send(self(), :broadcast)
         {:noreply, state, :hibernate}
       end
 
       def handle_info(:timed_broadcast, state) do
+        Logger.info("#{__MODULE__} broadcasting on :timed_broadcast #{@broadcast_interval_ms}")
+
         send(self(), :broadcast)
         broadcast_timer(@broadcast_interval_ms)
         {:noreply, state, :hibernate}

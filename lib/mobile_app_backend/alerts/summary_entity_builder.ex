@@ -44,7 +44,18 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   def build_all(alerts, at_time, locale, global, context) do
     Map.new(
       Enum.map(alerts, fn alert ->
-        {alert.id, build_for_alert(alert, at_time, locale, global, context)}
+        Logger.info("#{__MODULE__} building summaries for alert #{alert.id}")
+
+        {time_micros, result} =
+          :timer.tc(fn ->
+            build_for_alert(alert, at_time, locale, global, context)
+          end)
+
+        Logger.info(
+          "#{__MODULE__} completed building summaries for alert #{alert.id} duration=#{time_micros / 1000}"
+        )
+
+        {alert.id, result}
       end)
     )
   end
