@@ -32,6 +32,7 @@ defmodule MBTAV3API.Stream.Instance do
        name: MBTAV3API.Stream.Registry.via_name(ref),
        url: url,
        headers: headers,
+       conn: %Mint.HTTP1{},
        idle_timeout: :timer.seconds(45)},
       consumer_spec(Keyword.put(opts, :ref, ref))
     ]

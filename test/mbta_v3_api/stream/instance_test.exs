@@ -19,6 +19,7 @@ defmodule MBTAV3API.Stream.InstanceTest do
     assert SSEStub.get_args(sse_stage) == [
              url: "https://example.com",
              headers: [{"a", "b"}],
+             conn: %Mint.HTTP1{},
              idle_timeout: :timer.seconds(45)
            ]
 

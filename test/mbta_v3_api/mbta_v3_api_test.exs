@@ -235,6 +235,7 @@ defmodule MBTAV3APITest do
       assert SSEStub.get_args(sse_stub) == [
                url: "http://example.com/ok?a=b&c=d",
                headers: [{"x-api-key", "efg"}],
+               conn: %Mint.HTTP1{},
                idle_timeout: :timer.seconds(45)
              ]
 
