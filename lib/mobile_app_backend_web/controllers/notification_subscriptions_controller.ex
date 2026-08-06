@@ -7,25 +7,31 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
   alias MobileAppBackend.Notifications.WritePayload
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
+  alias Util.FCMTarget
 
   def set_include_accessibility(conn, params) do
     status =
-      with {:ok, fcm_token} <- Map.fetch(params, "fcm_token"),
+      with {:ok, fcm_target} <- FCMTarget.parse(params),
            {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
         locale = params["locale"]
 
         now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
 
+        user_where = FCMTarget.user_where(fcm_target)
+
         Repo.update_all(
           from(u in User,
-            where: u.fcm_token == ^fcm_token,
+            where: ^user_where,
             update: [set: [fcm_last_verified: ^now, locale: coalesce(^locale, u.locale)]]
           ),
           []
         )
 
         Repo.update_all(
-          from(ns in Subscription, join: u in assoc(ns, :user), where: u.fcm_token == ^fcm_token),
+          from(ns in Subscription,
+            join: u in subquery(from u in User, where: ^user_where),
+            on: ns.user_id == u.id
+          ),
           set: [include_accessibility: include_accessibility]
         )
 
@@ -67,17 +73,17 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
 
   @spec perform_write(WritePayload.t(), DateTime.t()) :: {:ok, :ok} | {:error, term()}
   defp perform_write(payload, now) do
-    fcm_token = payload.fcm_token
+    user_where = FCMTarget.user_where(payload.fcm_target)
 
     Repo.transact(fn ->
       user =
         Repo.one(
           from u in User,
-            where: u.fcm_token == ^fcm_token,
+            where: ^user_where,
             preload: [notification_subscriptions: :windows]
         )
         |> case do
-          nil -> %User{fcm_token: fcm_token}
+          nil -> FCMTarget.new_user(payload.fcm_target)
           user -> user
         end
 
