@@ -129,7 +129,7 @@ defmodule MBTAV3API do
     {time, response} =
       :timer.tc(fn ->
         Req.new(
-          finch: Finch.CustomPool,
+          finch: [name: Finch.CustomPool, pool_timeout: timeout, receive_timeout: timeout],
           method: :get,
           base_url: base_url,
           url: URI.encode(url),
@@ -138,9 +138,7 @@ defmodule MBTAV3API do
           compressed: true,
           decode_body: false,
           retry_delay: fn _ -> 300 end,
-          max_retries: 2,
-          pool_timeout: timeout,
-          receive_timeout: timeout
+          max_retries: 2
         )
         |> MobileAppBackend.HTTP.request()
       end)
