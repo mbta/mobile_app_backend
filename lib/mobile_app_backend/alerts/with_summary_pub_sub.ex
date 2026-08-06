@@ -116,19 +116,10 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
 
   @impl GenServer
   def handle_info(:broadcast, %{last_dispatched_table_name: last_dispatched} = state) do
-    Logger.info("#{__MODULE__} handle :broadcast started")
     now = Map.get(state, :now, DateTime.now!("America/New_York"))
+    all_summaries = recalculate(last_dispatched, now)
+    perform_broadcast(last_dispatched, all_summaries)
 
-    {time_micros, _results} =
-      :timer.tc(fn ->
-        all_summaries = recalculate(last_dispatched, now)
-
-        perform_broadcast(last_dispatched, all_summaries)
-      end)
-
-    time_ms = time_micros / 1000
-
-    Logger.info("#{__MODULE__} handle :broadcast completed duration=#{time_ms}")
     {:noreply, state, :hibernate}
   end
 
@@ -138,16 +129,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
       ) do
     Logger.info("#{__MODULE__} handle :new_alerts started")
     now = Map.get(state, :now, DateTime.now!("America/New_York"))
-
-    {time_micros, _results} =
-      :timer.tc(fn ->
-        all_summaries = recalculate(last_dispatched, now, Map.values(all_alerts))
-
-        perform_broadcast(last_dispatched, all_summaries)
-      end)
-
-    time_ms = time_micros / 1000
-    Logger.info("#{__MODULE__} handle :new_alerts completed duration=#{time_ms}")
+    all_summaries = recalculate(last_dispatched, now, Map.values(all_alerts))
+    perform_broadcast(last_dispatched, all_summaries)
 
     {:noreply, state}
   end
