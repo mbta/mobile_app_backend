@@ -49,6 +49,14 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     )
   end
 
+  @spec build_all([Alert.t()], DateTime.t(), String.t(), AlertSummary.context()) ::
+          %{String.t() => [SummaryEntity.t()]}
+  def build_all(alerts, at_time, locale, context) do
+    global = GlobalDataCache.get_data()
+
+    build_all(alerts, at_time, locale, global, context)
+  end
+
   @spec build_all([Alert.t()], String.t(), AlertSummary.context()) ::
           %{String.t() => [SummaryEntity.t()]}
   def build_all(alerts, locale, context) do

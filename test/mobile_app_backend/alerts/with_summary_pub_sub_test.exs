@@ -36,7 +36,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     %{
       alerts_with_summaries:
         alerts_with_summaries
-        |> Map.new(&{&1.id, &1})
+        |> Map.new(&{&1.alert.id, &1})
     }
   end
 
@@ -53,10 +53,26 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     test "returns initial data" do
       alert_1 = build(:alert, id: "a_1")
 
-      ets_table = :ets.new(nil, [:set])
-      :ets.insert(ets_table, {:all_summaries, %{"en" => %{alert_1.id => alert_1}}})
+      with_summaries = %AlertWithSummaries{
+        alert: alert_1,
+        summaries: [],
+        summaries_updated_at: DateTime.now!("America/New_York")
+      }
 
-      assert to_alert_map([alert_1]) == WithSummaryPubSub.subscribe(ets_table: ets_table)
+      ets_table = :ets.new(nil, [:set])
+
+      :ets.insert(
+        ets_table,
+        {:all_summaries,
+         %{
+           "en" => %{
+             alert_1.id => with_summaries
+           }
+         }}
+      )
+
+      assert to_alert_map([with_summaries]) ==
+               WithSummaryPubSub.subscribe(ets_table: ets_table)
     end
 
     test "returns empty list when no alerts" do
@@ -70,7 +86,12 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
   describe "handle_info" do
     setup do
       _dispatched_table = :ets.new(:test_last_dispatched, [:set, :named_table])
-      {:ok, %{last_dispatched_table_name: :test_last_dispatched}}
+
+      {:ok,
+       %{
+         last_dispatched_table_name: :test_last_dispatched,
+         now: DateTime.now!("America/New_York")
+       }}
     end
 
     test "broadcasts on :reset_event", state do
@@ -115,9 +136,13 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert_receive {:new_alerts, new_alerts}
 
       assert to_alert_map([
-               AlertWithSummaries.from_alert(alert_1, [
-                 %SummaryEntity{summary: "Delay until further notice"}
-               ])
+               AlertWithSummaries.from_alert(
+                 alert_1,
+                 [
+                   %SummaryEntity{summary: "Delay until further notice"}
+                 ],
+                 state.now
+               )
              ]) == new_alerts
 
       # Doesn't re-send the same alerts that have already been seen
@@ -131,7 +156,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert_receive {:new_alerts, new_alerts}
 
       assert to_alert_map([
-               AlertWithSummaries.from_alert(alert_2, [%SummaryEntity{summary: "Delay"}])
+               AlertWithSummaries.from_alert(
+                 alert_2,
+                 [%SummaryEntity{summary: "Delay"}],
+                 state.now
+               )
              ]) == new_alerts
     end
 
@@ -144,7 +173,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
           cause: :single_tracking,
           active_period: [
             %Alert.ActivePeriod{
-              start: DateTime.add(DateTime.now!("America/New_York"), 10, :minute),
+              start: DateTime.add(state.now, 10, :minute),
               end: nil
             }
           ],
@@ -157,7 +186,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
           cause: :single_tracking,
           active_period: [
             %Alert.ActivePeriod{
-              start: DateTime.add(DateTime.now!("America/New_York"), -10, :minute),
+              start: DateTime.add(state.now, -10, :minute),
               end: nil
             }
           ],
@@ -180,9 +209,13 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       WithSummaryPubSub.handle_info(:broadcast, state)
 
       assert to_alert_map([
-               AlertWithSummaries.from_alert(single_tracking_now, [
-                 %SummaryEntity{summary: "Delay until further notice"}
-               ])
+               AlertWithSummaries.from_alert(
+                 single_tracking_now,
+                 [
+                   %SummaryEntity{summary: "Delay until further notice"}
+                 ],
+                 state.now
+               )
              ]) ==
                WithSummaryPubSub.subscribe(ets_table: state.last_dispatched_table_name)
 
@@ -191,6 +224,61 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert_receive {:new_alerts, new_alerts}
 
       assert to_alert_map([]) == new_alerts
+    end
+
+    test ":broadcast sends message when the date has changed from inactive to active", state do
+      alert_1 =
+        build(:alert,
+          id: "a_1",
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(state.now, 23, :hour),
+              end: nil
+            }
+          ]
+        )
+
+      AlertsStoreMock
+      # 1st and 2nd broadcast
+      |> expect(:fetch, 2, fn _ -> [alert_1] end)
+
+      GlobalDataCacheMock
+      |> stub(:default_key, fn -> :default_key end)
+      |> stub(:get_data, fn _ ->
+        %{route_patterns: %{}}
+      end)
+
+      RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
+
+      WithSummaryPubSub.subscribe(ets_table: state.last_dispatched_table_name)
+
+      WithSummaryPubSub.handle_info(:broadcast, state)
+
+      assert_receive {:new_alerts, new_alerts}
+
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(
+                 alert_1,
+                 [
+                   %SummaryEntity{summary: "Delay starting tomorrow"}
+                 ],
+                 state.now
+               )
+             ]) == new_alerts
+
+      # Resends when summaries change due to passage of time
+      new_now = DateTime.add(state.now, 1, :day)
+      WithSummaryPubSub.handle_info(:broadcast, %{state | now: new_now})
+
+      assert_receive {:new_alerts, new_alerts}
+
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(
+                 alert_1,
+                 [%SummaryEntity{summary: "Delay until further notice"}],
+                 new_now
+               )
+             ]) == new_alerts
     end
   end
 end
