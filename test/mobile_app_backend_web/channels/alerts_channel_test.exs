@@ -41,6 +41,15 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
     |> Map.new()
   end
 
+  defp to_flattended_alert_map([%AlertWithSummaries{} | _rest] = alerts) do
+    alerts
+    |> Enum.map(fn alert_with_summaries ->
+      {alert_with_summaries.alert.id,
+       AlertWithSummaries.flatten_alert_fields(alert_with_summaries)}
+    end)
+    |> Map.new()
+  end
+
   test "joins and subscribes correctly", %{socket: socket} do
     alert1 = %Alert{
       id: "501047",
@@ -81,8 +90,7 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     expect(AlertsPubSubMock, :subscribe, 1, fn _ -> data1 end)
 
-    {:ok, ^data1, socket} =
-      subscribe_and_join(socket, "alerts")
+    {:ok, ^data1, socket} = subscribe_and_join(socket, "alerts")
 
     data2 = %{alerts: to_alert_map([alert1])}
 
@@ -210,21 +218,20 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
     {:ok,
      %AlertsChannel.AlertUpdate{
        remove: [],
-       update: ^data1
+       update: update
      }, socket} =
       subscribe_and_join(socket, "alerts:v3")
 
-    data2 =
-      to_alert_map([
-        %{
-          alert1
-          | alert: %{alert1.alert | description: "different description"},
-            summaries_updated_at: DateTime.utc_now()
-        }
-      ])
+    assert update == to_flattended_alert_map([alert1, alert2, alert3])
+
+    updated_alert1 = %{
+      alert1
+      | alert: %{alert1.alert | description: "different description"},
+        summaries_updated_at: DateTime.utc_now()
+    }
 
     AlertsChannel.handle_info(
-      {:new_alerts, %{alerts_with_summaries: Map.merge(data2, %{alert3.alert.id => alert3})}},
+      {:new_alerts, %{alerts_with_summaries: to_alert_map([updated_alert1, alert3])}},
       socket
     )
 
@@ -232,8 +239,10 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
     assert_push("stream_data", %AlertsChannel.AlertUpdate{
       remove: [^alert2_id],
-      update: ^data2
+      update: update
     })
+
+    assert update == to_flattended_alert_map([updated_alert1])
   end
 
   test "v3 skips updates if there are no changes", %{socket: socket} do
@@ -289,9 +298,11 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
     {:ok,
      %AlertsChannel.AlertUpdate{
        remove: [],
-       update: ^data1
+       update: update
      }, socket} =
       subscribe_and_join(socket, "alerts:v3")
+
+    assert update == to_flattended_alert_map([alert1, alert2])
 
     AlertsChannel.handle_info(
       {:new_alerts, %{alerts_with_summaries: data1}},

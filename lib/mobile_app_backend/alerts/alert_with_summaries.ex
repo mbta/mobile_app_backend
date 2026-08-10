@@ -41,4 +41,15 @@ defmodule MobileAppBackend.Alerts.AlertWithSummaries do
       Util.DateTime.datetime_to_gtfs(old_alert_with_summaries.summaries_updated_at) !=
         Util.DateTime.datetime_to_gtfs(now)
   end
+
+  @spec flatten_alert_fields(t()) :: map()
+  @doc """
+  Flattens the alert fields to the top level for convenience when treating an `AlertWithSummaries` as an `Alert`
+  """
+  def flatten_alert_fields(alert_with_summaries) do
+    alert_with_summaries
+    |> Map.from_struct()
+    |> Map.drop([:alert])
+    |> Map.merge(Map.from_struct(alert_with_summaries.alert))
+  end
 end
