@@ -54,7 +54,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     %{alerts_with_summaries: alerts} = pubsub_module.subscribe(get_opts(socket))
     socket = assign(socket, :last_alerts, alert_hashes(alerts))
 
-    {:ok, %AlertUpdate{remove: [], update: alerts}, socket}
+    {:ok, %AlertUpdate{remove: [], update: flatten_alert_fields(alerts)}, socket}
   end
 
   defp get_opts(socket) do
@@ -104,7 +104,10 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     response =
       %AlertUpdate{
         remove: MapSet.to_list(removed_ids),
-        update: Map.filter(alerts, fn {id, _alert} -> Enum.member?(update_ids, id) end)
+        update:
+          alerts
+          |> Map.filter(fn {id, _alert} -> Enum.member?(update_ids, id) end)
+          |> flatten_alert_fields()
       }
 
     if !AlertUpdate.empty?(response) do
@@ -114,30 +117,18 @@ defmodule MobileAppBackendWeb.AlertsChannel do
     assign(socket, :last_alerts, current_hashes)
   end
 
+  defp flatten_alert_fields(alerts_map) do
+    alerts_map
+    |> Map.new(fn {id, alert_with_summaries} ->
+      {id, AlertWithSummaries.flatten_alert_fields(alert_with_summaries)}
+    end)
+  end
+
   @spec alert_hashes(%{String.t() => Alert.t()}) :: %{String.t() => String.t()}
   defp alert_hashes(alert_map) do
     Map.new(alert_map, fn {key, val} ->
       {key,
-       val
-       |> Map.from_struct()
-       |> Enum.sort_by(fn {key, _value} -> key end)
-       |> Enum.map(fn {key, value} ->
-         case key do
-           # Do some hacky sorting of informed entities, since the backend can return them arbitrarily in any order
-           :informed_entity ->
-             {key,
-              Enum.sort_by(value, fn entity ->
-                "#{entity.route}-#{entity.stop}-#{entity.direction_id}-#{entity.route_type}-#{entity.facility}-#{entity.trip}"
-              end)}
-
-           # Summaries can also change order based on the entity order, so sort those too
-           :summaries ->
-             {key, Enum.sort_by(value, fn summary -> summary.summary end)}
-
-           _ ->
-             {key, value}
-         end
-       end)
+       val.summaries_updated_at
        |> :erlang.term_to_binary()
        |> then(&:crypto.hash(:md5, &1))
        |> Base.encode16()}
