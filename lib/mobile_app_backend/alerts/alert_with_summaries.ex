@@ -1,7 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertWithSummaries do
   alias MBTAV3API.Alert
-  alias MBTAV3API.Alert.ActivePeriod
-  alias MBTAV3API.Alert.InformedEntity
   alias MobileAppBackend.Alerts.SummaryEntity
 
   @type t :: %__MODULE__{
