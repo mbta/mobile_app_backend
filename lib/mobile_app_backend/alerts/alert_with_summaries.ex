@@ -5,50 +5,21 @@ defmodule MobileAppBackend.Alerts.AlertWithSummaries do
   alias MobileAppBackend.Alerts.SummaryEntity
 
   @type t :: %__MODULE__{
-          id: String.t(),
-          active_period: [ActivePeriod.t()],
-          cause: Alert.cause(),
-          closed_timestamp: DateTime.t() | nil,
-          description: String.t() | nil,
-          duration_certainty: Alert.duration_certainty(),
-          effect: Alert.effect(),
-          effect_name: String.t() | nil,
-          header: String.t() | nil,
-          informed_entity: [InformedEntity.t()],
-          last_push_notification_timestamp: DateTime.t() | nil,
-          lifecycle: Alert.lifecycle(),
-          severity: integer(),
+          alert: Alert.t(),
           summaries: [SummaryEntity.t()],
-          summaries_updated_at: DateTime.t(),
-          updated_at: DateTime.t()
+          summaries_updated_at: DateTime.t()
         }
 
   @derive Jason.Encoder
   defstruct [
-    :id,
-    :active_period,
-    :cause,
-    :closed_timestamp,
-    :description,
-    :duration_certainty,
-    :effect,
-    :effect_name,
-    :header,
-    :informed_entity,
-    :last_push_notification_timestamp,
-    :lifecycle,
-    :severity,
+    :alert,
     :summaries,
-    :summaries_updated_at,
-    :updated_at
+    :summaries_updated_at
   ]
 
   @spec from_alert(Alert.t(), [SummaryEntity.t()]) :: t()
   def from_alert(alert, summaries, summaries_updated_at \\ DateTime.now!("America/New_York")) do
-    struct(
-      %__MODULE__{summaries: summaries, summaries_updated_at: summaries_updated_at},
-      Map.from_struct(alert)
-    )
+    %__MODULE__{alert: alert, summaries: summaries, summaries_updated_at: summaries_updated_at}
   end
 
   @doc """
@@ -62,7 +33,7 @@ defmodule MobileAppBackend.Alerts.AlertWithSummaries do
         new_alert,
         now \\ DateTime.now!("America/New_York")
       ) do
-    old_alert = struct(Alert, Map.from_struct(old_alert_with_summaries))
+    old_alert = old_alert_with_summaries.alert
 
     old_alert != new_alert ||
       Alert.active?(old_alert, old_alert_with_summaries.summaries_updated_at) !=

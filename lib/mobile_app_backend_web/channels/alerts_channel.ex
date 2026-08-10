@@ -118,26 +118,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   defp alert_hashes(alert_map) do
     Map.new(alert_map, fn {key, val} ->
       {key,
-       val
-       |> Map.from_struct()
-       |> Enum.sort_by(fn {key, _value} -> key end)
-       |> Enum.map(fn {key, value} ->
-         case key do
-           # Do some hacky sorting of informed entities, since the backend can return them arbitrarily in any order
-           :informed_entity ->
-             {key,
-              Enum.sort_by(value, fn entity ->
-                "#{entity.route}-#{entity.stop}-#{entity.direction_id}-#{entity.route_type}-#{entity.facility}-#{entity.trip}"
-              end)}
-
-           # Summaries can also change order based on the entity order, so sort those too
-           :summaries ->
-             {key, Enum.sort_by(value, fn summary -> summary.summary end)}
-
-           _ ->
-             {key, value}
-         end
-       end)
+       val.summaries_updated_at
        |> :erlang.term_to_binary()
        |> then(&:crypto.hash(:md5, &1))
        |> Base.encode16()}

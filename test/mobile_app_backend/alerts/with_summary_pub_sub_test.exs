@@ -36,7 +36,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     %{
       alerts_with_summaries:
         alerts_with_summaries
-        |> Map.new(&{&1.id, &1})
+        |> Map.new(&{&1.alert.id, &1})
     }
   end
 
@@ -53,10 +53,26 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     test "returns initial data" do
       alert_1 = build(:alert, id: "a_1")
 
-      ets_table = :ets.new(nil, [:set])
-      :ets.insert(ets_table, {:all_summaries, %{"en" => %{alert_1.id => alert_1}}})
+      with_summaries = %AlertWithSummaries{
+        alert: alert_1,
+        summaries: [],
+        summaries_updated_at: DateTime.now!("America/New_York")
+      }
 
-      assert to_alert_map([alert_1]) == WithSummaryPubSub.subscribe(ets_table: ets_table)
+      ets_table = :ets.new(nil, [:set])
+
+      :ets.insert(
+        ets_table,
+        {:all_summaries,
+         %{
+           "en" => %{
+             alert_1.id => with_summaries
+           }
+         }}
+      )
+
+      assert to_alert_map([with_summaries]) ==
+               WithSummaryPubSub.subscribe(ets_table: ets_table)
     end
 
     test "returns empty list when no alerts" do

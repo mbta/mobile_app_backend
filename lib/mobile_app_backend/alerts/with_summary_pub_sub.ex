@@ -92,9 +92,10 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   # Temporary patch because upcoming single tracking alerts are displayed
   # incorrectly in the app. Remove any single tracking alerts that aren't happening
   # right now.
-  defp filter_upcoming_single_tracking_alerts(alerts) do
-    Map.filter(alerts, fn {_key, alert} ->
-      !(alert.cause == :single_tracking && !Alert.active?(alert))
+  defp filter_upcoming_single_tracking_alerts(alerts_with_summaries) do
+    Map.filter(alerts_with_summaries, fn {_key, alert_with_summaries} ->
+      !(alert_with_summaries.alert.cause == :single_tracking &&
+          !Alert.active?(alert_with_summaries.alert))
     end)
   end
 

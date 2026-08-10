@@ -25,11 +25,21 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
   setup :verify_on_exit!
 
-  defp to_alert_map(alerts),
-    do:
-      alerts
-      |> Enum.map(fn alert -> {alert.id, alert} end)
-      |> Map.new()
+  defp to_alert_map([%AlertWithSummaries{} | _rest] = alerts) do
+    alerts
+    |> Enum.map(fn alert_with_summaries ->
+      {alert_with_summaries.alert.id, alert_with_summaries}
+    end)
+    |> Map.new()
+  end
+
+  defp to_alert_map(alerts) do
+    alerts
+    |> Enum.map(fn alert ->
+      {alert.id, alert}
+    end)
+    |> Map.new()
+  end
 
   test "joins and subscribes correctly", %{socket: socket} do
     alert1 = %Alert{
@@ -133,53 +143,63 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
   test "joins and subscribes v3 correctly", %{socket: socket} do
     alert1 = %AlertWithSummaries{
-      id: "501047",
-      active_period: [%Alert.ActivePeriod{start: ~B[2023-05-26 16:46:13]}],
-      effect: :station_issue,
-      effect_name: nil,
-      informed_entity: [
-        %Alert.InformedEntity{
-          activities: [:board],
-          route: "Green-D",
-          route_type: :light_rail,
-          stop: "70511"
-        },
-        %Alert.InformedEntity{
-          activities: [:board],
-          route: "88",
-          route_type: :bus,
-          stop: "place-lech"
-        }
-      ],
-      lifecycle: :ongoing,
+      alert: %Alert{
+        id: "501047",
+        active_period: [%Alert.ActivePeriod{start: ~B[2023-05-26 16:46:13]}],
+        effect: :station_issue,
+        effect_name: nil,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:board],
+            route: "Green-D",
+            route_type: :light_rail,
+            stop: "70511"
+          },
+          %Alert.InformedEntity{
+            activities: [:board],
+            route: "88",
+            route_type: :bus,
+            stop: "place-lech"
+          }
+        ],
+        lifecycle: :ongoing
+      },
       summaries: [%SummaryEntity{summary: "test summary"}]
     }
 
     alert2 = %AlertWithSummaries{
-      id: "559018",
-      active_period: [
-        %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
-      ],
-      effect: :delay,
-      effect_name: nil,
-      informed_entity: [
-        %Alert.InformedEntity{activities: [:board, :exit, :ride], route: "120", route_type: :bus}
-      ],
-      lifecycle: :new,
+      alert: %Alert{
+        id: "559018",
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
+        ],
+        effect: :delay,
+        effect_name: nil,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "120",
+            route_type: :bus
+          }
+        ],
+        lifecycle: :new
+      },
       summaries: [%SummaryEntity{summary: "test summary"}]
     }
 
     alert3 = %AlertWithSummaries{
-      id: "559019",
-      active_period: [
-        %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
-      ],
-      effect: :delay,
-      effect_name: nil,
-      informed_entity: [
-        %Alert.InformedEntity{activities: [:board, :exit, :ride], route: "1", route_type: :bus}
-      ],
-      lifecycle: :new,
+      alert: %Alert{
+        id: "559019",
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
+        ],
+        effect: :delay,
+        effect_name: nil,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board, :exit, :ride], route: "1", route_type: :bus}
+        ],
+        lifecycle: :new
+      },
       summaries: [%SummaryEntity{summary: "test summary"}]
     }
 
@@ -194,14 +214,21 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
      }, socket} =
       subscribe_and_join(socket, "alerts:v3")
 
-    data2 = to_alert_map([%{alert1 | description: "different description"}])
+    data2 =
+      to_alert_map([
+        %{
+          alert1
+          | alert: %{alert1.alert | description: "different description"},
+            summaries_updated_at: DateTime.utc_now()
+        }
+      ])
 
     AlertsChannel.handle_info(
-      {:new_alerts, %{alerts_with_summaries: Map.merge(data2, %{alert3.id => alert3})}},
+      {:new_alerts, %{alerts_with_summaries: Map.merge(data2, %{alert3.alert.id => alert3})}},
       socket
     )
 
-    alert2_id = alert2.id
+    alert2_id = alert2.alert.id
 
     assert_push("stream_data", %AlertsChannel.AlertUpdate{
       remove: [^alert2_id],
@@ -211,39 +238,47 @@ defmodule MobileAppBackendWeb.AlertsChannelTest do
 
   test "v3 skips updates if there are no changes", %{socket: socket} do
     alert1 = %AlertWithSummaries{
-      id: "501047",
-      active_period: [%Alert.ActivePeriod{start: ~B[2023-05-26 16:46:13]}],
-      effect: :station_issue,
-      effect_name: nil,
-      informed_entity: [
-        %Alert.InformedEntity{
-          activities: [:board],
-          route: "Green-D",
-          route_type: :light_rail,
-          stop: "70511"
-        },
-        %Alert.InformedEntity{
-          activities: [:board],
-          route: "88",
-          route_type: :bus,
-          stop: "place-lech"
-        }
-      ],
-      lifecycle: :ongoing,
+      alert: %Alert{
+        id: "501047",
+        active_period: [%Alert.ActivePeriod{start: ~B[2023-05-26 16:46:13]}],
+        effect: :station_issue,
+        effect_name: nil,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:board],
+            route: "Green-D",
+            route_type: :light_rail,
+            stop: "70511"
+          },
+          %Alert.InformedEntity{
+            activities: [:board],
+            route: "88",
+            route_type: :bus,
+            stop: "place-lech"
+          }
+        ],
+        lifecycle: :ongoing
+      },
       summaries: [%SummaryEntity{summary: "test summary"}]
     }
 
     alert2 = %AlertWithSummaries{
-      id: "559018",
-      active_period: [
-        %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
-      ],
-      effect: :delay,
-      effect_name: nil,
-      informed_entity: [
-        %Alert.InformedEntity{activities: [:board, :exit, :ride], route: "120", route_type: :bus}
-      ],
-      lifecycle: :new,
+      alert: %Alert{
+        id: "559018",
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2024-03-14 16:12:00], end: ~B[2024-03-14 18:13:39]}
+        ],
+        effect: :delay,
+        effect_name: nil,
+        informed_entity: [
+          %Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "120",
+            route_type: :bus
+          }
+        ],
+        lifecycle: :new
+      },
       summaries: [%SummaryEntity{summary: "test summary"}]
     }
 
