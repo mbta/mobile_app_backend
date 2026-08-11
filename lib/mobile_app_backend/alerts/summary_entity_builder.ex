@@ -149,7 +149,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     formatted =
       FormattedAlert.summary(
         %FormattedAlert{alert: alert, alert_summary: summary},
-        locale
+        locale,
+        context == :card
       )
 
     %SummaryEntity{
