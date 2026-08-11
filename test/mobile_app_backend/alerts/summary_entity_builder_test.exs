@@ -59,7 +59,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "Service suspended on Red Line"
+                   summary: "**Service suspended** on **Red Line**"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
@@ -377,7 +377,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                  direction_id: nil,
                  route_id: nil,
                  stop_id: nil,
-                 summary: "Service suspended on Red Line",
+                 summary: "**Service suspended** on **Red Line**",
                  trip_id: nil
                }
              ]
@@ -417,7 +417,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "Service suspended at Wollaston"
+                   summary: "**Service suspended** at **Wollaston**"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
