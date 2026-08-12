@@ -48,7 +48,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         fn alert ->
           {alert.id, build_for_alert(alert, at_time, locale, global, context)}
         end,
-        max_concurrency: 20,
+        max_concurrency: 5,
         timeout: 100_000,
         on_timeout: :kill_task
       )
