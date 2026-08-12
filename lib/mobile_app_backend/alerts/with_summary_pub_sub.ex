@@ -125,12 +125,12 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
   end
 
   def handle_info(
-        {:new_alerts, %{alerts: all_alerts}},
+        {:new_alerts, _alerts_data},
         %{last_dispatched_table_name: last_dispatched} = state
       ) do
     Logger.info("#{__MODULE__} handle :new_alerts started")
     now = Map.get(state, :now, DateTime.now!("America/New_York"))
-    all_summaries = recalculate(last_dispatched, now, Map.values(all_alerts))
+    all_summaries = recalculate(last_dispatched, now)
     perform_broadcast(last_dispatched, all_summaries)
 
     {:noreply, state}

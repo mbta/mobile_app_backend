@@ -164,6 +164,50 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
              ]) == new_alerts
     end
 
+    test "handle_info(:new_alerts) uses the latest data from the table, not what is included in the message",
+         state do
+      alert_1 =
+        build(:alert,
+          id: "a_1",
+          cause: :mainetenance,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: ~B[2024-02-12 09:44:04],
+              end: nil
+            }
+          ]
+        )
+
+      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
+
+      AlertsStoreMock
+      |> expect(:fetch, 1, fn _ -> [alert_1] end)
+
+      GlobalDataCacheMock
+      |> stub(:default_key, fn -> :default_key end)
+      |> stub(:get_data, fn _ ->
+        %{route_patterns: %{}}
+      end)
+
+      RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
+
+      WithSummaryPubSub.subscribe(ets_table: state.last_dispatched_table_name)
+
+      WithSummaryPubSub.handle_info({:new_alerts, %{alerts: %{alert_2.id => alert_2}}}, state)
+
+      assert_receive {:new_alerts, pushed_alerts}
+
+      assert to_alert_map([
+               AlertWithSummaries.from_alert(
+                 alert_1,
+                 [
+                   %SummaryEntity{summary: "**Delay** until further notice"}
+                 ],
+                 state.now
+               )
+             ]) == pushed_alerts
+    end
+
     test ":broadcast filters out upcoming single tracking alerts", state do
       route = build(:route)
 
