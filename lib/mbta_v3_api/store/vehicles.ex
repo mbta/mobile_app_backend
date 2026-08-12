@@ -119,6 +119,11 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
     :ok
   end
 
+  @impl true
+  def table_size() do
+    :ets.info(@vehicles_table_name, :size)
+  end
+
   defp upsert_data(vehicles) do
     records = vehicles |> Stream.filter(& &1.revenue) |> Enum.map(&to_record(&1))
 

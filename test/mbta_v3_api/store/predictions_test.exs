@@ -309,4 +309,22 @@ defmodule MBTAV3API.Store.PredictionsTest do
                Store.Predictions.fetch_with_associations([[stop_id: "12345"]])
     end
   end
+
+  describe "table_size" do
+    test "returns the number of records in the store", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
+      assert Store.Predictions.table_size() == 2
+
+      Store.Predictions.process_remove([
+        %Reference{type: "prediction", id: prediction_1.id}
+      ])
+
+      assert Store.Predictions.table_size() == 1
+    end
+  end
 end

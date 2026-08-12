@@ -136,4 +136,17 @@ defmodule MBTAV3API.Store.VehiclesTest do
                Store.Vehicles.fetch_with_associations([[id: "v_1"], [id: "v_2"]])
     end
   end
+
+  describe "table_size" do
+    test "returns the number of records in the store", %{
+      vehicle_1: vehicle_1,
+      vehicle_2: vehicle_2
+    } do
+      Store.Vehicles.process_upsert(:add, [vehicle_1, vehicle_2])
+      assert Store.Vehicles.table_size() == 2
+
+      Store.Vehicles.process_remove([%Reference{type: "vehicle", id: vehicle_1.id}])
+      assert Store.Vehicles.table_size() == 1
+    end
+  end
 end
