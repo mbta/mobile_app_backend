@@ -43,9 +43,16 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         ) :: %{String.t() => [SummaryEntity.t()]}
   def build_all(alerts, at_time, locale, global, context) do
     Map.new(
-      Enum.map(alerts, fn alert ->
-        {alert.id, build_for_alert(alert, at_time, locale, global, context)}
-      end)
+      alerts
+      |> Task.async_stream(
+        fn alert ->
+          {alert.id, build_for_alert(alert, at_time, locale, global, context)}
+        end,
+        max_concurrency: 10,
+        timeout: 100_000,
+        on_timeout: :kill_task
+      )
+      |> Enum.map(fn {:ok, result} -> result end)
     )
   end
 
