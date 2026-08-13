@@ -908,7 +908,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     RepositoryMock
     |> expect(
       :schedules,
-      fn [filter: [trip: [^trip_id]], include: :trip, sort: {:stop_sequence, :asc}], _ ->
+      fn [filter: [trip: [^trip_id], date: _date], include: :trip, sort: {:stop_sequence, :asc}],
+         _ ->
         ok_response([build(:schedule, trip_id: trip_id)], [trip])
       end
     )
@@ -929,7 +930,82 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              Engine.notifications([subscription], [alert], now)
   end
 
-  test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
+  test "retrieves schedules for future specified trips" do
+    now = DateTime.now!("America/New_York")
+    upstream_timestamp = DateTime.add(now, -2)
+
+    trip_1 = build(:trip, route_id: "Red")
+    trip_1_id = trip_1.id
+    trip_2 = build(:trip, route_id: "Red")
+    trip_2_id = trip_2.id
+
+    today = Util.DateTime.datetime_to_gtfs(now)
+    tomorrow = today |> Date.add(1)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: DateTime.add(now, -1), end: DateTime.add(now, 3, :day)}
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], route: "Red", trip: trip_1_id},
+          %Alert.InformedEntity{activities: [:board], route: "Red", trip: trip_2_id}
+        ],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    _ = GlobalDataCache.get_data()
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(
+      :schedules,
+      fn [
+           filter: [trip: [^trip_1_id, ^trip_2_id], date: ^today],
+           include: :trip,
+           sort: {:stop_sequence, :asc}
+         ],
+         _ ->
+        ok_response([build(:schedule, trip_id: trip_1_id)], [trip_1])
+      end
+    )
+    |> expect(
+      :schedules,
+      fn [
+           filter: [trip: [^trip_2_id], date: ^tomorrow],
+           include: :trip,
+           sort: {:stop_sequence, :asc}
+         ],
+         _ ->
+        ok_response([build(:schedule, trip_id: trip_2_id)], [trip_2])
+      end
+    )
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
+             Engine.notifications([subscription], [alert], now)
+  end
+
+   test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
     now = ~B[2026-07-31 10:00:00]
     hingham = build(:stop, id: "Hingham", name: "Hingham")
     hull = build(:stop, id: "Hull", name: "Hull")
