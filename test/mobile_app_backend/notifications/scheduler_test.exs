@@ -444,6 +444,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         stop_ids: ["FR-0201-02"]
       )
 
+    trip_id = trip.id
+
     start_time = DateTime.add(now, 3, :hour)
 
     alert =
@@ -467,7 +469,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         last_push_notification_timestamp: DateTime.add(now, -1, :minute)
       )
 
-    parent_stop = build(:stop, id: "place-FR-0201", name: "Concord")
+    parent_stop =
+      build(:stop, id: "place-FR-0201", name: "Concord", child_stop_ids: ["FR-0201-02"])
+
     stop = build(:stop, id: "FR-0201-02", name: "Concord", parent_station_id: parent_stop.id)
 
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
@@ -485,6 +489,12 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         [trip]
       )
     end)
+    |> expect(
+      :trips,
+      fn [filter: [id: [^trip_id]], include: [:stops], fields: [stop: []]], _ ->
+        ok_response([trip], %{})
+      end
+    )
 
     reassign_env(
       :mobile_app_backend,
@@ -565,6 +575,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         stop_ids: ["FR-0201-02"]
       )
 
+    trip_id = trip.id
+
     start_time = DateTime.add(now, 20, :minute)
 
     alert =
@@ -588,7 +600,9 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         last_push_notification_timestamp: DateTime.add(now, -1, :minute)
       )
 
-    parent_stop = build(:stop, id: "place-FR-0201", name: "Concord")
+    parent_stop =
+      build(:stop, id: "place-FR-0201", name: "Concord", child_stop_ids: ["FR-0201-02"])
+
     stop = build(:stop, id: "FR-0201-02", name: "Concord", parent_station_id: parent_stop.id)
 
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
@@ -606,6 +620,12 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         [trip]
       )
     end)
+    |> expect(
+      :trips,
+      fn [filter: [id: [^trip_id]], include: [:stops], fields: [stop: []]], _ ->
+        ok_response([trip], %{})
+      end
+    )
 
     reassign_env(
       :mobile_app_backend,
