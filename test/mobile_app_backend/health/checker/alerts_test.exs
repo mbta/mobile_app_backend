@@ -92,9 +92,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
     end
 
     test "returns ok when alert counts match" do
-      expect(AlertsStoreMock, :fetch, fn _ ->
-        [build(:alert, id: "a_1", effect: :shuttle)]
-      end)
+      expect(AlertsStoreMock, :table_size, fn -> 1 end)
 
       first_timestamp = Checker.LastFreshStore.last_fresh_timestamp()
       assert :ok = Checker.check_health()
@@ -103,9 +101,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
     end
 
     test "returns ok when alert counts do not match but last match time < 5 min" do
-      expect(AlertsStoreMock, :fetch, fn _ ->
-        [build(:alert, id: "a_1", effect: :shuttle), build(:alert, id: "a_2", effect: :closure)]
-      end)
+      expect(AlertsStoreMock, :table_size, fn -> 2 end)
 
       set_log_level(:warning)
 
@@ -115,9 +111,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
     end
 
     test "returns error when alert counts do not match and last match time > 5 min" do
-      expect(AlertsStoreMock, :fetch, fn _ ->
-        [build(:alert, id: "a_1", effect: :shuttle), build(:alert, id: "a_2", effect: :closure)]
-      end)
+      expect(AlertsStoreMock, :table_size, fn -> 2 end)
 
       set_log_level(:warning)
 
@@ -142,9 +136,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
 
       reassign_env(:mobile_app_backend, MBTAV3API.Store.Alerts, AlertsStoreMock)
 
-      expect(AlertsStoreMock, :fetch, fn _ ->
-        [build(:alert, id: "a_1", effect: :shuttle), build(:alert, id: "a_2", effect: :closure)]
-      end)
+      expect(AlertsStoreMock, :table_size, fn -> 2 end)
 
       expect(
         MobileAppBackend.HTTPMock,

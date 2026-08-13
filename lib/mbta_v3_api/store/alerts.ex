@@ -140,6 +140,11 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   end
 
   @impl true
+  def table_size do
+    :ets.info(@alerts_table_name, :size)
+  end
+
+  @impl true
   def process_remove(references) do
     for reference <- references do
       case reference do

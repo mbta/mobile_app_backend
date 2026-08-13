@@ -193,6 +193,11 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     :ok
   end
 
+  @impl true
+  def table_size do
+    :ets.info(@predictions_table_name, :size)
+  end
+
   defp process_one_remove(%{type: "prediction", id: id}) do
     Logger.debug("#{__MODULE__} process_remove type=prediction id=#{id}")
     :ets.delete(@predictions_table_name, id)

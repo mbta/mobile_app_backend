@@ -90,4 +90,14 @@ defmodule MBTAV3API.Store.AlertsTest do
     |> Store.Alerts.fetch()
     |> Enum.sort_by(& &1.id)
   end
+
+  describe "table_size" do
+    test "returns the number of records in the store", %{alert_1: alert_1, alert_2: alert_2} do
+      Store.Alerts.process_upsert(:add, [alert_1, alert_2])
+      assert Store.Alerts.table_size() == 2
+
+      Store.Alerts.process_remove([%Reference{type: "alert", id: alert_1.id}])
+      assert Store.Alerts.table_size() == 1
+    end
+  end
 end

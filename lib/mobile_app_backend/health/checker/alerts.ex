@@ -21,7 +21,7 @@ defmodule MobileAppBackend.Health.Checker.Alerts.Impl do
 
   @impl true
   def check_health do
-    store_count = length(Store.Alerts.fetch(fields: [alert: []]))
+    store_count = Store.Alerts.table_size()
 
     case Repository.alerts([]) do
       {:ok, %{data: repo_alerts}} ->

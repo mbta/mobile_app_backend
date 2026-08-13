@@ -43,6 +43,11 @@ defmodule MBTAV3API.Store do
   """
   @callback fetch_with_associations(fetch_keys()) :: JsonApi.Object.full_map()
 
+  @doc """
+  Return the number of records in the store
+  """
+  @callback table_size() :: non_neg_integer()
+
   @spec timed_fetch(atom(), :ets.match_spec(), String.t()) :: [any()]
   @doc """
   Fetch matching records from the given table and log the duration.
@@ -114,6 +119,11 @@ defmodule MBTAV3API.Store do
         Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).process_remove(
           references
         )
+      end
+
+      @impl true
+      def table_size do
+        Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).table_size()
       end
     end
   end
