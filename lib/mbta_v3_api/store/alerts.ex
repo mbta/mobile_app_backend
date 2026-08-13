@@ -140,7 +140,7 @@ defmodule MBTAV3API.Store.Alerts.Impl do
   end
 
   @impl true
-  def table_size() do
+  def table_size do
     :ets.info(@alerts_table_name, :size)
   end
 

@@ -194,7 +194,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
   end
 
   @impl true
-  def table_size() do
+  def table_size do
     :ets.info(@predictions_table_name, :size)
   end
 

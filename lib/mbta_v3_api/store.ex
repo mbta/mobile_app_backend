@@ -122,7 +122,7 @@ defmodule MBTAV3API.Store do
       end
 
       @impl true
-      def table_size() do
+      def table_size do
         Application.get_env(:mobile_app_backend, __MODULE__, unquote(implementation_module)).table_size()
       end
     end

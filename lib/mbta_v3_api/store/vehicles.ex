@@ -120,7 +120,7 @@ defmodule MBTAV3API.Store.Vehicles.Impl do
   end
 
   @impl true
-  def table_size() do
+  def table_size do
     :ets.info(@vehicles_table_name, :size)
   end
 
