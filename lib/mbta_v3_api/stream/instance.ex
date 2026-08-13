@@ -90,9 +90,9 @@ defmodule MBTAV3API.Stream.Instance do
       |> Enum.map_join(" ", fn {name, value} -> "#{name}=#{value}" end)
 
     if stage_healthy and consumer_healthy do
-      Logger.info("#{__MODULE__} #{health_state}")
+      Logger.debug("#{__MODULE__} #{health_state} consumer_pid=#{inspect(consumer_pid)}")
     else
-      Logger.warning("#{__MODULE__} #{health_state}")
+      Logger.warning("#{__MODULE__} #{health_state} consumer_pid=#{inspect(consumer_pid)}")
     end
   end
 

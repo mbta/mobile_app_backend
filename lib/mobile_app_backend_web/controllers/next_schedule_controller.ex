@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.NextScheduleController do
+  require Logger
   use MobileAppBackendWeb, :controller
   alias MBTAV3API.Repository
   alias MBTAV3API.Service
@@ -23,14 +24,40 @@ defmodule MobileAppBackendWeb.NextScheduleController do
         first_schedule_tomorrow
       else
         {:ok, %{data: services}} = Repository.services(filter: [route: route_id])
+
+        next_schedule_from_services(
+          services,
+          service_date,
+          route_id,
+          stop_id,
+          direction_id
+        )
+      end
+
+    json(conn, %{"next_schedule" => next_schedule})
+  end
+
+  defp next_schedule_from_services(
+         services,
+         service_date,
+         route_id,
+         stop_id,
+         direction_id
+       ) do
+    {time_in_us, first_schedule} =
+      :timer.tc(fn ->
         next_service_dates = Service.next_active(services, service_date)
 
         Enum.find_value(next_service_dates, fn service_date ->
           first_schedule_on(service_date, route_id, stop_id, direction_id)
         end)
-      end
+      end)
 
-    json(conn, %{"next_schedule" => next_schedule})
+    Logger.info(
+      "#{__MODULE__} next_schedule after API calls route=#{route_id} stop=#{stop_id} direction=#{direction_id} duration_ms=#{time_in_us / 1000}"
+    )
+
+    first_schedule
   end
 
   defp first_schedule_on(service_date, route, stop, direction) do

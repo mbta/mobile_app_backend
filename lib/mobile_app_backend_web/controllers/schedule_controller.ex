@@ -12,7 +12,16 @@ defmodule MobileAppBackendWeb.ScheduleController do
     if stop_ids_concat == "" do
       json(conn, %{schedules: [], trips: %{}})
     else
-      fetch_schedules_and_combine_data(conn, stop_ids_concat, date_time_string, params)
+      {time_in_us, result} =
+        :timer.tc(fn ->
+          fetch_schedules_and_combine_data(conn, stop_ids_concat, date_time_string, params)
+        end)
+
+      Logger.info(
+        "#{__MODULE__} schedules request stop_ids=#{stop_ids_concat} date_time=#{date_time_string} params=#{inspect(params)} duration_ms=#{time_in_us / 1000}"
+      )
+
+      result
     end
   end
 
@@ -81,11 +90,17 @@ defmodule MobileAppBackendWeb.ScheduleController do
       parent_stop_ids
       |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(date_time)))
 
-    data =
-      case filters do
-        [filter] -> fetch_schedules(filter, date_time)
-        filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
-      end
+    {time_in_us, data} =
+      :timer.tc(fn ->
+        case filters do
+          [filter] -> fetch_schedules(filter, date_time)
+          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
+        end
+      end)
+
+    Logger.info(
+      "#{__MODULE__} schedule request parent_stop_ids_count=#{Enum.count(parent_stop_ids)} duration_ms=#{time_in_us / 1000}"
+    )
 
     case data do
       :error ->
