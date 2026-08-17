@@ -37,6 +37,10 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
+    string_list = [alert_id, type, title, body]
+
+    tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
+
     Req.Test.expect(Util.GCP, fn conn ->
       assert conn.method == "POST"
 
@@ -60,7 +64,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                  },
                  "android" => %{
                    "notification" => %{
-                     "tag" => alert_id,
+                     "tag" => tag,
                      "sound" => "default",
                      "visibility" => "public"
                    }
@@ -69,6 +73,38 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                    "payload" => %{"aps" => %{"sound" => "default", "thread-id" => alert_id}}
                  },
                  "fcm_options" => %{"analytics_label" => analytics_label}
+               }
+             }
+
+      Req.Test.json(conn, %{})
+    end)
+
+    Req.Test.expect(Util.GCP, fn conn ->
+      assert conn.method == "POST"
+
+      assert Plug.Conn.request_url(conn) ==
+               "https://fcm.googleapis.com/v1/projects/mbta-app-c574d/messages:send"
+
+      assert [
+               {"accept", "application/json"},
+               {"authorization", "Bearer gcp_token"},
+               {"content-type", "application/json"},
+               {"user-agent", "req/" <> _}
+             ] = Enum.sort(conn.req_headers)
+
+      assert conn.body_params == %{
+               "message" => %{
+                 "token" => fcm_token,
+                 "data" => %{
+                   "alert_id" => alert_id,
+                   "title" => title,
+                   "body" => body,
+                   "tag" => tag
+                 },
+                 "fcm_options" => %{"analytics_label" => analytics_label},
+                 "android" => nil,
+                 "apns" => nil,
+                 "notification" => nil
                }
              }
 
