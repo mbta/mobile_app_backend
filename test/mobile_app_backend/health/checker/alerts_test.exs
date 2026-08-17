@@ -5,7 +5,6 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
   alias MobileAppBackend.Health.Checker.Alerts, as: Checker
 
   import ExUnit.CaptureLog
-  import MobileAppBackend.Factory
   import Mox
   import Test.Support.Helpers
 

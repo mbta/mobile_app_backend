@@ -58,7 +58,9 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           }
         },
         apns: %FCM.ApnsConfig{
-          payload: %{aps: %{sound: "default"}}
+          payload: %{
+            aps: %{sound: "default", "thread-id": alert_id}
+          }
         },
         fcm_options: %FCM.FcmOptions{
           analytics_label: analytics_label

@@ -65,7 +65,9 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                      "visibility" => "public"
                    }
                  },
-                 "apns" => %{"payload" => %{"aps" => %{"sound" => "default"}}},
+                 "apns" => %{
+                   "payload" => %{"aps" => %{"sound" => "default", "thread-id" => alert_id}}
+                 },
                  "fcm_options" => %{"analytics_label" => analytics_label}
                }
              }
