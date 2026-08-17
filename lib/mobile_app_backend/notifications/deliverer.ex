@@ -81,6 +81,36 @@ defmodule MobileAppBackend.Notifications.Deliverer do
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
 
+    # This section is only to allow Android to group notifications, it gets ignored by iOS
+    data_request_body = %{
+      message: %FCM.Message{
+        data: %{alert_id: alert_id, title: title, body: body},
+        android: %FCM.AndroidConfig{
+          notification: %FCM.AndroidNotification{
+            sound: "default",
+            tag: tag,
+            visibility: :public
+          }
+        },
+        fcm_options: %FCM.FcmOptions{
+          analytics_label: analytics_label
+        },
+        token: user.fcm_token
+      }
+    }
+
+    data_notification_result =
+      FCM.send(
+        gcp_token,
+        "projects/mbta-app-c574d",
+        data_request_body
+      )
+      |> handle_fcm_response(user)
+
+    Logger.info(
+      "#{__MODULE__} data_notification_sent result=#{data_notification_result} type=#{type} alert_id=#{alert_id}"
+    )
+
     case result do
       :ok ->
         Repo.insert!(%DeliveredNotification{
