@@ -908,7 +908,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     RepositoryMock
     |> expect(
       :schedules,
-      fn [filter: [trip: [^trip_id], date: _date], include: :trip, sort: {:stop_sequence, :asc}],
+      fn [
+           filter: [trip: [^trip_id], date: _date],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc}
+         ],
          _ ->
         ok_response([build(:schedule, trip_id: trip_id)], [trip])
       end
@@ -976,7 +980,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       :schedules,
       fn [
            filter: [trip: [^trip_1_id, ^trip_2_id], date: ^today],
-           include: :trip,
+           include: [trip: :stops],
            sort: {:stop_sequence, :asc}
          ],
          _ ->
@@ -987,7 +991,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       :schedules,
       fn [
            filter: [trip: [^trip_2_id], date: ^tomorrow],
-           include: :trip,
+           include: [trip: :stops],
            sort: {:stop_sequence, :asc}
          ],
          _ ->

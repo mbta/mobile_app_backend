@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
   use ExUnit.Case
 
+  alias MBTAV3API.Alert.ActivePeriod
   alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.RoutePattern
   alias MobileAppBackend.Alerts.SummaryEntity
@@ -114,10 +115,17 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
           )
         end
 
+      service_date = Util.DateTime.datetime_to_gtfs(now)
+
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
       expect(RepositoryMock, :schedules, 2, fn
-        [filter: [trip: [^trip_id]], include: [trip: :stops], sort: {:stop_sequence, :asc}], [] ->
+        [
+          filter: [trip: [^trip_id], date: ^service_date],
+          include: [trip: :stops],
+          sort: {:stop_sequence, :asc}
+        ],
+        [] ->
           ok_response(schedules, [trip])
       end)
 
@@ -129,6 +137,12 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
           effect: :suspension,
           informed_entity: [
             %InformedEntity{route: route_id, trip: trip_id, direction_id: trip.direction_id}
+          ],
+          active_period: [
+            %ActivePeriod{
+              start: now |> DateTime.add(-1, :hour),
+              end: DateTime.add(now, 3, :day)
+            }
           ]
         )
 
@@ -325,8 +339,9 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
       trip_id = trip.id
 
       tomorrow = DateTime.add(now, 1, :day)
+      service_day_tomorrow = Util.DateTime.datetime_to_gtfs(tomorrow)
 
-      _schedules =
+      schedules =
         for {stop, index} <- Enum.with_index(stops) do
           build(:schedule,
             departure_time: DateTime.add(tomorrow, index, :minute),
@@ -338,9 +353,15 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
 
       reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
-      expect(RepositoryMock, :schedules, 2, fn
-        [filter: [trip: [^trip_id]], include: [trip: :stops], sort: {:stop_sequence, :asc}], [] ->
-          ok_response([], [trip])
+      RepositoryMock
+      |> expect(:schedules, 2, fn
+        [
+          filter: [trip: [^trip_id], date: ^service_day_tomorrow],
+          include: [trip: :stops],
+          sort: {:stop_sequence, :asc}
+        ],
+        [] ->
+          ok_response(schedules, [trip])
       end)
 
       stub(RepositoryMock, :stops, fn [include: [:child_stops]], [] -> all_child_stops end)
@@ -351,6 +372,12 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
           effect: :suspension,
           informed_entity: [
             %InformedEntity{route: route_id, trip: trip_id, direction_id: trip.direction_id}
+          ],
+          active_period: [
+            %ActivePeriod{
+              start: now |> DateTime.add(1, :day) |> DateTime.add(-1, :hour),
+              end: DateTime.add(now, 3, :day)
+            }
           ]
         )
 
@@ -363,8 +390,138 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                %MobileAppBackend.Alerts.SummaryEntity{
                  direction_id: nil,
                  route_id: nil,
-                 stop_id: nil,
-                 summary: "Service suspended on Red Line",
+                 stop_id: "place-alfcl",
+                 summary: "12:17 PM train from Alewife is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-andrw",
+                 summary: "12:06 PM train from Andrew is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-brdwy",
+                 summary: "12:07 PM train from Broadway is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-brntn",
+                 summary:
+                   "12:00 PM train from Braintree is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-chmnl",
+                 summary:
+                   "12:11 PM train from Charles/MGH is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-cntsq",
+                 summary: "12:13 PM train from Central is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-davis",
+                 summary: "12:16 PM train from Davis is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-dwnxg",
+                 summary:
+                   "12:09 PM train from Downtown Crossing is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-harsq",
+                 summary: "12:14 PM train from Harvard is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-jfk",
+                 summary:
+                   "12:05 PM train from JFK/UMass is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-knncl",
+                 summary:
+                   "12:12 PM train from Kendall/MIT is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-nqncy",
+                 summary:
+                   "12:04 PM train from North Quincy is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-pktrm",
+                 summary:
+                   "12:10 PM train from Park Street is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-portr",
+                 summary: "12:15 PM train from Porter is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-qamnl",
+                 summary:
+                   "12:01 PM train from Quincy Adams is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-qnctr",
+                 summary:
+                   "12:02 PM train from Quincy Center is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-sstat",
+                 summary:
+                   "12:08 PM train from South Station is suspended tomorrow due to maintenance",
+                 trip_id: nil
+               },
+               %MobileAppBackend.Alerts.SummaryEntity{
+                 direction_id: nil,
+                 route_id: nil,
+                 stop_id: "place-wlsta",
+                 summary:
+                   "12:03 PM train from Wollaston is suspended tomorrow due to maintenance",
                  trip_id: nil
                }
              ]
@@ -377,7 +534,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                  direction_id: nil,
                  route_id: nil,
                  stop_id: nil,
-                 summary: "**Service suspended** on **Red Line**",
+                 summary: "This train is suspended tomorrow due to maintenance",
                  trip_id: nil
                }
              ]
