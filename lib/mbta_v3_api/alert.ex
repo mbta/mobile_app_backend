@@ -334,8 +334,7 @@ defmodule MBTAV3API.Alert do
     Enum.any?(alert.informed_entity, predicate)
   end
 
-  @spec trip_ids(t()) :: [Trip.id()]
-
+  @spec trip_ids(t() | [t()]) :: [Trip.id()]
   def trip_ids(alerts) when is_list(alerts) do
     alerts
     |> Enum.flat_map(&trip_ids(&1))
