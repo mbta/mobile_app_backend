@@ -85,12 +85,6 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     data_request_body = %{
       message: %FCM.Message{
         data: %{alert_id: alert_id, title: title, body: body},
-        android: %FCM.AndroidConfig{
-          notification: %FCM.AndroidNotification{
-            sound: "default",
-            visibility: :public
-          }
-        },
         fcm_options: %FCM.FcmOptions{
           analytics_label: analytics_label
         },
