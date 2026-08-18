@@ -35,12 +35,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     delay_duration = if delay_duration == "", do: "", else: " #{delay_duration}"
 
     gettext(
-      "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+      "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: effect_sentence_case(:delay),
       delay_duration: delay_duration,
       summary_location: location,
       summary_timeframe: timeframe,
-      summary_recurrence: recurrence
+      summary_recurrence: recurrence,
+      due_to_cause:
+        alert.cause
+        |> cause_lower_case()
+        |> due_to_cause()
     )
   end
 
