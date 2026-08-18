@@ -433,6 +433,35 @@ defmodule MBTAV3API.AlertTest do
     assert Alert.significance(bus_delay_severe) == nil
   end
 
+  describe "trip_ids/1" do
+    test "returns trip ids when alert has any" do
+      assert ["1", "2"] =
+               Alert.trip_ids(
+                 build(:alert,
+                   effect: :delay,
+                   severity: 10,
+                   informed_entity: [
+                     %InformedEntity{trip: "1"},
+                     %InformedEntity{trip: "1"},
+                     %InformedEntity{trip: "2"},
+                     %InformedEntity{trip: nil, stop: "stop"}
+                   ]
+                 )
+               )
+    end
+
+    test "returns empty list when no trips" do
+      assert [] =
+               Alert.trip_ids(
+                 build(:alert,
+                   effect: :delay,
+                   severity: 10,
+                   informed_entity: [%InformedEntity{route_type: :light_rail, stop: "stop"}]
+                 )
+               )
+    end
+  end
+
   describe "recurrence_range/1" do
     test "daily on all days in range" do
       today =
