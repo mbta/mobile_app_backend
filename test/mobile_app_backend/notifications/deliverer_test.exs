@@ -180,4 +180,62 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert [] = Repo.all(User)
     assert [] = Repo.all(Notifications.Subscription)
   end
+
+  test "deletes user if APNs returns 410" do
+    start_link_supervised!(Alerts)
+    user = NotificationsFactory.insert(:user)
+    NotificationsFactory.insert(:notification_subscription, user_id: user.id)
+    user_id = user.id
+    alert = Factory.build(:alert)
+    Alerts.process_reset([alert], [])
+    alert_id = alert.id
+    upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
+
+    reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
+      token: "gcp_token",
+      expires: ~U[9999-12-31 23:59:59Z]
+    })
+
+    Req.Test.expect(Util.GCP, fn conn ->
+      conn
+      |> Plug.Conn.put_status(:bad_request)
+      |> Req.Test.json(%{
+        "error" => %{
+          "code" => 400,
+          "details" => [
+            %{
+              "@type" => "type.googleapis.com/google.firebase.fcm.v1.FcmError",
+              "errorCode" => "INVALID_ARGUMENT"
+            },
+            %{
+              "@type" => "type.googleapis.com/google.firebase.fcm.v1.ApnsError",
+              "reason" => "Unregistered",
+              "statusCode" => 410
+            }
+          ],
+          "message" => "APNs device token is disabled.",
+          "status" => "INVALID_ARGUMENT"
+        }
+      })
+    end)
+
+    {:ok, _} =
+      with_log(fn ->
+        perform_job(Notifications.Deliverer, %{
+          user_id: user_id,
+          alert_id: alert_id,
+          title: "title",
+          body: "body",
+          deep_link_path: "/a/#{alert_id}/r/1/s/1",
+          upstream_timestamp: upstream_timestamp,
+          type: type,
+          analytics_label: "route=1;effect=delay;type=notification"
+        })
+      end)
+
+    assert [] = Repo.all(DeliveredNotification)
+    assert [] = Repo.all(User)
+    assert [] = Repo.all(Notifications.Subscription)
+  end
 end
