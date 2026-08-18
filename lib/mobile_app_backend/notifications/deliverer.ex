@@ -37,11 +37,9 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     gcp_token = GCPToken.get_token()
 
     # in Android, a notification with a tag will replace an old notification with the same tag
-    tag =
-      case type do
-        :all_clear -> "#{alert_id}-all-clear"
-        _ -> alert_id
-      end
+    string_list = [alert_id, type, title, body]
+
+    tag = :erlang.phash2(Enum.join(string_list)).to_string()
 
     request_body = %{
       message: %FCM.Message{
@@ -84,7 +82,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     # This section is only to allow Android to group notifications, it gets ignored by iOS
     data_request_body = %{
       message: %FCM.Message{
-        data: %{alert_id: alert_id, title: title, body: body},
+        data: %{alert_id: alert_id, title: title, body: body, tag: tag},
         fcm_options: %FCM.FcmOptions{
           analytics_label: analytics_label
         },
