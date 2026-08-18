@@ -1245,7 +1245,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
     RepositoryMock
-    |> expect(:trips, 1, fn [filter: [id: [trip_id]], include: [:stops], fields: [stop: []]], _ ->
+    |> expect(:trips, 1, fn [
+                              filter: [id: [trip_id], date: ~D[2026-07-31]],
+                              include: [:stops],
+                              fields: [stop: []]
+                            ],
+                            _ ->
       ok_response([Map.get(trips, trip_id)])
     end)
 

@@ -116,12 +116,15 @@ defmodule MobileAppBackend.Notifications.Engine do
       trip_by_id = Map.new(trips, &{&1.id, MapSet.new(&1.stop_ids)})
 
       Enum.filter(alerts, fn %Alert{} = alert ->
-        alert_applies_at_stop(alert, trip_by_id, target_stop_set)
+        alert
+        |> Alert.trip_ids()
+        |> Enum.empty?() ||
+          trip_alert_serves_stop(alert, trip_by_id, target_stop_set)
       end)
     end
   end
 
-  defp alert_applies_at_stop(%Alert{} = alert, trip_by_id, target_stop_set) do
+  defp trip_alert_serves_stop(%Alert{} = alert, trip_by_id, target_stop_set) do
     Alert.any_informed_entity_satisfies(alert, fn ie ->
       trip_id = ie.trip
 

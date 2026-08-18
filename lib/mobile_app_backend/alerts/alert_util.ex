@@ -10,7 +10,7 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
   @spec fetch_schedules_for_alert(Alert.t(), DateTime.t()) ::
           {[Schedule.t()] | nil, %{String.t() => Trip.t()} | nil}
   def fetch_schedules_for_alert(alert, now) do
-    trip_ids = trip_ids(alert)
+    trip_ids = Alert.trip_ids(alert)
     dates = relevant_service_dates(alert, now)
 
     case trip_ids do
@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
   # Fetch trips for all trip IDs referenced in all alerts informed_entity lists
   @spec fetch_trips_for_alerts([Alert.t()], DateTime.t()) :: [Trip.t()]
   def fetch_trips_for_alerts(alerts, now) do
-    trip_ids = trip_ids(alerts)
+    trip_ids = Alert.trip_ids(alerts)
 
     case trip_ids do
       [] ->
@@ -48,15 +48,6 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
         trips
     end
   end
-
-  @spec trip_ids(Alert.t()) :: [String.t()]
-  def trip_ids(%Alert{informed_entity: entities}), do: entity_trip_ids(entities)
-
-  @spec trip_ids([Alert.t()]) :: [String.t()]
-  def trip_ids(alerts), do: alerts |> Enum.flat_map(& &1.informed_entity) |> entity_trip_ids
-
-  defp entity_trip_ids(entities),
-    do: entities |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
 
   defp reduce_trip_alert_schedules(date, {remaining_trip_ids, acc_schedules, acc_trips}) do
     case remaining_trip_ids do

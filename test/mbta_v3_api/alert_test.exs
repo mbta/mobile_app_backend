@@ -460,6 +460,28 @@ defmodule MBTAV3API.AlertTest do
                  )
                )
     end
+
+    test "for a list of alerts" do
+      assert ["1", "2"] =
+               Alert.trip_ids([
+                 build(:alert,
+                   effect: :delay,
+                   severity: 10,
+                   informed_entity: [
+                     %InformedEntity{trip: "1"},
+                     %InformedEntity{trip: nil, stop: "stop"}
+                   ]
+                 ),
+                 build(:alert,
+                   effect: :delay,
+                   severity: 10,
+                   informed_entity: [
+                     %InformedEntity{trip: "2"},
+                     %InformedEntity{trip: "1"}
+                   ]
+                 )
+               ])
+    end
   end
 
   describe "recurrence_range/1" do
