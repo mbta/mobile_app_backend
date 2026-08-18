@@ -874,6 +874,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
   test "retrieves schedules for specified trips" do
     now = DateTime.now!("America/New_York")
+    service_day = Util.DateTime.datetime_to_gtfs(now)
     upstream_timestamp = DateTime.add(now, -2)
 
     trip = build(:trip, route_id: "Red", stop_ids: ["place-sstat"])
@@ -909,9 +910,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     |> expect(
       :schedules,
       fn [
-           filter: [trip: [^trip_id], date: _date],
+           filter: [trip: [^trip_id], date: ^service_day],
            include: [trip: :stops],
-           sort: {:stop_sequence, :asc}
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
          ],
          _ ->
         ok_response([build(:schedule, trip_id: trip_id)], [trip])
@@ -919,7 +921,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     )
     |> expect(
       :trips,
-      fn [filter: [id: [^trip_id]], include: [:stops], fields: [stop: []]], _ ->
+      fn [filter: [id: [^trip_id], date: ^service_day], include: [:stops], fields: [stop: []]],
+         _ ->
         ok_response([trip], %{})
       end
     )
@@ -938,9 +941,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     now = DateTime.now!("America/New_York")
     upstream_timestamp = DateTime.add(now, -2)
 
-    trip_1 = build(:trip, route_id: "Red")
+    trip_1 = build(:trip, route_id: "Red", stop_ids: ["place-sstat"])
     trip_1_id = trip_1.id
-    trip_2 = build(:trip, route_id: "Red")
+    trip_2 = build(:trip, route_id: "Red", stop_ids: ["place-sstat"])
     trip_2_id = trip_2.id
 
     today = Util.DateTime.datetime_to_gtfs(now)
@@ -981,7 +984,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       fn [
            filter: [trip: [^trip_1_id, ^trip_2_id], date: ^today],
            include: [trip: :stops],
-           sort: {:stop_sequence, :asc}
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
          ],
          _ ->
         ok_response([build(:schedule, trip_id: trip_1_id)], [trip_1])
@@ -992,10 +996,22 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       fn [
            filter: [trip: [^trip_2_id], date: ^tomorrow],
            include: [trip: :stops],
-           sort: {:stop_sequence, :asc}
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
          ],
          _ ->
         ok_response([build(:schedule, trip_id: trip_2_id)], [trip_2])
+      end
+    )
+    |> expect(
+      :trips,
+      fn [
+           filter: [id: [^trip_1_id, ^trip_2_id], date: ^today],
+           include: [:stops],
+           fields: [stop: []]
+         ],
+         _ ->
+        ok_response([trip_1, trip_2])
       end
     )
 
@@ -1009,8 +1025,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              Engine.notifications([subscription], [alert], now)
   end
 
-   test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
+  test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
     now = ~B[2026-07-31 10:00:00]
+    service_date = Util.DateTime.datetime_to_gtfs(now)
     hingham = build(:stop, id: "Hingham", name: "Hingham")
     hull = build(:stop, id: "Hull", name: "Hull")
     george = build(:stop, id: "George", name: "George")
@@ -1060,7 +1077,13 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     |> expect(
       :schedules,
       1,
-      fn [filter: [trip: [trip_id]], include: :trip, sort: {:stop_sequence, :asc}], _ ->
+      fn [
+           filter: [trip: [trip_id], date: ^service_date],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
+         ],
+         _ ->
         trip = Map.get(trips, trip_id)
 
         ok_response(
@@ -1081,7 +1104,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         [filter: [id: trip_id]] ->
           ok_response([Map.get(trips, trip_id)])
 
-        [filter: [id: [trip_id]], include: [:stops], fields: [stop: []]] ->
+        [filter: [id: [trip_id], date: ^service_date], include: [:stops], fields: [stop: []]] ->
           ok_response([Map.get(trips, trip_id)])
       end
     end)

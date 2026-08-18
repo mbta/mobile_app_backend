@@ -123,7 +123,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
         [
           filter: [trip: [^trip_id], date: ^service_date],
           include: [trip: :stops],
-          sort: {:stop_sequence, :asc}
+          sort: {:stop_sequence, :asc},
+          fields: [stop: []]
         ],
         [] ->
           ok_response(schedules, [trip])
@@ -358,7 +359,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
         [
           filter: [trip: [^trip_id], date: ^service_day_tomorrow],
           include: [trip: :stops],
-          sort: {:stop_sequence, :asc}
+          sort: {:stop_sequence, :asc},
+          fields: [stop: []]
         ],
         [] ->
           ok_response(schedules, [trip])

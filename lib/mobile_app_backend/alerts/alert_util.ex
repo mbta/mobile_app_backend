@@ -28,8 +28,35 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
     end
   end
 
-  defp trip_ids(alert),
-    do: alert.informed_entity |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
+  # Fetch trips for all trip IDs referenced in all alerts informed_entity lists
+  @spec fetch_trips_for_alerts([Alert.t()], DateTime.t()) :: [Trip.t()]
+  def fetch_trips_for_alerts(alerts, now) do
+    trip_ids = trip_ids(alerts)
+
+    case trip_ids do
+      [] ->
+        []
+
+      trip_ids ->
+        {_, trips} =
+          Enum.reduce(
+            date_range(today_and_tomorrow(now)),
+            {trip_ids, []},
+            &reduce_trip_alert_trips/2
+          )
+
+        trips
+    end
+  end
+
+  @spec trip_ids(Alert.t()) :: [String.t()]
+  def trip_ids(%Alert{informed_entity: entities}), do: entity_trip_ids(entities)
+
+  @spec trip_ids([Alert.t()]) :: [String.t()]
+  def trip_ids(alerts), do: alerts |> Enum.flat_map(& &1.informed_entity) |> entity_trip_ids
+
+  defp entity_trip_ids(entities),
+    do: entities |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
 
   defp reduce_trip_alert_schedules(date, {remaining_trip_ids, acc_schedules, acc_trips}) do
     case remaining_trip_ids do
@@ -40,7 +67,8 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
         case Repository.schedules(
                filter: [trip: remaining_trip_ids, date: date],
                include: [trip: :stops],
-               sort: {:stop_sequence, :asc}
+               sort: {:stop_sequence, :asc},
+               fields: [stop: []]
              ) do
           {:ok, %{data: date_schedules, included: %{trips: date_trips}}} ->
             {
@@ -59,6 +87,33 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
     end
   end
 
+  defp reduce_trip_alert_trips(date, {remaining_trip_ids, acc_trips}) do
+    case remaining_trip_ids do
+      [] ->
+        {[], acc_trips}
+
+      remaining_trip_ids ->
+        case Repository.trips(
+               filter: [id: remaining_trip_ids, date: date],
+               include: [:stops],
+               fields: [stop: []]
+             ) do
+          {:ok, %{data: date_trips}} ->
+            {
+              remaining_trip_ids -- Enum.map(date_trips, & &1.id),
+              acc_trips ++ date_trips
+            }
+
+          response ->
+            Logger.error(
+              "failed to fetch trips for trip_ids #{inspect(remaining_trip_ids)} response=#{inspect(response)}"
+            )
+
+            {remaining_trip_ids, acc_trips}
+        end
+    end
+  end
+
   defp service_day_matches?(nil, _), do: false
 
   defp service_day_matches?(datetime, service_day) do
@@ -68,9 +123,14 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
   defp date_range(nil), do: nil
   defp date_range({first, last}), do: Date.range(first, last)
 
-  def relevant_service_dates(alert, now) do
+  defp today_and_tomorrow(now) do
     today = Util.DateTime.datetime_to_gtfs(now)
     tomorrow = Date.add(today, 1)
+    {today, tomorrow}
+  end
+
+  def relevant_service_dates(alert, now) do
+    {today, tomorrow} = today_and_tomorrow(now)
 
     current_period = Alert.current_period(alert, now)
     next_period = Alert.next_period(alert, now)
