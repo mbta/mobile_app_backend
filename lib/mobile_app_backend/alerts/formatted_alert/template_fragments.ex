@@ -3,6 +3,8 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
   @moduledoc """
   Fragments of strings to be combined and used in `MobileAppBackend.Alerts.FormattedAlert.Templates`
+  These functions produce strings that can't stand on their own; strings that can be used outside of summaries should
+  live in `MobileAppBackend.PresentationStrings`.
   """
   alias MBTAV3API.{Alert, Stop}
   alias MobileAppBackend.Alerts.AlertSummary
