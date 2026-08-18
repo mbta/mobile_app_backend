@@ -82,8 +82,6 @@ defmodule MobileAppBackend.Notifications.Engine do
           [subscription.stop_id]
       end
 
-    alerts = filter_trip_alerts_serving_stop(alerts, target_stop_with_children)
-
     applicable_alerts =
       applicable_alerts(alerts, subscription, route_ids, target_stop_with_children)
 
@@ -103,46 +101,6 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
       List.wrap(alert_candidate(subscription, alert, now))
-    end)
-  end
-
-  defp filter_trip_alerts_serving_stop(alerts, target_stop_with_children) do
-    trip_ids =
-      alerts
-      |> Enum.flat_map(& &1.informed_entity)
-      |> Enum.map(& &1.trip)
-      |> Enum.uniq()
-      |> Enum.reject(&is_nil/1)
-
-    if Enum.empty?(trip_ids) do
-      alerts
-    else
-      filter_trip_alerts_serving_stop(alerts, trip_ids, target_stop_with_children)
-    end
-  end
-
-  defp filter_trip_alerts_serving_stop(alerts, trip_ids, target_stop_with_children) do
-    {:ok, %{data: trips}} =
-      Repository.trips(
-        filter: [id: trip_ids],
-        include: [:stops],
-        fields: [stop: []]
-      )
-
-    target_stop_set = MapSet.new(target_stop_with_children)
-    trip_by_id = Map.new(trips, &{&1.id, MapSet.new(&1.stop_ids)})
-
-    Enum.filter(alerts, fn %Alert{} = alert ->
-      Alert.any_informed_entity_satisfies(alert, fn ie ->
-        trip_id = ie.trip
-
-        trip_stop_ids = Map.get(trip_by_id, trip_id)
-
-        trip_stop_ids != nil &&
-          trip_stop_ids
-          |> MapSet.intersection(target_stop_set)
-          |> MapSet.size() > 0
-      end)
     end)
   end
 
