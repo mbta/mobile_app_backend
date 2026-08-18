@@ -25,6 +25,20 @@ defmodule MobileAppBackend.PresentationStrings do
     end
   end
 
+  @spec delay_duration(integer()) :: String.t()
+  def delay_duration(severity) do
+    case severity do
+      3 -> gettext("of about 10 minutes")
+      4 -> gettext("of about 15 minutes")
+      5 -> gettext("of about 20 minutes")
+      6 -> gettext("of about 25 minutes")
+      7 -> gettext("of about 30 minutes")
+      8 -> gettext("of more than 30 minutes")
+      9 -> gettext("of more than an hour")
+      _ -> ""
+    end
+  end
+
   @spec effect_sentence_case(Alert.effect()) :: String.t()
   def effect_sentence_case(effect) do
     case effect do

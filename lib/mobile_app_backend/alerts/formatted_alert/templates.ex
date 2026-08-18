@@ -8,7 +8,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   import MobileAppBackend.PresentationStrings
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
-  def standard(effect, location, timeframe, _recurrence, _is_update)
+  def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =
       case effect do
@@ -29,14 +29,26 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
-  # TODO
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
+  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update) do
+    delay_duration = delay_duration(alert.severity)
+    delay_duration = if delay_duration == "", do: "", else: " #{delay_duration}"
+
+    gettext(
+      "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+      effect_sentence_case: effect_sentence_case(:delay),
+      delay_duration: delay_duration,
+      summary_location: location,
+      summary_timeframe: timeframe,
+      summary_recurrence: recurrence
+    )
+  end
 
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
   # TODO: do is_update prefix separately and consistently
-  def standard(effect, location, timeframe, recurrence, is_update) do
+  def standard(%{effect: effect}, location, timeframe, recurrence, is_update) do
     if is_update do
       gettext(
         "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",

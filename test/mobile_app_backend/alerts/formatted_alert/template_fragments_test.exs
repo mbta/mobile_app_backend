@@ -1,7 +1,6 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
   use ExUnit.Case, async: true
   import Test.Support.Sigils
-  alias MobileAppBackend.Alerts.FormattedAlert
   alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
 
   alias MobileAppBackend.Alerts.AlertSummary.{

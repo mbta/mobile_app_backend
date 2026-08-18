@@ -17,7 +17,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   Build a localized string representing the summarized alert.
   If include_bolding is true, elements that should be emphasized will be surrounded by **, ex: "**element to emphasize**"
   """
-  def summary(%{alert_summary: alert_summary} = formatted_alert, locale, include_bolding \\ false) do
+  def summary(
+        %{alert: alert, alert_summary: alert_summary} = formatted_alert,
+        locale,
+        include_bolding \\ false
+      ) do
     summary_with_bolding =
       Gettext.with_locale(locale, fn ->
         case alert_summary do
@@ -27,14 +31,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             )
 
           %AlertSummary.Standard{} ->
-            effect = resolved_effect(formatted_alert)
-
             location = TemplateFragments.location(alert_summary.effect, alert_summary.location)
             timeframe = TemplateFragments.timeframe(alert_summary.timeframe)
             recurrence = TemplateFragments.recurrence(alert_summary.recurrence)
 
             Templates.standard(
-              effect,
+              alert,
               location,
               timeframe,
               recurrence,
@@ -140,15 +142,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
 
       %AlertSummary.TripShuttle.MultipleTrips{} ->
         gettext("multiple trips")
-    end
-  end
-
-  @spec resolved_effect(__MODULE__.t()) :: Alert.effect()
-  defp resolved_effect(formatted_alert) do
-    cond do
-      formatted_alert.alert != nil -> formatted_alert.alert.effect
-      formatted_alert.alert_summary != nil -> formatted_alert.alert_summary.effect
-      true -> :unknown
     end
   end
 

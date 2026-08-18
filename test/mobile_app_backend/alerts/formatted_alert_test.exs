@@ -5,7 +5,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   alias MobileAppBackend.Alerts.AlertSummary
 
   alias MobileAppBackend.Alerts.AlertSummary.{
-    Direction,
     Location,
     Recurrence,
     Timeframe,
@@ -14,7 +13,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     Unknown
   }
 
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.{EndOfService, StartOfService}
   alias MobileAppBackend.Alerts.FormattedAlert
 
   describe "summary/2 all_clear" do
