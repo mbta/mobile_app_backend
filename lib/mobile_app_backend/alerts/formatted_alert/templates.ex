@@ -6,7 +6,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   import MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
   import MobileAppBackend.PresentationStrings
-  # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
   def standard(effect, location, timeframe, _recurrence, _is_update)
@@ -29,6 +28,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         )
     )
   end
+
+  # TODO
+  # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
+
+  # TODO
+  # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
   # TODO: do is_update prefix separately and consistently
   def standard(effect, location, timeframe, recurrence, is_update) do
@@ -56,9 +61,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # TODO
   # [Disruption description] until [end time/further notice]. See alert details.
-
-  # TODO
-  # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
   def trip_specific(trip_identity, effect, cause, recurrence) do
     gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
