@@ -84,7 +84,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     # This section is only to allow Android to group notifications, it gets ignored by iOS
     data_request_body = %{
       message: %FCM.Message{
-        data: %{alert_id: alert_id},
+        data: %{alert_id: alert_id, title: title, body: body},
         android: %FCM.AndroidConfig{
           notification: %FCM.AndroidNotification{
             sound: "default",
