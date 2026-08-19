@@ -39,7 +39,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     # in Android, a notification with a tag will replace an old notification with the same tag
     string_list = [alert_id, type, title, body]
 
-    tag = :erlang.phash2(Enum.join(string_list)).to_string()
+    tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
 
     request_body = %{
       message: %FCM.Message{
