@@ -7,7 +7,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
   live in `MobileAppBackend.PresentationStrings`.
   """
   alias MBTAV3API.{Alert, Stop}
-  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.{Location, Recurrence, Timeframe}
   alias MobileAppBackend.Alerts.DirectionLabel
   alias MobileAppBackend.PresentationStrings
@@ -16,7 +15,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
 
   ### Stops / Location ###
 
-  @spec location(Alert.effect() | nil, Location.t() | nil) :: String.t()
+  @spec location(Alert.effect() | nil, Location.t() | [Stop.id()] | nil) :: String.t()
   def location(effect, location) do
     case location do
       %Location.DirectionToStop{} ->
@@ -53,6 +52,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
 
       %Location.AffectedStops{} ->
         affected_stop_list(location.stops)
+
+      stops when is_list(stops) ->
+        affected_stop_list(stops)
 
       _ ->
         ""
@@ -220,58 +222,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
 
       _ ->
         nil
-    end
-  end
-
-  ### Trip specific ###
-
-  @spec trip_effect(
-          AlertSummary.TripSpecific.trip_identity(),
-          Alert.effect(),
-          [String.t()] | nil,
-          bool()
-        ) :: String.t()
-  def trip_effect(trip_identity, effect, effect_stops, is_today) do
-    day = if is_today, do: gettext("today"), else: gettext("tomorrow")
-    is_plural = match?(%AlertSummary.TripSpecific.MultipleTrips{}, trip_identity)
-
-    cond do
-      effect == :cancellation && is_plural ->
-        gettext("are cancelled %{day}", day: day)
-
-      effect == :cancellation ->
-        gettext("is cancelled %{day}", day: day)
-
-      effect in [:dock_closure, :station_closure, :stop_closure] && effect_stops != nil ->
-        effect_stops
-        |> affected_stop_list()
-        |> skipped_effect(day)
-
-      effect == :suspension ->
-        first_effected_stop =
-          effect_stops
-          |> List.wrap()
-          |> List.first()
-
-        cond do
-          first_effected_stop != nil ->
-            gettext("will terminate at %{terminating_stop} %{day}",
-              terminating_stop: first_effected_stop,
-              day: day
-            )
-
-          is_plural ->
-            gettext("are suspended %{day}", day: day)
-
-          true ->
-            gettext("is suspended %{day}", day: day)
-        end
-
-      true ->
-        gettext("affected by %{effect} %{day}",
-          effect: PresentationStrings.effect_sentence_case(effect),
-          day: day
-        )
     end
   end
 end

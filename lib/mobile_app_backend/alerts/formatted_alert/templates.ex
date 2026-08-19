@@ -78,10 +78,147 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # [Disruption description] until [end time/further notice]. See alert details.
 
-  def trip_specific(trip_identity, effect, cause, recurrence) do
-    gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
+  @spec trip_specific(
+          String.t(),
+          Alert.t(),
+          [String.t()] | nil,
+          String.t(),
+          String.t(),
+          boolean()
+        ) :: String.t()
+  def trip_specific(
+        trip_identity,
+        %{effect: :cancellation, cause: cause},
+        _stops,
+        timeframe,
+        recurrence,
+        multiple_trips?
+      ) do
+    cause =
+      cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    if multiple_trips? do
+      gettext(
+        "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    else
+      gettext(
+        "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    end
+  end
+
+  def trip_specific(
+        trip_identity,
+        %{effect: effect, cause: cause},
+        stops,
+        timeframe,
+        recurrence,
+        _one_trip?
+      )
+      when effect in [:dock_closure, :station_closure, :stop_closure] and stops != nil and
+             stops != [] do
+    cause =
+      cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    skipped_effect =
+      effect
+      |> location(stops)
+      |> skipped_effect(timeframe)
+
+    gettext("%{trip_identity} %{skipped_effect}%{cause}%{recurrence}",
       trip_identity: trip_identity,
-      trip_effect: effect,
+      skipped_effect: skipped_effect,
+      cause: cause,
+      recurrence: recurrence
+    )
+  end
+
+  def trip_specific(
+        trip_identity,
+        %{effect: :suspension, cause: cause},
+        [terminating_stop | _rest],
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    cause =
+      cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    gettext(
+      "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      terminating_stop: terminating_stop,
+      timeframe: timeframe,
+      cause: cause,
+      recurrence: recurrence
+    )
+  end
+
+  def trip_specific(
+        trip_identity,
+        %{effect: :suspension, cause: cause},
+        _stops,
+        timeframe,
+        recurrence,
+        multiple_trips?
+      ) do
+    cause =
+      cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    if multiple_trips? do
+      gettext(
+        "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    else
+      gettext(
+        "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    end
+  end
+
+  def trip_specific(
+        trip_identity,
+        %{effect: effect, cause: cause},
+        _location,
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    cause =
+      cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    gettext(
+      "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      effect: effect_sentence_case(effect),
+      timeframe: timeframe,
       cause: cause,
       recurrence: recurrence
     )

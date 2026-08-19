@@ -18,7 +18,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   If include_bolding is true, elements that should be emphasized will be surrounded by **, ex: "**element to emphasize**"
   """
   def summary(
-        %{alert: alert, alert_summary: alert_summary} = formatted_alert,
+        %{alert: alert, alert_summary: alert_summary},
         locale,
         include_bolding \\ false
       ) do
@@ -46,21 +46,20 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           %AlertSummary.TripSpecific{} ->
             trip_identity = summary_trip_identity(alert_summary.trip_identity)
 
-            trip_effect =
-              TemplateFragments.trip_effect(
-                alert_summary.trip_identity,
-                alert_summary.effect,
-                alert_summary.effect_stops,
-                alert_summary.is_today
-              )
-
-            cause =
-              formatted_alert
-              |> cause_lower_case()
-              |> TemplateFragments.due_to_cause()
-
+            timeframe = if alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")
             recurrence = TemplateFragments.recurrence(alert_summary.recurrence)
-            Templates.trip_specific(trip_identity, trip_effect, cause, recurrence)
+
+            multiple_trips? =
+              match?(%AlertSummary.TripSpecific.MultipleTrips{}, alert_summary.trip_identity)
+
+            Templates.trip_specific(
+              trip_identity,
+              alert,
+              alert_summary.effect_stops,
+              timeframe,
+              recurrence,
+              multiple_trips?
+            )
 
           %AlertSummary.TripShuttle{} ->
             one_trip? =
@@ -143,22 +142,5 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       %AlertSummary.TripShuttle.MultipleTrips{} ->
         gettext("multiple trips")
     end
-  end
-
-  @spec cause_lower_case(__MODULE__.t()) :: String.t() | nil
-  defp cause_lower_case(formatted_alert) do
-    cause =
-      cond do
-        formatted_alert.alert != nil && formatted_alert.alert.cause != nil ->
-          formatted_alert.alert.cause
-
-        match?(%AlertSummary.TripSpecific{}, formatted_alert.alert_summary) ->
-          formatted_alert.alert_summary.cause
-
-        true ->
-          nil
-      end
-
-    PresentationStrings.cause_lower_case(cause)
   end
 end
