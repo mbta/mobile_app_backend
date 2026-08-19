@@ -112,17 +112,17 @@ msgstr ""
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:123
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:127
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:100
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:104
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:107
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:111
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
 msgstr ""
@@ -463,7 +463,7 @@ msgstr ""
 msgid "Multiple routes"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:114
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:118
 #, elixir-autogen, elixir-format
 msgid "Multiple trips"
 msgstr ""
@@ -727,7 +727,7 @@ msgstr ""
 msgid "Technical Problem"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:95
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:99
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
 msgstr ""
@@ -982,7 +982,7 @@ msgstr ""
 msgid "medical emergency"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:147
 #, elixir-autogen, elixir-format
 msgid "multiple trips"
 msgstr ""
@@ -1077,12 +1077,12 @@ msgstr ""
 msgid "technical problem"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:130
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:134
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:138
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:142
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
 msgstr ""
@@ -1092,12 +1092,12 @@ msgstr ""
 msgid "tie replacement"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:79
 #, elixir-autogen, elixir-format
 msgid "today"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:79
 #, elixir-autogen, elixir-format
 msgid "tomorrow"
 msgstr ""
