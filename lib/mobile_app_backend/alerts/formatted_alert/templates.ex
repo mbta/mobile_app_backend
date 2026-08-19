@@ -46,7 +46,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
-  def standard(%{effect: effect}, location, timeframe, recurrence) do
+  def standard(%{effect: effect} = alert, location, timeframe, recurrence) do
     due_to_cause =
       if location == "" || timeframe == "" ||
            timeframe == TemplateFragments.until_further_notice() do
