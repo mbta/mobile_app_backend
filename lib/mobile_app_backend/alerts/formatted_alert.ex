@@ -44,22 +44,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             )
 
           %AlertSummary.TripSpecific{} ->
-            trip_identity = summary_trip_identity(alert_summary.trip_identity)
-
-            timeframe = if alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")
-            recurrence = TemplateFragments.recurrence(alert_summary.recurrence)
-
-            multiple_trips? =
-              match?(%AlertSummary.TripSpecific.MultipleTrips{}, alert_summary.trip_identity)
-
-            Templates.trip_specific(
-              trip_identity,
-              alert,
-              alert_summary.effect_stops,
-              timeframe,
-              recurrence,
-              multiple_trips?
-            )
+            trip_specific(alert, alert_summary)
 
           %AlertSummary.TripShuttle{} ->
             one_trip? =
@@ -86,6 +71,25 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     else
       String.replace(summary_with_bolding, "**", "")
     end
+  end
+
+  defp trip_specific(alert, alert_summary) do
+    trip_identity = summary_trip_identity(alert_summary.trip_identity)
+
+    timeframe = if alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")
+    recurrence = TemplateFragments.recurrence(alert_summary.recurrence)
+
+    multiple_trips? =
+      match?(%AlertSummary.TripSpecific.MultipleTrips{}, alert_summary.trip_identity)
+
+    Templates.trip_specific(
+      trip_identity,
+      alert,
+      alert_summary.effect_stops,
+      timeframe,
+      recurrence,
+      multiple_trips?
+    )
   end
 
   @spec summary_trip_identity(AlertSummary.TripSpecific.trip_identity()) :: String.t()
