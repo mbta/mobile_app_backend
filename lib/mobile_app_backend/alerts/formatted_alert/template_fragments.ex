@@ -148,9 +148,15 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
   end
 
   ### Cause ###
+  @spec due_to_cause(Alert.cause() | String.t() | nil) :: String.t()
 
-  @spec due_to_cause(String.t() | nil) :: String.t()
-  def due_to_cause(due_to_cause) do
+  def due_to_cause(due_to_cause) when not is_nil(due_to_cause) and is_atom(due_to_cause) do
+    due_to_cause
+    |> PresentationStrings.cause_lower_case()
+    |> due_to_cause()
+  end
+
+  def due_to_cause(due_to_cause) when is_binary(due_to_cause) or is_nil(due_to_cause) do
     if due_to_cause != nil do
       gettext(" due to %{cause}", cause: due_to_cause)
     else
