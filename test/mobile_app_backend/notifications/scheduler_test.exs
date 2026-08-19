@@ -427,7 +427,6 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
   test "sends trip cancellation with future active period" do
     now = DateTime.now!("America/New_York")
-    service_day = Util.DateTime.datetime_to_gtfs(now)
 
     route =
       build(:route,
@@ -486,13 +485,6 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         [trip]
       )
     end)
-    |> expect(
-      :trips,
-      fn [filter: [id: [^trip_id], date: ^service_day], include: [:stops], fields: [stop: []]],
-         _ ->
-        ok_response([trip], %{})
-      end
-    )
 
     reassign_env(
       :mobile_app_backend,
@@ -556,7 +548,6 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
   test "sends trip cancellation reminder with near future active period" do
     now = DateTime.now!("America/New_York")
-    service_day = Util.DateTime.datetime_to_gtfs(now)
 
     route =
       build(:route,
@@ -615,13 +606,6 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         [trip]
       )
     end)
-    |> expect(
-      :trips,
-      fn [filter: [id: [^trip_id], date: ^service_day], include: [:stops], fields: [stop: []]],
-         _ ->
-        ok_response([trip], %{})
-      end
-    )
 
     reassign_env(
       :mobile_app_backend,
