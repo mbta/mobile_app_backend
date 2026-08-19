@@ -82,6 +82,13 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
     end
   end
 
+  ### Delays ###
+
+  def delay_duration(severity) do
+    raw = PresentationStrings.delay_duration(severity)
+    if raw == "", do: "", else: " #{raw}"
+  end
+
   ### Recurrence ###
 
   @spec recurrence(Recurrence.t() | nil) :: String.t()

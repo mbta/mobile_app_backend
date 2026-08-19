@@ -16,17 +16,17 @@ msgstr ""
 msgid " at **%{stop_name}**"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:94
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:101
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:148
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:155
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:198
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr ""
@@ -56,38 +56,38 @@ msgstr ""
 msgid " replacing **%{mode_label}**"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:110
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:193
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:200
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:190
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:163
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:170
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:117
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:124
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:167
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:120
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:127
 #, elixir-autogen, elixir-format
 msgid " until tomorrow"
 msgstr ""
@@ -102,12 +102,12 @@ msgstr ""
 msgid "%{name} bus"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:256
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:254
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:66
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:65
 #, elixir-autogen, elixir-format
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 msgstr ""
@@ -132,7 +132,7 @@ msgstr ""
 msgid "**All clear:** Regular service%{location}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:58
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:57
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 msgstr ""
@@ -589,7 +589,7 @@ msgstr ""
 msgid "Shuttle buses"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:264
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:262
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr ""
@@ -867,7 +867,7 @@ msgstr ""
 msgid "electrical work"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:225
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr ""
@@ -937,27 +937,27 @@ msgstr ""
 msgid "ice in harbor"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:123
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:130
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:131
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:138
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:169
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:176
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:177
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:184
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:185
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:192
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr ""
@@ -1052,7 +1052,7 @@ msgstr ""
 msgid "speed restriction"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:215
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:222
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr ""
@@ -1183,47 +1183,47 @@ msgstr ""
 msgid "will not stop at %{stop_list} %{timeframe}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:142
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:141
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:244
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:242
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:104
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:103
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:187
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:186
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:221
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:219
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:112
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:111
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:195
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:194
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:163
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:162
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:38
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:37
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr ""

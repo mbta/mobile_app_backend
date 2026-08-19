@@ -5,8 +5,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   use Gettext, backend: MobileAppBackend.Gettext
 
   alias MBTAV3API.Alert
-  import MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
-  import MobileAppBackend.PresentationStrings
+  alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
+  alias MobileAppBackend.PresentationStrings
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
   def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update)
@@ -23,7 +23,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       "%{mode} %{skipped_effect}",
       mode: mode,
       skipped_effect:
-        skipped_effect(
+        TemplateFragments.skipped_effect(
           location,
           String.trim_leading(timeframe)
         )
@@ -32,20 +32,19 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
   def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update) do
-    delay_duration = delay_duration(alert.severity)
-    delay_duration = if delay_duration == "", do: "", else: " #{delay_duration}"
+    delay_duration = TemplateFragments.delay_duration(alert.severity)
 
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
-      effect_sentence_case: effect_sentence_case(:delay),
+      effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
       delay_duration: delay_duration,
       summary_location: location,
       summary_timeframe: timeframe,
       summary_recurrence: recurrence,
       due_to_cause:
         alert.cause
-        |> cause_lower_case()
-        |> due_to_cause()
+        |> PresentationStrings.cause_lower_case()
+        |> TemplateFragments.due_to_cause()
     )
   end
 
@@ -57,7 +56,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     if is_update do
       gettext(
         "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: effect_sentence_case(effect),
+        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
         summary_recurrence: recurrence
@@ -65,7 +64,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     else
       gettext(
         "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: effect_sentence_case(effect),
+        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
         summary_recurrence: recurrence
@@ -97,8 +96,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       ) do
     cause =
       alert.cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
     if multiple_trips? do
       gettext(
@@ -131,13 +130,13 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
              stops != [] do
     cause =
       alert.cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
     skipped_effect =
       effect
-      |> location(stops)
-      |> skipped_effect(timeframe)
+      |> TemplateFragments.location(stops)
+      |> TemplateFragments.skipped_effect(timeframe)
 
     gettext("%{trip_identity} %{skipped_effect}%{cause}%{recurrence}",
       trip_identity: trip_identity,
@@ -157,8 +156,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       ) do
     cause =
       alert.cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
     gettext(
       "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}",
@@ -180,8 +179,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       ) do
     cause =
       alert.cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
     if multiple_trips? do
       gettext(
@@ -212,11 +211,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       ) do
     cause =
       alert.cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
-    delay_duration = delay_duration(alert.severity)
-    delay_duration = if delay_duration == "", do: "", else: " #{delay_duration}"
+    delay_duration = TemplateFragments.delay_duration(alert.severity)
 
     gettext(
       "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}",
@@ -238,13 +236,13 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       ) do
     cause =
       cause
-      |> cause_lower_case()
-      |> due_to_cause()
+      |> PresentationStrings.cause_lower_case()
+      |> TemplateFragments.due_to_cause()
 
     gettext(
       "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}",
       trip_identity: trip_identity,
-      effect: effect_sentence_case(effect),
+      effect: PresentationStrings.effect_sentence_case(effect),
       timeframe: timeframe,
       cause: cause,
       recurrence: recurrence
