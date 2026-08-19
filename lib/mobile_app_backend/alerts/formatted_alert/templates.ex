@@ -4,6 +4,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   """
   use Gettext, backend: MobileAppBackend.Gettext
 
+  alias MBTAV3API.Alert
   import MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
   import MobileAppBackend.PresentationStrings
 
@@ -88,14 +89,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         ) :: String.t()
   def trip_specific(
         trip_identity,
-        %{effect: :cancellation, cause: cause},
+        %{effect: :cancellation} = alert,
         _stops,
         timeframe,
         recurrence,
         multiple_trips?
       ) do
     cause =
-      cause
+      alert.cause
       |> cause_lower_case()
       |> due_to_cause()
 
@@ -120,7 +121,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: effect, cause: cause},
+        %{effect: effect} = alert,
         stops,
         timeframe,
         recurrence,
@@ -129,7 +130,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       when effect in [:dock_closure, :station_closure, :stop_closure] and stops != nil and
              stops != [] do
     cause =
-      cause
+      alert.cause
       |> cause_lower_case()
       |> due_to_cause()
 
@@ -148,14 +149,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: :suspension, cause: cause},
+        %{effect: :suspension} = alert,
         [terminating_stop | _rest],
         timeframe,
         recurrence,
         _multiple_trips?
       ) do
     cause =
-      cause
+      alert.cause
       |> cause_lower_case()
       |> due_to_cause()
 
@@ -171,14 +172,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: :suspension, cause: cause},
+        %{effect: :suspension} = alert,
         _stops,
         timeframe,
         recurrence,
         multiple_trips?
       ) do
     cause =
-      cause
+      alert.cause
       |> cause_lower_case()
       |> due_to_cause()
 
@@ -199,6 +200,32 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence: recurrence
       )
     end
+  end
+
+  def trip_specific(
+        trip_identity,
+        %{effect: :delay} = alert,
+        _stops,
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    cause =
+      alert.cause
+      |> cause_lower_case()
+      |> due_to_cause()
+
+    delay_duration = delay_duration(alert.severity)
+    delay_duration = if delay_duration == "", do: "", else: " #{delay_duration}"
+
+    gettext(
+      "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      delay_duration: delay_duration,
+      timeframe: timeframe,
+      cause: cause,
+      recurrence: recurrence
+    )
   end
 
   def trip_specific(

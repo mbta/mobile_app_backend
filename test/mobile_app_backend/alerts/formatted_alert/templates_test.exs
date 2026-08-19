@@ -4,6 +4,60 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
 
   alias MobileAppBackend.Alerts.FormattedAlert.Templates
 
+  describe "standard/5" do
+    test "dock_closure" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :dock_closure),
+          "**A**",
+          " until further notice",
+          "",
+          false
+        )
+
+      assert "Ferries will not stop at **A** until further notice" == summary
+    end
+
+    test "delay" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :delay, severity: 3),
+          "",
+          " until further notice",
+          "",
+          false
+        )
+
+      assert "**Delays** of about 10 minutes until further notice" == summary
+    end
+
+    test "fallback update" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour),
+          "",
+          " until further notice",
+          "",
+          true
+        )
+
+      assert "**Update:** Detour until further notice" == summary
+    end
+
+    test "fallback" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour),
+          "",
+          " until further notice",
+          "",
+          false
+        )
+
+      assert "**Detour** until further notice" == summary
+    end
+  end
+
   describe "trip_specific/6" do
     test "multiple cancelled" do
       summary =
@@ -63,6 +117,20 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
                summary
     end
 
+    test "suspension with terminating stop" do
+      summary =
+        Templates.trip_specific(
+          "This trip",
+          build(:alert, effect: :suspension, cause: :weather),
+          ["A", "B"],
+          "today",
+          "",
+          false
+        )
+
+      assert "This trip will terminate at A today due to weather" == summary
+    end
+
     test "multiple suspended" do
       summary =
         Templates.trip_specific(
@@ -89,6 +157,20 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         )
 
       assert "This trip is suspended today due to weather" == summary
+    end
+
+    test "delays" do
+      summary =
+        Templates.trip_specific(
+          "This trip",
+          build(:alert, effect: :delay, cause: :weather, severity: 3),
+          nil,
+          "today",
+          "",
+          false
+        )
+
+      assert "This trip experiencing delays of about 10 minutes today due to weather" == summary
     end
 
     test "fallback" do
