@@ -1,11 +1,11 @@
 defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Alert
   alias MBTAV3API.Line
-  alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MobileAppBackend.Alerts.AlertSummary
+  alias MobileAppBackend.Alerts.AlertUtil
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.Engine.OutgoingNotification
@@ -82,6 +82,8 @@ defmodule MobileAppBackend.Notifications.Engine do
           [subscription.stop_id]
       end
 
+    alerts = filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children)
+
     applicable_alerts =
       applicable_alerts(alerts, subscription, route_ids, target_stop_with_children)
 
@@ -101,6 +103,37 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
       List.wrap(alert_candidate(subscription, alert, now))
+    end)
+  end
+
+  defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
+    trips = AlertUtil.fetch_trips_for_alerts(alerts, now)
+
+    if Enum.empty?(trips) do
+      alerts
+    else
+      target_stop_set = MapSet.new(target_stop_with_children)
+      trip_by_id = Map.new(trips, &{&1.id, MapSet.new(&1.stop_ids)})
+
+      Enum.filter(alerts, fn %Alert{} = alert ->
+        alert
+        |> Alert.trip_ids()
+        |> Enum.empty?() ||
+          trip_alert_serves_stop(alert, trip_by_id, target_stop_set)
+      end)
+    end
+  end
+
+  defp trip_alert_serves_stop(%Alert{} = alert, trip_by_id, target_stop_set) do
+    Alert.any_informed_entity_satisfies(alert, fn ie ->
+      trip_id = ie.trip
+
+      trip_stop_ids = Map.get(trip_by_id, trip_id)
+
+      trip_stop_ids != nil &&
+        trip_stop_ids
+        |> MapSet.intersection(target_stop_set)
+        |> MapSet.size() > 0
     end)
   end
 
@@ -243,7 +276,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         global_data
       )
 
-    schedules = schedules_for_subscription(alert, subscription, global_data)
+    schedules = schedules_for_subscription(alert, subscription, global_data, now)
 
     AlertSummary.summarizing(
       alert,
@@ -257,28 +290,15 @@ defmodule MobileAppBackend.Notifications.Engine do
     )
   end
 
-  defp schedules_for_subscription(alert, subscription, global_data) do
-    trip_ids =
-      alert.informed_entity |> Enum.map(& &1.trip) |> Enum.uniq() |> Enum.reject(&is_nil/1)
-
-    case trip_ids do
-      [] ->
+  defp schedules_for_subscription(alert, subscription, global_data, now) do
+    case AlertUtil.fetch_schedules_for_alert(alert, now) do
+      {nil, nil} ->
         nil
 
-      trip_ids ->
-        {:ok, %{data: schedules, included: %{trips: trips}}} =
-          Repository.schedules(
-            filter: [trip: trip_ids],
-            include: :trip,
-            sort: {:stop_sequence, :asc}
-          )
-
-        schedules =
-          Enum.filter(schedules, fn schedule ->
-            schedule_matches_subscription?(schedule, subscription, trips, global_data)
-          end)
-
-        schedules
+      {schedules, trips} ->
+        Enum.filter(schedules, fn schedule ->
+          schedule_matches_subscription?(schedule, subscription, trips, global_data)
+        end)
     end
   end
 
