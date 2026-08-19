@@ -12,16 +12,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
     if stop_ids_concat == "" do
       json(conn, %{schedules: [], trips: %{}})
     else
-      {time_in_us, result} =
-        :timer.tc(fn ->
-          fetch_schedules_and_combine_data(conn, stop_ids_concat, date_time_string, params)
-        end)
-
-      Logger.info(
-        "#{__MODULE__} schedules request stop_ids=#{stop_ids_concat} date_time=#{date_time_string} params=#{inspect(params)} duration_ms=#{time_in_us / 1000}"
-      )
-
-      result
+      fetch_schedules_and_combine_data(conn, stop_ids_concat, date_time_string, params)
     end
   end
 
@@ -99,7 +90,7 @@ defmodule MobileAppBackendWeb.ScheduleController do
       end)
 
     Logger.info(
-      "#{__MODULE__} schedule request parent_stop_ids_count=#{Enum.count(parent_stop_ids)} duration_ms=#{time_in_us / 1000}"
+      "#{__MODULE__} schedule request parent_stop_ids_count=#{Enum.count(parent_stop_ids)} date_time=#{date_time} duration_ms=#{time_in_us / 1000}"
     )
 
     case data do
