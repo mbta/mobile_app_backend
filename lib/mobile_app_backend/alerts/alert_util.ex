@@ -94,9 +94,12 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
 
       remaining_trip_ids ->
         case Repository.trips(
-               filter: [id: remaining_trip_ids, date: date],
-               include: [:stops],
-               fields: [stop: []]
+               [
+                 filter: [id: remaining_trip_ids, date: date],
+                 include: [:stops],
+                 fields: [stop: []]
+               ],
+               cache_empty: true
              ) do
           {:ok, %{data: date_trips}} ->
             {

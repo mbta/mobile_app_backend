@@ -161,7 +161,7 @@ defmodule MobileAppBackend.Alerts.AlertUtilTest do
       |> expect(
         :trips,
         fn [filter: [id: [^trip_id], date: ^service_day], include: [:stops], fields: [stop: []]],
-           _ ->
+           [cache_empty: true] ->
           ok_response([trip], %{})
         end
       )
@@ -205,14 +205,14 @@ defmodule MobileAppBackend.Alerts.AlertUtilTest do
              include: [:stops],
              fields: [stop: []]
            ],
-           _ ->
+           [cache_empty: true] ->
           ok_response([trip_1], %{})
         end
       )
       |> expect(
         :trips,
         fn [filter: [id: [^trip_2_id], date: ^tomorrow], include: [:stops], fields: [stop: []]],
-           _ ->
+           [cache_empty: true] ->
           ok_response([trip_2], %{})
         end
       )
