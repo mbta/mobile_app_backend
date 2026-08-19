@@ -139,16 +139,14 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
   end
 
-  defp handle_fcm_response({:ok, %Req.Response{status: 404}}, user) do
-    # if an FCM token is deleted, it won’t be recreated later, so prune the user now
-    case Repo.delete(user) do
-      {:ok, _} ->
-        :deleted
+  # if an FCM token is deleted, it won’t be recreated later, so prune the user now
+  defp handle_fcm_response({:ok, %Req.Response{status: 404}}, user), do: delete_user(user)
 
-      {:error, error} ->
-        Logger.error(inspect(error))
-        :error
-    end
+  # if we get a 410 status code from APNs, the token is no longer registered and should be pruned
+  defp handle_fcm_response({:ok, %Req.Response{status: 400, body: body}} = result, user) do
+    if apns_unregistered_410?(body),
+      do: delete_user(user),
+      else: handle_fcm_response(result, user)
   end
 
   defp handle_fcm_response(result, _user) do
@@ -165,4 +163,27 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     Sentry.capture_message("FCM delivery failed: #{inspect(error)}")
     :error
   end
+
+  defp delete_user(user) do
+    case Repo.delete(user) do
+      {:ok, _} ->
+        :deleted
+
+      {:error, error} ->
+        Logger.error(inspect(error))
+        :error
+    end
+  end
+
+  defp apns_unregistered_410?(%{"error" => %{"details" => details}}) when is_list(details) do
+    Enum.any?(details, fn
+      %{"@type" => "type.googleapis.com/google.firebase.fcm.v1.ApnsError", "statusCode" => 410} ->
+        true
+
+      _ ->
+        false
+    end)
+  end
+
+  defp apns_unregistered_410?(_), do: false
 end

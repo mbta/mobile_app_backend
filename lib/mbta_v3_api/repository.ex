@@ -124,6 +124,13 @@ defmodule MBTAV3API.Repository.Impl do
   def stops(params, opts \\ []), do: all(MBTAV3API.Stop, params, opts)
 
   @impl true
+  def trips(params, opts \\ []),
+    do:
+      if(Keyword.get(opts, :cache_empty, false),
+        do: trips_cache_empty(params, opts),
+        else: trips_no_cache_empty(params, opts)
+      )
+
   @decorate cacheable(
               cache: RepositoryCache,
               match: fn
@@ -136,7 +143,10 @@ defmodule MBTAV3API.Repository.Impl do
               on_error: :nothing,
               opts: [ttl: @trip_ttl]
             )
-  def trips(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
+  defp trips_no_cache_empty(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
+
+  @decorate cacheable(cache: RepositoryCache, on_error: :nothing, opts: [ttl: @ttl])
+  defp trips_cache_empty(params, opts \\ []), do: all(MBTAV3API.Trip, params, opts)
 
   @spec all(module(), JsonApi.Params.t(), Keyword.t()) ::
           {:ok, JsonApi.Response.t(JsonApi.Object.t())} | {:error, term()}

@@ -8,6 +8,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
   alias MobileAppBackend.Alerts.AlertSummary
+  alias MobileAppBackend.Alerts.AlertUtil
   alias MobileAppBackend.Alerts.FormattedAlert
   alias MobileAppBackend.Alerts.SummaryEntity
   alias MobileAppBackend.GlobalDataCache
@@ -82,7 +83,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         ) :: [SummaryEntity.t()]
   defp build_for_alert(alert, at_time, locale, global, context) do
     # Fetch schedules once for the whole alert for any trips included in the informed entities
-    {schedules, trips} = fetch_schedules_for_alert(alert)
+    {schedules, trips} =
+      AlertUtil.fetch_schedules_for_alert(alert, at_time)
 
     # The global stops don't include all child stops, so we need to fetch them separately
     stops = fetch_all_stops()
@@ -377,9 +379,12 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
                 nil
             end
 
-          _ ->
+          trip_id when not is_nil(trips) ->
             # If a trip ID is provided, we can pull a stop ID from the trip's stop list
             Map.get(trips, trip_id, %{stop_ids: []}).stop_ids |> List.first()
+
+          _ ->
+            nil
         end,
         stops
       )
@@ -394,39 +399,6 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
          ) do
       %Stop{id: id} -> id
       _ -> nil
-    end
-  end
-
-  # Fetch schedules for all trip IDs referenced in the alert's informed_entity list
-  @spec fetch_schedules_for_alert(Alert.t()) ::
-          {[Schedule.t()] | nil, %{String.t() => Trip.t()} | nil}
-  defp fetch_schedules_for_alert(alert) do
-    trip_ids =
-      alert.informed_entity
-      |> Enum.map(& &1.trip)
-      |> Enum.uniq()
-      |> Enum.reject(&is_nil/1)
-
-    case trip_ids do
-      [] ->
-        {nil, nil}
-
-      trip_ids ->
-        case Repository.schedules(
-               filter: [trip: trip_ids],
-               include: [trip: :stops],
-               sort: {:stop_sequence, :asc}
-             ) do
-          {:ok, %{data: schedules, included: %{trips: trips}}} ->
-            {schedules, trips}
-
-          response ->
-            Logger.error(
-              "failed to fetch schedules for trip_ids #{inspect(trip_ids)} response=#{inspect(response)}"
-            )
-
-            {nil, nil}
-        end
     end
   end
 

@@ -334,6 +334,20 @@ defmodule MBTAV3API.Alert do
     Enum.any?(alert.informed_entity, predicate)
   end
 
+  @spec trip_ids(t() | [t()]) :: [Trip.id()]
+  def trip_ids(alerts) when is_list(alerts) do
+    alerts
+    |> Enum.flat_map(&trip_ids(&1))
+    |> Enum.uniq()
+  end
+
+  def trip_ids(alert) do
+    alert.informed_entity
+    |> Enum.map(& &1.trip)
+    |> Enum.uniq()
+    |> Enum.reject(&is_nil/1)
+  end
+
   defmodule RecurrenceInfo do
     @type t :: %__MODULE__{
             start: DateTime.t(),

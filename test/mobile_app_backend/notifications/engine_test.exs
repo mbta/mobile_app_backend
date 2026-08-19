@@ -874,6 +874,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
   test "retrieves schedules for specified trips" do
     now = DateTime.now!("America/New_York")
+    service_day = Util.DateTime.datetime_to_gtfs(now)
     upstream_timestamp = DateTime.add(now, -2)
 
     trip = build(:trip, route_id: "Red")
@@ -908,8 +909,21 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     RepositoryMock
     |> expect(
       :schedules,
-      fn [filter: [trip: [^trip_id]], include: :trip, sort: {:stop_sequence, :asc}], _ ->
+      fn [
+           filter: [trip: [^trip_id], date: ^service_day],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
+         ],
+         _ ->
         ok_response([build(:schedule, trip_id: trip_id)], [trip])
+      end
+    )
+    |> expect(
+      :trips,
+      fn [filter: [id: [^trip_id], date: ^service_day], include: [:stops], fields: [stop: []]],
+         _ ->
+        ok_response([trip], %{})
       end
     )
 
@@ -921,5 +935,412 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              }
            ] =
              Engine.notifications([subscription], [alert], now)
+  end
+
+  test "retrieves schedules for future specified trips" do
+    now = DateTime.now!("America/New_York")
+    upstream_timestamp = DateTime.add(now, -2)
+
+    trip_1 = build(:trip, route_id: "Red", stop_ids: ["place-sstat"])
+    trip_1_id = trip_1.id
+    trip_2 = build(:trip, route_id: "Red", stop_ids: ["place-sstat"])
+    trip_2_id = trip_2.id
+
+    today = Util.DateTime.datetime_to_gtfs(now)
+    tomorrow = today |> Date.add(1)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: DateTime.add(now, -1), end: DateTime.add(now, 3, :day)}
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %Alert.InformedEntity{activities: [:board], route: "Red", trip: trip_1_id},
+          %Alert.InformedEntity{activities: [:board], route: "Red", trip: trip_2_id}
+        ],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    _ = GlobalDataCache.get_data()
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(
+      :schedules,
+      fn [
+           filter: [trip: [^trip_1_id, ^trip_2_id], date: ^today],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
+         ],
+         _ ->
+        ok_response([build(:schedule, trip_id: trip_1_id)], [trip_1])
+      end
+    )
+    |> expect(
+      :schedules,
+      fn [
+           filter: [trip: [^trip_2_id], date: ^tomorrow],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
+         ],
+         _ ->
+        ok_response([build(:schedule, trip_id: trip_2_id)], [trip_2])
+      end
+    )
+    |> expect(
+      :trips,
+      fn [
+           filter: [id: [^trip_1_id, ^trip_2_id], date: ^today],
+           include: [:stops],
+           fields: [stop: []]
+         ],
+         _ ->
+        ok_response([trip_1, trip_2])
+      end
+    )
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
+             Engine.notifications([subscription], [alert], now)
+  end
+
+  test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
+    now = ~B[2026-07-31 10:00:00]
+    service_date = Util.DateTime.datetime_to_gtfs(now)
+    hingham = build(:stop, id: "Hingham", name: "Hingham")
+    hull = build(:stop, id: "Hull", name: "Hull")
+    george = build(:stop, id: "George", name: "George")
+    logan = build(:stop, id: "Logan", name: "Logan")
+    route = build(:route, id: "Boat-F2H", type: :ferry, long_name: "Hingham/Hull Ferry")
+
+    trip_stops_at_both =
+      build(:trip,
+        id: "other",
+        direction_id: 1,
+        headsign: "Logan",
+        route_id: route.id,
+        stop_ids: [
+          hingham.id,
+          hull.id,
+          george.id,
+          logan.id
+        ]
+      )
+
+    affected_trip_only_george =
+      build(:trip,
+        id: "affected",
+        direction_id: 1,
+        headsign: "Logan",
+        route_id: route.id,
+        stop_ids: [hingham.id, george.id, logan.id]
+      )
+
+    trips =
+      [trip_stops_at_both, affected_trip_only_george]
+      |> Map.new(fn trip -> {trip.id, trip} end)
+
+    patterns =
+      Enum.map([trip_stops_at_both, affected_trip_only_george], fn trip ->
+        build(:route_pattern,
+          id: "RP_#{trip.id}",
+          route_id: route.id,
+          direction_id: 1,
+          representative_trip_id: trip.id
+        )
+      end)
+
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(
+      :schedules,
+      1,
+      fn [
+           filter: [trip: [trip_id], date: ^service_date],
+           include: [trip: :stops],
+           sort: {:stop_sequence, :asc},
+           fields: [stop: []]
+         ],
+         _ ->
+        trip = Map.get(trips, trip_id)
+
+        ok_response(
+          Enum.map(trip.stop_ids, fn stop_id ->
+            build(:schedule,
+              trip_id: trip_id,
+              route_id: route.id,
+              stop_id: stop_id,
+              departure_time: ~B[2026-07-31 10:35:00]
+            )
+          end),
+          [trip]
+        )
+      end
+    )
+    |> expect(:trips, 4, fn params, _ ->
+      case params do
+        [filter: [id: trip_id]] ->
+          ok_response([Map.get(trips, trip_id)])
+
+        [filter: [id: [trip_id], date: ^service_date], include: [:stops], fields: [stop: []]] ->
+          ok_response([Map.get(trips, trip_id)])
+      end
+    end)
+
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    GlobalDataCacheMock
+    |> expect(:default_key, 2, fn -> :default_key end)
+    |> expect(:get_data, 2, fn _ ->
+      %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes: %{"Boat-F1" => build(:route, type: :ferry, id: "Boat-F1"), route.id => route},
+        route_patterns: Map.new(patterns, &{&1.id, &1}),
+        stops: %{
+          hingham.id => hingham,
+          hull.id => hull,
+          george.id => george,
+          logan.id => logan
+        },
+        trips: %{
+          trip_stops_at_both.id => trip_stops_at_both,
+          affected_trip_only_george.id => affected_trip_only_george
+        }
+      }
+    end)
+
+    alert =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2026-07-31 10:15:00], end: ~B[2026-07-31 12:00:00]}
+        ],
+        duration_certainty: :known,
+        effect: :dock_closure,
+        informed_entity: [
+          %Alert.InformedEntity{
+            route: route.id,
+            stop: george.id,
+            trip: affected_trip_only_george.id,
+            direction_id: nil,
+            activities: [:board, :exit]
+          },
+          %Alert.InformedEntity{
+            route: "Boat-F1",
+            stop: george.id,
+            trip: affected_trip_only_george.id,
+            direction_id: nil,
+            activities: [:board, :exit]
+          }
+        ]
+      )
+
+    subscription_hull =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: route.id,
+        stop_id: hull.id,
+        direction_id: 1,
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-10, :hour) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(10, :hour) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    subscription_hingham =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: route.id,
+        stop_id: hingham.id,
+        direction_id: 1,
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-10, :hour) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(10, :hour) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [] =
+             Engine.notifications([subscription_hull], [alert], now)
+
+    assert [outgoing_notification] =
+             Engine.notifications([subscription_hull, subscription_hingham], [alert], now)
+
+    assert %{body: "10:35 AM ferry to Logan will not stop at George today"} =
+             OutgoingNotification.localize(outgoing_notification, "en")
+  end
+
+  test "Handles a mix of trip-specific and route-level alerts" do
+    now = ~B[2026-07-31 10:00:00]
+    hingham = build(:stop, id: "Hingham", name: "Hingham")
+    hull = build(:stop, id: "Hull", name: "Hull")
+    george = build(:stop, id: "George", name: "George")
+    route = build(:route, id: "Boat-F2H", type: :ferry, long_name: "Hingham/Hull Ferry")
+
+    affected_trip =
+      build(:trip,
+        id: "affected",
+        direction_id: 1,
+        headsign: "Logan",
+        route_id: route.id,
+        stop_ids: [hingham.id, george.id]
+      )
+
+    other_trip =
+      build(:trip,
+        id: "other",
+        direction_id: 1,
+        headsign: "George",
+        route_id: route.id,
+        stop_ids: [
+          hingham.id,
+          hull.id,
+          george.id
+        ]
+      )
+
+    trips =
+      [other_trip, affected_trip]
+      |> Map.new(fn trip -> {trip.id, trip} end)
+
+    patterns =
+      Enum.map([other_trip, affected_trip], fn trip ->
+        build(:route_pattern,
+          id: "RP_#{trip.id}",
+          route_id: route.id,
+          direction_id: 1,
+          representative_trip_id: trip.id
+        )
+      end)
+
+    reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+    RepositoryMock
+    |> expect(:trips, 1, fn [
+                              filter: [id: [trip_id], date: ~D[2026-07-31]],
+                              include: [:stops],
+                              fields: [stop: []]
+                            ],
+                            _ ->
+      ok_response([Map.get(trips, trip_id)])
+    end)
+
+    reassign_env(
+      :mobile_app_backend,
+      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCacheMock
+    )
+
+    GlobalDataCacheMock
+    |> expect(:default_key, 1, fn -> :default_key end)
+    |> expect(:get_data, 1, fn _ ->
+      %{
+        lines: %{},
+        pattern_ids_by_stop: %{},
+        routes: %{"Boat-F1" => build(:route, type: :ferry, id: "Boat-F1"), route.id => route},
+        route_patterns: Map.new(patterns, &{&1.id, &1}),
+        stops: %{
+          hingham.id => hingham,
+          hull.id => hull,
+          george.id => george
+        },
+        trips: %{
+          other_trip.id => other_trip,
+          affected_trip.id => affected_trip
+        }
+      }
+    end)
+
+    alert_trip_specific =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2026-07-31 10:15:00], end: ~B[2026-07-31 12:00:00]}
+        ],
+        duration_certainty: :known,
+        effect: :dock_closure,
+        informed_entity: [
+          %Alert.InformedEntity{
+            route: route.id,
+            stop: george.id,
+            trip: affected_trip.id,
+            direction_id: nil,
+            activities: [:board, :exit]
+          },
+          %Alert.InformedEntity{
+            route: "Boat-F1",
+            stop: george.id,
+            trip: affected_trip.id,
+            direction_id: nil,
+            activities: [:board, :exit]
+          }
+        ]
+      )
+
+    alert_route =
+      build(:alert,
+        active_period: [
+          %Alert.ActivePeriod{start: ~B[2026-07-31 10:15:00], end: ~B[2026-07-31 12:00:00]}
+        ],
+        duration_certainty: :known,
+        effect: :delay,
+        severity: 7,
+        informed_entity: [
+          %Alert.InformedEntity{
+            route: route.id,
+            direction_id: nil,
+            activities: [:board, :exit]
+          }
+        ]
+      )
+
+    subscription_hull =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: route.id,
+        stop_id: hull.id,
+        direction_id: 1,
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: now |> DateTime.add(-10, :hour) |> DateTime.to_time(),
+            end_time: now |> DateTime.add(10, :hour) |> DateTime.to_time(),
+            days_of_week: Range.to_list(0..6)
+          )
+        ]
+      )
+
+    assert [
+             %MobileAppBackend.Notifications.Engine.OutgoingNotification{
+               summary: %AlertSummary.Standard{effect: :delay}
+             }
+           ] =
+             Engine.notifications([subscription_hull], [alert_trip_specific, alert_route], now)
   end
 end
