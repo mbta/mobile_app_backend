@@ -85,9 +85,12 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
 
       remaining_trip_ids ->
         case Repository.trips(
-               filter: [id: remaining_trip_ids, date: date],
-               include: [:stops],
-               fields: [stop: []]
+               [
+                 filter: [id: remaining_trip_ids, date: date],
+                 include: [:stops],
+                 fields: [stop: []]
+               ],
+               cache_empty: true
              ) do
           {:ok, %{data: date_trips}} ->
             {
@@ -120,7 +123,7 @@ defmodule MobileAppBackend.Alerts.AlertUtil do
     {today, tomorrow}
   end
 
-  def relevant_service_dates(alert, now) do
+  defp relevant_service_dates(alert, now) do
     {today, tomorrow} = today_and_tomorrow(now)
 
     current_period = Alert.current_period(alert, now)
