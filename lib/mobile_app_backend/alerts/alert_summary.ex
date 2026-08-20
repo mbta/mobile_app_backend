@@ -28,10 +28,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             location: Location.t() | nil,
             timeframe: Timeframe.t() | nil,
             recurrence: Recurrence.t() | nil,
-            is_update: boolean()
+            is_update: boolean(),
+            context: AlertSummary.context()
           }
     @derive PolymorphicJson
-    defstruct [:effect, :location, :timeframe, :recurrence, :is_update]
+    defstruct [:effect, :location, :timeframe, :recurrence, :is_update, :context]
   end
 
   defmodule AllClear do
@@ -80,7 +81,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         location: alert_location(alert, stop_id, direction_id, patterns, global),
         timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
         recurrence: recurrence,
-        is_update: alert_is_update?(alert, at_time)
+        is_update: alert_is_update?(alert, at_time),
+        context: context
       }
     end
   end
