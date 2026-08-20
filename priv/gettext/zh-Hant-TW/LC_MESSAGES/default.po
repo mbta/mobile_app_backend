@@ -21,12 +21,12 @@ msgstr " 在**%{stop_name}**"
 msgid " daily%{recurrence_text}"
 msgstr " 每日%{recurrence_text}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:155
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:161
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr " 由於%{cause}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr " 從%{start_time}至%{end_time}"
@@ -61,28 +61,28 @@ msgstr " 替代**%{mode_label}**"
 msgid " some days%{recurrence_text}"
 msgstr " 部分日子%{recurrence_text}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:200
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:213
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr " 自今日**%{formatted_time}**起"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:210
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr " 自明日起"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:170
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:180
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr " 直至服務結束"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:186
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr " 直至明天"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:124
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:167
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:177
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr " 直至另行通知"
@@ -102,27 +102,22 @@ msgstr "%{label} %{mode_label}"
 msgid "%{name} bus"
 msgstr "%{name}巴士"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:254
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:236
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "%{trip_identity}從**%{start_stop}**至**%{end_stop}**%{recurrence}由接駁巴士替代營運"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:65
-#, elixir-autogen, elixir-format
-msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-msgstr "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:123
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:128
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
 msgstr "**%{time}**%{vehicle}從**%{from_stop}**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:100
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:105
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
 msgstr "**%{trip_time}**%{route_type}從**%{stop_name}**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:107
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:112
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
 msgstr "**%{trip_time}**%{route_type}至**%{headsign}**"
@@ -131,11 +126,6 @@ msgstr "**%{trip_time}**%{route_type}至**%{headsign}**"
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Regular service%{location}"
 msgstr "**運行正常：**常規營運%{location}"
-
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:57
-#, elixir-autogen, elixir-format
-msgid "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-msgstr "**最新訊息：**%{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 
 #: lib/presentation_strings.ex:85
 #, elixir-autogen, elixir-format
@@ -463,7 +453,7 @@ msgstr "調整後的服務"
 msgid "Multiple routes"
 msgstr "多條線路"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:114
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:119
 #, elixir-autogen, elixir-format
 msgid "Multiple trips"
 msgstr "多個班次"
@@ -589,7 +579,7 @@ msgstr "擺渡巴士"
 msgid "Shuttle buses"
 msgstr "擺渡巴士"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:262
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:244
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "接駁巴士替代從**%{start_stop}**至**%{end_stop}**%{recurrence}的%{trip_identity}"
@@ -727,7 +717,7 @@ msgstr "道岔故障"
 msgid "Technical Problem"
 msgstr "技術故障"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:95
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:100
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
 msgstr "該%{route_type}"
@@ -867,7 +857,7 @@ msgstr "開合橋故障"
 msgid "electrical work"
 msgstr "電力作業"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:225
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:238
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr "服務結束"
@@ -947,17 +937,17 @@ msgstr " 直至%{1}"
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr " 直至%{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:176
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:189
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr " 至%{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:184
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr " 至%{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:192
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr " 至%{1}"
@@ -982,7 +972,7 @@ msgstr "機械故障"
 msgid "medical emergency"
 msgstr "醫療急救"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:148
 #, elixir-autogen, elixir-format
 msgid "multiple trips"
 msgstr "多個班次"
@@ -1052,7 +1042,7 @@ msgstr "特殊事件"
 msgid "speed restriction"
 msgstr "速度限制"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:222
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:235
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr "服務開始"
@@ -1077,12 +1067,12 @@ msgstr "道岔故障"
 msgid "technical problem"
 msgstr "技術故障"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:130
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:135
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
 msgstr "**%{time}** %{vehicle}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:138
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
 msgstr "該%{vehicle}"
@@ -1092,12 +1082,12 @@ msgstr "該%{vehicle}"
 msgid "tie replacement"
 msgstr "更換軌枕"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:80
 #, elixir-autogen, elixir-format
 msgid "today"
 msgstr "今日"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:80
 #, elixir-autogen, elixir-format
 msgid "tomorrow"
 msgstr "明日"
@@ -1183,47 +1173,47 @@ msgstr "**多個網站**"
 msgid "will not stop at %{stop_list} %{timeframe}"
 msgstr "將不停靠%{stop_list}%{timeframe}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:141
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 msgstr "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:242
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:224
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 受 %{effect} %{timeframe}%{cause}%{recurrence} 影響"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:103
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:112
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 已取消 %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:186
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:180
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 已暫停 %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:219
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:206
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 遇到延誤%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:111
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:120
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 已取消 %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:194
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:188
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 已暫停 %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:162
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:159
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 將在 %{terminating_stop} %{timeframe}%{cause}%{recurrence} 處終止"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:37
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:35
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr "**延誤**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
@@ -1262,3 +1252,23 @@ msgstr "超過30分鐘"
 #, elixir-autogen, elixir-format
 msgid "of more than an hour"
 msgstr "超過一個小時"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:82
+#, elixir-autogen, elixir-format
+msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:73
+#, elixir-autogen, elixir-format
+msgid "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**更新：** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:183
+#, elixir-autogen, elixir-format
+msgid " until later today"
+msgstr "直到今天晚些時候"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:53
+#, elixir-autogen, elixir-format
+msgid "%{summary}. See alert details."
+msgstr "%{summary}。查看警報詳情。"

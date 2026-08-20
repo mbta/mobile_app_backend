@@ -258,7 +258,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Timeframe.t() | nil
   defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  # TODO: Alternatively have as later today?
   defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _),
     do: %Timeframe.LaterToday{}
 
