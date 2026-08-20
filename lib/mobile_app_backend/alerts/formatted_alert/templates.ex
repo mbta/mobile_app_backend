@@ -63,7 +63,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   defp default_standard(%{effect: effect} = alert, location, timeframe, recurrence, is_update) do
     due_to_cause =
       if location == "" || timeframe == "" ||
-           timeframe == TemplateFragments.until_further_notice() do
+           timeframe in TemplateFragments.indefinite_end_time_strings() do
         TemplateFragments.due_to_cause(alert.cause)
       else
         ""

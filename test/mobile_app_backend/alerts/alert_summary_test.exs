@@ -462,7 +462,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterToday{}} =
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
     end
 
