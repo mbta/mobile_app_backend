@@ -99,7 +99,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     relevant_alerts =
       Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
-      |> Enum.filter(&(&1.last_push_notification_timestamp != nil))
+      |> Enum.filter(&Alert.eligible_for_notification?(&1))
 
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
       List.wrap(alert_candidate(subscription, alert, now))

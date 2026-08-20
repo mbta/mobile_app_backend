@@ -210,6 +210,15 @@ defmodule MBTAV3API.Alert do
     end)
   end
 
+  @spec eligible_for_notification?(t()) :: boolean()
+  @doc """
+  An alert is eligible for notifications if it has been marked for notification
+  now (via last_push_notification_timestamp) or later (reminder_times)
+  """
+  def eligible_for_notification?(alert) do
+    alert.last_push_notification_timestamp != nil or alert.reminder_times != []
+  end
+
   @spec active?(t(), DateTime.t()) :: boolean()
   def active?(alert, now \\ DateTime.now!("America/New_York")) do
     current_period(alert, now) != nil

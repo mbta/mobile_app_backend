@@ -98,7 +98,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                "lifecycle" => "NEW",
                "severity" => 7,
-               "reminder_times" => [],
+               "reminder_times" => nil,
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
@@ -185,7 +185,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
                ],
                "lifecycle" => "NEW",
-               "reminder_times" => [],
+               "reminder_times" => ["2024-02-12T11:49:00-05:00"],
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
@@ -206,7 +206,7 @@ defmodule MBTAV3API.AlertTest do
                }
              ],
              lifecycle: :new,
-             reminder_times: [],
+             reminder_times: [~B[2024-02-12 11:49:00]],
              updated_at: ~B[2024-02-12 11:49:00]
            }
   end
@@ -276,7 +276,6 @@ defmodule MBTAV3API.AlertTest do
                  }
                ],
                "lifecycle" => "NEW",
-               "reminder_times" => [],
                "reminder_times" => [],
                "severity" => 5,
                "updated_at" => "2025-03-17T15:17:11-04:00"
@@ -1123,5 +1122,27 @@ defmodule MBTAV3API.AlertTest do
       )
 
     assert downstream_alerts == []
+  end
+
+  describe "eligible_for_notification?/1" do
+    test "returns true if last_push_notification_timestamp is not nil" do
+      alert = build(:alert, last_push_notification_timestamp: ~B[2025-04-10 03:00:00])
+      assert Alert.eligible_for_notification?(alert)
+    end
+
+    test "returns true if reminder_times is not empty" do
+      alert =
+        build(:alert,
+          last_push_notification_timestamp: nil,
+          reminder_times: [~B[2025-04-10 03:00:00]]
+        )
+
+      assert Alert.eligible_for_notification?(alert)
+    end
+
+    test "returns false if last_push_notification_timestamp is nil and no reminder times" do
+      alert = build(:alert, last_push_notification_timestamp: nil, reminder_times: [])
+      refute Alert.eligible_for_notification?(alert)
+    end
   end
 end
