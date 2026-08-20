@@ -21,6 +21,7 @@ defmodule MBTAV3API.Alert do
           informed_entity: [InformedEntity.t()],
           last_push_notification_timestamp: DateTime.t() | nil,
           lifecycle: lifecycle(),
+          reminder_times: [DateTime.t()],
           severity: integer(),
           updated_at: DateTime.t()
         }
@@ -157,6 +158,7 @@ defmodule MBTAV3API.Alert do
     :informed_entity,
     :last_push_notification_timestamp,
     :lifecycle,
+    :reminder_times,
     :severity,
     :updated_at
   ]
@@ -175,6 +177,7 @@ defmodule MBTAV3API.Alert do
       :informed_entity,
       :last_push_notification_timestamp,
       :lifecycle,
+      :reminder_times,
       :severity,
       :updated_at
     ]
@@ -205,6 +208,15 @@ defmodule MBTAV3API.Alert do
     Enum.find(alert.active_period, fn %ActivePeriod{start: ap_start} ->
       DateTime.after?(ap_start, now) and DateTime.diff(ap_start, now, :hour) < 24
     end)
+  end
+
+  @spec eligible_for_notification?(t()) :: boolean()
+  @doc """
+  An alert is eligible for notifications if it has been marked for notification
+  now (via last_push_notification_timestamp) or later (reminder_times)
+  """
+  def eligible_for_notification?(alert) do
+    alert.last_push_notification_timestamp != nil or alert.reminder_times != []
   end
 
   @spec active?(t(), DateTime.t()) :: boolean()
@@ -246,6 +258,10 @@ defmodule MBTAV3API.Alert do
           item.attributes["last_push_notification_timestamp"]
         ),
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
+      reminder_times:
+        item.attributes["reminder_times"]
+        |> List.wrap()
+        |> Enum.map(&Util.DateTime.parse_datetime!/1),
       severity: item.attributes["severity"],
       updated_at: Util.DateTime.parse_datetime!(item.attributes["updated_at"])
     }
