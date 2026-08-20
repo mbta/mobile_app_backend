@@ -198,7 +198,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                timeframe: %AlertSummary.Timeframe.Tomorrow{},
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
-               }
+               },
+               context: :notification
              }) ==
                %{
                  type: "standard",
@@ -212,7 +213,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  recurrence: %{
                    type: "some_days",
                    ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
-                 }
+                 },
+                 context: "notification"
                }
     end
 
@@ -247,7 +249,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                cause: :holiday,
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-03-10 14:28:00]}
-               }
+               },
+               context: :notification
              }) == %{
                type: "trip_specific",
                trip_identity: %{
@@ -263,7 +266,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %{
                  type: "daily",
                  ending: %{type: "later_date", time: "2026-03-10T14:28:00-04:00"}
-               }
+               },
+               context: "notification"
              }
     end
 
@@ -276,7 +280,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                },
                start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
-               recurrence: nil
+               recurrence: nil,
+               context: :notification
              }) == %{
                type: "trip_shuttle",
                trip_identity: %{
@@ -287,7 +292,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                },
                start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
-               recurrence: nil
+               recurrence: nil,
+               context: "notification"
              }
     end
 
