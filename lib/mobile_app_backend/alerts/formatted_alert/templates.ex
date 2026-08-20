@@ -83,7 +83,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         ) :: String.t()
   def trip_specific(
         trip_identity,
-        %{effect: :cancellation} = alert,
+        %Alert{effect: :cancellation} = alert,
         _stops,
         timeframe,
         recurrence,
@@ -112,7 +112,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: effect} = alert,
+        %Alert{effect: effect} = alert,
         stops,
         timeframe,
         recurrence,
@@ -133,7 +133,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: :suspension} = alert,
+        %Alert{effect: :suspension} = alert,
         [terminating_stop | _rest],
         timeframe,
         recurrence,
@@ -151,7 +151,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: :suspension} = alert,
+        %Alert{effect: :suspension} = alert,
         _stops,
         timeframe,
         recurrence,
@@ -180,7 +180,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: :delay} = alert,
+        %Alert{effect: :delay} = alert,
         _stops,
         timeframe,
         recurrence,
@@ -198,7 +198,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_specific(
         trip_identity,
-        %{effect: effect, cause: cause},
+        %Alert{effect: effect, cause: cause},
         _location,
         timeframe,
         recurrence,
