@@ -256,7 +256,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Timeframe.t() | nil
   defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
+  # TODO: Alternatively have as later today?
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _),
+    do: %Timeframe.UntilFurtherNotice{}
 
   defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.DateTime.datetime_to_gtfs(at_time)

@@ -447,6 +447,19 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
     end
 
+    test "summary with estimated later today timeframe", %{now: now} do
+      end_time = DateTime.add(now, 1, :hour)
+
+      alert =
+        build(:alert,
+          duration_certainty: :estimated,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
+        )
+
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
+               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+    end
+
     test "summary with end of service timeframe", %{now: now} do
       tomorrow = Util.DateTime.datetime_to_gtfs(now) |> Date.add(1)
       end_time = DateTime.new!(tomorrow, ~T[02:59:00], "America/New_York")
