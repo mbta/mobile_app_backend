@@ -25,7 +25,7 @@ export ALGOLIA_SEARCH_KEY=
 export ALGOLIA_READ_URL=
 
 # Configuration for [Sentry](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
-# Used for error logging
+# Do not use unless you need to send messages to Sentry from local env
 export SENTRY_DSN=
 export SENTRY_ENV=local
 
