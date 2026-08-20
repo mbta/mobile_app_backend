@@ -98,6 +98,7 @@ defmodule MBTAV3API.AlertTest do
                ],
                "lifecycle" => "NEW",
                "severity" => 7,
+               "reminder_times" => [],
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
@@ -118,6 +119,7 @@ defmodule MBTAV3API.AlertTest do
                }
              ],
              lifecycle: :new,
+             reminder_times: [],
              severity: 7,
              updated_at: ~B[2024-02-12 11:49:00]
            }
@@ -158,6 +160,7 @@ defmodule MBTAV3API.AlertTest do
                    %{"activities" => ["BOARD", "EXIT", "RIDE"], "route_type" => 3}
                  ],
                  "lifecycle" => "NEW",
+                 "reminder_times" => [],
                  "updated_at" => "2026-01-26T09:43:00-05:00"
                }
              })
@@ -182,6 +185,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"activities" => ["BOARD", "EXIT", "RIDE"], "route" => "39", "route_type" => 3}
                ],
                "lifecycle" => "NEW",
+               "reminder_times" => [],
                "updated_at" => "2024-02-12T11:49:00-05:00"
              }
            }) == %Alert{
@@ -202,6 +206,7 @@ defmodule MBTAV3API.AlertTest do
                }
              ],
              lifecycle: :new,
+             reminder_times: [],
              updated_at: ~B[2024-02-12 11:49:00]
            }
   end
@@ -271,6 +276,8 @@ defmodule MBTAV3API.AlertTest do
                  }
                ],
                "lifecycle" => "NEW",
+               "reminder_times" => [],
+               "reminder_times" => [],
                "severity" => 5,
                "updated_at" => "2025-03-17T15:17:11-04:00"
              }
@@ -294,6 +301,7 @@ defmodule MBTAV3API.AlertTest do
              ],
              lifecycle: :new,
              severity: 5,
+             reminder_times: [],
              updated_at: ~B[2025-03-17 15:17:11]
            }
   end

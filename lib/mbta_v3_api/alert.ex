@@ -21,6 +21,7 @@ defmodule MBTAV3API.Alert do
           informed_entity: [InformedEntity.t()],
           last_push_notification_timestamp: DateTime.t() | nil,
           lifecycle: lifecycle(),
+          reminder_times: [DateTime.t()],
           severity: integer(),
           updated_at: DateTime.t()
         }
@@ -157,6 +158,7 @@ defmodule MBTAV3API.Alert do
     :informed_entity,
     :last_push_notification_timestamp,
     :lifecycle,
+    :reminder_times,
     :severity,
     :updated_at
   ]
@@ -175,6 +177,7 @@ defmodule MBTAV3API.Alert do
       :informed_entity,
       :last_push_notification_timestamp,
       :lifecycle,
+      :reminder_times,
       :severity,
       :updated_at
     ]
@@ -246,6 +249,10 @@ defmodule MBTAV3API.Alert do
           item.attributes["last_push_notification_timestamp"]
         ),
       lifecycle: parse_lifecycle!(item.attributes["lifecycle"]),
+      reminder_times:
+        item.attributes["reminder_times"]
+        |> List.wrap()
+        |> Enum.map(&Util.DateTime.parse_datetime!/1),
       severity: item.attributes["severity"],
       updated_at: Util.DateTime.parse_datetime!(item.attributes["updated_at"])
     }
