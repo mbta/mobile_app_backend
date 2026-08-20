@@ -8,8 +8,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
   alias MobileAppBackend.PresentationStrings
 
-  # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
-  def standard(%{effect: effect}, location, timeframe, _recurrence)
+  # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].=
+  def standard(%{effect: effect}, location, timeframe, _recurrence, _context)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =
       case effect do
@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   end
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
-  def standard(%{effect: :delay} = alert, location, timeframe, recurrence) do
+  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _context) do
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
@@ -46,7 +46,19 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
-  def standard(%{effect: effect} = alert, location, timeframe, recurrence) do
+  # [Disruption description] until [end time/further notice]. See alert details.
+  def standard(%{effect: effect} = alert, location, timeframe, recurrence, context)
+      when effect in [:detour, :snow_route] and context == :notification do
+    summary = default_standard(alert, location, timeframe, recurrence)
+    gettext("%{summary}. See alert details.", summary: summary)
+  end
+
+  # [Disruption description] [Affected stop(s)] [end time] [due to cause].
+  def standard(alert, location, timeframe, recurrence, _context) do
+    default_standard(alert, location, timeframe, recurrence)
+  end
+
+  defp default_standard(%{effect: effect} = alert, location, timeframe, recurrence) do
     due_to_cause =
       if location == "" || timeframe == "" ||
            timeframe == TemplateFragments.until_further_notice() do
@@ -64,12 +76,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       due_to_cause: due_to_cause
     )
   end
-
-  # TODO
-  # [Disruption description] [Affected stop(s)] [end time] [due to cause].
-
-  # TODO
-  # [Disruption description] until [end time/further notice]. See alert details.
 
   @spec trip_specific(
           String.t(),
