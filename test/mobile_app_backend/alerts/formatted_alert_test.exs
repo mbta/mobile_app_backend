@@ -5,7 +5,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   alias MobileAppBackend.Alerts.AlertSummary
 
   alias MobileAppBackend.Alerts.AlertSummary.{
-    Direction,
     Location,
     Recurrence,
     Timeframe,
@@ -14,7 +13,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     Unknown
   }
 
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.{EndOfService, StartOfService}
   alias MobileAppBackend.Alerts.FormattedAlert
 
   describe "summary/2 all_clear" do
@@ -150,7 +148,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary/2 trip-specific" do
     test "suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :accident)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.TripFrom{
@@ -173,7 +171,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     test "downstream suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :weather)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.TripFrom{
@@ -196,7 +194,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     test "this trip suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :weather)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.ThisTrip{

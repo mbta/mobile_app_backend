@@ -139,7 +139,9 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  alert_1,
                  [
-                   %SummaryEntity{summary: "**Delay** until further notice"}
+                   %SummaryEntity{
+                     summary: "**Delays** until further notice due to single tracking"
+                   }
                  ],
                  state.now
                )
@@ -158,7 +160,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert to_alert_map([
                AlertWithSummaries.from_alert(
                  alert_2,
-                 [%SummaryEntity{summary: "**Delay**"}],
+                 [%SummaryEntity{summary: "**Delays** due to rail defect"}],
                  state.now
                )
              ]) == new_alerts
@@ -201,7 +203,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  alert_1,
                  [
-                   %SummaryEntity{summary: "**Delay** until further notice"}
+                   %SummaryEntity{summary: "**Delays** until further notice"}
                  ],
                  state.now
                )
@@ -228,6 +230,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
         build(:alert,
           id: "a_2",
           cause: :single_tracking,
+          severity: 3,
           active_period: [
             %Alert.ActivePeriod{
               start: DateTime.add(state.now, -10, :minute),
@@ -256,7 +259,10 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  single_tracking_now,
                  [
-                   %SummaryEntity{summary: "**Delay** until further notice"}
+                   %SummaryEntity{
+                     summary:
+                       "**Delays** of about 10 minutes until further notice due to single tracking"
+                   }
                  ],
                  state.now
                )
@@ -304,7 +310,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  alert_1,
                  [
-                   %SummaryEntity{summary: "**Delay** starting tomorrow"}
+                   %SummaryEntity{summary: "**Delays** starting tomorrow"}
                  ],
                  state.now
                )
@@ -319,7 +325,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert to_alert_map([
                AlertWithSummaries.from_alert(
                  alert_1,
-                 [%SummaryEntity{summary: "**Delay** until further notice"}],
+                 [%SummaryEntity{summary: "**Delays** until further notice"}],
                  new_now
                )
              ]) == new_alerts

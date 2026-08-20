@@ -4,11 +4,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   """
   use Gettext, backend: MobileAppBackend.Gettext
 
-  import MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
-  import MobileAppBackend.PresentationStrings
+  alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
+  alias MobileAppBackend.PresentationStrings
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
-  def standard(effect, location, timeframe, _recurrence, _is_update)
+  def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =
       case effect do
@@ -22,25 +23,35 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       "%{mode} %{skipped_effect}",
       mode: mode,
       skipped_effect:
-        skipped_effect(
+        TemplateFragments.skipped_effect(
           location,
           String.trim_leading(timeframe)
         )
     )
   end
 
-  # TODO
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
+  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update) do
+    gettext(
+      "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
+      effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
+      delay_duration: TemplateFragments.delay_duration(alert.severity),
+      summary_location: location,
+      summary_timeframe: timeframe,
+      summary_recurrence: recurrence,
+      due_to_cause: TemplateFragments.due_to_cause(alert.cause)
+    )
+  end
 
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
   # TODO: do is_update prefix separately and consistently
-  def standard(effect, location, timeframe, recurrence, is_update) do
+  def standard(%{effect: effect}, location, timeframe, recurrence, is_update) do
     if is_update do
       gettext(
         "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: effect_sentence_case(effect),
+        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
         summary_recurrence: recurrence
@@ -48,7 +59,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     else
       gettext(
         "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: effect_sentence_case(effect),
+        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
         summary_recurrence: recurrence
@@ -62,11 +73,143 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # [Disruption description] until [end time/further notice]. See alert details.
 
-  def trip_specific(trip_identity, effect, cause, recurrence) do
-    gettext("%{trip_identity} %{trip_effect}%{cause}%{recurrence}",
+  @spec trip_specific(
+          String.t(),
+          Alert.t(),
+          [String.t()] | nil,
+          String.t(),
+          String.t(),
+          boolean()
+        ) :: String.t()
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: :cancellation} = alert,
+        _stops,
+        timeframe,
+        recurrence,
+        multiple_trips?
+      ) do
+    cause = TemplateFragments.due_to_cause(alert.cause)
+
+    if multiple_trips? do
+      gettext(
+        "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    else
+      gettext(
+        "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    end
+  end
+
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: effect} = alert,
+        stops,
+        timeframe,
+        recurrence,
+        _one_trip?
+      )
+      when effect in [:dock_closure, :station_closure, :stop_closure] and stops != nil and
+             stops != [] do
+    gettext("%{trip_identity} %{skipped_effect}%{cause}%{recurrence}",
       trip_identity: trip_identity,
-      trip_effect: effect,
-      cause: cause,
+      skipped_effect:
+        effect
+        |> TemplateFragments.location(stops)
+        |> TemplateFragments.skipped_effect(timeframe),
+      cause: TemplateFragments.due_to_cause(alert.cause),
+      recurrence: recurrence
+    )
+  end
+
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: :suspension} = alert,
+        [terminating_stop | _rest],
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    gettext(
+      "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      terminating_stop: terminating_stop,
+      timeframe: timeframe,
+      cause: TemplateFragments.due_to_cause(alert.cause),
+      recurrence: recurrence
+    )
+  end
+
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: :suspension} = alert,
+        _stops,
+        timeframe,
+        recurrence,
+        multiple_trips?
+      ) do
+    cause = TemplateFragments.due_to_cause(alert.cause)
+
+    if multiple_trips? do
+      gettext(
+        "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    else
+      gettext(
+        "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}",
+        trip_identity: trip_identity,
+        timeframe: timeframe,
+        cause: cause,
+        recurrence: recurrence
+      )
+    end
+  end
+
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: :delay} = alert,
+        _stops,
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    gettext(
+      "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      delay_duration: TemplateFragments.delay_duration(alert.severity),
+      timeframe: timeframe,
+      cause: TemplateFragments.due_to_cause(alert.cause),
+      recurrence: recurrence
+    )
+  end
+
+  def trip_specific(
+        trip_identity,
+        %Alert{effect: effect, cause: cause},
+        _location,
+        timeframe,
+        recurrence,
+        _multiple_trips?
+      ) do
+    gettext(
+      "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}",
+      trip_identity: trip_identity,
+      effect: PresentationStrings.effect_sentence_case(effect),
+      timeframe: timeframe,
+      cause: TemplateFragments.due_to_cause(cause),
       recurrence: recurrence
     )
   end
