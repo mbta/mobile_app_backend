@@ -40,7 +40,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
               location,
               timeframe,
               recurrence,
-              alert_summary.is_update
+              alert_summary.is_update,
+              alert_summary.context
             )
 
           %AlertSummary.TripSpecific{} ->
