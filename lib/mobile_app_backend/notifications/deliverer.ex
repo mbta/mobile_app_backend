@@ -43,6 +43,15 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         _ -> alert_id
       end
 
+    {installation_id, token} =
+      case user do
+        %User{fcm_installation_id: installation_id} when not is_nil(installation_id) ->
+          {installation_id, nil}
+
+        %User{fcm_installation_id: nil, fcm_token: token} ->
+          {nil, token}
+      end
+
     request_body = %{
       message: %FCM.Message{
         notification: %FCM.Notification{
@@ -65,7 +74,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         fcm_options: %FCM.FcmOptions{
           analytics_label: analytics_label
         },
-        token: user.fcm_token
+        fid: installation_id,
+        token: token
       }
     }
 

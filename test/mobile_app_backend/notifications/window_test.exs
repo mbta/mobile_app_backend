@@ -11,7 +11,7 @@ defmodule MobileAppBackend.Notifications.WindowTest do
   test "can insert windows for subscription" do
     %{id: user_id} =
       MobileAppBackend.Repo.insert!(%User{
-        fcm_token: "fake",
+        fcm_installation_id: "fake",
         fcm_last_verified: ~U[2025-09-10 00:00:00Z]
       })
 
