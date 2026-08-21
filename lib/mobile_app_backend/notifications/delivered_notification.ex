@@ -43,24 +43,18 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
 
   def can_send?(user_id, alert_id, {:update, upstream_timestamp}) do
     # Have they already been sent a notification or update for this alert with the same upstream timestamp
+    query =
+      from dn in __MODULE__,
+        where:
+          dn.user_id == ^user_id and dn.alert_id == ^alert_id and
+            dn.type in [:notification, :update]
+
     matching_sent_message_count =
       if is_nil(upstream_timestamp) do
-        Repo.aggregate(
-          from(dn in __MODULE__,
-            where:
-              dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-                dn.type in [:notification, :update] and is_nil(dn.upstream_timestamp)
-          ),
-          :count
-        )
+        Repo.aggregate(from(dn in query, where: is_nil(dn.upstream_timestamp)), :count)
       else
         Repo.aggregate(
-          from(dn in __MODULE__,
-            where:
-              dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-                dn.type in [:notification, :update] and
-                dn.upstream_timestamp == ^upstream_timestamp
-          ),
+          from(dn in query, where: dn.upstream_timestamp == ^upstream_timestamp),
           :count
         )
       end
