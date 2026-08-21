@@ -112,7 +112,14 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
     start_link_supervised!(Store.Alerts)
     Store.Alerts.process_reset([alert], [])
-    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+    set_log_level(:info)
+
+    {{:ok, _}, log} =
+      with_log([level: :info], fn ->
+        perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+      end)
+
+    assert log =~ "find_new_notifications_for_user status=ok"
 
     assert_enqueued(
       worker: Notifications.Deliverer,
@@ -270,7 +277,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       end)
 
     assert {:ok, nil} = result
-    assert log =~ "failed find_new_notifications"
+    assert log =~ "failed find_new_notifications_for_user status=error"
     assert log =~ "this is bad"
   end
 

@@ -197,21 +197,39 @@ defmodule MobileAppBackend.Notifications.Engine do
       is_nil(next_overlap) ->
         nil
 
-      open_now? and active_now? ->
-        if DeliveredNotification.can_send?(
-             subscription.user_id,
-             alert.id,
-             {:notification, alert.last_push_notification_timestamp}
-           ) do
-          {alert, :notification, subscription}
-        else
-          {alert, :update, subscription}
-        end
+      open_now? and active_now? and
+          DeliveredNotification.can_send?(
+            subscription.user_id,
+            alert.id,
+            {:notification, alert.last_push_notification_timestamp}
+          ) ->
+        {alert, :notification, subscription}
 
-      open_now? and next_overlap_in_hours < 24 ->
+      open_now? and active_now? and
+          DeliveredNotification.can_send?(
+            subscription.user_id,
+            alert.id,
+            {:update, alert.last_push_notification_timestamp}
+          ) ->
+        {alert, :update, subscription}
+
+      open_now? and active_now? ->
+        nil
+
+      open_now? and next_overlap_in_hours < 24 and
+          DeliveredNotification.can_send?(
+            subscription.user_id,
+            alert.id,
+            :reminder
+          ) ->
         {alert, :reminder, subscription}
 
-      next_overlap_in_hours < 12 ->
+      next_overlap_in_hours < 12 and
+          DeliveredNotification.can_send?(
+            subscription.user_id,
+            alert.id,
+            :reminder
+          ) ->
         {alert, :reminder, subscription}
 
       true ->
