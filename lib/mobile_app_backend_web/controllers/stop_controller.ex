@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.StopController do
+  require Logger
   alias MBTAV3API.Repository
   alias MobileAppBackendWeb.ShapesController
   use MobileAppBackendWeb, :controller
@@ -24,9 +25,18 @@ defmodule MobileAppBackendWeb.StopController do
 
     # Generic nodes often don't contain coordinates, but the frontend expects
     # all stops to have coordinates, and we have no use for them, so they're removed.
-    child_stops
-    |> Enum.filter(fn {_, stop} -> stop.location_type != :generic_node end)
-    |> Enum.into(%{})
+    {time_in_us, result} =
+      :timer.tc(fn ->
+        child_stops
+        |> Enum.filter(fn {_, stop} -> stop.location_type != :generic_node end)
+        |> Enum.into(%{})
+      end)
+
+    Logger.info(
+      "#{__MODULE__} unfiltered_child_stops_count=#{Enum.count(child_stops)} filtered_child_stops_count=#{Enum.count(result)} duration_ms=#{time_in_us / 1000}"
+    )
+
+    result
   end
 
   defp fetch_shape_data_for_map(stop_id) do
@@ -44,6 +54,10 @@ defmodule MobileAppBackendWeb.StopController do
         filter: [stop: [stop_id]],
         include: [:route, representative_trip: [:shape, stops: :parent_station]]
       )
+
+    Logger.info(
+      "#{__MODULE__} route_patterns_count=#{Enum.count(patterns)} routes_count=#{Enum.count(routes_by_id)} trips_count=#{Enum.count(trips_by_id)} shapes_count=#{Enum.count(shapes_by_id)} stops_count=#{Enum.count(stops_by_id)}"
+    )
 
     %{
       route_patterns: patterns,

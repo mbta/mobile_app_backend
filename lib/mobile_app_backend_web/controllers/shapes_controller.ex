@@ -1,4 +1,5 @@
 defmodule MobileAppBackendWeb.ShapesController do
+  require Logger
   alias MBTAV3API.Repository
   alias MBTAV3API.RoutePattern
   alias MobileAppBackend.MapFriendlyRouteShape
@@ -60,17 +61,26 @@ defmodule MobileAppBackendWeb.ShapesController do
         }
       )
 
-    route_segments
-    |> MapFriendlyRouteShape.from_segments(
-      Map.new(route_patterns, &{&1.id, &1}),
-      trips_by_id,
-      shapes_by_id
+    {time_in_us, result} =
+      :timer.tc(fn ->
+        route_segments
+        |> MapFriendlyRouteShape.from_segments(
+          Map.new(route_patterns, &{&1.id, &1}),
+          trips_by_id,
+          shapes_by_id
+        )
+        |> Enum.group_by(& &1.source_route_id)
+        |> Enum.map(fn {route_id, route_shapes} ->
+          %{route_id: route_id, route_shapes: route_shapes}
+        end)
+        |> Enum.sort_by(&Map.fetch!(routes_by_id, &1.route_id).sort_order)
+      end)
+
+    Logger.info(
+      "#{__MODULE__} map_friendly_route_shapes route_patterns_count=#{Enum.count(route_patterns)} routes_count=#{Enum.count(routes_by_id)} trips_count=#{Enum.count(trips_by_id)} shapes_count=#{Enum.count(shapes_by_id)} stops_count=#{Enum.count(stops_by_id)} duration_ms=#{time_in_us / 1000}"
     )
-    |> Enum.group_by(& &1.source_route_id)
-    |> Enum.map(fn {route_id, route_shapes} ->
-      %{route_id: route_id, route_shapes: route_shapes}
-    end)
-    |> Enum.sort_by(&Map.fetch!(routes_by_id, &1.route_id).sort_order)
+
+    result
   end
 
   # Get the rail patterns & shapes most relevant for display on a map in a single direction
