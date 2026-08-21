@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   alias MobileAppBackend.PresentationStrings
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
-  def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update)
+  def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update, _context)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =
       case effect do
@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   end
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
-  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update) do
+  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update, _context) do
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
@@ -46,32 +46,49 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
+  # [Disruption description] until [end time/further notice]. See alert details.
+  def standard(%{effect: effect} = alert, location, timeframe, recurrence, is_update, context)
+      when effect in [:detour, :snow_route] and context == :notification do
+    summary = default_standard(alert, location, timeframe, recurrence, is_update)
+    gettext("%{summary}. See alert details.", summary: summary)
+  end
+
+  # [Disruption description] [Affected stop(s)] [end time] [due to cause].
+  def standard(alert, location, timeframe, recurrence, is_update, _context) do
+    default_standard(alert, location, timeframe, recurrence, is_update)
+  end
+
   # TODO: do is_update prefix separately and consistently
-  def standard(%{effect: effect}, location, timeframe, recurrence, is_update) do
+
+  defp default_standard(%{effect: effect} = alert, location, timeframe, recurrence, is_update) do
+    due_to_cause =
+      if location == "" || timeframe == "" ||
+           timeframe in TemplateFragments.indefinite_end_time_strings() do
+        TemplateFragments.due_to_cause(alert.cause)
+      else
+        ""
+      end
+
     if is_update do
       gettext(
-        "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+        "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
         effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
-        summary_recurrence: recurrence
+        summary_recurrence: recurrence,
+        due_to_cause: due_to_cause
       )
     else
       gettext(
-        "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+        "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
         effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
         summary_location: location,
         summary_timeframe: timeframe,
-        summary_recurrence: recurrence
+        summary_recurrence: recurrence,
+        due_to_cause: due_to_cause
       )
     end
   end
-
-  # TODO
-  # [Disruption description] [Affected stop(s)] [end time] [due to cause].
-
-  # TODO
-  # [Disruption description] until [end time/further notice]. See alert details.
 
   @spec trip_specific(
           String.t(),

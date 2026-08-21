@@ -166,14 +166,21 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
 
   ### Timeframe ###
 
+  @until_further_notice " until further notice"
+  @until_later_today " until later today"
+  def indefinite_end_time_strings, do: [@until_further_notice, @until_later_today]
+
   @spec timeframe(Timeframe.t() | nil) :: String.t()
   def timeframe(timeframe) do
     case timeframe do
       %Timeframe.UntilFurtherNotice{} ->
-        gettext(" until further notice")
+        gettext(@until_further_notice)
 
       %Timeframe.EndOfService{} ->
         gettext(" through end of service")
+
+      %Timeframe.LaterToday{} ->
+        gettext(@until_later_today)
 
       %Timeframe.Tomorrow{} ->
         gettext(" through tomorrow")

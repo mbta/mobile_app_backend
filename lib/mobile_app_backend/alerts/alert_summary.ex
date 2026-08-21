@@ -23,15 +23,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @gl_routes ~w(Green-B Green-C Green-D Green-E)
 
   defmodule Standard do
+    alias MobileAppBackend.Alerts.AlertSummary
+
     @type t :: %__MODULE__{
             effect: Alert.effect(),
             location: Location.t() | nil,
             timeframe: Timeframe.t() | nil,
             recurrence: Recurrence.t() | nil,
-            is_update: boolean()
+            is_update: boolean(),
+            context: AlertSummary.context()
           }
     @derive PolymorphicJson
-    defstruct [:effect, :location, :timeframe, :recurrence, :is_update]
+    defstruct [:effect, :location, :timeframe, :recurrence, :is_update, :context]
   end
 
   defmodule AllClear do
@@ -80,7 +83,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         location: alert_location(alert, stop_id, direction_id, patterns, global),
         timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
         recurrence: recurrence,
-        is_update: alert_is_update?(alert, at_time)
+        is_update: alert_is_update?(alert, at_time),
+        context: context
       }
     end
   end
@@ -256,7 +260,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Timeframe.t() | nil
   defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _),
+    do: %Timeframe.LaterToday{}
 
   defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.DateTime.datetime_to_gtfs(at_time)
