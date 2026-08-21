@@ -23,6 +23,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @gl_routes ~w(Green-B Green-C Green-D Green-E)
 
   defmodule Standard do
+    alias MobileAppBackend.Alerts.AlertSummary
+
     @type t :: %__MODULE__{
             effect: Alert.effect(),
             location: Location.t() | nil,
