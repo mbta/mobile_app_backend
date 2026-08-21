@@ -115,6 +115,43 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
              )
     end
 
+    test "no update if delivered upstream_timestamp is nil and matches" do
+      user = insert(:user)
+      alert_id = "3"
+      upstream_timestamp = nil
+
+      Repo.insert!(%DeliveredNotification{
+        user_id: user.id,
+        alert_id: alert_id,
+        upstream_timestamp: upstream_timestamp,
+        type: :notification
+      })
+
+      refute DeliveredNotification.can_send?(
+               user.id,
+               alert_id,
+               {:update, upstream_timestamp}
+             )
+    end
+
+    test "update if delivered upstream_timestamp is nil and update for real time" do
+      user = insert(:user)
+      alert_id = "3"
+
+      Repo.insert!(%DeliveredNotification{
+        user_id: user.id,
+        alert_id: alert_id,
+        upstream_timestamp: nil,
+        type: :notification
+      })
+
+      assert DeliveredNotification.can_send?(
+               user.id,
+               alert_id,
+               {:update, ~U[2025-12-04 13:10:00Z]}
+             )
+    end
+
     test "update if already notified with different upstream timestamp" do
       user = insert(:user)
       alert_id = "3"
