@@ -102,36 +102,45 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
-    Enum.flat_map(outgoing_notifications, fn outgoing_notification ->
-      try do
-        if DeliveredNotification.can_send?(
-             user_id,
-             outgoing_notification.alert.id,
-             outgoing_notification.type
-           ) do
-          localized_notification =
-            OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
+    {errors, to_send} =
+      outgoing_notifications
+      |> Enum.flat_map(fn outgoing_notification ->
+        try do
+          if DeliveredNotification.can_send?(
+               user_id,
+               outgoing_notification.alert.id,
+               outgoing_notification.type
+             ) do
+            localized_notification =
+              OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
 
-          [{user, localized_notification}]
-        else
-          []
+            [{user, localized_notification}]
+          else
+            [:error]
+          end
+        rescue
+          error ->
+            log_exception(
+              "check_notification_sending",
+              "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
+              Exception.format(:error, error, __STACKTRACE__)
+            )
+
+            [:error]
         end
-      rescue
-        error ->
-          log_exception(
-            "check_notification_sending",
-            "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
-            Exception.format(:error, error, __STACKTRACE__)
-          )
+      end)
+      |> Enum.split_with(&(&1 == :error))
 
-          []
-      end
-    end)
+    Logger.info(
+      "#{__MODULE__} find_new_notifications_for_user status=#{if errors == [], do: "ok", else: "error"}"
+    )
+
+    to_send
   rescue
     error ->
       log_exception(
-        "find_new_notifications",
-        "user_id=#{user_id}",
+        "find_new_notifications_for_user",
+        "status=error user_id=#{user_id}",
         Exception.format(:error, error, __STACKTRACE__)
       )
 
