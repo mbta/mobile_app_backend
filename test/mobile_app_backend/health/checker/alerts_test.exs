@@ -50,7 +50,7 @@ defmodule MobileAppBackend.Health.Checker.AlertsTest do
                          "BOARD"
                        ]
                      },
-                     %{
+                    %{
                        stop: "FR-0301-02",
                        route_type: 2,
                        route: "CR-Fitchburg",

@@ -169,6 +169,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           end_stop_name: stop
         }
       ]
+      # Wouldnt' it be better if we do
+      # when opposite_direction.id + direction.id == 1
+      # since we don't know if the direction of the first one is
       when opposite_direction.id == 1 - direction.id ->
         location
 

@@ -27,6 +27,12 @@ defmodule MobileAppBackend.Notifications.Engine do
         fn {_alert, type, subscription} -> {type, subscription} end
       )
 
+    alerts_by_user_id =
+    Enum.group_by(
+      all_candidates,
+      fn {_alert, _type, %Subscription{user_id: user_id}} -> user_id end,
+      fn {alert, _type, _subscription} -> alert end
+    )
     Enum.map(candidates_by_alert, fn {alert, candidates} ->
       subscriptions_by_type =
         Enum.group_by(
@@ -50,6 +56,22 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :reminder}
         end
 
+      subscriptions_by_alert_quantity_group =
+        Enum.group_by(
+          subscriptions,
+          fn subscription -> if length(alerts_by_user_id[subscription.user_id]) > 1, do: :multiple, else: :single end,
+          fn subscription -> subscription end
+        )
+
+      {subscriptions, alert_quantity_group} =
+        case subscriptions_by_alert_quantity_group do
+          %{multiple: subscriptions} ->
+            {subscriptions, :multiple}
+
+          %{single: subscriptions} ->
+            {subscriptions, :single}
+        end
+
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),
         summary: build_summary(alert, subscriptions, now, global_data),
@@ -60,6 +82,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
+  # Get list of relevant alerts
   defp get_all_candidates(%Subscription{} = subscription, alerts, now, global_data) do
     route_ids =
       case subscription.route_id do

@@ -26,6 +26,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       Gettext.with_locale(locale, fn ->
         case alert_summary do
           %AlertSummary.AllClear{} ->
+            # Do all All clear: Normal service has resumed. when there are elevator alerts only
+            # location => affected stops?
+            # effect => disruption description?
+            # Should it include trip specific?
             gettext("**All clear:** Regular service%{location}",
               location: TemplateFragments.location(nil, alert_summary.location)
             )

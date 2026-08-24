@@ -67,6 +67,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     end
   end
 
+  # All clear  section
+  def all_clear() do
+
+  end
+
   # TODO
   # [Disruption description] [Affected stop(s)] [end time] [due to cause].
 
