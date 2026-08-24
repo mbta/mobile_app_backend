@@ -33,6 +33,9 @@ defmodule MobileAppBackend.Notifications.Engine do
       fn {_alert, _type, %Subscription{user_id: user_id}} -> user_id end,
       fn {alert, _type, _subscription} -> alert end
     )
+
+    # I'm assuming candidates_by_alert is a map where the keys are alerts and the values are lists
+    # of tuples containing the type of notification and the subscription. Subscriptions can come from different users, is that correct?
     Enum.map(candidates_by_alert, fn {alert, candidates} ->
       subscriptions_by_type =
         Enum.group_by(
@@ -41,6 +44,9 @@ defmodule MobileAppBackend.Notifications.Engine do
           fn {_type, subscription} -> subscription end
         )
 
+      # Does this mean that only subscriptions of one type will be sent and then it will
+      # for the next pass until there are no subscriptions of that type to send the notification
+      # of the next type?
       {subscriptions, type} =
         case subscriptions_by_type do
           %{all_clear: subscriptions} ->
@@ -72,6 +78,7 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :single}
         end
 
+      # One outgoing notification is for one single user?
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),
         summary: build_summary(alert, subscriptions, now, global_data),
