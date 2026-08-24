@@ -116,7 +116,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
             [{user, localized_notification}]
           else
-            [:error]
+            []
           end
         rescue
           error ->
