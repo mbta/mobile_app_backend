@@ -82,7 +82,7 @@ msgid " through tomorrow"
 msgstr ""
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:124
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:177
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:169
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr ""
@@ -1263,7 +1263,7 @@ msgstr ""
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:183
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:170
 #, elixir-autogen, elixir-format
 msgid " until later today"
 msgstr ""
