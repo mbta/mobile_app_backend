@@ -114,7 +114,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # All Clear => Update: [Vehicle type] service has resumed at/from [Affected stop(s)].
 
   # All clear with no other active alerts
-  def all_clear(_effect, has_multiple_active_alerts, _location)
+  def all_clear(%{effect: _effect}, has_multiple_active_alerts, _location)
       when has_multiple_active_alerts == false do
     gettext("**All clear:** Normal service has resumed")
   end

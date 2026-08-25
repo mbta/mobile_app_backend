@@ -113,11 +113,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   into a single summary. When possible, picks a descriptive location and timeframe that
   applies to all summaries. If not possible, those fields are nil in the result.
   """
-  @spec combine_summaries(Alert.t(), [t()]) :: t()
+  @spec combine_summaries(Alert.t(), [t()], boolean()) :: t()
 
-  def combine_summaries(_alert, [summary]), do: summary
+  def combine_summaries(_alert, [summary], _has_multiple_active_alerts), do: summary
 
-  def combine_summaries(alert, summaries) do
+  def combine_summaries(alert, summaries, has_multiple_active_alerts \\ false) do
     effect = alert.effect
 
     summaries = Enum.uniq(summaries)
@@ -133,7 +133,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.uniq()
           |> deduplicate_locations()
 
-        %__MODULE__.AllClear{location: location}
+        %__MODULE__.AllClear{effect: effect, has_multiple_active_alerts: has_multiple_active_alerts, location: location}
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
         location =

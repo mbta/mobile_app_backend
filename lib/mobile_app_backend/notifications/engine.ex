@@ -305,7 +305,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         )
       end)
 
-    AlertSummary.combine_summaries(alert, individual_summaries)
+    AlertSummary.combine_summaries(alert, individual_summaries, has_multiple_active_alerts)
   end
 
   defp summary_for_subscription(alert, subscription, has_multiple_active_alerts, now, global_data) do
