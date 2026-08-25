@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
@@ -115,9 +116,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   """
   @spec combine_summaries(Alert.t(), [t()], boolean()) :: t()
 
+  def combine_summaries(alert, summaries, has_multiple_active_alerts \\ false)
+
   def combine_summaries(_alert, [summary], _has_multiple_active_alerts), do: summary
 
-  def combine_summaries(alert, summaries, has_multiple_active_alerts \\ false) do
+  def combine_summaries(alert, summaries, has_multiple_active_alerts) do
     effect = alert.effect
 
     summaries = Enum.uniq(summaries)
@@ -127,13 +130,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         List.first(summaries)
 
       Enum.all?(summaries, &match?(%__MODULE__.AllClear{}, &1)) ->
+        Logger.info(
+          "#{__MODULE__} summaries locations [#{Enum.map_join(summaries, ", ", & &1.location)}]"
+        )
+
         location =
           summaries
           |> Enum.map(& &1.location)
           |> Enum.uniq()
           |> deduplicate_locations()
 
-        %__MODULE__.AllClear{effect: effect, has_multiple_active_alerts: has_multiple_active_alerts, location: location}
+        %__MODULE__.AllClear{
+          effect: effect,
+          has_multiple_active_alerts: has_multiple_active_alerts,
+          location: location
+        }
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
         location =

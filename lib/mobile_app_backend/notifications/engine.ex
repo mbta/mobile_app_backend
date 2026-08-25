@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Notifications.Engine do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Line
   alias MBTAV3API.RoutePattern
@@ -64,6 +65,12 @@ defmodule MobileAppBackend.Notifications.Engine do
               &1.effect != :elevator_closure &&
               Alert.active?(&1, now))
         ) > 0
+
+      if more_active_alerts > 0 do
+        Logger.info(
+          "#{__MODULE__} relevant_alerts [#{Enum.map_join(relevant_alerts, ", ", & &1.id)}]"
+        )
+      end
 
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),

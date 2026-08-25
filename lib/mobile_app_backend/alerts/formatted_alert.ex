@@ -29,6 +29,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             Templates.all_clear(
               alert,
               alert_summary.has_multiple_active_alerts,
+              # TO DO
+              # When stop is affected it doesn't have the information
               TemplateFragments.location(alert_summary.effect, alert_summary.location)
             )
 
