@@ -73,6 +73,52 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # [Disruption description] until [end time/further notice]. See alert details.
 
+  # ===========================================================================
+  # All Clear
+  # ===========================================================================
+
+  # All clear with multiple active alerts and closure effect
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when effect in [:dock_closure, :station_closure, :stop_closure, :elevator_closure] and
+             has_multiple_active_alerts == true do
+    mode =
+      case effect do
+        :dock_closure -> gettext("Ferry")
+        :station_closure -> gettext("Train")
+        :stop_closure -> gettext("Bus")
+        :elevator_closure -> gettext("Elevator")
+      end
+
+    # TODO
+    # Might be missing an "at"
+    gettext(
+      "**Update:** %{mode} service has resumed%{summary_location}",
+      mode: mode,
+      summary_location: location
+    )
+  end
+
+  # All clear with multiple active alerts
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when has_multiple_active_alerts == true do
+    gettext(
+      # TODO
+      # Add has/have depending on effect_sentence_case
+      "**Update:** %{effect_sentence_case} has ended%{summary_location}",
+      effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
+      summary_location: location
+    )
+  end
+
+  # TODO
+  # All Clear => Update: [Vehicle type] service has resumed at/from [Affected stop(s)].
+
+  # All clear with no other active alerts
+  def all_clear(_effect, has_multiple_active_alerts, _location)
+      when has_multiple_active_alerts == false do
+    gettext("**All clear:** Normal service has resumed")
+  end
+
   @spec trip_specific(
           String.t(),
           Alert.t(),

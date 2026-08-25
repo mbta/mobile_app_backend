@@ -35,9 +35,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defmodule AllClear do
-    @type t :: %__MODULE__{location: Location.t() | nil}
+    @type t :: %__MODULE__{
+            effect: Alert.effect(),
+            has_multiple_active_alerts: boolean(),
+            location: Location.t() | nil
+          }
     @derive PolymorphicJson
-    defstruct [:location]
+    defstruct [:effect, :has_multiple_active_alerts, :location]
   end
 
   defmodule Unknown do
@@ -58,10 +62,29 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           DateTime.t(),
           [Schedule.t()] | nil,
           GlobalDataCache.data(),
-          context()
+          context(),
+          boolean() | nil
         ) :: t()
-  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global, context) do
-    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, global),
+  def summarizing(
+        alert,
+        stop_id,
+        direction_id,
+        patterns,
+        at_time,
+        schedules,
+        global,
+        context,
+        has_multiple_active_alerts \\ false
+      ) do
+    with nil <-
+           all_clear_summary(
+             alert,
+             stop_id,
+             direction_id,
+             patterns,
+             has_multiple_active_alerts,
+             global
+           ),
          nil <-
            TripSpecific.summary(
              alert,
@@ -182,11 +205,23 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Stop.id(),
           0 | 1,
           [RoutePattern.t()],
+          boolean(),
           GlobalDataCache.data()
         ) :: AllClear.t() | nil
-  defp all_clear_summary(alert, stop_id, direction_id, patterns, global) do
+  defp all_clear_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         has_multiple_active_alerts,
+         global
+       ) do
     if Alert.all_clear?(alert) do
-      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+      %AllClear{
+        effect: alert.effect,
+        has_multiple_active_alerts: has_multiple_active_alerts,
+        location: alert_location(alert, stop_id, direction_id, patterns, global)
+      }
     end
   end
 

@@ -65,7 +65,7 @@ if Mix.env() == :test do
         )
 
         [outgoing_notification] =
-          Notifications.Engine.notifications(
+          Notifications.Engine.user_notifications(
             scenario.subscriptions,
             [scenario.alert],
             scenario.at_time
@@ -86,6 +86,7 @@ if Mix.env() == :test do
 
       IO.puts("scenario,notification title,notification body")
 
+      # what does a notification represent? is it one notification per user or one type of notification
       for scenario <- scenarios() do
         notification = Scenario.outgoing(scenario)
         IO.puts(~s|"#{scenario.name}","#{notification.title}","#{notification.body}"|)

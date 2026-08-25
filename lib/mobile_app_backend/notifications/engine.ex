@@ -13,12 +13,17 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
 
-  @spec notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [OutgoingNotification.t()]
-  def notifications(subscriptions, alerts, now) do
+  # Function gets called for a single user at a time from a Oban worker
+  @spec user_notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
+          OutgoingNotification.t()
+        ]
+  def user_notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
 
+    relevant_alerts = Enum.flat_map(subscriptions, &get_relevant_alerts(&1, alerts, now, global_data))
+
     all_candidates =
-      Enum.flat_map(subscriptions, &get_all_candidates(&1, alerts, now, global_data))
+      Enum.flat_map(subscriptions, &get_all_candidates(&1, relevant_alerts, now))
 
     candidates_by_alert =
       Enum.group_by(
@@ -35,6 +40,7 @@ defmodule MobileAppBackend.Notifications.Engine do
           fn {_type, subscription} -> subscription end
         )
 
+      # Get subscriptions of the a single type for the alert
       {subscriptions, type} =
         case subscriptions_by_type do
           %{all_clear: subscriptions} ->
@@ -50,9 +56,16 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :reminder}
         end
 
+      more_active_alerts =
+        relevant_alerts
+        |> Enum.filter(&(&1.id != alert.id))
+        |> Enum.filter(&(&1.effect != :elevator_closure))
+        |> Enum.filter(&Alert.active?(&1, now))
+        |> Enum.count() > 0
+
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),
-        summary: build_summary(alert, subscriptions, now, global_data),
+        summary: build_summary(alert, subscriptions, more_active_alerts, now, global_data),
         subscriptions: subscriptions,
         alert: alert,
         type: type
@@ -60,7 +73,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
-  defp get_all_candidates(%Subscription{} = subscription, alerts, now, global_data) do
+  defp get_relevant_alerts(%Subscription{} = subscription, alerts, now, global_data) do
     route_ids =
       case subscription.route_id do
         "line-" <> _ ->
@@ -97,10 +110,12 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    relevant_alerts =
-      Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
-      |> Enum.filter(&Alert.eligible_for_notification?(&1))
+    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    |> Enum.filter(&Alert.eligible_for_notification?(&1))
+  end
 
+  # Get list of relevant alerts
+  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, now) do
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
       List.wrap(alert_candidate(subscription, alert, now))
     end)
@@ -272,20 +287,26 @@ defmodule MobileAppBackend.Notifications.Engine do
     NotificationTitle.from_lines_or_routes(title_lines_or_routes)
   end
 
-  defp build_summary(alert, [subscription], now, global_data) do
-    summary_for_subscription(alert, subscription, now, global_data)
+  defp build_summary(alert, [subscription], has_multiple_active_alerts, now, global_data) do
+    summary_for_subscription(alert, subscription, has_multiple_active_alerts, now, global_data)
   end
 
-  defp build_summary(alert, subscriptions, now, global_data) do
+  defp build_summary(alert, subscriptions, has_multiple_active_alerts, now, global_data) do
     individual_summaries =
       Enum.map(subscriptions, fn subscription ->
-        summary_for_subscription(alert, subscription, now, global_data)
+        summary_for_subscription(
+          alert,
+          subscription,
+          has_multiple_active_alerts,
+          now,
+          global_data
+        )
       end)
 
     AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
-  defp summary_for_subscription(alert, subscription, now, global_data) do
+  defp summary_for_subscription(alert, subscription, has_multiple_active_alerts, now, global_data) do
     patterns =
       RoutePattern.get_relevant_patterns(
         subscription.route_id,
@@ -304,7 +325,8 @@ defmodule MobileAppBackend.Notifications.Engine do
       now,
       schedules,
       global_data,
-      :notification
+      :notification,
+      has_multiple_active_alerts
     )
   end
 

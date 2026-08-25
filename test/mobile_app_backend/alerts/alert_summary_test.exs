@@ -220,6 +220,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
     test "can serialize all clear summary" do
       assert json_round_trip(%AlertSummary.AllClear{
+               effect: :station_closure,
+               has_multiple_active_alerts: true,
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Lechmere",
                  end_stop_name: "Government Center",
@@ -227,6 +229,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                }
              }) == %{
                type: "all_clear",
+               effect: "station_closure",
+               has_multiple_active_alerts: true,
                location: %{
                  type: "successive_stops",
                  start_stop_name: "Lechmere",
