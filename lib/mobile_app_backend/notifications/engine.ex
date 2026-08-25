@@ -20,7 +20,8 @@ defmodule MobileAppBackend.Notifications.Engine do
   def user_notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
 
-    relevant_alerts = Enum.flat_map(subscriptions, &get_relevant_alerts(&1, alerts, now, global_data))
+    relevant_alerts =
+      Enum.flat_map(subscriptions, &get_relevant_alerts(&1, alerts, now, global_data))
 
     all_candidates =
       Enum.flat_map(subscriptions, &get_all_candidates(&1, relevant_alerts, now))
@@ -58,10 +59,11 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       more_active_alerts =
         relevant_alerts
-        |> Enum.filter(&(&1.id != alert.id))
-        |> Enum.filter(&(&1.effect != :elevator_closure))
-        |> Enum.filter(&Alert.active?(&1, now))
-        |> Enum.count() > 0
+        |> Enum.count(
+          &(&1.id != alert.id &&
+              &1.effect != :elevator_closure &&
+              Alert.active?(&1, now))
+        ) > 0
 
       %OutgoingNotification{
         title: build_title(alert, subscriptions, global_data),
