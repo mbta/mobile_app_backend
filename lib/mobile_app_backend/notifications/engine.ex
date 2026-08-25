@@ -66,7 +66,7 @@ defmodule MobileAppBackend.Notifications.Engine do
               Alert.active?(&1, now))
         ) > 0
 
-      if more_active_alerts > 0 do
+      if more_active_alerts do
         Logger.info(
           "#{__MODULE__} relevant_alerts [#{Enum.map_join(relevant_alerts, ", ", & &1.id)}]"
         )

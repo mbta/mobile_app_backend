@@ -18,6 +18,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   alias MobileAppBackend.GlobalDataCache
   alias Util.PolymorphicJson
+  alias MobileAppBackend.Alerts.FormattedAlert.{TemplateFragments}
 
   @gl_id "line-Green"
   @gl_label "Green Line"
@@ -131,7 +132,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       Enum.all?(summaries, &match?(%__MODULE__.AllClear{}, &1)) ->
         Logger.info(
-          "#{__MODULE__} summaries locations [#{Enum.map_join(summaries, ", ", & &1.location)}]"
+          "#{__MODULE__} summaries locations [#{Enum.map_join(summaries, ", ", &TemplateFragments.location(effect, &1.location))}]"
         )
 
         location =
