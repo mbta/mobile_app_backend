@@ -98,7 +98,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          now
        ) do
     {engine_us, outgoing_notifications} =
-      :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
+      :timer.tc(&Engine.user_notifications/3, [subscriptions, alerts, now], :microsecond)
 
     Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 

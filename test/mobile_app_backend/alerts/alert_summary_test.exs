@@ -17,6 +17,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   alias MobileAppBackend.Alerts.AlertSummary.TripSpecific
 
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.Subscription
 
   setup :verify_on_exit!
 
@@ -220,6 +221,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
     test "can serialize all clear summary" do
       assert json_round_trip(%AlertSummary.AllClear{
+               effect: :station_closure,
+               has_multiple_active_alerts: true,
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Lechmere",
                  end_stop_name: "Government Center",
@@ -227,6 +230,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                }
              }) == %{
                type: "all_clear",
+               effect: "station_closure",
+               has_multiple_active_alerts: true,
                location: %{
                  type: "successive_stops",
                  start_stop_name: "Lechmere",
@@ -432,7 +437,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with later today timeframe", %{now: now} do
@@ -444,7 +457,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.Time{time: ^end_time}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with end of service timeframe", %{now: now} do
@@ -457,7 +478,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with alt end of service timeframe", %{now: now} do
@@ -470,7 +499,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.EndOfService{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with tomorrow timeframe", %{now: now} do
@@ -484,7 +521,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.Tomorrow{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with this week timeframe" do
@@ -499,7 +544,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.ThisWeek{time: ^end_time}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with later date timeframe" do
@@ -514,7 +567,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterDate{time: ^end_time}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with starting tomorrow timeframe" do
@@ -526,7 +587,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.StartingTomorrow{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with starting later today timeframe" do
@@ -536,7 +605,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^later_today}
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with single stop", %{now: now} do
@@ -567,8 +645,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -620,8 +697,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 Enum.at(successive_stops, 2).id,
-                 0,
+                 %Subscription{stop_id: Enum.at(successive_stops, 2).id, direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -668,8 +744,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{location: nil} =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -745,8 +820,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 hd(unaffected_stops).id,
-                 0,
+                 %Subscription{stop_id: hd(unaffected_stops).id, direction_id: 0},
                  [branch1, branch2],
                  now,
                  nil,
@@ -827,8 +901,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 hd(unaffected_stops).id,
-                 0,
+                 %Subscription{stop_id: hd(unaffected_stops).id, direction_id: 0},
                  [branch1, branch2],
                  now,
                  nil,
@@ -906,8 +979,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 kenmore.id,
-                 0,
+                 %Subscription{stop_id: kenmore.id, direction_id: 0},
                  [b_branch, c_branch],
                  now,
                  nil,
@@ -973,8 +1045,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 saint_marys.id,
-                 1,
+                 %Subscription{stop_id: saint_marys.id, direction_id: 1},
                  [c_branch],
                  now,
                  nil,
@@ -1045,8 +1116,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 medford_tufts.id,
-                 0,
+                 %Subscription{stop_id: medford_tufts.id, direction_id: 0},
                  [e_branch],
                  now,
                  nil,
@@ -1090,7 +1160,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ^end_time}
                }
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with daily recurrence until further notice", %{now: now} do
@@ -1123,7 +1202,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.UntilFurtherNotice{}
                }
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with MWF recurrence ending later this week" do
@@ -1171,8 +1259,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [],
                  DateTime.new!(monday, noon, "America/New_York"),
                  nil,
@@ -1186,8 +1273,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [],
                  DateTime.new!(tuesday, noon, "America/New_York"),
                  nil,
@@ -1208,7 +1294,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.Standard{
                timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
                is_update: true
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with all_clear update", %{now: now} do
@@ -1223,7 +1318,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.AllClear{location: nil} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with whole route entity", %{now: now} do
@@ -1252,8 +1355,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -1301,8 +1403,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -1359,8 +1460,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "stopId",
-                 0,
+                 %Subscription{stop_id: "stopId", direction_id: 0},
                  e_patterns,
                  now,
                  nil,
@@ -1443,8 +1543,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "stopId",
-                 0,
+                 %Subscription{stop_id: "stopId", direction_id: 0},
                  e_patterns,
                  now,
                  nil,
@@ -1515,8 +1614,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "stopId",
-                 0,
+                 %Subscription{stop_id: "stopId", direction_id: 0},
                  e_pattern,
                  now,
                  nil,
@@ -1573,8 +1671,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop.id,
-                 0,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -1630,8 +1727,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -1701,8 +1797,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -1788,8 +1883,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -1869,8 +1963,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -1927,8 +2020,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop.id,
-                 0,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule1, schedule2],
@@ -1984,8 +2076,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -2049,8 +2140,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -2101,8 +2191,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop.id,
-                 0,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -2143,8 +2232,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop.id,
-                 0,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
                  [pattern],
                  now,
                  [],
@@ -2208,8 +2296,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop1.id,
-                 0,
+                 %Subscription{stop_id: stop1.id, direction_id: 0},
                  [pattern],
                  now,
                  [schedule],
@@ -2406,15 +2493,59 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       summary1 = %AlertSummary.AllClear{
+        effect: :suspension,
+        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
       }
 
       summary2 = %AlertSummary.AllClear{
+        effect: :suspension,
+        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "C", end_stop_name: "D"}
       }
 
       assert %AlertSummary.AllClear{
+               effect: :suspension,
+               has_multiple_active_alerts: false,
                location: nil
+             } =
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "all clear keeps location if opposite directions" do
+      now = DateTime.now!("America/New_York")
+      upstream_timestamp = DateTime.add(now, -2)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{start: DateTime.add(now, -10), end: DateTime.add(now, -5)}
+          ],
+          closed_timestamp: upstream_timestamp,
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-sstat"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-brdwy"}
+          ],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      summary1 = %AlertSummary.AllClear{
+        effect: :suspension,
+        has_multiple_active_alerts: false,
+        location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
+      }
+
+      summary2 = %AlertSummary.AllClear{
+        effect: :suspension,
+        has_multiple_active_alerts: false,
+        location: %Location.SuccessiveStops{start_stop_name: "B", end_stop_name: "A"}
+      }
+
+      assert %AlertSummary.AllClear{
+               effect: :suspension,
+               has_multiple_active_alerts: false,
+               location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
@@ -2459,6 +2590,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.AllClear{
+               effect: :stop_closure,
+               has_multiple_active_alerts: false,
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
                  end_stop_name: "Last Stop",
@@ -2467,8 +2600,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 Enum.at(successive_stops, 2).id,
-                 0,
+                 %Subscription{stop_id: Enum.at(successive_stops, 2).id, direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -2509,8 +2641,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,
@@ -2553,8 +2684,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 "",
-                 0,
+                 %Subscription{stop_id: "", direction_id: 0},
                  [pattern],
                  now,
                  nil,

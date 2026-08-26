@@ -49,7 +49,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                alert: ^alert
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "matches Green Line subscription to multiple branches" do
@@ -85,7 +85,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                alert: ^alert
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "matches parent subscription to child stop" do
@@ -129,7 +129,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "includes downstream alerts" do
@@ -164,7 +164,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "includes elevator closures if requested" do
@@ -192,7 +192,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [%OutgoingNotification{subscriptions: [^subscription_including], alert: ^alert}] =
-             Engine.notifications([subscription_including], [alert], now)
+             Engine.user_notifications([subscription_including], [alert], now)
 
     subscription_excluding =
       NotificationsFactory.build(:notification_subscription,
@@ -202,7 +202,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         include_accessibility: false
       )
 
-    assert [] = Engine.notifications([subscription_excluding], [alert], now)
+    assert [] = Engine.user_notifications([subscription_excluding], [alert], now)
   end
 
   test "does not send all clear if closed without push notification" do
@@ -229,7 +229,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [] = Engine.notifications([subscription], [alert], now)
+    assert [] = Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends all clear if closed with push notification" do
@@ -263,7 +263,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: :all_clear
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends notification with timestamp if open and has timestamp" do
@@ -298,7 +298,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends update if notified previously" do
@@ -346,7 +346,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:update, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends no update if already received update" do
@@ -397,7 +397,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     })
 
     assert [] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends notification with timestamp if open" do
@@ -433,7 +433,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^notification_time}
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "skips notification if timestamp is nil" do
@@ -461,7 +461,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [] = Engine.notifications([subscription], [alert], now)
+    assert [] = Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends reminder at 24h-1s if open before active" do
@@ -490,7 +490,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert, type: :reminder}] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "does not send reminder at 24h+1s if open before active" do
@@ -517,7 +517,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [] = Engine.notifications([subscription], [alert], now)
+    assert [] = Engine.user_notifications([subscription], [alert], now)
   end
 
   test "sends reminder at 12h-1s if not open before active" do
@@ -545,7 +545,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert, type: :reminder}] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "does not send reminder at 12h+1s if not open before active" do
@@ -571,7 +571,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [] = Engine.notifications([subscription], [alert], now)
+    assert [] = Engine.user_notifications([subscription], [alert], now)
   end
 
   test "uses overlap time instead of just active time" do
@@ -599,10 +599,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         ]
       )
 
-    assert [] = Engine.notifications([subscription], [alert], friday_noon)
+    assert [] = Engine.user_notifications([subscription], [alert], friday_noon)
 
     assert [%OutgoingNotification{type: :reminder}] =
-             Engine.notifications([subscription], [alert], DateTime.add(sunday_noon, -11, :hour))
+             Engine.user_notifications(
+               [subscription],
+               [alert],
+               DateTime.add(sunday_noon, -11, :hour)
+             )
   end
 
   test "picks notification over reminder based on windows" do
@@ -650,7 +654,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription_now, subscription_later], [alert], now)
+             Engine.user_notifications([subscription_now, subscription_later], [alert], now)
   end
 
   test "keeps identical summary from multiple routes" do
@@ -703,7 +707,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription1, subscription2], [alert], now)
+             Engine.user_notifications([subscription1, subscription2], [alert], now)
   end
 
   test "keeps successive stops if subscribed in both directions" do
@@ -807,7 +811,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                alert: ^alert
              }
            ] =
-             Engine.notifications([subscription1, subscription2], [alert], now)
+             Engine.user_notifications([subscription1, subscription2], [alert], now)
   end
 
   test "discards location if disagreements" do
@@ -863,7 +867,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription1, subscription2], [alert], now)
+             Engine.user_notifications([subscription1, subscription2], [alert], now)
   end
 
   test "returns a single all clear when multiple subscriptions match" do
@@ -920,7 +924,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: :all_clear
              }
            ] =
-             Engine.notifications([subscription1, subscription2], [alert], now)
+             Engine.user_notifications([subscription1, subscription2], [alert], now)
   end
 
   test "retrieves schedules for specified trips" do
@@ -985,7 +989,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "retrieves schedules for future specified trips" do
@@ -1073,7 +1077,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                type: {:notification, ^upstream_timestamp}
              }
            ] =
-             Engine.notifications([subscription], [alert], now)
+             Engine.user_notifications([subscription], [alert], now)
   end
 
   test "Doesn't send notification for trip that doesn't serve subscribed stop (even if the route sometime serves that stop)" do
@@ -1241,10 +1245,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       )
 
     assert [] =
-             Engine.notifications([subscription_hull], [alert], now)
+             Engine.user_notifications([subscription_hull], [alert], now)
 
     assert [outgoing_notification] =
-             Engine.notifications([subscription_hull, subscription_hingham], [alert], now)
+             Engine.user_notifications([subscription_hull, subscription_hingham], [alert], now)
 
     assert %{body: "10:35 AM ferry to Logan will not stop at George today"} =
              OutgoingNotification.localize(outgoing_notification, "en")
@@ -1392,6 +1396,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary.Standard{effect: :delay}
              }
            ] =
-             Engine.notifications([subscription_hull], [alert_trip_specific, alert_route], now)
+             Engine.user_notifications(
+               [subscription_hull],
+               [alert_trip_specific, alert_route],
+               now
+             )
   end
 end
