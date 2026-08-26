@@ -1,4 +1,6 @@
 defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
+  use Gettext, backend: MobileAppBackend.Gettext
+
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.FormattedAlert
@@ -34,16 +36,24 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
   Stringify the notification's title & body in the given locale
   """
   def localize(outgoing_notification, locale) do
+    body =
+      FormattedAlert.summary(
+        %FormattedAlert{
+          alert: outgoing_notification.alert,
+          alert_summary: outgoing_notification.summary
+        },
+        locale
+      )
+
+    body =
+      case outgoing_notification.type do
+        {:update, _} -> gettext("Update: %{body}", body: body)
+        _ -> body
+      end
+
     %Localized{
       title: NotificationTitle.to_string(outgoing_notification.title, locale),
-      body:
-        FormattedAlert.summary(
-          %FormattedAlert{
-            alert: outgoing_notification.alert,
-            alert_summary: outgoing_notification.summary
-          },
-          locale
-        ),
+      body: body,
       subscriptions: outgoing_notification.subscriptions,
       alert_id: outgoing_notification.alert.id,
       alert_effect: outgoing_notification.alert.effect,
