@@ -1,4 +1,5 @@
 defmodule MBTAV3API.Stream.Supervisor do
+  require Logger
   use DynamicSupervisor
 
   alias MBTAV3API.Stream.Instance
@@ -28,6 +29,8 @@ defmodule MBTAV3API.Stream.Supervisor do
 
   def log_health do
     instances = DynamicSupervisor.which_children(__MODULE__)
+
+    Logger.info("#{__MODULE__} stream_instance_count=#{Enum.count(instances)}")
 
     for {_, instance, _, _} <- instances do
       MBTAV3API.Stream.Instance.check_health(instance)
