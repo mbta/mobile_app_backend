@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   alias MobileAppBackend.PresentationStrings
 
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
-  def standard(%{effect: effect}, location, timeframe, _recurrence, _is_update)
+  def standard(%{effect: effect}, location, timeframe, _recurrence)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =
       case effect do
@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   end
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
-  def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _is_update) do
+  def standard(%{effect: :delay} = alert, location, timeframe, recurrence) do
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
@@ -46,25 +46,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # TODO
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
-  # TODO: do is_update prefix separately and consistently
-  def standard(%{effect: effect}, location, timeframe, recurrence, is_update) do
-    if is_update do
-      gettext(
-        "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
-        summary_location: location,
-        summary_timeframe: timeframe,
-        summary_recurrence: recurrence
-      )
-    else
-      gettext(
-        "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
-        effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
-        summary_location: location,
-        summary_timeframe: timeframe,
-        summary_recurrence: recurrence
-      )
-    end
+  def standard(%{effect: effect}, location, timeframe, recurrence) do
+    gettext(
+      "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+      effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
+      summary_location: location,
+      summary_timeframe: timeframe,
+      summary_recurrence: recurrence
+    )
   end
 
   # TODO

@@ -27,11 +27,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             effect: Alert.effect(),
             location: Location.t() | nil,
             timeframe: Timeframe.t() | nil,
-            recurrence: Recurrence.t() | nil,
-            is_update: boolean()
+            recurrence: Recurrence.t() | nil
           }
     @derive PolymorphicJson
-    defstruct [:effect, :location, :timeframe, :recurrence, :is_update]
+    defstruct [:effect, :location, :timeframe, :recurrence]
   end
 
   defmodule AllClear do
@@ -79,8 +78,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         effect: alert.effect,
         location: alert_location(alert, stop_id, direction_id, patterns, global),
         timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
-        recurrence: recurrence,
-        is_update: alert_is_update?(alert, at_time)
+        recurrence: recurrence
       }
     end
   end
@@ -360,24 +358,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     else
       _ -> nil
-    end
-  end
-
-  @spec alert_is_update?(Alert.t(), DateTime.t()) :: boolean()
-  defp alert_is_update?(alert, at_time) do
-    case Alert.current_period(alert, at_time) do
-      %Alert.ActivePeriod{start: start_time}
-      when not is_nil(alert.updated_at) ->
-        updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
-        five_minutes_ago = DateTime.add(at_time, -5, :minute)
-
-        updated_within_five_minutes =
-          DateTime.compare(alert.updated_at, five_minutes_ago) == :gt
-
-        updated_after_active and updated_within_five_minutes
-
-      _ ->
-        false
     end
   end
 

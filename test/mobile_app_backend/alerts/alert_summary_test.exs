@@ -198,8 +198,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                timeframe: %AlertSummary.Timeframe.Tomorrow{},
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
-               },
-               is_update: true
+               }
              }) ==
                %{
                  type: "standard",
@@ -213,8 +212,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  recurrence: %{
                    type: "some_days",
                    ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
-                 },
-                 is_update: true
+                 }
                }
     end
 
@@ -1206,8 +1204,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{
-               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
-               is_update: true
+               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time}
              } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
     end
 
@@ -2136,7 +2133,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %MobileAppBackend.Alerts.AlertSummary.Standard{
                effect: :suspension,
-               is_update: false,
                location: nil,
                recurrence: nil,
                timeframe: %MobileAppBackend.Alerts.AlertSummary.Timeframe.StartingTomorrow{}
