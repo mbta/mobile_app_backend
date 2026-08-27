@@ -11,8 +11,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           build(:alert, effect: :dock_closure),
           "**A**",
           " until further notice",
-          "",
-          false
+          ""
         )
 
       assert "Ferries will not stop at **A** until further notice" == summary
@@ -24,24 +23,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           build(:alert, effect: :delay, severity: 3),
           "",
           " until further notice",
-          "",
-          false
+          ""
         )
 
       assert "**Delays** of about 10 minutes until further notice" == summary
-    end
-
-    test "fallback update" do
-      summary =
-        Templates.standard(
-          build(:alert, effect: :detour),
-          "",
-          " until further notice",
-          "",
-          true
-        )
-
-      assert "**Update:** Detour until further notice" == summary
     end
 
     test "fallback" do
@@ -50,8 +35,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           build(:alert, effect: :detour),
           "",
           " until further notice",
-          "",
-          false
+          ""
         )
 
       assert "**Detour** until further notice" == summary

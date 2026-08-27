@@ -87,26 +87,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
-    test "update" do
-      alert = build(:alert, effect: :suspension)
-
-      alert_summary = %AlertSummary.Standard{
-        location: %Location.SuccessiveStops{
-          start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
-        },
-        recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}},
-        is_update: true
-      }
-
-      assert "Update: Service suspended from Oak Grove to North Station daily until Apr 29" ==
-               FormattedAlert.summary(
-                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
-                 "en"
-               )
-    end
-
     test "station bypass until further notice" do
       alert = build(:alert, effect: :station_closure)
 

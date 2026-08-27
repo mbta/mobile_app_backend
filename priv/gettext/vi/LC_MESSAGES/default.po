@@ -21,12 +21,12 @@ msgstr " tại **%{stop_name}**"
 msgid " daily%{recurrence_text}"
 msgstr " hằng ngày%{recurrence_text}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:155
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:161
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr " do %{cause}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:211
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr " từ %{start_time} đến %{end_time}"
@@ -61,28 +61,28 @@ msgstr " thay thế **%{mode_label}**"
 msgid " some days%{recurrence_text}"
 msgstr " một số ngày%{recurrence_text}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:200
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr " bắt đầu từ **%{formatted_time}** hôm nay"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:203
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr " bắt đầu từ ngày mai"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:170
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:176
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr " đến cuối dịch vụ"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:179
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr " đến ngày mai"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:124
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:167
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr " cho đến khi có thông báo mới"
@@ -102,27 +102,27 @@ msgstr "%{label} %{mode_label}"
 msgid "%{name} bus"
 msgstr "%{name} xe buýt"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:254
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:208
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "Tuyến %{trip_identity} được thay thế bằng xe buýt đưa đón từ **%{start_stop}** đến **%{end_stop}**%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:65
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:50
 #, elixir-autogen, elixir-format
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 msgstr "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:123
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:126
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
 msgstr "**%{time}** %{vehicle} từ **%{from_stop}**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:100
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:103
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
 msgstr "**%{trip_time}** %{route_type} từ **%{stop_name}**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:107
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:110
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
 msgstr "**%{trip_time}** %{route_type} đến **%{headsign}**"
@@ -131,11 +131,6 @@ msgstr "**%{trip_time}** %{route_type} đến **%{headsign}**"
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Regular service%{location}"
 msgstr "**Đã thông thoáng:** Dịch vụ thường lệ%{location}"
-
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:57
-#, elixir-autogen, elixir-format
-msgid "**Update:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
-msgstr "**Cập nhật:** %{effect_sentence_case}%{summary_location}%{summary_timeframe}%{summary_recurrence}"
 
 #: lib/presentation_strings.ex:85
 #, elixir-autogen, elixir-format
@@ -463,7 +458,7 @@ msgstr "Dịch vụ đã sửa đổi"
 msgid "Multiple routes"
 msgstr "Nhiều tuyến đường"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:114
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:117
 #, elixir-autogen, elixir-format
 msgid "Multiple trips"
 msgstr "Nhiều chuyến đi"
@@ -589,7 +584,7 @@ msgstr "Xe đưa đón"
 msgid "Shuttle buses"
 msgstr "Xe buýt đưa đón"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:262
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:216
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "Xe buýt đưa đón thay thế %{trip_identity} từ **%{start_stop}** đến **%{end_stop}**%{recurrence}"
@@ -727,7 +722,7 @@ msgstr "Vấn đề chuyển đổi"
 msgid "Technical Problem"
 msgstr "Vấn đề kỹ thuật"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:95
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:98
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
 msgstr "Cái này %{route_type}"
@@ -867,7 +862,7 @@ msgstr "vấn đề cầu kéo"
 msgid "electrical work"
 msgstr "công việc về điện"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:225
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:231
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr "kết thúc dịch vụ"
@@ -947,17 +942,17 @@ msgstr " cho đến khi %{1}"
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr " cho đến khi %{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:176
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr " đến %{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:184
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:190
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr " đến %{1}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:192
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:198
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr " đến %{1}"
@@ -982,7 +977,7 @@ msgstr "vấn đề cơ khí"
 msgid "medical emergency"
 msgstr "cấp cứu y tế"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:146
 #, elixir-autogen, elixir-format
 msgid "multiple trips"
 msgstr "nhiều chuyến đi"
@@ -1052,7 +1047,7 @@ msgstr "sự kiện đặc biệt"
 msgid "speed restriction"
 msgstr "hạn chế tốc độ"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:222
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:228
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr "bắt đầu dịch vụ"
@@ -1077,12 +1072,12 @@ msgstr "vấn đề chuyển đổi"
 msgid "technical problem"
 msgstr "vấn đề kỹ thuật"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:130
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:133
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
 msgstr "**%{time}** %{vehicle}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:138
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:141
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
 msgstr "%{vehicle} này"
@@ -1092,12 +1087,12 @@ msgstr "%{vehicle} này"
 msgid "tie replacement"
 msgstr "thay tà vẹt"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:78
 #, elixir-autogen, elixir-format
 msgid "today"
 msgstr "hôm nay"
 
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:49
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:78
 #, elixir-autogen, elixir-format
 msgid "tomorrow"
 msgstr "ngày mai"
@@ -1183,47 +1178,47 @@ msgstr "**nhiều điểm dừng**"
 msgid "will not stop at %{stop_list} %{timeframe}"
 msgstr "sẽ không dừng lại ở %{stop_list} %{timeframe}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:141
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:112
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 msgstr "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:242
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:196
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} bị ảnh hưởng bởi %{effect} %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:103
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:84
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} bị hủy %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:186
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:152
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} bị đình chỉ %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:219
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:178
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} đang gặp sự chậm trễ%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:111
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:92
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} đã bị hủy %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:194
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:160
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} bị tạm ngưng %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:162
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:131
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} sẽ kết thúc tại %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:37
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:35
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr "**Trì hoãn**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
@@ -1262,3 +1257,8 @@ msgstr "hơn 30 phút"
 #, elixir-autogen, elixir-format
 msgid "of more than an hour"
 msgstr "hơn một giờ"
+
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:50
+#, elixir-autogen, elixir-format
+msgid "Update: %{body}"
+msgstr "Cập nhật: %{body}"
