@@ -8,7 +8,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
   alias MobileAppBackend.PresentationStrings
 
-  # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].=
+  # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
   def standard(%{effect: effect}, location, timeframe, _recurrence, _context)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
     mode =

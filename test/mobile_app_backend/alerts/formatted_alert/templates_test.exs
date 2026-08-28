@@ -51,7 +51,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           "",
           " until further notice",
           "",
-          false,
           :card
         )
 
@@ -65,7 +64,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " from X to Y",
           " until further notice",
           "",
-          false,
           :card
         )
 
@@ -79,7 +77,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " from X to Y",
           " starting at 4PM",
           "",
-          false,
           :card
         )
 
@@ -93,7 +90,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " from X to Y",
           " until further notice",
           "",
-          false,
           :notification
         )
 
@@ -108,7 +104,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at Porter",
           " until further notice",
           "",
-          false,
           :notification
         )
 
