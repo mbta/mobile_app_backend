@@ -756,7 +756,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "user_id" => user.id,
         "alert_id" => alert.id,
         "title" => "66 bus",
-        "body" => "Service suspended until further notice",
+        "body" => "Update: Service suspended until further notice",
         "deep_link_path" => "/s/1/r/66/d/0",
         "upstream_timestamp" => alert.last_push_notification_timestamp,
         "type" => "update",

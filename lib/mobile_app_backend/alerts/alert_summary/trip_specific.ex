@@ -51,10 +51,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
           effect_stops: [String.t()] | nil,
           is_today: boolean(),
           cause: Alert.cause() | nil,
-          recurrence: AlertSummary.Recurrence.t() | nil
+          recurrence: AlertSummary.Recurrence.t() | nil,
+          context: AlertSummary.context()
         }
   @derive PolymorphicJson
-  defstruct [:trip_identity, :effect, :effect_stops, :is_today, :cause, :recurrence]
+  defstruct [:trip_identity, :effect, :effect_stops, :is_today, :cause, :recurrence, :context]
 
   @spec summary(
           Alert.t(),
@@ -160,10 +161,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         effect_stops: first.effect_stops,
         is_today: first.is_today,
         cause: alert.cause,
-        recurrence: first.recurrence
+        recurrence: first.recurrence,
+        context: first.context
       }
     else
-      %AlertSummary.Standard{effect: alert.effect, recurrence: first.recurrence}
+      %AlertSummary.Standard{
+        effect: alert.effect,
+        recurrence: first.recurrence,
+        context: first.context
+      }
     end
   end
 
@@ -228,7 +234,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         effect_stops: informed_stops,
         is_today: is_today,
         cause: alert.cause,
-        recurrence: AlertSummary.alert_recurrence(alert, at_time)
+        recurrence: AlertSummary.alert_recurrence(alert, at_time),
+        context: context
       }
     end
   end
@@ -258,7 +265,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         effect_stops: effect_stops,
         is_today: is_today,
         cause: alert.cause,
-        recurrence: AlertSummary.alert_recurrence(alert, at_time)
+        recurrence: AlertSummary.alert_recurrence(alert, at_time),
+        context: context
       }
     end
   end

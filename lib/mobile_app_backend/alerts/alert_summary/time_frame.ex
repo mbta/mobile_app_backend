@@ -49,6 +49,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Timeframe do
     defstruct []
   end
 
+  defmodule LaterToday do
+    @type t :: %__MODULE__{}
+    @derive PolymorphicJson
+    defstruct []
+  end
+
   defmodule TimeRange do
     @type t :: %__MODULE__{start_time: start_time(), end_time: end_time()}
     @derive PolymorphicJson
@@ -85,4 +91,5 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Timeframe do
           | StartingTomorrow.t()
           | StartingLaterToday.t()
           | UntilFurtherNotice.t()
+          | LaterToday.t()
 end

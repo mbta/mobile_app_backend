@@ -200,7 +200,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-01-16 10:31:00]}
                },
-               is_update: true
+               context: :notification
              }) ==
                %{
                  type: "standard",
@@ -215,7 +215,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                    type: "some_days",
                    ending: %{type: "later_date", time: "2026-01-16T10:31:00-05:00"}
                  },
-                 is_update: true
+                 context: "notification"
                }
     end
 
@@ -254,7 +254,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                cause: :holiday,
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.LaterDate{time: ~B[2026-03-10 14:28:00]}
-               }
+               },
+               context: :notification
              }) == %{
                type: "trip_specific",
                trip_identity: %{
@@ -270,7 +271,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %{
                  type: "daily",
                  ending: %{type: "later_date", time: "2026-03-10T14:28:00-04:00"}
-               }
+               },
+               context: "notification"
              }
     end
 
@@ -283,7 +285,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                },
                start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
-               recurrence: nil
+               recurrence: nil,
+               context: :notification
              }) == %{
                type: "trip_shuttle",
                trip_identity: %{
@@ -294,7 +297,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                },
                start_stop_name: "Ruggles",
                end_stop_name: "Forest Hills",
-               recurrence: nil
+               recurrence: nil,
+               context: "notification"
              }
     end
 
@@ -466,6 +470,19 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  %{},
                  :notification
                )
+    end
+
+    test "summary with estimated later today timeframe", %{now: now} do
+      end_time = DateTime.add(now, 1, :hour)
+
+      alert =
+        build(:alert,
+          duration_certainty: :estimated,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
+        )
+
+      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterToday{}} =
+               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
     end
 
     test "summary with end of service timeframe", %{now: now} do
@@ -2225,7 +2242,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %MobileAppBackend.Alerts.AlertSummary.Standard{
                effect: :suspension,
-               is_update: false,
                location: nil,
                recurrence: nil,
                timeframe: %MobileAppBackend.Alerts.AlertSummary.Timeframe.StartingTomorrow{}

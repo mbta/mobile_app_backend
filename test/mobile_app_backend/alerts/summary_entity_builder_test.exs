@@ -48,7 +48,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "Service suspended on Red Line"
+                   summary: "Service suspended on Red Line due to maintenance"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
@@ -60,7 +60,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "**Service suspended** on **Red Line**"
+                   summary: "**Service suspended** on **Red Line** due to maintenance"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
@@ -564,7 +564,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "Service suspended at Wollaston"
+                   summary: "Service suspended at Wollaston due to maintenance"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :notification)
@@ -576,7 +576,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                    stop_id: nil,
                    trip_id: nil,
                    direction_id: nil,
-                   summary: "**Service suspended** at **Wollaston**"
+                   summary: "**Service suspended** at **Wollaston** due to maintenance"
                  }
                ]
              } = SummaryEntityBuilder.build_all([alert], now, "en", global, :card)
@@ -606,21 +606,21 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilderTest do
                  stop_id: nil,
                  trip_id: nil,
                  direction_id: nil,
-                 summary: "Service suspended on Blue Line"
+                 summary: "Service suspended on Blue Line due to maintenance"
                },
                %SummaryEntity{
                  route_id: "Orange",
                  stop_id: nil,
                  trip_id: nil,
                  direction_id: nil,
-                 summary: "Service suspended on Orange Line"
+                 summary: "Service suspended on Orange Line due to maintenance"
                },
                %SummaryEntity{
                  route_id: "Red",
                  stop_id: nil,
                  trip_id: nil,
                  direction_id: nil,
-                 summary: "Service suspended on Red Line"
+                 summary: "Service suspended on Red Line due to maintenance"
                }
              ] =
                summary_entities

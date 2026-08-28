@@ -37,14 +37,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
           trip_identity: trip_identity(),
           start_stop_name: String.t(),
           end_stop_name: String.t(),
-          recurrence: AlertSummary.Recurrence.t() | nil
+          recurrence: AlertSummary.Recurrence.t() | nil,
+          context: AlertSummary.context()
         }
   @derive PolymorphicJson
   defstruct [
     :trip_identity,
     :start_stop_name,
     :end_stop_name,
-    :recurrence
+    :recurrence,
+    :context
   ]
 
   @spec summary(
@@ -83,7 +85,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
         trip_identity: trip_identity,
         start_stop_name: start_stop_name,
         end_stop_name: end_stop_name,
-        recurrence: AlertSummary.alert_recurrence(alert, at_time)
+        recurrence: AlertSummary.alert_recurrence(alert, at_time),
+        context: context
       }
     else
       _ -> nil
@@ -137,10 +140,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
         trip_identity: trip_identity,
         start_stop_name: first.start_stop_name,
         end_stop_name: first.end_stop_name,
-        recurrence: first.recurrence
+        recurrence: first.recurrence,
+        context: first.context
       }
     else
-      %AlertSummary.Standard{effect: alert.effect, recurrence: first.recurrence}
+      %AlertSummary.Standard{
+        effect: alert.effect,
+        recurrence: first.recurrence,
+        context: first.context
+      }
     end
   end
 

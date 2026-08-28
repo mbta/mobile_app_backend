@@ -26,7 +26,7 @@ msgstr ""
 msgid " due to %{cause}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:211
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr ""
@@ -61,28 +61,28 @@ msgstr ""
 msgid " some days%{recurrence_text}"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:213
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:203
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:210
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:176
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:180
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:179
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:186
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr ""
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:124
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:169
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr ""
@@ -862,7 +862,7 @@ msgstr ""
 msgid "electrical work"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:231
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:238
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr ""
@@ -942,17 +942,17 @@ msgstr ""
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:189
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:190
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:198
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr ""
@@ -1047,7 +1047,7 @@ msgstr ""
 msgid "speed restriction"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:228
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:235
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr ""

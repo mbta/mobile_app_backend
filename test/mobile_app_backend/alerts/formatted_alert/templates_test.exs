@@ -12,7 +12,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           "**A**",
           " until further notice",
           "",
-          false
+          :notification
         )
 
       assert "Ferries will not stop at **A** until further notice" == summary
@@ -25,23 +25,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           "",
           " until further notice",
           "",
-          false
+          :notification
         )
 
       assert "**Delays** of about 10 minutes until further notice" == summary
-    end
-
-    test "fallback update" do
-      summary =
-        Templates.standard(
-          build(:alert, effect: :detour),
-          "",
-          " until further notice",
-          "",
-          true
-        )
-
-      assert "**Update:** Detour until further notice" == summary
     end
 
     test "fallback" do
@@ -51,10 +38,76 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           "",
           " until further notice",
           "",
-          false
+          :card
         )
 
       assert "**Detour** until further notice" == summary
+    end
+
+    test "fallback cause when missing location" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour, cause: :maintenance),
+          "",
+          " until further notice",
+          "",
+          :card
+        )
+
+      assert "**Detour** until further notice due to maintenance" == summary
+    end
+
+    test "fallback cause when unknown end time" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour, cause: :maintenance),
+          " from X to Y",
+          " until further notice",
+          "",
+          :card
+        )
+
+      assert "**Detour** from X to Y until further notice due to maintenance" == summary
+    end
+
+    test "fallback no cause when location and timeframe" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour, cause: :maintenance),
+          " from X to Y",
+          " starting at 4PM",
+          "",
+          :card
+        )
+
+      assert "**Detour** from X to Y starting at 4PM" == summary
+    end
+
+    test "detour notification see alert details" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :detour, cause: :maintenance),
+          " from X to Y",
+          " until further notice",
+          "",
+          :notification
+        )
+
+      assert "**Detour** from X to Y until further notice due to maintenance. See alert details." ==
+               summary
+    end
+
+    test "Elevator closure" do
+      summary =
+        Templates.standard(
+          build(:alert, effect: :elevator_closure, cause: :maintenance),
+          " at Porter",
+          " until further notice",
+          "",
+          :notification
+        )
+
+      assert "**Elevator closed** at Porter until further notice due to maintenance" == summary
     end
   end
 
