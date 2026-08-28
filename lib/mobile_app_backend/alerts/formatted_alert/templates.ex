@@ -47,12 +47,21 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # Elevator closed at [Affected stop(s)] until [end time/further notice].
 
   def standard(%{effect: effect}, location, timeframe, recurrence) do
+    due_to_cause =
+      if location == "" || timeframe == "" ||
+           timeframe == TemplateFragments.until_further_notice() do
+        TemplateFragments.due_to_cause(alert.cause)
+      else
+        ""
+      end
+
     gettext(
-      "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}",
+      "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: PresentationStrings.effect_sentence_case(effect),
       summary_location: location,
       summary_timeframe: timeframe,
-      summary_recurrence: recurrence
+      summary_recurrence: recurrence,
+      due_to_cause: due_to_cause
     )
   end
 
