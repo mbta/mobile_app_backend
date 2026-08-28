@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Notifications.Engine do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Line
   alias MBTAV3API.RoutePattern
@@ -20,18 +21,22 @@ defmodule MobileAppBackend.Notifications.Engine do
   def user_notifications(subscriptions, alerts, now) do
     global_data = GlobalDataCache.get_data()
 
+    relevant_alerts_by_subscription =
+      Enum.map(subscriptions, fn subscription ->
+        relevant_alerts =
+          extract_relevant_alerts_for_subscription(alerts, subscription, now, global_data)
+
+        {subscription, relevant_alerts}
+      end)
+
     all_candidates =
-      Enum.map(subscriptions, &get_all_candidates(&1, alerts, now, global_data))
-
-    candidates = Enum.flat_map(all_candidates, fn %{candidates: candidates} -> candidates end)
-
-    relevant_alerts =
-      Enum.flat_map(all_candidates, fn %{relevant_alerts: relevant_alerts} -> relevant_alerts end)
-      |> Enum.uniq()
+      Enum.flat_map(relevant_alerts_by_subscription, fn {subscription, relevant_alerts} ->
+        get_all_candidates(subscription, relevant_alerts, now)
+      end)
 
     candidates_by_alert =
       Enum.group_by(
-        candidates,
+        all_candidates,
         fn {alert, _type, _subscription} -> alert end,
         fn {_alert, type, subscription} -> {type, subscription} end
       )
@@ -60,6 +65,15 @@ defmodule MobileAppBackend.Notifications.Engine do
             {subscriptions, :reminder}
         end
 
+      relevant_alerts =
+        relevant_alerts_by_subscription
+        |> Enum.filter(fn {subscription, _relevant_alerts} -> subscription in subscriptions end)
+        |> Enum.flat_map(fn {_subscription, relevant_alerts} -> relevant_alerts end)
+
+      Logger.debug(
+        "#{__MODULE__} relevant_alerts=[#{relevant_alerts |> Enum.map_join(",", & &1.id)}]"
+      )
+
       more_active_alerts =
         relevant_alerts
         |> Enum.count(
@@ -79,7 +93,22 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
-  defp get_all_candidates(%Subscription{} = subscription, alerts, now, global_data) do
+  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, now) do
+    relevant_alerts =
+      relevant_alerts
+      |> Enum.filter(&Alert.eligible_for_notification?(&1))
+
+    Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
+      List.wrap(alert_candidate(subscription, alert, now))
+    end)
+  end
+
+  defp extract_relevant_alerts_for_subscription(
+         alerts,
+         %Subscription{} = subscription,
+         now,
+         global_data
+       ) do
     route_ids =
       case subscription.route_id do
         "line-" <> _ ->
@@ -116,19 +145,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    relevant_alerts =
-      Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
-      |> Enum.filter(&Alert.eligible_for_notification?(&1))
-
-    candidates =
-      Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
-        List.wrap(alert_candidate(subscription, alert, now))
-      end)
-
-    %{
-      relevant_alerts: relevant_alerts,
-      candidates: candidates
-    }
+    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
   end
 
   defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
@@ -313,7 +330,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         )
       end)
 
-    AlertSummary.combine_summaries(alert, individual_summaries, has_multiple_active_alerts)
+    AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
   defp summary_for_subscription(alert, subscription, now, global_data, has_multiple_active_alerts) do

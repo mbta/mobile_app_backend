@@ -373,7 +373,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "user_id" => user.id,
         "alert_id" => alert.id,
         "title" => "66 bus",
-        "body" => "All clear: Normal service has resumed",
+        "body" => "All clear: Normal service has resumed.",
         "deep_link_path" => "/s/1/r/66/d/0",
         "type" => "all_clear",
         "upstream_timestamp" => nil,

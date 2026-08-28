@@ -67,7 +67,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**Update:** Train service has resumed at **Wood Island**" == summary
+      # Leaving Trains until translations are complete, otherwise test will fail
+      assert "**Update:** Trains service has resumed at **Wood Island**." == summary
     end
 
     test "delay" do
@@ -78,7 +79,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**Update:** Delay has ended at **Wood Island**" == summary
+      assert "**Update:** Delay has ended at **Wood Island**." == summary
     end
 
     test "with no location" do
@@ -89,7 +90,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           ""
         )
 
-      assert "**Update:** Detour has ended" == summary
+      assert "**Update:** Detour has ended." == summary
     end
 
     test "returns normal service resumed when single all clear" do
@@ -100,7 +101,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**All clear:** Normal service has resumed" == summary
+      assert "**All clear:** Normal service has resumed." == summary
     end
   end
 

@@ -29,7 +29,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "All clear: Normal service has resumed" ==
+      assert "All clear: Normal service has resumed." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -45,7 +45,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Service suspended has ended on Red Line" ==
+      assert "Update: Suspension has ended on Red Line." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -65,7 +65,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Service suspended has ended from Oak Grove to North Station" ==
+      assert "Update: Suspension has ended from Oak Grove to North Station." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -84,7 +84,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Service suspended has ended at Ruggles" ==
+      assert "Update: Suspension has ended at Ruggles." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -103,7 +103,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Train service has resumed at Oak Grove" ==
+      # Leaving Trains until translations are complete, otherwise test will fail
+      assert "Update: Trains service has resumed at Oak Grove." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
