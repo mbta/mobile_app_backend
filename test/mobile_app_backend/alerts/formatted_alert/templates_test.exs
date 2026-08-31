@@ -120,8 +120,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      # Leaving Trains until translations are complete, otherwise test will fail
-      assert "**Update:** Trains service has resumed at **Wood Island**." == summary
+      assert "**Update:** Train service has resumed at **Wood Island**." == summary
     end
 
     test "delay" do

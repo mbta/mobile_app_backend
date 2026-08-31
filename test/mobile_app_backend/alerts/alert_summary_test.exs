@@ -482,7 +482,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterToday{}} =
-               AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with end of service timeframe", %{now: now} do
@@ -1309,8 +1317,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
         )
 
       assert %AlertSummary.Standard{
-               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
-               is_update: true
+               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time}
              } =
                AlertSummary.summarizing(
                  alert,

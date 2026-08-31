@@ -110,7 +110,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           location: alert_location(alert, stop_id, direction_id, patterns, global),
           timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
           recurrence: recurrence,
-          is_update: alert_is_update?(alert, at_time)
+          context: context
         }
     end
   end

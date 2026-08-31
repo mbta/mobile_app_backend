@@ -103,8 +103,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      # Leaving Trains until translations are complete, otherwise test will fail
-      assert "Update: Trains service has resumed at Oak Grove." ==
+      assert "Update: Train service has resumed at Oak Grove." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
