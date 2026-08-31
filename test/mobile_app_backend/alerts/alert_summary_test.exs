@@ -423,6 +423,135 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   end
 
   describe "summarizing/7" do
+    test "summary with a signal issue delay" do
+      now = ~B[2026-03-12 12:00:00]
+      end_time = ~B[2026-03-12 14:00:00]
+
+      alert =
+        build(:alert,
+          cause: :signal_issue,
+          effect: :delay,
+          active_period: [%Alert.ActivePeriod{start: ~B[2026-03-12 11:00:00], end: end_time}]
+        )
+
+      assert %AlertSummary.Standard{
+               effect: :delay,
+               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
+               recurrence: nil
+             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+    end
+
+    test "summary with an upcoming delay" do
+      now = ~B[2026-03-12 12:00:00]
+      start_time = ~B[2026-03-12 14:00:00]
+
+      alert =
+        build(:alert,
+          effect: :delay,
+          active_period: [%Alert.ActivePeriod{start: start_time, end: nil}]
+        )
+
+      assert %AlertSummary.Standard{
+               effect: :delay,
+               timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^start_time},
+               recurrence: nil
+             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+    end
+
+    test "summary with an active single tracking delay" do
+      now = ~B[2026-03-09 12:00:00]
+      start_time = ~B[2026-03-09 11:00:00]
+      end_time = ~B[2026-03-09 13:00:00]
+      recurrence_end_time = ~B[2026-03-11 13:00:00]
+
+      alert =
+        build(:alert,
+          cause: :single_tracking,
+          effect: :delay,
+          duration_certainty: :known,
+          active_period: [
+            %Alert.ActivePeriod{start: start_time, end: end_time},
+            %Alert.ActivePeriod{start: ~B[2026-03-10 11:00:00], end: ~B[2026-03-10 13:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-11 11:00:00], end: ~B[2026-03-11 13:00:00]}
+          ]
+        )
+
+      assert %AlertSummary.Standard{
+               effect: :delay,
+               timeframe: %AlertSummary.Timeframe.TimeRange{
+                 start_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^start_time},
+                 end_time: %AlertSummary.Timeframe.TimeRange.Time{time: ^end_time}
+               },
+               recurrence: %AlertSummary.Recurrence.Daily{
+                 ending: %AlertSummary.Timeframe.ThisWeek{time: ^recurrence_end_time}
+               }
+             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+    end
+
+    test "summary with an upcoming single tracking delay" do
+      now = ~B[2026-03-09 12:00:00]
+      start_time = ~B[2026-03-09 14:00:00]
+      recurrence_end_time = ~B[2026-03-13 16:00:00]
+
+      alert =
+        build(:alert,
+          cause: :single_tracking,
+          effect: :delay,
+          duration_certainty: :known,
+          active_period: [
+            %Alert.ActivePeriod{start: start_time, end: ~B[2026-03-09 16:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-11 14:00:00], end: ~B[2026-03-11 16:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-13 14:00:00], end: ~B[2026-03-13 16:00:00]}
+          ]
+        )
+
+      assert %AlertSummary.Standard{
+               effect: :delay,
+               timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^start_time},
+               recurrence: %AlertSummary.Recurrence.SomeDays{
+                 ending: %AlertSummary.Timeframe.ThisWeek{time: ^recurrence_end_time}
+               }
+             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+    end
+
+    test "summary with a single tracking delay at a specific stop", %{now: now} do
+      stop = build(:stop, id: "stop", name: "Ruggles")
+      route = build(:route, type: :heavy_rail)
+      pattern = build(:route_pattern, route_id: route.id, direction_id: 0)
+      end_time = DateTime.add(now, 1, :hour)
+
+      alert =
+        build(:alert,
+          cause: :single_tracking,
+          effect: :delay,
+          severity: 5,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}],
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], route: route.id, stop: stop.id}
+          ]
+        )
+
+      assert %AlertSummary.Standard{
+               effect: :delay,
+               location: %AlertSummary.Location.SingleStop{
+                 stop_name: "Ruggles",
+                 downstream: false
+               },
+               timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
+               recurrence: nil
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 stop.id,
+                 0,
+                 [pattern],
+                 now,
+                 nil,
+                 %{routes: %{route.id => route}, stops: %{stop.id => stop}},
+                 :notification
+               )
+    end
+
     test "summary with until further notice timeframe", %{now: now} do
       alert =
         build(:alert,
