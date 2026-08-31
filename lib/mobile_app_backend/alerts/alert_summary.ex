@@ -2,7 +2,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
-  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
 
