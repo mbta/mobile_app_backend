@@ -67,6 +67,30 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           context(),
           boolean() | nil
         ) :: t()
+  @spec summarizing(
+          Alert.t(),
+          Stop.id() | nil,
+          0 | 1 | nil,
+          [RoutePattern.t()],
+          DateTime.t(),
+          [Schedule.t()] | nil,
+          GlobalDataCache.data(),
+          context()
+        ) :: t()
+  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global, context)
+      when (is_binary(stop_id) or is_nil(stop_id)) and
+             (is_integer(direction_id) or is_nil(direction_id)) do
+    summarizing(
+      alert,
+      %Subscription{stop_id: stop_id, direction_id: direction_id},
+      patterns,
+      at_time,
+      schedules,
+      global,
+      context
+    )
+  end
+
   def summarizing(
         alert,
         %Subscription{stop_id: stop_id, direction_id: direction_id},
