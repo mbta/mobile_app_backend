@@ -443,7 +443,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                effect: :delay,
                timeframe: %AlertSummary.Timeframe.Time{time: ^end_time},
                recurrence: nil
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with an upcoming delay" do
@@ -460,7 +469,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                effect: :delay,
                timeframe: %AlertSummary.Timeframe.StartingLaterToday{time: ^start_time},
                recurrence: nil
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with an active single tracking delay" do
@@ -490,7 +508,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %AlertSummary.Recurrence.Daily{
                  ending: %AlertSummary.Timeframe.ThisWeek{time: ^recurrence_end_time}
                }
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with an upcoming single tracking delay" do
@@ -516,7 +543,16 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                recurrence: %AlertSummary.Recurrence.SomeDays{
                  ending: %AlertSummary.Timeframe.ThisWeek{time: ^recurrence_end_time}
                }
-             } = AlertSummary.summarizing(alert, "", 0, [], now, nil, %{}, :notification)
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
     end
 
     test "summary with a single tracking delay at a specific stop", %{now: now} do
@@ -547,8 +583,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } =
                AlertSummary.summarizing(
                  alert,
-                 stop.id,
-                 0,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
                  [pattern],
                  now,
                  nil,
