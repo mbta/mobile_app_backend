@@ -67,6 +67,92 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary/2 standard" do
+    test "delay with signal issue cause" do
+      alert = build(:alert, effect: :delay, cause: :signal_issue)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.Time{time: ~B[2026-03-12 14:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays through 2:00 PM due to signal issue" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "upcoming delay" do
+      alert = build(:alert, effect: :delay)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.StartingLaterToday{time: ~B[2026-03-12 14:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays starting 2:00 PM today" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "active recurring delay" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.TimeRange{
+          start_time: %Timeframe.TimeRange.Time{time: ~B[2026-03-09 11:00:00]},
+          end_time: %Timeframe.TimeRange.Time{time: ~B[2026-03-09 13:00:00]}
+        },
+        recurrence: %Recurrence.Daily{ending: %Timeframe.ThisWeek{time: ~B[2026-03-11 13:00:00]}}
+      }
+
+      assert "Delays from 11:00 AM to 1:00 PM daily until Wednesday due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "upcoming recurring delay" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.StartingLaterToday{time: ~B[2026-03-09 14:00:00]},
+        recurrence: %Recurrence.SomeDays{
+          ending: %Timeframe.ThisWeek{time: ~B[2026-03-13 16:00:00]}
+        }
+      }
+
+      assert "Delays starting 2:00 PM today some days until Friday due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "single tracking delay at a specific stop" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking, severity: 5)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        location: %Location.SingleStop{stop_name: "Ruggles", downstream: false},
+        timeframe: %Timeframe.Time{time: ~B[2026-03-09 13:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays of about 20 minutes at Ruggles through 1:00 PM due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "daily shuttle between stops until further notice" do
       alert = build(:alert, effect: :shuttle)
 
