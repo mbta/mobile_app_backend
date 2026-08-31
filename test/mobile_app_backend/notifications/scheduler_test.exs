@@ -320,6 +320,46 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     refute_enqueued(worker: Notifications.Deliverer)
   end
 
+  test "skips notifications for information alerts" do
+    now = DateTime.now!("America/New_York")
+
+    alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -2, :hour),
+            end: DateTime.add(now, 5, :hour)
+          }
+        ],
+        effect: :detour,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        severity: 1,
+        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    refute_enqueued(worker: Notifications.Deliverer)
+  end
+
   test "sends all clear notifications" do
     now = DateTime.now!("America/New_York")
 
