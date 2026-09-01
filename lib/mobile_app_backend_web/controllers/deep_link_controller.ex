@@ -50,7 +50,12 @@ defmodule MobileAppBackendWeb.DeepLinkController do
   # Any unrecognized strings at the root path are assumed to be stop IDs,
   # along with explicit /s/ or /stop/ deep links
   def stop(conn, %{"stop_id" => stop_id} = params) do
-    stop_redirect(conn, stop_id, Map.delete(Map.delete(params, "_"), "stop_id"))
+    stop_redirect(conn, stop_id, params |> Map.drop(["_", "stop_id"]))
+  end
+
+  # When we get a go.mbta.com/{stop_id} request, append a tracking source
+  def root_stop(conn, params) do
+    stop(conn, Map.put(params, "utm_source", "go-redirect"))
   end
 
   def alert(conn, %{"path_params" => path_params} = params) do

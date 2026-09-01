@@ -18,7 +18,8 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       conn = get(conn, ~p"/place-chill?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
+      assert redirected_to(conn, 302) ==
+               "https://example.com/stops/place-chill?param_1=val_1&utm_source=go-redirect"
     end
 
     test "redirects to dotcom stop page, ignoring remainder of path", %{conn: conn} do
@@ -26,7 +27,8 @@ defmodule MobileAppBackendWeb.DeepLinkControllerTest do
 
       conn = get(conn, ~p"/place-chill/test/path?param_1=val_1")
 
-      assert redirected_to(conn, 302) == "https://example.com/stops/place-chill?param_1=val_1"
+      assert redirected_to(conn, 302) ==
+               "https://example.com/stops/place-chill?param_1=val_1&utm_source=go-redirect"
     end
 
     test "redirects stop urls, preserving query params", %{conn: conn} do
