@@ -14,7 +14,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     # TODO: There may be some issues with skipped_effect depending on how many stops
     gettext(
       "%{mode} %{skipped_effect}",
-      mode: vehicle_type(effect, false, ""),
+      mode: vehicle_type(effect, false),
       skipped_effect:
         TemplateFragments.skipped_effect(
           location,
@@ -80,7 +80,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
              has_multiple_active_alerts == true do
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
-      mode: vehicle_type(effect, true, gettext("Elevator")),
+      mode: vehicle_type(effect, true),
       summary_location: location
     )
   end
@@ -278,7 +278,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     end
   end
 
-  defp vehicle_type(effect, singular?, default) do
+  defp vehicle_type(effect, singular?) do
     case effect do
       :dock_closure ->
         if singular? do
@@ -300,9 +300,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         else
           gettext("Buses")
         end
-
-      _ ->
-        default
     end
   end
 end

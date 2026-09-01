@@ -1253,7 +1253,6 @@ msgstr "de más de una hora"
 msgid "Bus"
 msgstr "Autobús"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:83
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:93
 #, elixir-autogen, elixir-format
 msgid "Elevator"
