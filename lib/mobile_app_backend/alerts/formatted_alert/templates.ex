@@ -76,11 +76,21 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # All clear with multiple active alerts and closure effect
   def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
-      when effect in [:dock_closure, :station_closure, :stop_closure, :elevator_closure] and
+      when effect in [:dock_closure, :station_closure, :stop_closure] and
              has_multiple_active_alerts == true do
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
       mode: vehicle_type(effect, true, gettext("Elevator")),
+      summary_location: location
+    )
+  end
+
+  # All clear with multiple active alerts and elevator closure effect
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when effect == :elevator_closure and has_multiple_active_alerts == true do
+    gettext(
+      "**Update:** %{mode} service has resumed%{summary_location}.",
+      mode: gettext("Elevator"),
       summary_location: location
     )
   end
