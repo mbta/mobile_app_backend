@@ -1,6 +1,9 @@
 # Configuration for the [MBTA v3 API](https://github.com/mbta/api)
 # Used for reading static and realtime GTFS data
+# Prod V3 API URL
 export API_URL=https://api-dev.mbtace.com/
+# Dev green V3 API URL
+# export API_URL=https://api-dev-green.mbtace.com/
 export API_KEY=
 
 # Configuration for the Database
