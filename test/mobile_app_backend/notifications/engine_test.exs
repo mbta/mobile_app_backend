@@ -574,6 +574,103 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     assert [] = Engine.user_notifications([subscription], [alert], now)
   end
 
+  test "sends notification when overnight window is open before midnight" do
+    now = ~B[2026-03-20 22:30:00]
+    upstream_timestamp = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: ~T[22:00:00],
+            end_time: ~T[03:00:00],
+            days_of_week: [5]
+          )
+        ]
+      )
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
+             Engine.user_notifications([subscription], [alert], now)
+  end
+
+  test "sends notification when overnight window is still open after midnight" do
+    now = ~B[2026-03-21 01:30:00]
+    upstream_timestamp = DateTime.add(now, -2)
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -3, :hour), end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: upstream_timestamp
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: ~T[22:00:00],
+            end_time: ~T[03:00:00],
+            days_of_week: [5]
+          )
+        ]
+      )
+
+    assert [
+             %OutgoingNotification{
+               subscriptions: [^subscription],
+               alert: ^alert,
+               type: {:notification, ^upstream_timestamp}
+             }
+           ] =
+             Engine.user_notifications([subscription], [alert], now)
+  end
+
+  test "does not send notification once an overnight window has closed" do
+    now = ~B[2026-03-21 04:00:00]
+
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -6, :hour), end: nil}],
+        effect: :suspension,
+        informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+        last_push_notification_timestamp: DateTime.add(now, -6, :hour)
+      )
+
+    subscription =
+      NotificationsFactory.build(:notification_subscription,
+        route_id: "Red",
+        stop_id: "place-sstat",
+        windows: [
+          NotificationsFactory.build(:window,
+            start_time: ~T[22:00:00],
+            end_time: ~T[03:00:00],
+            days_of_week: [5]
+          )
+        ]
+      )
+
+    assert [] = Engine.user_notifications([subscription], [alert], now)
+  end
+
   test "uses overlap time instead of just active time" do
     friday_noon = ~B[2026-03-20 12:00:00]
     sunday_noon = ~B[2026-03-22 12:00:00]

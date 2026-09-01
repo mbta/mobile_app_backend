@@ -9,6 +9,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   alias MobileAppBackend.Notifications.Deliverer
   alias MobileAppBackend.Notifications.Engine
   alias MobileAppBackend.Notifications.Subscription
+  alias MobileAppBackend.Notifications.Window
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
 
@@ -55,13 +56,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   defp get_open_windows(now) do
     # to receive a reminder, the window must be open either right now or in twelve hours
     # to receive a notification or all clear, the window must be open right now
-    current_datetime = now
-    current_day_of_week = Date.day_of_week(current_datetime)
-    current_time = DateTime.to_time(current_datetime)
+    reminder_target = DateTime.add(now, 12, :hour)
 
-    reminder_target = DateTime.add(current_datetime, 12, :hour)
-    reminder_target_day_of_week = Date.day_of_week(reminder_target)
-    reminder_target_time = DateTime.to_time(reminder_target)
+    window_binding = :window
 
     {query_us, users_with_open_windows} =
       :timer.tc(
@@ -70,11 +67,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
             from u in User,
               join: s in assoc(u, :notification_subscriptions),
               join: w in assoc(s, :windows),
-              where:
-                (w.start_time <= ^current_time and ^current_time <= w.end_time and
-                   ^current_day_of_week in w.days_of_week) or
-                  (w.start_time <= ^reminder_target_time and ^reminder_target_time <= w.end_time and
-                     ^reminder_target_day_of_week in w.days_of_week),
+              as: ^window_binding,
+              where: ^Window.open_dynamic(window_binding, now),
+              or_where: ^Window.open_dynamic(window_binding, reminder_target),
               preload: [notification_subscriptions: {s, windows: w}]
           )
         end,

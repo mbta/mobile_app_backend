@@ -386,14 +386,7 @@ defmodule MobileAppBackend.Notifications.Engine do
       trips[schedule.trip_id].direction_id == subscription.direction_id
 
     trip_time = schedule.departure_time || schedule.arrival_time
-    time = DateTime.to_time(trip_time)
-    day = Date.day_of_week(trip_time)
-
-    time_matches? =
-      Enum.any?(subscription.windows, fn %Window{} = window ->
-        Time.compare(window.start_time, time) != :gt and
-          Time.compare(time, window.end_time) != :gt and day in window.days_of_week
-      end)
+    time_matches? = Enum.any?(subscription.windows, &Window.open?(&1, trip_time))
 
     route_matches? and stop_matches? and direction_matches? and time_matches?
   end
