@@ -143,5 +143,81 @@ defmodule MobileAppBackend.Notifications.WindowTest do
       assert Window.next_overlap([p1, p2], [w2, w1], now) == expected
       assert Window.next_overlap([p2, p1], [w2, w1], now) == expected
     end
+
+    test "overnight window start when window starts after period starts" do
+      period = %Alert.ActivePeriod{start: ~B[2026-03-20 20:00:00], end: nil}
+
+      window = %Window{
+        start_time: ~T[22:00:00],
+        end_time: ~T[03:00:00],
+        days_of_week: [5]
+      }
+
+      now = ~B[2026-03-20 20:00:00]
+      assert Window.next_overlap(period, window, now) == ~B[2026-03-20 22:00:00]
+    end
+
+    test "overnight window is open past midnight when its day of week is the previous day" do
+      period = %Alert.ActivePeriod{start: ~B[2026-03-21 01:00:00], end: nil}
+
+      window = %Window{
+        start_time: ~T[22:00:00],
+        end_time: ~T[03:00:00],
+        days_of_week: [5]
+      }
+
+      now = ~B[2026-03-21 01:00:00]
+      assert Window.next_overlap(period, window, now) == ~B[2026-03-21 01:00:00]
+    end
+
+    test "overnight window ends before period starts the morning after its day of week" do
+      period = %Alert.ActivePeriod{start: ~B[2026-03-21 04:00:00], end: nil}
+
+      window = %Window{
+        start_time: ~T[22:00:00],
+        end_time: ~T[03:00:00],
+        days_of_week: [5]
+      }
+
+      now = ~B[2026-03-21 04:00:00]
+      assert Window.next_overlap(period, window, now) == ~B[2026-03-27 22:00:00]
+    end
+  end
+
+  describe "open?/2" do
+    test "open within a normal same-day window" do
+      window = %Window{start_time: ~T[08:00:00], end_time: ~T[09:00:00], days_of_week: [5]}
+      assert Window.open?(window, ~B[2026-03-20 08:30:00])
+    end
+
+    test "closed outside a normal same-day window" do
+      window = %Window{start_time: ~T[08:00:00], end_time: ~T[09:00:00], days_of_week: [5]}
+      refute Window.open?(window, ~B[2026-03-20 10:00:00])
+    end
+
+    test "open before midnight on an overnight window's day of week" do
+      window = %Window{start_time: ~T[22:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      assert Window.open?(window, ~B[2026-03-20 23:00:00])
+    end
+
+    test "open after midnight the day after an overnight window's day of week" do
+      window = %Window{start_time: ~T[22:00:00], end_time: ~T[03:00:00], days_of_week: [7]}
+      assert Window.open?(window, ~B[2026-03-23 02:00:00])
+    end
+
+    test "closed after an overnight window ends the day after its day of week" do
+      window = %Window{start_time: ~T[22:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      refute Window.open?(window, ~B[2026-03-21 04:00:00])
+    end
+
+    test "closed before an overnight window starts on its day of week" do
+      window = %Window{start_time: ~T[22:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      refute Window.open?(window, ~B[2026-03-20 21:00:00])
+    end
+
+    test "closed after midnight when the previous day isn't the overnight window's day of week" do
+      window = %Window{start_time: ~T[22:00:00], end_time: ~T[03:00:00], days_of_week: [6]}
+      refute Window.open?(window, ~B[2026-03-21 02:00:00])
+    end
   end
 end
