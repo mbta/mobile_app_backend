@@ -2,7 +2,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
-  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
 
@@ -16,6 +15,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   }
 
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.Subscription
   alias Util.PolymorphicJson
 
   @gl_id "line-Green"
@@ -37,9 +37,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defmodule AllClear do
-    @type t :: %__MODULE__{location: Location.t() | nil}
+    @type t :: %__MODULE__{
+            effect: Alert.effect(),
+            has_multiple_active_alerts: boolean(),
+            location: Location.t() | nil
+          }
     @derive PolymorphicJson
-    defstruct [:location]
+    defstruct [:effect, :has_multiple_active_alerts, :location]
   end
 
   defmodule Unknown do
@@ -52,38 +56,51 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @type context :: :notification | :card
 
-  @spec summarizing(
-          Alert.t(),
-          Stop.id(),
-          0 | 1,
-          [RoutePattern.t()],
-          DateTime.t(),
-          [Schedule.t()] | nil,
-          GlobalDataCache.data(),
-          context()
-        ) :: t()
-  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global, context) do
-    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, global),
-         nil <-
-           TripSpecific.summary(
-             alert,
-             stop_id,
-             direction_id,
-             patterns,
-             at_time,
-             schedules,
-             global,
-             context
-           ) do
-      recurrence = alert_recurrence(alert, at_time)
+  def summarizing(
+        alert,
+        %Subscription{stop_id: stop_id, direction_id: direction_id},
+        patterns,
+        at_time,
+        schedules,
+        global,
+        context,
+        has_multiple_active_alerts \\ false
+      ) do
+    cond do
+      all_clear =
+          all_clear_summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            has_multiple_active_alerts,
+            global
+          ) ->
+        all_clear
 
-      %Standard{
-        effect: alert.effect,
-        location: alert_location(alert, stop_id, direction_id, patterns, global),
-        timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
-        recurrence: recurrence,
-        context: context
-      }
+      trip_specific =
+          TripSpecific.summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            at_time,
+            schedules,
+            global,
+            context
+          ) ->
+        trip_specific
+
+      true ->
+        recurrence = alert_recurrence(alert, at_time)
+
+        %Standard{
+          effect: alert.effect,
+          location: alert_location(alert, stop_id, direction_id, patterns, global),
+          timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
+          recurrence: recurrence,
+          context: context
+        }
     end
   end
 
@@ -112,7 +129,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.uniq()
           |> deduplicate_locations()
 
-        %__MODULE__.AllClear{location: location}
+        %__MODULE__.AllClear{
+          effect: effect,
+          has_multiple_active_alerts: summaries |> Enum.any?(& &1.has_multiple_active_alerts),
+          location: location
+        }
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
         location =
@@ -184,11 +205,23 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Stop.id(),
           0 | 1,
           [RoutePattern.t()],
+          boolean(),
           GlobalDataCache.data()
         ) :: AllClear.t() | nil
-  defp all_clear_summary(alert, stop_id, direction_id, patterns, global) do
+  defp all_clear_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         has_multiple_active_alerts,
+         global
+       ) do
     if Alert.all_clear?(alert) do
-      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+      %AllClear{
+        effect: alert.effect,
+        has_multiple_active_alerts: has_multiple_active_alerts,
+        location: alert_location(alert, stop_id, direction_id, patterns, global)
+      }
     end
   end
 

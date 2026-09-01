@@ -30,6 +30,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   defp get_relevant_alerts(now) do
     alerts = Alerts.fetch([])
 
+    Logger.debug(
+      "#{__MODULE__} alert_ids=#{inspect(Enum.map(alerts, & &1.id), pretty: false, width: :infinity)}"
+    )
+
     Enum.filter(alerts, fn %Alert{} = alert -> filter_alert(alert, now) end)
   end
 
@@ -98,7 +102,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          now
        ) do
     {engine_us, outgoing_notifications} =
-      :timer.tc(&Engine.notifications/3, [subscriptions, alerts, now], :microsecond)
+      :timer.tc(&Engine.user_notifications/3, [subscriptions, alerts, now], :microsecond)
 
     Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
@@ -113,6 +117,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
              ) do
             localized_notification =
               OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
+
+            Logger.debug(
+              "#{__MODULE__} localized notification: title=[#{localized_notification.title}] body=[#{localized_notification.body}]"
+            )
 
             [{user, localized_notification}]
           else

@@ -12,6 +12,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   alias MobileAppBackend.Alerts.FormattedAlert
   alias MobileAppBackend.Alerts.SummaryEntity
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.Subscription
 
   defmodule Combination do
     @moduledoc "specific parameters for an individual summary"
@@ -146,8 +147,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     summary =
       AlertSummary.summarizing(
         alert,
-        resolved_stop_id,
-        direction_id,
+        %Subscription{stop_id: resolved_stop_id, direction_id: direction_id},
         patterns,
         at_time,
         resolved_schedules,

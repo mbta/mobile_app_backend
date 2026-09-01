@@ -65,7 +65,7 @@ if Mix.env() == :test do
         )
 
         [outgoing_notification] =
-          Notifications.Engine.notifications(
+          Notifications.Engine.user_notifications(
             scenario.subscriptions,
             [scenario.alert],
             scenario.at_time

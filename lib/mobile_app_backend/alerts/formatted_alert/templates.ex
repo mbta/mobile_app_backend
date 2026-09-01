@@ -11,17 +11,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # [Vehicle type] will not stop at [Affected stop(s)] until [end time/further notice].
   def standard(%{effect: effect}, location, timeframe, _recurrence, _context)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
-    mode =
-      case effect do
-        :dock_closure -> gettext("Ferries")
-        :station_closure -> gettext("Trains")
-        :stop_closure -> gettext("Buses")
-      end
-
     # TODO: There may be some issues with skipped_effect depending on how many stops
     gettext(
       "%{mode} %{skipped_effect}",
-      mode: mode,
+      mode: vehicle_type(effect, false),
       skipped_effect:
         TemplateFragments.skipped_effect(
           location,
@@ -75,6 +68,53 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       summary_recurrence: recurrence,
       due_to_cause: due_to_cause
     )
+  end
+
+  # ===========================================================================
+  # All Clear
+  # ===========================================================================
+
+  # All clear with multiple active alerts and closure effect
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when effect in [:dock_closure, :station_closure, :stop_closure] and
+             has_multiple_active_alerts == true do
+    gettext(
+      "**Update:** %{mode} service has resumed%{summary_location}.",
+      mode: vehicle_type(effect, true),
+      summary_location: location
+    )
+  end
+
+  # All clear with multiple active alerts and elevator closure effect
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when effect == :elevator_closure and has_multiple_active_alerts == true do
+    gettext(
+      "**Update:** %{mode} service has resumed%{summary_location}.",
+      mode: gettext("Elevator"),
+      summary_location: location
+    )
+  end
+
+  # All clear with multiple active alerts
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+      when has_multiple_active_alerts == true do
+    gettext(
+      # TODO
+      # Add has/have depending on effect_sentence_case
+      "**Update:** %{effect_sentence_case} has ended%{summary_location}.",
+      effect_sentence_case: PresentationStrings.effect(effect),
+      summary_location: location
+    )
+  end
+
+  # TODO
+  # All Clear => Update: [Vehicle type] service has resumed at/from [Affected stop(s)].
+  # :shuttle
+
+  # All clear with no other active alerts
+  def all_clear(%{effect: _effect}, has_multiple_active_alerts, _location)
+      when has_multiple_active_alerts == false do
+    gettext("**All clear:** Normal service has resumed.")
   end
 
   @spec trip_specific(
@@ -235,6 +275,31 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         end_stop: end_stop,
         recurrence: recurrence
       )
+    end
+  end
+
+  defp vehicle_type(effect, singular?) do
+    case effect do
+      :dock_closure ->
+        if singular? do
+          gettext("Ferry")
+        else
+          gettext("Ferries")
+        end
+
+      :station_closure ->
+        if singular? do
+          gettext("Train")
+        else
+          gettext("Trains")
+        end
+
+      :stop_closure ->
+        if singular? do
+          gettext("Bus")
+        else
+          gettext("Buses")
+        end
     end
   end
 end

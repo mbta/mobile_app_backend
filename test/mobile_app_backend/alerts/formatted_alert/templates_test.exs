@@ -111,6 +111,52 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
     end
   end
 
+  describe "all_clear/3" do
+    test "station_closure" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :station_closure),
+          true,
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Train service has resumed at **Wood Island**." == summary
+    end
+
+    test "delay" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :delay),
+          true,
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Delay has ended at **Wood Island**." == summary
+    end
+
+    test "with no location" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          true,
+          ""
+        )
+
+      assert "**Update:** Detour has ended." == summary
+    end
+
+    test "returns normal service resumed when single all clear" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          false,
+          " at **Wood Island**"
+        )
+
+      assert "**All clear:** Normal service has resumed." == summary
+    end
+  end
+
   describe "trip_specific/6" do
     test "multiple cancelled" do
       summary =

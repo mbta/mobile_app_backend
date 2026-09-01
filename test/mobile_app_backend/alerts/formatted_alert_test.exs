@@ -16,14 +16,36 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   alias MobileAppBackend.Alerts.FormattedAlert
 
   describe "summary/2 all_clear" do
+    test "all clear with single active alert" do
+      alert = build(:alert, effect: :detour)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        },
+        has_multiple_active_alerts: false,
+        effect: alert.effect
+      }
+
+      assert "All clear: Normal service has resumed." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "all clear whole route" do
       alert = build(:alert, effect: :suspension)
 
       alert_summary = %AlertSummary.AllClear{
-        location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"}
+        location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"},
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service on Red Line" ==
+      assert "Update: Suspension has ended on Red Line." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -38,10 +60,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           start_stop_name: "Oak Grove",
           end_stop_name: "North Station",
           downstream: false
-        }
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service from Oak Grove to North Station" ==
+      assert "Update: Suspension has ended from Oak Grove to North Station." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -55,10 +79,31 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         location: %Location.SingleStop{
           stop_name: "Ruggles",
           downstream: false
-        }
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service at Ruggles" ==
+      assert "Update: Suspension has ended at Ruggles." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear station closure" do
+      alert = build(:alert, effect: :station_closure)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SingleStop{
+          stop_name: "Oak Grove",
+          downstream: false
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
+      }
+
+      assert "Update: Train service has resumed at Oak Grove." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"

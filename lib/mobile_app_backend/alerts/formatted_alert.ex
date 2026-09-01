@@ -26,8 +26,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
       Gettext.with_locale(locale, fn ->
         case alert_summary do
           %AlertSummary.AllClear{} ->
-            gettext("**All clear:** Regular service%{location}",
-              location: TemplateFragments.location(nil, alert_summary.location)
+            Templates.all_clear(
+              alert,
+              alert_summary.has_multiple_active_alerts,
+              TemplateFragments.location(alert_summary.effect, alert_summary.location)
             )
 
           %AlertSummary.Standard{} ->
