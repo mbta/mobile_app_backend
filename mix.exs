@@ -54,7 +54,7 @@ defmodule MobileAppBackend.MixProject do
       {:decorator, "~> 1.4"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:diskusage_logger, "~> 0.2", only: :prod},
-      {:dns_cluster, "~> 0.2.0"},
+      {:dns_cluster, "~> 0.3.0"},
       {:ecto_sql, "~> 3.0"},
       {:ecto_psql_extras, "~> 0.6"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
