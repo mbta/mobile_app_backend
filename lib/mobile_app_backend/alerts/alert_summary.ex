@@ -1,6 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
-  alias MBTAV3API.Alert.InformedEntity
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
@@ -41,11 +40,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     @type t :: %__MODULE__{
             effect: Alert.effect(),
             has_multiple_active_alerts: boolean(),
-            location: Location.t() | nil,
-            informed_entity: [InformedEntity.t()] | nil
+            location: Location.t() | nil
           }
     @derive PolymorphicJson
-    defstruct [:effect, :has_multiple_active_alerts, :location, :informed_entity]
+    defstruct [:effect, :has_multiple_active_alerts, :location]
   end
 
   defmodule Unknown do
@@ -69,32 +67,28 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         has_multiple_active_alerts \\ false
       ) do
     cond do
-      not is_nil(
-        all_clear =
-            all_clear_summary(
-              alert,
-              stop_id,
-              direction_id,
-              patterns,
-              has_multiple_active_alerts,
-              global
-            )
-      ) ->
+      all_clear =
+          all_clear_summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            has_multiple_active_alerts,
+            global
+          ) ->
         all_clear
 
-      not is_nil(
-        trip_specific =
-            TripSpecific.summary(
-              alert,
-              stop_id,
-              direction_id,
-              patterns,
-              at_time,
-              schedules,
-              global,
-              context
-            )
-      ) ->
+      trip_specific =
+          TripSpecific.summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            at_time,
+            schedules,
+            global,
+            context
+          ) ->
         trip_specific
 
       true ->
@@ -138,8 +132,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         %__MODULE__.AllClear{
           effect: effect,
           has_multiple_active_alerts: summaries |> Enum.any?(& &1.has_multiple_active_alerts),
-          location: location,
-          informed_entity: alert.informed_entity
+          location: location
         }
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
@@ -227,8 +220,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       %AllClear{
         effect: alert.effect,
         has_multiple_active_alerts: has_multiple_active_alerts,
-        location: alert_location(alert, stop_id, direction_id, patterns, global),
-        informed_entity: alert.informed_entity
+        location: alert_location(alert, stop_id, direction_id, patterns, global)
       }
     end
   end

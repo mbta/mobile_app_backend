@@ -117,8 +117,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         Templates.all_clear(
           build(:alert, effect: :station_closure),
           true,
-          " at **Wood Island**",
-          nil
+          " at **Wood Island**"
         )
 
       assert "**Update:** Train service has resumed at **Wood Island**." == summary
@@ -129,8 +128,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         Templates.all_clear(
           build(:alert, effect: :delay),
           true,
-          " at **Wood Island**",
-          nil
+          " at **Wood Island**"
         )
 
       assert "**Update:** Delay has ended at **Wood Island**." == summary
@@ -139,10 +137,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
     test "shuttle" do
       summary =
         Templates.all_clear(
-          build(:alert, effect: :shuttle),
+          build(:alert, effect: :shuttle, informed_entity: [%{route_type: :bus}]),
           true,
-          " at **Wood Island**",
-          [%{route_type: :bus}]
+          " at **Wood Island**"
         )
 
       assert "**Update:** Bus service has resumed at **Wood Island**." == summary
@@ -153,8 +150,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         Templates.all_clear(
           build(:alert, effect: :detour),
           true,
-          "",
-          nil
+          ""
         )
 
       assert "**Update:** Detour has ended." == summary
@@ -165,8 +161,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         Templates.all_clear(
           build(:alert, effect: :detour),
           false,
-          " at **Wood Island**",
-          nil
+          " at **Wood Island**"
         )
 
       assert "**All clear:** Normal service has resumed." == summary
