@@ -174,6 +174,26 @@ defmodule MBTAV3API.Store.PredictionsTest do
       assert predictions == %{"1" => prediction_1}
       assert trips == %{"trip_1" => trip_1}
     end
+
+    @tag :capture_log
+    test "drops predictions and trips with a nil direction_id", %{
+      prediction_1: prediction_1,
+      prediction_2: prediction_2,
+      trip_1: trip_1,
+      trip_2: trip_2
+    } do
+      prediction_2 = %{prediction_2 | direction_id: nil}
+      trip_2 = %{trip_2 | direction_id: nil}
+      Store.Predictions.process_upsert(:add, [prediction_1, prediction_2, trip_1, trip_2])
+
+      assert %{
+               predictions: predictions,
+               trips: trips
+             } = Store.Predictions.fetch_with_associations(stop_id: "12345")
+
+      assert predictions == %{"1" => prediction_1}
+      assert trips == %{"trip_1" => trip_1}
+    end
   end
 
   describe "fetch" do
