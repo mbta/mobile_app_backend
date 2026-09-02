@@ -222,6 +222,7 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     records_by_type =
       data
       |> Stream.filter(& &1.revenue)
+      |> Stream.filter(&valid_direction_id?/1)
       |> Enum.group_by(
         fn data ->
           %data_type{} = data
@@ -233,6 +234,20 @@ defmodule MBTAV3API.Store.Predictions.Impl do
     :ets.insert(@trips_table_name, Map.get(records_by_type, Trip, []))
     :ets.insert(@predictions_table_name, Map.get(records_by_type, Prediction, []))
   end
+
+  # The V3 API occasionally emits trips (and their predictions) with a nil direction_id,
+  # which the clients can't parse.
+  defp valid_direction_id?(%{direction_id: nil} = data) do
+    %data_type{} = data
+
+    Logger.warning(
+      "#{__MODULE__} skipping object with nil direction_id type=#{inspect(data_type)} id=#{data.id}"
+    )
+
+    false
+  end
+
+  defp valid_direction_id?(_), do: true
 
   defp clear_data(keys) do
     # Since we stream predictions by route, we can clear both the predictions  & route
