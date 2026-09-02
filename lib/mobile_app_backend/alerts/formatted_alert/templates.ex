@@ -75,7 +75,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # ===========================================================================
 
   # All clear with multiple active alerts and closure effect
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location, _informed_entity)
       when effect in [:dock_closure, :station_closure, :stop_closure] and
              has_multiple_active_alerts == true do
     gettext(
@@ -86,7 +86,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   end
 
   # All clear with multiple active alerts and elevator closure effect
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location, _informed_entity)
       when effect == :elevator_closure and has_multiple_active_alerts == true do
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
@@ -95,24 +95,30 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
+  # All clear with multiple active alerts and shuttle effect
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location, [
+        %{route_type: route_type} | _rest
+      ])
+      when effect == :shuttle and has_multiple_active_alerts == true do
+    gettext(
+      "**Update:** %{mode} service has resumed%{summary_location}.",
+      mode: PresentationStrings.route_type(route_type, :singular, :sentence_case),
+      summary_location: location
+    )
+  end
+
   # All clear with multiple active alerts
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
+  def all_clear(%{effect: effect}, has_multiple_active_alerts, location, _informed_entity)
       when has_multiple_active_alerts == true do
     gettext(
-      # TODO
-      # Add has/have depending on effect_sentence_case
       "**Update:** %{effect_sentence_case} has ended%{summary_location}.",
       effect_sentence_case: PresentationStrings.effect(effect),
       summary_location: location
     )
   end
 
-  # TODO
-  # All Clear => Update: [Vehicle type] service has resumed at/from [Affected stop(s)].
-  # :shuttle
-
   # All clear with no other active alerts
-  def all_clear(%{effect: _effect}, has_multiple_active_alerts, _location)
+  def all_clear(%{effect: _effect}, has_multiple_active_alerts, _location, _informed_entity)
       when has_multiple_active_alerts == false do
     gettext("**All clear:** Normal service has resumed.")
   end

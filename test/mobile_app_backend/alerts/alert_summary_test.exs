@@ -237,7 +237,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  start_stop_name: "Lechmere",
                  end_stop_name: "Government Center",
                  downstream: true
-               }
+               },
+               informed_entity: nil
              }
     end
 

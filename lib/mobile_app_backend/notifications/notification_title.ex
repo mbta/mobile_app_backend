@@ -62,7 +62,7 @@ defmodule MobileAppBackend.Notifications.NotificationTitle do
         %ModeLabel{} ->
           gettext("%{label} %{mode_label}",
             label: title.label,
-            mode_label: PresentationStrings.route_type(title.mode, true)
+            mode_label: PresentationStrings.route_type(title.mode, :singular, :lower_case)
           )
 
         %MultipleRoutes{} ->
