@@ -130,6 +130,12 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     end
   end
 
+  defp can_app_handle_data_only_notification?(user) do
+    user.platform == "Android" and user.app_version != nil and
+      Version.parse(user.app_version) != :error and
+      Version.compare(user.app_version, "2.1.4") == :gt
+  end
+
   defp handle_fcm_response({:ok, %Req.Response{status: status}}, user) when status in 200..299 do
     user
     |> Ecto.Changeset.change(fcm_last_verified: DateTime.utc_now(:second))
@@ -142,12 +148,6 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         Logger.error(inspect(error))
         :error
     end
-  end
-
-  defp can_app_handle_data_only_notification?(user) do
-    user.platform == "Android" and user.app_version != nil and
-      Version.parse(user.app_version) != :error and
-      Version.compare(user.app_version, "2.1.4") == :gt
   end
 
   # if an FCM token is deleted, it won’t be recreated later, so prune the user now
