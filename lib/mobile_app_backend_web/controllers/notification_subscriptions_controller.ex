@@ -38,8 +38,20 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
   end
 
   def write(conn, params) do
+    user_agent =
+      conn
+      |> get_req_header("user-agent")
+      |> List.first()
+      |> to_string()
+
+    [app_version, platform] =
+      Regex.run(~r{/(\d+(?:\.\d+)*) \(([^)]+)\)}, user_agent, capture: :all_but_first) ||
+        [nil, nil]
+
     status =
-      case WritePayload.parse(params) do
+      case WritePayload.parse(
+             Map.merge(params, %{"app_version" => app_version, "platform" => platform})
+           ) do
         {:ok, payload} ->
           now =
             Map.get_lazy(conn.private, :mobile_app_backend_now, fn ->

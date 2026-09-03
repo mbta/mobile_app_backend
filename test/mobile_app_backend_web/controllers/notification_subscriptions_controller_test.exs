@@ -266,6 +266,49 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert %User{locale: "en"} = Repo.reload(user)
     end
 
+    test "sets app_version and platform", %{conn: conn} do
+      user = insert(:user)
+
+      conn = put_req_header(conn, "user-agent", "MyApp/1.2.3 (iOS)")
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_token: user.fcm_token,
+          subscriptions: []
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{app_version: "1.2.3", platform: "iOS"} = Repo.reload(user)
+    end
+
+    test "does not clear app_version and platform", %{conn: conn} do
+      user = insert(:user, app_version: "1.2.3", platform: "iOS")
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_token: user.fcm_token,
+          subscriptions: []
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{app_version: "1.2.3", platform: "iOS"} = Repo.reload(user)
+    end
+
+    test "user_agent wrong format doesn't clear app_version and platform", %{conn: conn} do
+      user = insert(:user, app_version: "1.2.3", platform: "iOS")
+
+      conn = put_req_header(conn, "user-agent", "wrong format")
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_token: user.fcm_token,
+          subscriptions: []
+        })
+
+      assert json_response(conn, :ok) == nil
+      assert %User{app_version: "1.2.3", platform: "iOS"} = Repo.reload(user)
+    end
+
     @tag :capture_log
     test "sends 400 on bad request", %{conn: conn} do
       conn =

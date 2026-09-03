@@ -18,7 +18,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
 
   test "delivers notification via FCM and marks notification as delivered" do
     start_link_supervised!(Alerts)
-    user = NotificationsFactory.insert(:user)
+    user = NotificationsFactory.insert(:user, app_version: "2.1.5", platform: "Android")
     user_id = user.id
     fcm_token = user.fcm_token
     alert = Factory.build(:alert)

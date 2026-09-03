@@ -81,8 +81,9 @@ defmodule MobileAppBackend.Notifications.Deliverer do
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
 
-    if result == :ok do
-      # This section is only to allow Android to group notifications, it gets ignored by iOS
+    # This section is only to allow Android to group notifications on version greater than 2.1.4
+    # because it's dependant on change https://github.com/mbta/mobile_app/pull/1938
+    if result == :ok and can_app_handle_data_only_notification?(user) do
       data_request_body = %{
         message: %FCM.Message{
           data: %{"alert_id" => alert_id, "title" => title, "body" => body, "tag" => tag},
@@ -141,6 +142,12 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         Logger.error(inspect(error))
         :error
     end
+  end
+
+  defp can_app_handle_data_only_notification?(user) do
+    user.platform == "Android" and user.app_version != nil and
+      Version.parse(user.app_version) != :error and
+      Version.compare(user.app_version, "2.1.4") == :gt
   end
 
   # if an FCM token is deleted, it won’t be recreated later, so prune the user now

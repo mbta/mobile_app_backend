@@ -14,6 +14,8 @@ defmodule MobileAppBackend.User do
     field(:fcm_last_verified, :utc_datetime, null: false)
     # should be a BCP 47 language tag like iOS’s
     field(:locale, :string, null: true) :: Gettext.locale() | nil
+    field(:app_version, :string, null: true)
+    field(:platform, :string, null: true)
 
     has_many(:notification_subscriptions, MobileAppBackend.Notifications.Subscription,
       on_replace: :delete_if_exists

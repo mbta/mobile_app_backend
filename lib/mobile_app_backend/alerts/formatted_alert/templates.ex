@@ -116,7 +116,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   end
 
   # All clear with no other active alerts
-  def all_clear(%{effect: _effect}, _has_multiple_active_alerts, _location) do
+  def all_clear(_alert, _has_multiple_active_alerts, _location) do
     gettext("**All clear:** Normal service has resumed.")
   end
 
