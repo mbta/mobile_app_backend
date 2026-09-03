@@ -134,6 +134,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
       assert "**Update:** Delay has ended at **Wood Island**." == summary
     end
 
+    test "shuttle" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :shuttle, informed_entity: [%{route_type: :bus}]),
+          true,
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Bus service has resumed at **Wood Island**." == summary
+    end
+
     test "with no location" do
       summary =
         Templates.all_clear(

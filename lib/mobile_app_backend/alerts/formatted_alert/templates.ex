@@ -14,7 +14,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     # TODO: There may be some issues with skipped_effect depending on how many stops
     gettext(
       "%{mode} %{skipped_effect}",
-      mode: vehicle_type(effect, false),
+      mode: vehicle_type(effect, :plural),
       skipped_effect:
         TemplateFragments.skipped_effect(
           location,
@@ -75,19 +75,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # ===========================================================================
 
   # All clear with multiple active alerts and closure effect
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
-      when effect in [:dock_closure, :station_closure, :stop_closure] and
-             has_multiple_active_alerts == true do
+  def all_clear(%{effect: effect}, true, location)
+      when effect in [:dock_closure, :station_closure, :stop_closure] do
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
-      mode: vehicle_type(effect, true),
+      mode: vehicle_type(effect, :singular),
       summary_location: location
     )
   end
 
   # All clear with multiple active alerts and elevator closure effect
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
-      when effect == :elevator_closure and has_multiple_active_alerts == true do
+  def all_clear(%{effect: :elevator_closure}, true, location) do
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
       mode: gettext("Elevator"),
@@ -95,25 +93,30 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
-  # All clear with multiple active alerts
-  def all_clear(%{effect: effect}, has_multiple_active_alerts, location)
-      when has_multiple_active_alerts == true do
+  # All clear with multiple active alerts and shuttle effect
+  def all_clear(
+        %{effect: :shuttle, informed_entity: [%{route_type: route_type} | _rest]},
+        true,
+        location
+      ) do
     gettext(
-      # TODO
-      # Add has/have depending on effect_sentence_case
+      "**Update:** %{mode} service has resumed%{summary_location}.",
+      mode: PresentationStrings.route_type(route_type, :singular, :sentence_case),
+      summary_location: location
+    )
+  end
+
+  # All clear with multiple active alerts
+  def all_clear(%{effect: effect}, true, location) do
+    gettext(
       "**Update:** %{effect_sentence_case} has ended%{summary_location}.",
       effect_sentence_case: PresentationStrings.effect(effect),
       summary_location: location
     )
   end
 
-  # TODO
-  # All Clear => Update: [Vehicle type] service has resumed at/from [Affected stop(s)].
-  # :shuttle
-
   # All clear with no other active alerts
-  def all_clear(%{effect: _effect}, has_multiple_active_alerts, _location)
-      when has_multiple_active_alerts == false do
+  def all_clear(%{effect: _effect}, _has_multiple_active_alerts, _location) do
     gettext("**All clear:** Normal service has resumed.")
   end
 
@@ -278,28 +281,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     end
   end
 
-  defp vehicle_type(effect, singular?) do
+  @spec vehicle_type(Alert.effect(), :singular | :plural) :: String.t()
+  defp vehicle_type(effect, plurality) do
     case effect do
       :dock_closure ->
-        if singular? do
-          gettext("Ferry")
-        else
-          gettext("Ferries")
-        end
+        PresentationStrings.route_type(:ferry, plurality, :sentence_case)
 
       :station_closure ->
-        if singular? do
-          gettext("Train")
-        else
-          gettext("Trains")
-        end
+        PresentationStrings.route_type(:light_rail, plurality, :sentence_case)
 
       :stop_closure ->
-        if singular? do
-          gettext("Bus")
-        else
-          gettext("Buses")
-        end
+        PresentationStrings.route_type(:bus, plurality, :sentence_case)
     end
   end
 end

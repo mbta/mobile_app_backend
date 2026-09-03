@@ -99,20 +99,23 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     case trip_identity do
       %AlertSummary.TripSpecific.ThisTrip{} ->
         gettext("This %{route_type}",
-          route_type: PresentationStrings.route_type(trip_identity.route_type, true)
+          route_type:
+            PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case)
         )
 
       %AlertSummary.TripSpecific.TripFrom{} ->
         gettext("**%{trip_time}** %{route_type} from **%{stop_name}**",
           trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
-          route_type: PresentationStrings.route_type(trip_identity.route_type, true),
+          route_type:
+            PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case),
           stop_name: trip_identity.stop_name
         )
 
       %AlertSummary.TripSpecific.TripTo{} ->
         gettext("**%{trip_time}** %{route_type} to **%{headsign}**",
           trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
-          route_type: PresentationStrings.route_type(trip_identity.route_type, true),
+          route_type:
+            PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case),
           headsign: trip_identity.headsign
         )
 
@@ -129,20 +132,33 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           gettext("**%{time}** %{vehicle} from **%{from_stop}**",
             time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
-              MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true),
+              MobileAppBackend.PresentationStrings.route_type(
+                trip_identity.route_type,
+                :singular,
+                :lower_case
+              ),
             from_stop: trip_identity.from_stop_name
           )
         else
           gettext("the **%{time}** %{vehicle}",
             time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
-              MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
+              MobileAppBackend.PresentationStrings.route_type(
+                trip_identity.route_type,
+                :singular,
+                :lower_case
+              )
           )
         end
 
       %AlertSummary.TripShuttle.ThisTrip{} ->
         gettext("this %{vehicle}",
-          vehicle: MobileAppBackend.PresentationStrings.route_type(trip_identity.route_type, true)
+          vehicle:
+            MobileAppBackend.PresentationStrings.route_type(
+              trip_identity.route_type,
+              :singular,
+              :lower_case
+            )
         )
 
       %AlertSummary.TripShuttle.MultipleTrips{} ->
