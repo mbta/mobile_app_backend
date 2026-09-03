@@ -81,11 +81,17 @@ defmodule MobileAppBackendWeb.ScheduleController do
       parent_stop_ids
       |> Enum.map(&get_filter(&1, Util.DateTime.datetime_to_gtfs(date_time)))
 
-    data =
-      case filters do
-        [filter] -> fetch_schedules(filter, date_time)
-        filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
-      end
+    {time_in_us, data} =
+      :timer.tc(fn ->
+        case filters do
+          [filter] -> fetch_schedules(filter, date_time)
+          filters -> fetch_schedules_parallel(filters, date_time, parallel_timeout, log_prefix)
+        end
+      end)
+
+    Logger.info(
+      "#{__MODULE__} schedule request parent_stop_ids_count=#{Enum.count(parent_stop_ids)} date_time=#{date_time} duration_ms=#{time_in_us / 1000}"
+    )
 
     case data do
       :error ->

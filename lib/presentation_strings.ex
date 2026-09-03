@@ -8,13 +8,22 @@ defmodule MobileAppBackend.PresentationStrings do
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
 
-  @spec route_type(Route.type(), boolean()) :: String.t()
-  def route_type(:bus, true), do: gettext("bus")
-  def route_type(:bus, false), do: gettext("buses")
-  def route_type(:ferry, true), do: gettext("ferry")
-  def route_type(:ferry, false), do: gettext("ferries")
-  def route_type(_train, true), do: gettext("train")
-  def route_type(_train, false), do: gettext("trains")
+  @type plurality :: :singular | :plural
+  @type string_case :: :lower_case | :sentence_case
+
+  @spec route_type(Route.type(), plurality(), string_case()) :: String.t()
+  def route_type(:bus, :singular, :lower_case), do: gettext("bus")
+  def route_type(:bus, :plural, :lower_case), do: gettext("buses")
+  def route_type(:bus, :singular, :sentence_case), do: gettext("Bus")
+  def route_type(:bus, :plural, :sentence_case), do: gettext("Buses")
+  def route_type(:ferry, :singular, :lower_case), do: gettext("ferry")
+  def route_type(:ferry, :plural, :lower_case), do: gettext("ferries")
+  def route_type(:ferry, :singular, :sentence_case), do: gettext("Ferry")
+  def route_type(:ferry, :plural, :sentence_case), do: gettext("Ferries")
+  def route_type(_train, :singular, :lower_case), do: gettext("train")
+  def route_type(_train, :plural, :lower_case), do: gettext("trains")
+  def route_type(_train, :singular, :sentence_case), do: gettext("Train")
+  def route_type(_train, :plural, :sentence_case), do: gettext("Trains")
 
   @spec mode_label(String.t(), Route.type()) :: String.t()
   def mode_label(name, route_type) do
@@ -22,6 +31,20 @@ defmodule MobileAppBackend.PresentationStrings do
       gettext("%{name} bus", name: name)
     else
       name
+    end
+  end
+
+  @spec delay_duration(integer()) :: String.t()
+  def delay_duration(severity) do
+    case severity do
+      3 -> gettext("of about 10 minutes")
+      4 -> gettext("of about 15 minutes")
+      5 -> gettext("of about 20 minutes")
+      6 -> gettext("of about 25 minutes")
+      7 -> gettext("of about 30 minutes")
+      8 -> gettext("of more than 30 minutes")
+      9 -> gettext("of more than an hour")
+      _ -> ""
     end
   end
 

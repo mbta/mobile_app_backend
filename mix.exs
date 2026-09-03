@@ -54,7 +54,7 @@ defmodule MobileAppBackend.MixProject do
       {:decorator, "~> 1.4"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:diskusage_logger, "~> 0.2", only: :prod},
-      {:dns_cluster, "~> 0.2.0"},
+      {:dns_cluster, "~> 0.3.0"},
       {:ecto_sql, "~> 3.0"},
       {:ecto_psql_extras, "~> 0.6"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
@@ -79,7 +79,7 @@ defmodule MobileAppBackend.MixProject do
       {:oban, "~> 2.22"},
       {:oban_web, "~> 2.11"},
       {:phoenix_html, "~> 4.0"},
-      {:phoenix_live_dashboard, "~> 0.8.2"},
+      {:phoenix_live_dashboard, "~> 0.9.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 1.2.0"},
       {:phoenix, "~> 1.8.0"},
@@ -88,7 +88,7 @@ defmodule MobileAppBackend.MixProject do
       {:req, "~> 0.7"},
       {:sentry, "~> 13.0"},
       {:server_sent_event_stage, "~> 1.2"},
-      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.15", only: [:dev, :test], runtime: false},
       {:tailwind, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
@@ -114,7 +114,8 @@ defmodule MobileAppBackend.MixProject do
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
       "ecto.setup": ["ecto.create", "ecto.migrate"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      checks: ["format", "credo", "dialyzer", "gettext.extract --merge"]
     ]
   end
 end

@@ -1,15 +1,13 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
   use ExUnit.Case, async: true
   import Test.Support.Sigils
-  alias MobileAppBackend.Alerts.FormattedAlert
   alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
 
   alias MobileAppBackend.Alerts.AlertSummary.{
     Direction,
     Location,
     Recurrence,
-    Timeframe,
-    TripSpecific
+    Timeframe
   }
 
   alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.{EndOfService, StartOfService}
@@ -155,112 +153,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
                TemplateFragments.recurrence(%Recurrence.SomeDays{
                  ending: %Timeframe.ThisWeek{time: ~B[2026-04-29 10:31:00]}
                })
-    end
-  end
-
-  describe "summary_trip_effect/4" do
-    test "multiple cancelled" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.MultipleTrips{},
-          :cancellation,
-          nil,
-          true
-        )
-
-      assert "are cancelled today" == summary
-    end
-
-    test "one cancelled" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.TripFrom{
-            trip_time: ~B[2026-04-29 10:31:00],
-            route_type: :commuter_rail,
-            stop_name: "Oak Grove"
-          },
-          :cancellation,
-          nil,
-          false
-        )
-
-      assert "is cancelled tomorrow" == summary
-    end
-
-    test "multiple stops closed" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.TripFrom{
-            trip_time: ~B[2026-04-29 10:31:00],
-            route_type: :commuter_rail,
-            stop_name: "Oak Grove"
-          },
-          :station_closure,
-          ["A", "B", "C"],
-          false
-        )
-
-      assert "will not stop at **A**, **B**, and **C** tomorrow" == summary
-    end
-
-    test "one stop closed" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.TripFrom{
-            trip_time: ~B[2026-04-29 10:31:00],
-            route_type: :commuter_rail,
-            stop_name: "Oak Grove"
-          },
-          :station_closure,
-          ["A"],
-          false
-        )
-
-      assert "will not stop at **A** tomorrow" == summary
-    end
-
-    test "multiple suspended" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.MultipleTrips{},
-          :suspension,
-          nil,
-          true
-        )
-
-      assert "are suspended today" == summary
-    end
-
-    test "one suspended" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.TripFrom{
-            trip_time: ~B[2026-04-29 10:31:00],
-            route_type: :commuter_rail,
-            stop_name: "Oak Grove"
-          },
-          :suspension,
-          nil,
-          true
-        )
-
-      assert "is suspended today" == summary
-    end
-
-    test "fallback" do
-      summary =
-        TemplateFragments.trip_effect(
-          %TripSpecific.TripFrom{
-            trip_time: ~B[2026-04-29 10:31:00],
-            route_type: :commuter_rail,
-            stop_name: "Oak Grove"
-          },
-          :modified_service,
-          nil,
-          true
-        )
-
-      assert "affected by Modified service today" == summary
     end
   end
 end

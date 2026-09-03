@@ -5,7 +5,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   alias MobileAppBackend.Alerts.AlertSummary
 
   alias MobileAppBackend.Alerts.AlertSummary.{
-    Direction,
     Location,
     Recurrence,
     Timeframe,
@@ -14,18 +13,39 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     Unknown
   }
 
-  alias MobileAppBackend.Alerts.AlertSummary.Timeframe.TimeRange.{EndOfService, StartOfService}
   alias MobileAppBackend.Alerts.FormattedAlert
 
   describe "summary/2 all_clear" do
+    test "all clear with single active alert" do
+      alert = build(:alert, effect: :detour)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        },
+        has_multiple_active_alerts: false,
+        effect: alert.effect
+      }
+
+      assert "All clear: Normal service has resumed." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "all clear whole route" do
       alert = build(:alert, effect: :suspension)
 
       alert_summary = %AlertSummary.AllClear{
-        location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"}
+        location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"},
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service on Red Line" ==
+      assert "Update: Suspension has ended on Red Line." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -40,10 +60,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           start_stop_name: "Oak Grove",
           end_stop_name: "North Station",
           downstream: false
-        }
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service from Oak Grove to North Station" ==
+      assert "Update: Suspension has ended from Oak Grove to North Station." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -57,10 +79,31 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         location: %Location.SingleStop{
           stop_name: "Ruggles",
           downstream: false
-        }
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
       }
 
-      assert "All clear: Regular service at Ruggles" ==
+      assert "Update: Suspension has ended at Ruggles." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear station closure" do
+      alert = build(:alert, effect: :station_closure)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SingleStop{
+          stop_name: "Oak Grove",
+          downstream: false
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
+      }
+
+      assert "Update: Train service has resumed at Oak Grove." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -69,6 +112,92 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
   end
 
   describe "summary/2 standard" do
+    test "delay with signal issue cause" do
+      alert = build(:alert, effect: :delay, cause: :signal_issue)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.Time{time: ~B[2026-03-12 14:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays through 2:00 PM due to signal issue" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "upcoming delay" do
+      alert = build(:alert, effect: :delay)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.StartingLaterToday{time: ~B[2026-03-12 14:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays starting 2:00 PM today" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "active recurring delay" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.TimeRange{
+          start_time: %Timeframe.TimeRange.Time{time: ~B[2026-03-09 11:00:00]},
+          end_time: %Timeframe.TimeRange.Time{time: ~B[2026-03-09 13:00:00]}
+        },
+        recurrence: %Recurrence.Daily{ending: %Timeframe.ThisWeek{time: ~B[2026-03-11 13:00:00]}}
+      }
+
+      assert "Delays from 11:00 AM to 1:00 PM daily until Wednesday due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "upcoming recurring delay" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        timeframe: %Timeframe.StartingLaterToday{time: ~B[2026-03-09 14:00:00]},
+        recurrence: %Recurrence.SomeDays{
+          ending: %Timeframe.ThisWeek{time: ~B[2026-03-13 16:00:00]}
+        }
+      }
+
+      assert "Delays starting 2:00 PM today some days until Friday due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "single tracking delay at a specific stop" do
+      alert = build(:alert, effect: :delay, cause: :single_tracking, severity: 5)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        location: %Location.SingleStop{stop_name: "Ruggles", downstream: false},
+        timeframe: %Timeframe.Time{time: ~B[2026-03-09 13:00:00]},
+        recurrence: nil
+      }
+
+      assert "Delays of about 20 minutes at Ruggles through 1:00 PM due to single tracking" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "daily shuttle between stops until further notice" do
       alert = build(:alert, effect: :shuttle)
 
@@ -83,26 +212,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       }
 
       assert "Shuttle buses from Oak Grove to North Station until further notice" ==
-               FormattedAlert.summary(
-                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
-                 "en"
-               )
-    end
-
-    test "update" do
-      alert = build(:alert, effect: :suspension)
-
-      alert_summary = %AlertSummary.Standard{
-        location: %Location.SuccessiveStops{
-          start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
-        },
-        recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}},
-        is_update: true
-      }
-
-      assert "Update: Service suspended from Oak Grove to North Station daily until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -150,7 +259,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
   describe "summary/2 trip-specific" do
     test "suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :accident)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.TripFrom{
@@ -173,7 +282,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     test "downstream suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :weather)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.TripFrom{
@@ -196,7 +305,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
     end
 
     test "this trip suspension" do
-      alert = build(:alert, effect: :suspension)
+      alert = build(:alert, effect: :suspension, cause: :weather)
 
       alert_summary = %AlertSummary.TripSpecific{
         trip_identity: %TripSpecific.ThisTrip{

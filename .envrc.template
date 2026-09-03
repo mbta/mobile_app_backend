@@ -1,6 +1,9 @@
 # Configuration for the [MBTA v3 API](https://github.com/mbta/api)
 # Used for reading static and realtime GTFS data
+# Prod V3 API URL
 export API_URL=https://api-dev.mbtace.com/
+# Dev green V3 API URL
+# export API_URL=https://api-dev-green.mbtace.com/
 export API_KEY=
 
 # Configuration for the Database
@@ -25,7 +28,7 @@ export ALGOLIA_SEARCH_KEY=
 export ALGOLIA_READ_URL=
 
 # Configuration for [Sentry](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
-# Used for error logging
+# Do not use unless you need to send messages to Sentry from local env
 export SENTRY_DSN=
 export SENTRY_ENV=local
 

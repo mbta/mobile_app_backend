@@ -52,7 +52,7 @@ defmodule MBTAV3API.Service do
     |> Enum.flat_map(fn service ->
       active_dates(service) |> Enum.find(&Date.after?(&1, start_date)) |> List.wrap()
     end)
-    |> Enum.sort(Date)
     |> Enum.dedup()
+    |> Enum.sort(Date)
   end
 end

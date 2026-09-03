@@ -2,7 +2,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
-  alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
 
@@ -16,6 +15,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   }
 
   alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.Notifications.Subscription
   alias Util.PolymorphicJson
 
   @gl_id "line-Green"
@@ -23,21 +23,27 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @gl_routes ~w(Green-B Green-C Green-D Green-E)
 
   defmodule Standard do
+    alias MobileAppBackend.Alerts.AlertSummary
+
     @type t :: %__MODULE__{
             effect: Alert.effect(),
             location: Location.t() | nil,
             timeframe: Timeframe.t() | nil,
             recurrence: Recurrence.t() | nil,
-            is_update: boolean()
+            context: AlertSummary.context()
           }
     @derive PolymorphicJson
-    defstruct [:effect, :location, :timeframe, :recurrence, :is_update]
+    defstruct [:effect, :location, :timeframe, :recurrence, :context]
   end
 
   defmodule AllClear do
-    @type t :: %__MODULE__{location: Location.t() | nil}
+    @type t :: %__MODULE__{
+            effect: Alert.effect(),
+            has_multiple_active_alerts: boolean(),
+            location: Location.t() | nil
+          }
     @derive PolymorphicJson
-    defstruct [:location]
+    defstruct [:effect, :has_multiple_active_alerts, :location]
   end
 
   defmodule Unknown do
@@ -50,38 +56,51 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @type context :: :notification | :card
 
-  @spec summarizing(
-          Alert.t(),
-          Stop.id(),
-          0 | 1,
-          [RoutePattern.t()],
-          DateTime.t(),
-          [Schedule.t()] | nil,
-          GlobalDataCache.data(),
-          context()
-        ) :: t()
-  def summarizing(alert, stop_id, direction_id, patterns, at_time, schedules, global, context) do
-    with nil <- all_clear_summary(alert, stop_id, direction_id, patterns, global),
-         nil <-
-           TripSpecific.summary(
-             alert,
-             stop_id,
-             direction_id,
-             patterns,
-             at_time,
-             schedules,
-             global,
-             context
-           ) do
-      recurrence = alert_recurrence(alert, at_time)
+  def summarizing(
+        alert,
+        %Subscription{stop_id: stop_id, direction_id: direction_id},
+        patterns,
+        at_time,
+        schedules,
+        global,
+        context,
+        has_multiple_active_alerts \\ false
+      ) do
+    cond do
+      all_clear =
+          all_clear_summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            has_multiple_active_alerts,
+            global
+          ) ->
+        all_clear
 
-      %Standard{
-        effect: alert.effect,
-        location: alert_location(alert, stop_id, direction_id, patterns, global),
-        timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
-        recurrence: recurrence,
-        is_update: alert_is_update?(alert, at_time)
-      }
+      trip_specific =
+          TripSpecific.summary(
+            alert,
+            stop_id,
+            direction_id,
+            patterns,
+            at_time,
+            schedules,
+            global,
+            context
+          ) ->
+        trip_specific
+
+      true ->
+        recurrence = alert_recurrence(alert, at_time)
+
+        %Standard{
+          effect: alert.effect,
+          location: alert_location(alert, stop_id, direction_id, patterns, global),
+          timeframe: alert_timeframe(alert, at_time, not is_nil(recurrence)),
+          recurrence: recurrence,
+          context: context
+        }
     end
   end
 
@@ -110,7 +129,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.uniq()
           |> deduplicate_locations()
 
-        %__MODULE__.AllClear{location: location}
+        %__MODULE__.AllClear{
+          effect: effect,
+          has_multiple_active_alerts: summaries |> Enum.any?(& &1.has_multiple_active_alerts),
+          location: location
+        }
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
         location =
@@ -182,11 +205,23 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Stop.id(),
           0 | 1,
           [RoutePattern.t()],
+          boolean(),
           GlobalDataCache.data()
         ) :: AllClear.t() | nil
-  defp all_clear_summary(alert, stop_id, direction_id, patterns, global) do
+  defp all_clear_summary(
+         alert,
+         stop_id,
+         direction_id,
+         patterns,
+         has_multiple_active_alerts,
+         global
+       ) do
     if Alert.all_clear?(alert) do
-      %AllClear{location: alert_location(alert, stop_id, direction_id, patterns, global)}
+      %AllClear{
+        effect: alert.effect,
+        has_multiple_active_alerts: has_multiple_active_alerts,
+        location: alert_location(alert, stop_id, direction_id, patterns, global)
+      }
     end
   end
 
@@ -256,7 +291,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Timeframe.t() | nil
   defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _),
+    do: %Timeframe.LaterToday{}
 
   defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.DateTime.datetime_to_gtfs(at_time)
@@ -360,24 +396,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       end
     else
       _ -> nil
-    end
-  end
-
-  @spec alert_is_update?(Alert.t(), DateTime.t()) :: boolean()
-  defp alert_is_update?(alert, at_time) do
-    case Alert.current_period(alert, at_time) do
-      %Alert.ActivePeriod{start: start_time}
-      when not is_nil(alert.updated_at) ->
-        updated_after_active = DateTime.compare(start_time, alert.updated_at) == :lt
-        five_minutes_ago = DateTime.add(at_time, -5, :minute)
-
-        updated_within_five_minutes =
-          DateTime.compare(alert.updated_at, five_minutes_ago) == :gt
-
-        updated_after_active and updated_within_five_minutes
-
-      _ ->
-        false
     end
   end
 
