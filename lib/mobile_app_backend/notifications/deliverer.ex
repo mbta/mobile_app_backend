@@ -7,6 +7,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
   alias MobileAppBackend.User
   alias Util.GCP.FCM
 
+  @fcm_project "projects/mbta-app-c574d"
+
   @impl true
   def perform(%Oban.Job{
         args: %{
@@ -37,11 +39,9 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     gcp_token = GCPToken.get_token()
 
     # in Android, a notification with a tag will replace an old notification with the same tag
-    tag =
-      case type do
-        :all_clear -> "#{alert_id}-all-clear"
-        _ -> alert_id
-      end
+    string_list = [alert_id, type, title, body]
+
+    tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
 
     request_body = %{
       message: %FCM.Message{
@@ -72,7 +72,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     result =
       FCM.send(
         gcp_token,
-        "projects/mbta-app-c574d",
+        @fcm_project,
         request_body
       )
       |> handle_fcm_response(user)
@@ -80,6 +80,32 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     Logger.info(
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
+
+    # This section is only to allow Android to group notifications on version greater than 2.1.4
+    # because it's dependant on change https://github.com/mbta/mobile_app/pull/1938
+    if result == :ok and can_app_handle_data_only_notification?(user) do
+      data_request_body = %{
+        message: %FCM.Message{
+          data: %{"alert_id" => alert_id, "title" => title, "body" => body, "tag" => tag},
+          fcm_options: %FCM.FcmOptions{
+            analytics_label: analytics_label
+          },
+          token: user.fcm_token
+        }
+      }
+
+      data_notification_result =
+        FCM.send(
+          gcp_token,
+          @fcm_project,
+          data_request_body
+        )
+        |> handle_fcm_response(user)
+
+      Logger.info(
+        "#{__MODULE__} data_notification_sent result=#{data_notification_result} type=#{type} alert_id=#{alert_id}"
+      )
+    end
 
     case result do
       :ok ->
@@ -102,6 +128,12 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         # cancelled so the retry doesn’t count as a duplicate
         {:cancel, :error}
     end
+  end
+
+  defp can_app_handle_data_only_notification?(user) do
+    user.platform == "Android" and user.app_version != nil and
+      Version.parse(user.app_version) != :error and
+      Version.compare(user.app_version, "2.1.4") == :gt
   end
 
   defp handle_fcm_response({:ok, %Req.Response{status: status}}, user) when status in 200..299 do
