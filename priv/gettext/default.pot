@@ -1304,3 +1304,8 @@ msgstr ""
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr ""
+
+#: lib/presentation_strings.ex:253
+#, elixir-autogen, elixir-format
+msgid "Test translation"
+msgstr ""
