@@ -250,7 +250,7 @@ defmodule MobileAppBackend.PresentationStrings do
       :train_traffic -> gettext("Train Traffic")
       :unruly_passenger -> gettext("Unruly Passenger")
       :weather -> gettext("Weather")
-      _ -> nil
+      _ -> gettext("Test translation")
     end
   end
 end
