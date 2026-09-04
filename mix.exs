@@ -92,7 +92,7 @@ defmodule MobileAppBackend.MixProject do
       {:tailwind, "~> 0.5.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:typed_ecto_schema, "~> 0.4.3"},
+      {:typed_ecto_schema, "~> 0.5.0"},
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
       {:ueberauth_oidcc, "~> 0.4"},
