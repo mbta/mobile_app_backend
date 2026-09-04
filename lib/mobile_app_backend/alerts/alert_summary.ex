@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
@@ -129,6 +130,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.uniq()
           |> deduplicate_locations()
 
+        Logger.notice(
+          "#{__MODULE__} All clear summaries location deduplicated to [#{inspect(location)}] for alert [#{alert.id}] with form locations [#{inspect(Enum.map(summaries, & &1.location))}]"
+        )
+
         %__MODULE__.AllClear{
           effect: effect,
           has_multiple_active_alerts: summaries |> Enum.any?(& &1.has_multiple_active_alerts),
@@ -141,6 +146,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.map(& &1.location)
           |> Enum.uniq()
           |> deduplicate_locations()
+
+        Logger.notice(
+          "#{__MODULE__} Standard summaries location deduplicated to [#{inspect(location)}] for alert [#{alert.id}] with form locations [#{inspect(Enum.map(summaries, & &1.location))}]"
+        )
 
         timeframe =
           summaries
@@ -159,15 +168,27 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         %type{} = summary
         match?(TripShuttle, type)
       end) ->
+        Logger.notice(
+          "#{__MODULE__} TripShuttle summaries cannot be combined for alert [#{alert.id}], delegating to TripShuttle.combine/2"
+        )
+
         __MODULE__.TripShuttle.combine(alert, summaries)
 
       Enum.all?(summaries, fn summary ->
         %type{} = summary
         match?(TripSpecific, type)
       end) ->
+        Logger.notice(
+          "#{__MODULE__} TripSpecific summaries cannot be combined for alert [#{alert.id}], delegating to TripSpecific.combine/2"
+        )
+
         __MODULE__.TripSpecific.combine(alert, summaries)
 
       true ->
+        Logger.notice(
+          "#{__MODULE__} cannot combine summaries [#{inspect(summaries)}] for alert #{alert.id}, returning a generic summary"
+        )
+
         %__MODULE__.Standard{effect: alert.effect}
     end
   end
@@ -260,15 +281,27 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       cond do
         alert_location_is_closure?(alert, affected_stops) ->
+          Logger.notice(
+            "#{__MODULE__} Alert location for alert [#{alert.id}] is a closure affecting stops [#{Enum.map(affected_stops, & &1.id)}]"
+          )
+
           %Location.AffectedStops{
             stops: Enum.map(affected_stops, fn stop -> stop.name end)
           }
 
         length(affected_stops) == 1 ->
+          Logger.notice(
+            "#{__MODULE__} Alert location for alert [#{alert.id}] involves a single stop [#{hd(affected_stops).id}]"
+          )
+
           %Location.SingleStop{stop_name: hd(affected_stops).name, downstream: downstream}
 
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
+          Logger.notice(
+            "#{__MODULE__} Alert location for alert [#{alert.id}] involves multiple stops for a bus route, which is not displayed"
+          )
+
           nil
 
         true ->
@@ -468,6 +501,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
     case routes do
       [single_route] when matches_all_stops ->
+        Logger.notice(
+          "#{__MODULE__} Alert location for alert [#{alert.id}] matches to the whole route [#{single_route.id}]"
+        )
+
         %Location.WholeRoute{
           route_label: Route.label(single_route),
           route_type: single_route.type
@@ -486,16 +523,28 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
     cond do
       Enum.sort(affected_branches) == Enum.sort(@gl_routes) ->
+        Logger.notice(
+          "#{__MODULE__} Alert location for alert [#{alert.id}] applies to the whole GL route"
+        )
+
         %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
 
       length(affected_branches) == 1 ->
         route = global.routes[hd(affected_branches)]
+
+        Logger.notice(
+          "#{__MODULE__} Alert location for alert [#{alert.id}] applies to the whole GL branch [#{route.id}]"
+        )
 
         if route,
           do: %Location.WholeRoute{route_label: Route.label(route), route_type: route.type},
           else: nil
 
       true ->
+        Logger.notice(
+          "#{__MODULE__} Alert location for alert [#{alert.id}] applies to branches [#{Enum.join(affected_branches, ", ")}], no location displayed"
+        )
+
         nil
     end
   end
@@ -504,11 +553,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     case routes do
       [single_route] ->
         if matches_whole_route(alert, single_route.id, direction_id) do
+          Logger.notice(
+            "#{__MODULE__} Alert location for alert [#{alert.id}] applies to the whole route [#{single_route.id}]"
+          )
+
           %Location.WholeRoute{
             route_label: Route.label(single_route),
             route_type: single_route.type
           }
         else
+          Logger.notice(
+            "#{__MODULE__} Alert location for alert [#{alert.id}] does NOT apply to the whole route [#{single_route.id}]"
+          )
+
           nil
         end
 
@@ -558,11 +615,17 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       Enum.all?(affected_pattern_stops, fn {_, stops} ->
         MapSet.equal?(MapSet.new(stops), MapSet.new(first_stops))
       end) ->
-        %Location.SuccessiveStops{
+        location = %Location.SuccessiveStops{
           start_stop_name: List.first(ordered_stops).name,
           end_stop_name: List.last(ordered_stops).name,
           downstream: downstream
         }
+
+        Logger.notice(
+          "#{__MODULE__} Location SuccessiveStops location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+        )
+
+        location
 
       Enum.all?(affected_pattern_stops, fn {_, stops} ->
         List.first(stops) == List.first(ordered_stops).id
@@ -576,11 +639,17 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             Map.keys(affected_pattern_stops)
           )
 
-        %Location.StopToDirection{
+        location = %Location.StopToDirection{
           start_stop_name: stop.name,
           direction: Enum.at(directions, direction_id),
           downstream: downstream
         }
+
+        Logger.notice(
+          "#{__MODULE__} Location stop to direction location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+        )
+
+        location
 
       Enum.all?(affected_pattern_stops, fn {_, stops} ->
         List.last(stops) == List.last(ordered_stops).id
@@ -594,13 +663,23 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             Map.keys(affected_pattern_stops)
           )
 
-        %Location.DirectionToStop{
+        location = %Location.DirectionToStop{
           direction: Enum.at(directions, 1 - direction_id),
           end_stop_name: stop.name,
           downstream: downstream
         }
 
+        Logger.notice(
+          "#{__MODULE__} Location direction to stop location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+        )
+
+        location
+
       true ->
+        Logger.notice(
+          "#{__MODULE__} Location could not be determined first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+        )
+
         nil
     end
   end
