@@ -1,15 +1,15 @@
-## "msgid"s in this file come from POT (.pot) files.
-###
-### Do not add, change, or remove "msgid"s manually here as
-### they're tied to the ones in the corresponding POT file
-### (with the same domain).
-###
-### Use "mix gettext.extract --merge" or "mix gettext.merge"
-### to merge POT files into PO files.
+## This file is a PO Template file.
+##
+## "msgid"s here are often extracted from source code.
+## Add new messages manually only if they're dynamic
+## messages that can't be statically extracted.
+##
+## Run "mix gettext.extract" to bring this file up to
+## date. Leave "msgstr"s empty as changing them here has no
+## effect: edit them in PO (.po) files instead.
+#
 msgid ""
 msgstr ""
-"Language: ht\n"
-"Plural-Forms: nplurals=3\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:28
 #, elixir-autogen, elixir-format
@@ -24,7 +24,7 @@ msgstr " chak jou%{recurrence_text}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:161
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
-msgstr " akòz %{cause}"
+msgstr " akòz"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
 #, elixir-autogen, elixir-format
@@ -34,17 +34,17 @@ msgstr " soti nan %{start_time} rive nan %{end_time}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:22
 #, elixir-autogen, elixir-format
 msgid " from **%{direction_name}** stops to **%{end_stop_name}**"
-msgstr " soti nan **%{direction_name}** sispann rive nan **%{end_stop_name}**"
+msgstr " soti nan **%{direction_name}** arè pou rive nan **%{end_stop_name}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:37
 #, elixir-autogen, elixir-format
 msgid " from **%{start_stop}** to **%{end_stop}**"
-msgstr " soti nan **%{start_stop}** a **%{end_stop}**"
+msgstr " soti nan **%{start_stop}** pou rive nan **%{end_stop}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:31
 #, elixir-autogen, elixir-format
 msgid " from **%{stop_name}** to **%{direction_name}** stops"
-msgstr " soti nan **%{stop_name}** rive nan **%{direction_name}** sispann"
+msgstr " soti nan **%{stop_name}** pou rive nan **%{direction_name}** arè"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:48
 #, elixir-autogen, elixir-format
@@ -54,7 +54,7 @@ msgstr " sou **%{mode_label}**"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:44
 #, elixir-autogen, elixir-format
 msgid " replacing **%{mode_label}**"
-msgstr " ranplase **%{mode_label}**"
+msgstr " ranplase ****"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:110
 #, elixir-autogen, elixir-format
@@ -64,7 +64,7 @@ msgstr " kèk jou%{recurrence_text}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:213
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
-msgstr " kòmanse **%{formatted_time}** jodi a"
+msgstr " kòmanse **** jodi a"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:210
 #, elixir-autogen, elixir-format
@@ -105,12 +105,12 @@ msgstr "%{name} bis"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:266
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "Yo ranplase %{trip_identity} ak bis navèt soti **%{start_stop}** pou rive **%{end_stop}**%{recurrence}"
+msgstr "Yo ranplase  ak bis navèt soti **** pou rive ****"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:132
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
-msgstr "**%{time}** %{vehicle} soti nan **%{from_stop}**"
+msgstr "**%{tan}** %{veyikil} soti nan **%{from_stop}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:107
 #, elixir-autogen, elixir-format
@@ -577,7 +577,7 @@ msgstr "Otobis k ap fè lanavèt"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:274
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "Otobis navèt yo ranplase %{trip_identity} soti **%{start_stop}** pou rive **%{end_stop}**%{recurrence}"
+msgstr "Navèt Bis ou prale %{trip_identity} soti nan **%{start_stop}** pou rive nan **%{end_stop}**%{recurrence}"
 
 #: lib/presentation_strings.ex:235
 #, elixir-autogen, elixir-format
@@ -925,27 +925,27 @@ msgstr "glas nan pò"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:130
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
-msgstr " jiska %{1}"
+msgstr "kle/alèt_rezime_rekirans_fen_jou_dat_pita"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:138
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
-msgstr " jiska %{1}"
+msgstr "kle/alèt_rezime_rekirans_fen_jou_semèn_sa a"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:189
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
-msgstr " jiska %{1}"
+msgstr "kle/rezime_alèt_delè_dat_pita"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:197
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
-msgstr " jiska %{1}"
+msgstr "kle/rezime_alèt_delè_semèn_sa a"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
-msgstr " jiska %{1}"
+msgstr "kle/rezime_alèt_tan_delè"
 
 #: lib/presentation_strings.ex:162
 #, elixir-autogen, elixir-format
@@ -1065,12 +1065,12 @@ msgstr "pwoblèm teknik"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:143
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
-msgstr "**%{time}** %{vehicle} la"
+msgstr "machin nan %{tan}}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:155
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
-msgstr "%{vehicle} sa a"
+msgstr "machin sa a"
 
 #: lib/presentation_strings.ex:183
 #, elixir-autogen, elixir-format
@@ -1130,18 +1130,18 @@ msgstr "move tan"
 #: lib/mobile_app_backend_web/components/core_components.ex:484
 #, elixir-autogen, elixir-format, import-optional
 msgid "Actions"
-msgstr ""
+msgstr "Aksyon yo"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:78
 #: lib/mobile_app_backend_web/components/core_components.ex:132
 #, elixir-autogen, elixir-format, import-optional
 msgid "close"
-msgstr ""
+msgstr "Fèmen"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
 #, elixir-autogen, elixir-format
 msgid "%{mode} %{skipped_effect}"
-msgstr "%{mode} %{skipped_effect}"
+msgstr "%{mòd} %{efè_sote}"
 
 #: lib/presentation_strings.ex:18
 #, elixir-autogen, elixir-format
@@ -1196,7 +1196,7 @@ msgstr "%{trip_identity} ap fè fas ak reta%{delay_duration} %{timeframe}%{cause
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:150
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} anile %{timeframe}%{cause}%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:218
 #, elixir-autogen, elixir-format
@@ -1211,7 +1211,7 @@ msgstr "%{trip_identity} ap fini nan %{terminating_stop} %{timeframe}%{cause}%{r
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "**deta**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**reta**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
@@ -1276,7 +1276,7 @@ msgstr " pita jodi a"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:46
 #, elixir-autogen, elixir-format
 msgid "%{summary}. See alert details."
-msgstr "%{summary}. Detay Avètisman"
+msgstr "%{rezime}. Detay Avètisman"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:63
 #, elixir-autogen, elixir-format
@@ -1291,7 +1291,7 @@ msgstr "**out bagay klè:** sèvis nòmal has resumed."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:111
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
-msgstr "**Mizajou:** %{effect_sentence_case} fini%{summary_location}."
+msgstr "**Mizajou:** %{effect_sentence_case} fini %{summary_location}."
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:80
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:89
@@ -1303,4 +1303,9 @@ msgstr "**Mizajou:** Sèvis %{mode} la rekòmanse%{summary_location}."
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:50
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
-msgstr "Mizajou: %{body}"
+msgstr "Mizajou:"
+
+#: lib/presentation_strings.ex:253
+#, elixir-autogen, elixir-format
+msgid "Test translation"
+msgstr "Tradiksyon tès"
