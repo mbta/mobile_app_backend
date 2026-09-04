@@ -36,7 +36,12 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     user = Repo.get!(User, user_id)
 
-    gcp_token = GCPToken.get_token()
+    gcp_token =
+      if Application.get_env(:mobile_app_backend, :debug_fcm) do
+        nil
+      else
+        GCPToken.get_token()
+      end
 
     # in Android, a notification with a tag will replace an old notification with the same tag
     string_list = [alert_id, type, title, body]
