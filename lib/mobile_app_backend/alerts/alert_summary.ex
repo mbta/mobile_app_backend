@@ -260,7 +260,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     location = alert_location(alert, stop_id, direction_id, patterns, global, routes)
 
     Logger.notice(
-      "#{__MODULE__} Alert location for alert [#{alert}] stop_id [#{stop_id}] direction_id [#{direction_id}] routes [#{inspect(routes)}] and patterns [#{inspect(patterns)}] is location [#{inspect(location)}]"
+      "#{__MODULE__} Alert location for alert [#{inspect(alert)}] stop_id [#{inspect(stop_id)}] direction_id [#{inspect(direction_id)}] routes [#{inspect(routes)}] and patterns [#{inspect(patterns)}] is location [#{inspect(location)}]"
     )
 
     location
