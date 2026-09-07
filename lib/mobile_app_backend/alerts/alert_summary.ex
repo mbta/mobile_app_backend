@@ -253,9 +253,20 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
           Location.t() | nil
+
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
+    location = alert_location(alert, stop_id, direction_id, patterns, global, routes)
+
+    Logger.notice(
+      "Alert location for alert [#{alert}] stop_id [#{stop_id}] direction_id [#{direction_id}] routes [#{inspect(routes)}] and patterns [#{inspect(patterns)}] is location [#{inspect(location)}]"
+    )
+
+    location
+  end
+
+  def alert_location(alert, stop_id, direction_id, patterns, global, routes) do
     typical_routes =
       patterns
       |> Enum.filter(&(&1.typicality == :typical))
@@ -622,7 +633,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
         Logger.notice(
-          "#{__MODULE__} Location SuccessiveStops location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+          "#{__MODULE__} Location SuccessiveStops location=#{inspect(location)} first_stops=[#{inspect(List.first(first_stops))}, " <>
+            "#{inspect(length(first_stops))}] ordered_stops=[#{inspect(List.first(ordered_stops))}, " <>
+            " affected_pattern_stops=[#{map_size(affected_pattern_stops)}]"
         )
 
         location
@@ -646,7 +659,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
         Logger.notice(
-          "#{__MODULE__} Location stop to direction location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+          "#{__MODULE__} Location stop to direction location=#{inspect(location)} first_stops=[#{inspect(List.first(first_stops))}, " <>
+            "#{inspect(length(first_stops))}] ordered_stops=[#{inspect(List.first(ordered_stops))}, " <>
+            " affected_pattern_stops=[#{map_size(affected_pattern_stops)}]"
         )
 
         location
@@ -670,14 +685,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
         Logger.notice(
-          "#{__MODULE__} Location direction to stop location=#{inspect(location)} first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+          "#{__MODULE__} Location direction to stop location=#{inspect(location)} first_stops=[#{inspect(List.first(first_stops))}, " <>
+            "#{inspect(length(first_stops))}] ordered_stops=[#{inspect(List.first(ordered_stops))}, " <>
+            " affected_pattern_stops=[#{map_size(affected_pattern_stops)}]"
         )
 
         location
 
       true ->
         Logger.notice(
-          "#{__MODULE__} Location could not be determined first_stops=[#{inspect(first_stops)}] ordered_stops=[#{inspect(ordered_stops)}] affected_pattern_stops=[#{inspect(affected_pattern_stops)}]"
+          "#{__MODULE__} Location could not be determined first_stops=[#{inspect(List.first(first_stops))}, " <>
+            "#{inspect(length(first_stops))}] ordered_stops=[#{inspect(List.first(ordered_stops))}, " <>
+            " affected_pattern_stops=[#{map_size(affected_pattern_stops)}]"
         )
 
         nil
