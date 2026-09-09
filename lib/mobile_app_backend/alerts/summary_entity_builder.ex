@@ -91,6 +91,9 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
     stops = fetch_all_stops()
 
     combinations = relevant_combinations(alert, {stops, trips, global})
+    # if alert.id == "1004388" do
+    #   IO.inspect("Alert #{alert.id} has combinations: #{inspect(combinations)}")
+    # end
 
     Enum.map(
       combinations,
@@ -161,6 +164,10 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         locale,
         context == :card
       )
+    if (locale == "en" and alert.id == "1004388" and route_id == "Green-B") do
+      IO.inspect(formatted, label: "Formatted summary for alert #{alert.id} at stop #{resolved_stop_id}")
+    end
+    # IO
 
     %SummaryEntity{
       route_id: route_id,
@@ -276,6 +283,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
          global
        ) do
     patterns = RoutePattern.get_relevant_patterns(route_id, nil, direction_id, global)
+    # IO.inspect("#{route_id}", label: "Route ID")
 
     cond do
       not is_nil(trip_id) && not is_nil(trips[trip_id]) ->
@@ -309,9 +317,10 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
             patterns: []
           }
         ]
-
+      # IO.inspect("")
       String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
         # for branching routes or the Green Line, the summary may differ by stop id
+        # IO.inspect("Green Line or branching route for route #{route_id} with patterns #{inspect(patterns)}")
         patterns
         |> Enum.flat_map(fn pattern ->
           pattern_stop_ids = global.trips[pattern.representative_trip_id].stop_ids

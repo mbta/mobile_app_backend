@@ -165,13 +165,14 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSub do
       end
 
     all_alerts = all_alerts || Store.Alerts.fetch([])
+    all_alerts = Enum.filter(all_alerts, fn alert -> alert.id == "1004388" end)
 
-    changed_alerts =
-      alerts_to_recalculate(
-        Map.get(old_summaries_by_locale, @default_locale, %{}),
-        all_alerts,
-        now
-      )
+    changed_alerts = all_alerts
+      # alerts_to_recalculate(
+      #   Map.get(old_summaries_by_locale, @default_locale, %{}),
+      #   all_alerts,
+      #   now
+      # )
 
     {time_micros, alerts_with_changed_summaries_by_locale} =
       :timer.tc(fn -> build_all_summaries(changed_alerts, now) end)

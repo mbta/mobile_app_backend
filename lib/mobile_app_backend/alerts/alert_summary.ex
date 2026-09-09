@@ -545,6 +545,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end)
   end
 
+  # Check the order of the steps and see why the location to stop
   defp multi_stop_location(affected_pattern_stops, direction_id, downstream, global) do
     # Compare the first stop list to all the others to determine if all patterns share the same disrupted stops,
     # or if multiple branches are disrupted
@@ -618,9 +619,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   # branch. These are hard coded because the patterns provided to `summarizing` will only include ones served at the
   # selected stop, they don't take other branches into account, but we always want to show when a disruption is
   # happening on all downstream branches.
-  @westbound_branches [
+  @westbound_branches %{
     # B Branch
-    {
+    "Green-B" => {
       [
         # Lechmere
         "70502",
@@ -658,7 +659,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       ]
     },
     # C Branch
-    {
+    "Green-C" => {
       [
         # Lechmere
         "70502",
@@ -693,7 +694,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       ]
     },
     # D Branch
-    {
+    "Green-D" => {
       [
         # Lechmere
         "70502",
@@ -728,7 +729,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       ]
     },
     # E Branch
-    {
+    "Green-E" => {
       [
         # Lechmere
         "70502",
@@ -758,11 +759,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         "70260"
       ]
     }
-  ]
+  }
 
-  @eastbound_branches [
+  @eastbound_branches %{
     # Medford/Tufts
-    {
+    "Green-E" => {
       [
         # Kenmore
         "70150",
@@ -789,7 +790,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       ]
     },
     # Union
-    {
+    "Green-D" => {
       [
         # Kenmore
         "70150",
@@ -810,7 +811,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         "70503"
       ]
     }
-  ]
+  }
 
   defp map_patterns_to_affected_stops(alert, stop_id, direction_id, patterns, routes, global) do
     pattern_stops =
@@ -822,32 +823,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           _ -> {pattern, []}
         end
       end)
+      |> filter_stops_for_alert(alert, global)
       |> Kernel.++(
         # Special casing to properly show when alerts affect multiple GL branches
         if Enum.any?(routes, &(&1.line_id == @gl_id)) do
-          gl_synthetic_patterns(stop_id, direction_id, routes, global)
+          gl_synthetic_patterns(stop_id, direction_id, routes, global) # tupple of pattern and stop_ids
+          |> filter_stops_for_alert_green_line(alert, global)
         else
           []
         end
       )
-      |> Enum.map(fn {pattern, stop_ids} ->
-        stop_ids_on_pattern =
-          stop_ids
-          |> Enum.filter(fn stop_on_trip ->
-            Alert.any_informed_entity_satisfies(
-              alert,
-              &(Alert.InformedEntity.stop_in?(&1, [stop_on_trip]) and
-                  Alert.InformedEntity.route?(&1, pattern.route_id))
-            )
-          end)
-          |> Enum.map(&Stop.parent_id(global.stops[&1]))
-          |> Enum.reject(&is_nil/1)
-
-        case stop_ids_on_pattern do
-          [] -> nil
-          _ -> {pattern, stop_ids_on_pattern}
-        end
-      end)
       |> Enum.reject(&is_nil/1)
       |> Map.new()
 
@@ -860,6 +845,43 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       pattern_stops
     end
   end
+
+  # 1 top level filtering
+  # 1 does for specific pattern
+  # 1 for specific green line synthetic pattern => Route check on all the gl route ids
+  defp filter_stops_for_alert(pattern_stops, alert, global) do
+    pattern_stops
+    |> Enum.map(fn {pattern, stop_ids} ->
+        filter_stops(pattern, stop_ids, [pattern.route_id], alert, global)
+      end)
+  end
+
+  defp filter_stops_for_alert_green_line(pattern_stops, alert, global) do
+    pattern_stops
+    |> Enum.map(fn {pattern, stop_ids} ->
+        filter_stops(pattern, stop_ids, @gl_routes, alert, global)
+      end)
+  end
+
+  defp filter_stops(pattern, stop_ids, route_ids, alert, global) do
+  stop_ids_on_pattern =
+        stop_ids
+        |> Enum.filter(fn stop_on_trip ->
+          Alert.any_informed_entity_satisfies(
+            alert,
+            &(Alert.InformedEntity.stop_in?(&1, [stop_on_trip]) and
+                Alert.InformedEntity.route_in?(&1, route_ids))
+          )
+        end)
+        |> Enum.map(&Stop.parent_id(global.stops[&1]))
+        |> Enum.reject(&is_nil/1)
+
+      case stop_ids_on_pattern do
+        [] -> nil
+        _ -> {pattern, stop_ids_on_pattern}
+      end
+  end
+
 
   defp later_this_week(on_date, end_date) do
     Date.day_of_week(on_date) < Date.day_of_week(end_date) and Date.diff(end_date, on_date) < 7
@@ -874,12 +896,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
     # If the provided stop is on a branch, don't take any parallel branches into account,
     # we only want to group downstream branches
-    if Enum.any?(direction_stops, fn {_, branch_stops} ->
+    if Enum.any?(direction_stops, fn {_key, {_, branch_stops}} ->
          Enum.any?(branch_stops, &(Stop.parent_id(global.stops[&1]) == stop_id))
        end) do
       []
     else
-      Enum.map(direction_stops, fn {earlier, branched} ->
+      Enum.map(direction_stops, fn {route_id, {earlier, branched}} ->
         {%RoutePattern{
            id: Enum.join(branched, "-"),
            direction_id: direction_id,
@@ -887,18 +909,23 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
            sort_order: 0,
            typicality: :typical,
            representative_trip_id: "",
-           route_id: hd(routes).id
+           route_id: route_id
          }, earlier ++ branched}
       end)
     end
   end
 
   defp discard_subsets(pattern_stops) do
+    IO.inspect("Separator")
+    if (Enum.any?(pattern_stops, fn {pattern, stops} -> pattern.id == "Green-B-812-0" end)) do
+      IO.inspect(pattern_stops, label: "Pattern stops before filtering")
+    end
     Map.filter(pattern_stops, fn {this_pattern, these_stops} ->
       not Enum.any?(pattern_stops, fn {other_pattern, other_stops} ->
         other_pattern != this_pattern and length(other_stops) > length(these_stops) and
           Enum.all?(these_stops, &(&1 in other_stops))
       end)
+      |> IO.inspect(label: "Pattern Id #{this_pattern.id}")
     end)
   end
 end
