@@ -59,7 +59,7 @@ defmodule MobileAppBackend.MixProject do
       {:ecto_psql_extras, "~> 0.6"},
       {:ehmon, github: "mbta/ehmon", only: :prod},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:ex_aws, "== 2.6.1"},
+      {:ex_aws, "== 2.7.0"},
       {:ex_aws_rds, "== 2.0.2"},
       {:ex_aws_sts, "~> 2.3"},
       {:ex_cldr, "~> 2.47.1"},
