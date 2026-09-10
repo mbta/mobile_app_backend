@@ -12,7 +12,7 @@ permissions: {}
 jobs:
   deploy:
     name: Deploy ${{ github.ref_type }} ${{ github.ref_name }} to Prod
-    uses: ./.github/workflows/deploy.yml
+    uses: $/.github/workflows/deploy.yml
     permissions:
       id-token: write
       contents: read
