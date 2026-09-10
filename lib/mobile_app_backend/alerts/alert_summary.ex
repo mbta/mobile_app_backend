@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
@@ -17,6 +18,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.Subscription
   alias Util.PolymorphicJson
+  alias Util.StringFormatter
 
   @gl_id "line-Green"
   @gl_label "Green Line"
@@ -127,7 +129,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           summaries
           |> Enum.map(& &1.location)
           |> Enum.uniq()
-          |> deduplicate_locations()
+          |> deduplicate_locations(alert)
 
         %__MODULE__.AllClear{
           effect: effect,
@@ -140,7 +142,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           summaries
           |> Enum.map(& &1.location)
           |> Enum.uniq()
-          |> deduplicate_locations()
+          |> deduplicate_locations(alert)
 
         timeframe =
           summaries
@@ -170,6 +172,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       true ->
         %__MODULE__.Standard{effect: alert.effect}
     end
+  end
+
+  defp deduplicate_locations(locations, alert) do
+    location = deduplicate_locations(locations)
+
+    if is_nil(location) do
+      Logger.info(
+        "#{__MODULE__} deduplicated location is nil for unique locations #{inspect(locations)} alert_id [#{alert.id}]"
+      )
+    end
+
+    location
   end
 
   defp deduplicate_locations(locations) do
@@ -235,6 +249,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
+    location = alert_location(alert, stop_id, direction_id, patterns, global, routes)
+
+    Logger.info(
+      "#{__MODULE__} alert_location with alert_id [#{alert.id}] stop_id [#{inspect(stop_id)}] " <>
+        "direction_id [#{inspect(direction_id)}] routes [#{StringFormatter.format_list_for_log(routes, 3)}] " <>
+        "and patterns [#{StringFormatter.format_list_for_log(patterns, 3)}] result location is [#{inspect(location)}]"
+    )
+
+    location
+  end
+
+  def alert_location(alert, stop_id, direction_id, patterns, global, routes) do
     typical_routes =
       patterns
       |> Enum.filter(&(&1.typicality == :typical))
@@ -474,7 +500,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
       _ ->
-        multi_stop_location(affected_pattern_stops, direction_id, downstream, global)
+        location = multi_stop_location(affected_pattern_stops, direction_id, downstream, global)
+
+        Logger.info(
+          "#{__MODULE__} multi_stop_location with alert_id [#{alert.id}] " <>
+            "routes [#{StringFormatter.format_list_for_log(routes, 3)}] " <>
+            " and affected_pattern_stops [#{StringFormatter.format_list_for_log(affected_pattern_stops, 3)}] " <>
+            "result location is [#{inspect(location)}]"
+        )
+
+        location
     end
   end
 
