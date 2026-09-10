@@ -16,7 +16,7 @@ permissions: {}
 
 jobs:
   zizmor:
-    uses: ./.github/workflows/zizmor.yml
+    uses: $/.github/workflows/zizmor.yml
   setup:
     name: asdf and Elixir dependencies
     timeout-minutes: 30
