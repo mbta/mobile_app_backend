@@ -96,7 +96,8 @@ defmodule MobileAppBackend.MixProject do
       {:tzdata, "~> 1.1"},
       {:ueberauth, "~> 0.10"},
       {:ueberauth_oidcc, "~> 0.4"},
-      {:uniq, "~> 0.6", only: :test}
+      {:uniq, "~> 0.6", only: :test},
+      {:unrooted_polytree, "0.1.1"}
     ]
   end
 

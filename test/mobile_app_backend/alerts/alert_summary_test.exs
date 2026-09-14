@@ -25,6 +25,34 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     %{now: DateTime.now!("America/New_York")}
   end
 
+  describe "same_direction_subtree/2" do
+    test "keeps branches that continue in the same direction from the starting node" do
+      tree =
+        UnrootedPolytree.from_lists([
+          [{"D", :d}, {"B", :b}, {"A", :a}],
+          [{"C", :c}, {"A", :a}],
+          [{"B", :b}, {"F", :f}],
+          [{"A", :a}, {"E", :e}, {"G", :g}],
+          [{"H", :h}, {"E", :e}]
+        ])
+
+      assert %UnrootedPolytree{} = subtree = AlertSummary.same_direction_subtree(tree, "A")
+
+      assert subtree.starting_nodes == ["A"]
+      assert Map.keys(subtree.by_id) |> Enum.sort() == ["A", "B", "C", "D", "E", "G"]
+      refute Map.has_key?(subtree.by_id, "F")
+      refute Map.has_key?(subtree.by_id, "H")
+      refute "F" in UnrootedPolytree.edges_for_id(subtree, "B").next
+      refute "H" in UnrootedPolytree.edges_for_id(subtree, "E").previous
+    end
+
+    test "returns an empty tree for an unknown starting node" do
+      tree = UnrootedPolytree.from_lists([[{"A", :a}, {"B", :b}]])
+
+      assert %UnrootedPolytree{} == AlertSummary.same_direction_subtree(tree, "unknown")
+    end
+  end
+
   describe "Direction" do
     test "basic case gets correct values" do
       route =

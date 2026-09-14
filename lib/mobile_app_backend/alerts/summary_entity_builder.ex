@@ -44,6 +44,8 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
           AlertSummary.context()
         ) :: %{String.t() => [SummaryEntity.t()]}
   def build_all(alerts, at_time, locale, global, context) do
+    alerts = Enum.filter(alerts, fn alert -> alert.id == "1004388" end)
+
     Map.new(
       alerts
       |> Task.async_stream(
@@ -161,6 +163,13 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
         locale,
         context == :card
       )
+
+    if locale == "en" and alert.id == "1004388" do
+      IO.inspect(formatted,
+        label:
+          "Formatted Summary for alert 1004388 for stop #{resolved_stop_id}, route #{route_id}"
+      )
+    end
 
     %SummaryEntity{
       route_id: route_id,
@@ -312,7 +321,7 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
 
       String.starts_with?(route_id, "Green-") or length(patterns) > 1 ->
         # for branching routes or the Green Line, the summary may differ by stop id
-        patterns
+        RoutePattern.canonical_or_most_typical(patterns)
         |> Enum.flat_map(fn pattern ->
           pattern_stop_ids = global.trips[pattern.representative_trip_id].stop_ids
           Enum.map(pattern_stop_ids, &{Stop.parent_id_if_exists(&1, global.stops), pattern})

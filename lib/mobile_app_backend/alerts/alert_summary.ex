@@ -5,6 +5,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MBTAV3API.Stop
   alias MBTAV3API.Trip
 
+  alias MobileAppBackend.Alerts.EndpointStops
+
   alias MobileAppBackend.Alerts.AlertSummary.{
     Direction,
     Location,
@@ -235,26 +237,33 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
-    typical_routes =
-      patterns
-      |> Enum.filter(&(&1.typicality == :typical))
-      |> routes_for_patterns(global)
+    IO.inspect(
+      "Combinations of Routes #{Enum.map(routes, & &1.id)} stop_id: #{stop_id}, direction_id: #{direction_id}, patterns: #{Enum.map(patterns, & &1.id)}, alert_id: #{alert.id}"
+    )
 
-    is_gl =
-      typical_routes != [] and
-        Enum.all?(typical_routes, &(&1.id in @gl_routes))
+    # typical_routes =
+    #   patterns
+    #   |> Enum.filter(&(&1.typicality == :typical))
+    #   |> routes_for_patterns(global)
+
+    # is_gl =
+    #   typical_routes != [] and
+    #     Enum.all?(typical_routes, &(&1.id in @gl_routes))
 
     # If the route is on the GL, check if the alert applies to the entirety of every
     # branch or an entire single branch (not necessarily a provided branch)
-    gl_whole_route_location =
-      if is_gl do
-        alert_location_for_whole_gl(alert, direction_id, global)
-      else
-        nil
-      end
+    # gl_whole_route_location =
+    #   if is_gl do
+    #     alert_location_for_whole_gl(alert, direction_id, global)
+    #   else
+    #     nil
+    #   end
 
-    with nil <- gl_whole_route_location,
-         nil <- alert_location_for_whole_route(alert, direction_id, routes) do
+    # if gl_whole_route_location do
+    #   IO.inspect(gl_whole_route_location, label: "GL Whole Route Location")
+    # end
+
+    with nil <- alert_location_for_whole_route(alert, direction_id, routes) do
       affected_stops = get_alert_affected_stops(global, alert, routes)
       downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
@@ -420,6 +429,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
 
     if matches_whole_route(alert, route_id, direction_id) do
+      IO.inspect(alert, label: "Alert applies to whole GL route")
       true
     else
       gl_route = global.routes[route_id]
@@ -437,7 +447,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         affected_pattern_stops =
           map_patterns_to_affected_stops(alert, "", direction_id, gl_patterns, [gl_route], global)
 
-        matches_all_stops_on_patterns(affected_pattern_stops, global)
+        matches_all = matches_all_stops_on_patterns(affected_pattern_stops, global)
+
+        if matches_all do
+          IO.inspect(
+            Enum.map(affected_pattern_stops, fn {pattern, stops} -> {pattern.id, stops} end),
+            label: "Affected pattern stops for GL route #{route_id} and alert #{alert.id}"
+          )
+
+          IO.inspect(matches_all, label: "Matches all stops on patterns")
+        end
+
+        matches_all
       end
     end
   end
@@ -451,30 +472,66 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          downstream,
          global
        ) do
-    # Map each pattern to its list of stops affected by this alert
-    affected_pattern_stops =
-      map_patterns_to_affected_stops(
-        alert,
-        stop_id,
-        direction_id,
-        patterns,
-        routes,
-        global
-      )
+    is_gl =
+      Enum.all?(routes, &(&1.id in @gl_routes))
 
-    # If every affected stop on the patterns are specified in the informed entities,
-    # return the whole route location
-    matches_all_stops = matches_all_stops_on_patterns(affected_pattern_stops, global)
+    if not is_gl do
+      IO.inspect(Enum.map(routes, & &1.id), label: "Routes for Multiple Stops Location")
+    end
 
-    case routes do
-      [single_route] when matches_all_stops ->
-        %Location.WholeRoute{
-          route_label: Route.label(single_route),
-          route_type: single_route.type
-        }
+    gl_location =
+      if is_gl do
+        affected_stops_tree =
+          build_affected_stops_polytree(
+            alert,
+            stop_id,
+            direction_id,
+            global
+          )
 
-      _ ->
-        multi_stop_location(affected_pattern_stops, direction_id, downstream, global)
+        build_location_from_affected_stops_tree(
+          affected_stops_tree,
+          patterns,
+          direction_id,
+          downstream,
+          global
+        )
+      else
+        nil
+      end
+
+    with nil <- gl_location do
+      # Map each pattern to its list of stops affected by this alert
+      affected_pattern_stops =
+        map_patterns_to_affected_stops(
+          alert,
+          stop_id,
+          direction_id,
+          patterns,
+          routes,
+          global
+        )
+
+      # If every affected stop on the patterns are specified in the informed entities,
+      # return the whole route location
+      matches_all_stops = matches_all_stops_on_patterns(affected_pattern_stops, global)
+
+      case routes do
+        [single_route] when matches_all_stops ->
+          IO.inspect(
+            "Single route affected matches_all_stops_on_patterns route_id: #{single_route.id} for alert #{alert.id}"
+          )
+
+          %Location.WholeRoute{
+            route_label: Route.label(single_route),
+            route_type: single_route.type
+          }
+
+        _ ->
+          multi_stop_location(affected_pattern_stops, direction_id, downstream, global)
+      end
+    else
+      location -> location
     end
   end
 
@@ -504,6 +561,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     case routes do
       [single_route] ->
         if matches_whole_route(alert, single_route.id, direction_id) do
+          IO.inspect("Single whole route affected: #{single_route.id} for alert #{alert.id}")
+
           %Location.WholeRoute{
             route_label: Route.label(single_route),
             route_type: single_route.type
@@ -900,5 +959,118 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Enum.all?(these_stops, &(&1 in other_stops))
       end)
     end)
+  end
+
+  defp all_green_line_routes_patterns(global, direction_id) do
+    global.route_patterns
+    |> Map.values()
+    |> Enum.filter(&(&1.route_id in @gl_routes))
+    |> Enum.filter(&(&1.direction_id == direction_id))
+  end
+
+  defp ordered_stops_for_pattern(global, pattern) do
+    case global.trips[pattern.representative_trip_id] do
+      %Trip{} = trip -> trip.stop_ids
+      _ -> []
+    end
+  end
+
+  defp affected_child_stops_for_pattern(global, pattern, alert) do
+    ordered_stops_for_pattern(global, pattern)
+    |> Enum.filter(fn stop_on_trip ->
+      Alert.any_informed_entity_satisfies(
+        alert,
+        &(Alert.InformedEntity.stop_in?(&1, [stop_on_trip]) and
+            Alert.InformedEntity.route?(&1, pattern.route_id))
+      )
+    end)
+  end
+
+  defp affected_parent_stops_for_pattern(pattern, alert, global) do
+    affected_child_stops_for_pattern(global, pattern, alert)
+    |> Enum.map(&Stop.parent_id(global.stops[&1]))
+    # Remove all the stops that couldn't be resolved to parent stops
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+  end
+
+  defp build_affected_stops_polytree(alert, stop_id, direction_id, global) do
+    green_patterns =
+      all_green_line_routes_patterns(global, direction_id)
+
+    reachable_stops_tree = build_all_reachable_stops_tree(green_patterns, stop_id, global)
+
+    green_patterns
+    |> Enum.map(&affected_parent_stops_for_pattern(&1, alert, global))
+    |> Enum.map(fn stops ->
+      # Remove all the stops that are not reachable from the current stop
+      Enum.reject(stops, &(UnrootedPolytree.node_for_id(reachable_stops_tree, &1) == :error))
+    end)
+    |> Enum.reject(fn stops -> stops == [] end)
+    |> Enum.map(fn stops ->
+      Enum.map(stops, fn parent_stop_id -> {parent_stop_id, global.stops[parent_stop_id]} end)
+    end)
+    |> UnrootedPolytree.from_lists()
+  end
+
+  defp build_all_reachable_stops_tree(patterns, stop_id, global) do
+    patterns
+    |> Enum.map(fn pattern ->
+      ordered_stops_for_pattern(global, pattern)
+      |> Enum.reject(&is_nil(global.stops[&1]))
+      |> Enum.map(&Stop.parent_id(global.stops[&1]))
+      |> Enum.uniq()
+      # Key and value can be the same since we are only interested in the structure of the tree
+      |> Enum.map(&{&1, &1})
+    end)
+    |> UnrootedPolytree.from_lists()
+    |> EndpointStops.reachable_nodes_from_stop(stop_id)
+  end
+
+  defp build_location_from_affected_stops_tree(
+         affected_stops_tree,
+         patterns,
+         direction_id,
+         downstream,
+         global
+       ) do
+    first_stops = affected_stops_tree |> EndpointStops.first_stops()
+    last_stops = affected_stops_tree |> EndpointStops.last_stops()
+
+    %{
+      first_stops: first_stops,
+      last_stops: last_stops
+    }
+    |> case do
+      %{first_stops: [first_stop], last_stops: [last_stop]} ->
+        %Location.SuccessiveStops{
+          start_stop_name: first_stop.name,
+          end_stop_name: last_stop.name,
+          downstream: downstream
+        }
+
+      %{first_stops: [first_stop], last_stops: _last_stops} ->
+        directions =
+          Direction.get_directions_for_line(global, first_stop, patterns)
+
+        %Location.StopToDirection{
+          start_stop_name: first_stop.name,
+          direction: Enum.at(directions, direction_id),
+          downstream: downstream
+        }
+
+      %{first_stops: _first_stops, last_stops: [last_stop]} ->
+        directions =
+          Direction.get_directions_for_line(global, last_stop, patterns)
+
+        %Location.DirectionToStop{
+          direction: Enum.at(directions, 1 - direction_id),
+          end_stop_name: last_stop.name,
+          downstream: downstream
+        }
+
+      _ ->
+        nil
+    end
   end
 end
