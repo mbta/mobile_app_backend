@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.EndpointStops do
+  alias MBTAV3API.Stop
   @typep traversal_fun_t() :: (UnrootedPolytree.Edges.t() -> [UnrootedPolytree.Node.t()])
 
   # Provides a tree of stops that are reachable from a given stop.
