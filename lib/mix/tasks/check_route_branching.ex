@@ -5,8 +5,6 @@ defmodule Mix.Tasks.CheckRouteBranching do
   Filter to a handful of routes and directions with `mix check_route_branching 33 Boat-F1:1 350:0`.
 
   Works best with GraphViz installed.
-
-  Pass `--allow-unused-workarounds` to warn instead of erroring on unused workarounds.
   """
 
   use Mix.Task
@@ -23,86 +21,9 @@ defmodule Mix.Tasks.CheckRouteBranching do
   alias MobileAppBackend.RouteBranching.SegmentGraph
   alias MobileAppBackend.RouteBranching.StopGraph
 
-  defmodule UnusedWorkaroundsDetector do
-    alias MobileAppBackend.RouteBranching.Workarounds
-
-    # rather than define a second list of known workarounds here that will usually be stale, just read the source code
-    # to know which workarounds are defined and should be used
-    workarounds_path =
-      __ENV__.file
-      |> Path.split()
-      |> Enum.take_while(&(&1 != "lib"))
-      |> Path.join()
-      |> Path.join("lib/mobile_app_backend/route_branching/workarounds.ex")
-
-    @external_resource workarounds_path
-
-    workarounds_module =
-      workarounds_path
-      |> File.read!()
-      |> Code.string_to_quoted!()
-
-    workarounds_cases =
-      Macro.prewalker(workarounds_module)
-      |> Enum.map(fn
-        {:record_workaround_used, _, [route_id, direction_id]}
-        when is_binary(route_id) and direction_id in [0, 1] ->
-          {route_id, direction_id}
-
-        _ ->
-          nil
-      end)
-      |> Enum.reject(&is_nil/1)
-
-    @expected MapSet.new(workarounds_cases)
-
-    def start do
-      {:ok, _} =
-        Agent.start_link(
-          fn ->
-            MapSet.new()
-          end,
-          name: __MODULE__
-        )
-
-      :ok = :telemetry.attach(__MODULE__, [Workarounds, :used], &handle_event/4, nil)
-    end
-
-    def finish(opts) do
-      allowed = opts[:allowed]
-      actual = Agent.get(__MODULE__, & &1)
-      Agent.stop(__MODULE__)
-
-      if not MapSet.equal?(@expected, actual) do
-        known_unused = @expected |> MapSet.difference(actual) |> Enum.sort()
-        used_unknown = actual |> MapSet.difference(@expected) |> Enum.sort()
-
-        message =
-          "Workarounds have gone stale: known but not used #{inspect(known_unused)}, used but not known #{inspect(used_unknown)}"
-
-        if allowed do
-          Logger.warning(message)
-          Path.join("route-branching", "stale-workarounds.txt") |> File.write!([message, ?\n])
-        else
-          raise message
-        end
-      end
-    end
-
-    def handle_event(
-          [Workarounds, :used],
-          _measurements,
-          %{route_id: route_id, direction_id: direction_id},
-          _config
-        ) do
-      Agent.update(__MODULE__, &MapSet.put(&1, {route_id, direction_id}))
-    end
-  end
-
   @impl Mix.Task
   def run(args) do
-    {opts, args} = OptionParser.parse!(args, strict: [allow_unused_workarounds: :boolean])
-    allow_unused_workarounds = opts[:allow_unused_workarounds]
+    {_opts, args} = OptionParser.parse!(args, strict: [])
     global_data = GlobalDataCache.get_data()
 
     routes_directions =
@@ -119,10 +40,6 @@ defmodule Mix.Tasks.CheckRouteBranching do
         end)
       end
 
-    if args == [] do
-      UnusedWorkaroundsDetector.start()
-    end
-
     serious_issue =
       routes_directions
       |> Enum.map(fn {route_id, direction} ->
@@ -131,10 +48,6 @@ defmodule Mix.Tasks.CheckRouteBranching do
       end)
       |> tap(&IO.puts("Checked route branching across #{length(&1)} routes and directions"))
       |> then(&(:error in &1))
-
-    if args == [] do
-      UnusedWorkaroundsDetector.finish(allowed: allow_unused_workarounds)
-    end
 
     if serious_issue do
       System.stop(1)
