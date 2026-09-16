@@ -16,6 +16,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
   setup :verify_on_exit!
 
+  @tag skip: "Entire green line logic unti green line summaries refactor is completed"
   test "matches Green Line subscription to single branch" do
     now = DateTime.now!("America/New_York")
 

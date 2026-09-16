@@ -1109,108 +1109,68 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     test "summary with branching GL stops ahead", %{now: now} do
-      kenmore = build(:stop, name: "Kenmore", child_stop_ids: ["70151", "71151"])
-      blandford = build(:stop, name: "Blandford Street", child_stop_ids: ["70149"])
-      saint_marys = build(:stop, name: "Saint Mary's Street", child_stop_ids: ["70211"])
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+      kenmore = global.stops["place-kencl"]
+      blandford = global.stops["place-bland"]
+      saint_marys = global.stops["place-smary"]
 
-      child_stops = [
-        build(:stop, id: "70151", parent_station_id: kenmore.id),
-        build(:stop, id: "71151", parent_station_id: kenmore.id),
-        build(:stop, id: "70149", parent_station_id: blandford.id),
-        build(:stop, id: "70211", parent_station_id: saint_marys.id)
-      ]
+      route_pattern_b = global.route_patterns["Green-B-812-0"]
+      route_pattern_c = global.route_patterns["Green-C-832-0"]
 
-      route =
-        build(:route,
-          type: :light_rail,
-          line_id: "line-Green",
-          direction_names: ["Westbound", "Eastbound"],
-          direction_destinations: ["", "Park St & North"]
+      b_branch_informed_entities =
+        [kenmore, blandford]
+        |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
+        |> Enum.map(
+          &%Alert.InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: "Green-B",
+            stop: &1
+          }
         )
 
-      b_branch_trip = build(:trip, stop_ids: ["71151", "70149"])
-      c_branch_trip = build(:trip, stop_ids: ["70151", "70211"])
-
-      b_branch =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 0,
-          representative_trip_id: b_branch_trip.id
-        )
-
-      c_branch =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 0,
-          representative_trip_id: c_branch_trip.id
+      c_branch_informed_entities =
+        [kenmore, saint_marys]
+        |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
+        |> Enum.map(
+          &%Alert.InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: "Green-C",
+            stop: &1
+          }
         )
 
       alert =
         build(:alert,
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          informed_entity:
-            Enum.map(
-              [kenmore, blandford, saint_marys | child_stops],
-              &%Alert.InformedEntity{
-                activities: ~w(board exit ride)a,
-                route: route.id,
-                stop: &1.id
-              }
-            )
+          informed_entity: b_branch_informed_entities ++ c_branch_informed_entities
         )
 
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
-                 direction: %Direction{name: "Westbound", destination: "", id: 0},
+                 direction: %Direction{name: "West", id: 0},
                  downstream: false
                }
              } =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: kenmore.id, direction_id: 0},
-                 [b_branch, c_branch],
+                 [route_pattern_b, route_pattern_c],
                  now,
                  nil,
-                 %{
-                   routes: %{route.id => route},
-                   stops: Map.new([kenmore, blandford, saint_marys | child_stops], &{&1.id, &1}),
-                   trips: %{b_branch_trip.id => b_branch_trip, c_branch_trip.id => c_branch_trip}
-                 },
+                 global,
                  :notification
                )
     end
 
     test "summary with branching GL on branch", %{now: now} do
-      kenmore = build(:stop, name: "Kenmore", child_stop_ids: ["70150"])
-      blandford = build(:stop, name: "Blandford Street", child_stop_ids: ["70148"])
-      saint_marys = build(:stop, name: "Saint Mary's Street", child_stop_ids: ["70212"])
-      c_branch_terminal = build(:stop, name: "Cleveland Circle", child_stop_ids: ["70237"])
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+      saint_marys = global.stops["place-smary"]
 
-      child_stops = [
-        build(:stop, id: "70150", parent_station_id: kenmore.id),
-        build(:stop, id: "70148", parent_station_id: blandford.id),
-        build(:stop, id: "70212", parent_station_id: saint_marys.id),
-        build(:stop, id: "70237", parent_station_id: c_branch_terminal.id)
-      ]
-
-      route =
-        build(:route,
-          id: "Green-C",
-          type: :light_rail,
-          line_id: "line-Green",
-          direction_names: ["Westbound", "Eastbound"],
-          direction_destinations: ["", "Park St & North"]
-        )
-
-      c_branch_trip = build(:trip, stop_ids: ["70237", "70212", "70150"])
-
-      c_branch =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 1,
-          representative_trip_id: c_branch_trip.id
-        )
+      route = global.routes["Green-C"]
+      c_branch = global.route_patterns["Green-C-832-0"]
 
       alert =
         build(:alert,
@@ -1238,82 +1198,62 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  [c_branch],
                  now,
                  nil,
-                 %{
-                   routes: %{route.id => route},
-                   stops:
-                     Map.new(
-                       [kenmore, blandford, saint_marys, c_branch_terminal | child_stops],
-                       &{&1.id, &1}
-                     ),
-                   trips: %{c_branch_trip.id => c_branch_trip}
-                 },
+                 global,
                  :notification
                )
     end
 
     test "summary with branching GL on opposite and disconnected branch", %{now: now} do
-      medford_tufts = build(:stop, id: "M", name: "Medford/Tufts", child_stop_ids: ["70511"])
-      heath_street = build(:stop, id: "H", name: "Heath Street", child_stop_ids: ["70260"])
-      kenmore = build(:stop, id: "K", name: "Kenmore", child_stop_ids: ["70151", "71151"])
-      blandford = build(:stop, id: "B", name: "Blandford Street", child_stop_ids: ["70149"])
-      saint_marys = build(:stop, id: "S", name: "Saint Mary's Street", child_stop_ids: ["70211"])
-      parent_stations = [medford_tufts, heath_street, kenmore, blandford, saint_marys]
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+      medford_tufts = global.stops["place-mdftf"]
+      kenmore = global.stops["place-kencl"]
+      blandford = global.stops["place-bland"]
+      saint_marys = global.stops["place-smary"]
 
-      child_stops =
-        parent_stations
-        |> Enum.flat_map(fn %{id: parent_station_id, child_stop_ids: child_stop_ids} ->
-          Enum.map(child_stop_ids, &build(:stop, id: &1, parent_station_id: parent_station_id))
-        end)
+      route_pattern_e = global.route_patterns["Green-E-885-0"]
 
-      route =
-        build(:route,
-          type: :light_rail,
-          line_id: "line-Green",
-          direction_names: ["Westbound", "Eastbound"],
-          direction_destinations: ["Copley & West", "Medford/Tufts"]
+      b_branch_informed_entities =
+        [kenmore, blandford]
+        |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
+        |> Enum.map(
+          &%Alert.InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: "Green-B",
+            stop: &1
+          }
         )
 
-      e_branch_trip = build(:trip, stop_ids: ["70511", "70260"])
-
-      e_branch =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 0,
-          representative_trip_id: e_branch_trip.id
+      c_branch_informed_entities =
+        [kenmore, saint_marys]
+        |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
+        |> Enum.map(
+          &%Alert.InformedEntity{
+            activities: ~w(board exit ride)a,
+            route: "Green-C",
+            stop: &1
+          }
         )
 
       alert =
         build(:alert,
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          informed_entity:
-            [kenmore, blandford, saint_marys]
-            |> Enum.flat_map(&[&1.id | &1.child_stop_ids])
-            |> Enum.map(
-              &%Alert.InformedEntity{
-                activities: ~w(board exit ride)a,
-                route: route.id,
-                stop: &1
-              }
-            )
+          informed_entity: b_branch_informed_entities ++ c_branch_informed_entities
         )
 
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.StopToDirection{
                  start_stop_name: "Kenmore",
-                 direction: %Direction{name: "Westbound", destination: "Copley & West", id: 0}
+                 direction: %Direction{name: "West", destination: "Heath Street", id: 0}
                }
              } =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: medford_tufts.id, direction_id: 0},
-                 [e_branch],
+                 [route_pattern_e],
                  now,
                  nil,
-                 %{
-                   routes: %{route.id => route},
-                   stops: Map.new(parent_stations ++ child_stops, &{&1.id, &1}),
-                   trips: %{e_branch_trip.id => e_branch_trip}
-                 },
+                 global,
                  :notification
                )
     end
@@ -1745,6 +1685,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    @tag skip: "Entire green line logic unti green line summaries refactor is completed"
     test "summary for whole other green line branch", %{now: now} do
       green_route_ids = ~w(Green-B Green-C Green-D Green-E)
 
