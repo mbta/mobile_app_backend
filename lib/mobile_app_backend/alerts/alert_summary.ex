@@ -1,11 +1,10 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
+  require Logger
   alias MBTAV3API.Alert
+  alias MBTAV3API.LineDigraph
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
-  alias MBTAV3API.Trip
-
-  alias MobileAppBackend.Alerts.EndpointStops
 
   alias MobileAppBackend.Alerts.AlertSummary.{
     Direction,
@@ -20,7 +19,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   alias MobileAppBackend.Notifications.Subscription
   alias Util.PolymorphicJson
 
-  @gl_id "line-Green"
   @gl_label "Green Line"
   @gl_routes ~w(Green-B Green-C Green-D Green-E)
 
@@ -228,12 +226,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defp alert_location_is_closure?(alert, affected_stops) do
-    alert.effect in [:dock_closure, :station_closure, :stop_closure] and
+    alert.effect in [:dock_closure, :station_closure, :stop_closure, :parking_closure] and
       affected_stops != [] and (Alert.active?(alert) or Alert.active_soon?(alert))
   end
 
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
           Location.t() | nil
+
+  def alert_location(_alert, _stop_id, _direction_id, [], _global) do
+    # Seen on ferry patterns, no patterns match provided becuase they are all in the same direction
+    nil
+  end
+
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
@@ -416,10 +420,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Map.values()
           |> Enum.filter(&(&1.typicality == :typical and &1.route_id == route_id))
 
-        # # The blank stop ID is fine because the ID is only used to check if the stop is on a GL branch,
-        # # and here we specifically don't care about branching
-        affected_pattern_stops =
-          map_patterns_to_affected_stops(alert, "", direction_id, gl_patterns, [gl_route], global)
+        # The blank stop ID is fine because the ID is only used to check if the stop is on a GL branch,
+        # and here we specifically don't care about branching
+        affected_pattern_stops = affected_pattern_stops(gl_patterns, alert, global)
+
+        affected_pattern_stops = discard_subsets(affected_pattern_stops)
 
         matches_all_stops_on_patterns(affected_pattern_stops, global)
       end
@@ -435,21 +440,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          downstream,
          global
        ) do
-    is_gl =
-      not Enum.empty?(routes) and
-        Enum.all?(routes, &(&1.id in @gl_routes))
+    all_patterns = augment_patterns_for_branched_lines(routes, direction_id, patterns, global)
 
-    all_patterns =
-      if is_gl do
-        all_green_line_routes_patterns(global, direction_id)
-      else
-        patterns
-      end
-
-    affected_pattern_stops =
-      all_patterns
-      |> Enum.map(&{&1, affected_parent_stops_for_pattern(&1, alert, global)})
-      |> Map.new()
+    affected_pattern_stops = affected_pattern_stops(all_patterns, alert, global)
 
     matches_all_stops = matches_all_stops_on_patterns(affected_pattern_stops, global)
 
@@ -461,20 +454,22 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
       _ ->
-        affected_stops_tree =
-          build_reachable_affected_stops_tree(
-            all_patterns,
-            affected_pattern_stops,
-            stop_id,
-            global
-          )
+        digraph =
+          LineDigraph.build_stops_digraph_from_patterns(all_patterns, direction_id, global)
 
-        build_location_from_affected_stops_tree(
-          affected_stops_tree,
+        if not is_nil(stop_id) do
+          LineDigraph.remove_unreachable_stops_from_digraph(digraph, stop_id)
+        end
+
+        LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops)
+
+        build_location_from_affected_stops_digraph(
+          digraph,
           patterns,
           direction_id,
           downstream,
-          global
+          global,
+          alert
         )
     end
   end
@@ -497,14 +492,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       if Enum.sort(affected_branches) == Enum.sort(@gl_routes) do
         %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
-
-        # TODO: single affected_branch should only appear if no other branch is impacted
-        # length(affected_branches) == 1 ->
-        #   route = global.routes[hd(affected_branches)]
-
-        #   if route,
-        #     do: %Location.WholeRoute{route_label: Route.label(route), route_type: route.type},
-        #     else: nil
       else
         nil
       end
@@ -565,285 +552,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     |> Enum.reject(&is_nil/1)
   end
 
-  # The first value in these pairs is the list of trunk stops for each route, including a few minor child stop
-  # differences at some stops, like Park and Kenmore. Stops on branches on the opposite end of the line are not
-  # included, only trunk stops are included. The second value contains all the child stops that exist only on each
-  # branch. These are hard coded because the patterns provided to `summarizing` will only include ones served at the
-  # selected stop, they don't take other branches into account, but we always want to show when a disruption is
-  # happening on all downstream branches.
-  @westbound_branches [
-    # B Branch
-    {
-      [
-        # Lechmere
-        "70502",
-        "70208",
-        "70206",
-        "70204",
-        "70202",
-        "70196",
-        "70159",
-        "70157",
-        "70155",
-        "70153",
-        # Kenmore
-        "71151"
-      ],
-      [
-        # Blandford Street
-        "70149",
-        "70147",
-        "70145",
-        "170141",
-        "170137",
-        "70135",
-        "70131",
-        "70129",
-        "70127",
-        "70125",
-        "70121",
-        "70117",
-        "70115",
-        "70113",
-        "70111",
-        # Boston College
-        "70107"
-      ]
-    },
-    # C Branch
-    {
-      [
-        # Lechmere
-        "70502",
-        "70208",
-        "70206",
-        "70204",
-        "70202",
-        "70197",
-        "70159",
-        "70157",
-        "70155",
-        "70153",
-        # Kenmore
-        "70151"
-      ],
-      [
-        # Saint Mary's Street
-        "70211",
-        "70213",
-        "70215",
-        "70217",
-        "70219",
-        "70223",
-        "70225",
-        "70227",
-        "70229",
-        "70231",
-        "70233",
-        "70235",
-        # Cleveland Circle
-        "70237"
-      ]
-    },
-    # D Branch
-    {
-      [
-        # Lechmere
-        "70502",
-        "70208",
-        "70206",
-        "70204",
-        "70202",
-        "70198",
-        "70159",
-        "70157",
-        "70155",
-        "70153",
-        # Kenmore
-        "70151"
-      ],
-      [
-        # Fenway
-        "70187",
-        "70183",
-        "70181",
-        "70179",
-        "70177",
-        "70175",
-        "70173",
-        "70171",
-        "70169",
-        "70167",
-        "70165",
-        "70163",
-        # Riverside
-        "70161"
-      ]
-    },
-    # E Branch
-    {
-      [
-        # Lechmere
-        "70502",
-        "70208",
-        "70206",
-        "70204",
-        "70202",
-        "70199",
-        "70159",
-        "70157",
-        # Copley
-        "70155"
-      ],
-      [
-        # Prudential
-        "70239",
-        "70241",
-        "70243",
-        "70245",
-        "70247",
-        "70249",
-        "70251",
-        "70253",
-        "70255",
-        "70257",
-        # Heath Street
-        "70260"
-      ]
-    }
-  ]
-
-  @eastbound_branches [
-    # Medford/Tufts
-    {
-      [
-        # Kenmore
-        "70150",
-        "70152",
-        "70154",
-        "70156",
-        "70158",
-        "70200",
-        "70201",
-        "70203",
-        "70205",
-        "70207",
-        # Lechmere
-        "70501"
-      ],
-      [
-        # East Somerville
-        "70513",
-        "70505",
-        "70507",
-        "70509",
-        # Medford/Tufts
-        "70511"
-      ]
-    },
-    # Union
-    {
-      [
-        # Kenmore
-        "70150",
-        "70152",
-        "70154",
-        "70156",
-        "70158",
-        "70200",
-        "70201",
-        "70203",
-        "70205",
-        "70207",
-        # Lechmere
-        "70501"
-      ],
-      [
-        # Union Square
-        "70503"
-      ]
-    }
-  ]
-
-  defp map_patterns_to_affected_stops(alert, stop_id, direction_id, patterns, routes, global) do
-    pattern_stops =
-      patterns
-      |> Enum.filter(&(&1.direction_id == direction_id))
-      |> Enum.map(fn pattern ->
-        case global.trips[pattern.representative_trip_id] do
-          %Trip{} = trip -> {pattern, trip.stop_ids}
-          _ -> {pattern, []}
-        end
-      end)
-      |> Kernel.++(
-        # Special casing to properly show when alerts affect multiple GL branches
-        if Enum.any?(routes, &(&1.line_id == @gl_id)) do
-          gl_synthetic_patterns(stop_id, direction_id, routes, global)
-        else
-          []
-        end
-      )
-      |> Enum.map(fn {pattern, stop_ids} ->
-        stop_ids_on_pattern =
-          stop_ids
-          |> Enum.filter(fn stop_on_trip ->
-            Alert.any_informed_entity_satisfies(
-              alert,
-              &(Alert.InformedEntity.stop_in?(&1, [stop_on_trip]) and
-                  Alert.InformedEntity.route?(&1, pattern.route_id))
-            )
-          end)
-          |> Enum.map(&Stop.parent_id(global.stops[&1]))
-          |> Enum.reject(&is_nil/1)
-
-        case stop_ids_on_pattern do
-          [] -> nil
-          _ -> {pattern, stop_ids_on_pattern}
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-      |> Map.new()
-
-    # On the D branch, there are patterns that terminate at Reservoir and Riverside, this will remove stop lists that
-    # are subsets of some other stop list so that we don't display "Westbound stops" instead of "Riverside" in this
-    # case.
-    if map_size(pattern_stops) > 1 do
-      discard_subsets(pattern_stops)
-    else
-      pattern_stops
-    end
-  end
-
   defp later_this_week(on_date, end_date) do
     Date.day_of_week(on_date) < Date.day_of_week(end_date) and Date.diff(end_date, on_date) < 7
-  end
-
-  defp gl_synthetic_patterns(stop_id, direction_id, routes, global) do
-    direction_stops =
-      case direction_id do
-        0 -> @westbound_branches
-        1 -> @eastbound_branches
-      end
-
-    # If the provided stop is on a branch, don't take any parallel branches into account,
-    # we only want to group downstream branches
-    if Enum.any?(direction_stops, fn {_, branch_stops} ->
-         Enum.any?(branch_stops, &(Stop.parent_id(global.stops[&1]) == stop_id))
-       end) do
-      []
-    else
-      Enum.map(direction_stops, fn {earlier, branched} ->
-        {%RoutePattern{
-           id: Enum.join(branched, "-"),
-           direction_id: direction_id,
-           name: "",
-           sort_order: 0,
-           typicality: :typical,
-           representative_trip_id: "",
-           route_id: hd(routes).id
-         }, earlier ++ branched}
-      end)
-    end
   end
 
   defp discard_subsets(pattern_stops) do
@@ -855,21 +565,52 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end)
   end
 
-  defp all_green_line_routes_patterns(global, direction_id) do
-    global.route_patterns
-    |> Map.values()
-    |> Enum.filter(&(&1.route_id in @gl_routes and &1.direction_id == direction_id))
-  end
+  # Augments the given list of route patterns for branched lines, such as the Green Line.
+  # If all routes are part of the Green Line, it will include all patterns for the specified direction.
+  # Otherwise, it returns the original list of patterns.
+  # Note: This is not needed for the red line because the red line provides all the relevant patterns already.
+  @spec augment_patterns_for_branched_lines(
+          [Route.t()],
+          1 | 0,
+          [RoutePattern.t()],
+          GlobalDataCache.data()
+        ) :: [RoutePattern.t()]
+  defp augment_patterns_for_branched_lines(routes, direction_id, patterns, global) do
+    cond do
+      routes == [] ->
+        patterns
 
-  defp ordered_stops_for_pattern(global, pattern) do
-    case global.trips[pattern.representative_trip_id] do
-      %Trip{} = trip -> trip.stop_ids
-      _ -> []
+      Enum.all?(routes, &(&1.id in @gl_routes)) ->
+        global.route_patterns
+        |> Map.values()
+        |> Enum.filter(&(&1.route_id in @gl_routes and &1.direction_id == direction_id))
+
+      true ->
+        patterns
     end
   end
 
-  defp affected_child_stops_for_pattern(global, pattern, alert) do
-    ordered_stops_for_pattern(global, pattern)
+  @spec affected_pattern_stops([RoutePattern.t()], Alert.t(), GlobalDataCache.data()) :: %{
+          RoutePattern.t() => [String.t()]
+        }
+  defp affected_pattern_stops(patterns, alert, global) do
+    patterns
+    |> Enum.map(&{&1, affected_parent_stops_for_pattern(&1, alert, global)})
+    |> Map.new()
+  end
+
+  @spec affected_parent_stops_for_pattern(RoutePattern.t(), Alert.t(), GlobalDataCache.data()) ::
+          [String.t()]
+  defp affected_parent_stops_for_pattern(pattern, alert, global) do
+    affected_child_stops_for_pattern(pattern, alert, global)
+    |> Stop.get_parent_ids(global)
+  end
+
+  @spec affected_child_stops_for_pattern(RoutePattern.t(), Alert.t(), GlobalDataCache.data()) :: [
+          String.t()
+        ]
+  defp affected_child_stops_for_pattern(pattern, alert, global) do
+    RoutePattern.get_child_stop_ids(pattern, global)
     |> Enum.filter(fn stop_on_trip ->
       Alert.any_informed_entity_satisfies(
         alert,
@@ -879,57 +620,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end)
   end
 
-  defp affected_parent_stops_for_pattern(pattern, alert, global) do
-    affected_child_stops_for_pattern(global, pattern, alert)
-    |> Enum.map(&Stop.parent_id(global.stops[&1]))
-    # Remove all the stops that couldn't be resolved to parent stops
-    |> Enum.reject(&is_nil/1)
-    |> Enum.uniq()
-  end
-
-  defp build_reachable_affected_stops_tree(
-         patterns,
-         affected_pattern_stops,
-         stop_id,
-         global
-       ) do
-    reachable_stops_tree = build_all_reachable_stops_tree(patterns, stop_id, global)
-
-    affected_pattern_stops
-    |> Enum.map(fn {_pattern, stops} ->
-      # Remove all the stops that are not reachable from the current stop
-      Enum.reject(stops, &(UnrootedPolytree.node_for_id(reachable_stops_tree, &1) == :error))
-    end)
-    |> Enum.reject(fn stops -> stops == [] end)
-    |> Enum.map(fn stops ->
-      Enum.map(stops, fn parent_stop_id -> {parent_stop_id, global.stops[parent_stop_id]} end)
-    end)
-    |> UnrootedPolytree.from_lists()
-  end
-
-  defp build_all_reachable_stops_tree(patterns, stop_id, global) do
-    patterns
-    |> Enum.map(fn pattern ->
-      ordered_stops_for_pattern(global, pattern)
-      |> Enum.reject(&is_nil(global.stops[&1]))
-      |> Enum.map(&Stop.parent_id(global.stops[&1]))
-      |> Enum.uniq()
-      # Key and value can be the same since we are only interested in the structure of the tree
-      |> Enum.map(&{&1, &1})
-    end)
-    |> UnrootedPolytree.from_lists()
-    |> EndpointStops.reachable_nodes_from_stop(stop_id)
-  end
-
-  defp build_location_from_affected_stops_tree(
-         affected_stops_tree,
+  defp build_location_from_affected_stops_digraph(
+         digraph,
          patterns,
          direction_id,
          downstream,
-         global
+         global,
+         alert
        ) do
-    first_stops = affected_stops_tree |> EndpointStops.first_stops()
-    last_stops = affected_stops_tree |> EndpointStops.last_stops()
+    first_stops = LineDigraph.get_first_stops(digraph, global)
+    last_stops = LineDigraph.get_last_stops(digraph, global)
 
     %{
       first_stops: first_stops,
@@ -964,6 +664,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
       _ ->
+        Logger.warning(
+          "Location couldn't be determined for alert [#{alert.id}] and digraph with " <>
+            "first stops [#{Enum.map_join(first_stops, ", ", & &1.id)}] and " <>
+            "last stops [#{Enum.map_join(last_stops, ", ", & &1.id)}]"
+        )
+
         nil
     end
   end

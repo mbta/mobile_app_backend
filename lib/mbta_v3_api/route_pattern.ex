@@ -145,6 +145,18 @@ defmodule MBTAV3API.RoutePattern do
     end)
   end
 
+  @doc """
+    Get the child stop Ids for a given route pattern based on its representative trip.
+  """
+  @spec get_child_stop_ids(t(), GlobalDataCache.data()) ::
+          [String.t()]
+  def get_child_stop_ids(pattern, global) do
+    case global.trips[pattern.representative_trip_id] do
+      %Trip{} = trip -> trip.stop_ids
+      _ -> []
+    end
+  end
+
   defp match_pattern_route?(
          %__MODULE__{route_id: pattern_route_id},
          route_id,
