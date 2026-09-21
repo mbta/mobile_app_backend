@@ -1,13 +1,13 @@
 defmodule MobileAppBackend.Alerts.AlertSummary do
   require Logger
   alias MBTAV3API.Alert
-  alias MBTAV3API.LineDigraph
   alias MBTAV3API.Route
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
 
   alias MobileAppBackend.Alerts.AlertSummary.{
     Direction,
+    LineDigraph,
     Location,
     Recurrence,
     Timeframe,

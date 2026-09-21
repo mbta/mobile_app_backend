@@ -1,4 +1,4 @@
-defmodule MBTAV3API.LineDigraph do
+defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraph do
   require Logger
   alias MBTAV3API.RoutePattern
   alias MBTAV3API.Stop
@@ -47,16 +47,22 @@ defmodule MBTAV3API.LineDigraph do
     Given a digraph and a target stop id, it will remove all stops that can not reach
     or can not be reached from the target stop.
   """
-  @spec remove_unreachable_stops_from_digraph(:digraph.graph(), String.t()) :: :ok
+  @spec remove_unreachable_stops_from_digraph(:digraph.graph(), String.t()) ::
+          :ok | {:error, :stop_not_found}
   def remove_unreachable_stops_from_digraph(digraph, target_stop) do
-    all_reachable_stops = get_all_reachable_stops(digraph, target_stop)
-    stops_to_remove = :digraph.vertices(digraph) -- all_reachable_stops
+    case vertex_exists?(digraph, target_stop) do
+      true ->
+        all_reachable_stops = get_all_reachable_stops(digraph, target_stop)
+        stops_to_remove = :digraph.vertices(digraph) -- all_reachable_stops
 
-    if stops_to_remove != [] do
-      :digraph.del_vertices(digraph, stops_to_remove)
+        if stops_to_remove != [] do
+          :digraph.del_vertices(digraph, stops_to_remove)
+        end
+
+        :ok
+      false ->
+        {:error, :stop_not_found}
     end
-
-    :ok
   end
 
   @doc """
@@ -144,5 +150,13 @@ defmodule MBTAV3API.LineDigraph do
         Logger.warning("Disconnected sink stop: #{stop_id} from the digraph")
       end
     end)
+  end
+
+  defp vertex_exists?(digraph, vertex) do
+    if :digraph.vertex(digraph, vertex) == false do
+      false
+    else
+      true
+    end
   end
 end
