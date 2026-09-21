@@ -60,6 +60,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraph do
         end
 
         :ok
+
       false ->
         {:error, :stop_not_found}
     end
