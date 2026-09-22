@@ -16,7 +16,6 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
   setup :verify_on_exit!
 
-  @tag skip: "Entire green line logic unti green line summaries refactor is completed"
   test "matches Green Line subscription to single branch" do
     now = DateTime.now!("America/New_York")
 
@@ -808,7 +807,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              Engine.user_notifications([subscription1, subscription2], [alert], now)
   end
 
-  test "keeps successive stops if subscribed in both directions" do
+  test "show affected stops if stops are disconnected" do
     now = DateTime.now!("America/New_York")
 
     reassign_env(
@@ -844,9 +843,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
             id: "#{id}-#{direction_id}-trip",
             stop_ids:
               if direction_id == 0 do
-                ["place-river", "place-unsq", "place-boyls"]
+                ["place-river", "place-unsq", "place-boyls", "place-south"]
               else
-                ["place-boyls", "place-unsq", "place-river"]
+                ["place-south", "place-boyls", "place-unsq", "place-river"]
               end
           )
         end)
@@ -863,6 +862,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         stops: %{
           "place-boyls" => build(:stop, id: "place-boyls", name: "Boylston"),
           "place-river" => build(:stop, id: "place-river", name: "Riverside"),
+          "place-south" => build(:stop, id: "place-south", name: "South Station"),
           "place-unsq" => build(:stop, id: "place-unsq", name: "Union Square")
         },
         trips: Map.new(trips, &{&1.id, &1})
@@ -899,9 +899,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              %OutgoingNotification{
                summary: %AlertSummary.Standard{
                  effect: :suspension,
-                 location: %AlertSummary.Location.SuccessiveStops{
-                   start_stop_name: "Boylston",
-                   end_stop_name: "Riverside"
+                 location: %AlertSummary.Location.AffectedStops{
+                   stops: ["place-river", "place-boyls"]
                  },
                  timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },

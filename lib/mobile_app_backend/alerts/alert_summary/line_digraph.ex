@@ -69,29 +69,25 @@ defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraph do
   @doc """
   Removes stops from the digraph that are not affected by the given list of affected stop IDs.
   """
-  @spec remove_unaffected_stops(:digraph.graph(), %{RoutePattern.t() => [String.t()]}) :: :ok
+  @spec remove_unaffected_stops(:digraph.graph(), %{RoutePattern.t() => [String.t()]}) ::
+          :ok | {:error, :disconnected_stops}
   def remove_unaffected_stops(digraph, affected_pattern_stops) do
-    path_list =
+    affected_stops =
       affected_pattern_stops
-      |> Enum.map(fn {_pattern, stop_ids} ->
-        existing_stop_ids =
-          stop_ids
-          |> Enum.reject(&(:digraph.vertex(digraph, &1) == false))
-
-        :digraph.get_path(digraph, List.first(existing_stop_ids), List.last(existing_stop_ids))
-      end)
-      |> Enum.reject(&(&1 == false))
-      |> List.flatten()
+      |> Enum.flat_map(fn {_pattern, stop_ids} -> stop_ids end)
       |> MapSet.new()
 
-    stops_to_remove = :digraph.vertices(digraph) -- MapSet.to_list(path_list)
+    stops_to_remove = :digraph.vertices(digraph) -- MapSet.to_list(affected_stops)
 
     if stops_to_remove != [] do
       :digraph.del_vertices(digraph, stops_to_remove)
     end
 
-    log_disconnected_stops(digraph)
-    :ok
+    if has_disconnected_stops?(digraph) do
+      {:error, :disconnected_stops}
+    else
+      :ok
+    end
   end
 
   @doc """
@@ -137,27 +133,25 @@ defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraph do
   # Use for detecting disconnected source and sink stops in the digraph.
   # This would mean that after removing stops that are not affected
   # there were orphaned stops left in the digraph.
-  defp log_disconnected_stops(digraph) do
-    :digraph.source_vertices(digraph)
-    |> Enum.each(fn stop_id ->
-      if :digraph.out_degree(digraph, stop_id) == 0 do
-        Logger.warning("Disconnected source stop: #{stop_id} from the digraph")
-      end
-    end)
+  @spec has_disconnected_stops?(:digraph.graph()) :: boolean()
+  defp has_disconnected_stops?(digraph) do
+    first_stops = get_first_stop_ids(digraph)
+    last_stops = get_last_stop_ids(digraph)
+    pairs = for x <- first_stops, y <- last_stops, x != y, do: {x, y}
 
-    :digraph.sink_vertices(digraph)
-    |> Enum.each(fn stop_id ->
-      if :digraph.in_degree(digraph, stop_id) == 0 do
-        Logger.warning("Disconnected sink stop: #{stop_id} from the digraph")
+    pairs
+    |> Enum.reject(fn {first_stop, last_stop} ->
+      if :digraph.get_path(digraph, first_stop, last_stop) do
+        true
+      else
+        Logger.warning("Disconnected path from #{first_stop} to #{last_stop}")
+        false
       end
     end)
+    |> Enum.any?()
   end
 
   defp vertex_exists?(digraph, vertex) do
-    if :digraph.vertex(digraph, vertex) == false do
-      false
-    else
-      true
-    end
+    match?({_vertex, _label}, :digraph.vertex(digraph, vertex))
   end
 end

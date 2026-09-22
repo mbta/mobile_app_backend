@@ -231,12 +231,14 @@ defmodule MobileAppBackend.Alerts.SummaryEntityBuilder do
   end
 
   defp expand_entity(
-         %Alert.InformedEntity{direction_id: nil} = ie,
+         %Alert.InformedEntity{direction_id: nil, route: route} = ie,
          {all_child_stops, trips, global}
        ) do
     directions =
       if is_nil(ie.trip) do
-        [0, 1]
+        RoutePattern.get_relevant_patterns(route, nil, nil, global)
+        |> Enum.map(& &1.direction_id)
+        |> Enum.uniq()
       else
         [trips[ie.trip].direction_id]
       end

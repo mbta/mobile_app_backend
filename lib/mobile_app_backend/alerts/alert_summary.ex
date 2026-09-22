@@ -195,6 +195,16 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       when opposite_direction.id == 1 - direction.id ->
         location
 
+      [
+        %__MODULE__.Location.AffectedStops{stops: stop_list_1} = location,
+        %__MODULE__.Location.AffectedStops{stops: stop_list_2}
+      ] ->
+        if Enum.sort(stop_list_1) == Enum.sort(stop_list_2) do
+          location
+        else
+          nil
+        end
+
       _ ->
         nil
     end
@@ -233,15 +243,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @spec alert_location(Alert.t(), Stop.id(), 0 | 1, [RoutePattern.t()], GlobalDataCache.data()) ::
           Location.t() | nil
 
-  def alert_location(_alert, _stop_id, _direction_id, [], _global) do
+  def alert_location(alert, stop_id, direction_id, [], _global) do
     # Seen on ferry patterns, no patterns match provided becuase they are all in the same direction
+    Logger.notice(
+      "#{__MODULE__}: No patterns match for alert: #{inspect(alert)} at stop: #{stop_id} with direction: #{direction_id}"
+    )
+
     nil
   end
 
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
-    with nil <- alert_location_for_whole_gl(alert, patterns, direction_id, global),
+    with nil <- alert_location_for_whole_gl(alert, routes, patterns, direction_id, global),
          nil <- alert_location_for_whole_route(alert, direction_id, routes) do
       affected_stops = get_alert_affected_stops(global, alert, routes)
       downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
@@ -422,9 +436,9 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         # The blank stop ID is fine because the ID is only used to check if the stop is on a GL branch,
         # and here we specifically don't care about branching
-        affected_pattern_stops = affected_pattern_stops(gl_patterns, alert, global)
-
-        affected_pattern_stops = discard_subsets(affected_pattern_stops)
+        affected_pattern_stops =
+          affected_pattern_stops(gl_patterns, alert, global)
+          |> discard_subsets()
 
         matches_all_stops_on_patterns(affected_pattern_stops, global)
       end
@@ -440,9 +454,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          downstream,
          global
        ) do
-    all_patterns = augment_patterns_for_branched_lines(routes, direction_id, patterns, global)
+    aumented_patterns =
+      augment_patterns_for_branched_lines(routes, direction_id, patterns, global)
 
-    affected_pattern_stops = affected_pattern_stops(all_patterns, alert, global)
+    affected_pattern_stops = affected_pattern_stops(aumented_patterns, alert, global)
 
     matches_all_stops = matches_all_stops_on_patterns(affected_pattern_stops, global)
 
@@ -454,27 +469,77 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         }
 
       _ ->
-        digraph =
-          LineDigraph.build_stops_digraph_from_patterns(all_patterns, direction_id, global)
-
-        if not is_nil(stop_id) do
-          LineDigraph.remove_unreachable_stops_from_digraph(digraph, stop_id)
-        end
-
-        LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops)
-
-        build_location_from_affected_stops_digraph(
-          digraph,
-          patterns,
+        build_location_for_multiple_stops(
+          aumented_patterns,
+          affected_pattern_stops,
+          stop_id,
           direction_id,
           downstream,
           global,
-          alert
+          alert,
+          patterns
         )
     end
   end
 
-  defp alert_location_for_whole_gl(alert, patterns, direction_id, global) do
+  @spec build_location_for_multiple_stops(
+          aumented_patterns :: [RoutePattern.t()],
+          affected_pattern_stops :: %{RoutePattern.t() => [String.t()]},
+          stop_id :: String.t() | nil,
+          direction_id :: 0 | 1,
+          downstream :: boolean(),
+          global :: GlobalDataCache.data(),
+          alert :: Alert.t(),
+          patterns :: [RoutePattern.t()]
+        ) :: Location.t() | nil
+  defp build_location_for_multiple_stops(
+         aumented_patterns,
+         affected_pattern_stops,
+         stop_id,
+         direction_id,
+         downstream,
+         global,
+         alert,
+         patterns
+       ) do
+    digraph =
+      LineDigraph.build_stops_digraph_from_patterns(aumented_patterns, direction_id, global)
+
+    with :ok <- LineDigraph.remove_unreachable_stops_from_digraph(digraph, stop_id),
+         :ok <- LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops) do
+      build_location_from_affected_stops_digraph(
+        digraph,
+        patterns,
+        direction_id,
+        downstream,
+        global,
+        alert
+      )
+    else
+      {:error, :stop_not_found} ->
+        Logger.warning(
+          "#{__MODULE__} stop: #{stop_id} not found on route patterns: #{Enum.map_join(patterns, ", ", & &1.id)}"
+        )
+
+        nil
+
+      {:error, :disconnected_stops} ->
+        if alert.effect == :suspension or alert.effect == :shuttle do
+          # Logging this message so we check the alert for potential data issues
+          Logger.warning(
+            "#{__MODULE__} Build location for alert: #{alert.id} has disconnected stops, this could be a data issue"
+          )
+        end
+
+        stops = affected_pattern_stops |> Enum.flat_map(fn {_pattern, stops} -> stops end)
+
+        %Location.AffectedStops{
+          stops: stops
+        }
+    end
+  end
+
+  defp alert_location_for_whole_gl(alert, routes, patterns, direction_id, global) do
     typical_routes =
       patterns
       |> Enum.filter(&(&1.typicality == :typical))
@@ -490,10 +555,17 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           alert_applies_to_whole_gl_route(alert, route_id, direction_id, global)
         end)
 
-      if Enum.sort(affected_branches) == Enum.sort(@gl_routes) do
-        %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
-      else
-        nil
+      route = Enum.find(routes, &(&1.id in affected_branches))
+
+      cond do
+        Enum.sort(affected_branches) == Enum.sort(@gl_routes) ->
+          %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
+
+        length(affected_branches) == 1 and route != nil ->
+          %Location.WholeRoute{route_label: Route.label(route), route_type: :light_rail}
+
+        true ->
+          nil
       end
     else
       nil
@@ -620,6 +692,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end)
   end
 
+  @spec build_location_from_affected_stops_digraph(
+          :digraph.graph(),
+          [RoutePattern.t()],
+          0 | 1,
+          boolean(),
+          GlobalDataCache.data(),
+          Alert.t()
+        ) :: Location.t() | nil
   defp build_location_from_affected_stops_digraph(
          digraph,
          patterns,
@@ -665,7 +745,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       _ ->
         Logger.warning(
-          "Location couldn't be determined for alert [#{alert.id}] and digraph with " <>
+          "#{__MODULE__} Location couldn't be determined for alert [#{alert.id}] and digraph with " <>
             "first stops [#{Enum.map_join(first_stops, ", ", & &1.id)}] and " <>
             "last stops [#{Enum.map_join(last_stops, ", ", & &1.id)}]"
         )
