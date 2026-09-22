@@ -531,11 +531,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           )
         end
 
-        stops = affected_pattern_stops |> Enum.flat_map(fn {_pattern, stops} -> stops end)
+        stop_names =
+          affected_pattern_stops
+          |> Enum.flat_map(fn {_pattern, stops} -> stops end)
+          |> Enum.map(&global.stops[&1])
+          |> Enum.reject(&is_nil/1)
+          |> Enum.uniq()
+          |> Enum.map(& &1.name)
 
-        %Location.AffectedStops{
-          stops: stops
-        }
+        if stop_names != [] do
+          %Location.AffectedStops{
+            stops: stop_names
+          }
+        else
+          nil
+        end
     end
   end
 

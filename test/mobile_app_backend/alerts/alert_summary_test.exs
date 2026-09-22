@@ -1685,7 +1685,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    @tag skip: "Entire green line logic unti green line summaries refactor is completed"
     test "summary for whole other green line branch", %{now: now} do
       green_route_ids = ~w(Green-B Green-C Green-D Green-E)
 
@@ -1732,7 +1731,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           ]
         )
 
-      e_pattern = Enum.filter(patterns, &(&1.route_id == "Green-E"))
+      c_pattern = Enum.filter(patterns, &(&1.route_id == "Green-C"))
 
       assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
@@ -1744,7 +1743,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: "stopId", direction_id: 0},
-                 e_pattern,
+                 c_pattern,
                  now,
                  nil,
                  %{

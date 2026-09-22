@@ -900,7 +900,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                summary: %AlertSummary.Standard{
                  effect: :suspension,
                  location: %AlertSummary.Location.AffectedStops{
-                   stops: ["place-river", "place-boyls"]
+                   stops: ["Riverside", "Boylston"]
                  },
                  timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
                },
