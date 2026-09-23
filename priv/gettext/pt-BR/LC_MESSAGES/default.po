@@ -1163,11 +1163,6 @@ msgstr "Balsas"
 msgid "**multiple stops**"
 msgstr "**várias paradas**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
-#, elixir-autogen, elixir-format
-msgid "will not stop at %{stop_list} %{timeframe}"
-msgstr "não vai parar em %{stop_list} %{timeframe}"
-
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:170
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
@@ -1304,3 +1299,14 @@ msgstr "**Atualização:** o serviço %{mode} foi retomado%{summary_location}."
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "Atualização: %{body}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:57
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr " em %{stop_list}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr "não vai parar em%{affected_stops_location} %{timeframe}"

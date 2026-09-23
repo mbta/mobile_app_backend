@@ -245,7 +245,7 @@ msgstr "Fallo en el cruce"
 #: lib/presentation_strings.ex:99
 #, elixir-autogen, elixir-format
 msgid "Delay"
-msgstr "Demora"
+msgstr "Retraso"
 
 #: lib/presentation_strings.ex:208
 #, elixir-autogen, elixir-format
@@ -1163,11 +1163,6 @@ msgstr "Transbordadores"
 msgid "**multiple stops**"
 msgstr "**varias paradas**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
-#, elixir-autogen, elixir-format
-msgid "will not stop at %{stop_list} %{timeframe}"
-msgstr "no se detendrá en %{stop_list} %{timeframe}"
-
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:170
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
@@ -1211,7 +1206,7 @@ msgstr "%{trip_identity} terminará su recorrido en %{terminating_stop} %{timefr
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "**demora**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**Retrasos**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
@@ -1304,3 +1299,14 @@ msgstr "**Actualización:** %{mode} servicio se reanudó%{summary_location}."
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "Actualización: %{body}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:57
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr " en %{stop_list}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr "no se detendrá en%{affected_stops_location} %{timeframe}"

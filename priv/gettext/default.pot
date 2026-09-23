@@ -1163,11 +1163,6 @@ msgstr ""
 msgid "**multiple stops**"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
-#, elixir-autogen, elixir-format
-msgid "will not stop at %{stop_list} %{timeframe}"
-msgstr ""
-
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:170
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
@@ -1303,4 +1298,15 @@ msgstr ""
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:50
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
+msgstr ""
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:57
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr ""
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
 msgstr ""
