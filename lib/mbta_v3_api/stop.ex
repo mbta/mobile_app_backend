@@ -1,5 +1,6 @@
 defmodule MBTAV3API.Stop do
   alias MBTAV3API.JsonApi.Object
+  alias MobileAppBackend.GlobalDataCache
   use MBTAV3API.JsonApi.Object
   require Util
 
@@ -142,6 +143,14 @@ defmodule MBTAV3API.Stop do
          end
        )}
     end)
+  end
+
+  @spec get_parent_ids([id()], GlobalDataCache.data()) :: [id()]
+  def get_parent_ids(children_stop_ids, global) do
+    children_stop_ids
+    |> Enum.map(&parent_id(global.stops[&1]))
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
   end
 
   @impl JsonApi.Object

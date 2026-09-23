@@ -101,6 +101,17 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     end
 
     test ":broadcast sends message to subscribed pid", state do
+      route = build(:route)
+      route_pattern = build(:route_pattern, route_id: route.id, typicality: :typical)
+      stop = build(:stop)
+
+      trip =
+        build(:trip,
+          id: route_pattern.representative_trip_id,
+          route_pattern_id: route_pattern.id,
+          stop_ids: [stop.id]
+        )
+
       alert_1 =
         build(:alert,
           id: "a_1",
@@ -110,10 +121,16 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
               start: ~B[2024-02-12 09:44:04],
               end: nil
             }
-          ]
+          ],
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
         )
 
-      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
+      alert_2 =
+        build(:alert,
+          id: "a_2",
+          cause: :rail_defect,
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
+        )
 
       AlertsStoreMock
       # 1st and 2nd broadcast
@@ -124,7 +141,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       GlobalDataCacheMock
       |> stub(:default_key, fn -> :default_key end)
       |> stub(:get_data, fn _ ->
-        %{route_patterns: %{}}
+        %{
+          routes: %{route.id => route},
+          route_patterns: %{route_pattern.id => route_pattern},
+          trips: %{trip.id => trip}
+        }
       end)
 
       RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
@@ -140,7 +161,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                  alert_1,
                  [
                    %SummaryEntity{
-                     summary: "**Delays** until further notice due to single tracking"
+                     summary:
+                       "**Delays** on **66 bus** until further notice due to single tracking"
                    }
                  ],
                  state.now
@@ -160,7 +182,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert to_alert_map([
                AlertWithSummaries.from_alert(
                  alert_2,
-                 [%SummaryEntity{summary: "**Delays** due to rail defect"}],
+                 [%SummaryEntity{summary: "**Delays** on **66 bus** due to rail defect"}],
                  state.now
                )
              ]) == new_alerts
@@ -168,6 +190,17 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
 
     test "handle_info(:new_alerts) uses the latest data from the table, not what is included in the message",
          state do
+      route = build(:route)
+      route_pattern = build(:route_pattern, route_id: route.id, typicality: :typical)
+      stop = build(:stop)
+
+      trip =
+        build(:trip,
+          id: route_pattern.representative_trip_id,
+          route_pattern_id: route_pattern.id,
+          stop_ids: [stop.id]
+        )
+
       alert_1 =
         build(:alert,
           id: "a_1",
@@ -177,10 +210,16 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
               start: ~B[2024-02-12 09:44:04],
               end: nil
             }
-          ]
+          ],
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
         )
 
-      alert_2 = build(:alert, id: "a_2", cause: :rail_defect)
+      alert_2 =
+        build(:alert,
+          id: "a_2",
+          cause: :rail_defect,
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
+        )
 
       AlertsStoreMock
       |> expect(:fetch, 1, fn _ -> [alert_1] end)
@@ -188,7 +227,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       GlobalDataCacheMock
       |> stub(:default_key, fn -> :default_key end)
       |> stub(:get_data, fn _ ->
-        %{route_patterns: %{}}
+        %{
+          routes: %{route.id => route},
+          route_patterns: %{route_pattern.id => route_pattern},
+          trips: %{trip.id => trip}
+        }
       end)
 
       RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
@@ -203,7 +246,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  alert_1,
                  [
-                   %SummaryEntity{summary: "**Delays** until further notice"}
+                   %SummaryEntity{summary: "**Delays** on **66 bus** until further notice"}
                  ],
                  state.now
                )
@@ -212,6 +255,15 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
 
     test ":broadcast filters out upcoming single tracking alerts", state do
       route = build(:route)
+      route_pattern = build(:route_pattern, route_id: route.id, typicality: :typical)
+      stop = build(:stop)
+
+      trip =
+        build(:trip,
+          id: route_pattern.representative_trip_id,
+          route_pattern_id: route_pattern.id,
+          stop_ids: [stop.id]
+        )
 
       single_tracking_future =
         build(:alert,
@@ -248,7 +300,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       GlobalDataCacheMock
       |> stub(:default_key, fn -> :default_key end)
       |> stub(:get_data, fn _ ->
-        %{route: %{route.id => route}, route_patterns: %{}}
+        %{
+          routes: %{route.id => route},
+          route_patterns: %{route_pattern.id => route_pattern},
+          trips: %{trip.id => trip}
+        }
       end)
 
       RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
@@ -261,7 +317,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                  [
                    %SummaryEntity{
                      summary:
-                       "**Delays** of about 10 minutes until further notice due to single tracking"
+                       "**Delays** of about 10 minutes on **66 bus** until further notice due to single tracking"
                    }
                  ],
                  state.now
@@ -277,6 +333,17 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
     end
 
     test ":broadcast sends message when the date has changed from inactive to active", state do
+      route = build(:route)
+      route_pattern = build(:route_pattern, route_id: route.id, typicality: :typical)
+      stop = build(:stop)
+
+      trip =
+        build(:trip,
+          id: route_pattern.representative_trip_id,
+          route_pattern_id: route_pattern.id,
+          stop_ids: [stop.id]
+        )
+
       alert_1 =
         build(:alert,
           id: "a_1",
@@ -285,7 +352,8 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
               start: DateTime.add(state.now, 23, :hour),
               end: nil
             }
-          ]
+          ],
+          informed_entity: [%Alert.InformedEntity{route: route.id}]
         )
 
       AlertsStoreMock
@@ -295,7 +363,11 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       GlobalDataCacheMock
       |> stub(:default_key, fn -> :default_key end)
       |> stub(:get_data, fn _ ->
-        %{route_patterns: %{}}
+        %{
+          routes: %{route.id => route},
+          route_patterns: %{route_pattern.id => route_pattern},
+          trips: %{trip.id => trip}
+        }
       end)
 
       RepositoryMock |> stub(:stops, fn _, _ -> {:ok, %{data: []}} end)
@@ -310,7 +382,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
                AlertWithSummaries.from_alert(
                  alert_1,
                  [
-                   %SummaryEntity{summary: "**Delays** starting tomorrow"}
+                   %SummaryEntity{summary: "**Delays** on **66 bus** starting tomorrow"}
                  ],
                  state.now
                )
@@ -325,7 +397,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert to_alert_map([
                AlertWithSummaries.from_alert(
                  alert_1,
-                 [%SummaryEntity{summary: "**Delays** until further notice"}],
+                 [%SummaryEntity{summary: "**Delays** on **66 bus** until further notice"}],
                  new_now
                )
              ]) == new_alerts
