@@ -109,6 +109,29 @@ defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraphTest do
       assert stops |> Enum.all?(&(:digraph.vertex(digraph, &1) != false))
       assert unaffected_stops |> Enum.all?(&(:digraph.vertex(digraph, &1) == false))
     end
+
+    test "removing unaffected stops has disconnected stops" do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+
+      route_pattern_b = global.route_patterns["Green-B-812-0"]
+      route_pattern_c = global.route_patterns["Green-C-832-0"]
+
+      digraph =
+        LineDigraph.build_stops_digraph_from_patterns(
+          [route_pattern_b, route_pattern_c],
+          0,
+          global
+        )
+
+      affected_pattern_stops = %{
+        route_pattern_b.id => ["place-kencl", "place-bland", "place-boyls"],
+        route_pattern_c.id => ["place-kencl", "place-smary"]
+      }
+
+      assert {:error, :disconnected_stops} ==
+               LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops)
+    end
   end
 
   describe "get_first_stops/2" do

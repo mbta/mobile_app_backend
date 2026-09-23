@@ -236,7 +236,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   end
 
   defp alert_location_is_closure?(alert, affected_stops) do
-    alert.effect in [:dock_closure, :station_closure, :stop_closure, :parking_closure] and
+    alert.effect in [:dock_closure, :station_closure, :stop_closure] and
       affected_stops != [] and (Alert.active?(alert) or Alert.active_soon?(alert))
   end
 
