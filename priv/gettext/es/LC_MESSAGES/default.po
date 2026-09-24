@@ -1314,14 +1314,14 @@ msgstr "no se detendrá en%{affected_stops_location} %{timeframe}"
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
 #, elixir-autogen, elixir-format
 msgid "Clockwise"
-msgstr ""
+msgstr "En sentido horario"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:13
 #, elixir-autogen, elixir-format
 msgid "Counterclockwise"
-msgstr ""
+msgstr "En sentido antihorario"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:14
 #, elixir-autogen, elixir-format
 msgid "Looping"
-msgstr ""
+msgstr "Vuelta"

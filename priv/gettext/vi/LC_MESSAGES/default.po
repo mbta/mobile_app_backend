@@ -1314,14 +1314,14 @@ msgstr "sẽ không dừng lại ở%{affected_stops_location} %{timeframe}"
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
 #, elixir-autogen, elixir-format
 msgid "Clockwise"
-msgstr ""
+msgstr "Theo chiều kim đồng hồ"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:13
 #, elixir-autogen, elixir-format
 msgid "Counterclockwise"
-msgstr ""
+msgstr "Ngược chiều kim đồng hồ"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:14
 #, elixir-autogen, elixir-format
 msgid "Looping"
-msgstr ""
+msgstr "Lặp lại"

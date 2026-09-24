@@ -1314,14 +1314,14 @@ msgstr "将不停靠%{affected_stops_location}%{timeframe}"
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
 #, elixir-autogen, elixir-format
 msgid "Clockwise"
-msgstr ""
+msgstr "顺时针"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:13
 #, elixir-autogen, elixir-format
 msgid "Counterclockwise"
-msgstr ""
+msgstr "逆时针"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:14
 #, elixir-autogen, elixir-format
 msgid "Looping"
-msgstr ""
+msgstr "循环"

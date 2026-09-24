@@ -1314,14 +1314,14 @@ msgstr "ne s’arrêtera pas à%{affected_stops_location} %{timeframe}"
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
 #, elixir-autogen, elixir-format
 msgid "Clockwise"
-msgstr ""
+msgstr "Dans le sens des aiguilles d’une montre"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:13
 #, elixir-autogen, elixir-format
 msgid "Counterclockwise"
-msgstr ""
+msgstr "Dans le sens antihoraire"
 
 #: lib/mobile_app_backend/alerts/direction_label.ex:14
 #, elixir-autogen, elixir-format
 msgid "Looping"
-msgstr ""
+msgstr "Boucle"
