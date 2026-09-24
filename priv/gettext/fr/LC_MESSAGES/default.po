@@ -1163,11 +1163,6 @@ msgstr "Ferries"
 msgid "**multiple stops**"
 msgstr "**plusieurs arrêts**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
-#, elixir-autogen, elixir-format
-msgid "will not stop at %{stop_list} %{timeframe}"
-msgstr "ne s’arrêtera pas à %{stop_list} %{timeframe}"
-
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:170
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
@@ -1304,3 +1299,14 @@ msgstr "**Mise à jour :** %{mode} service a repris%{summary_location}."
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "Mise à jour : %{body}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:57
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr " à %{stop_list}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr "ne s’arrêtera pas à%{affected_stops_location} %{timeframe}"

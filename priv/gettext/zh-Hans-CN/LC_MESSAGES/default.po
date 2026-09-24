@@ -1163,11 +1163,6 @@ msgstr "渡轮"
 msgid "**multiple stops**"
 msgstr "**多个站点**"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
-#, elixir-autogen, elixir-format
-msgid "will not stop at %{stop_list} %{timeframe}"
-msgstr "将不停靠%{stop_list}%{timeframe}"
-
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:170
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
@@ -1304,3 +1299,14 @@ msgstr "**更新：**%{mode} 服务已恢复%{summary_location}。"
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "更新：%{body}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:57
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr " 于%{stop_list}到站"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr "将不停靠%{affected_stops_location}%{timeframe}"

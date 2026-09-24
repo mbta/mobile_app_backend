@@ -9,7 +9,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
       summary =
         Templates.standard(
           build(:alert, effect: :dock_closure),
-          "**A**",
+          " at **A**",
           " until further notice",
           "",
           :notification
