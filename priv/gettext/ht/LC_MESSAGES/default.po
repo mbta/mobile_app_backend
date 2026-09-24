@@ -378,7 +378,7 @@ msgstr "Blokaj Nan Tren Machandiz"
 msgid "Hazmat Condition"
 msgstr "Eta Matyè Danjere"
 
-#: lib/mobile_app_backend/alerts/direction_label.ex:17
+#: lib/mobile_app_backend/alerts/direction_label.ex:20
 #, elixir-autogen, elixir-format
 msgid "Heading"
 msgstr "Prale nan direksyon"
@@ -1310,3 +1310,18 @@ msgstr " nan %{stop_list}"
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
 msgstr "p ap rete nan%{affected_stops_location} %{timeframe}"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:12
+#, elixir-autogen, elixir-format
+msgid "Clockwise"
+msgstr "Nan sans zegwi mont lan"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:13
+#, elixir-autogen, elixir-format
+msgid "Counterclockwise"
+msgstr "Nan sans kontrè zegwi mont lan (goch mont)"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:14
+#, elixir-autogen, elixir-format
+msgid "Looping"
+msgstr "Boukl"

@@ -378,7 +378,7 @@ msgstr ""
 msgid "Hazmat Condition"
 msgstr ""
 
-#: lib/mobile_app_backend/alerts/direction_label.ex:17
+#: lib/mobile_app_backend/alerts/direction_label.ex:20
 #, elixir-autogen, elixir-format
 msgid "Heading"
 msgstr ""
@@ -1309,4 +1309,19 @@ msgstr ""
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:66
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr ""
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:12
+#, elixir-autogen, elixir-format
+msgid "Clockwise"
+msgstr ""
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:13
+#, elixir-autogen, elixir-format
+msgid "Counterclockwise"
+msgstr ""
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:14
+#, elixir-autogen, elixir-format
+msgid "Looping"
 msgstr ""

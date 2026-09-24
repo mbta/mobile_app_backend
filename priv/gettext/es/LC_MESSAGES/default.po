@@ -378,7 +378,7 @@ msgstr "Interferencia con trenes de carga"
 msgid "Hazmat Condition"
 msgstr "Condición de materiales peligrosos"
 
-#: lib/mobile_app_backend/alerts/direction_label.ex:17
+#: lib/mobile_app_backend/alerts/direction_label.ex:20
 #, elixir-autogen, elixir-format
 msgid "Heading"
 msgstr "Rumbo"
@@ -1310,3 +1310,18 @@ msgstr " en %{stop_list}"
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
 msgstr "no se detendrá en%{affected_stops_location} %{timeframe}"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:12
+#, elixir-autogen, elixir-format
+msgid "Clockwise"
+msgstr "En sentido horario"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:13
+#, elixir-autogen, elixir-format
+msgid "Counterclockwise"
+msgstr "En sentido antihorario"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:14
+#, elixir-autogen, elixir-format
+msgid "Looping"
+msgstr "Vuelta"

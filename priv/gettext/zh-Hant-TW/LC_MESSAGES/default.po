@@ -378,7 +378,7 @@ msgstr "貨運列車干擾"
 msgid "Hazmat Condition"
 msgstr "危險物質"
 
-#: lib/mobile_app_backend/alerts/direction_label.ex:17
+#: lib/mobile_app_backend/alerts/direction_label.ex:20
 #, elixir-autogen, elixir-format
 msgid "Heading"
 msgstr "方向"
@@ -1310,3 +1310,18 @@ msgstr " 在%{stop_list}"
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
 msgstr "將不停靠%{affected_stops_location}%{timeframe}"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:12
+#, elixir-autogen, elixir-format
+msgid "Clockwise"
+msgstr "順時針"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:13
+#, elixir-autogen, elixir-format
+msgid "Counterclockwise"
+msgstr "逆時針"
+
+#: lib/mobile_app_backend/alerts/direction_label.ex:14
+#, elixir-autogen, elixir-format
+msgid "Looping"
+msgstr "循環"
