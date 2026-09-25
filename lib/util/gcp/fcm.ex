@@ -4,6 +4,7 @@ defmodule Util.GCP.FCM do
 
   [api]: https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages
   """
+  require Logger
 
   defmodule Notification do
     @moduledoc """
@@ -78,12 +79,20 @@ defmodule Util.GCP.FCM do
         }) ::
           {:ok, Req.Response.t()} | {:error, Exception.t()}
   def send(token, parent, body) do
-    Util.GCP.base_req()
-    |> Req.post(
-      base_url: "https://fcm.googleapis.com",
-      auth: {:bearer, token},
-      url: "/v1/#{parent}/messages:send",
-      json: body
-    )
+    if Application.get_env(:mobile_app_backend, :debug_fcm) do
+      Logger.notice(
+        "FCM Request Body: #{inspect(body.message.notification, pretty: false, width: :infinity)}"
+      )
+
+      {:ok, %Req.Response{status: 200, body: %{"name" => "test"}}}
+    else
+      Util.GCP.base_req()
+      |> Req.post(
+        base_url: "https://fcm.googleapis.com",
+        auth: {:bearer, token},
+        url: "/v1/#{parent}/messages:send",
+        json: body
+      )
+    end
   end
 end
