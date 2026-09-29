@@ -51,10 +51,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
         end
 
       %Location.AffectedStops{} ->
-        affected_stop_list(location.stops)
+        gettext(" at %{stop_list}", stop_list: affected_stop_list(location.stops))
 
       stops when is_list(stops) ->
-        affected_stop_list(stops)
+        gettext(" at %{stop_list}", stop_list: affected_stop_list(stops))
 
       _ ->
         ""
@@ -62,10 +62,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
   end
 
   @spec skipped_effect(String.t(), String.t()) :: String.t()
-  def skipped_effect(stops, timeframe) do
-    gettext("will not stop at %{stop_list} %{timeframe}",
+  def skipped_effect(affected_stops_location, timeframe) do
+    gettext("will not stop%{affected_stops_location} %{timeframe}",
       timeframe: timeframe,
-      stop_list: stops
+      affected_stops_location: affected_stops_location
     )
   end
 

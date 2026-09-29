@@ -246,7 +246,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   def alert_location(alert, stop_id, direction_id, [], _global) do
     # Seen on ferry patterns, no patterns match provided becuase they are all in the same direction
     Logger.notice(
-      "#{__MODULE__}: No patterns match for alert: #{inspect(alert)} at stop: #{stop_id} with direction: #{direction_id}"
+      "#{__MODULE__}: No patterns match for alert: #{alert.id} at stop: #{stop_id} with direction: #{direction_id}"
     )
 
     nil

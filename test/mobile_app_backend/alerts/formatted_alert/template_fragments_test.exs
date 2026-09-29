@@ -68,6 +68,20 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
                  route_type: :bus
                })
     end
+
+    test "affected stops" do
+      assert " at **Downtown Crossing**, **Oak Grove**, and **Park Street**" ==
+               TemplateFragments.location(:suspension, %Location.AffectedStops{
+                 stops: ["Downtown Crossing", "Oak Grove", "Park Street"]
+               })
+    end
+
+    test "affected stops with more than 3 stops" do
+      assert " at **multiple stops**" ==
+               TemplateFragments.location(:suspension, %Location.AffectedStops{
+                 stops: ["Downtown Crossing", "Oak Grove", "Park Street", "Harvard", "Kendall"]
+               })
+    end
   end
 
   describe "summary_timeframe/1" do

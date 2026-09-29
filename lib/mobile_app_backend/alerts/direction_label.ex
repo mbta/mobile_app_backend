@@ -8,7 +8,10 @@ defmodule MobileAppBackend.Alerts.DirectionLabel do
       "East" => gettext("Eastbound"),
       "West" => gettext("Westbound"),
       "Inbound" => gettext("Inbound"),
-      "Outbound" => gettext("Outbound")
+      "Outbound" => gettext("Outbound"),
+      "Clockwise" => gettext("Clockwise"),
+      "Counterclockwise" => gettext("Counterclockwise"),
+      "Loop" => gettext("Looping")
     }
   end
 
