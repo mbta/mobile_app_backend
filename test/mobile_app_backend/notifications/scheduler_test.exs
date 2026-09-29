@@ -640,24 +640,33 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         type: :commuter_rail
       )
 
+    route_pattern =
+      build(:route_pattern,
+        id: "CR-Fitchburg-d82ea33a-1",
+        direction_id: 1,
+        route_id: route.id,
+        representative_trip_id: "ERMLTieJob-819597-438"
+      )
+
     trip =
       build(:trip,
         id: "ERMLTieJob-819597-438",
         route_id: "CR-Fitchburg",
+        route_pattern_id: route_pattern.id,
         direction_id: 1,
         stop_ids: ["FR-0201-02"]
       )
 
     trip_id = trip.id
 
-    start_time = DateTime.add(now, 3, :hour)
+    trip_time = DateTime.add(now, 3, :hour)
 
     alert =
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: start_time,
-            end: DateTime.add(now, 7, :hour)
+            start: DateTime.add(trip_time, -1, :hour),
+            end: DateTime.add(trip_time, 1, :hour)
           }
         ],
         effect: :cancellation,
@@ -681,10 +690,11 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
     RepositoryMock
-    |> expect(:schedules, fn _, _ ->
+    |> expect(:schedules, 2, fn _, _ ->
       ok_response(
         [
           build(:schedule,
+            departure_time: trip_time,
             trip_id: trip.id,
             stop_id: stop.id,
             route_id: route.id
@@ -712,14 +722,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     |> expect(:get_data, fn _ ->
       %{
         routes: %{route.id => route},
-        route_patterns: %{
-          "CR-Fitchburg-d82ea33a-1" =>
-            build(:route_pattern,
-              id: "CR-Fitchburg-d82ea33a-1",
-              route_id: route.id,
-              representative_trip_id: trip.id
-            )
-        },
+        route_patterns: %{route_pattern.id => route_pattern},
         trips: %{trip.id => trip},
         stops: %{
           parent_stop.id => parent_stop,
@@ -752,7 +755,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "alert_id" => alert.id,
         "title" => "Fitchburg Line",
         "body" =>
-          "Trip cancelled starting #{Util.DateTime.datetime_to_string(start_time, :short_time)} today",
+          "#{Util.DateTime.datetime_to_string(trip_time, :short_time)} train from Concord is cancelled today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
         "upstream_timestamp" => nil,
@@ -773,24 +776,32 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         type: :commuter_rail
       )
 
+    route_pattern =
+      build(:route_pattern,
+        direction_id: 1,
+        route_id: "CR-Fitchburg",
+        representative_trip_id: "ERMLTieJob-819597-438"
+      )
+
     trip =
       build(:trip,
         id: "ERMLTieJob-819597-438",
         route_id: "CR-Fitchburg",
+        route_pattern_id: route_pattern.id,
         direction_id: 1,
         stop_ids: ["FR-0201-02"]
       )
 
     trip_id = trip.id
 
-    start_time = DateTime.add(now, 20, :minute)
+    trip_time = DateTime.add(now, 20, :minute)
 
     alert =
       build(:alert,
         active_period: [
           %MBTAV3API.Alert.ActivePeriod{
-            start: start_time,
-            end: DateTime.add(now, 7, :hour)
+            start: DateTime.add(trip_time, -1, :hour),
+            end: DateTime.add(trip_time, 1, :hour)
           }
         ],
         effect: :cancellation,
@@ -814,10 +825,11 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
 
     RepositoryMock
-    |> expect(:schedules, fn _, _ ->
+    |> expect(:schedules, 2, fn _, _ ->
       ok_response(
         [
           build(:schedule,
+            departure_time: trip_time,
             trip_id: trip.id,
             stop_id: stop.id,
             route_id: route.id
@@ -845,14 +857,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     |> expect(:get_data, fn _ ->
       %{
         routes: %{route.id => route},
-        route_patterns: %{
-          "CR-Fitchburg-d82ea33a-1" =>
-            build(:route_pattern,
-              id: "CR-Fitchburg-d82ea33a-1",
-              route_id: route.id,
-              representative_trip_id: trip.id
-            )
-        },
+        route_patterns: %{route_pattern.id => route_pattern},
         trips: %{trip.id => trip},
         stops: %{
           parent_stop.id => parent_stop,
@@ -885,7 +890,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         "alert_id" => alert.id,
         "title" => "Fitchburg Line",
         "body" =>
-          "Trip cancelled starting #{Util.DateTime.datetime_to_string(start_time, :short_time)} today",
+          "#{Util.DateTime.datetime_to_string(trip_time, :short_time)} train from Concord is cancelled today",
         "deep_link_path" => "/s/#{parent_stop.id}/r/#{route.id}/d/1",
         "type" => "reminder",
         "upstream_timestamp" => nil,

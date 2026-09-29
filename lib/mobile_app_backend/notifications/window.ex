@@ -57,20 +57,22 @@ defmodule MobileAppBackend.Notifications.Window do
     )
   end
 
-  @spec next_overlap([Alert.ActivePeriod.t()], [t()], DateTime.t()) :: DateTime.t() | nil
-  def next_overlap(active_periods, windows, now)
-      when is_list(active_periods)
+  @type overlap_target :: Alert.ActivePeriod.t() | DateTime.t()
+
+  @spec next_overlap([overlap_target()], [t()], DateTime.t()) :: DateTime.t() | nil
+  def next_overlap(targets, windows, now)
+      when is_list(targets)
       when is_list(windows) do
-    active_periods
-    |> Stream.flat_map(fn active_period -> Stream.map(windows, &{active_period, &1}) end)
-    |> Stream.map(fn {active_period, window} ->
-      next_overlap(active_period, window, now)
+    targets
+    |> Stream.flat_map(fn target -> Stream.map(windows, &{target, &1}) end)
+    |> Stream.map(fn {target, window} ->
+      next_overlap(target, window, now)
     end)
     |> Stream.reject(&is_nil/1)
     |> Enum.min(DateTime, fn -> nil end)
   end
 
-  @spec next_overlap(Alert.ActivePeriod.t(), t(), DateTime.t()) :: DateTime.t() | nil
+  @spec next_overlap(overlap_target(), t(), DateTime.t()) :: DateTime.t() | nil
   def next_overlap(%Alert.ActivePeriod{} = active_period, %__MODULE__{} = window, now) do
     period_start = Enum.max([active_period.start, now], DateTime)
     period_days = days_between(period_start, active_period.end)
@@ -106,6 +108,12 @@ defmodule MobileAppBackend.Notifications.Window do
           window_start
       end
     end)
+  end
+
+  def next_overlap(%DateTime{} = datetime, %__MODULE__{} = window, _now) do
+    if open?(window, datetime) do
+      datetime
+    end
   end
 
   # A window whose end time is in the calendar day after its selected day of the week
