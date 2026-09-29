@@ -181,7 +181,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       deep_link_path: deep_link_path(notification.alert_id, subscriptions),
       upstream_timestamp: upstream_timestamp,
       type: type,
-      analytics_label: analytics_label(subscriptions, notification.alert_effect, type)
+      analytics_label: analytics_label(subscriptions, notification.alert_effect, type),
+      metadata: %{subscriptions: subscriptions, locale: notification.locale}
     }
     |> Deliverer.new()
     |> Oban.insert!()
