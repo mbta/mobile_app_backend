@@ -64,12 +64,13 @@ if Mix.env() == :test do
           end
         )
 
-        [outgoing_notification] =
-          Notifications.Engine.user_notifications(
-            scenario.subscriptions,
-            [scenario.alert],
-            scenario.at_time
-          )
+        # TODO: Hook this back up
+        [outgoing_notification] = ["TODO"]
+        #   Notifications.Engine.user_notifications(
+        #     scenario.subscriptions,
+        #     [scenario.alert],
+        #      scenario.at_time
+        #   )
 
         Application.put_env(:mobile_app_backend, MBTAV3API.Repository, real_repo)
 
