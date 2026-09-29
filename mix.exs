@@ -68,6 +68,8 @@ defmodule MobileAppBackend.MixProject do
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 1.0"},
       {:goth, "~> 1.4"},
+      # for ex_aws
+      {:hackney, "~> 4.0"},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.11"},
       {:lazy_html, ">= 0.0.0", only: :test},
