@@ -40,7 +40,7 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
   def delete_users(conn, _params) do
     count_before = Repo.aggregate(User, :count)
 
-    Repo.delete_all(from u in User, where: like(u.fcm_token, "mock_user_%"))
+    delete_mock_users_in_chunks()
 
     count_after = Repo.aggregate(User, :count)
 
@@ -48,6 +48,23 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
       count_before: count_before,
       count_after: count_after
     })
+  end
+
+  defp delete_mock_users_in_chunks(chunk_size \\ 1000) do
+    chunk_query =
+      from u in User,
+        where: like(u.fcm_token, "mock_user_%"),
+        select: u.id,
+        limit: ^chunk_size
+
+    delete_mock_users_chunk(chunk_query)
+  end
+
+  defp delete_mock_users_chunk(chunk_query) do
+    case Repo.delete_all(from u in User, where: u.id in subquery(chunk_query)) do
+      {0, _} -> :ok
+      {_count, _} -> delete_mock_users_chunk(chunk_query)
+    end
   end
 
   defp create_user_with_subscriptions do
@@ -110,8 +127,11 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
       |> Map.get(:stop_ids)
       |> List.first()
 
+    route_or_line_id =
+      if String.starts_with?(route_id, "Green-"), do: "line-Green", else: route_id
+
     %Subscription{
-      route_id: route_id,
+      route_id: route_or_line_id,
       stop_id: stop_id,
       direction_id: route_pattern.direction_id,
       include_accessibility: true,

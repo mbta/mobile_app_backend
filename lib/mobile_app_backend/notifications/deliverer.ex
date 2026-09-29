@@ -74,7 +74,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         #  Req.get("https://b7665c6f-b9ba-4689-8b87-6b88d4d9e8f7.mock.pstmn.io/mock/notifications")
         :timer.sleep(300)
 
-        {:ok, :slept}
+        :ok
       else
         FCM.send(
           gcp_token,
@@ -83,6 +83,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         )
         |> handle_fcm_response(user)
       end
+
     Logger.info(
       "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
     )
