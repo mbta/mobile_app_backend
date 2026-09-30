@@ -23,4 +23,17 @@ defmodule MobileAppBackend.User do
 
     has_many(:delivered_notifications, MobileAppBackend.Notifications.DeliveredNotification)
   end
+
+  @doc """
+  Explodes a user into a list of users with one subscription each
+  """
+  @spec explode_user_subscriptions(t()) :: [t()]
+  def explode_user_subscriptions(user) do
+    Enum.map(user.notification_subscriptions, fn subscription ->
+      %MobileAppBackend.User{
+        user
+        | notification_subscriptions: [subscription]
+      }
+    end)
+  end
 end

@@ -85,19 +85,58 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           {User.t(), OutgoingNotification.Localized.t()}
         ]
   defp find_new_recipients(alerts, users, now) do
+    global = MobileAppBackend.GlobalDataCache.get()
+
+
     Enum.flat_map(users, &new_notifications(&1, alerts, now))
   end
 
-  @spec new_notifications(User.t(), [Alert.t()], DateTime.t()) :: [
+ def new_entrypoint(alerts, users, now) do
+      global = MobileAppBackend.GlobalDataCache.get()
+         user_subscriptions = Enum.flat_map(users, &MobileAppBackend.User.explode_user_subscriptions/1)
+
+    user_subscriptions
+      Enum.group_by(fn %User{notification_subscriptions: [subscription]} ->
+        Subscription.Key.from_subscription(subscription)
+      end)
+      |> Enum.map(fn {subscription_key, users} ->
+        {subscription_key, new_notifications_for_subscription_key({subscription_key, users}, alerts, now)}
+      end)
+      |> Enum.map()
+
+
+ end
+
+ @spec new_notifications_for_subscription_key(Subscription.Key.t(), [User.t()], [Alert.t()], DateTime.t()) :: %{
+         User.t() => [{Alert.t(), DeliveredNotification.type()}]
+       }
+  defp new_notifications_for_subscription_key(subscription_key, users, alerts, now) do
+    {engine_us, relevant_alerts} =
+      :timer.tc(
+        &Engine.alerts_for_subscription_key/4,
+        [subscription_key, alerts, now, global],
+        :microsecond
+      )
+
+    Logger.info("#{__MODULE__} alerts_for_subscription_key duration=#{engine_us}")
+
+    Engine.user_notification_types({subscription_key, users}, relevant_alerts, now, global)
+  end
+
+  @spec new_notifications({Subscription.Key.t(), [User.t()]}, [Alert.t()], DateTime.t()) :: [
           {User.t(), OutgoingNotification.Localized.t()}
         ]
   defp new_notifications(
-         %User{id: user_id, notification_subscriptions: subscriptions, locale: locale} = user,
+         {subscription_key, users},
          alerts,
          now
        ) do
-    {engine_us, outgoing_notifications} =
-      :timer.tc(&Engine.user_notifications/3, [subscriptions, alerts, now], :microsecond)
+    {engine_us, relevant_alerts} =
+      :timer.tc(
+        &Engine.alerts_for_subscription_key/4,
+        [subscription_key, alerts, now],
+        :microsecond
+      )
 
     Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
