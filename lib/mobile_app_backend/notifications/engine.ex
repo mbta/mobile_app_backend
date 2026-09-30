@@ -16,6 +16,8 @@ defmodule MobileAppBackend.Notifications.Engine do
 
   @slow_step_threshold_us 10_000
 
+  @cr_core MapSet.new(["place-north", "place-sstat", "place-bbsta", "place-rugg"])
+
   # Function gets called for a single user at a time from a Oban worker
   @spec user_notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
           OutgoingNotification.t()
@@ -249,13 +251,21 @@ defmodule MobileAppBackend.Notifications.Engine do
          route_ids,
          target_stop_with_children
        ) do
-    cr_core? =
-      Enum.any?(
-        target_stop_with_children,
-        &(&1 in ["place-north", "place-sstat", "place-bbsta", "place-rugg"])
-      )
+    target_stop_set = MapSet.new(target_stop_with_children)
 
-    applicable_alerts =
+    cr_core? =
+      target_stop_set
+      |> MapSet.intersection(@cr_core)
+      |> MapSet.size() > 0
+
+    alerts =
+      if cr_core? do
+        Enum.filter(alerts, &(&1.effect != :track_change))
+      else
+        alerts
+      end
+
+
       Alert.applicable_alerts(
         alerts,
         subscription.direction_id,
@@ -263,12 +273,6 @@ defmodule MobileAppBackend.Notifications.Engine do
         target_stop_with_children,
         nil
       )
-
-    if cr_core? do
-      Enum.filter(applicable_alerts, &(&1.effect != :track_change))
-    else
-      applicable_alerts
-    end
   end
 
   @spec downstream_alerts([Alert.t()], [Route.id()], [Stop.id()], GlobalDataCache.data()) :: [
