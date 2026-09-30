@@ -19,7 +19,9 @@ defmodule MobileAppBackend.GlobalDataCache do
             (stop_id :: String.t()) => route_pattern_ids :: [String.t()]
           },
           routes: Object.route_map(),
+          routes_by_line: %{Line.id() => [Route.id()]},
           route_patterns: Object.route_pattern_map(),
+          route_patterns_by_route: %{Route.id() => [RoutePattern.id()]},
           stops: Object.stop_map(),
           trips: Object.trip_map(),
           stop_blocklist: [String.t()]
@@ -83,6 +85,28 @@ defmodule MobileAppBackend.GlobalDataCache do
       MobileAppBackend.GlobalDataCache.Module,
       MobileAppBackend.GlobalDataCache.Impl
     ).route_ids_for_stops(stop_ids, key)
+  end
+
+  @doc """
+  Adds calculated fields to pre-compute common operations, such as getting all routes for a line
+  """
+  def add_calculated_fields(data) do
+    routes = data.routes
+    route_patterns = data.route_patterns
+
+    routes_by_line =
+      routes
+      |> Map.values()
+      |> Enum.group_by(& &1.line_id, & &1.id)
+
+    patterns_by_route =
+      route_patterns
+      |> Map.values()
+      |> Enum.group_by(& &1.route_id, & &1.id)
+
+    data
+    |> Map.put(:route_patterns_by_route, patterns_by_route)
+    |> Map.put(:routes_by_line, routes_by_line)
   end
 end
 
@@ -177,6 +201,8 @@ defmodule MobileAppBackend.GlobalDataCache.Impl do
       trips: trips,
       stop_blocklist: MobileAppBackend.StopBlocklist.get()
     }
+
+    data = GlobalDataCache.add_calculated_fields(data)
 
     :persistent_term.put(key, data)
 

@@ -32,7 +32,9 @@ defmodule MobileAppBackend.Notifications.Engine do
           Enum.map(subscriptions, fn subscription ->
             {subscription_us, relevant_alerts} =
               :timer.tc(
-                fn -> extract_relevant_alerts_for_subscription(alerts, subscription, now, global_data) end,
+                fn ->
+                  extract_relevant_alerts_for_subscription(alerts, subscription, now, global_data)
+                end,
                 :microsecond
               )
 
@@ -51,7 +53,10 @@ defmodule MobileAppBackend.Notifications.Engine do
         fn ->
           Enum.flat_map(relevant_alerts_by_subscription, fn {subscription, relevant_alerts} ->
             {subscription_us, candidates} =
-              :timer.tc(fn -> get_all_candidates(subscription, relevant_alerts, now) end, :microsecond)
+              :timer.tc(
+                fn -> get_all_candidates(subscription, relevant_alerts, now) end,
+                :microsecond
+              )
 
             log_slow_step("evaluate_candidates", subscription_us)
 
@@ -171,10 +176,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     route_ids =
       case subscription.route_id do
         "line-" <> _ ->
-          global_data.routes
-          |> Map.values()
-          |> Enum.filter(&(&1.line_id == subscription.route_id))
-          |> Enum.map(& &1.id)
+          global_data.routes_by_line[subscription.route_id]
 
         _ ->
           [subscription.route_id]
@@ -269,9 +271,20 @@ defmodule MobileAppBackend.Notifications.Engine do
     end
   end
 
+  @spec downstream_alerts([Alert.t()], [Route.id()], [Stop.id()], GlobalDataCache.data()) :: [
+          Alert.t()
+        ]
   defp downstream_alerts(alerts, route_ids, target_stop_with_children, global_data) do
+    pattern_ids =
+      global_data.route_patterns_by_route
+      |> Map.take(route_ids)
+      |> Map.values()
+      |> List.flatten()
+
     route_patterns =
-      global_data.route_patterns |> Map.values() |> Enum.filter(&(&1.route_id in route_ids))
+      global_data.route_patterns
+      |> Map.take(pattern_ids)
+      |> Map.values()
 
     Alert.alerts_downstream_for_patterns(
       alerts,
