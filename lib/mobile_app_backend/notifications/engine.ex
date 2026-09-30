@@ -208,7 +208,9 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    [applicable_alerts, downstream_alerts, elevator_alerts]
+    |> List.flatten()
+    |> Enum.uniq_by(& &1.id)
   end
 
   defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
@@ -265,14 +267,13 @@ defmodule MobileAppBackend.Notifications.Engine do
         alerts
       end
 
-
-      Alert.applicable_alerts(
-        alerts,
-        subscription.direction_id,
-        route_ids,
-        target_stop_with_children,
-        nil
-      )
+    Alert.applicable_alerts(
+      alerts,
+      subscription.direction_id,
+      route_ids,
+      target_stop_with_children,
+      nil
+    )
   end
 
   @spec downstream_alerts([Alert.t()], [Route.id()], [Stop.id()], GlobalDataCache.data()) :: [
