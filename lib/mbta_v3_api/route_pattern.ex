@@ -158,11 +158,12 @@ defmodule MBTAV3API.RoutePattern do
   end
 
   @doc """
-  Get the ids given a. list of route patterns.
+  Get the ids given a list of route patterns.
   """
   @spec ids([t()]) :: [String.t()]
-  def ids([]), do: []
-  def ids([%__MODULE__{} = pattern | rest]), do: [pattern.id | ids(rest)]
+  def ids(list) do
+    for %__MODULE__{id: id} <- list, do: id
+  end
 
   defp match_pattern_route?(
          %__MODULE__{route_id: pattern_route_id},

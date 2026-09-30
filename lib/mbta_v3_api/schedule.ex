@@ -99,6 +99,7 @@ defmodule MBTAV3API.Schedule do
   Get the ids given a list of schedules.
   """
   @spec ids([t()]) :: [String.t()]
-  def ids([]), do: []
-  def ids([%__MODULE__{} = schedule | rest]), do: [schedule.id | ids(rest)]
+  def ids(list) do
+    for %__MODULE__{id: id} <- list, do: id
+  end
 end
