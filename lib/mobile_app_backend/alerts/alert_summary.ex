@@ -127,7 +127,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           summaries
           |> Enum.map(& &1.location)
           |> Enum.uniq()
-          |> deduplicate_locations()
+          |> deduplicate_locations(alert)
 
         %__MODULE__.AllClear{
           effect: effect,
@@ -140,7 +140,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           summaries
           |> Enum.map(& &1.location)
           |> Enum.uniq()
-          |> deduplicate_locations()
+          |> deduplicate_locations(alert)
 
         timeframe =
           summaries
@@ -172,8 +172,13 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  defp deduplicate_locations(locations) do
+  @spec deduplicate_locations([Location.t()], Alert.t()) :: Location.t()
+  defp deduplicate_locations(locations, alert) do
     case locations do
+      [] ->
+        Logger.warning("Combining locations: [] for alert: #{alert.id} reason is known")
+        %__MODULE__.Location.Omit{reason: :known}
+
       [location] ->
         location
 
@@ -202,11 +207,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         if Enum.sort(stop_list_1) == Enum.sort(stop_list_2) do
           location
         else
-          nil
+          %__MODULE__.Location.Omit{reason: :combine_affected_stops_differ}
         end
 
       _ ->
-        nil
+        Logger.warning(
+          "Combining locations: #{inspect(locations)} for alert: #{alert.id} reason is unknown"
+        )
+
+        %__MODULE__.Location.Omit{reason: :combine_unknown}
     end
   end
 
@@ -249,7 +258,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       "#{__MODULE__}: No patterns match for alert: #{alert.id} at stop: #{stop_id} with direction: #{direction_id}"
     )
 
-    nil
+    %Location.Omit{reason: :combination_with_no_route_patterns}
   end
 
   def alert_location(alert, stop_id, direction_id, patterns, global) do
@@ -271,7 +280,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
-          nil
+          %Location.Omit{reason: :multiple_stops_for_bus}
 
         true ->
           alert_location_for_multiple_stops(
@@ -521,7 +530,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           "#{__MODULE__} stop: #{stop_id} not found on route patterns: #{Enum.map_join(patterns, ", ", & &1.id)}"
         )
 
-        nil
+        %Location.Omit{reason: :stop_not_found_in_digraph}
 
       {:error, :disconnected_stops} ->
         if alert.effect == :suspension or alert.effect == :shuttle do

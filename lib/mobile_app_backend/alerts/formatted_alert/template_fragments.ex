@@ -56,6 +56,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
       stops when is_list(stops) ->
         gettext(" at %{stop_list}", stop_list: affected_stop_list(stops))
 
+      %Location.Omit{} ->
+        ""
+
       _ ->
         ""
     end

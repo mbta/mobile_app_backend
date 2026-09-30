@@ -53,6 +53,20 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Location do
     defstruct [:stops]
   end
 
+  defmodule Omit do
+    @type omit_reason ::
+            :multiple_stops_for_bus
+            | :combine_affected_stops_differ
+            | :combine_unknown
+            | :combination_with_no_route_patterns
+            | :stop_not_found_in_digraph
+            | :unknown
+
+    @type t :: %__MODULE__{reason: omit_reason()}
+    @derive PolymorphicJson
+    defstruct [:reason]
+  end
+
   @type t ::
           DirectionToStop.t()
           | SingleStop.t()
@@ -60,4 +74,5 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Location do
           | SuccessiveStops.t()
           | WholeRoute.t()
           | AffectedStops.t()
+          | Omit.t()
 end
