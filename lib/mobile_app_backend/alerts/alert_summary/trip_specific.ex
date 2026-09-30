@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
+  require Logger
   alias MBTAV3API.Alert
   alias MBTAV3API.Repository
   alias MBTAV3API.Route
@@ -77,46 +78,52 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
         global,
         context
       ) do
-    informed_schedules =
-      Enum.filter(schedules || [], fn schedule ->
-        Enum.any?(alert.informed_entity, &(&1.trip == schedule.trip_id))
-      end)
-
-    case alert.effect do
-      :shuttle ->
-        AlertSummary.TripShuttle.summary(
-          alert,
-          stop_id,
-          direction_id,
-          patterns,
-          at_time,
-          informed_schedules,
-          global,
-          context
-        )
-
-      effect when effect in [:dock_closure, :station_closure, :stop_closure] ->
-        trip_stop_bypass_summary(
-          alert,
-          stop_id,
-          patterns,
-          at_time,
-          informed_schedules,
-          global,
-          context
-        )
+    case Alert.trip_ids(alert) do
+      [] ->
+        nil
 
       _ ->
-        trip_specific_other_summary(
-          alert,
-          stop_id,
-          direction_id,
-          patterns,
-          at_time,
-          informed_schedules,
-          global,
-          context
-        )
+        informed_schedules =
+          Enum.filter(schedules || [], fn schedule ->
+            Enum.any?(alert.informed_entity, &(&1.trip == schedule.trip_id))
+          end)
+
+        case alert.effect do
+          :shuttle ->
+            AlertSummary.TripShuttle.summary(
+              alert,
+              stop_id,
+              direction_id,
+              patterns,
+              at_time,
+              informed_schedules,
+              global,
+              context
+            )
+
+          effect when effect in [:dock_closure, :station_closure, :stop_closure] ->
+            trip_stop_bypass_summary(
+              alert,
+              stop_id,
+              patterns,
+              at_time,
+              informed_schedules,
+              global,
+              context
+            )
+
+          _ ->
+            trip_specific_other_summary(
+              alert,
+              stop_id,
+              direction_id,
+              patterns,
+              at_time,
+              informed_schedules,
+              global,
+              context
+            )
+        end
     end
   end
 
@@ -307,9 +314,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
   defp trip_identity_is_today(stop_id, at_time, route_type, informed_schedules, global, context) do
     case informed_schedules do
       [] ->
+        Logger.info("No informed schedules for stop_id #{stop_id} and route type #{route_type}")
         {nil, nil}
 
       [%Schedule{}] when is_nil(route_type) ->
+        Logger.info(
+          "Present informed schedule for stop_id #{stop_id} but no route type available"
+        )
+
         {nil, nil}
 
       [%Schedule{} = informed_trip]

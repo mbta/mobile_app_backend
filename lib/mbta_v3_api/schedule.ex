@@ -94,4 +94,11 @@ defmodule MBTAV3API.Schedule do
         end
     end
   end
+
+  @doc """
+  Get the ids given a list of schedules.
+  """
+  @spec ids([t()]) :: [String.t()]
+  def ids([]), do: []
+  def ids([%__MODULE__{} = schedule | rest]), do: [schedule.id | ids(rest)]
 end

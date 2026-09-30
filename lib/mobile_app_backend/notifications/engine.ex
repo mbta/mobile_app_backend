@@ -344,16 +344,54 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     schedules = schedules_for_subscription(alert, subscription, global_data, now)
 
-    AlertSummary.summarizing(
-      alert,
-      subscription,
-      patterns,
-      now,
-      schedules,
-      global_data,
-      :notification,
-      has_multiple_active_alerts
-    )
+    alert_summary =
+      AlertSummary.summarizing(
+        alert,
+        subscription,
+        patterns,
+        now,
+        schedules,
+        global_data,
+        :notification,
+        has_multiple_active_alerts
+      )
+
+    log_alert_summary_type_issues(alert, alert_summary, patterns, schedules)
+
+    alert_summary
+  end
+
+  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [RoutePattern.t()], [
+          Schedule.t()
+        ]) :: :ok
+  defp log_alert_summary_type_issues(alert, alert_summary, patterns, schedules) do
+    case alert_summary do
+      %AlertSummary.Standard{} ->
+        if Alert.trip_ids(alert) != [] do
+          Logger.warning(
+            "Alert #{alert.id} has trips Ids but is summarized as Standard. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      %AlertSummary.TripSpecific{} ->
+        if Alert.trip_ids(alert) == [] do
+          Logger.warning(
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Specific. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      %AlertSummary.TripShuttle{} ->
+        if Alert.trip_ids(alert) == [] do
+          Logger.warning(
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Shuttle. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      _ ->
+        :ok
+    end
+
+    :ok
   end
 
   defp schedules_for_subscription(alert, subscription, global_data, now) do
