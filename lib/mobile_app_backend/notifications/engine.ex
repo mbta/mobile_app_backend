@@ -28,14 +28,14 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     log_slow_step("global_data", global_data_us)
 
-    {relevance_us, relevant_alerts_by_subscription} =
+    {relevance_us, alerts_by_subscription} =
       :timer.tc(
         fn ->
           Enum.map(subscriptions, fn subscription ->
             {subscription_us, relevant_alerts} =
               :timer.tc(
                 fn ->
-                  extract_relevant_alerts_for_subscription(alerts, subscription, now, global_data)
+                  alerts_for_subscription(alerts, subscription, now, global_data)
                 end,
                 :microsecond
               )
@@ -53,10 +53,10 @@ defmodule MobileAppBackend.Notifications.Engine do
     {candidate_us, all_candidates} =
       :timer.tc(
         fn ->
-          Enum.flat_map(relevant_alerts_by_subscription, fn {subscription, relevant_alerts} ->
+          Enum.flat_map(alerts_by_subscription, fn {subscription, alerts} ->
             {subscription_us, candidates} =
               :timer.tc(
-                fn -> get_all_candidates(subscription, relevant_alerts, now) end,
+                fn -> notification_candidates(subscription, alerts, now) end,
                 :microsecond
               )
 
@@ -115,7 +115,7 @@ defmodule MobileAppBackend.Notifications.Engine do
                     end
 
                   relevant_alerts =
-                    relevant_alerts_by_subscription
+                    alerts_by_subscription
                     |> Enum.filter(fn {subscription, _relevant_alerts} ->
                       subscription in subscriptions
                     end)
@@ -159,7 +159,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     notifications
   end
 
-  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, now) do
+  defp notification_candidates(%Subscription{} = subscription, relevant_alerts, now) do
     relevant_alerts =
       relevant_alerts
       |> Enum.filter(&Alert.eligible_for_notification?(&1))
@@ -169,7 +169,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
-  defp extract_relevant_alerts_for_subscription(
+  defp alerts_for_subscription(
          alerts,
          %Subscription{} = subscription,
          now,
@@ -307,7 +307,6 @@ defmodule MobileAppBackend.Notifications.Engine do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp alert_candidate(subscription, alert, now) do
     open_now? = Enum.any?(subscription.windows, &Window.open?(&1, now))
-
     next_overlap = Window.next_overlap(alert.active_period, subscription.windows, now)
     next_overlap_in_hours = if next_overlap, do: DateTime.diff(next_overlap, now, :minute) / 60
     active_now? = next_overlap_in_hours <= 0
@@ -319,34 +318,41 @@ defmodule MobileAppBackend.Notifications.Engine do
       is_nil(next_overlap) ->
         nil
 
-      open_now? and active_now? and
-          can_send_for_candidate?(
-            subscription,
-            alert,
-            {:notification, alert.last_push_notification_timestamp}
-          ) ->
-        {alert, :notification, subscription}
-
-      open_now? and active_now? and
-          can_send_for_candidate?(
-            subscription,
-            alert,
-            {:update, alert.last_push_notification_timestamp}
-          ) ->
-        {alert, :update, subscription}
-
       open_now? and active_now? ->
-        nil
+        candidate_in_open_active_window(alert, subscription)
 
-      open_now? and next_overlap_in_hours < 24 and
-          can_send_for_candidate?(subscription, alert, :reminder) ->
-        {alert, :reminder, subscription}
-
-      next_overlap_in_hours < 12 and
+      ((open_now? and next_overlap_in_hours < 24) or next_overlap_in_hours < 12) and
           can_send_for_candidate?(subscription, alert, :reminder) ->
         {alert, :reminder, subscription}
 
       true ->
+        nil
+    end
+  end
+
+  defp candidate_in_open_active_window(alert, subscription) do
+    last_sent =
+      DeliveredNotification.last_sent(subscription.user_id, alert.id, [:notification, :update])
+
+    case last_sent do
+      nil ->
+        Logger.error("A")
+        {alert, :notification, subscription}
+
+      %{type: :notification, upstream_timestamp: upstream_timestamp}
+      when is_nil(upstream_timestamp) and not is_nil(alert.last_push_notification_timestamp) ->
+        {alert, :update, subscription}
+
+      %{upstream_timestamp: upstream_timestamp} ->
+        if !is_nil(upstream_timestamp) and !is_nil(alert.last_push_notification_timestamp) and
+             DateTime.diff(alert.last_push_notification_timestamp, upstream_timestamp, :second) >
+               0 do
+          {alert, :update, subscription}
+        else
+          nil
+        end
+
+      _ ->
         nil
     end
   end
