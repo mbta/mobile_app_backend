@@ -159,26 +159,33 @@ defmodule MobileAppBackend.Notifications.Engine do
     notifications
   end
 
-  @spec alerts_for_subscription_key(Subscription.Key.t(), [Alert.t()], DateTime.t(), map()) :: [
-          Alert.t()
-        ]
-  def alerts_for_subscription_key(
-        subscription_key,
-        alerts,
-        now,
-        global_data
-      ) do
+  defp notification_candidates(%Subscription{} = subscription, relevant_alerts, now) do
+    relevant_alerts =
+      relevant_alerts
+      |> Enum.filter(&Alert.eligible_for_notification?(&1))
+
+    Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
+      List.wrap(alert_candidate(subscription, alert, now))
+    end)
+  end
+
+  defp alerts_for_subscription(
+         alerts,
+         %Subscription{} = subscription,
+         now,
+         global_data
+       ) do
     route_ids =
-      case subscription_key.route_id do
+      case subscription.route_id do
         "line-" <> _ ->
-          global_data.routes_by_line[subscription_key.route_id]
+          global_data.routes_by_line[subscription.route_id]
 
         _ ->
-          [subscription_key.route_id]
+          [subscription.route_id]
       end
 
     target_stop_with_children =
-      case Stop.parent_if_exists(global_data.stops[subscription_key.stop_id], global_data.stops) do
+      case Stop.parent_if_exists(global_data.stops[subscription.stop_id], global_data.stops) do
         %Stop{id: target_stop_id, child_stop_ids: child_stop_ids} ->
           [target_stop_id | child_stop_ids]
 
@@ -195,7 +202,7 @@ defmodule MobileAppBackend.Notifications.Engine do
       downstream_alerts(alerts, route_ids, target_stop_with_children, global_data)
 
     elevator_alerts =
-      if subscription_key.include_accessibility do
+      if subscription.include_accessibility do
         elevator_alerts(alerts, target_stop_with_children)
       else
         []
@@ -204,38 +211,6 @@ defmodule MobileAppBackend.Notifications.Engine do
     [applicable_alerts, downstream_alerts, elevator_alerts]
     |> List.flatten()
     |> Enum.uniq_by(& &1.id)
-  end
-
-  @doc """
-  Given a list of alerts already determined to be relevant to the subscription key and users,
-  returns a map of users to the list of alerts they should be notified about
-  """
-  @spec user_notification_types(
-          {Subscription.Key.t(), [User.t()]},
-          [Alert.t()],
-          DateTime.t(),
-          GlobalDataCache.data()
-        ) :: %{User.t() => [{Alert.t(), DeliveredNotification.type()}]}
-  def user_notification_types({subscription_key, users}, alerts, now, global_data) do
-    alerts = Enum.filter(alerts, &Alert.eligible_for_notification?(&1))
-
-    Enum.into(users, %{}, fn user ->
-      {user, notification_candidates(user, alerts, now)}
-    end)
-  end
-
-  defp notification_candidates(
-         %User{notification_subscriptions: [subscription]} = user,
-         relevant_alerts,
-         now
-       ) do
-    notification_candidates(subscription, relevant_alerts, now)
-  end
-
-  defp notification_candidates(subscription, relevant_alerts, now) do
-    Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
-      List.wrap(alert_candidate(subscription, alert, now))
-    end)
   end
 
   defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
@@ -338,7 +313,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     cond do
       open_now? and Alert.all_clear?(alert) ->
-        {alert, :all_clear}
+        {alert, :all_clear, subscription}
 
       is_nil(next_overlap) ->
         nil
@@ -348,7 +323,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       ((open_now? and next_overlap_in_hours < 24) or next_overlap_in_hours < 12) and
           can_send_for_candidate?(subscription, alert, :reminder) ->
-        {alert, :reminder}
+        {alert, :reminder, subscription}
 
       true ->
         nil
@@ -362,17 +337,17 @@ defmodule MobileAppBackend.Notifications.Engine do
     case last_sent do
       nil ->
         Logger.error("A")
-        {alert, :notification}
+        {alert, :notification, subscription}
 
       %{type: :notification, upstream_timestamp: upstream_timestamp}
       when is_nil(upstream_timestamp) and not is_nil(alert.last_push_notification_timestamp) ->
-        {alert, :update}
+        {alert, :update, subscription}
 
       %{upstream_timestamp: upstream_timestamp} ->
         if !is_nil(upstream_timestamp) and !is_nil(alert.last_push_notification_timestamp) and
              DateTime.diff(alert.last_push_notification_timestamp, upstream_timestamp, :second) >
                0 do
-          {alert, :update}
+          {alert, :update, subscription}
         else
           nil
         end

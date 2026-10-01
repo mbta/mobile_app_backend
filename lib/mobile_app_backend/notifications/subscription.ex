@@ -12,25 +12,4 @@ defmodule MobileAppBackend.Notifications.Subscription do
 
     timestamps(type: :utc_datetime)
   end
-
-  defmodule Key do
-    alias MobileAppBackend.Notifications.Subscription
-
-    @type t :: %__MODULE__{
-            route_id: String.t(),
-            stop_id: String.t(),
-            direction_id: integer(),
-            include_accessibility: boolean()
-          }
-
-    @spec from_subscription(Subscription.t()) :: t()
-    def from_subscription(subscription) do
-      %__MODULE__{
-        route_id: subscription.route_id,
-        stop_id: subscription.stop_id,
-        direction_id: subscription.direction_id,
-        include_accessibility: subscription.include_accessibility
-      }
-    end
-  end
 end
