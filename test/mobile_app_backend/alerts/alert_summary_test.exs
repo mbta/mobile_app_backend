@@ -930,7 +930,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
             )
         )
 
-      assert %AlertSummary.Standard{location: nil} =
+      assert %AlertSummary.Standard{} =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: "", direction_id: 0},
@@ -1445,7 +1445,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           last_push_notification_timestamp: end_time
         )
 
-      assert %AlertSummary.AllClear{location: nil} =
+      assert %AlertSummary.AllClear{} =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: "", direction_id: 0},
@@ -2335,7 +2335,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "trip specific reminder no schedules today" do
       now = ~B[2026-03-12 12:00:00]
       stop = build(:stop, name: "Ruggles")
-      route = build(:route)
+      route = build(:route, type: :commuter_rail)
       pattern = build(:route_pattern, route_id: route.id)
       trip = build(:trip, route_pattern_id: pattern.id)
 
@@ -2353,7 +2353,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %MobileAppBackend.Alerts.AlertSummary.Standard{
                effect: :suspension,
-               location: nil,
                recurrence: nil,
                timeframe: %MobileAppBackend.Alerts.AlertSummary.Timeframe.StartingTomorrow{}
              } =
@@ -2365,7 +2364,8 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  [],
                  %{
                    stops: %{stop.id => stop},
-                   routes: %{route.id => route}
+                   routes: %{route.id => route},
+                   trips: %{trip.id => trip}
                  },
                  :notification
                )
@@ -2530,6 +2530,74 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    test "keeps location with list of same affected stops" do
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-kencl", route: "Green-D"}
+          ]
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.AffectedStops{
+          stops: ["Boylston", "Riverside", "Kenmore"]
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.AffectedStops{
+          stops: ["Riverside", "Boylston", "Kenmore"]
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      assert summary1 ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "omits location when combining locations with different affected stops" do
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-kencl", route: "Green-D"}
+          ]
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.AffectedStops{
+          stops: ["Boylston", "Riverside", "Kenmore"]
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.AffectedStops{
+          stops: ["Riverside", "Boylston"]
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               location: %AlertSummary.Location.Omit{reason: :combine_affected_stops_differ},
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
     test "discards location if disagreements" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
@@ -2557,7 +2625,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary.Standard{
                effect: :suspension,
-               location: nil,
+               location: %AlertSummary.Location.Omit{reason: :combine_unknown},
                timeframe: nil
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
@@ -2595,7 +2663,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary.Standard{
                effect: :suspension,
-               location: nil,
+               location: %AlertSummary.Location.Omit{reason: :combine_unknown},
                timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
@@ -2634,7 +2702,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
       assert %AlertSummary.AllClear{
                effect: :suspension,
                has_multiple_active_alerts: false,
-               location: nil
+               location: %Location.Omit{reason: :combine_unknown}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
@@ -3141,5 +3209,55 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              } ==
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
+  end
+
+  test "two summaries with the same location results in that location being used" do
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+        effect: :suspension
+      )
+
+    summary1 = %AlertSummary.Standard{
+      effect: :suspension,
+      recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}},
+      location: %AlertSummary.Location.StopToDirection{
+        start_stop_name: "North Station",
+        direction: %Direction{name: "Southbound", destination: "Forest Hills", id: 1}
+      }
+    }
+
+    summary2 = %AlertSummary.Standard{
+      effect: :suspension,
+      recurrence: %Recurrence.Daily{ending: %Timeframe.EndOfService{}},
+      location: %AlertSummary.Location.StopToDirection{
+        start_stop_name: "North Station",
+        direction: %Direction{name: "Southbound", destination: "Forest Hills", id: 1}
+      }
+    }
+
+    assert %AlertSummary.Standard{
+             effect: :suspension,
+             location: %AlertSummary.Location.StopToDirection{
+               start_stop_name: "North Station",
+               direction: %Direction{name: "Southbound", destination: "Forest Hills", id: 1}
+             }
+           } ==
+             AlertSummary.combine_summaries(alert, [summary1, summary2])
+  end
+
+  test "combine summaries with single summary returns that summary" do
+    alert =
+      build(:alert,
+        active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+        effect: :suspension
+      )
+
+    summary = %AlertSummary.Standard{
+      effect: :suspension,
+      recurrence: %Recurrence.Daily{ending: %Timeframe.Tomorrow{}}
+    }
+
+    assert summary == AlertSummary.combine_summaries(alert, [summary])
   end
 end
