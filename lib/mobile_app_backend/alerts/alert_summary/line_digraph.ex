@@ -139,16 +139,21 @@ defmodule MobileAppBackend.Alerts.AlertSummary.LineDigraph do
     last_stops = get_last_stop_ids(digraph)
     pairs = for x <- first_stops, y <- last_stops, x != y, do: {x, y}
 
-    pairs
-    |> Enum.reject(fn {first_stop, last_stop} ->
-      if :digraph.get_path(digraph, first_stop, last_stop) do
-        true
-      else
-        Logger.warning("Disconnected path from #{first_stop} to #{last_stop}")
-        false
-      end
-    end)
-    |> Enum.any?()
+    {connected_paths, disconnected_paths} =
+      pairs
+      |> Enum.split_with(fn {first, last} -> :digraph.get_path(digraph, first, last) end)
+
+    if disconnected_paths != [] do
+      Logger.warning(
+        "Disconnected paths detected: #{Enum.map_join(disconnected_paths, ", ", fn {first, last} -> "#{first} -> #{last}" end)}"
+      )
+
+      Logger.warning(
+        "Connected paths: #{Enum.map_join(connected_paths, " | ", fn {first, last} -> "[#{:digraph.get_path(digraph, first, last) |> Enum.join(", ")}]" end)}"
+      )
+    end
+
+    disconnected_paths != []
   end
 
   defp vertex_exists?(digraph, vertex) do
