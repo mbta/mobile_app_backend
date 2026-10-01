@@ -733,7 +733,7 @@ if Mix.env() == :test do
       if is_nil(Repo.get(MobileAppBackend.User, user_id)) do
         Repo.insert!(%MobileAppBackend.User{
           id: user_id,
-          fcm_token: "not-a-real-token-#{user_id}",
+          fcm_installation_id: "not-a-real-installation-id-#{user_id}",
           fcm_last_verified: ~U[2000-01-01 00:00:00Z]
         })
       end

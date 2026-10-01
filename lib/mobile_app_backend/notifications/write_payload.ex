@@ -2,6 +2,7 @@ defmodule MobileAppBackend.Notifications.WritePayload do
   alias Ecto.Changeset
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.User
+  alias Util.FCMTarget
 
   defmodule Window do
     @type t :: %__MODULE__{
@@ -100,13 +101,13 @@ defmodule MobileAppBackend.Notifications.WritePayload do
   end
 
   @type t :: %__MODULE__{
-          fcm_token: String.t(),
+          fcm_target: FCMTarget.t(),
           subscriptions: MapSet.t(Subscription.t()),
           locale: Gettext.locale() | nil,
           app_version: String.t() | nil,
           platform: String.t() | nil
         }
-  defstruct [:fcm_token, :subscriptions, :locale, :app_version, :platform]
+  defstruct [:fcm_target, :subscriptions, :locale, :app_version, :platform]
 
   def parse(payload) do
     {:ok, parse!(payload)}
@@ -114,9 +115,9 @@ defmodule MobileAppBackend.Notifications.WritePayload do
     _ -> :error
   end
 
-  def parse!(%{"fcm_token" => fcm_token, "subscriptions" => subscriptions} = payload) do
+  def parse!(%{"subscriptions" => subscriptions} = payload) do
     %__MODULE__{
-      fcm_token: fcm_token,
+      fcm_target: FCMTarget.parse!(payload),
       subscriptions: MapSet.new(subscriptions, &Subscription.parse!/1),
       locale: payload["locale"],
       app_version: payload["app_version"],
