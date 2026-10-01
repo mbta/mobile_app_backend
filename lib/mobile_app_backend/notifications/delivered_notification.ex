@@ -22,6 +22,23 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     timestamps(type: :utc_datetime)
   end
 
+  @doc """
+  Returns the last sent notification of the given types
+  """
+  @spec last_sent(User.id(), Alert.id(), [type()]) :: DateTime.t() | nil
+  def last_sent(user_id, alert_id, types) do
+    query =
+      from(dn in __MODULE__,
+        where:
+          dn.user_id == ^user_id and dn.alert_id == ^alert_id and
+            dn.type in ^types,
+        order_by: [desc: dn.inserted_at, desc: dn.upstream_timestamp],
+        limit: 1
+      )
+
+    Repo.one(query)
+  end
+
   @spec can_send?(User.id(), Alert.id(), type()) :: boolean()
   def can_send?(user_id, alert_id, type)
 

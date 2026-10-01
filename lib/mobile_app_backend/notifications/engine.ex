@@ -14,86 +14,152 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
 
+  @slow_step_threshold_us 10_000
+
+  @cr_core MapSet.new(["place-north", "place-sstat", "place-bbsta", "place-rugg"])
+
   # Function gets called for a single user at a time from a Oban worker
   @spec user_notifications([Subscription.t()], [Alert.t()], DateTime.t()) :: [
           OutgoingNotification.t()
         ]
   def user_notifications(subscriptions, alerts, now) do
-    global_data = GlobalDataCache.get_data()
+    {global_data_us, global_data} =
+      :timer.tc(&GlobalDataCache.get_data/0, :microsecond)
 
-    relevant_alerts_by_subscription =
-      Enum.map(subscriptions, fn subscription ->
-        relevant_alerts =
-          extract_relevant_alerts_for_subscription(alerts, subscription, now, global_data)
+    log_slow_step("global_data", global_data_us)
 
-        {subscription, relevant_alerts}
-      end)
+    {relevance_us, alerts_by_subscription} =
+      :timer.tc(
+        fn ->
+          Enum.map(subscriptions, fn subscription ->
+            {subscription_us, relevant_alerts} =
+              :timer.tc(
+                fn ->
+                  alerts_for_subscription(alerts, subscription, now, global_data)
+                end,
+                :microsecond
+              )
 
-    all_candidates =
-      Enum.flat_map(relevant_alerts_by_subscription, fn {subscription, relevant_alerts} ->
-        get_all_candidates(subscription, relevant_alerts, now)
-      end)
+            log_slow_step("extract_relevant_alerts", subscription_us)
 
-    candidates_by_alert =
-      Enum.group_by(
-        all_candidates,
-        fn {alert, _type, _subscription} -> alert end,
-        fn {_alert, type, subscription} -> {type, subscription} end
+            {subscription, relevant_alerts}
+          end)
+        end,
+        :microsecond
       )
 
-    Enum.map(candidates_by_alert, fn {alert, candidates} ->
-      subscriptions_by_type =
-        Enum.group_by(
-          candidates,
-          fn {type, _subscription} -> type end,
-          fn {_type, subscription} -> subscription end
-        )
+    log_slow_step("relevance", relevance_us)
 
-      # Get subscriptions of the a single type for the alert
-      {subscriptions, type} =
-        case subscriptions_by_type do
-          %{all_clear: subscriptions} ->
-            {subscriptions, :all_clear}
+    {candidate_us, all_candidates} =
+      :timer.tc(
+        fn ->
+          Enum.flat_map(alerts_by_subscription, fn {subscription, alerts} ->
+            {subscription_us, candidates} =
+              :timer.tc(
+                fn -> notification_candidates(subscription, alerts, now) end,
+                :microsecond
+              )
 
-          %{notification: subscriptions} ->
-            {subscriptions, {:notification, alert.last_push_notification_timestamp}}
+            log_slow_step("evaluate_candidates", subscription_us)
 
-          %{update: subscriptions} ->
-            {subscriptions, {:update, alert.last_push_notification_timestamp}}
-
-          %{reminder: subscriptions} ->
-            {subscriptions, :reminder}
-        end
-
-      relevant_alerts =
-        relevant_alerts_by_subscription
-        |> Enum.filter(fn {subscription, _relevant_alerts} -> subscription in subscriptions end)
-        |> Enum.flat_map(fn {_subscription, relevant_alerts} -> relevant_alerts end)
-
-      Logger.debug(
-        "#{__MODULE__} relevant_alerts=[#{relevant_alerts |> Enum.map_join(",", & &1.id)}]"
+            candidates
+          end)
+        end,
+        :microsecond
       )
 
-      more_active_alerts =
-        relevant_alerts
-        |> Enum.count(
-          # Elevator closures should not be considered as part of other active
-          &(&1.id != alert.id &&
-              &1.effect != :elevator_closure &&
-              Alert.active?(&1, now))
-        ) > 0
+    log_slow_step("candidate_evaluation", candidate_us)
 
-      %OutgoingNotification{
-        title: build_title(alert, subscriptions, global_data),
-        summary: build_summary(alert, subscriptions, now, global_data, more_active_alerts),
-        subscriptions: subscriptions,
-        alert: alert,
-        type: type
-      }
-    end)
+    {grouping_us, candidates_by_alert} =
+      :timer.tc(
+        fn ->
+          Enum.group_by(
+            all_candidates,
+            fn {alert, _type, _subscription} -> alert end,
+            fn {_alert, type, subscription} -> {type, subscription} end
+          )
+        end,
+        :microsecond
+      )
+
+    log_slow_step("candidate_grouping", grouping_us)
+
+    {notification_us, notifications} =
+      :timer.tc(
+        fn ->
+          Enum.map(candidates_by_alert, fn {alert, candidates} ->
+            {notification_build_us, notification} =
+              :timer.tc(
+                fn ->
+                  subscriptions_by_type =
+                    Enum.group_by(
+                      candidates,
+                      fn {type, _subscription} -> type end,
+                      fn {_type, subscription} -> subscription end
+                    )
+
+                  # Get subscriptions of the a single type for the alert
+                  {subscriptions, type} =
+                    case subscriptions_by_type do
+                      %{all_clear: subscriptions} ->
+                        {subscriptions, :all_clear}
+
+                      %{notification: subscriptions} ->
+                        {subscriptions, {:notification, alert.last_push_notification_timestamp}}
+
+                      %{update: subscriptions} ->
+                        {subscriptions, {:update, alert.last_push_notification_timestamp}}
+
+                      %{reminder: subscriptions} ->
+                        {subscriptions, :reminder}
+                    end
+
+                  relevant_alerts =
+                    alerts_by_subscription
+                    |> Enum.filter(fn {subscription, _relevant_alerts} ->
+                      subscription in subscriptions
+                    end)
+                    |> Enum.flat_map(fn {_subscription, relevant_alerts} -> relevant_alerts end)
+
+                  Logger.debug(
+                    "#{__MODULE__} relevant_alerts=[#{relevant_alerts |> Enum.map_join(",", & &1.id)}]"
+                  )
+
+                  more_active_alerts =
+                    relevant_alerts
+                    |> Enum.count(
+                      # Elevator closures should not be considered as part of other active
+                      &(&1.id != alert.id &&
+                          &1.effect != :elevator_closure &&
+                          Alert.active?(&1, now))
+                    ) > 0
+
+                  %OutgoingNotification{
+                    title: build_title(alert, subscriptions, global_data),
+                    summary:
+                      build_summary(alert, subscriptions, now, global_data, more_active_alerts),
+                    subscriptions: subscriptions,
+                    alert: alert,
+                    type: type
+                  }
+                end,
+                :microsecond
+              )
+
+            log_slow_step("build_notification", notification_build_us)
+
+            notification
+          end)
+        end,
+        :microsecond
+      )
+
+    log_slow_step("notification_build", notification_us)
+
+    notifications
   end
 
-  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, now) do
+  defp notification_candidates(%Subscription{} = subscription, relevant_alerts, now) do
     relevant_alerts =
       relevant_alerts
       |> Enum.filter(&Alert.eligible_for_notification?(&1))
@@ -103,7 +169,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
-  defp extract_relevant_alerts_for_subscription(
+  defp alerts_for_subscription(
          alerts,
          %Subscription{} = subscription,
          now,
@@ -112,10 +178,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     route_ids =
       case subscription.route_id do
         "line-" <> _ ->
-          global_data.routes
-          |> Map.values()
-          |> Enum.filter(&(&1.line_id == subscription.route_id))
-          |> Enum.map(& &1.id)
+          global_data.routes_by_line[subscription.route_id]
 
         _ ->
           [subscription.route_id]
@@ -145,11 +208,16 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    [applicable_alerts, downstream_alerts, elevator_alerts]
+    |> List.flatten()
+    |> Enum.uniq_by(& &1.id)
   end
 
   defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
-    trips = AlertUtil.fetch_trips_for_alerts(alerts, now)
+    {trip_fetch_us, trips} =
+      :timer.tc(fn -> AlertUtil.fetch_trips_for_alerts(alerts, now) end, :microsecond)
+
+    log_slow_step("fetch_trips_for_alerts", trip_fetch_us)
 
     if Enum.empty?(trips) do
       alerts
@@ -185,31 +253,43 @@ defmodule MobileAppBackend.Notifications.Engine do
          route_ids,
          target_stop_with_children
        ) do
+    target_stop_set = MapSet.new(target_stop_with_children)
+
     cr_core? =
-      Enum.any?(
-        target_stop_with_children,
-        &(&1 in ["place-north", "place-sstat", "place-bbsta", "place-rugg"])
-      )
+      target_stop_set
+      |> MapSet.intersection(@cr_core)
+      |> MapSet.size() > 0
 
-    applicable_alerts =
-      Alert.applicable_alerts(
-        alerts,
-        subscription.direction_id,
-        route_ids,
-        target_stop_with_children,
-        nil
-      )
+    alerts =
+      if cr_core? do
+        Enum.filter(alerts, &(&1.effect != :track_change))
+      else
+        alerts
+      end
 
-    if cr_core? do
-      Enum.filter(applicable_alerts, &(&1.effect != :track_change))
-    else
-      applicable_alerts
-    end
+    Alert.applicable_alerts(
+      alerts,
+      subscription.direction_id,
+      route_ids,
+      target_stop_with_children,
+      nil
+    )
   end
 
+  @spec downstream_alerts([Alert.t()], [Route.id()], [Stop.id()], GlobalDataCache.data()) :: [
+          Alert.t()
+        ]
   defp downstream_alerts(alerts, route_ids, target_stop_with_children, global_data) do
+    pattern_ids =
+      global_data.route_patterns_by_route
+      |> Map.take(route_ids)
+      |> Map.values()
+      |> List.flatten()
+
     route_patterns =
-      global_data.route_patterns |> Map.values() |> Enum.filter(&(&1.route_id in route_ids))
+      global_data.route_patterns
+      |> Map.take(pattern_ids)
+      |> Map.values()
 
     Alert.alerts_downstream_for_patterns(
       alerts,
@@ -227,7 +307,6 @@ defmodule MobileAppBackend.Notifications.Engine do
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   defp alert_candidate(subscription, alert, now) do
     open_now? = Enum.any?(subscription.windows, &Window.open?(&1, now))
-
     next_overlap = Window.next_overlap(alert.active_period, subscription.windows, now)
     next_overlap_in_hours = if next_overlap, do: DateTime.diff(next_overlap, now, :minute) / 60
     active_now? = next_overlap_in_hours <= 0
@@ -239,44 +318,57 @@ defmodule MobileAppBackend.Notifications.Engine do
       is_nil(next_overlap) ->
         nil
 
-      open_now? and active_now? and
-          DeliveredNotification.can_send?(
-            subscription.user_id,
-            alert.id,
-            {:notification, alert.last_push_notification_timestamp}
-          ) ->
-        {alert, :notification, subscription}
-
-      open_now? and active_now? and
-          DeliveredNotification.can_send?(
-            subscription.user_id,
-            alert.id,
-            {:update, alert.last_push_notification_timestamp}
-          ) ->
-        {alert, :update, subscription}
-
       open_now? and active_now? ->
-        nil
+        candidate_in_open_active_window(alert, subscription)
 
-      open_now? and next_overlap_in_hours < 24 and
-          DeliveredNotification.can_send?(
-            subscription.user_id,
-            alert.id,
-            :reminder
-          ) ->
-        {alert, :reminder, subscription}
-
-      next_overlap_in_hours < 12 and
-          DeliveredNotification.can_send?(
-            subscription.user_id,
-            alert.id,
-            :reminder
-          ) ->
+      ((open_now? and next_overlap_in_hours < 24) or next_overlap_in_hours < 12) and
+          can_send_for_candidate?(subscription, alert, :reminder) ->
         {alert, :reminder, subscription}
 
       true ->
         nil
     end
+  end
+
+  defp candidate_in_open_active_window(alert, subscription) do
+    last_sent =
+      DeliveredNotification.last_sent(subscription.user_id, alert.id, [:notification, :update])
+
+    case last_sent do
+      nil ->
+        Logger.error("A")
+        {alert, :notification, subscription}
+
+      %{type: :notification, upstream_timestamp: upstream_timestamp}
+      when is_nil(upstream_timestamp) and not is_nil(alert.last_push_notification_timestamp) ->
+        {alert, :update, subscription}
+
+      %{upstream_timestamp: upstream_timestamp} ->
+        if !is_nil(upstream_timestamp) and !is_nil(alert.last_push_notification_timestamp) and
+             DateTime.diff(alert.last_push_notification_timestamp, upstream_timestamp, :second) >
+               0 do
+          {alert, :update, subscription}
+        else
+          nil
+        end
+
+      _ ->
+        nil
+    end
+  end
+
+  defp can_send_for_candidate?(subscription, alert, type) do
+    {query_us, can_send?} =
+      :timer.tc(
+        fn ->
+          DeliveredNotification.can_send?(subscription.user_id, alert.id, type)
+        end,
+        :microsecond
+      )
+
+    log_slow_step("delivered_notification_check", query_us)
+
+    can_send?
   end
 
   defp build_title(alert, subscriptions, global_data) do
@@ -357,7 +449,12 @@ defmodule MobileAppBackend.Notifications.Engine do
   end
 
   defp schedules_for_subscription(alert, subscription, global_data, now) do
-    case AlertUtil.fetch_schedules_for_alert(alert, now) do
+    {schedule_fetch_us, schedules_and_trips} =
+      :timer.tc(fn -> AlertUtil.fetch_schedules_for_alert(alert, now) end, :microsecond)
+
+    log_slow_step("fetch_schedules_for_alert", schedule_fetch_us)
+
+    case schedules_and_trips do
       {nil, nil} ->
         nil
 
@@ -367,6 +464,13 @@ defmodule MobileAppBackend.Notifications.Engine do
         end)
     end
   end
+
+  defp log_slow_step(step, duration_us) when duration_us >= @slow_step_threshold_us do
+    duration_ms = Float.round(duration_us / 1_000, 2)
+    Logger.info("step=#{step} duration_ms=#{duration_ms}")
+  end
+
+  defp log_slow_step(_step, _duration_us), do: :ok
 
   defp schedule_matches_subscription?(
          %Schedule{} = schedule,

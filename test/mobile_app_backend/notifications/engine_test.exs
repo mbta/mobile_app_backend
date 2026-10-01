@@ -100,7 +100,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     GlobalDataCacheMock
     |> expect(:default_key, fn -> :default_key end)
     |> expect(:get_data, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         lines: %{},
         pattern_ids_by_stop: %{},
         routes: %{"Green-D" => %MBTAV3API.Route{}},
@@ -111,7 +111,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           }
         },
         trips: %{}
-      }
+      })
     end)
 
     alert =
@@ -854,7 +854,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     GlobalDataCacheMock
     |> expect(:default_key, fn -> :default_key end)
     |> expect(:get_data, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         lines: %{},
         pattern_ids_by_stop: %{},
         routes: routes,
@@ -866,7 +866,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           "place-unsq" => build(:stop, id: "place-unsq", name: "Union Square")
         },
         trips: Map.new(trips, &{&1.id, &1})
-      }
+      })
     end)
 
     alert =
@@ -1270,7 +1270,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     GlobalDataCacheMock
     |> expect(:default_key, 2, fn -> :default_key end)
     |> expect(:get_data, 2, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         lines: %{},
         pattern_ids_by_stop: %{},
         routes: %{"Boat-F1" => build(:route, type: :ferry, id: "Boat-F1"), route.id => route},
@@ -1285,7 +1285,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           trip_stops_at_both.id => trip_stops_at_both,
           affected_trip_only_george.id => affected_trip_only_george
         }
-      }
+      })
     end)
 
     alert =
@@ -1415,7 +1415,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     GlobalDataCacheMock
     |> expect(:default_key, 1, fn -> :default_key end)
     |> expect(:get_data, 1, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         lines: %{},
         pattern_ids_by_stop: %{},
         routes: %{"Boat-F1" => build(:route, type: :ferry, id: "Boat-F1"), route.id => route},
@@ -1429,7 +1429,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           other_trip.id => other_trip,
           affected_trip.id => affected_trip
         }
-      }
+      })
     end)
 
     alert_trip_specific =

@@ -350,6 +350,11 @@ defmodule MBTAV3API.Alert do
     Enum.any?(alert.informed_entity, predicate)
   end
 
+  @spec any_informed_entity_satisfies(t(), (InformedEntity.t() -> boolean())) :: boolean()
+  defp no_informed_entity_satisfies(alert, predicate) do
+    Enum.all?(alert.informed_entity, fn ie -> not predicate.(ie) end)
+  end
+
   @spec trip_ids(t() | [t()]) :: [Trip.id()]
   def trip_ids(alerts) when is_list(alerts) do
     alerts
@@ -442,44 +447,46 @@ defmodule MBTAV3API.Alert do
     end)
   end
 
-  @spec downstream_alerts([t()], Trip.t(), [Stop.id()]) :: [t()]
-  def downstream_alerts(alerts, trip, target_stop_with_children) do
-    stop_ids = trip.stop_ids || []
-
+  @spec downstream_alerts([t()], Trip.t() | [Trip.t()], [Stop.id()]) :: [t()]
+  def downstream_alerts(alerts, trips, target_stop_with_children) when is_list(trips) do
     alerts =
-      Enum.filter(
-        alerts,
-        &(has_stops_specified(&1) and
-            compare_significance(significance(&1), :accessibility) != :lt)
-      )
-
-    target_stop_alert_ids =
       alerts
       |> Enum.filter(fn alert ->
-        any_informed_entity_satisfies(
-          alert,
-          &applies_downstream_at(&1, trip, target_stop_with_children)
-        )
+        has_stops_specified(alert) and
+          compare_significance(significance(alert), :accessibility) != :lt and
+          no_informed_entity_satisfies(
+            alert,
+            &Enum.any?(trips, fn trip ->
+              applies_at(&1, trip, target_stop_with_children)
+            end)
+          )
       end)
-      |> MapSet.new(& &1.id)
 
-    downstream_stops =
-      stop_ids |> Enum.drop_while(&(&1 not in target_stop_with_children)) |> Enum.drop(1)
+    trips
+    |> Enum.flat_map(fn trip ->
+      downstream_stops =
+        trip.stop_ids |> Enum.drop_while(&(&1 not in target_stop_with_children)) |> Enum.drop(1)
 
-    Enum.find_value(downstream_stops, [], fn stop ->
-      alerts
-      |> Enum.filter(fn alert ->
-        any_informed_entity_satisfies(alert, &applies_downstream_at(&1, trip, [stop])) and
-          alert.id not in target_stop_alert_ids
+      Enum.find_value(downstream_stops, [], fn stop ->
+        alerts
+        |> Enum.filter(fn alert ->
+          any_informed_entity_satisfies(alert, &applies_at(&1, trip, [stop]))
+        end)
+        |> case do
+          [] -> nil
+          downstream_alerts -> downstream_alerts
+        end
       end)
-      |> case do
-        [] -> nil
-        downstream_alerts -> downstream_alerts
-      end
     end)
+    |> Enum.uniq()
   end
 
-  defp applies_downstream_at(ie, trip, stop_ids) do
+  @spec downstream_alerts([t()], Trip.t(), [Stop.id()]) :: [t()]
+  def downstream_alerts(alerts, trip, target_stop_with_children) do
+    downstream_alerts(alerts, [trip], target_stop_with_children)
+  end
+
+  defp applies_at(ie, trip, stop_ids) do
     InformedEntity.activity_in?(ie, [:exit, :ride]) and
       InformedEntity.direction?(ie, trip.direction_id) and
       InformedEntity.route?(ie, trip.route_id) and
@@ -490,16 +497,15 @@ defmodule MBTAV3API.Alert do
           Trip.id() => Trip.t()
         }) :: [t()]
   def alerts_downstream_for_patterns(alerts, patterns, target_stop_with_children, trips_by_id) do
-    patterns
-    |> Enum.flat_map(fn pattern ->
-      case trips_by_id[pattern.representative_trip_id] do
-        %Trip{} = trip ->
-          downstream_alerts(alerts, trip, target_stop_with_children)
+    trips =
+      patterns
+      |> Enum.flat_map(fn pattern ->
+        case trips_by_id[pattern.representative_trip_id] do
+          %Trip{} = trip -> [trip]
+          _ -> []
+        end
+      end)
 
-        _ ->
-          []
-      end
-    end)
-    |> Enum.uniq()
+    downstream_alerts(alerts, trips, target_stop_with_children)
   end
 end

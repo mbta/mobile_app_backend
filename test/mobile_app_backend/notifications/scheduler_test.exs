@@ -8,6 +8,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
   import Mox
   import Test.Support.Helpers
   alias MBTAV3API.Store
+  alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
@@ -703,14 +704,14 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
     reassign_env(
       :mobile_app_backend,
-      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCache.Module,
       GlobalDataCacheMock
     )
 
     GlobalDataCacheMock
     |> expect(:default_key, fn -> :default_key end)
     |> expect(:get_data, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         routes: %{route.id => route},
         route_patterns: %{
           "CR-Fitchburg-d82ea33a-1" =>
@@ -728,7 +729,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         lines: %{
           "line-Fitchburg" => build(:line, id: "line-Fitchburg")
         }
-      }
+      })
     end)
 
     user = NotificationsFactory.insert(:user)
@@ -836,14 +837,14 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
 
     reassign_env(
       :mobile_app_backend,
-      MobileAppBackend.GlobalDataCache.Module,
+      GlobalDataCache.Module,
       GlobalDataCacheMock
     )
 
     GlobalDataCacheMock
     |> expect(:default_key, fn -> :default_key end)
     |> expect(:get_data, fn _ ->
-      %{
+      GlobalDataCache.add_calculated_fields(%{
         routes: %{route.id => route},
         route_patterns: %{
           "CR-Fitchburg-d82ea33a-1" =>
@@ -861,7 +862,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         lines: %{
           "line-Fitchburg" => build(:line, id: "line-Fitchburg")
         }
-      }
+      })
     end)
 
     user = NotificationsFactory.insert(:user)
