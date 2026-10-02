@@ -68,7 +68,15 @@ defmodule Mix.Tasks.CheckRouteBranching do
 
     {us, {stop_graph, segment_graph, segments}} =
       :timer.tc(fn ->
-        RouteBranching.calculate(route.id, direction, stop_ids, global_data)
+        RouteBranching.calculate(
+          route.id,
+          direction,
+          stop_ids,
+          global_data.routes,
+          global_data.route_patterns,
+          global_data.trips,
+          global_data.stops
+        )
       end)
 
     if us > 5_000 do

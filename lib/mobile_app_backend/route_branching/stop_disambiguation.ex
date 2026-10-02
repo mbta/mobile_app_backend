@@ -1,44 +1,58 @@
 defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
-  alias MBTAV3API.RoutePattern
-  alias MBTAV3API.Stop
-  alias MBTAV3API.Trip
-  alias MobileAppBackend.GlobalDataCache
+  alias MobileAppBackend.RouteBranching
 
-  @type disambiguated_stop_id :: {Stop.id(), count :: pos_integer()}
-  @type t :: [{RoutePattern.t(), [disambiguated_stop_id()]}]
+  @type disambiguated_stop_id :: {RouteBranching.stop_id(), count :: pos_integer()}
+  @type t :: [{RouteBranching.route_pattern(), [disambiguated_stop_id()]}]
 
-  @spec build([Stop.id()], [RoutePattern.t()], GlobalDataCache.data()) :: t()
-  def build(canon_stop_ids, patterns, global_data) do
+  @spec build(
+          [RouteBranching.stop_id()],
+          [RouteBranching.route_pattern()],
+          %{RouteBranching.trip_id() => RouteBranching.trip()},
+          %{RouteBranching.stop_id() => RouteBranching.stop()}
+        ) :: t()
+  def build(canon_stop_ids, patterns, all_representative_trips, all_stops) do
     canon_stop_set = MapSet.new(canon_stop_ids)
-    pattern_stops = Enum.map(patterns, &pattern_stops(&1, canon_stop_set, global_data))
+
+    pattern_stops =
+      Enum.map(patterns, &pattern_stops(&1, canon_stop_set, all_representative_trips, all_stops))
+
     pattern_stops_with_counts = pattern_stops_with_counts(pattern_stops, canon_stop_ids)
     pattern_stops_with_counts
   end
 
-  @spec pattern_stops(RoutePattern.t(), MapSet.t(Stop.id()), GlobalDataCache.data()) ::
-          {RoutePattern.t(), [Stop.id()]}
-  defp pattern_stops(pattern, canon_stops, global_data) do
+  @spec pattern_stops(
+          RouteBranching.route_pattern(),
+          MapSet.t(RouteBranching.stop_id()),
+          %{RouteBranching.trip_id() => RouteBranching.trip()},
+          %{RouteBranching.stop_id() => RouteBranching.stop()}
+        ) ::
+          {RouteBranching.route_pattern(), [RouteBranching.stop_id()]}
+  defp pattern_stops(pattern, canon_stops, all_representative_trips, all_stops) do
     stop_ids =
-      case global_data.trips[pattern.representative_trip_id] do
-        %Trip{} = trip -> trip.stop_ids
+      case all_representative_trips[pattern.representative_trip_id] do
+        %{stop_ids: stop_ids} when is_list(stop_ids) -> stop_ids
         _ -> []
       end
 
     stops =
       stop_ids
-      |> Enum.map(&stop_or_parent_if_canon(&1, canon_stops, global_data))
+      |> Enum.map(&stop_or_parent_if_canon(&1, canon_stops, all_stops))
       |> Enum.reject(&is_nil/1)
 
     {pattern, stops}
   end
 
-  @spec stop_or_parent_if_canon(Stop.id(), MapSet.t(Stop.id()), GlobalDataCache.data()) ::
-          Stop.id() | nil
-  defp stop_or_parent_if_canon(stop_id, canon_stops, global_data) do
+  @spec stop_or_parent_if_canon(
+          RouteBranching.stop_id(),
+          MapSet.t(RouteBranching.stop_id()),
+          %{RouteBranching.stop_id() => RouteBranching.stop()}
+        ) ::
+          RouteBranching.stop_id() | nil
+  defp stop_or_parent_if_canon(stop_id, canon_stops, all_stops) do
     if MapSet.member?(canon_stops, stop_id) do
       stop_id
     else
-      parent = global_data.stops[stop_id].parent_station_id
+      parent = all_stops[stop_id].parent_station_id
 
       if MapSet.member?(canon_stops, parent) do
         parent
@@ -54,11 +68,11 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
     assigned the most optimal count possible.
     """
     @type t :: %__MODULE__{
-            stops_with_counts: [{Stop.id(), count :: pos_integer()}],
-            global_list_countless: [Stop.id()],
-            global_list_countful: [{Stop.id(), count :: pos_integer()}],
+            stops_with_counts: [{RouteBranching.stop_id(), count :: pos_integer()}],
+            global_list_countless: [RouteBranching.stop_id()],
+            global_list_countful: [{RouteBranching.stop_id(), count :: pos_integer()}],
             global_list_countful_remaining: [non_neg_integer()],
-            counts: %{Stop.id() => pos_integer()}
+            counts: %{RouteBranching.stop_id() => pos_integer()}
           }
     defstruct [
       :stops_with_counts,
@@ -69,10 +83,10 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
     ]
 
     @spec process_edit_list(
-            [{:eq | :ins | :del, [Stop.id()]}],
-            [Stop.id()],
-            [{Stop.id(), pos_integer()}],
-            %{Stop.id() => pos_integer()}
+            [{:eq | :ins | :del, [RouteBranching.stop_id()]}],
+            [RouteBranching.stop_id()],
+            [{RouteBranching.stop_id(), pos_integer()}],
+            %{RouteBranching.stop_id() => pos_integer()}
           ) :: t()
     def process_edit_list(edit_list, global_list_countless, global_list_countful, counts) do
       edit_list
@@ -89,14 +103,16 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
     @spec new :: t()
     def new, do: new([], [], %{})
 
-    @spec new([Stop.id()]) :: t()
+    @spec new([RouteBranching.stop_id()]) :: t()
     def new(global_list_countless) do
       global_list_countful = Enum.map(global_list_countless, &{&1, 1})
       counts = Map.new(global_list_countful)
       new(global_list_countless, global_list_countful, counts)
     end
 
-    @spec new([Stop.id()], [{Stop.id(), pos_integer()}], %{Stop.id() => pos_integer()}) :: t()
+    @spec new([RouteBranching.stop_id()], [{RouteBranching.stop_id(), pos_integer()}], %{
+            RouteBranching.stop_id() => pos_integer()
+          }) :: t()
     defp new(global_list_countless, global_list_countful, counts) do
       %__MODULE__{
         stops_with_counts: [],
@@ -107,7 +123,7 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
       }
     end
 
-    @spec apply_action(t(), :eq | :ins | :del, [Stop.id()]) :: t()
+    @spec apply_action(t(), :eq | :ins | :del, [RouteBranching.stop_id()]) :: t()
     defp apply_action(state, action, sublist)
 
     defp apply_action(%__MODULE__{} = state, :eq, sublist) do
@@ -161,14 +177,26 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
   end
 
   @doc false
-  @spec pattern_stops_with_counts([{RoutePattern.t(), [Stop.id()]}], [Stop.id()]) :: t()
+  @spec pattern_stops_with_counts(
+          [{RouteBranching.route_pattern(), [RouteBranching.stop_id()]}],
+          [RouteBranching.stop_id()]
+        ) :: t()
   def pattern_stops_with_counts(patterns_stops, canon_stop_ids) do
     {result, _} =
       patterns_stops
       |> Enum.sort_by(fn {pattern, stops} ->
         # we want to consider more typical patterns earlier, and also we want to consider longer patterns earlier
         # since longer patterns give us more context to use when disambiguating stops
-        {RoutePattern.serialize_typicality!(pattern.typicality), -length(stops)}
+        typicality_sort =
+          case pattern.typicality do
+            :typical -> 1
+            :deviation -> 2
+            :atypical -> 3
+            :diversion -> 4
+            :canonical_only -> 5
+          end
+
+        {typicality_sort, -length(stops)}
       end)
       |> Enum.map_reduce(
         StopCountState.new(canon_stop_ids),

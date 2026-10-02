@@ -18,7 +18,15 @@ defmodule MobileAppBackendWeb.RouteController do
     global_data = GlobalDataCache.get_data()
 
     {_stop_graph, _segment_graph, branches} =
-      RouteBranching.calculate(route_id, direction_id, stop_ids, global_data)
+      RouteBranching.calculate(
+        route_id,
+        direction_id,
+        stop_ids,
+        global_data.routes,
+        global_data.route_patterns,
+        global_data.trips,
+        global_data.stops
+      )
 
     json(conn, branches)
   end

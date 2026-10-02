@@ -25,30 +25,67 @@ defmodule MobileAppBackend.RouteBranching do
   """
 
   require Logger
-  alias MBTAV3API.Route
-  alias MBTAV3API.Stop
-  alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.RouteBranching.Segment
   alias MobileAppBackend.RouteBranching.SegmentGraph
   alias MobileAppBackend.RouteBranching.StopDisambiguation
   alias MobileAppBackend.RouteBranching.StopGraph
 
-  @spec calculate(Route.id(), 0 | 1, [Stop.id()], GlobalDataCache.data()) ::
-          {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
-  def calculate(route_id, direction_id, stop_ids, global_data) do
+  @type route_id :: String.t()
+  @type route :: %{
+          id: route_id(),
+          direction_destinations: [String.t()],
+          type: :light_rail | :heavy_rail | :commuter_rail | :bus | :ferry,
+          long_name: String.t()
+        }
+  @type route_pattern_id :: String.t()
+  @type route_pattern :: %{
+          id: route_pattern_id(),
+          direction_id: 0 | 1,
+          typicality: route_pattern_typicality(),
+          representative_trip_id: trip_id(),
+          route_id: route_id()
+        }
+  @type route_pattern_typicality ::
+          :typical | :deviation | :atypical | :diversion | :canonical_only
+  @type stop_id :: String.t()
+  @type stop :: %{id: stop_id(), parent_station_id: stop_id() | nil}
+  @type trip_id :: String.t()
+  @type trip :: %{id: trip_id(), stop_ids: [stop_id()]}
+
+  @spec calculate(
+          route_id(),
+          0 | 1,
+          [stop_id()],
+          %{route_id() => route()},
+          %{route_pattern_id() => route_pattern()},
+          %{trip_id() => trip()},
+          %{stop_id() => stop()}
+        ) :: {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
+  def calculate(
+        route_id,
+        direction_id,
+        stop_ids,
+        all_routes,
+        all_route_patterns,
+        all_representative_trips,
+        all_stops
+      ) do
     context = %{route_id: route_id, direction_id: direction_id}
-    route = global_data.routes[route_id]
+    route = all_routes[route_id]
 
     patterns =
-      global_data.route_patterns
+      all_route_patterns
       |> Map.filter(fn {_, pattern} ->
         pattern.route_id == route_id and pattern.direction_id == direction_id
       end)
       |> Map.values()
 
     segment_name_candidates = get_name_candidates(route, direction_id)
-    stop_disambiguation = StopDisambiguation.build(stop_ids, patterns, global_data)
-    stop_graph = StopGraph.build(stop_disambiguation, global_data)
+
+    stop_disambiguation =
+      StopDisambiguation.build(stop_ids, patterns, all_representative_trips, all_stops)
+
+    stop_graph = StopGraph.build(stop_disambiguation, all_stops)
 
     segment_graph =
       if :digraph_utils.is_acyclic(stop_graph) do
@@ -97,7 +134,7 @@ defmodule MobileAppBackend.RouteBranching do
   # deleted before the segment starts. unfortunately, we need to break ties topologically, rather than in a way
   # that’s easy to determine a priori, so it’s actually a topological sort with ties broken by index in the canon
   # stop list
-  @spec get_segment_order(SegmentGraph.t(), [Stop.id()]) :: [SegmentGraph.vertex_id()]
+  @spec get_segment_order(SegmentGraph.t(), [stop_id()]) :: [SegmentGraph.vertex_id()]
   defp get_segment_order(segment_graph, stop_ids) do
     segment_canon_indices =
       Map.new(:digraph.vertices(segment_graph), fn segment_id ->
