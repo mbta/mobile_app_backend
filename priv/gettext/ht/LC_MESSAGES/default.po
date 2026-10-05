@@ -8,8 +8,8 @@
 ### to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: ht\n"
-"Plural-Forms: nplurals=3\n"
+"Language: ht_HT\n"
+"Plural-Forms: nplurals=2; plural=n>1;\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:28
 #, elixir-autogen, elixir-format
@@ -1206,7 +1206,7 @@ msgstr "%{trip_identity} ap fini nan %{terminating_stop} %{timeframe}%{cause}%{r
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "**deta**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**Reta**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
@@ -1271,7 +1271,7 @@ msgstr " pita jodi a"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:46
 #, elixir-autogen, elixir-format
 msgid "%{summary}. See alert details."
-msgstr "%{summary}. Detay Avètisman"
+msgstr "%{summary} pou Detay Avètisman"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:63
 #, elixir-autogen, elixir-format
