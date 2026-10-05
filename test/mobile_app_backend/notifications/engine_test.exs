@@ -1053,6 +1053,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
         stop_id: "place-sstat",
+        direction_id: trip.direction_id,
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
@@ -1124,6 +1125,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
     trip_2 =
       build(:trip,
         id: "trip2",
+        direction_id: trip_1.direction_id,
         route_id: "Red",
         route_pattern_id: "Red-3-0",
         stop_ids: ["place-sstat"]
@@ -1151,6 +1153,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       NotificationsFactory.build(:notification_subscription,
         route_id: "Red",
         stop_id: "place-sstat",
+        direction_id: trip_1.direction_id,
         windows: [
           NotificationsFactory.build(:window,
             start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
