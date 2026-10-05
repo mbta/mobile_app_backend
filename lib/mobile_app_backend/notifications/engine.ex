@@ -4,7 +4,6 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MBTAV3API.Line
   alias MBTAV3API.Schedule
   alias MBTAV3API.Stop
-  alias MobileAppBackend.User
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertUtil
   alias MobileAppBackend.GlobalDataCache
@@ -13,6 +12,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.NotificationTitle
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
+  alias MobileAppBackend.User
 
   # Function gets called for a single user at a time from a Oban worker
   @spec user_notifications(
@@ -41,17 +41,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       else
         subscription_key_to_alerts =
-          summaries_by_subscription_key
-          |> Map.new(fn {subscription_key, summaries_by_alert_id} ->
-            alert_ids =
-              summaries_by_alert_id
-              |> Map.keys()
-
-            {subscription_key,
-             alerts_by_id
-             |> Map.take(alert_ids)
-             |> Map.values()}
-          end)
+          subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id)
 
         has_more_active_alerts =
           has_more_active_alerts?(alert, subscription_key_to_alerts, subscriptions, now)
@@ -116,6 +106,20 @@ defmodule MobileAppBackend.Notifications.Engine do
         )
 
       {alert, matching_subscriptions}
+    end)
+  end
+
+  defp subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id) do
+    summaries_by_subscription_key
+    |> Map.new(fn {subscription_key, summaries_by_alert_id} ->
+      alert_ids =
+        summaries_by_alert_id
+        |> Map.keys()
+
+      {subscription_key,
+       alerts_by_id
+       |> Map.take(alert_ids)
+       |> Map.values()}
     end)
   end
 

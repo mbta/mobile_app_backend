@@ -13,6 +13,7 @@ if Mix.env() == :test do
     alias MobileAppBackend.GlobalDataCache
     alias MobileAppBackend.Notifications
     alias MobileAppBackend.Repo
+
     use Mix.Task
     @shortdoc "Exports some alert summaries"
     @requirements ["app.start"]
@@ -44,9 +45,11 @@ if Mix.env() == :test do
         Mox.stub(
           RepositoryMock,
           :schedules,
-          fn [filter: [trip: trip_filter], include: :trip, sort: {:stop_sequence, :asc}], [] ->
+          fn params, [] ->
             schedules = Enum.sort_by(scenario.schedules, & &1.stop_sequence)
             trips = Map.new(scenario.trips, &{&1.id, &1})
+
+            trip_filter = get_in(params, [:filter, :id]) || get_in(params, [:filter, :trip]) || []
 
             if Enum.sort(trip_filter) != Enum.sort(Map.keys(trips)) do
               raise "Expected trip filter #{inspect(Map.keys(trips))} but got trip filter #{inspect(trip_filter)}"
@@ -59,22 +62,37 @@ if Mix.env() == :test do
         Mox.stub(
           RepositoryMock,
           :trips,
-          fn [filter: [id: trip_id]], [] ->
-            {:ok, %{data: Enum.filter(scenario.trips, &(&1.id == trip_id))}}
+          fn params, _opts ->
+            trip_id = get_in(params, [:filter, :id]) || get_in(params, [:filter, :trip])
+
+            case trip_id do
+              nil ->
+                :error
+
+              trip_id ->
+                {:ok, %{data: Enum.filter(scenario.trips, &(&1.id == trip_id))}}
+            end
           end
         )
 
-        # TODO: Hook this back up
-        [outgoing_notification] = ["TODO"]
-        #   Notifications.Engine.user_notifications(
-        #     scenario.subscriptions,
-        #     [scenario.alert],
-        #      scenario.at_time
-        #   )
+        [%{user_id: user_id} | _] = scenario.subscriptions
+
+        user = %MobileAppBackend.User{
+          id: user_id,
+          notification_subscriptions: scenario.subscriptions
+        }
+
+        [{_user, outgoing_notification}] =
+          Notifications.Scheduler.new_notifications(
+            [user],
+            [scenario.alert],
+            scenario.at_time,
+            GlobalDataCache.get_data()
+          )
 
         Application.put_env(:mobile_app_backend, MBTAV3API.Repository, real_repo)
 
-        OutgoingNotification.localize(outgoing_notification, "en")
+        outgoing_notification
       end
     end
 
@@ -735,7 +753,8 @@ if Mix.env() == :test do
         Repo.insert!(%MobileAppBackend.User{
           id: user_id,
           fcm_token: "not-a-real-token-#{user_id}",
-          fcm_last_verified: ~U[2000-01-01 00:00:00Z]
+          fcm_last_verified: ~U[2000-01-01 00:00:00Z],
+          notification_subscriptions: scenario.subscriptions
         })
       end
 
@@ -743,7 +762,9 @@ if Mix.env() == :test do
         user_id: user_id,
         alert_id: scenario.alert.id,
         upstream_timestamp:
-          scenario.alert.last_push_notification_timestamp |> DateTime.shift_zone!("Etc/UTC"),
+          scenario.alert.last_push_notification_timestamp
+          |> DateTime.shift_zone!("Etc/UTC")
+          |> DateTime.add(-1, :minute),
         type: :notification
       })
 

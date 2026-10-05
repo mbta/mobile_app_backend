@@ -2,10 +2,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   alias MBTAV3API.{Alert, RoutePattern, Schedule}
   alias MBTAV3API.Store.Alerts
   alias MobileAppBackend.Alerts.AlertSummary
-
-  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.Deliverer
   alias MobileAppBackend.Notifications.Engine
+  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
   alias MobileAppBackend.Repo
