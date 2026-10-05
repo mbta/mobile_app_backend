@@ -31,7 +31,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     all_candidates =
       Enum.flat_map(relevant_alerts_by_subscription, fn {subscription, relevant_alerts} ->
-        get_all_candidates(subscription, relevant_alerts, now)
+        get_all_candidates(subscription, relevant_alerts, global_data, now)
       end)
 
     candidates_by_alert =
@@ -93,13 +93,13 @@ defmodule MobileAppBackend.Notifications.Engine do
     end)
   end
 
-  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, now) do
+  defp get_all_candidates(%Subscription{} = subscription, relevant_alerts, global_data, now) do
     relevant_alerts =
       relevant_alerts
       |> Enum.filter(&Alert.eligible_for_notification?(&1))
 
     Enum.flat_map(relevant_alerts, fn %Alert{} = alert ->
-      List.wrap(alert_candidate(subscription, alert, now))
+      List.wrap(alert_candidate(subscription, alert, global_data, now))
     end)
   end
 
@@ -225,10 +225,21 @@ defmodule MobileAppBackend.Notifications.Engine do
 
   # this is not actually particularly complicated
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defp alert_candidate(subscription, alert, now) do
+  defp alert_candidate(subscription, alert, global_data, now) do
     open_now? = Enum.any?(subscription.windows, &Window.open?(&1, now))
 
-    next_overlap = Window.next_overlap(alert.active_period, subscription.windows, now)
+    trip_times = trip_times(subscription, alert, global_data, now)
+
+    overlap_targets =
+      if trip_times != nil do
+        trip_times
+      else
+        alert.active_period
+      end
+
+    next_overlap =
+      Window.next_overlap(overlap_targets, subscription.windows, now)
+
     next_overlap_in_hours = if next_overlap, do: DateTime.diff(next_overlap, now, :minute) / 60
     active_now? = next_overlap_in_hours <= 0
 
@@ -427,5 +438,18 @@ defmodule MobileAppBackend.Notifications.Engine do
     time_matches? = Enum.any?(subscription.windows, &Window.open?(&1, trip_time))
 
     route_matches? and stop_matches? and direction_matches? and time_matches?
+  end
+
+  defp trip_times(subscription, alert, global_data, now) do
+    schedules = schedules_for_subscription(alert, subscription, global_data, now)
+
+    if schedules != nil do
+      schedules
+      |> Enum.map(&(&1.departure_time || &1.arrival_time))
+      |> Enum.uniq()
+      |> Enum.reject(&is_nil/1)
+    else
+      nil
+    end
   end
 end

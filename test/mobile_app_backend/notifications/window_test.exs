@@ -39,7 +39,7 @@ defmodule MobileAppBackend.Notifications.WindowTest do
     })
   end
 
-  describe "next_overlap/3" do
+  describe "next_overlap/3 on ActivePeriods" do
     test "nil when window ends before period starts" do
       period = %Alert.ActivePeriod{start: ~B[2026-03-20 16:11:00], end: ~B[2026-03-20 23:59:00]}
 
@@ -181,6 +181,73 @@ defmodule MobileAppBackend.Notifications.WindowTest do
 
       now = ~B[2026-03-21 04:00:00]
       assert Window.next_overlap(period, window, now) == ~B[2026-03-27 22:00:00]
+    end
+  end
+
+  describe "next_overlap/3 on DateTimes" do
+    test "nil when window ends before datetime" do
+      datetime = ~B[2026-03-20 16:11:00]
+
+      window = %Window{
+        start_time: ~T[00:00:00],
+        end_time: ~T[16:10:00],
+        days_of_week: Enum.to_list(1..7)
+      }
+
+      now = ~B[2026-03-20 16:12:00]
+      assert Window.next_overlap(datetime, window, now) == nil
+    end
+
+    test "nil when window starts after datetime" do
+      datetime = ~B[2026-03-20 16:14:00]
+
+      window = %Window{
+        start_time: ~T[16:15:00],
+        end_time: ~T[23:59:00],
+        days_of_week: Enum.to_list(1..7)
+      }
+
+      now = ~B[2026-03-20 16:00:00]
+      assert Window.next_overlap(datetime, window, now) == nil
+    end
+
+    test "datetime when window starts before datetime" do
+      datetime = ~B[2026-03-20 16:18:00]
+
+      window = %Window{
+        start_time: ~T[16:00:00],
+        end_time: ~T[17:00:00],
+        days_of_week: Enum.to_list(1..7)
+      }
+
+      now = ~B[2026-03-20 15:30:00]
+      assert Window.next_overlap(datetime, window, now) == ~B[2026-03-20 16:18:00]
+    end
+
+    test "datetime when datetime already happened" do
+      datetime = ~B[2026-03-20 16:00:00]
+
+      window = %Window{
+        start_time: ~T[16:00:00],
+        end_time: ~T[17:00:00],
+        days_of_week: Enum.to_list(1..7)
+      }
+
+      now = ~B[2026-03-20 16:20:00]
+      assert Window.next_overlap(datetime, window, now) == ~B[2026-03-20 16:00:00]
+    end
+
+    test "overnight window is open past midnight when its day of week is the previous day" do
+      datetime = ~B[2026-03-21 01:00:00]
+
+      window = %Window{
+        start_time: ~T[22:00:00],
+        end_time: ~T[03:00:00],
+        days_of_week: [5]
+      }
+
+      now = ~B[2026-03-21 01:00:00]
+      assert Window.next_overlap(datetime, window, now) == ~B[2026-03-21 01:00:00]
     end
   end
 
