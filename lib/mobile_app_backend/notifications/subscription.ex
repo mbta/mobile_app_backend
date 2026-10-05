@@ -20,7 +20,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
           include_accessibility: boolean()
         }
 
-  @spec key_properties(Subscription.t()) :: key_properties()
+  @spec key_properties(t()) :: key_properties()
   def key_properties(subscription) do
     %{
       route_id: subscription.route_id,

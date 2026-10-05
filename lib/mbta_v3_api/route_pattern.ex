@@ -1,5 +1,5 @@
 defmodule MBTAV3API.RoutePattern do
-  alias MBTAV3API.Trip
+  alias MBTAV3API.{Line, Route, Trip}
   alias MobileAppBackend.GlobalDataCache
   use MBTAV3API.JsonApi.Object
   require Util
