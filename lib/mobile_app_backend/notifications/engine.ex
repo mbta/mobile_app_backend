@@ -191,13 +191,19 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     log_duration("applicable_alerts", applicable_duration_us)
 
+    {applicable_duration_us, applicable_alerts} =
+      :timer.tc(
+        fn -> applicable_alerts(alerts, subscription_key, route_ids, target_stop_with_children) end,
+        :microsecond
+      )
+
+
     {downstream_duration_us, downstream_alerts} =
       :timer.tc(
         fn -> downstream_alerts(alerts, route_ids, target_stop_with_children, global_data) end,
         :microsecond
       )
 
-    log_duration("downstream_alerts", downstream_duration_us)
 
     elevator_alerts =
       if subscription_key.include_accessibility do

@@ -8,8 +8,8 @@
 ### to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: fr\n"
-"Plural-Forms: nplurals=3\n"
+"Language: fr_FR\n"
+"Plural-Forms: nplurals=2; plural=n>1;\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:28
 #, elixir-autogen, elixir-format
@@ -935,17 +935,17 @@ msgstr " jusqu’à %{1}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:192
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
-msgstr " jusqu’au %{1}"
+msgstr " jusqu’à %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:200
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
-msgstr " jusqu’au %{1}"
+msgstr " jusqu’à %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:208
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
-msgstr " jusqu’au %{1}"
+msgstr " jusqu’à %{1}"
 
 #: lib/presentation_strings.ex:162
 #, elixir-autogen, elixir-format
@@ -1186,7 +1186,7 @@ msgstr "%{trip_identity} sont suspendus %{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:236
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} de ressentir des%{delay_duration} %{timeframe}%{cause}%{recurrence}retardés"
+msgstr "%{trip_identity} rencontrer des retards%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:150
 #, elixir-autogen, elixir-format
@@ -1206,7 +1206,7 @@ msgstr "%{trip_identity} se terminera à %{terminating_stop} %{timeframe}%{cause
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "**retardé**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**Retards**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
