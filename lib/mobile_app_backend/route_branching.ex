@@ -52,40 +52,50 @@ defmodule MobileAppBackend.RouteBranching do
   @type trip_id :: String.t()
   @type trip :: %{id: trip_id(), stop_ids: [stop_id()]}
 
+  @type system_data :: %{
+          route_patterns: %{route_pattern_id() => route_pattern()},
+          representative_trips: %{trip_id() => trip()},
+          stops: %{stop_id() => stop()}
+        }
+
+  @doc """
+  Calculates a route branching diagram.
+
+  Canon stop IDs come from the V3 API, which defines several workarounds and exceptions
+  that would be impractical to replicate here.
+  """
   @spec calculate(
-          route_id(),
+          route(),
           0 | 1,
           [stop_id()],
-          %{route_id() => route()},
-          %{route_pattern_id() => route_pattern()},
-          %{trip_id() => trip()},
-          %{stop_id() => stop()}
+          system_data()
         ) :: {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
   def calculate(
-        route_id,
+        route,
         direction_id,
-        stop_ids,
-        all_routes,
-        all_route_patterns,
-        all_representative_trips,
-        all_stops
+        canon_stop_ids,
+        system_data
       ) do
-    context = %{route_id: route_id, direction_id: direction_id}
-    route = all_routes[route_id]
+    context = %{route_id: route.id, direction_id: direction_id}
 
     patterns =
-      all_route_patterns
+      system_data.route_patterns
       |> Map.filter(fn {_, pattern} ->
-        pattern.route_id == route_id and pattern.direction_id == direction_id
+        pattern.route_id == route.id and pattern.direction_id == direction_id
       end)
       |> Map.values()
 
     segment_name_candidates = get_name_candidates(route, direction_id)
 
     stop_disambiguation =
-      StopDisambiguation.build(stop_ids, patterns, all_representative_trips, all_stops)
+      StopDisambiguation.build(
+        canon_stop_ids,
+        patterns,
+        system_data.representative_trips,
+        system_data.stops
+      )
 
-    stop_graph = StopGraph.build(stop_disambiguation, all_stops)
+    stop_graph = StopGraph.build(stop_disambiguation, system_data.stops)
 
     segment_graph =
       if :digraph_utils.is_acyclic(stop_graph) do
@@ -96,7 +106,7 @@ defmodule MobileAppBackend.RouteBranching do
 
     segment_order =
       if not is_nil(segment_graph) and :digraph_utils.is_acyclic(segment_graph) do
-        get_segment_order(segment_graph, stop_ids)
+        get_segment_order(segment_graph, canon_stop_ids)
       else
         if not is_nil(segment_graph) do
           unpeel_result({:error, "Segment graph contains cycle"}, context)
@@ -113,7 +123,7 @@ defmodule MobileAppBackend.RouteBranching do
         |> unpeel_result(context)
       end
 
-    segments = segments || Segment.get_fallback(stop_ids)
+    segments = segments || Segment.get_fallback(canon_stop_ids)
 
     {stop_graph, segment_graph, segments}
   end

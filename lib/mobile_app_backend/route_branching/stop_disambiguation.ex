@@ -10,11 +10,14 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
           %{RouteBranching.trip_id() => RouteBranching.trip()},
           %{RouteBranching.stop_id() => RouteBranching.stop()}
         ) :: t()
-  def build(canon_stop_ids, patterns, all_representative_trips, all_stops) do
+  def build(canon_stop_ids, patterns, representative_trips_by_id, stops_by_id) do
     canon_stop_set = MapSet.new(canon_stop_ids)
 
     pattern_stops =
-      Enum.map(patterns, &pattern_stops(&1, canon_stop_set, all_representative_trips, all_stops))
+      Enum.map(
+        patterns,
+        &pattern_stops(&1, canon_stop_set, representative_trips_by_id, stops_by_id)
+      )
 
     pattern_stops_with_counts = pattern_stops_with_counts(pattern_stops, canon_stop_ids)
     pattern_stops_with_counts
@@ -27,16 +30,16 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
           %{RouteBranching.stop_id() => RouteBranching.stop()}
         ) ::
           {RouteBranching.route_pattern(), [RouteBranching.stop_id()]}
-  defp pattern_stops(pattern, canon_stops, all_representative_trips, all_stops) do
+  defp pattern_stops(pattern, canon_stops, representative_trips_by_id, stops_by_id) do
     stop_ids =
-      case all_representative_trips[pattern.representative_trip_id] do
+      case representative_trips_by_id[pattern.representative_trip_id] do
         %{stop_ids: stop_ids} when is_list(stop_ids) -> stop_ids
         _ -> []
       end
 
     stops =
       stop_ids
-      |> Enum.map(&stop_or_parent_if_canon(&1, canon_stops, all_stops))
+      |> Enum.map(&stop_or_parent_if_canon(&1, canon_stops, stops_by_id))
       |> Enum.reject(&is_nil/1)
 
     {pattern, stops}
@@ -48,11 +51,11 @@ defmodule MobileAppBackend.RouteBranching.StopDisambiguation do
           %{RouteBranching.stop_id() => RouteBranching.stop()}
         ) ::
           RouteBranching.stop_id() | nil
-  defp stop_or_parent_if_canon(stop_id, canon_stops, all_stops) do
+  defp stop_or_parent_if_canon(stop_id, canon_stops, stops_by_id) do
     if MapSet.member?(canon_stops, stop_id) do
       stop_id
     else
-      parent = all_stops[stop_id].parent_station_id
+      parent = stops_by_id[stop_id].parent_station_id
 
       if MapSet.member?(canon_stops, parent) do
         parent

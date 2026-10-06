@@ -19,13 +19,14 @@ defmodule MobileAppBackendWeb.RouteController do
 
     {_stop_graph, _segment_graph, branches} =
       RouteBranching.calculate(
-        route_id,
+        global_data.routes[route_id],
         direction_id,
         stop_ids,
-        global_data.routes,
-        global_data.route_patterns,
-        global_data.trips,
-        global_data.stops
+        %{
+          route_patterns: global_data.route_patterns,
+          representative_trips: global_data.trips,
+          stops: global_data.stops
+        }
       )
 
     json(conn, branches)

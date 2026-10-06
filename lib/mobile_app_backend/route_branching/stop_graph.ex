@@ -26,7 +26,7 @@ defmodule MobileAppBackend.RouteBranching.StopGraph do
   @type edge_id :: {vertex_id(), vertex_id()}
 
   @spec build(StopDisambiguation.t(), %{RouteBranching.stop_id() => RouteBranching.stop()}) :: t()
-  def build(patterns_disambiguated_stops, all_stops) do
+  def build(patterns_disambiguated_stops, stops_by_id) do
     result = :digraph.new([:cyclic, :protected])
 
     patterns_disambiguated_stops
@@ -39,7 +39,7 @@ defmodule MobileAppBackend.RouteBranching.StopGraph do
     )
     |> Enum.each(fn {{stop_id, stop_count}, typicalities} ->
       :digraph.add_vertex(result, {stop_id, stop_count}, %Node{
-        stop: all_stops[stop_id],
+        stop: stops_by_id[stop_id],
         typicalities: MapSet.new(typicalities)
       })
     end)

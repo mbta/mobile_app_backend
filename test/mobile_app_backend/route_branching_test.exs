@@ -59,13 +59,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
 
       {_, _, segments} =
         RouteBranching.calculate(
-          route.id,
+          route,
           pattern1.direction_id,
           [a.id, b.id, c.id, d.id],
-          objects.routes,
-          objects.route_patterns,
-          objects.trips,
-          objects.stops
+          %{
+            route_patterns: objects.route_patterns,
+            representative_trips: objects.trips,
+            stops: objects.stops
+          }
         )
 
       assert segments == [
@@ -219,13 +220,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
 
       {_, _, segments} =
         RouteBranching.calculate(
-          route.id,
+          route,
           0,
           trunk_ids ++ ashmont_ids ++ braintree_ids,
-          global_data.routes,
-          global_data.route_patterns,
-          global_data.trips,
-          global_data.stops
+          %{
+            route_patterns: global_data.route_patterns,
+            representative_trips: global_data.trips,
+            stops: global_data.stops
+          }
         )
 
       jfk_to_north_quincy_skip = %StickConnection{
@@ -458,13 +460,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
                 %Segment{name: "Providence"}
               ]} =
                RouteBranching.calculate(
-                 route.id,
+                 route,
                  0,
                  stop_ids,
-                 global_data.routes,
-                 global_data.route_patterns,
-                 global_data.trips,
-                 global_data.stops
+                 %{
+                   route_patterns: global_data.route_patterns,
+                   representative_trips: global_data.trips,
+                   stops: global_data.stops
+                 }
                )
 
       assert {_, _,
@@ -474,13 +477,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
                 %Segment{name: "South Station"}
               ]} =
                RouteBranching.calculate(
-                 route.id,
+                 route,
                  1,
                  Enum.reverse(stop_ids),
-                 global_data.routes,
-                 global_data.route_patterns,
-                 global_data.trips,
-                 global_data.stops
+                 %{
+                   route_patterns: global_data.route_patterns,
+                   representative_trips: global_data.trips,
+                   stops: global_data.stops
+                 }
                )
     end
 
@@ -520,13 +524,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
 
       {_, _, segments} =
         RouteBranching.calculate(
-          route.id,
+          route,
           0,
           [a.id, b.id, c.id],
-          objects.routes,
-          objects.route_patterns,
-          objects.trips,
-          objects.stops
+          %{
+            route_patterns: objects.route_patterns,
+            representative_trips: objects.trips,
+            stops: objects.stops
+          }
         )
 
       assert [
@@ -616,13 +621,14 @@ defmodule MobileAppBackend.RouteBranchingTest do
       {{stop_graph, segment_graph, segments}, log} =
         ExUnit.CaptureLog.with_log(fn ->
           RouteBranching.calculate(
-            route.id,
+            route,
             pattern1.direction_id,
             [a.id, b.id, c.id, d.id, e.id],
-            objects.routes,
-            objects.route_patterns,
-            objects.trips,
-            objects.stops
+            %{
+              route_patterns: objects.route_patterns,
+              representative_trips: objects.trips,
+              stops: objects.stops
+            }
           )
         end)
 
