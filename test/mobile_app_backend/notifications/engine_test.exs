@@ -1646,6 +1646,83 @@ defmodule MobileAppBackend.Notifications.EngineTest do
   end
 
   describe "schedules_for_alert_trips/4" do
+    test "retrieves schedules for specified trips" do
+      now = DateTime.now!("America/New_York")
+      service_day = Util.DateTime.datetime_to_gtfs(now)
+      upstream_timestamp = DateTime.add(now, -2)
+
+      trip =
+        build(:trip,
+          route_id: "Red",
+          route_pattern_id: "Red-3-0",
+          direction_id: 0,
+          stop_ids: ["place-sstat"]
+        )
+
+      trip_id = trip.id
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], route: "Red", trip: trip_id}
+          ],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          direction_id: trip.direction_id,
+          windows: [
+            NotificationsFactory.build(:window,
+              start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+              end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+              days_of_week: Range.to_list(0..6)
+            )
+          ]
+        )
+
+      global_data = GlobalDataCache.get_data()
+      reassign_env(:mobile_app_backend, MBTAV3API.Repository, RepositoryMock)
+
+      schedule =
+        build(:schedule,
+          departure_time: now,
+          trip_id: trip_id,
+          route_id: trip.route_id,
+          stop_id: "place-sstat"
+        )
+
+      RepositoryMock
+      |> expect(
+        :schedules,
+        1,
+        fn [
+             filter: [trip: [^trip_id], date: ^service_day],
+             include: [trip: :stops],
+             sort: {:stop_sequence, :asc},
+             fields: [stop: []]
+           ],
+           _ ->
+          ok_response(
+            [schedule],
+            [trip]
+          )
+        end
+      )
+
+      assert [schedule] ==
+               Engine.schedules_for_alert_trips(
+                 alert,
+                 Subscription.key_properties(subscription),
+                 global_data,
+                 now
+               )
+    end
+
     test "retrieves schedules for future specified trips" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
