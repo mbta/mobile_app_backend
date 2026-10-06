@@ -1361,6 +1361,136 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  GlobalDataCache.get_data()
                )
     end
+
+    test "uses right summary when multiple active alerts on route" do
+      now = DateTime.now!("America/New_York")
+      upstream_timestamp = DateTime.add(now, -2)
+
+      alert_1 =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      alert_2 =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :delay,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [
+            NotificationsFactory.build(:window,
+              start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+              end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+              days_of_week: Range.to_list(0..6)
+            )
+          ]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      assert [
+               %OutgoingNotification{
+                 subscriptions: [^subscription],
+                 summary: "fake_1_multiple_alert",
+                 alert: ^alert_1,
+                 type: {:notification, ^upstream_timestamp}
+               },
+               %OutgoingNotification{
+                 subscriptions: [^subscription],
+                 summary: "fake_2_multiple_alert",
+                 alert: ^alert_2,
+                 type: {:notification, ^upstream_timestamp}
+               }
+             ] =
+               user
+               |> Engine.user_notifications(
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert_1.id => {"fake_1_single_alert", "fake_1_multiple_alert"},
+                     alert_2.id => {"fake_2_single_alert", "fake_2_multiple_alert"}
+                   }
+                 },
+                 %{alert_1.id => alert_1, alert_2.id => alert_2},
+                 now,
+                 GlobalDataCache.get_data()
+               )
+               |> Enum.sort_by(& &1.summary)
+    end
+
+    test "uses regular summary when other active alert is elevator closure" do
+      now = DateTime.now!("America/New_York")
+      upstream_timestamp = DateTime.add(now, -2)
+
+      alert_1 =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      alert_2 =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          effect: :elevator_closure,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: upstream_timestamp
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [
+            NotificationsFactory.build(:window,
+              start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
+              end_time: now |> DateTime.add(1) |> DateTime.to_time(),
+              days_of_week: Range.to_list(0..6)
+            )
+          ]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      assert [
+               %OutgoingNotification{
+                 subscriptions: [^subscription],
+                 summary: "fake_1_single_alert",
+                 alert: ^alert_1,
+                 type: {:notification, ^upstream_timestamp}
+               },
+               %OutgoingNotification{
+                 subscriptions: [^subscription],
+                 summary: "fake_2_multiple_alert",
+                 alert: ^alert_2,
+                 type: {:notification, ^upstream_timestamp}
+               }
+             ] =
+               user
+               |> Engine.user_notifications(
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert_1.id => {"fake_1_single_alert", "fake_1_multiple_alert"},
+                     alert_2.id => {"fake_2_single_alert", "fake_2_multiple_alert"}
+                   }
+                 },
+                 %{alert_1.id => alert_1, alert_2.id => alert_2},
+                 now,
+                 GlobalDataCache.get_data()
+               )
+               |> Enum.sort_by(& &1.summary)
+    end
   end
 
   describe "alerts_for_subscription_key/4" do
