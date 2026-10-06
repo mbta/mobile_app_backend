@@ -29,10 +29,11 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     try do
       relevant_alerts = get_relevant_alerts(now)
-      open_windows = get_open_windows(now)
+      users_with_open_windows = users_with_open_windows(now)
+      global = MobileAppBackend.GlobalDataCache.get_data()
 
-      relevant_alerts
-      |> notifications_to_send(open_windows, now)
+      users_with_open_windows
+      |> new_notifications(relevant_alerts, now, global)
       |> enqueue_delivery()
     rescue
       error ->
@@ -72,8 +73,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       false
   end
 
-  @spec get_open_windows(DateTime.t()) :: [User.t()]
-  defp get_open_windows(now) do
+  @spec users_with_open_windows(DateTime.t()) :: [User.t()]
+  defp users_with_open_windows(now) do
     # to receive a reminder, the window must be open either right now or in twelve hours
     # to receive a notification or all clear, the window must be open right now
     reminder_target = DateTime.add(now, 12, :hour)
@@ -99,15 +100,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     Logger.info("#{__MODULE__} open_windows_query duration=#{query_us}")
 
     users_with_open_windows
-  end
-
-  @spec notifications_to_send([Alert.t()], [User.t()], DateTime.t()) :: [
-          {User.t(), OutgoingNotification.Localized.t()}
-        ]
-  defp notifications_to_send(alerts, users, now) do
-    global = MobileAppBackend.GlobalDataCache.get_data()
-
-    new_notifications(users, alerts, now, global)
   end
 
   @spec new_notifications([User.t()], [Alert.t()], DateTime.t(), GlobalDataCache.data()) :: [
