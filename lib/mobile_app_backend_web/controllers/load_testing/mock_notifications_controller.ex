@@ -129,8 +129,8 @@ defmodule MobileAppBackendWeb.LoadTesting.MockNotificationsController do
     stop_id =
       global_data.trips
       |> Map.fetch!(route_pattern.representative_trip_id)
-      |> Map.get(:stop_ids)
-      |> List.first()
+      |> Map.get(:stop_ids, [])
+      |> Enum.random()
 
     route_or_line_id =
       if String.starts_with?(route_id, "Green-"), do: "line-Green", else: route_id
