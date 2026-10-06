@@ -30,8 +30,11 @@ defmodule MobileAppBackend.RouteBranching do
   alias MobileAppBackend.RouteBranching.StopDisambiguation
   alias MobileAppBackend.RouteBranching.StopGraph
 
+  # dialyzer will complain about extra keys in these maps
+  # unless we specifically allow them with optional(atom()) => term()
   @type route_id :: String.t()
   @type route :: %{
+          optional(atom()) => term(),
           id: route_id(),
           direction_destinations: [String.t()],
           type: :light_rail | :heavy_rail | :commuter_rail | :bus | :ferry,
@@ -39,6 +42,7 @@ defmodule MobileAppBackend.RouteBranching do
         }
   @type route_pattern_id :: String.t()
   @type route_pattern :: %{
+          optional(atom()) => term(),
           id: route_pattern_id(),
           direction_id: 0 | 1,
           typicality: route_pattern_typicality(),
@@ -48,9 +52,9 @@ defmodule MobileAppBackend.RouteBranching do
   @type route_pattern_typicality ::
           :typical | :deviation | :atypical | :diversion | :canonical_only
   @type stop_id :: String.t()
-  @type stop :: %{id: stop_id(), parent_station_id: stop_id() | nil}
+  @type stop :: %{optional(atom()) => term(), id: stop_id(), parent_station_id: stop_id() | nil}
   @type trip_id :: String.t()
-  @type trip :: %{id: trip_id(), stop_ids: [stop_id()]}
+  @type trip :: %{optional(atom()) => term(), id: trip_id(), stop_ids: [stop_id()]}
 
   @type system_data :: %{
           route_patterns: %{route_pattern_id() => route_pattern()},
@@ -64,12 +68,8 @@ defmodule MobileAppBackend.RouteBranching do
   Canon stop IDs come from the V3 API, which defines several workarounds and exceptions
   that would be impractical to replicate here.
   """
-  @spec calculate(
-          route(),
-          0 | 1,
-          [stop_id()],
-          system_data()
-        ) :: {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
+  @spec calculate(route(), 0 | 1, [stop_id()], system_data()) ::
+          {StopGraph.t(), SegmentGraph.t() | nil, [Segment.t()]}
   def calculate(
         route,
         direction_id,
