@@ -1597,8 +1597,6 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                )
     end
 
-    # TODO: schedule-based tests for trip-specific alerts
-    # TODO: test has_more_alerts summary picking
     test "includes trip-specific alerts" do
       now = DateTime.now!("America/New_York")
       service_day = Util.DateTime.datetime_to_gtfs(now)
