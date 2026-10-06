@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.RouteBranching.Segment do
-  alias MBTAV3API.Stop
+  alias MobileAppBackend.RouteBranching
   alias MobileAppBackend.RouteBranching.Segment
   alias MobileAppBackend.RouteBranching.SegmentGraph
 
@@ -18,8 +18,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     @type vpos :: :top | :center | :bottom
 
     @type t :: %__MODULE__{
-            from_stop: Stop.id(),
-            to_stop: Stop.id(),
+            from_stop: RouteBranching.stop_id(),
+            to_stop: RouteBranching.stop_id(),
             from_lane: Segment.lane(),
             to_lane: Segment.lane(),
             from_vpos: vpos(),
@@ -30,10 +30,8 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   end
 
   defmodule BranchStop do
-    alias MBTAV3API.Stop
-
     @type t :: %__MODULE__{
-            stop_id: Stop.id(),
+            stop_id: RouteBranching.stop_id(),
             stop_lane: Segment.lane(),
             connections: [StickConnection.t()]
           }
@@ -72,7 +70,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
     end
   end
 
-  @spec get_segment_name([Stop.t()], [String.t()]) :: String.t() | nil
+  @spec get_segment_name([RouteBranching.stop()], [String.t()]) :: String.t() | nil
   def get_segment_name(segment_stops, segment_name_candidates) do
     Enum.find(segment_name_candidates, fn candidate ->
       regex = ~r"(\b|^)#{candidate}(\b|$)"
@@ -84,7 +82,7 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   Constructs a single segment with all stops with no connections. Used as a fallback if the graph-based process
   encountered an error.
   """
-  @spec get_fallback([Stop.id()]) :: [t()]
+  @spec get_fallback([RouteBranching.stop_id()]) :: [t()]
   def get_fallback(stop_ids) do
     [
       %__MODULE__{
@@ -306,9 +304,9 @@ defmodule MobileAppBackend.RouteBranching.Segment do
           %{segment_id() => lane()},
           SegmentGraph.t(),
           (:digraph.graph(), :digraph.vertex() -> [:digraph.vertex()]),
-          ([Stop.t()] -> Stop.t()),
+          ([RouteBranching.stop()] -> RouteBranching.stop()),
           (segment_id() -> {segment_id(), segment_id()})
-        ) :: [{Stop.id(), lane()}]
+        ) :: [{RouteBranching.stop_id(), lane()}]
   defp segment_neighbor_stops(
          segment_id,
          segment_lanes,
@@ -343,10 +341,10 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   # Turns the list of Stops into a list of BranchStops with the relevant StickConnections
   # (see build_segment_stop_connections/6).
   @spec build_segment_stops(
-          [Stop.t()],
+          [RouteBranching.stop()],
           lane(),
-          [{Stop.id(), lane()}],
-          [{Stop.id(), lane()}],
+          [{RouteBranching.stop_id(), lane()}],
+          [{RouteBranching.stop_id(), lane()}],
           [StickConnection.t()]
         ) ::
           [BranchStop.t()]
@@ -483,12 +481,12 @@ defmodule MobileAppBackend.RouteBranching.Segment do
   # (if it’s in the middle of a segment) or the incoming/outgoing segment connections
   # (if it’s at the start/end of a segment).
   @spec build_segment_stop_connections(
-          Stop.t(),
-          Stop.t() | nil,
-          Stop.t() | nil,
+          RouteBranching.stop(),
+          RouteBranching.stop() | nil,
+          RouteBranching.stop() | nil,
           lane(),
-          [{Stop.id(), lane()}],
-          [{Stop.id(), lane()}]
+          [{RouteBranching.stop_id(), lane()}],
+          [{RouteBranching.stop_id(), lane()}]
         ) :: [StickConnection.t()]
   defp build_segment_stop_connections(
          stop,

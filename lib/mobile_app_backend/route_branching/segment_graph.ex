@@ -1,10 +1,12 @@
 defmodule MobileAppBackend.RouteBranching.SegmentGraph do
+  alias MobileAppBackend.RouteBranching
   alias MobileAppBackend.RouteBranching.StopGraph
 
   defmodule Node do
-    alias MBTAV3API.RoutePattern
-    alias MBTAV3API.Stop
-    @type t :: %__MODULE__{stops: [Stop.t()], typicalities: MapSet.t(RoutePattern.typicality())}
+    @type t :: %__MODULE__{
+            stops: [RouteBranching.stop()],
+            typicalities: MapSet.t(RouteBranching.route_pattern_typicality())
+          }
     defstruct [:stops, :typicalities]
   end
 
