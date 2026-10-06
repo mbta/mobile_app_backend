@@ -1,5 +1,5 @@
 defmodule MBTAV3API.RoutePattern do
-  alias MBTAV3API.Trip
+  alias MBTAV3API.{Line, Route, Trip}
   alias MobileAppBackend.GlobalDataCache
   use MBTAV3API.JsonApi.Object
   require Util
@@ -130,16 +130,16 @@ defmodule MBTAV3API.RoutePattern do
   end
 
   @spec get_relevant_patterns(
-          String.t() | nil,
+          Route.id() | Line.id() | nil,
           String.t() | nil,
           integer() | nil,
           GlobalDataCache.data()
         ) :: [t()]
-  def get_relevant_patterns(route_id, stop_id, direction_id, global_data) do
+  def get_relevant_patterns(route_or_line_id, stop_id, direction_id, global_data) do
     global_data.route_patterns
     |> Stream.map(fn {_, pattern} -> pattern end)
     |> Enum.filter(fn pattern ->
-      match_pattern_route?(pattern, route_id, global_data) and
+      match_pattern_route?(pattern, route_or_line_id, global_data) and
         match_pattern_stop?(pattern, stop_id, global_data) and
         match_pattern_direction?(pattern, direction_id)
     end)
