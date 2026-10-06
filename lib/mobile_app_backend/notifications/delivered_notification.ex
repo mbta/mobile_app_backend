@@ -78,4 +78,16 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
         :count
       ) == 0
   end
+
+  @doc """
+  Returns the priority of a given notification type. Higher numbers indicate higher priority.
+  If a user could be notified with multiple types for the same alert, the type with the highest
+  priority should be sent.
+  """
+  @spec type_priority(type() | nil) :: non_neg_integer()
+  def type_priority(:all_clear), do: 4
+  def type_priority({:notification, _}), do: 3
+  def type_priority({:update, _}), do: 2
+  def type_priority(:reminder), do: 1
+  def type_priority(_), do: 0
 end

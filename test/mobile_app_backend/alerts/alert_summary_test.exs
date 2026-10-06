@@ -1,5 +1,6 @@
 defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   use ExUnit.Case, async: true
+  import ExUnit.CaptureLog
   import MobileAppBackend.Factory
   import Mox
   import Test.Support.Helpers
@@ -2434,6 +2435,57 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  },
                  :notification
                )
+    end
+
+    test "location is affected stops if stops are disconnected" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
+          ]
+        )
+
+      stop1 = build(:stop, id: "place-boyls", name: "Boylston")
+      stop2 = build(:stop, id: "place-coecl", name: "Copley")
+      stop3 = build(:stop, id: "place-river", name: "Riverside")
+      route = build(:route, id: "Green-D", type: :light_rail, line_id: "line-Green")
+      representative_trip = build(:trip, stop_ids: [stop1.id, stop2.id, stop3.id])
+
+      pattern =
+        build(:route_pattern, representative_trip_id: representative_trip.id, route_id: route.id)
+
+      {summary, log} =
+        with_log([level: :warning], fn ->
+          AlertSummary.summarizing(
+            alert,
+            %Subscription{stop_id: "place-boyls", direction_id: 0},
+            [pattern],
+            now,
+            [],
+            %{
+              stops: %{stop1.id => stop1, stop2.id => stop2, stop3.id => stop3},
+              routes: %{route.id => route},
+              trips: %{representative_trip.id => representative_trip},
+              route_patterns: %{pattern.id => pattern}
+            },
+            :notification
+          )
+        end)
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               location: %AlertSummary.Location.AffectedStops{
+                 stops: ["Boylston", "Riverside"]
+               },
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+             } = summary
+
+      assert log =~ "Disconnected paths detected: place-boyls -> place-river"
     end
   end
 
