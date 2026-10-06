@@ -8,13 +8,13 @@
 ### to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: zh-Hans-CN\n"
-"Plural-Forms: nplurals=1\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:28
 #, elixir-autogen, elixir-format
 msgid " at **%{stop_name}**"
-msgstr " 于**%{stop_name}**到站"
+msgstr " 在**%{stop_name}**"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:104
 #, elixir-autogen, elixir-format
@@ -1176,7 +1176,7 @@ msgstr "%{trip_identity}受 影响%{effect}%{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:142
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} 被取消 %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity}被取消%{timeframe} %{cause} %{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:210
 #, elixir-autogen, elixir-format
@@ -1186,7 +1186,7 @@ msgstr "%{trip_identity}暂停%{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:236
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} 经历延误%{delay_duration} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity}出现延误%{delay_duration} %{timeframe} %{cause} %{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:150
 #, elixir-autogen, elixir-format
@@ -1206,7 +1206,7 @@ msgstr "%{trip_identity}将在 终止运营%{terminating_stop}%{timeframe}%{caus
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "**延误**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "**延误** %{delay_duration} %{summary_location} %{summary_timeframe} %{summary_recurrence} %{due_to_cause}"
 
 #: lib/presentation_strings.ex:40
 #, elixir-autogen, elixir-format
@@ -1266,12 +1266,12 @@ msgstr "列车"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:173
 #, elixir-autogen, elixir-format
 msgid " until later today"
-msgstr " 今天晚些时候"
+msgstr "今天晚些时候"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:46
 #, elixir-autogen, elixir-format
 msgid "%{summary}. See alert details."
-msgstr "%{summary}。警报详情"
+msgstr "%{summary}至警报详情"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:63
 #, elixir-autogen, elixir-format
@@ -1286,14 +1286,14 @@ msgstr "**通行正常：**服务已恢复正常。"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:111
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
-msgstr "**更新：** %{effect_sentence_case} 已结束%{summary_location}。"
+msgstr "**更新：** %{effect_sentence_case}已结束%{summary_location} 。"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:80
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:89
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:102
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**更新：**%{mode} 服务已恢复%{summary_location}。"
+msgstr "**更新：** %{mode}服务已恢复%{summary_location} 。"
 
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:50
 #, elixir-autogen, elixir-format

@@ -8,8 +8,8 @@
 ### to merge POT files into PO files.
 msgid ""
 msgstr ""
-"Language: es\n"
-"Plural-Forms: nplurals=3\n"
+"Language: es_LA\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:28
 #, elixir-autogen, elixir-format
@@ -940,12 +940,12 @@ msgstr " hasta el %{1}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:200
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
-msgstr " hasta las %{1}"
+msgstr " hasta el %{1}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:208
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
-msgstr " hasta las %{1}"
+msgstr " hasta el %{1}"
 
 #: lib/presentation_strings.ex:162
 #, elixir-autogen, elixir-format
@@ -1181,12 +1181,12 @@ msgstr "%{trip_identity} se cancelan %{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:210
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} están suspendidos %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} son suspendidos %{timeframe}%{cause}%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:236
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} experimentando%{delay_duration} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} experimentando demoras%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:150
 #, elixir-autogen, elixir-format
@@ -1293,7 +1293,7 @@ msgstr "**Actualización:** %{effect_sentence_case} terminó%{summary_location}.
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:102
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**Actualización:** %{mode} servicio se reanudó%{summary_location}."
+msgstr "**Todo despejado:** %{mode} El servicio normal se%{summary_location} reanudó."
 
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:50
 #, elixir-autogen, elixir-format
