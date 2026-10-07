@@ -2598,6 +2598,45 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    test "prefers whole route location when combining multiple locations" do
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension,
+          informed_entity: [
+            %Alert.InformedEntity{activities: [:board], stop: "place-boyls", route: "Green-D"},
+            %Alert.InformedEntity{activities: [:board], stop: "place-river", route: "Green-D"}
+          ]
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.AffectedStops{
+          stops: ["Boylston", "Riverside"]
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %AlertSummary.Location.WholeRoute{
+          route_label: "Green-D",
+          route_type: "light-rail"
+        },
+        timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+      }
+
+      assert %AlertSummary.Standard{
+               effect: :suspension,
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green-D",
+                 route_type: "light-rail"
+               },
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+             } ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
     test "discards location if disagreements" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
