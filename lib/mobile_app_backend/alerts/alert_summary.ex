@@ -211,11 +211,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         end
 
       _ ->
-        Logger.warning(
-          "Combining locations: #{inspect(locations)} for alert: #{alert.id} reason is unknown"
-        )
+        # There are cases were multiple locations are specified, but whole route takes precedence
+        whole_route_location = Enum.find(locations, &match?(%Location.WholeRoute{}, &1))
 
-        %__MODULE__.Location.Omit{reason: :combine_unknown}
+        if whole_route_location do
+          whole_route_location
+        else
+          Logger.warning(
+            "Combining locations: #{inspect(locations)} for alert: #{alert.id} reason is unknown"
+          )
+
+          %__MODULE__.Location.Omit{reason: :combine_unknown}
+        end
     end
   end
 
