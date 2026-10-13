@@ -272,7 +272,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     # Oban.insert_all doesn't respect uniqueness constraints, but
     # Scheduler enforces uniqueness itself and only one Scheduler job
     # can run at once, so it is safe to use here.
-    |> Oban.insert_all()
+    |> Enum.chunk_every(100)
+    |> Enum.each(&Oban.insert_all(&1))
 
     :ok
   rescue
