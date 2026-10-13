@@ -119,33 +119,25 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         {subscription_key, summaries_by_subscription_key(subscription_key, alerts, now, global)}
       end)
 
-    Task.async_stream(
-      users,
-      fn user ->
-        try do
-          outgoing_notifications =
-            Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
+    Enum.flat_map(users, fn user ->
+      try do
+        outgoing_notifications =
+          Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
 
-          results = localize_notifications(user, outgoing_notifications)
-          Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
-          results
-        rescue
-          error ->
-            log_exception(
-              "find_new_notifications_for_user",
-              "status=error user_id=#{user.id}",
-              Exception.format(:error, error, __STACKTRACE__)
-            )
+        results = localize_notifications(user, outgoing_notifications)
+        Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
+        results
+      rescue
+        error ->
+          log_exception(
+            "find_new_notifications_for_user",
+            "status=error user_id=#{user.id}",
+            Exception.format(:error, error, __STACKTRACE__)
+          )
 
-            []
-        end
-      end,
-      ordered: false,
-      timeout: :infinity
-    )
-    |> Stream.filter(&match?({:ok, _}, &1))
-    |> Stream.map(fn {:ok, result} -> result end)
-    |> Enum.flat_map(& &1)
+          []
+      end
+    end)
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
