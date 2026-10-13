@@ -155,7 +155,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           DateTime.t(),
           GlobalDataCache.data()
         ) ::
-          %{Alert.id() => {AlertSummary.t(), AlertSummary.t()}}
+          %{Alert.id() => %{default: AlertSummary.t(), multiple_active: AlertSummary.t()}}
 
   defp summaries_by_subscription_key(subscription_key, alerts, now, global) do
     {engine_us, relevant_alerts} =
