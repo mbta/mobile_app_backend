@@ -267,23 +267,22 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @spec enqueue_delivery([{User.t(), OutgoingNotification.Localized.t()}]) :: :ok
   defp enqueue_delivery(user_notifications) do
-    try do
-      user_notifications
-      |> Enum.map(&deliverer_job/1)
-      # Oban.insert_all doesn't respect uniqueness constraints, but
-      # Scheduler enforces uniqueness itself and only one Scheduler job
-      # can run at once, so it is safe to use here.
-      |> Oban.insert_all()
-    rescue
-      error ->
-        log_exception(
-          "enqueue_delivery",
-          "",
-          Exception.format(:error, error, __STACKTRACE__)
-        )
+    user_notifications
+    |> Enum.map(&deliverer_job/1)
+    # Oban.insert_all doesn't respect uniqueness constraints, but
+    # Scheduler enforces uniqueness itself and only one Scheduler job
+    # can run at once, so it is safe to use here.
+    |> Oban.insert_all()
+    :ok
+  rescue
+    error ->
+      log_exception(
+        "enqueue_delivery",
+        "",
+        Exception.format(:error, error, __STACKTRACE__)
+      )
 
-        :ok
-    end
+      :ok
   end
 
   defp deliverer_job({%User{} = recipient, %OutgoingNotification.Localized{} = notification}) do
