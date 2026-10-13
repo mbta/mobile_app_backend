@@ -28,25 +28,13 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       end
 
     try do
-      {alerts_duration_us, relevant_alerts} =
-        :timer.tc(fn -> get_relevant_alerts(now) end, :microsecond)
-
-      log_duration("get_relevant_alerts", alerts_duration_us)
-
+      relevant_alerts = get_relevant_alerts(now)
       users_with_open_windows = users_with_open_windows(now)
       global = MobileAppBackend.GlobalDataCache.get_data()
 
-      {notifications_duration_us, notifications} =
-        :timer.tc(
-          fn -> new_notifications(users_with_open_windows, relevant_alerts, now, global) end,
-          :microsecond
-        )
-
-      log_duration("new_notifications", notifications_duration_us)
-
-      {enqueue_duration_us, _result} = :timer.tc(fn -> enqueue_delivery(notifications) end, :microsecond)
-
-      log_duration("enqueue_delivery", enqueue_duration_us)
+      users_with_open_windows
+      |> new_notifications(relevant_alerts, now, global)
+      |> enqueue_delivery()
     rescue
       error ->
         log_exception(
@@ -186,64 +174,58 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         global
       )
 
-    {summaries_duration_us, summaries_per_alert} =
-      :timer.tc(
-        fn ->
-          Map.new(
-            relevant_alerts,
-            fn alert ->
-              schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
+    summaries_per_alert =
+      Map.new(
+        relevant_alerts,
+        fn alert ->
+          schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
 
-              summary_no_other_active_alerts =
-                AlertSummary.summarizing(
-                  alert,
-                  %Subscription{
-                    route_id: subscription_key.route_id,
-                    stop_id: subscription_key.stop_id,
-                    direction_id: subscription_key.direction_id,
-                    include_accessibility: subscription_key.include_accessibility
-                  },
-                  patterns,
-                  now,
-                  schedules,
-                  global,
-                  :notification,
-                  false
-                )
+          summary_no_other_active_alerts =
+            AlertSummary.summarizing(
+              alert,
+              %Subscription{
+                route_id: subscription_key.route_id,
+                stop_id: subscription_key.stop_id,
+                direction_id: subscription_key.direction_id,
+                include_accessibility: subscription_key.include_accessibility
+              },
+              patterns,
+              now,
+              schedules,
+              global,
+              :notification,
+              false
+            )
 
-              summary_has_multiple_active_alerts =
-                AlertSummary.summarizing(
-                  alert,
-                  %Subscription{
-                    route_id: subscription_key.route_id,
-                    stop_id: subscription_key.stop_id,
-                    direction_id: subscription_key.direction_id,
-                    include_accessibility: subscription_key.include_accessibility
-                  },
-                  patterns,
-                  now,
-                  schedules,
-                  global,
-                  :notification,
-                  true
-                )
+          summary_has_multiple_active_alerts =
+            AlertSummary.summarizing(
+              alert,
+              %Subscription{
+                route_id: subscription_key.route_id,
+                stop_id: subscription_key.stop_id,
+                direction_id: subscription_key.direction_id,
+                include_accessibility: subscription_key.include_accessibility
+              },
+              patterns,
+              now,
+              schedules,
+              global,
+              :notification,
+              true
+            )
 
-              log_alert_summary_type_issues(
-                alert,
-                summary_no_other_active_alerts,
-                patterns,
-                schedules
-              )
-
-              {alert.id, {summary_no_other_active_alerts, summary_has_multiple_active_alerts}}
-            end
+          log_alert_summary_type_issues(
+            alert,
+            summary_no_other_active_alerts,
+            patterns,
+            schedules
           )
-        end,
-        :microsecond
+
+          {alert.id, {summary_no_other_active_alerts, summary_has_multiple_active_alerts}}
+        end
       )
 
-    log_duration("alerts_for_subscription_key", engine_us)
-    log_duration("summaries_for_subscription_key", summaries_duration_us)
+    Logger.info("#{__MODULE__} alerts_for_subscription_key duration=#{engine_us}")
     summaries_per_alert
   end
 
@@ -374,10 +356,5 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   defp log_exception(step_name, metadata, error) do
     Logger.error("#{__MODULE__} failed step=#{step_name} #{metadata} error=#{inspect(error)}")
-  end
-
-  defp log_duration(step, duration_us) do
-    duration_ms = duration_us / 1000
-    Logger.info("#{__MODULE__} step=#{step} duration_ms=#{duration_ms}")
   end
 end

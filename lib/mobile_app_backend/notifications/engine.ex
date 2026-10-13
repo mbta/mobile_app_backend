@@ -27,52 +27,35 @@ defmodule MobileAppBackend.Notifications.Engine do
           OutgoingNotification.t()
         ]
   def user_notifications(user, summaries_by_subscription_key, alerts_by_id, now, global_data) do
-    {matching_duration_us, alert_to_matching_subscriptions} =
-      :timer.tc(
-        fn ->
-          alert_to_matching_subscriptions(
-            user,
-            summaries_by_subscription_key,
-            alerts_by_id,
-            global_data,
-            now
-          )
-        end,
-        :microsecond
+    alert_to_matching_subscriptions =
+      alert_to_matching_subscriptions(
+        user,
+        summaries_by_subscription_key,
+        alerts_by_id,
+        global_data,
+        now
       )
 
-    log_duration("notification_classification", matching_duration_us)
+    Enum.flat_map(alert_to_matching_subscriptions, fn {alert, {type, subscriptions}} ->
+      if is_nil(type) do
+        []
+      else
+        subscription_key_to_alerts =
+          subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id)
 
-    {build_duration_us, notifications} =
-      :timer.tc(
-        fn ->
-          Enum.flat_map(alert_to_matching_subscriptions, fn {alert, {type, subscriptions}} ->
-            if is_nil(type) do
-              []
-            else
-              subscription_key_to_alerts =
-                subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id)
+        has_more_active_alerts =
+          has_more_active_alerts?(alert, subscription_key_to_alerts, subscriptions, now)
 
-              has_more_active_alerts =
-                has_more_active_alerts?(alert, subscription_key_to_alerts, subscriptions, now)
-
-              build_outgoing_notification(
-                alert,
-                subscriptions,
-                summaries_by_subscription_key,
-                has_more_active_alerts,
-                type,
-                global_data
-              )
-            end
-          end)
-        end,
-        :microsecond
-      )
-
-    log_duration("notification_build", build_duration_us)
-
-    notifications
+        build_outgoing_notification(
+          alert,
+          subscriptions,
+          summaries_by_subscription_key,
+          has_more_active_alerts,
+          type,
+          global_data
+        )
+      end
+    end)
   end
 
   @spec alert_to_matching_subscriptions(
@@ -175,29 +158,13 @@ defmodule MobileAppBackend.Notifications.Engine do
           [subscription_key.stop_id]
       end
 
-    {trip_filter_duration_us, alerts} =
-      :timer.tc(
-        fn -> filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) end,
-        :microsecond
-      )
+    alerts = filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children)
 
-    log_duration("trip_alert_filter", trip_filter_duration_us)
+    applicable_alerts =
+      applicable_alerts(alerts, subscription_key, route_ids, target_stop_with_children)
 
-    {applicable_duration_us, applicable_alerts} =
-      :timer.tc(
-        fn -> applicable_alerts(alerts, subscription_key, route_ids, target_stop_with_children) end,
-        :microsecond
-      )
-
-    log_duration("applicable_alerts", applicable_duration_us)
-
-    {downstream_duration_us, downstream_alerts} =
-      :timer.tc(
-        fn -> downstream_alerts(alerts, route_ids, target_stop_with_children, global_data) end,
-        :microsecond
-      )
-
-    log_duration("downstream_alerts", downstream_duration_us)
+    downstream_alerts =
+      downstream_alerts(alerts, route_ids, target_stop_with_children, global_data)
 
     elevator_alerts =
       if subscription_key.include_accessibility do
@@ -220,29 +187,16 @@ defmodule MobileAppBackend.Notifications.Engine do
           DateTime.t()
         ) :: [Schedule.t()] | nil
   def schedules_for_alert_trips(alert, subscription_key, global_data, now) do
-    {fetch_duration_us, schedules_and_trips} =
-      :timer.tc(fn -> AlertUtil.fetch_schedules_for_alert(alert, now) end, :microsecond)
-
-    log_duration("fetch_alert_schedules", fetch_duration_us)
+    schedules_and_trips = AlertUtil.fetch_schedules_for_alert(alert, now)
 
     case schedules_and_trips do
       {nil, nil} ->
         nil
 
       {schedules, trips} ->
-        {filter_duration_us, matching_schedules} =
-          :timer.tc(
-            fn ->
-              Enum.filter(schedules, fn schedule ->
-                schedule_matches_subscription_key?(schedule, subscription_key, trips, global_data)
-              end)
-            end,
-            :microsecond
-          )
-
-        log_duration("filter_alert_schedules", filter_duration_us)
-
-        matching_schedules
+        Enum.filter(schedules, fn schedule ->
+          schedule_matches_subscription_key?(schedule, subscription_key, trips, global_data)
+        end)
     end
   end
 
@@ -576,10 +530,5 @@ defmodule MobileAppBackend.Notifications.Engine do
     else
       nil
     end
-  end
-
-  defp log_duration(event, duration_us) do
-    duration_ms = duration_us / 1000
-    Logger.info("#{__MODULE__} step=#{event} duration_ms=#{duration_ms}")
   end
 end
