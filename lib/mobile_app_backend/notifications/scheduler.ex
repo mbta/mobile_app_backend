@@ -1,13 +1,15 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
-  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
   import Ecto.Query
   require Logger
-  alias MBTAV3API.Alert
+
+  alias MBTAV3API.{Alert, RoutePattern, Schedule}
   alias MBTAV3API.Store.Alerts
-  alias MobileAppBackend.Notifications.DeliveredNotification
+  alias MobileAppBackend.Alerts.AlertSummary
+  alias MobileAppBackend.GlobalDataCache
   alias MobileAppBackend.Notifications.Deliverer
   alias MobileAppBackend.Notifications.Engine
+  alias MobileAppBackend.Notifications.Engine.OutgoingNotification
   alias MobileAppBackend.Notifications.Subscription
   alias MobileAppBackend.Notifications.Window
   alias MobileAppBackend.Repo
@@ -16,13 +18,31 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   @default_locale MobileAppBackend.Application.default_locale()
 
   @impl Oban.Worker
-  def perform(_) do
-    now = DateTime.now!("America/New_York")
-    relevant_alerts = get_relevant_alerts(now)
-    open_windows = get_open_windows(now)
+  def perform(%{args: args}) do
+    now =
+      if Map.has_key?(args, "now") do
+        {:ok, now, _offset} = DateTime.from_iso8601(Map.get(args, "now"))
+        DateTime.shift_zone!(now, "America/New_York")
+      else
+        DateTime.now!("America/New_York")
+      end
 
-    find_new_recipients(relevant_alerts, open_windows, now)
-    |> enqueue_delivery()
+    try do
+      relevant_alerts = get_relevant_alerts(now)
+      users_with_open_windows = users_with_open_windows(now)
+      global = MobileAppBackend.GlobalDataCache.get_data()
+
+      users_with_open_windows
+      |> new_notifications(relevant_alerts, now, global)
+      |> enqueue_delivery()
+    rescue
+      error ->
+        log_exception(
+          "catch_all",
+          "status=error",
+          Exception.format(:error, error, __STACKTRACE__)
+        )
+    end
 
     {:ok, nil}
   end
@@ -40,7 +60,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
   @spec filter_alert(Alert.t(), DateTime.t()) :: boolean()
   defp filter_alert(%Alert{} = alert, now) do
-    alert.severity >= 3 && Alert.significance(alert) != nil && Alert.can_notify?(alert, now)
+    Alert.should_notify?(alert, now)
   rescue
     error ->
       log_exception(
@@ -52,8 +72,8 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       false
   end
 
-  @spec get_open_windows(DateTime.t()) :: [User.t()]
-  defp get_open_windows(now) do
+  @spec users_with_open_windows(DateTime.t()) :: [User.t()]
+  defp users_with_open_windows(now) do
     # to receive a reminder, the window must be open either right now or in twelve hours
     # to receive a notification or all clear, the window must be open right now
     reminder_target = DateTime.add(now, 12, :hour)
@@ -81,84 +101,193 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     users_with_open_windows
   end
 
-  @spec find_new_recipients([Alert.t()], [User.t()], DateTime.t()) :: [
+  @spec new_notifications([User.t()], [Alert.t()], DateTime.t(), GlobalDataCache.data()) :: [
           {User.t(), OutgoingNotification.Localized.t()}
         ]
-  defp find_new_recipients(alerts, users, now) do
-    Enum.flat_map(users, &new_notifications(&1, alerts, now))
+  def new_notifications(users, alerts, now, global) do
+    alerts_by_id = Map.new(alerts, &{&1.id, &1})
+
+    subscription_keys =
+      users
+      |> Enum.flat_map(& &1.notification_subscriptions)
+      |> Enum.map(&Subscription.key_properties/1)
+      |> MapSet.new()
+
+    summaries_by_key =
+      Map.new(subscription_keys, fn subscription_key ->
+        {subscription_key, summaries_by_subscription_key(subscription_key, alerts, now, global)}
+      end)
+
+    Enum.flat_map(users, fn user ->
+      try do
+        outgoing_notifications =
+          Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
+
+        results = localize_notifications(user, outgoing_notifications)
+        Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
+        results
+      rescue
+        error ->
+          log_exception(
+            "find_new_notifications_for_user",
+            "status=error user_id=#{user.id}",
+            Exception.format(:error, error, __STACKTRACE__)
+          )
+
+          []
+      end
+    end)
   end
 
-  @spec new_notifications(User.t(), [Alert.t()], DateTime.t()) :: [
+  @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
           {User.t(), OutgoingNotification.Localized.t()}
         ]
-  defp new_notifications(
-         %User{id: user_id, notification_subscriptions: subscriptions, locale: locale} = user,
-         alerts,
-         now
-       ) do
-    {engine_us, outgoing_notifications} =
-      :timer.tc(&Engine.user_notifications/3, [subscriptions, alerts, now], :microsecond)
+  def localize_notifications(user, outgoing_notifications) do
+    outgoing_notifications
+    |> Enum.map(fn outgoing_notification ->
+      {user, OutgoingNotification.localize(outgoing_notification, user.locale || @default_locale)}
+    end)
+  end
 
-    Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
+  @spec summaries_by_subscription_key(
+          Subscription.key_properties(),
+          [Alert.t()],
+          DateTime.t(),
+          GlobalDataCache.data()
+        ) ::
+          %{Alert.id() => %{default: AlertSummary.t(), multiple_active: AlertSummary.t()}}
 
-    {errors, to_send} =
-      outgoing_notifications
-      |> Enum.flat_map(fn outgoing_notification ->
-        try do
-          if DeliveredNotification.can_send?(
-               user_id,
-               outgoing_notification.alert.id,
-               outgoing_notification.type
-             ) do
-            localized_notification =
-              OutgoingNotification.localize(outgoing_notification, locale || @default_locale)
-
-            Logger.debug(
-              "#{__MODULE__} localized notification: title=[#{localized_notification.title}] body=[#{localized_notification.body}]"
-            )
-
-            [{user, localized_notification}]
-          else
-            []
-          end
-        rescue
-          error ->
-            log_exception(
-              "check_notification_sending",
-              "user_id=#{user_id} alert_id=#{outgoing_notification.alert.id}",
-              Exception.format(:error, error, __STACKTRACE__)
-            )
-
-            [:error]
-        end
-      end)
-      |> Enum.split_with(&(&1 == :error))
-
-    Logger.info(
-      "#{__MODULE__} find_new_notifications_for_user status=#{if errors == [], do: "ok", else: "error"}"
-    )
-
-    to_send
-  rescue
-    error ->
-      log_exception(
-        "find_new_notifications_for_user",
-        "status=error user_id=#{user_id}",
-        Exception.format(:error, error, __STACKTRACE__)
+  defp summaries_by_subscription_key(subscription_key, alerts, now, global) do
+    {engine_us, relevant_alerts} =
+      :timer.tc(
+        &Engine.alerts_for_subscription_key/4,
+        [subscription_key, alerts, now, global],
+        :microsecond
       )
 
-      []
+    patterns =
+      RoutePattern.get_relevant_patterns(
+        subscription_key.route_id,
+        subscription_key.stop_id,
+        subscription_key.direction_id,
+        global
+      )
+
+    summaries_per_alert =
+      Map.new(
+        relevant_alerts,
+        fn alert ->
+          schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
+
+          summary_no_other_active_alerts =
+            AlertSummary.summarizing(
+              alert,
+              %Subscription{
+                route_id: subscription_key.route_id,
+                stop_id: subscription_key.stop_id,
+                direction_id: subscription_key.direction_id,
+                include_accessibility: subscription_key.include_accessibility
+              },
+              patterns,
+              now,
+              schedules,
+              global,
+              :notification,
+              false
+            )
+
+          summary_has_multiple_active_alerts =
+            AlertSummary.summarizing(
+              alert,
+              %Subscription{
+                route_id: subscription_key.route_id,
+                stop_id: subscription_key.stop_id,
+                direction_id: subscription_key.direction_id,
+                include_accessibility: subscription_key.include_accessibility
+              },
+              patterns,
+              now,
+              schedules,
+              global,
+              :notification,
+              true
+            )
+
+          log_alert_summary_type_issues(
+            alert,
+            summary_no_other_active_alerts,
+            patterns,
+            schedules
+          )
+
+          {alert.id,
+           %{
+             default: summary_no_other_active_alerts,
+             multiple_active: summary_has_multiple_active_alerts
+           }}
+        end
+      )
+
+    Logger.info("#{__MODULE__} alerts_for_subscription_key duration=#{engine_us}")
+    summaries_per_alert
+  end
+
+  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [RoutePattern.t()], [
+          Schedule.t()
+        ]) :: :ok
+  defp log_alert_summary_type_issues(alert, alert_summary, patterns, schedules) do
+    case alert_summary do
+      %AlertSummary.Standard{} ->
+        if Alert.trip_ids(alert) != [] do
+          Logger.warning(
+            "Alert #{alert.id} has trips Ids but is summarized as Standard. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      %AlertSummary.TripSpecific{} ->
+        if Alert.trip_ids(alert) == [] do
+          Logger.warning(
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Specific. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      %AlertSummary.TripShuttle{} ->
+        if Alert.trip_ids(alert) == [] do
+          Logger.warning(
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Shuttle. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+          )
+        end
+
+      _ ->
+        :ok
+    end
+
+    :ok
   end
 
   @spec enqueue_delivery([{User.t(), OutgoingNotification.Localized.t()}]) :: :ok
-  defp enqueue_delivery(recipients) do
-    # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, &deliver_notification/1)
+  defp enqueue_delivery(user_notifications) do
+    user_notifications
+    |> Enum.map(&deliverer_job/1)
+    # Oban.insert_all doesn't respect uniqueness constraints, but
+    # Scheduler enforces uniqueness itself and only one Scheduler job
+    # can run at once, so it is safe to use here.
+    |> Enum.chunk_every(100)
+    |> Enum.each(&Oban.insert_all(&1))
+
+    :ok
+  rescue
+    error ->
+      log_exception(
+        "enqueue_delivery",
+        "",
+        Exception.format(:error, error, __STACKTRACE__)
+      )
+
+      :ok
   end
 
-  defp deliver_notification(
-         {%User{} = recipient, %OutgoingNotification.Localized{} = notification}
-       ) do
+  defp deliverer_job({%User{} = recipient, %OutgoingNotification.Localized{} = notification}) do
     {type, upstream_timestamp} =
       case notification.type do
         {type, upstream_timestamp} -> {type, upstream_timestamp}
@@ -173,7 +302,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         end
       )
 
-    %{
+    Deliverer.new(%{
       user_id: recipient.id,
       alert_id: notification.alert_id,
       title: notification.title,
@@ -183,18 +312,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       type: type,
       analytics_label: analytics_label(subscriptions, notification.alert_effect, type),
       metadata: %{subscriptions: subscriptions, locale: notification.locale}
-    }
-    |> Deliverer.new()
-    |> Oban.insert!()
-  rescue
-    error ->
-      log_exception(
-        "enqueue_delivery",
-        "user_id=#{recipient.id} alert_id=#{notification.alert_id}",
-        Exception.format(:error, error, __STACKTRACE__)
-      )
-
-      :ok
+    })
   end
 
   @spec deep_link_path(Alert.id(), [
@@ -243,6 +361,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   defp log_exception(step_name, metadata, error) do
-    Logger.error("#{__MODULE__} failed #{step_name} #{metadata} error=#{inspect(error)}")
+    Logger.error("#{__MODULE__} failed step=#{step_name} #{metadata} error=#{inspect(error)}")
   end
 end

@@ -12,4 +12,21 @@ defmodule MobileAppBackend.Notifications.Subscription do
 
     timestamps(type: :utc_datetime)
   end
+
+  @type key_properties() :: %{
+          route_id: String.t(),
+          stop_id: String.t(),
+          direction_id: integer(),
+          include_accessibility: boolean()
+        }
+
+  @spec key_properties(t()) :: key_properties()
+  def key_properties(subscription) do
+    %{
+      route_id: subscription.route_id,
+      stop_id: subscription.stop_id,
+      direction_id: subscription.direction_id,
+      include_accessibility: subscription.include_accessibility
+    }
+  end
 end

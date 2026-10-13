@@ -210,12 +210,25 @@ defmodule MBTAV3API.Alert do
     end)
   end
 
-  @spec eligible_for_notification?(t()) :: boolean()
   @doc """
-  An alert is eligible for notifications if it has been marked for notification
-  now (via last_push_notification_timestamp) or later (reminder_times)
+  Notification should be sent for an alert if all the following conditions are met:
+  1. The alert has been marked for notification by an OIO
+  2. severity is greater than or equal to 3
+  3. non-nil significance
+  4. it is the right time to send a notification (as a preminder, regular notification, or all-clear)
   """
-  def eligible_for_notification?(alert) do
+  @spec should_notify?(t(), DateTime.t()) :: boolean()
+  def should_notify?(alert, now \\ DateTime.now!("America/New_York")) do
+    marked_as_should_notify?(alert) && alert.severity >= 3 &&
+      significance(alert) != nil && can_notify?(alert, now)
+  end
+
+  @spec marked_as_should_notify?(t()) :: boolean()
+  @doc """
+  An alert has been marked for notification now (via last_push_notification_timestamp)
+  or later (reminder_times)
+  """
+  def marked_as_should_notify?(alert) do
     alert.last_push_notification_timestamp != nil or alert.reminder_times != []
   end
 
