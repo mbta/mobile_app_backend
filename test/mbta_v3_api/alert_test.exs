@@ -1124,10 +1124,10 @@ defmodule MBTAV3API.AlertTest do
     assert downstream_alerts == []
   end
 
-  describe "eligible_for_notification?/1" do
+  describe "marked_as_should_notify?/1" do
     test "returns true if last_push_notification_timestamp is not nil" do
       alert = build(:alert, last_push_notification_timestamp: ~B[2025-04-10 03:00:00])
-      assert Alert.eligible_for_notification?(alert)
+      assert Alert.marked_as_should_notify?(alert)
     end
 
     test "returns true if reminder_times is not empty" do
@@ -1137,12 +1137,12 @@ defmodule MBTAV3API.AlertTest do
           reminder_times: [~B[2025-04-10 03:00:00]]
         )
 
-      assert Alert.eligible_for_notification?(alert)
+      assert Alert.marked_as_should_notify?(alert)
     end
 
     test "returns false if last_push_notification_timestamp is nil and no reminder times" do
       alert = build(:alert, last_push_notification_timestamp: nil, reminder_times: [])
-      refute Alert.eligible_for_notification?(alert)
+      refute Alert.marked_as_should_notify?(alert)
     end
   end
 end
