@@ -2134,7 +2134,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       schedule2 =
         build(:schedule,
-          trip_id: trip1.id,
+          trip_id: trip2.id,
           departure_time: ~B[2026-03-12 18:30:00]
         )
 
@@ -2153,6 +2153,60 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                  now,
                  [schedule1, schedule2],
                  %{routes: %{route.id => route}},
+                 :notification
+               )
+    end
+
+    test "multi-route trip cancellation" do
+      now = ~B[2026-03-12 12:00:00]
+      stop = build(:stop, name: "Blossom Street Pier")
+      [route1, route2] = build_pair(:route)
+      pattern = build(:route_pattern, route_id: route1.id)
+      trip = build(:trip, route_pattern_id: pattern.id)
+
+      alert =
+        build(:alert,
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, -2, :hour),
+              end: DateTime.add(now, 2, :hour)
+            }
+          ],
+          cause: :ice_in_harbor,
+          effect: :cancellation,
+          informed_entity: [
+            %Alert.InformedEntity{route: route1.id, trip: trip.id},
+            %Alert.InformedEntity{route: route2.id, trip: trip.id}
+          ]
+        )
+
+      schedule1 =
+        build(:schedule,
+          route_id: route1.id,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 18:00:00]
+        )
+
+      schedule2 =
+        build(:schedule,
+          route_id: route2.id,
+          trip_id: trip.id,
+          departure_time: ~B[2026-03-12 18:30:00]
+        )
+
+      assert %AlertSummary.TripSpecific{
+               trip_identity: %AlertSummary.TripSpecific.TripFrom{}
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: stop.id, direction_id: 0},
+                 [pattern],
+                 now,
+                 [schedule1, schedule2],
+                 %{
+                   routes: %{route1.id => route1, route2.id => route2},
+                   stops: %{stop.id => stop}
+                 },
                  :notification
                )
     end

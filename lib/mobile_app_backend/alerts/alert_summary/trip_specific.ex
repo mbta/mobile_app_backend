@@ -84,9 +84,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
 
       _ ->
         informed_schedules =
-          Enum.filter(schedules || [], fn schedule ->
+          (schedules || [])
+          |> Enum.filter(fn schedule ->
             Enum.any?(alert.informed_entity, &(&1.trip == schedule.trip_id))
           end)
+          |> Enum.uniq_by(& &1.trip_id)
 
         case alert.effect do
           :shuttle ->
