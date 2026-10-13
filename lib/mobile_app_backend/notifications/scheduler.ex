@@ -273,6 +273,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     # Scheduler enforces uniqueness itself and only one Scheduler job
     # can run at once, so it is safe to use here.
     |> Oban.insert_all()
+
     :ok
   rescue
     error ->
