@@ -266,14 +266,27 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   end
 
   @spec enqueue_delivery([{User.t(), OutgoingNotification.Localized.t()}]) :: :ok
-  defp enqueue_delivery(recipients) do
-    # Unfortunately, Oban.insert_all/3 doesn’t respect uniqueness unless you use Oban Pro.
-    Enum.each(recipients, &deliver_notification/1)
+  defp enqueue_delivery(user_notifications) do
+    try do
+      user_notifications
+      |> Enum.map(&deliverer_job/1)
+      # Oban.insert_all doesn't respect uniqueness constraints, but
+      # Scheduler enforces uniqueness itself and only one Scheduler job
+      # can run at once, so it is safe to use here.
+      |> Oban.insert_all()
+    rescue
+      error ->
+        log_exception(
+          "enqueue_delivery",
+          "",
+          Exception.format(:error, error, __STACKTRACE__)
+        )
+
+        :ok
+    end
   end
 
-  defp deliver_notification(
-         {%User{} = recipient, %OutgoingNotification.Localized{} = notification}
-       ) do
+  defp deliverer_job({%User{} = recipient, %OutgoingNotification.Localized{} = notification}) do
     {type, upstream_timestamp} =
       case notification.type do
         {type, upstream_timestamp} -> {type, upstream_timestamp}
@@ -288,7 +301,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         end
       )
 
-    %{
+    Deliverer.new(%{
       user_id: recipient.id,
       alert_id: notification.alert_id,
       title: notification.title,
@@ -298,18 +311,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       type: type,
       analytics_label: analytics_label(subscriptions, notification.alert_effect, type),
       metadata: %{subscriptions: subscriptions, locale: notification.locale}
-    }
-    |> Deliverer.new()
-    |> Oban.insert!()
-  rescue
-    error ->
-      log_exception(
-        "enqueue_delivery",
-        "user_id=#{recipient.id} alert_id=#{notification.alert_id}",
-        Exception.format(:error, error, __STACKTRACE__)
-      )
-
-      :ok
+    })
   end
 
   @spec deep_link_path(Alert.id(), [
