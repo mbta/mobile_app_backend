@@ -1,4 +1,8 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
+  use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
+  import Ecto.Query
+  require Logger
+
   alias MBTAV3API.{Alert, RoutePattern, Schedule}
   alias MBTAV3API.Store.Alerts
   alias MobileAppBackend.Alerts.AlertSummary
@@ -10,10 +14,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   alias MobileAppBackend.Notifications.Window
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
-
-  use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
-  import Ecto.Query
-  require Logger
 
   @default_locale MobileAppBackend.Application.default_locale()
 
@@ -221,7 +221,11 @@ defmodule MobileAppBackend.Notifications.Scheduler do
             schedules
           )
 
-          {alert.id, {summary_no_other_active_alerts, summary_has_multiple_active_alerts}}
+          {alert.id,
+           %{
+             default: summary_no_other_active_alerts,
+             multiple_active: summary_has_multiple_active_alerts
+           }}
         end
       )
 

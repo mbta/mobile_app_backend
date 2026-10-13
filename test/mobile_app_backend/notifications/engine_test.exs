@@ -59,7 +59,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                Engine.user_notifications(
                  user,
                  %{
-                   Subscription.key_properties(subscription) => %{alert.id => {summary, summary}}
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   }
                  },
                  %{alert.id => alert},
                  now,
@@ -108,7 +110,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                Engine.user_notifications(
                  user,
                  %{
-                   Subscription.key_properties(subscription) => %{alert.id => {summary, summary}}
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   }
                  },
                  %{alert.id => alert},
                  now,
@@ -162,7 +166,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -206,7 +214,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -265,7 +277,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -327,7 +343,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -372,7 +392,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -419,7 +443,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -459,7 +487,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -502,7 +534,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -538,7 +574,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -582,7 +622,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -626,7 +670,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -663,7 +711,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
@@ -701,7 +753,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  friday_noon,
                  GlobalDataCache.get_data()
@@ -710,7 +766,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [%OutgoingNotification{type: :reminder}] =
                Engine.user_notifications(
                  user,
-                 %{Subscription.key_properties(subscription) => %{alert.id => {"fake", "fake"}}},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     alert.id => %{default: "fake", multiple_active: "fake"}
+                   }
+                 },
                  %{alert.id => alert},
                  DateTime.add(sunday_noon, -11, :hour),
                  GlobalDataCache.get_data()
@@ -781,10 +841,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  user,
                  %{
                    Subscription.key_properties(subscription_now) => %{
-                     alert.id => {summary, summary}
+                     alert.id => %{default: summary, multiple_active: summary}
                    },
                    Subscription.key_properties(subscription_later) => %{
-                     alert.id => {summary, summary}
+                     alert.id => %{default: summary, multiple_active: summary}
                    }
                  },
                  %{alert.id => alert},
@@ -856,8 +916,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                Engine.user_notifications(
                  user,
                  %{
-                   Subscription.key_properties(subscription1) => %{alert.id => {summary, summary}},
-                   Subscription.key_properties(subscription2) => %{alert.id => {summary, summary}}
+                   Subscription.key_properties(subscription1) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   },
+                   Subscription.key_properties(subscription2) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   }
                  },
                  %{alert.id => alert},
                  now,
@@ -940,8 +1004,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                Engine.user_notifications(
                  user,
                  %{
-                   Subscription.key_properties(subscription1) => %{alert.id => {summary, summary}},
-                   Subscription.key_properties(subscription2) => %{alert.id => {summary, summary}}
+                   Subscription.key_properties(subscription1) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   },
+                   Subscription.key_properties(subscription2) => %{
+                     alert.id => %{default: summary, multiple_active: summary}
+                   }
                  },
                  %{alert.id => alert},
                  now,
@@ -1000,7 +1068,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  user,
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => {"fake", "fake"}
+                     alert.id => %{default: "fake", multiple_active: "fake"}
                    }
                  },
                  %{alert.id => alert},
@@ -1092,10 +1160,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  user,
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => {summary1, summary1}
+                     alert.id => %{default: summary1, multiple_active: summary1}
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => {summary2, summary2}
+                     alert.id => %{default: summary2, multiple_active: summary2}
                    }
                  },
                  %{alert.id => alert},
@@ -1338,22 +1406,22 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  user,
                  %{
                    Subscription.key_properties(subscription1_early) => %{
-                     alert1.id => {"fake1_early", "fake1_early"}
+                     alert1.id => %{default: "fake1_early", multiple_active: "fake1_early"}
                    },
                    Subscription.key_properties(subscription1_matching) => %{
-                     alert1.id => {"fake1_matching", "fake1_matching"}
+                     alert1.id => %{default: "fake1_matching", multiple_active: "fake1_matching"}
                    },
                    Subscription.key_properties(subscription1_late) => %{
-                     alert1.id => {"fake1_late", "fake1_late"}
+                     alert1.id => %{default: "fake1_late", multiple_active: "fake1_late"}
                    },
                    Subscription.key_properties(subscription2_early) => %{
-                     alert2.id => {"fake2_early", "fake2_early"}
+                     alert2.id => %{default: "fake2_early", multiple_active: "fake2_early"}
                    },
                    Subscription.key_properties(subscription2_matching) => %{
-                     alert2.id => {"fake2_matching", "fake2_matching"}
+                     alert2.id => %{default: "fake2_matching", multiple_active: "fake2_matching"}
                    },
                    Subscription.key_properties(subscription2_late) => %{
-                     alert2.id => {"fake2_late", "fake2_late"}
+                     alert2.id => %{default: "fake2_late", multiple_active: "fake2_late"}
                    }
                  },
                  %{alert1.id => alert1, alert2.id => alert2},
@@ -1416,8 +1484,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                |> Engine.user_notifications(
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert_1.id => {"fake_1_single_alert", "fake_1_multiple_alert"},
-                     alert_2.id => {"fake_2_single_alert", "fake_2_multiple_alert"}
+                     alert_1.id => %{
+                       default: "fake_1_single_alert",
+                       multiple_active: "fake_1_multiple_alert"
+                     },
+                     alert_2.id => %{
+                       default: "fake_2_single_alert",
+                       multiple_active: "fake_2_multiple_alert"
+                     }
                    }
                  },
                  %{alert_1.id => alert_1, alert_2.id => alert_2},
@@ -1481,8 +1555,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                |> Engine.user_notifications(
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert_1.id => {"fake_1_single_alert", "fake_1_multiple_alert"},
-                     alert_2.id => {"fake_2_single_alert", "fake_2_multiple_alert"}
+                     alert_1.id => %{
+                       default: "fake_1_single_alert",
+                       multiple_active: "fake_1_multiple_alert"
+                     },
+                     alert_2.id => %{
+                       default: "fake_2_single_alert",
+                       multiple_active: "fake_2_multiple_alert"
+                     }
                    }
                  },
                  %{alert_1.id => alert_1, alert_2.id => alert_2},

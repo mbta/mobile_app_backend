@@ -139,7 +139,7 @@ defmodule MBTAV3API.RoutePattern do
     global_data.route_patterns
     |> Stream.map(fn {_, pattern} -> pattern end)
     |> Enum.filter(fn pattern ->
-      match_pattern_route?(pattern, route_or_line_id, global_data) and
+      match_pattern_route_or_line?(pattern, route_or_line_id, global_data) and
         match_pattern_stop?(pattern, stop_id, global_data) and
         match_pattern_direction?(pattern, direction_id)
     end)
@@ -165,7 +165,7 @@ defmodule MBTAV3API.RoutePattern do
     for %__MODULE__{id: id} <- list, do: id
   end
 
-  defp match_pattern_route?(
+  defp match_pattern_route_or_line?(
          %__MODULE__{route_id: pattern_route_id},
          route_id,
          global

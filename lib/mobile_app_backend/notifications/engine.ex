@@ -84,10 +84,10 @@ defmodule MobileAppBackend.Notifications.Engine do
         alert_ids = Map.keys(summaries_by_subscription_key[subscription_key])
         Enum.map(alert_ids, fn alert_id -> {alert_id, subscription} end)
       end)
-      |> Enum.group_by(fn {alert_id, _subscription} -> alerts_by_id[alert_id] end, fn {_alert_id,
-                                                                                       subscription} ->
-        subscription
-      end)
+      |> Enum.group_by(
+        fn {alert_id, _subscription} -> alerts_by_id[alert_id] end,
+        fn {_alert_id, subscription} -> subscription end
+      )
 
     alert_to_subscriptions
     |> Map.new(fn {alert, subscriptions} ->
@@ -445,13 +445,13 @@ defmodule MobileAppBackend.Notifications.Engine do
          alert,
          [subscription],
          summaries_by_subscription_key,
-         has_multiple_active_alerts
+         has_multiple_active_alerts?
        ) do
     summary_for_subscription(
       alert,
       subscription,
       summaries_by_subscription_key,
-      has_multiple_active_alerts
+      has_multiple_active_alerts?
     )
   end
 
@@ -459,7 +459,7 @@ defmodule MobileAppBackend.Notifications.Engine do
          alert,
          subscriptions,
          summaries_by_subscription_key,
-         has_multiple_active_alerts
+         has_multiple_active_alerts?
        ) do
     individual_summaries =
       Enum.map(subscriptions, fn subscription ->
@@ -467,7 +467,7 @@ defmodule MobileAppBackend.Notifications.Engine do
           alert,
           subscription,
           summaries_by_subscription_key,
-          has_multiple_active_alerts
+          has_multiple_active_alerts?
         )
       end)
 
@@ -478,18 +478,18 @@ defmodule MobileAppBackend.Notifications.Engine do
          alert,
          subscription,
          summaries_by_subscription_key,
-         has_multiple_active_alerts
+         has_multiple_active_alerts?
        ) do
-    {no_other_active_alert_summary, has_multiple_active_alerts_summary} =
+    %{default: default_summary, multiple_active: has_multiple_active_alerts_summary} =
       get_in(summaries_by_subscription_key, [
         Subscription.key_properties(subscription),
         alert.id
       ])
 
-    if has_multiple_active_alerts do
+    if has_multiple_active_alerts? do
       has_multiple_active_alerts_summary
     else
-      no_other_active_alert_summary
+      default_summary
     end
   end
 
