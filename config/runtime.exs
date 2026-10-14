@@ -80,7 +80,6 @@ config :mobile_app_backend, MobileAppBackend.Repo,
 config :mobile_app_backend, Oban,
   queues: [default: 1, deliverer: max(Integer.floor_div(db_pool_size, 2), 10)]
 
-
 if config_env() == :dev do
   config :logger, :console, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "debug"))
 end
