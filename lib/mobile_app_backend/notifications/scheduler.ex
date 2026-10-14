@@ -113,30 +113,52 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       |> Enum.map(&Subscription.key_properties/1)
       |> MapSet.new()
 
-    summaries_by_key =
-      Map.new(subscription_keys, fn subscription_key ->
-        {subscription_key, summaries_by_subscription_key(subscription_key, alerts, now, global)}
-      end)
+    {summaries_us, summaries_by_key} =
+      :timer.tc(
+        fn ->
+          Map.new(subscription_keys, fn subscription_key ->
+            {subscription_key,
+             summaries_by_subscription_key(subscription_key, alerts, now, global)}
+          end)
+        end,
+        :microsecond
+      )
 
-    Enum.flat_map(users, fn user ->
-      try do
-        outgoing_notifications =
-          Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
+    Logger.info(
+      "#{__MODULE__} build_summaries_by_key duration=#{summaries_us / 1000} subscription_key_count=#{MapSet.size(subscription_keys)}"
+    )
 
-        results = localize_notifications(user, outgoing_notifications)
-        Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
-        results
-      rescue
-        error ->
-          log_exception(
-            "find_new_notifications_for_user",
-            "status=error user_id=#{user.id}",
-            Exception.format(:error, error, __STACKTRACE__)
-          )
+    {notifications_us, notifications} =
+      :timer.tc(
+        fn ->
+          Enum.flat_map(users, fn user ->
+            try do
+              outgoing_notifications =
+                Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
 
-          []
-      end
-    end)
+              results = localize_notifications(user, outgoing_notifications)
+              Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
+              results
+            rescue
+              error ->
+                log_exception(
+                  "find_new_notifications_for_user",
+                  "status=error user_id=#{user.id}",
+                  Exception.format(:error, error, __STACKTRACE__)
+                )
+
+                []
+            end
+          end)
+        end,
+        :microsecond
+      )
+
+    Logger.info(
+      "#{__MODULE__} processing_users duration=#{notifications_us / 1000} user_count=#{length(users)}"
+    )
+
+    notifications
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
