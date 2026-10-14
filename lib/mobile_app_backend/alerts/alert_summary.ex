@@ -683,6 +683,11 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         |> Map.values()
         |> Enum.filter(&(&1.route_id in @gl_routes and &1.direction_id == direction_id))
 
+      Enum.all?(routes, &(&1.id == "Red")) ->
+        global.route_patterns
+        |> Map.values()
+        |> Enum.filter(&(&1.route_id == "Red" and &1.direction_id == direction_id))
+
       true ->
         patterns
     end
