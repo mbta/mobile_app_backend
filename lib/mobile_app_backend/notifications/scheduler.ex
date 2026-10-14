@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
+  alias MobileAppBackend.Notifications.DeliveredNotification
   use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
   import Ecto.Query
   require Logger
@@ -113,23 +114,13 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       |> Enum.map(&Subscription.key_properties/1)
       |> MapSet.new()
 
-    {summaries_us, summaries_by_key} =
-      :timer.tc(
-        fn ->
-          Map.new(subscription_keys, fn subscription_key ->
-            {subscription_key,
-             summaries_by_subscription_key(subscription_key, alerts, now, global)}
-          end)
-        end,
-        :microsecond
-      )
+    summaries_by_key =
+      Map.new(subscription_keys, fn subscription_key ->
+        {subscription_key, summaries_by_subscription_key(subscription_key, alerts, now, global)}
+      end)
 
-    Logger.info(
-      "#{__MODULE__} build_summaries_by_key duration=#{summaries_us / 1000} subscription_key_count=#{MapSet.size(subscription_keys)}"
-    )
-
-    Process.put(:can_send_us, 0)
-    Process.put(:can_send_count, 0)
+    last_delivered_by_user_and_alert =
+      DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
 
     {notifications_us, notifications} =
       :timer.tc(
@@ -137,7 +128,14 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           Enum.flat_map(users, fn user ->
             try do
               outgoing_notifications =
-                Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
+                Engine.user_notifications(
+                  user,
+                  Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+                  summaries_by_key,
+                  alerts_by_id,
+                  now,
+                  global
+                )
 
               results = localize_notifications(user, outgoing_notifications)
               Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")

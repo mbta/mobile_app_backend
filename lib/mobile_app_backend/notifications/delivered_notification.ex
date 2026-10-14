@@ -22,61 +22,57 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
     timestamps(type: :utc_datetime)
   end
 
-  @spec can_send?(User.id(), Alert.id(), type()) :: boolean()
-  def can_send?(user_id, alert_id, type)
-
-  def can_send?(user_id, alert_id, :reminder) do
-    Repo.aggregate(
-      from(dn in __MODULE__, where: dn.user_id == ^user_id and dn.alert_id == ^alert_id),
-      :count
-    ) == 0
+  @doc """
+  Get the last delivered notification for each user who was delivered any of the given alerts
+  """
+  @spec latest_delivered_per_user([Alert.id()]) :: %{User.id() => %{Alert.id() => t()}}
+  def latest_delivered_per_user(alert_ids) do
+    from(dn in __MODULE__,
+      where: dn.alert_id in ^alert_ids,
+      order_by: [desc: dn.inserted_at]
+    )
+    |> Repo.all()
+    |> Enum.group_by(& &1.user_id)
+    |> Map.new(fn {user_id, delivered_notifications} ->
+      {user_id,
+       delivered_notifications
+       |> Enum.group_by(& &1.alert_id)
+       # Ordered by inserted_at descending, so List.first gives the latest
+       |> Map.new(fn {alert_id, dns} -> {alert_id, List.first(dns)} end)}
+    end)
   end
 
-  def can_send?(user_id, alert_id, {:notification, _upstream_timestamp}) do
-    Repo.aggregate(
-      from(dn in __MODULE__,
-        where: dn.user_id == ^user_id and dn.alert_id == ^alert_id and dn.type == :notification
-      ),
-      :count
-    ) == 0
+  @spec can_send?(Alert.t(), t() | nil, type()) :: boolean()
+  def can_send?(alert, last_delivered, type)
+
+  def can_send?(_alert, last_delivered, :reminder) do
+    last_delivered == nil
   end
 
-  def can_send?(user_id, alert_id, {:update, upstream_timestamp}) do
+  def can_send?(_alert, last_delivered, {:notification, _upstream_timestamp}) do
+    last_delivered == nil || last_delivered.type != :notification
+  end
+
+  def can_send?(_alert, nil, {:update, _upstream_timestamp}) do
+    # No update unless there has already been an earlier delivered notification
+    false
+  end
+
+  def can_send?(_alert, last_delivered, {:update, upstream_timestamp}) do
     # Have they already been sent a notification or update for this alert with the same upstream timestamp
-    query =
-      from dn in __MODULE__,
-        where:
-          dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            dn.type in [:notification, :update]
+    type_matches = last_delivered.type in [:notification, :update]
 
-    matching_sent_message_count =
-      if is_nil(upstream_timestamp) do
-        Repo.aggregate(from(dn in query, where: is_nil(dn.upstream_timestamp)), :count)
-      else
-        Repo.aggregate(
-          from(dn in query, where: dn.upstream_timestamp == ^upstream_timestamp),
-          :count
-        )
+    different_timestamp =
+      case last_delivered.upstream_timestamp do
+        nil -> !is_nil(upstream_timestamp)
+        last_delivered_ts -> DateTime.diff(upstream_timestamp, last_delivered_ts, :second) > 0
       end
 
-    matching_sent_message_count == 0
+    type_matches && different_timestamp
   end
 
-  def can_send?(user_id, alert_id, :all_clear) do
-    Repo.aggregate(
-      from(dn in __MODULE__,
-        where:
-          dn.user_id == ^user_id and dn.alert_id == ^alert_id and
-            dn.type in [:reminder, :notification, :update]
-      ),
-      :count
-    ) > 0 and
-      Repo.aggregate(
-        from(dn in __MODULE__,
-          where: dn.user_id == ^user_id and dn.alert_id == ^alert_id and dn.type == :all_clear
-        ),
-        :count
-      ) == 0
+  def can_send?(_alert, last_delivered, :all_clear) do
+    last_delivered != nil && last_delivered.type != :all_clear
   end
 
   @doc """
