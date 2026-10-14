@@ -701,26 +701,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   @spec affected_parent_stops_for_pattern(RoutePattern.t(), Alert.t(), GlobalDataCache.data()) ::
           [String.t()]
   defp affected_parent_stops_for_pattern(pattern, alert, global) do
-    affected_stops_for_pattern(pattern, alert, global)
-  end
-
-  @spec affected_stops_for_pattern(RoutePattern.t(), Alert.t(), GlobalDataCache.data()) :: [
-          String.t()
-        ]
-  defp affected_stops_for_pattern(pattern, alert, global) do
     RoutePattern.get_child_stop_ids(pattern, global)
-    |> Stop.get_parent_ids(global)
-    |> Enum.map(&global.stops[&1])
-    |> Enum.filter(fn stop ->
-      stops = [stop.id | stop.child_stop_ids] |> Enum.reject(&is_nil/1)
+    |> Enum.map(&{&1, Stop.parent_id(global.stops[&1])})
+    |> Enum.filter(fn {child_stop_id, parent_stop_id} ->
+      stop_ids = [child_stop_id | List.wrap(parent_stop_id)]
 
       Alert.any_informed_entity_satisfies(
         alert,
-        &(Alert.InformedEntity.stop_in?(&1, stops) and
+        &(Alert.InformedEntity.stop_in?(&1, stop_ids) and
             Alert.InformedEntity.route?(&1, pattern.route_id))
       )
     end)
-    |> Enum.map(& &1.id)
+    |> Enum.map(fn {_child_stop_id, parent_stop_id} -> parent_stop_id end)
   end
 
   @spec build_location_from_affected_stops_digraph(
