@@ -122,10 +122,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     last_delivered_by_user_and_alert =
       DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
 
-    {notifications_us, notifications} =
-      :timer.tc(
-        fn ->
-          Enum.flat_map(users, fn user ->
+     Enum.flat_map(users, fn user ->
             try do
               outgoing_notifications =
                 Engine.user_notifications(
@@ -151,19 +148,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
                 []
             end
           end)
-        end,
-        :microsecond
-      )
-
-    Logger.info(
-      "#{__MODULE__} processing_users duration=#{notifications_us / 1000} user_count=#{length(users)}"
-    )
-
-    Logger.info(
-      "#{__MODULE__} can_send_total duration=#{(Process.delete(:can_send_us) || 0) / 1000} call_count=#{Process.delete(:can_send_count)}"
-    )
-
-    notifications
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
