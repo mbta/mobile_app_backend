@@ -1,4 +1,5 @@
 defmodule MobileAppBackend.Notifications.Scheduler do
+  alias MobileAppBackend.Notifications.DeliveredNotification
   use Oban.Worker, unique: [period: :infinity, states: :incomplete], max_attempts: 4
   import Ecto.Query
   require Logger
@@ -118,10 +119,20 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         {subscription_key, summaries_by_subscription_key(subscription_key, alerts, now, global)}
       end)
 
+    last_delivered_by_user_and_alert =
+      DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
+
     Enum.flat_map(users, fn user ->
       try do
         outgoing_notifications =
-          Engine.user_notifications(user, summaries_by_key, alerts_by_id, now, global)
+          Engine.user_notifications(
+            user,
+            Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+            summaries_by_key,
+            alerts_by_id,
+            now,
+            global
+          )
 
         results = localize_notifications(user, outgoing_notifications)
         Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")

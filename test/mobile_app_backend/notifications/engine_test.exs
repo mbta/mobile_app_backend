@@ -58,6 +58,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: summary, multiple_active: summary}
@@ -109,6 +110,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: summary, multiple_active: summary}
@@ -166,6 +168,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [%OutgoingNotification{subscriptions: [^subscription], alert: ^alert}] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -214,6 +217,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -258,7 +262,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
       %{notification_subscriptions: [subscription]} = user
 
-      Repo.insert!(%DeliveredNotification{
+      delivered_notification = %DeliveredNotification{
         user_id: user.id,
         alert_id: alert.id,
         upstream_timestamp:
@@ -266,7 +270,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           |> DateTime.add(-1, :minute)
           |> DateTime.shift_zone!("Etc/UTC")
           |> DateTime.truncate(:second)
-      })
+      }
 
       assert [
                %OutgoingNotification{
@@ -277,6 +281,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -321,28 +326,19 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
       %{notification_subscriptions: [subscription]} = user
 
-      Repo.insert!(%DeliveredNotification{
-        user_id: user.id,
-        alert_id: alert.id,
-        upstream_timestamp:
-          alert.last_push_notification_timestamp
-          |> DateTime.add(-1, :minute)
-          |> DateTime.shift_zone!("Etc/UTC")
-          |> DateTime.truncate(:second)
-      })
-
-      Repo.insert!(%DeliveredNotification{
+      delivered_notification = %DeliveredNotification{
         user_id: user.id,
         alert_id: alert.id,
         upstream_timestamp:
           alert.last_push_notification_timestamp
           |> DateTime.shift_zone!("Etc/UTC")
           |> DateTime.truncate(:second)
-      })
+      }
 
       assert [] =
                Engine.user_notifications(
                  user,
+                 %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -392,6 +388,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -443,6 +440,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -487,6 +485,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -534,6 +533,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -574,6 +574,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -622,6 +623,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -670,6 +672,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -711,6 +714,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -753,6 +757,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -766,6 +771,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       assert [%OutgoingNotification{type: :reminder}] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -839,6 +845,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription_now) => %{
                      alert.id => %{default: summary, multiple_active: summary}
@@ -915,6 +922,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
                      alert.id => %{default: summary, multiple_active: summary}
@@ -983,7 +991,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
       [subscription1, subscription2] = user.notification_subscriptions
 
-      Repo.insert!(%DeliveredNotification{
+      delivered_notification = %DeliveredNotification{
         user_id: user.id,
         alert_id: alert.id,
         upstream_timestamp:
@@ -991,7 +999,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           |> DateTime.add(-1, :minute)
           |> DateTime.shift_zone!("Etc/UTC")
           |> DateTime.truncate(:second)
-      })
+      }
 
       assert [
                %OutgoingNotification{
@@ -1003,6 +1011,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription1) => %{
                      alert.id => %{default: summary, multiple_active: summary}
@@ -1045,7 +1054,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           ]
         )
 
-      Repo.insert!(%DeliveredNotification{
+      delivered_notification = %DeliveredNotification{
         user_id: user.id,
         alert_id: alert.id,
         upstream_timestamp:
@@ -1053,7 +1062,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           |> DateTime.add(-1, :minute)
           |> DateTime.shift_zone!("Etc/UTC")
           |> DateTime.truncate(:second)
-      })
+      }
 
       subscription = user.notification_subscriptions |> List.first()
 
@@ -1066,6 +1075,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert.id => %{default: "fake", multiple_active: "fake"}
@@ -1158,6 +1168,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
                      alert.id => %{default: summary1, multiple_active: summary1}
@@ -1404,6 +1415,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                Engine.user_notifications(
                  user,
+                 %{},
                  %{
                    Subscription.key_properties(subscription1_early) => %{
                      alert1.id => %{default: "fake1_early", multiple_active: "fake1_early"}
@@ -1482,6 +1494,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                user
                |> Engine.user_notifications(
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert_1.id => %{
@@ -1553,6 +1566,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
              ] =
                user
                |> Engine.user_notifications(
+                 %{},
                  %{
                    Subscription.key_properties(subscription) => %{
                      alert_1.id => %{

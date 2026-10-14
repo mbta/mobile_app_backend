@@ -17,6 +17,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   # Function gets called for a single user at a time from a Oban worker
   @spec user_notifications(
           User.t(),
+          %{Alert.id() => DeliveredNotification.t()},
           %{
             Subscription.key_properties() => %{Alert.id() => {AlertSummary.t(), AlertSummary.t()}}
           },
@@ -26,10 +27,18 @@ defmodule MobileAppBackend.Notifications.Engine do
         ) :: [
           OutgoingNotification.t()
         ]
-  def user_notifications(user, summaries_by_subscription_key, alerts_by_id, now, global_data) do
+  def user_notifications(
+        user,
+        last_delivered_by_alert,
+        summaries_by_subscription_key,
+        alerts_by_id,
+        now,
+        global_data
+      ) do
     alert_to_matching_subscriptions =
       alert_to_matching_subscriptions(
         user,
+        last_delivered_by_alert,
         summaries_by_subscription_key,
         alerts_by_id,
         global_data,
@@ -60,6 +69,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
   @spec alert_to_matching_subscriptions(
           User.t(),
+          %{Alert.id() => DeliveredNotification.t()},
           %{
             Subscription.key_properties() => %{Alert.id() => {AlertSummary.t(), AlertSummary.t()}}
           },
@@ -71,6 +81,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         }
   defp alert_to_matching_subscriptions(
          user,
+         last_delivered_by_alert,
          summaries_by_subscription_key,
          alerts_by_id,
          global_data,
@@ -81,8 +92,10 @@ defmodule MobileAppBackend.Notifications.Engine do
       user.notification_subscriptions
       |> Enum.flat_map(fn subscription ->
         subscription_key = Subscription.key_properties(subscription)
-        alert_ids = Map.keys(summaries_by_subscription_key[subscription_key])
-        Enum.map(alert_ids, fn alert_id -> {alert_id, subscription} end)
+
+        summaries_by_subscription_key[subscription_key]
+        |> Map.keys()
+        |> Enum.map(fn alert_id -> {alert_id, subscription} end)
       end)
       |> Enum.group_by(
         fn {alert_id, _subscription} -> alerts_by_id[alert_id] end,
@@ -94,7 +107,13 @@ defmodule MobileAppBackend.Notifications.Engine do
       matching_subscriptions =
         subscriptions
         |> Enum.map(fn subscription ->
-          {notification_type(subscription, alert, global_data, now), subscription}
+          {notification_type(
+             subscription,
+             alert,
+             Map.get(last_delivered_by_alert, alert.id),
+             global_data,
+             now
+           ), subscription}
         end)
         |> Enum.group_by(
           fn {type, _subscription} -> type end,
@@ -337,11 +356,17 @@ defmodule MobileAppBackend.Notifications.Engine do
     Alert.elevator_alerts(alerts, target_stop_with_children)
   end
 
-  @spec notification_type(Subscription.t(), Alert.t(), GlobalDataCache.data(), DateTime.t()) ::
+  @spec notification_type(
+          Subscription.t(),
+          Alert.t(),
+          DeliveredNotification.t() | nil,
+          GlobalDataCache.data(),
+          DateTime.t()
+        ) ::
           DeliveredNotification.type() | nil
   # this is not actually particularly complicated
   # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
-  defp notification_type(subscription, alert, global_data, now) do
+  defp notification_type(subscription, alert, last_delivered, global_data, now) do
     open_now? = Enum.any?(subscription.windows, &Window.open?(&1, now))
 
     trip_times = trip_times(subscription, alert, global_data, now)
@@ -361,7 +386,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
     cond do
       open_now? and Alert.all_clear?(alert) ->
-        if can_send?(subscription, alert, :all_clear) do
+        if can_send?(alert, last_delivered, :all_clear) do
           :all_clear
         else
           nil
@@ -372,29 +397,25 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       open_now? and active_now? and
           can_send?(
-            subscription,
             alert,
+            last_delivered,
             {:notification, alert.last_push_notification_timestamp}
           ) ->
         {:notification, alert.last_push_notification_timestamp}
 
       open_now? and active_now? and
-          can_send?(
-            subscription,
-            alert,
-            {:update, alert.last_push_notification_timestamp}
-          ) ->
+          can_send?(alert, last_delivered, {:update, alert.last_push_notification_timestamp}) ->
         {:update, alert.last_push_notification_timestamp}
 
       open_now? and active_now? ->
         nil
 
       open_now? and next_overlap_in_hours < 24 and
-          can_send?(subscription, alert, :reminder) ->
+          can_send?(alert, last_delivered, :reminder) ->
         :reminder
 
       next_overlap_in_hours < 12 and
-          can_send?(subscription, alert, :reminder) ->
+          can_send?(alert, last_delivered, :reminder) ->
         :reminder
 
       true ->
@@ -402,8 +423,8 @@ defmodule MobileAppBackend.Notifications.Engine do
     end
   end
 
-  defp can_send?(subscription, alert, type) do
-    DeliveredNotification.can_send?(subscription.user_id, alert.id, type)
+  defp can_send?(alert, last_delivered, type) do
+    DeliveredNotification.can_send?(alert, last_delivered, type)
   end
 
   defp build_title(alert, subscriptions, global_data) do
