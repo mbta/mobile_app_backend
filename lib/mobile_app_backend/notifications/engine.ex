@@ -403,7 +403,16 @@ defmodule MobileAppBackend.Notifications.Engine do
   end
 
   defp can_send?(subscription, alert, type) do
-    DeliveredNotification.can_send?(subscription.user_id, alert.id, type)
+    {us, result} =
+      :timer.tc(
+        fn -> DeliveredNotification.can_send?(subscription.user_id, alert.id, type) end,
+        :microsecond
+      )
+
+    # Totals are read and reset by Scheduler.new_notifications/4
+    Process.put(:can_send_us, Process.get(:can_send_us, 0) + us)
+    Process.put(:can_send_count, Process.get(:can_send_count, 0) + 1)
+    result
   end
 
   defp build_title(alert, subscriptions, global_data) do

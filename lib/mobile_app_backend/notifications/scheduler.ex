@@ -128,6 +128,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       "#{__MODULE__} build_summaries_by_key duration=#{summaries_us / 1000} subscription_key_count=#{MapSet.size(subscription_keys)}"
     )
 
+    Process.put(:can_send_us, 0)
+    Process.put(:can_send_count, 0)
+
     {notifications_us, notifications} =
       :timer.tc(
         fn ->
@@ -156,6 +159,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     Logger.info(
       "#{__MODULE__} processing_users duration=#{notifications_us / 1000} user_count=#{length(users)}"
+    )
+
+    Logger.info(
+      "#{__MODULE__} can_send_total duration=#{(Process.delete(:can_send_us) || 0) / 1000} call_count=#{Process.delete(:can_send_count)}"
     )
 
     notifications
