@@ -1067,7 +1067,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       })
       |> Oban.insert!()
 
-      Oban.drain_queue(queue: :default)
+      Oban.drain_queue(queue: :deliverer)
     end)
 
     {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})

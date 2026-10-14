@@ -80,7 +80,8 @@ config :mobile_app_backend, Oban,
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     Oban.Plugins.Reindexer
   ],
-  queues: [default: 10],
+  # Overridden in runtime.exs based on DATABASE_POOL_SIZE
+  queues: [default: 1, deliverer: 10],
   repo: MobileAppBackend.Repo
 
 config :mobile_app_backend, :logger, [

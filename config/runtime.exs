@@ -52,11 +52,14 @@ database_name =
     database_name_raw
   end
 
+db_pool_size = String.to_integer(System.get_env("DATABASE_POOL_SIZE") || "10")
+
 config :mobile_app_backend, MobileAppBackend.Repo,
   username: System.get_env("DATABASE_USER"),
   password: System.get_env("DATABASE_PASSWORD"),
   database: database_name,
   hostname: System.get_env("DATABASE_HOST"),
+  pool_size: db_pool_size,
   show_sensitive_data_on_connection_error: true,
   ssl: System.get_env("DATABASE_DISABLE_SSL") != "insecure-yes",
   ssl_opts: [
@@ -73,6 +76,10 @@ config :mobile_app_backend, MobileAppBackend.Repo,
     (if System.get_env("DATABASE_PASSWORD") == nil do
        {MobileAppBackend.Repo, :add_iam_credentials, []}
      end)
+
+config :mobile_app_backend, Oban,
+  queues: [default: 1, deliverer: max(Integer.floor_div(db_pool_size, 2), 10)]
+
 
 if config_env() == :dev do
   config :logger, :console, level: String.to_existing_atom(System.get_env("LOG_LEVEL", "debug"))

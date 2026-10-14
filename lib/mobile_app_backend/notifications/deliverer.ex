@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Deliverer do
-  use Oban.Worker, unique: [period: :infinity], max_attempts: 4
+  use Oban.Worker, queue: :deliverer, unique: [period: :infinity], max_attempts: 4
   require Logger
   alias MobileAppBackend.Notifications.DeliveredNotification
   alias MobileAppBackend.Notifications.GCPToken
