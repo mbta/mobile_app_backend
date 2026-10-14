@@ -122,32 +122,32 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     last_delivered_by_user_and_alert =
       DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
 
-     Enum.flat_map(users, fn user ->
-            try do
-              outgoing_notifications =
-                Engine.user_notifications(
-                  user,
-                  Map.get(last_delivered_by_user_and_alert, user.id, %{}),
-                  summaries_by_key,
-                  alerts_by_id,
-                  now,
-                  global
-                )
+    Enum.flat_map(users, fn user ->
+      try do
+        outgoing_notifications =
+          Engine.user_notifications(
+            user,
+            Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+            summaries_by_key,
+            alerts_by_id,
+            now,
+            global
+          )
 
-              results = localize_notifications(user, outgoing_notifications)
-              Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
-              results
-            rescue
-              error ->
-                log_exception(
-                  "find_new_notifications_for_user",
-                  "status=error user_id=#{user.id}",
-                  Exception.format(:error, error, __STACKTRACE__)
-                )
+        results = localize_notifications(user, outgoing_notifications)
+        Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
+        results
+      rescue
+        error ->
+          log_exception(
+            "find_new_notifications_for_user",
+            "status=error user_id=#{user.id}",
+            Exception.format(:error, error, __STACKTRACE__)
+          )
 
-                []
-            end
-          end)
+          []
+      end
+    end)
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
