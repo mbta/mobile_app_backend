@@ -124,15 +124,22 @@ defmodule MobileAppBackend.Notifications.Scheduler do
 
     Enum.flat_map(users, fn user ->
       try do
-        outgoing_notifications =
-          Engine.user_notifications(
-            user,
-            Map.get(last_delivered_by_user_and_alert, user.id, %{}),
-            summaries_by_key,
-            alerts_by_id,
-            now,
-            global
+        {engine_us, outgoing_notifications} =
+          :timer.tc(
+            fn ->
+              Engine.user_notifications(
+                user,
+                Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+                summaries_by_key,
+                alerts_by_id,
+                now,
+                global
+              )
+            end,
+            :microsecond
           )
+
+        Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
         results = localize_notifications(user, outgoing_notifications)
         Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
