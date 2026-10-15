@@ -104,6 +104,16 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
     test "notification if not notified" do
       alert = Factory.build(:alert)
 
+      assert DeliveredNotification.can_send?(
+               alert,
+               nil,
+               {:notification, ~U[2025-12-04 13:09:00Z]}
+             )
+    end
+
+    test "notification if reminded already" do
+      alert = Factory.build(:alert)
+
       delivered = %DeliveredNotification{
         user_id: "1",
         alert_id: alert.id,
@@ -114,16 +124,6 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
       assert DeliveredNotification.can_send?(
                alert,
                delivered,
-               {:notification, ~U[2025-12-04 13:09:00Z]}
-             )
-    end
-
-    test "notification if reminded already" do
-      alert = Factory.build(:alert)
-
-      assert DeliveredNotification.can_send?(
-               alert,
-               nil,
                {:notification, ~U[2025-12-04 13:09:00Z]}
              )
     end
