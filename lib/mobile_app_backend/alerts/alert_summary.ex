@@ -503,51 +503,56 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       _ ->
         build_location_for_multiple_stops(
-          aumented_patterns,
           affected_pattern_stops,
           stop_id,
           direction_id,
           downstream,
           global,
           alert,
-          patterns
+          patterns,
+          routes
         )
     end
   end
 
   @spec build_location_for_multiple_stops(
-          aumented_patterns :: [RoutePattern.t()],
           affected_pattern_stops :: %{RoutePattern.t() => [String.t()]},
           stop_id :: String.t() | nil,
           direction_id :: 0 | 1,
           downstream :: boolean(),
           global :: GlobalDataCache.data(),
           alert :: Alert.t(),
-          patterns :: [RoutePattern.t()]
+          patterns :: [RoutePattern.t()],
+          routes :: [Route.t()]
         ) :: Location.t() | nil
   defp build_location_for_multiple_stops(
-         aumented_patterns,
          affected_pattern_stops,
          stop_id,
          direction_id,
          downstream,
          global,
          alert,
-         patterns
+         patterns,
+         routes
        ) do
+    aumented_patterns =
+      augment_patterns_for_branched_lines(routes, direction_id, patterns, global)
+
     digraph =
       LineDigraph.build_stops_digraph_from_patterns(aumented_patterns, direction_id, global)
 
     with :ok <- LineDigraph.remove_unreachable_stops_from_digraph(digraph, stop_id),
-         :ok <- LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops) do
-      build_location_from_affected_stops_digraph(
-        digraph,
-        patterns,
-        direction_id,
-        downstream,
-        global,
-        alert
-      )
+         :ok <- LineDigraph.remove_unaffected_stops(digraph, affected_pattern_stops),
+         {:ok, location} <-
+           build_location_from_affected_stops_digraph(
+             digraph,
+             patterns,
+             direction_id,
+             downstream,
+             global,
+             alert
+           ) do
+      location
     else
       {:error, :stop_not_found} ->
         Logger.warning(
@@ -572,13 +577,28 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           |> Enum.uniq()
           |> Enum.map(& &1.name)
 
-        if stop_names != [] do
-          %Location.AffectedStops{
-            stops: stop_names
-          }
-        else
-          nil
+        cond do
+          # This condition handles when shuttles are created for routes that don't exist
+          # but want to show that shuttles have been added
+          alert.effect == :shuttle and
+              Enum.any?(routes, &(&1.type == :commuter_rail and length(stop_names) == 2)) ->
+            %Location.SuccessiveStops{
+              start_stop_name: Enum.at(stop_names, 0),
+              end_stop_name: Enum.at(stop_names, 1),
+              downstream: downstream
+            }
+
+          stop_names != [] ->
+            %Location.AffectedStops{
+              stops: stop_names
+            }
+
+          true ->
+            nil
         end
+
+      _ ->
+        nil
     end
   end
 
@@ -742,7 +762,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           boolean(),
           GlobalDataCache.data(),
           Alert.t()
-        ) :: Location.t() | nil
+        ) :: {:ok, Location.t()} | {:error, :disconnected_stops | :undetermined}
   defp build_location_from_affected_stops_digraph(
          digraph,
          patterns,
@@ -759,32 +779,38 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       last_stops: last_stops
     }
     |> case do
-      %{first_stops: [first_stop], last_stops: [last_stop]} ->
-        %Location.SuccessiveStops{
-          start_stop_name: first_stop.name,
-          end_stop_name: last_stop.name,
-          downstream: downstream
-        }
+      %{first_stops: [first_stop], last_stops: [last_stop]} when first_stop != last_stop ->
+        {:ok,
+         %Location.SuccessiveStops{
+           start_stop_name: first_stop.name,
+           end_stop_name: last_stop.name,
+           downstream: downstream
+         }}
+
+      %{first_stops: [first_stop], last_stops: [last_stop]} when first_stop == last_stop ->
+        {:error, :disconnected_stops}
 
       %{first_stops: [first_stop], last_stops: _last_stops} ->
         directions =
           Direction.get_directions_for_line(global, first_stop, patterns)
 
-        %Location.StopToDirection{
-          start_stop_name: first_stop.name,
-          direction: Enum.at(directions, direction_id),
-          downstream: downstream
-        }
+        {:ok,
+         %Location.StopToDirection{
+           start_stop_name: first_stop.name,
+           direction: Enum.at(directions, direction_id),
+           downstream: downstream
+         }}
 
       %{first_stops: _first_stops, last_stops: [last_stop]} ->
         directions =
           Direction.get_directions_for_line(global, last_stop, patterns)
 
-        %Location.DirectionToStop{
-          direction: Enum.at(directions, 1 - direction_id),
-          end_stop_name: last_stop.name,
-          downstream: downstream
-        }
+        {:ok,
+         %Location.DirectionToStop{
+           direction: Enum.at(directions, 1 - direction_id),
+           end_stop_name: last_stop.name,
+           downstream: downstream
+         }}
 
       _ ->
         Logger.warning(
@@ -793,7 +819,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             "last stops [#{Enum.map_join(last_stops, ", ", & &1.id)}]"
         )
 
-        nil
+        {:error, :undetermined}
     end
   end
 end
