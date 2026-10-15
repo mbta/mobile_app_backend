@@ -50,7 +50,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   end
 
   def can_send?(_alert, last_delivered, {:notification, _upstream_timestamp}) do
-    last_delivered == nil || last_delivered.type != :notification
+    last_delivered == nil || last_delivered.type == :reminder
   end
 
   def can_send?(_alert, nil, {:update, _upstream_timestamp}) do
