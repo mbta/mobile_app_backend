@@ -129,6 +129,24 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
              )
     end
 
+    test "no notification if already received update" do
+      alert = Factory.build(:alert)
+      upstream_timestamp = ~U[2025-12-04 13:10:00Z]
+
+      delivered = %DeliveredNotification{
+        user_id: "1",
+        alert_id: alert.id,
+        upstream_timestamp: upstream_timestamp,
+        type: :update
+      }
+
+      refute DeliveredNotification.can_send?(
+               alert,
+               delivered,
+               {:notification, upstream_timestamp}
+             )
+    end
+
     test "no notification if already notified with different upstream timestamp" do
       alert = Factory.build(:alert)
 
