@@ -900,67 +900,6 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    test "summary shuttle with two stops for heavy rail with successive stops", %{now: now} do
-      first_stop = build(:stop, name: "First Stop")
-      another_stop = build(:stop, name: "Another Stop")
-      last_stop = build(:stop, name: "Last Stop")
-
-      stops1 = [first_stop, another_stop]
-      stops2 = [another_stop, last_stop]
-
-      route = build(:route, type: :heavy_rail)
-      trip1 = build(:trip, stop_ids: Enum.map(stops1, & &1.id))
-      trip2 = build(:trip, stop_ids: Enum.map(stops2, & &1.id))
-
-      pattern1 =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 0,
-          representative_trip_id: trip1.id
-        )
-
-      pattern2 =
-        build(:route_pattern,
-          route_id: route.id,
-          direction_id: 0,
-          representative_trip_id: trip2.id
-        )
-
-      alert =
-        build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          effect: :shuttle,
-          informed_entity:
-            Enum.map(
-              [first_stop, last_stop],
-              &%Alert.InformedEntity{
-                activities: ~w(board exit ride)a,
-                route: route.id,
-                stop: &1.id
-              }
-            )
-        )
-
-      assert %AlertSummary.Standard{
-               location: %AlertSummary.Location.AffectedStops{
-                 stops: ["First Stop", "Last Stop"]
-               }
-             } =
-               AlertSummary.summarizing(
-                 alert,
-                 %Subscription{stop_id: first_stop.id, direction_id: 0},
-                 [pattern1, pattern2],
-                 now,
-                 nil,
-                 %{
-                   routes: %{route.id => route},
-                   stops: Map.new(stops1 ++ stops2, &{&1.id, &1}),
-                   trips: %{trip1.id => trip1, trip2.id => trip2}
-                 },
-                 :notification
-               )
-    end
-
     test "summary with successive bus stops", %{now: now} do
       first_stop = build(:stop, name: "First Stop")
       successive_stops = build_list(4, :stop)

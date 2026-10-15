@@ -279,9 +279,19 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
       cond do
         # Special case for alert with ID "1037115", will delete after the alert is closed
-        alert.id == "1037115" ->
-          %Location.AffectedStops{
-            stops: ["Foxboro", "Walpole"]
+        (alert.id == "1037115" or alert.id == "1037123") and
+            global.stops[stop_id].name == "Foxboro" ->
+          %Location.SuccessiveStops{
+            start_stop_name: "Foxboro",
+            end_stop_name: "Walpole",
+            downstream: downstream
+          }
+
+        alert.id == "1037115" or alert.id == "1037123" ->
+          %Location.SuccessiveStops{
+            start_stop_name: "Walpole",
+            end_stop_name: "Foxboro",
+            downstream: downstream
           }
 
         alert_location_is_closure?(alert, affected_stops) ->
@@ -295,12 +305,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
           %Location.Omit{reason: :multiple_stops_for_bus}
-
-        Enum.any?(routes, &(&1.type == :heavy_rail)) and alert.effect == :shuttle and
-            length(affected_stops) == 2 ->
-          %Location.AffectedStops{
-            stops: Enum.map(affected_stops, fn stop -> stop.name end)
-          }
 
         true ->
           alert_location_for_multiple_stops(
