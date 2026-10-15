@@ -268,6 +268,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     %Location.Omit{reason: :combination_with_no_route_patterns}
   end
 
+  # credo:disable-for-next-line Credo.Check.Refactor.CyclomaticComplexity
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
@@ -277,6 +278,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
       cond do
+        # Special case for alert with ID "1037115", will delete after the alert is closed
+        alert.id == "1037115" ->
+          %Location.AffectedStops{
+            stops: ["Foxboro", "Walpole"]
+          }
+
         alert_location_is_closure?(alert, affected_stops) ->
           %Location.AffectedStops{
             stops: Enum.map(affected_stops, fn stop -> stop.name end)
@@ -288,6 +295,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
           %Location.Omit{reason: :multiple_stops_for_bus}
+
+        Enum.any?(routes, &(&1.type == :heavy_rail)) and alert.effect == :shuttle and
+            length(affected_stops) == 2 ->
+          %Location.AffectedStops{
+            stops: Enum.map(affected_stops, fn stop -> stop.name end)
+          }
 
         true ->
           alert_location_for_multiple_stops(
