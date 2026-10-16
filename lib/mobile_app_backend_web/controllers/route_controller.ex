@@ -3,7 +3,6 @@ defmodule MobileAppBackendWeb.RouteController do
 
   alias MBTAV3API.Repository
   alias MobileAppBackend.GlobalDataCache
-  alias MobileAppBackend.RouteBranching
 
   def stop_graph(conn, %{"route_id" => route_id, "direction_id" => direction_id}) do
     direction_id = String.to_integer(direction_id)
@@ -18,7 +17,7 @@ defmodule MobileAppBackendWeb.RouteController do
     global_data = GlobalDataCache.get_data()
 
     {_stop_graph, _segment_graph, branches} =
-      RouteBranching.calculate(
+      GTFSRouteBranching.calculate(
         global_data.routes[route_id],
         direction_id,
         stop_ids,
