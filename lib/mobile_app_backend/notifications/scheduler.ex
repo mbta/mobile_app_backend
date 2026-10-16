@@ -162,9 +162,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       "#{__MODULE__} find_new_notifications_for_user success_count=#{success_count} error_count=#{error_count}"
     )
 
-
     List.flatten(notifications_per_user)
-
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
