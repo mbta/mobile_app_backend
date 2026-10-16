@@ -11,16 +11,13 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
   @impl true
   def perform(%Oban.Job{
-        args: %{
-          "user_id" => user_id,
-          "alert_id" => alert_id,
-          "title" => title,
-          "body" => body,
-          "deep_link_path" => deep_link_path,
-          "upstream_timestamp" => upstream_timestamp,
-          "type" => type,
-          "analytics_label" => analytics_label
-        }
+        args:
+          %{
+            "user_id" => user_id,
+            "alert_id" => alert_id,
+            "upstream_timestamp" => upstream_timestamp,
+            "type" => type
+          } = args
       }) do
     upstream_timestamp =
       if is_nil(upstream_timestamp) do
@@ -32,8 +29,46 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     {:ok, type} = Ecto.Enum.cast_value(DeliveredNotification, :type, type)
 
-    Logger.info("#{__MODULE__} sending alert #{alert_id} to user #{user_id}")
+    Logger.info("#{__MODULE__} sending notification alert=#{alert_id} user=#{user_id}")
 
+    eager_delivered_notification_result =
+      %DeliveredNotification{
+        user_id: user_id,
+        alert_id: alert_id,
+        upstream_timestamp: upstream_timestamp,
+        type: type
+      }
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.unique_constraint([:user_id, :alert_id, :upstream_timestamp],
+        name: :delivered_notifications_user_id_alert_id_upstream_timestamp_ind
+      )
+      |> Repo.insert()
+
+    case eager_delivered_notification_result do
+      {:ok, eager_delivered_notification} ->
+        send_notification(args, eager_delivered_notification)
+
+      {:error, changeset} ->
+        Logger.info(
+          "#{__MODULE__} skipping_notification user_id=#{user_id} alert_id=#{alert_id} upstream_timestamp=#{upstream_timestamp} reason=#{inspect(changeset)}"
+        )
+
+        :ok
+    end
+  end
+
+  defp send_notification(
+         %{
+           "user_id" => user_id,
+           "alert_id" => alert_id,
+           "title" => title,
+           "body" => body,
+           "deep_link_path" => deep_link_path,
+           "analytics_label" => analytics_label,
+           "type" => type
+         },
+         eager_delivered_notification
+       ) do
     user = Repo.get!(User, user_id)
 
     gcp_token = GCPToken.get_token()
@@ -109,13 +144,6 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     case result do
       :ok ->
-        Repo.insert!(%DeliveredNotification{
-          user_id: user_id,
-          alert_id: alert_id,
-          upstream_timestamp: upstream_timestamp,
-          type: type
-        })
-
         :ok
 
       :deleted ->
@@ -126,7 +154,19 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         # worth sending by the time it succeeds, so we leave it to the
         # scheduler to retry the notification, and we mark this job as
         # cancelled so the retry doesn’t count as a duplicate
-        {:cancel, :error}
+        delete_result = Repo.delete(eager_delivered_notification, allow_stale: true)
+
+        case delete_result do
+          {:ok, _} ->
+            {:cancel, :error}
+
+          {:error, error} ->
+            Logger.error(
+              "#{__MODULE__} notification_failed_no_retry user_id=#{user.id} alert_id=#{eager_delivered_notification.alert_id} upstream_timestamp=#{eager_delivered_notification.upstream_timestamp} error=#{inspect(error)}"
+            )
+
+            {:cancel, :error}
+        end
     end
   end
 
@@ -176,7 +216,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
   end
 
   defp delete_user(user) do
-    case Repo.delete(user) do
+    case Repo.delete(user, allow_stale: true) do
       {:ok, _} ->
         :deleted
 

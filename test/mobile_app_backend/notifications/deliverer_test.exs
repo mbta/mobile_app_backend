@@ -135,7 +135,63 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
     assert DateTime.before?(user.fcm_last_verified, Repo.reload!(user).fcm_last_verified)
   end
 
-  test "does not update FCM last verified if notification fails to deliver" do
+  test "doesn't deliver notification if already a delivered_notification" do
+    set_log_level(:info)
+    start_link_supervised!(Alerts)
+    user = NotificationsFactory.insert(:user, app_version: "2.1.5", platform: "Android")
+    user_id = user.id
+    alert = Factory.build(:alert)
+    Alerts.process_reset([alert], [])
+    alert_id = alert.id
+    upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
+
+    title = "Notification title"
+    body = "Notification body"
+    deep_link_path = "/a/#{alert_id}/r/1/s/1"
+    analytics_label = "route=1;effect=delay;type=notification"
+
+    reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
+      token: "gcp_token",
+      expires: ~U[9999-12-31 23:59:59Z]
+    })
+
+    Req.Test.stub(Util.GCP, fn _conn ->
+      flunk("FCM should not be called for an already delivered notification")
+    end)
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user_id,
+      alert_id: alert_id,
+      upstream_timestamp: upstream_timestamp,
+      type: type
+    })
+
+    {:ok, log} = with_log(fn ->
+      perform_job(Notifications.Deliverer, %{
+        user_id: user_id,
+        alert_id: alert_id,
+        title: title,
+        body: body,
+        deep_link_path: deep_link_path,
+        upstream_timestamp: upstream_timestamp,
+        type: type,
+        analytics_label: analytics_label
+      })
+    end)
+
+    assert [
+             %DeliveredNotification{
+               user_id: ^user_id,
+               alert_id: ^alert_id,
+               upstream_timestamp: ^upstream_timestamp,
+               type: ^type
+             }
+           ] = Repo.all(DeliveredNotification)
+           assert log =~ "skipping_notification"
+  end
+
+  test "does not update FCM last verified or insert delivered notification record if sending fails" do
     start_link_supervised!(Alerts)
     user = NotificationsFactory.insert(:user)
     user_id = user.id
