@@ -37,7 +37,7 @@ defmodule MBTAV3API do
          {:ok, %Req.Response{status: status} = response_content} <- response do
       case status do
         304 ->
-          Logger.info("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
+          Logger.debug("#{__MODULE__} cache hit url=#{url} params=#{inspect(params)}")
           elem(cached_response, 1)
 
         _other ->

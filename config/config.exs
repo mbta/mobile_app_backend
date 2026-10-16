@@ -119,6 +119,10 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id, :user_agent]
 
+# Increase drop mode threshold from the default to accommodate periodic
+# bursts of >200 log messages during notifications processing
+config :logger, :default_handler, config: [drop_mode_qlen: 500]
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

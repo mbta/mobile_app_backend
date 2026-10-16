@@ -97,7 +97,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         :microsecond
       )
 
-    Logger.info("#{__MODULE__} open_windows_query duration=#{query_us}")
+    Logger.info(
+      "#{__MODULE__} open_windows_query duration=#{query_us} user_count=#{length(users_with_open_windows)}"
+    )
 
     users_with_open_windows
   end
@@ -122,39 +124,45 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     last_delivered_by_user_and_alert =
       DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
 
-    Enum.flat_map(users, fn user ->
-      try do
-        {engine_us, outgoing_notifications} =
-          :timer.tc(
-            fn ->
-              Engine.user_notifications(
-                user,
-                Map.get(last_delivered_by_user_and_alert, user.id, %{}),
-                summaries_by_key,
-                alerts_by_id,
-                now,
-                global
-              )
-            end,
-            :microsecond
-          )
+    {notifications_per_user, success_count, error_count} =
+      Enum.reduce(users, {[], 0, 0}, fn user, {acc, success_count, error_count} ->
+        try do
+          {engine_us, outgoing_notifications} =
+            :timer.tc(
+              fn ->
+                Engine.user_notifications(
+                  user,
+                  Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+                  summaries_by_key,
+                  alerts_by_id,
+                  now,
+                  global
+                )
+              end,
+              :microsecond
+            )
 
-        Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
+          Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
-        results = localize_notifications(user, outgoing_notifications)
-        Logger.info("#{__MODULE__} find_new_notifications_for_user status=ok")
-        results
-      rescue
-        error ->
-          log_exception(
-            "find_new_notifications_for_user",
-            "status=error user_id=#{user.id}",
-            Exception.format(:error, error, __STACKTRACE__)
-          )
+          results = localize_notifications(user, outgoing_notifications)
+          {[acc | results], success_count + 1, error_count}
+        rescue
+          error ->
+            log_exception(
+              "new_notifications",
+              "status=error user_id=#{user.id}",
+              Exception.format(:error, error, __STACKTRACE__)
+            )
 
-          []
-      end
-    end)
+            {acc, success_count, error_count + 1}
+        end
+      end)
+
+    Logger.info(
+      "#{__MODULE__} find_new_notifications_for_user success_count=#{success_count} error_count=#{error_count}"
+    )
+
+    List.flatten(notifications_per_user)
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
@@ -176,12 +184,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           %{Alert.id() => %{default: AlertSummary.t(), multiple_active: AlertSummary.t()}}
 
   defp summaries_by_subscription_key(subscription_key, alerts, now, global) do
-    {engine_us, relevant_alerts} =
-      :timer.tc(
-        &Engine.alerts_for_subscription_key/4,
-        [subscription_key, alerts, now, global],
-        :microsecond
-      )
+    relevant_alerts = Engine.alerts_for_subscription_key(subscription_key, alerts, now, global)
 
     patterns =
       RoutePattern.get_relevant_patterns(
@@ -246,7 +249,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         end
       )
 
-    Logger.info("#{__MODULE__} alerts_for_subscription_key duration=#{engine_us}")
     summaries_per_alert
   end
 

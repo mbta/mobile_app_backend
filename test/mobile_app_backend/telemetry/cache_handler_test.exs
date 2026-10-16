@@ -8,10 +8,10 @@ defmodule MobileAppBackend.Telemetry.CacheHandlerTest do
 
   describe "handle_event/4" do
     test "logs hit" do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       {_results, log} =
-        with_log([level: :info], fn ->
+        with_log([level: :debug], fn ->
           CacheHandler.handle_event(
             [:mbtav3api, :response_cache, :command, :stop],
             %{duration: 0},
@@ -25,10 +25,10 @@ defmodule MobileAppBackend.Telemetry.CacheHandlerTest do
     end
 
     test "logs miss" do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       {_results, log} =
-        with_log([level: :info], fn ->
+        with_log([level: :debug], fn ->
           CacheHandler.handle_event(
             [:mbtav3api, :response_cache, :command, :stop],
             %{duration: 0},

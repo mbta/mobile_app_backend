@@ -23,14 +23,14 @@ defmodule MobileAppBackend.Health.FinchPool do
 
     case get_pool_status_fn.(pool_name, v3_api_url) do
       {:error, :not_found} ->
-        Logger.info("#{__MODULE__} pool not found")
+        Logger.debug("#{__MODULE__} pool not found")
 
       {:error, error} ->
         Logger.warning("#{__MODULE__} pool health error=#{inspect(error)}")
 
       {:ok, statuses} ->
         Enum.each(statuses, fn status ->
-          Logger.info(
+          Logger.debug(
             "#{__MODULE__} pool_health available_connections=#{status.available_connections} in_use_connections=#{status.in_use_connections} pool_index=#{status.pool_index} pool_size=#{status.pool_size}"
           )
         end)

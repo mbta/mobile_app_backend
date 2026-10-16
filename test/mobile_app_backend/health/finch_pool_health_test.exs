@@ -6,7 +6,7 @@ defmodule MobileAppBackend.Health.FinchPoolTest do
 
   describe "handle_info/1" do
     test "when pool not found yet, logs error" do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       msg =
         capture_log(fn ->
@@ -34,7 +34,7 @@ defmodule MobileAppBackend.Health.FinchPoolTest do
     end
 
     test "when pools found, logs status" do
-      set_log_level(:info)
+      set_log_level(:debug)
 
       status = %{available_connections: 5, in_use_connections: 10, pool_index: 1, pool_size: 15}
 

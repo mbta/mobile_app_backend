@@ -29,7 +29,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     {:ok, type} = Ecto.Enum.cast_value(DeliveredNotification, :type, type)
 
-    Logger.info("#{__MODULE__} sending notification alert=#{alert_id} user=#{user_id}")
+    Logger.debug("#{__MODULE__} sending notification alert=#{alert_id} user=#{user_id}")
 
     eager_delivered_notification_result =
       %DeliveredNotification{
