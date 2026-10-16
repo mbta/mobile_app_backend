@@ -30,7 +30,7 @@
         "alpine"
       ],
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "separateMajorMinor": true,
       "separateMinorPatch": true,
@@ -45,7 +45,7 @@
         "alpine"
       ],
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "matchUpdateTypes": [
         "patch"
@@ -58,7 +58,7 @@
         "erlang"
       ],
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "changelogUrl": "https://www.erlang.org/patches/OTP-{{ newVersion }}"
     },
@@ -68,7 +68,7 @@
         "elixir"
       ],
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "changelogUrl": "https://github.com/elixir-lang/elixir/releases/tag/v{{ newVersion }}"
     },
@@ -78,7 +78,7 @@
         "alpine"
       ],
       "matchManagers": [
-        "regex"
+        "custom.regex"
       ],
       "changelogUrl": "https://alpinelinux.org/posts/"
     }
