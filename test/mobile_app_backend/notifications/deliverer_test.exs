@@ -167,18 +167,19 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       type: type
     })
 
-    {:ok, log} = with_log(fn ->
-      perform_job(Notifications.Deliverer, %{
-        user_id: user_id,
-        alert_id: alert_id,
-        title: title,
-        body: body,
-        deep_link_path: deep_link_path,
-        upstream_timestamp: upstream_timestamp,
-        type: type,
-        analytics_label: analytics_label
-      })
-    end)
+    {:ok, log} =
+      with_log(fn ->
+        perform_job(Notifications.Deliverer, %{
+          user_id: user_id,
+          alert_id: alert_id,
+          title: title,
+          body: body,
+          deep_link_path: deep_link_path,
+          upstream_timestamp: upstream_timestamp,
+          type: type,
+          analytics_label: analytics_label
+        })
+      end)
 
     assert [
              %DeliveredNotification{
@@ -188,7 +189,8 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
                type: ^type
              }
            ] = Repo.all(DeliveredNotification)
-           assert log =~ "skipping_notification"
+
+    assert log =~ "skipping_notification"
   end
 
   test "does not update FCM last verified or insert delivered notification record if sending fails" do
