@@ -1023,7 +1023,8 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
             route_type: :bus
           }
         ],
-        last_push_notification_timestamp: DateTime.add(now, -1, :minute)
+        last_push_notification_timestamp:
+          now |> DateTime.add(-1, :minute) |> DateTime.truncate(:second)
       )
 
     user = NotificationsFactory.insert(:user)
@@ -1050,7 +1051,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       expires: ~U[9999-12-31 23:59:59Z]
     })
 
-    Req.Test.expect(Util.GCP, fn conn ->
+    Req.Test.expect(Util.GCP, 1, fn conn ->
       conn |> Plug.Conn.put_status(418) |> Req.Test.json(%{})
     end)
 
@@ -1067,7 +1068,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
       })
       |> Oban.insert!()
 
-      Oban.drain_queue(queue: :default)
+      %{cancelled: 1} = Oban.drain_queue(queue: :default)
     end)
 
     {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
