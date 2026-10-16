@@ -1757,6 +1757,45 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    test "summary when alert affects only parent stop", %{now: now} do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+      saint_marys = global.stops["place-smary"]
+
+      route = global.routes["Green-C"]
+      c_branch = global.route_patterns["Green-C-832-0"]
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
+          informed_entity:
+            Enum.map(
+              ["place-kencl", "place-bland", "place-smary"],
+              &%Alert.InformedEntity{
+                activities: ~w(board exit ride)a,
+                route: route.id,
+                stop: &1
+              }
+            )
+        )
+
+      assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.SuccessiveStops{
+                 start_stop_name: "Saint Mary's Street",
+                 end_stop_name: "Kenmore"
+               }
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: saint_marys.id, direction_id: 1},
+                 [c_branch],
+                 now,
+                 nil,
+                 global,
+                 :notification
+               )
+    end
+
     test "trip specific suspension" do
       now = ~B[2026-03-12 12:00:00]
       stop = build(:stop, name: "Ruggles")
