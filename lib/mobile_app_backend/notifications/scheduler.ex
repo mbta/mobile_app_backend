@@ -124,7 +124,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     last_delivered_by_user_and_alert =
       DeliveredNotification.latest_delivered_per_user(Map.keys(alerts_by_id))
 
-    {notifications, success_count, error_count} =
+    {notifications_per_user, success_count, error_count} =
       Enum.reduce(users, {[], 0, 0}, fn user, {acc, success_count, error_count} ->
         try do
           {engine_us, outgoing_notifications} =
@@ -145,7 +145,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
 
           results = localize_notifications(user, outgoing_notifications)
-          {acc ++ results, success_count + 1, error_count}
+          {[acc | results], success_count + 1, error_count}
         rescue
           error ->
             log_exception(
@@ -162,7 +162,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       "#{__MODULE__} find_new_notifications_for_user success_count=#{success_count} error_count=#{error_count}"
     )
 
-    notifications
+
+    List.flatten(notifications_per_user)
+
   end
 
   @spec localize_notifications(User.t(), [OutgoingNotification.t()]) :: [
