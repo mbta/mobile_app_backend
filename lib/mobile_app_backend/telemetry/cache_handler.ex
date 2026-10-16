@@ -37,7 +37,7 @@ defmodule MobileAppBackend.Telemetry.CacheHandler do
         _ -> ""
       end
 
-    Logger.info(
+    Logger.debug(
       "#{__MODULE__} cache=#{cache} duration=#{duration} result=#{result} key=#{inspect(List.first(metadata.args))}"
     )
   end

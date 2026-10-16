@@ -120,7 +120,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         perform_job(MobileAppBackend.Notifications.Scheduler, %{})
       end)
 
-    assert log =~ "find_new_notifications_for_user status=ok"
+    assert log =~ "find_new_notifications_for_user success_count=1 error_count=0"
 
     assert_enqueued(
       worker: Notifications.Deliverer,
