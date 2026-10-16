@@ -13,7 +13,6 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     env:
-      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: localhost
@@ -30,6 +29,23 @@ jobs:
           POSTGRES_DB: ${{env.DATABASE_NAME}}
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
+      - name: Get run URLs for each step
+        id: run_urls
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          ATTEMPT: ${{ github.run_attempt }}
+        run: |
+          # https://cmbuckley.co.uk/blog/2024/04/09/deep-links-to-github-actions-job-logs/
+          gh -R $REPO run view $RUN_ID --attempt $ATTEMPT --json jobs --jq '
+            .jobs[] | 
+            select(.name == "Check route branching") |
+            [.] |
+            map({step: .steps[], url} | {(.step.name): .url + "#step:\(.step.number):1"}) |
+            add(.[]) |
+            @json "run_urls=\(.)"
+          ' | tee -a $GITHUB_OUTPUT
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -79,6 +95,8 @@ jobs:
           LOG_LEVEL: notice
       - name: Report failure for prod/dev
         if: ${{ failure() && steps.check-prod-dev.outcome == 'failure' }}
+        env:
+          RUN_URL: ${{ fromJSON(steps.run_urls.outputs.run_urls)['Check route branching for prod/dev backend'] }}
         run: |
           jq --null-input '{text: "‼️ Route branching failing for prod/dev!", url: env.RUN_URL}' | \
             curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
@@ -102,6 +120,8 @@ jobs:
           LOG_LEVEL: notice
       - name: Report failure for dev-orange
         if: ${{ failure() && steps.check-dev-orange.outcome == 'failure' }}
+        env:
+          RUN_URL: ${{ fromJSON(steps.run_urls.outputs.run_urls)['Check route branching for dev-orange backend'] }}
         run: |
           jq --null-input '{text: "‼️ Route branching failing for dev-orange!", url: env.RUN_URL}' | \
             curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
@@ -117,6 +137,8 @@ jobs:
           git diff --staged --color --exit-code --src-prefix="      prod/" --dst-prefix="dev-orange/" && git status
       - name: Report diff
         if: ${{ steps.diff.outcome == 'failure' }}
+        env:
+          RUN_URL: ${{ fromJSON(steps.run_urls.outputs.run_urls)['Calculate diffs'] }}
         run: |
-          jq --null-input '{text: "⚠️ Route branching different between prod/dev and dev-orange:\n\(env.DIFFSTAT)", url: "\(env.RUN_URL)#step:15:14"}' | \
+          jq --null-input '{text: "⚠️ Route branching different between prod/dev and dev-orange:\n\(env.DIFFSTAT)", url: "\(env.RUN_URL)"}' | \
             curl -X POST --json @- ${{ secrets.ROUTE_BRANCHING_SLACK_WEBHOOK }}
