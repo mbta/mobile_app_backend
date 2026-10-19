@@ -47,8 +47,12 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
 
     body =
       case outgoing_notification.type do
-        {:update, _} -> gettext("Update: %{body}", body: body)
-        _ -> body
+        {:update, _} ->
+          gettext_comment("Example: “Update: Service has ended”")
+          gettext("Update: %{body}", body: body)
+
+        _ ->
+          body
       end
 
     %Localized{

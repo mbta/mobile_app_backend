@@ -66,6 +66,10 @@ defmodule MobileAppBackend.Notifications.NotificationTitle do
           )
 
         %MultipleRoutes{} ->
+          gettext_comment(
+            "Title displayed in notification for alert that applies to multiple subscribed routes"
+          )
+
           gettext("Multiple routes")
       end
     end)
