@@ -136,7 +136,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
               now,
               global
             )
-
+          Enum.each(outgoing_notifications, fn notification ->
+            log_alert_summary_type_issues(notification.alert, notification.summary, user.notification_subscriptions)
+          end)
           results = localize_notifications(user, outgoing_notifications)
           {[acc | results], success_count + 1, error_count}
         rescue
@@ -227,13 +229,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
               true
             )
 
-          log_alert_summary_type_issues(
-            alert,
-            summary_no_other_active_alerts,
-            patterns,
-            schedules
-          )
-
           {alert.id,
            %{
              default: summary_no_other_active_alerts,
@@ -245,29 +240,27 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     summaries_per_alert
   end
 
-  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [RoutePattern.t()], [
-          Schedule.t()
-        ]) :: :ok
-  defp log_alert_summary_type_issues(alert, alert_summary, patterns, schedules) do
+  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [UserNotificationSubscription.t()]) :: :ok
+  defp log_alert_summary_type_issues(alert, alert_summary, user_notification_subscriptions) do
     case alert_summary do
       %AlertSummary.Standard{} ->
         if Alert.trip_ids(alert) != [] do
           Logger.warning(
-            "Alert #{alert.id} has trips Ids but is summarized as Standard. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+            "Alert #{alert.id} has trips Ids but is summarized as Standard. user_notification_subscriptions: #{inspect(user_notification_subscriptions)}"
           )
         end
 
       %AlertSummary.TripSpecific{} ->
         if Alert.trip_ids(alert) == [] do
           Logger.warning(
-            "Alert #{alert.id} has no trip Ids but is summarized as Trip Specific. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Specific. user_notification_subscriptions: #{inspect(user_notification_subscriptions)}"
           )
         end
 
       %AlertSummary.TripShuttle{} ->
         if Alert.trip_ids(alert) == [] do
           Logger.warning(
-            "Alert #{alert.id} has no trip Ids but is summarized as Trip Shuttle. patterns: #{RoutePattern.ids(patterns)}, schedules: #{Schedule.ids(schedules)}"
+            "Alert #{alert.id} has no trip Ids but is summarized as Trip Shuttle. user_notification_subscriptions: #{inspect(user_notification_subscriptions)}"
           )
         end
 
