@@ -62,10 +62,10 @@ config :mobile_app_backend, MobileAppBackend.Repo,
   ssl_opts: [
     verify: :verify_peer,
     cacertfile: "priv/aws-cert-bundle.pem",
-    server_name_indication: String.to_charlist(System.get_env("DATABASE_HOST")),
+    server_name_indication: String.to_charlist(System.fetch_env!("DATABASE_HOST")),
     verify_fun:
       {&:ssl_verify_hostname.verify_fun/3,
-       [check_hostname: String.to_charlist(System.get_env("DATABASE_HOST"))]}
+       [check_hostname: String.to_charlist(System.fetch_env!("DATABASE_HOST"))]}
   ],
   # function to call before every connection
   # add RDS IAM auth, but only if there's no password
