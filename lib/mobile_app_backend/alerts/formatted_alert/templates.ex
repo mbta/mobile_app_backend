@@ -25,6 +25,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
   def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _context) do
+    gettext_comment("Assemble a summary of an alert with the structure:")
+
+    gettext_comment(
+      "**Delays**[ of about 15 minutes][ due to weather][ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]"
+    )
+
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       effect_sentence_case: PresentationStrings.effect_sentence_case(:delay),
@@ -43,6 +49,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   def standard(%{effect: effect} = alert, location, timeframe, recurrence, context)
       when effect in [:detour, :snow_route] and context == :notification do
     summary = default_standard(alert, location, timeframe, recurrence)
+    gettext_comment("Text in a notification prompting users to click to learn more")
     gettext("%{summary}. See alert details.", summary: summary)
   end
 
@@ -59,6 +66,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       else
         ""
       end
+
+    gettext_comment(
+      ~S"Assemble a full summary of an alert with the structure: \n**[Modified service]**[ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]"
+    )
 
     gettext(
       "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
@@ -77,6 +88,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # All clear with multiple active alerts and closure effect
   def all_clear(%{effect: effect}, true, location)
       when effect in [:dock_closure, :station_closure, :stop_closure] do
+    gettext_comment(
+      ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|
+    )
+
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
       mode: vehicle_type(effect, :singular),
@@ -86,9 +101,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # All clear with multiple active alerts and elevator closure effect
   def all_clear(%{effect: :elevator_closure}, true, location) do
+    gettext_comment("Elevator Service")
+    mode = gettext("Elevator")
+
+    gettext_comment(
+      ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|
+    )
+
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
-      mode: gettext("Elevator"),
+      mode: mode,
       summary_location: location
     )
   end
@@ -99,6 +121,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         true,
         location
       ) do
+    gettext_comment(
+      ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|
+    )
+
     gettext(
       "**Update:** %{mode} service has resumed%{summary_location}.",
       mode: PresentationStrings.route_type(route_type, :singular, :sentence_case),
@@ -108,6 +134,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # All clear with multiple active alerts
   def all_clear(%{effect: effect}, true, location) do
+    gettext_comment(
+      ~S|Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "[Update][Stop closure] has ended[ at Haymarket]." or \"[Update][Service suspension] has ended[ from Alewife to Harvard]”.|
+    )
+
     gettext(
       "**Update:** %{effect_sentence_case} has ended%{summary_location}.",
       effect_sentence_case: PresentationStrings.effect(effect),
@@ -117,6 +147,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # All clear with no other active alerts
   def all_clear(_alert, _has_multiple_active_alerts, _location) do
+    gettext_comment(~S|Alert summary in the format of \"All clear: Normal service has resumed.\"|)
     gettext("**All clear:** Normal service has resumed.")
   end
 
@@ -139,6 +170,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     cause = TemplateFragments.due_to_cause(alert.cause)
 
     if multiple_trips? do
+      gettext_comment("Assemble a summary of an alert with the structure:")
+
+      gettext_comment(
+        "[These trips] are cancelled [today][ due to maintenance][ daily until friday]"
+      )
+
       gettext(
         "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}",
         trip_identity: trip_identity,
@@ -147,6 +184,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence: recurrence
       )
     else
+      gettext_comment("Assemble a summary of an alert with the structure:")
+
+      gettext_comment(
+        "[This trip] is cancelled [today][ due to maintenance][ daily until friday]"
+      )
+
       gettext(
         "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}",
         trip_identity: trip_identity,
@@ -167,6 +210,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
       )
       when effect in [:dock_closure, :station_closure, :stop_closure] and stops != nil and
              stops != [] do
+    gettext_comment("Assemble a summary of an alert with the structure:")
+
+    gettext_comment(
+      "[This trip] [will not stop at  stop A][ due to maintenance][ daily until friday]"
+    )
+
+    gettext_comment(
+      "Alert summary in the format of “[trip identity] [is affected][due to cause][until recurrence]”, ex “[12:13 PM from Ruggles] [is cancelled today][ due to a mechanical issue][ some days until Wednesday]” or “[Multiple trips] [are suspended today][][]”"
+    )
+
     gettext("%{trip_identity} %{skipped_effect}%{cause}%{recurrence}",
       trip_identity: trip_identity,
       skipped_effect:
@@ -186,6 +239,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence,
         _multiple_trips?
       ) do
+    gettext_comment("Assemble a summary of an alert with the structure:")
+
+    gettext_comment(
+      "[This trip] will terminate at [Porter][ today][ due to maintenance][ daily until friday]"
+    )
+
     gettext(
       "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}",
       trip_identity: trip_identity,
@@ -207,6 +266,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     cause = TemplateFragments.due_to_cause(alert.cause)
 
     if multiple_trips? do
+      gettext_comment("Assemble a summary of an alert with the structure:")
+
+      gettext_comment(
+        "[These trips] are suspended [today][ due to maintenance][ daily until friday]"
+      )
+
       gettext(
         "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}",
         trip_identity: trip_identity,
@@ -215,6 +280,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence: recurrence
       )
     else
+      gettext_comment("Assemble a summary of an alert with the structure:")
+
+      gettext_comment(
+        "[This trip] is suspended [today][ due to maintenance][ daily until friday]"
+      )
+
       gettext(
         "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}",
         trip_identity: trip_identity,
@@ -233,6 +304,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence,
         _multiple_trips?
       ) do
+    gettext_comment("Assemble a summary of an alert with the structure:")
+
+    gettext_comment(
+      "[Trip 101] experiencing delays[ of about 10 minutes][ today][ due to maintenance][ daily until Friday]"
+    )
+
     gettext(
       "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}",
       trip_identity: trip_identity,
@@ -251,6 +328,12 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence,
         _multiple_trips?
       ) do
+    gettext_comment("Assemble a summary of an alert with the structure:")
+
+    gettext_comment(
+      "[This trip] affected by [detour] [today][ due to maintenance][ daily until friday]"
+    )
+
     gettext(
       "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}",
       trip_identity: trip_identity,
@@ -263,6 +346,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   def trip_shuttle(trip_identity, start_stop, end_stop, recurrence, one_trip?) do
     if one_trip? do
+      gettext_comment(
+        "Alert summary in the format of “[trip identity] is replaced by shuttle buses from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [the 12:13 PM train] from [Ruggles] to [Forest Hills][ some days until Friday]”"
+      )
+
       gettext(
         "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}",
         trip_identity: trip_identity,
@@ -271,6 +358,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
         recurrence: recurrence
       )
     else
+      gettext_comment(
+        "Alert summary in the format of “Shuttle buses replace [trip identity] from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [this train] from [Ruggles] to [Forest Hills][ some days until Friday]”"
+      )
+
       gettext(
         "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}",
         trip_identity: trip_identity,
