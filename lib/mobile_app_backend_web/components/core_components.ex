@@ -16,7 +16,7 @@ defmodule MobileAppBackendWeb.CoreComponents do
   """
   use Phoenix.Component
 
-  use Gettext, backend: MobileAppBackend.Gettext
+  use MobileAppBackend.Gettext
 
   alias Phoenix.HTML.{Form, FormField}
   alias Phoenix.LiveView.JS
@@ -75,7 +75,7 @@ defmodule MobileAppBackendWeb.CoreComponents do
                   phx-click={JS.exec("data-cancel", to: "##{@id}")}
                   type="button"
                   class="-m-3 flex-none p-3 opacity-20 hover:opacity-40"
-                  aria-label={gettext("close")}
+                  aria-label={gettext("close", comment: nil)}
                 >
                   <.icon name="hero-x-mark-solid" class="h-5 w-5" />
                 </button>
@@ -129,7 +129,11 @@ defmodule MobileAppBackendWeb.CoreComponents do
         {@title}
       </p>
       <p class="mt-2 text-sm leading-5">{msg}</p>
-      <button type="button" class="group absolute top-1 right-1 p-2" aria-label={gettext("close")}>
+      <button
+        type="button"
+        class="group absolute top-1 right-1 p-2"
+        aria-label={gettext("close", comment: nil)}
+      >
         <.icon name="hero-x-mark-solid" class="h-5 w-5 opacity-40 group-hover:opacity-70" />
       </button>
     </div>
@@ -481,7 +485,7 @@ defmodule MobileAppBackendWeb.CoreComponents do
           <tr>
             <th :for={col <- @col} class="p-0 pb-4 pr-6 font-normal">{col[:label]}</th>
             <th :if={@action != []} class="relative p-0 pb-4">
-              <span class="sr-only">{gettext("Actions")}</span>
+              <span class="sr-only">{gettext("Actions", comment: nil)}</span>
             </th>
           </tr>
         </thead>

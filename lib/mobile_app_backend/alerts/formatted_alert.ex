@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Alerts.FormattedAlert do
-  use Gettext, backend: MobileAppBackend.Gettext
+  use MobileAppBackend.Gettext
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.AlertSummary.TripShuttle
@@ -78,7 +78,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   defp trip_specific(alert, alert_summary) do
     trip_identity = summary_trip_identity(alert_summary.trip_identity)
 
-    timeframe = if alert_summary.is_today, do: gettext("today"), else: gettext("tomorrow")
+    timeframe =
+      if alert_summary.is_today,
+        do: gettext("today", comment: nil),
+        else: gettext("tomorrow", comment: nil)
+
     recurrence = TemplateFragments.recurrence(alert_summary.recurrence)
 
     multiple_trips? =
@@ -98,19 +102,16 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
   def summary_trip_identity(trip_identity) do
     case trip_identity do
       %AlertSummary.TripSpecific.ThisTrip{} ->
-        gettext_comment("Trip identity in the form of ”This [vehicle type]”, ex ”This [train]”")
-
         gettext("This %{route_type}",
+          comment: "Trip identity in the form of ”This [vehicle type]”, ex ”This [train]”",
           route_type:
             PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case)
         )
 
       %AlertSummary.TripSpecific.TripFrom{} ->
-        gettext_comment(
-          "Trip identity in the form of ”[time] [vehicle type] from [headsign]”, ex “[12:13 PM] [train] from [Stoughton]”"
-        )
-
         gettext("**%{trip_time}** %{route_type} from **%{stop_name}**",
+          comment:
+            "Trip identity in the form of ”[time] [vehicle type] from [headsign]”, ex “[12:13 PM] [train] from [Stoughton]”",
           trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type:
             PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case),
@@ -118,11 +119,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         )
 
       %AlertSummary.TripSpecific.TripTo{} ->
-        gettext_comment(
-          "Trip identity in the form of ”[time] [vehicle type] to [headsign]”, ex “[12:13 PM] [train] to [Stoughton]”"
-        )
-
         gettext("**%{trip_time}** %{route_type} to **%{headsign}**",
+          comment:
+            "Trip identity in the form of ”[time] [vehicle type] to [headsign]”, ex “[12:13 PM] [train] to [Stoughton]”",
           trip_time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
           route_type:
             PresentationStrings.route_type(trip_identity.route_type, :singular, :lower_case),
@@ -130,8 +129,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         )
 
       %AlertSummary.TripSpecific.MultipleTrips{} ->
-        gettext_comment("Trip identity referring to more than one specific trip")
-        gettext("Multiple trips")
+        gettext("Multiple trips",
+          comment: "Trip identity referring to more than one specific trip"
+        )
     end
   end
 
@@ -140,11 +140,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
     case trip_identity do
       %AlertSummary.TripShuttle.SingleTrip{} ->
         if trip_identity.from_stop_name != nil do
-          gettext_comment(
-            "Trip identity in the format of “[time] [vehicle] from [stop]”, ex “[12:13 PM] [train] from [South Station]“"
-          )
-
           gettext("**%{time}** %{vehicle} from **%{from_stop}**",
+            comment:
+              "Trip identity in the format of “[time] [vehicle] from [stop]”, ex “[12:13 PM] [train] from [South Station]“",
             time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(
@@ -155,11 +153,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
             from_stop: trip_identity.from_stop_name
           )
         else
-          gettext_comment(
-            "Trip identity in the format of “the [time] [vehicle]”, ex “the [12:13 PM] [train]"
-          )
-
           gettext("the **%{time}** %{vehicle}",
+            comment:
+              "Trip identity in the format of “the [time] [vehicle]”, ex “the [12:13 PM] [train]",
             time: Util.DateTime.datetime_to_string(trip_identity.trip_time, :short_time),
             vehicle:
               MobileAppBackend.PresentationStrings.route_type(
@@ -171,9 +167,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         end
 
       %AlertSummary.TripShuttle.ThisTrip{} ->
-        gettext_comment("Trip identity in the form of ”this [vehicle type]”, ex ”this [train]”")
-
         gettext("this %{vehicle}",
+          comment: "Trip identity in the form of ”this [vehicle type]”, ex ”this [train]”",
           vehicle:
             MobileAppBackend.PresentationStrings.route_type(
               trip_identity.route_type,
@@ -183,8 +178,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
         )
 
       %AlertSummary.TripShuttle.MultipleTrips{} ->
-        gettext_comment("Trip identity referring to more than one specific trip")
-        gettext("multiple trips")
+        gettext("multiple trips",
+          comment: "Trip identity referring to more than one specific trip"
+        )
     end
   end
 end
