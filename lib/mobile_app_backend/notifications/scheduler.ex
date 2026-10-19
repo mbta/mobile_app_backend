@@ -127,19 +127,14 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     {notifications_per_user, success_count, error_count} =
       Enum.reduce(users, {[], 0, 0}, fn user, {acc, success_count, error_count} ->
         try do
-          {engine_us, outgoing_notifications} =
-            :timer.tc(
-              fn ->
-                Engine.user_notifications(
-                  user,
-                  Map.get(last_delivered_by_user_and_alert, user.id, %{}),
-                  summaries_by_key,
-                  alerts_by_id,
-                  now,
-                  global
-                )
-              end,
-              :microsecond
+          outgoing_notifications =
+            Engine.user_notifications(
+              user,
+              Map.get(last_delivered_by_user_and_alert, user.id, %{}),
+              summaries_by_key,
+              alerts_by_id,
+              now,
+              global
             )
 
           results = localize_notifications(user, outgoing_notifications)
