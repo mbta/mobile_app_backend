@@ -142,8 +142,6 @@ defmodule MobileAppBackend.Notifications.Scheduler do
               :microsecond
             )
 
-          Logger.info("#{__MODULE__} run_engine duration=#{engine_us}")
-
           results = localize_notifications(user, outgoing_notifications)
           {[acc | results], success_count + 1, error_count}
         rescue
