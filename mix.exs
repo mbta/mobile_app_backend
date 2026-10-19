@@ -67,6 +67,7 @@ defmodule MobileAppBackend.MixProject do
       {:ex_cldr_lists, "~> 2.12"},
       {:ex_machina, "~> 2.8.0", only: :test},
       {:gettext, "~> 1.0"},
+      {:gtfs_route_branching, github: "mbta/gtfs_route_branching", tag: "0.1.1"},
       {:goth, "~> 1.4"},
       {:jason, "~> 1.2"},
       {:jose, "~> 1.11"},
