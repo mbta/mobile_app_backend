@@ -3,7 +3,7 @@ defmodule MobileAppBackend.PresentationStrings do
   @moduledoc """
   Localized string descriptions of pieces of data from MBTAV3API.
   """
-  use Gettext, backend: MobileAppBackend.Gettext
+  use MobileAppBackend.Gettext
 
   alias MBTAV3API.Alert
   alias MBTAV3API.Route
@@ -13,76 +13,67 @@ defmodule MobileAppBackend.PresentationStrings do
 
   @spec route_type(Route.type(), plurality(), string_case()) :: String.t()
   def route_type(:bus, :singular, :lower_case) do
-    gettext_comment("bus")
-    gettext("bus")
+    gettext("bus", comment: "bus")
   end
 
   def route_type(:bus, :plural, :lower_case) do
-    gettext_comment("buses")
-    gettext("buses")
+    gettext("buses", comment: "buses")
   end
 
   def route_type(:bus, :singular, :sentence_case) do
-    gettext_comment("Label for bus routes in the route picker view")
-    gettext("Bus")
+    gettext("Bus", comment: "Label for bus routes in the route picker view")
   end
 
   def route_type(:bus, :plural, :sentence_case) do
-    gettext_comment(~s|Mode of travel prefixing alert summary e.g.: "Buses will not stop at..."|)
-    gettext("Buses")
+    gettext("Buses",
+      comment: ~s|Mode of travel prefixing alert summary e.g.: "Buses will not stop at..."|
+    )
   end
 
   def route_type(:ferry, :singular, :lower_case) do
-    gettext_comment("ferry")
-    gettext("ferry")
+    gettext("ferry", comment: "ferry")
   end
 
   def route_type(:ferry, :plural, :lower_case) do
-    gettext_comment("ferries")
-    gettext("ferries")
+    gettext("ferries", comment: "ferries")
   end
 
   def route_type(:ferry, :singular, :sentence_case) do
-    gettext_comment("Label for ferry routes in the route picker view")
-    gettext("Ferry")
+    gettext("Ferry", comment: "Label for ferry routes in the route picker view")
   end
 
   def route_type(:ferry, :plural, :sentence_case) do
-    gettext_comment(
-      ~s|Mode of travel prefixing alert summary e.g.: "Ferries will not stop at..."|
+    gettext("Ferries",
+      comment: ~s|Mode of travel prefixing alert summary e.g.: "Ferries will not stop at..."|
     )
-
-    gettext("Ferries")
   end
 
   def route_type(_train, :singular, :lower_case) do
-    gettext_comment("train")
-    gettext("train")
+    gettext("train", comment: "train")
   end
 
   def route_type(_train, :plural, :lower_case) do
-    gettext_comment("trains")
-    gettext("trains")
+    gettext("trains", comment: "trains")
   end
 
   def route_type(_train, :singular, :sentence_case) do
-    gettext_comment("Train")
-    gettext("Train")
+    gettext("Train", comment: "Train")
   end
 
   def route_type(_train, :plural, :sentence_case) do
-    gettext_comment(~s|Mode of travel prefixing alert summary e.g.: "Trains will not stop at..."|)
-    gettext("Trains")
+    gettext("Trains",
+      comment: ~s|Mode of travel prefixing alert summary e.g.: "Trains will not stop at..."|
+    )
   end
 
   @spec mode_label(String.t(), Route.type()) :: String.t()
   def mode_label(name, route_type) do
     if route_type == :bus do
-      gettext_comment(
-        ~s|Bus route name label, with the value being the route number, ex. "1 bus", "66 bus"|
+      gettext("%{name} bus",
+        comment:
+          ~s|Bus route name label, with the value being the route number, ex. "1 bus", "66 bus"|,
+        name: name
       )
-
-      gettext("%{name} bus", name: name)
     else
       name
     end
@@ -92,32 +83,25 @@ defmodule MobileAppBackend.PresentationStrings do
   def delay_duration(severity) do
     case severity do
       3 ->
-        gettext_comment("Ex: delays [of about 10 minutes]")
-        gettext("of about 10 minutes")
+        gettext("of about 10 minutes", comment: "Ex: delays [of about 10 minutes]")
 
       4 ->
-        gettext_comment("Ex: delays [of about 15 minutes]")
-        gettext("of about 15 minutes")
+        gettext("of about 15 minutes", comment: "Ex: delays [of about 15 minutes]")
 
       5 ->
-        gettext_comment("Ex: delays [of about 20 minutes]")
-        gettext("of about 20 minutes")
+        gettext("of about 20 minutes", comment: "Ex: delays [of about 20 minutes]")
 
       6 ->
-        gettext_comment("Ex: delays [of about 25 minutes]")
-        gettext("of about 25 minutes")
+        gettext("of about 25 minutes", comment: "Ex: delays [of about 25 minutes]")
 
       7 ->
-        gettext_comment("Ex: delays [of about 30 minutes]")
-        gettext("of about 30 minutes")
+        gettext("of about 30 minutes", comment: "Ex: delays [of about 30 minutes]")
 
       8 ->
-        gettext_comment("Ex: delays [of more than 30 minutes]")
-        gettext("of more than 30 minutes")
+        gettext("of more than 30 minutes", comment: "Ex: delays [of more than 30 minutes]")
 
       9 ->
-        gettext_comment("Ex: delays [of more than an hour]")
-        gettext("of more than an hour")
+        gettext("of more than an hour", comment: "Ex: delays [of more than an hour]")
 
       _ ->
         ""
@@ -128,142 +112,113 @@ defmodule MobileAppBackend.PresentationStrings do
   def effect_sentence_case(effect) do
     case effect do
       :access_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Access issue")
+        gettext("Access issue", comment: "Possible alert effect")
 
       :additional_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Additional service")
+        gettext("Additional service", comment: "Possible alert effect")
 
       :amber_alert ->
-        gettext_comment("Possible alert effect")
-        gettext("Amber alert")
+        gettext("Amber alert", comment: "Possible alert effect")
 
       :bike_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Bike issue")
+        gettext("Bike issue", comment: "Possible alert effect")
 
       :cancellation ->
-        gettext_comment("Header for a cancelled trip card on stop details")
-        gettext_comment("Possible alert effect")
-        gettext("Trip cancelled")
+        gettext("Trip cancelled",
+          comment: [
+            "Header for a cancelled trip card on stop details",
+            "Possible alert effect"
+          ]
+        )
 
       :delay ->
-        gettext_comment("Possible alert effect")
-        gettext("Delay")
+        gettext("Delay", comment: "Possible alert effect")
 
       :detour ->
-        gettext_comment("Possible alert effect")
-        gettext("Detour")
+        gettext("Detour", comment: "Possible alert effect")
 
       :dock_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Dock closed")
+        gettext("Dock closed", comment: "Possible alert effect")
 
       :dock_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Dock issue")
+        gettext("Dock issue", comment: "Possible alert effect")
 
       :elevator_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Elevator closed")
+        gettext("Elevator closed", comment: "Possible alert effect")
 
       :escalator_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Escalator closed")
+        gettext("Escalator closed", comment: "Possible alert effect")
 
       :extra_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Extra service")
+        gettext("Extra service", comment: "Possible alert effect")
 
       :facility_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Facility issue")
+        gettext("Facility issue", comment: "Possible alert effect")
 
       :modified_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Modified service")
+        gettext("Modified service", comment: "Possible alert effect")
 
       :no_service ->
-        gettext_comment("Possible alert effect")
-        gettext("No service")
+        gettext("No service", comment: "Possible alert effect")
 
       :notice ->
-        gettext_comment("Possible alert effect")
-        gettext("Notice")
+        gettext("Notice", comment: "Possible alert effect")
 
       :parking_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Parking closed")
+        gettext("Parking closed", comment: "Possible alert effect")
 
       :parking_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Parking issue")
+        gettext("Parking issue", comment: "Possible alert effect")
 
       :policy_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Policy change")
+        gettext("Policy change", comment: "Possible alert effect")
 
       :schedule_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Schedule change")
+        gettext("Schedule change", comment: "Possible alert effect")
 
       :service_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Service change")
+        gettext("Service change", comment: "Possible alert effect")
 
       :shuttle ->
-        gettext_comment("Possible alert effect")
-        gettext("Shuttle buses")
+        gettext("Shuttle buses", comment: "Possible alert effect")
 
       :snow_route ->
-        gettext_comment("Possible alert effect")
-        gettext("Snow route")
+        gettext("Snow route", comment: "Possible alert effect")
 
       :station_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Station closed")
+        gettext("Station closed", comment: "Possible alert effect")
 
       :station_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Station issue")
+        gettext("Station issue", comment: "Possible alert effect")
 
       :stop_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop closed")
+        gettext("Stop closed", comment: "Possible alert effect")
 
       :stop_move ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop moved")
+        gettext("Stop moved", comment: "Possible alert effect")
 
       :stop_moved ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop moved")
+        gettext("Stop moved", comment: "Possible alert effect")
 
       :stop_shoveling ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop shoveling")
+        gettext("Stop shoveling", comment: "Possible alert effect")
 
       :summary ->
-        gettext_comment("Possible alert effect")
-        gettext("Summary")
+        gettext("Summary", comment: "Possible alert effect")
 
       :suspension ->
-        gettext_comment("Possible alert effect")
-        gettext_comment("Suspension alert VoiceOver text")
-        gettext("Service suspended")
+        gettext("Service suspended",
+          comment: ["Possible alert effect", "Suspension alert VoiceOver text"]
+        )
 
       :track_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Track change")
+        gettext("Track change", comment: "Possible alert effect")
 
       :other_effect ->
-        gettext_comment("Possible alert effect")
-        gettext("Alert")
+        gettext("Alert", comment: "Possible alert effect")
 
       :unknown_effect ->
-        gettext_comment("Possible alert effect")
-        gettext("Alert")
+        gettext("Alert", comment: "Possible alert effect")
     end
   end
 
@@ -271,143 +226,108 @@ defmodule MobileAppBackend.PresentationStrings do
   def effect(effect) do
     case effect do
       :access_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Access Issue")
+        gettext("Access Issue", comment: "Possible alert effect")
 
       :additional_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Additional Service")
+        gettext("Additional Service", comment: "Possible alert effect")
 
       :amber_alert ->
-        gettext_comment("Possible alert effect")
-        gettext("Amber Alert")
+        gettext("Amber Alert", comment: "Possible alert effect")
 
       :bike_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Bike Issue")
+        gettext("Bike Issue", comment: "Possible alert effect")
 
       :cancellation ->
-        gettext_comment("Possible alert effect")
-        gettext("Cancellation")
+        gettext("Cancellation", comment: "Possible alert effect")
 
       :delay ->
-        gettext_comment("Possible alert effect")
-        gettext("Delay")
+        gettext("Delay", comment: "Possible alert effect")
 
       :detour ->
-        gettext_comment("Possible alert effect")
-        gettext("Detour")
+        gettext("Detour", comment: "Possible alert effect")
 
       :dock_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Dock Closure")
+        gettext("Dock Closure", comment: "Possible alert effect")
 
       :dock_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Dock Issue")
+        gettext("Dock Issue", comment: "Possible alert effect")
 
       :elevator_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Elevator Closure")
+        gettext("Elevator Closure", comment: "Possible alert effect")
 
       :escalator_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Escalator Closure")
+        gettext("Escalator Closure", comment: "Possible alert effect")
 
       :extra_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Extra Service")
+        gettext("Extra Service", comment: "Possible alert effect")
 
       :facility_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Facility Issue")
+        gettext("Facility Issue", comment: "Possible alert effect")
 
       :modified_service ->
-        gettext_comment("Possible alert effect")
-        gettext("Modified Service")
+        gettext("Modified Service", comment: "Possible alert effect")
 
       :no_service ->
-        gettext_comment("Possible alert effect")
-        gettext("No Service")
+        gettext("No Service", comment: "Possible alert effect")
 
       :notice ->
-        gettext_comment("Possible alert effect")
-        gettext("Notice")
+        gettext("Notice", comment: "Possible alert effect")
 
       :parking_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Parking Closure")
+        gettext("Parking Closure", comment: "Possible alert effect")
 
       :parking_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Parking Issue")
+        gettext("Parking Issue", comment: "Possible alert effect")
 
       :policy_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Policy Change")
+        gettext("Policy Change", comment: "Possible alert effect")
 
       :schedule_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Schedule Change")
+        gettext("Schedule Change", comment: "Possible alert effect")
 
       :service_change ->
-        gettext_comment("Possible alert effect")
-        gettext("Service Change")
+        gettext("Service Change", comment: "Possible alert effect")
 
       :shuttle ->
-        gettext_comment("Possible alert effect")
-        gettext_comment("The status label for a shuttled trip")
-        gettext("Shuttle")
+        gettext("Shuttle",
+          comment: ["Possible alert effect", "The status label for a shuttled trip"]
+        )
 
       :snow_route ->
-        gettext_comment("Possible alert effect")
-        gettext("Snow Route")
+        gettext("Snow Route", comment: "Possible alert effect")
 
       :station_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Station Closure")
+        gettext("Station Closure", comment: "Possible alert effect")
 
       :station_issue ->
-        gettext_comment("Possible alert effect")
-        gettext("Station Issue")
+        gettext("Station Issue", comment: "Possible alert effect")
 
       :stop_closure ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop Closure")
+        gettext("Stop Closure", comment: "Possible alert effect")
 
       :stop_move ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop Moved")
+        gettext("Stop Moved", comment: "Possible alert effect")
 
       :stop_moved ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop Moved")
+        gettext("Stop Moved", comment: "Possible alert effect")
 
       :stop_shoveling ->
-        gettext_comment("Possible alert effect")
-        gettext("Stop Shoveling")
+        gettext("Stop Shoveling", comment: "Possible alert effect")
 
       :summary ->
-        gettext_comment("Possible alert effect")
-        gettext("Summary")
+        gettext("Summary", comment: "Possible alert effect")
 
       :suspension ->
-        gettext_comment("Possible alert effect")
-        gettext("Suspension")
+        gettext("Suspension", comment: "Possible alert effect")
 
       :trackChange ->
-        gettext_comment("Possible alert effect")
-        gettext("Track Change")
+        gettext("Track Change", comment: "Possible alert effect")
 
       :other_effect ->
-        gettext_comment("Possible alert effect")
-        gettext("Alert")
+        gettext("Alert", comment: "Possible alert effect")
 
       :unknown_effect ->
-        gettext_comment("Possible alert effect")
-
-        gettext_comment("Possible alert effect")
-        gettext("Alert")
+        gettext("Alert", comment: "Possible alert effect")
     end
   end
 
@@ -415,228 +335,184 @@ defmodule MobileAppBackend.PresentationStrings do
   def cause_lower_case(cause) do
     case cause do
       :accident ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("accident")
+        gettext("accident", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :amtrak ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("Amtrak")
+        gettext("Amtrak", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :amtrak_train_traffic ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("Amtrak train traffic")
+        gettext("Amtrak train traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :an_earlier_mechanical_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("an earlier mechanical problem")
+        gettext("an earlier mechanical problem",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :an_earlier_signal_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("an earlier signal problem")
+        gettext("an earlier signal problem",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :autos_impeding_service ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("autos impeding service")
+        gettext("autos impeding service", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :coast_guard_restriction ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("Coast Guard restriction")
+        gettext("Coast Guard restriction",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :congestion ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("congestion")
+        gettext("congestion", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :construction ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("construction")
+        gettext("construction", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :crossing_issue ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("crossing issue")
+        gettext("crossing issue", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :crossing_malfunction ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("crossing malfunction")
+        gettext("crossing malfunction", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :demonstration ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("demonstration")
+        gettext("demonstration", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :disabled_bus ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("disabled bus")
+        gettext("disabled bus", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :disabled_train ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("disabled train")
+        gettext("disabled train", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :drawbridge_being_raised ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("drawbridge being raised")
+        gettext("drawbridge being raised",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :drawbridge_issue ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("drawbridge issue")
+        gettext("drawbridge issue", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :electrical_work ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("electrical work")
+        gettext("electrical work", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :fire ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("fire")
+        gettext("fire", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :fire_department_activity ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("fire department activity")
+        gettext("fire department activity",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :flooding ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("flooding")
+        gettext("flooding", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :fog ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("fog")
+        gettext("fog", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :freight_train_interference ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("freight train interference")
+        gettext("freight train interference",
+          comment: "Alert cause, used in 'Delays due to [cause]'"
+        )
 
       :hazmat_condition ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("hazmat condition")
+        gettext("hazmat condition", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :heavy_ridership ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("heavy ridership")
+        gettext("heavy ridership", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :high_winds ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("high winds")
+        gettext("high winds", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :holiday ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("holiday")
+        gettext("holiday", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :hurricane ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("hurricane")
+        gettext("hurricane", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :ice_in_harbor ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("ice in harbor")
+        gettext("ice in harbor", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :maintenance ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("maintenance")
+        gettext("maintenance", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :mechanical_issue ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("mechanical issue")
+        gettext("mechanical issue", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :mechanical_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("mechanical problem")
+        gettext("mechanical problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :medical_emergency ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("medical emergency")
+        gettext("medical emergency", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :parade ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("parade")
+        gettext("parade", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :police_action ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("police action")
+        gettext("police action", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :police_activity ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("police activity")
+        gettext("police activity", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :power_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("power problem")
+        gettext("power problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :rail_defect ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("rail defect")
+        gettext("rail defect", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :severe_weather ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("severe weather")
+        gettext("severe weather", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :signal_issue ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("signal issue")
+        gettext("signal issue", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :signal_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("signal problem")
+        gettext("signal problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :single_tracking ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("single tracking")
+        gettext("single tracking", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :slippery_rail ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("slippery rail")
+        gettext("slippery rail", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :snow ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("snow")
+        gettext("snow", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :special_event ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("special event")
+        gettext("special event", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :speed_restriction ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("speed restriction")
+        gettext("speed restriction", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :strike ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("strike")
+        gettext("strike", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :switch_issue ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("switch issue")
+        gettext("switch issue", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :switch_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("switch problem")
+        gettext("switch problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :technical_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("technical problem")
+        gettext("technical problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :tie_replacement ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("tie replacement")
+        gettext("tie replacement", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :track_problem ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("track problem")
+        gettext("track problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :track_work ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("track work")
+        gettext("track work", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :traffic ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("traffic")
+        gettext("traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :train_traffic ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("train traffic")
+        gettext("train traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :unruly_passenger ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("unruly passenger")
+        gettext("unruly passenger", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :weather ->
-        gettext_comment("Alert cause, used in 'Delays due to [cause]'")
-        gettext("weather")
+        gettext("weather", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       _ ->
         nil
@@ -647,228 +523,172 @@ defmodule MobileAppBackend.PresentationStrings do
   def cause(cause) do
     case cause do
       :accident ->
-        gettext_comment("Possible alert cause")
-        gettext("Accident")
+        gettext("Accident", comment: "Possible alert cause")
 
       :amtrak ->
-        gettext_comment("Possible alert cause")
-        gettext("Amtrak")
+        gettext("Amtrak", comment: "Possible alert cause")
 
       :amtrak_train_traffic ->
-        gettext_comment("Possible alert cause")
-        gettext("Amtrak Train Traffic")
+        gettext("Amtrak Train Traffic", comment: "Possible alert cause")
 
       :an_earlier_mechanical_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("An Earlier Mechanical Problem")
+        gettext("An Earlier Mechanical Problem", comment: "Possible alert cause")
 
       :an_earlier_signal_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("An Earlier Signal Problem")
+        gettext("An Earlier Signal Problem", comment: "Possible alert cause")
 
       :autos_impeding_service ->
-        gettext_comment("Possible alert cause")
-        gettext("Autos Impeding Service")
+        gettext("Autos Impeding Service", comment: "Possible alert cause")
 
       :coast_guard_restriction ->
-        gettext_comment("Possible alert cause")
-        gettext("Coast Guard Restriction")
+        gettext("Coast Guard Restriction", comment: "Possible alert cause")
 
       :congestion ->
-        gettext_comment("Possible alert cause")
-        gettext("Congestion")
+        gettext("Congestion", comment: "Possible alert cause")
 
       :construction ->
-        gettext_comment("Possible alert cause")
-        gettext("Construction")
+        gettext("Construction", comment: "Possible alert cause")
 
       :crossing_issue ->
-        gettext_comment("Possible alert cause")
-        gettext("Crossing Issue")
+        gettext("Crossing Issue", comment: "Possible alert cause")
 
       :crossing_malfunction ->
-        gettext_comment("Possible alert cause")
-        gettext("Crossing Malfunction")
+        gettext("Crossing Malfunction", comment: "Possible alert cause")
 
       :demonstration ->
-        gettext_comment("Possible alert cause")
-        gettext("Demonstration")
+        gettext("Demonstration", comment: "Possible alert cause")
 
       :disabled_bus ->
-        gettext_comment("Possible alert cause")
-        gettext("Disabled Bus")
+        gettext("Disabled Bus", comment: "Possible alert cause")
 
       :disabled_train ->
-        gettext_comment("Possible alert cause")
-        gettext("Disabled Train")
+        gettext("Disabled Train", comment: "Possible alert cause")
 
       :drawbridge_being_raised ->
-        gettext_comment("Possible alert cause")
-        gettext("Drawbridge Being Raised")
+        gettext("Drawbridge Being Raised", comment: "Possible alert cause")
 
       :drawbridge_issue ->
-        gettext_comment("Possible alert cause")
-        gettext("Drawbridge Issue")
+        gettext("Drawbridge Issue", comment: "Possible alert cause")
 
       :electrical_work ->
-        gettext_comment("Possible alert cause")
-        gettext("Electrical Work")
+        gettext("Electrical Work", comment: "Possible alert cause")
 
       :fire ->
-        gettext_comment("Possible alert cause")
-        gettext("Fire")
+        gettext("Fire", comment: "Possible alert cause")
 
       :fire_department_activity ->
-        gettext_comment("Possible alert cause")
-        gettext("Fire Department Activity")
+        gettext("Fire Department Activity", comment: "Possible alert cause")
 
       :flooding ->
-        gettext_comment("Possible alert cause")
-        gettext("Flooding")
+        gettext("Flooding", comment: "Possible alert cause")
 
       :fog ->
-        gettext_comment("Possible alert cause")
-        gettext("Fog")
+        gettext("Fog", comment: "Possible alert cause")
 
       :freight_train_interference ->
-        gettext_comment("Possible alert cause")
-        gettext("Freight Train Interference")
+        gettext("Freight Train Interference", comment: "Possible alert cause")
 
       :hazmat_condition ->
-        gettext_comment("Possible alert cause")
-        gettext("Hazmat Condition")
+        gettext("Hazmat Condition", comment: "Possible alert cause")
 
       :heavy_ridership ->
-        gettext_comment("Possible alert cause")
-        gettext("Heavy Ridership")
+        gettext("Heavy Ridership", comment: "Possible alert cause")
 
       :high_winds ->
-        gettext_comment("Possible alert cause")
-        gettext("High Winds")
+        gettext("High Winds", comment: "Possible alert cause")
 
       :holiday ->
-        gettext_comment("Possible alert cause")
-        gettext("Holiday")
+        gettext("Holiday", comment: "Possible alert cause")
 
       :hurricane ->
-        gettext_comment("Possible alert cause")
-        gettext("Hurricane")
+        gettext("Hurricane", comment: "Possible alert cause")
 
       :ice_in_harbor ->
-        gettext_comment("Possible alert cause")
-        gettext("Ice In Harbor")
+        gettext("Ice In Harbor", comment: "Possible alert cause")
 
       :maintenance ->
-        gettext_comment("Possible alert cause")
-        gettext("Maintenance")
+        gettext("Maintenance", comment: "Possible alert cause")
 
       :mechanical_issue ->
-        gettext_comment("Possible alert cause")
-        gettext("Mechanical Issue")
+        gettext("Mechanical Issue", comment: "Possible alert cause")
 
       :mechanical_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Mechanical Problem")
+        gettext("Mechanical Problem", comment: "Possible alert cause")
 
       :medical_emergency ->
-        gettext_comment("Possible alert cause")
-        gettext("Medical Emergency")
+        gettext("Medical Emergency", comment: "Possible alert cause")
 
       :parade ->
-        gettext_comment("Possible alert cause")
-        gettext("Parade")
+        gettext("Parade", comment: "Possible alert cause")
 
       :police_action ->
-        gettext_comment("Possible alert cause")
-        gettext("Police Action")
+        gettext("Police Action", comment: "Possible alert cause")
 
       :police_activity ->
-        gettext_comment("Possible alert cause")
-        gettext("Police Activity")
+        gettext("Police Activity", comment: "Possible alert cause")
 
       :power_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Power Problem")
+        gettext("Power Problem", comment: "Possible alert cause")
 
       :rail_defect ->
-        gettext_comment("Possible alert cause")
-        gettext("Rail Defect")
+        gettext("Rail Defect", comment: "Possible alert cause")
 
       :severe_weather ->
-        gettext_comment("Possible alert cause")
-        gettext("Severe Weather")
+        gettext("Severe Weather", comment: "Possible alert cause")
 
       :signal_issue ->
-        gettext_comment("Possible alert cause")
-        gettext("Signal Issue")
+        gettext("Signal Issue", comment: "Possible alert cause")
 
       :signal_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Signal Problem")
+        gettext("Signal Problem", comment: "Possible alert cause")
 
       :single_tracking ->
-        gettext_comment("Possible alert cause")
-        gettext("Single Tracking")
+        gettext("Single Tracking", comment: "Possible alert cause")
 
       :slippery_rail ->
-        gettext_comment("Possible alert cause")
-        gettext("Slippery Rail")
+        gettext("Slippery Rail", comment: "Possible alert cause")
 
       :snow ->
-        gettext_comment("Possible alert cause")
-        gettext("Snow")
+        gettext("Snow", comment: "Possible alert cause")
 
       :special_event ->
-        gettext_comment("Possible alert cause")
-        gettext("Special Event")
+        gettext("Special Event", comment: "Possible alert cause")
 
       :speed_restriction ->
-        gettext_comment("Possible alert cause")
-        gettext("Speed Restriction")
+        gettext("Speed Restriction", comment: "Possible alert cause")
 
       :strike ->
-        gettext_comment("Possible alert cause")
-        gettext("Strike")
+        gettext("Strike", comment: "Possible alert cause")
 
       :switch_issue ->
-        gettext_comment("Possible alert cause")
-        gettext("Switch Issue")
+        gettext("Switch Issue", comment: "Possible alert cause")
 
       :switch_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Switch Problem")
+        gettext("Switch Problem", comment: "Possible alert cause")
 
       :technical_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Technical Problem")
+        gettext("Technical Problem", comment: "Possible alert cause")
 
       :tie_replacement ->
-        gettext_comment("Possible alert cause")
-        gettext("Tie Replacement")
+        gettext("Tie Replacement", comment: "Possible alert cause")
 
       :track_problem ->
-        gettext_comment("Possible alert cause")
-        gettext("Track Problem")
+        gettext("Track Problem", comment: "Possible alert cause")
 
       :track_work ->
-        gettext_comment("Possible alert cause")
-        gettext("Track Work")
+        gettext("Track Work", comment: "Possible alert cause")
 
       :traffic ->
-        gettext_comment("Possible alert cause")
-        gettext("Traffic")
+        gettext("Traffic", comment: "Possible alert cause")
 
       :train_traffic ->
-        gettext_comment("Possible alert cause")
-        gettext("Train Traffic")
+        gettext("Train Traffic", comment: "Possible alert cause")
 
       :unruly_passenger ->
-        gettext_comment("Possible alert cause")
-        gettext("Unruly Passenger")
+        gettext("Unruly Passenger", comment: "Possible alert cause")
 
       :weather ->
-        gettext_comment("Possible alert cause")
-        gettext("Weather")
+        gettext("Weather", comment: "Possible alert cause")
 
       _ ->
         nil

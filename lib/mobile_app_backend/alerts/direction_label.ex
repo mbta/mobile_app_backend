@@ -1,29 +1,26 @@
 defmodule MobileAppBackend.Alerts.DirectionLabel do
-  use Gettext, backend: MobileAppBackend.Gettext
-
-  defmacrop gt(text) do
-    quote do
-      gettext_comment("A route direction label")
-      gettext(unquote(text))
-    end
-  end
+  use MobileAppBackend.Gettext
 
   def localized_direction_names do
     %{
-      "North" => gt("Northbound"),
-      "South" => gt("Southbound"),
-      "East" => gt("Eastbound"),
-      "West" => gt("Westbound"),
-      "Inbound" => gt("Inbound"),
-      "Outbound" => gt("Outbound"),
-      "Clockwise" => gt("Clockwise"),
-      "Counterclockwise" => gt("Counterclockwise"),
-      "Loop" => gt("Looping")
+      "North" => gettext("Northbound", comment: "A route direction label"),
+      "South" => gettext("Southbound", comment: "A route direction label"),
+      "East" => gettext("Eastbound", comment: "A route direction label"),
+      "West" => gettext("Westbound", comment: "A route direction label"),
+      "Inbound" => gettext("Inbound", comment: "A route direction label"),
+      "Outbound" => gettext("Outbound", comment: "A route direction label"),
+      "Clockwise" => gettext("Clockwise", comment: "A route direction label"),
+      "Counterclockwise" => gettext("Counterclockwise", comment: "A route direction label"),
+      "Loop" => gettext("Looping", comment: "A route direction label")
     }
   end
 
   @spec direction_name_formatted(String.t()) :: String.t()
   def direction_name_formatted(direction_name) do
-    Map.get(localized_direction_names(), direction_name, gt("Heading"))
+    Map.get(
+      localized_direction_names(),
+      direction_name,
+      gettext("Heading", comment: "A route direction label")
+    )
   end
 end
