@@ -22,8 +22,12 @@ defmodule MobileAppBackend.Health.Check do
       ),
       fn result ->
         case result do
-          :ok -> true
-          _ -> false
+          :ok ->
+            Oban.resume_all_queues(local_only: true)
+            true
+
+          _ ->
+            false
         end
       end
     )
