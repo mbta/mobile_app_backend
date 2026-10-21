@@ -4,6 +4,8 @@ defmodule MobileAppBackend.Application do
   @moduledoc false
 
   use Application
+  import Ecto.Query
+  require Logger
 
   @default_locale Application.compile_env!(:mobile_app_backend, :default_locale_code)
   def default_locale, do: @default_locale
@@ -96,5 +98,28 @@ defmodule MobileAppBackend.Application do
   def config_change(changed, _new, removed) do
     MobileAppBackendWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  @doc """
+  Prepares the application for a graceful shutdown by pausing Oban queues on the current node,
+  then cancelling scheduler jobs on the current node.
+  """
+  @impl true
+  def prep_stop(state) do
+    Oban.pause_all_queues(local_only: true)
+
+    node = Oban.config().node
+
+    {:ok, jobs_cancelled} =
+      [worker: MobileAppBackend.Notifications.Scheduler, state: :executing]
+      |> Oban.Job.query()
+      |> where([j], fragment("?[1]", j.attempted_by) == ^node)
+      |> Oban.cancel_all_jobs()
+
+    if jobs_cancelled > 0 do
+      Logger.info("prep_stop jobs_cancelled=#{jobs_cancelled}")
+    end
+
+    state
   end
 end
