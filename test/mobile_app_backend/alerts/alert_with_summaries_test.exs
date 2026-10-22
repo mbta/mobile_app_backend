@@ -101,5 +101,31 @@ defmodule MobileAppBackend.Alerts.AlertWithSummariesTest do
                ~B[2026-08-05 07:01:01]
              )
     end
+
+    test "returns true when alert becomes active soon" do
+      now = ~B[2026-08-05 12:00:00]
+
+      alert =
+        build(:alert,
+          id: "a_1",
+          active_period: [
+            %Alert.ActivePeriod{
+              start: DateTime.add(now, 25, :hour),
+              end: nil
+            }
+          ]
+        )
+
+      old_with_summary =
+        AlertWithSummaries.from_alert(alert, [%SummaryEntity{summary: "asdf"}], now)
+
+      new_now = DateTime.add(now, 2, :hour)
+
+      assert AlertWithSummaries.should_recalculate_summaries?(
+               old_with_summary,
+               alert,
+               new_now
+             )
+    end
   end
 end

@@ -24,6 +24,7 @@ defmodule MobileAppBackend.Alerts.AlertWithSummaries do
   Alert summaries should be recalculated if any of the following are true:
   - The alert has changed (e.g. description, header, effect, etc.)
   - The alert has changed from active to inactive or vice versa
+  - The alert has changed from soon active to not soon active or vice versa (handling upcoming alerts with missing timeframe)
   - It is a different day than the last time summaries were calculated (either calendar date or service date)
   """
   def should_recalculate_summaries?(
@@ -36,6 +37,8 @@ defmodule MobileAppBackend.Alerts.AlertWithSummaries do
     old_alert != new_alert ||
       Alert.active?(old_alert, old_alert_with_summaries.summaries_updated_at) !=
         Alert.active?(new_alert, now) ||
+      Alert.active_soon?(old_alert, old_alert_with_summaries.summaries_updated_at) !=
+        Alert.active_soon?(new_alert, now) ||
       DateTime.to_date(old_alert_with_summaries.summaries_updated_at) !=
         DateTime.to_date(now) ||
       Util.DateTime.datetime_to_gtfs(old_alert_with_summaries.summaries_updated_at) !=
