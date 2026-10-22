@@ -424,9 +424,6 @@ defmodule MobileAppBackend.PresentationStrings do
       :holiday ->
         gettext("holiday", comment: "Alert cause, used in 'Delays due to [cause]'")
 
-      :hurricane ->
-        gettext("hurricane", comment: "Alert cause, used in 'Delays due to [cause]'")
-
       :ice_in_harbor ->
         gettext("ice in harbor", comment: "Alert cause, used in 'Delays due to [cause]'")
 
@@ -445,17 +442,20 @@ defmodule MobileAppBackend.PresentationStrings do
       :parade ->
         gettext("parade", comment: "Alert cause, used in 'Delays due to [cause]'")
 
-      :police_action ->
-        gettext("police action", comment: "Alert cause, used in 'Delays due to [cause]'")
-
       :police_activity ->
         gettext("police activity", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :power_problem ->
         gettext("power problem", comment: "Alert cause, used in 'Delays due to [cause]'")
 
+      :presence_of_whales ->
+        gettext("presence of whales", comment: "Alert cause, used in 'Delays due to [cause]'")
+
       :rail_defect ->
         gettext("rail defect", comment: "Alert cause, used in 'Delays due to [cause]'")
+
+      :rough_seas ->
+        gettext("rough seas", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :severe_weather ->
         gettext("severe weather", comment: "Alert cause, used in 'Delays due to [cause]'")
@@ -510,6 +510,15 @@ defmodule MobileAppBackend.PresentationStrings do
 
       :unruly_passenger ->
         gettext("unruly passenger", comment: "Alert cause, used in 'Delays due to [cause]'")
+
+      :utility_work ->
+        gettext("utility work", comment: "Alert cause, used in 'Delays due to [cause]'")
+
+      :vessel_substitution ->
+        gettext("vessel substitution", comment: "Alert cause, used in 'Delays due to [cause]'")
+
+      :vessel_traffic ->
+        gettext("vessel traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
 
       :weather ->
         gettext("weather", comment: "Alert cause, used in 'Delays due to [cause]'")
@@ -600,9 +609,6 @@ defmodule MobileAppBackend.PresentationStrings do
       :holiday ->
         gettext("Holiday", comment: "Possible alert cause")
 
-      :hurricane ->
-        gettext("Hurricane", comment: "Possible alert cause")
-
       :ice_in_harbor ->
         gettext("Ice In Harbor", comment: "Possible alert cause")
 
@@ -621,17 +627,20 @@ defmodule MobileAppBackend.PresentationStrings do
       :parade ->
         gettext("Parade", comment: "Possible alert cause")
 
-      :police_action ->
-        gettext("Police Action", comment: "Possible alert cause")
-
       :police_activity ->
         gettext("Police Activity", comment: "Possible alert cause")
 
       :power_problem ->
         gettext("Power Problem", comment: "Possible alert cause")
 
+      :presence_of_whales ->
+        gettext("Presence of Whales", comment: "Possible alert cause")
+
       :rail_defect ->
         gettext("Rail Defect", comment: "Possible alert cause")
+
+      :rough_seas ->
+        gettext("Rough Seas", comment: "Possible alert cause")
 
       :severe_weather ->
         gettext("Severe Weather", comment: "Possible alert cause")
@@ -686,6 +695,15 @@ defmodule MobileAppBackend.PresentationStrings do
 
       :unruly_passenger ->
         gettext("Unruly Passenger", comment: "Possible alert cause")
+
+      :utility_work ->
+        gettext("Utility Work", comment: "Possible alert cause")
+
+      :vessel_substitution ->
+        gettext("Vessel Substitution", comment: "Possible alert cause")
+
+      :vessel_traffic ->
+        gettext("Vessel Traffic", comment: "Possible alert cause")
 
       :weather ->
         gettext("Weather", comment: "Possible alert cause")
