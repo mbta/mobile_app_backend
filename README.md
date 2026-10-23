@@ -6,6 +6,8 @@ The backend server supporting our mobile app. Provides data from the V3 API and 
 
 ### Prerequisites
 
+Install elixir with `brew install elixir` if you don't already have it.
+
 Install the tools specified in `.tool-versions`. You can use [asdf](https://asdf-vm.com/) to help manage the required versions.
 
 Install postgres. Consider using one of the following methods
@@ -19,19 +21,19 @@ Install postgres. Consider using one of the following methods
 
 ### External Dependencies
 
-##### V3 API - [docs](https://www.mbta.com/developers/v3-api) - [mbta/api](https://github.com/mbta/api) - [dev](https://api-dev.mbtace.com/) - [prod](https://api.mbtace.com/)
+#### V3 API - [docs](https://www.mbta.com/developers/v3-api) - [mbta/api](https://github.com/mbta/api) - [dev](https://api-dev.mbtace.com/) - [prod](https://api.mbtace.com/)
 
 The V3 API provides static and realtime GTFS data that we use for most of the information that we pass through to the app frontend.
 
-##### OpenTripPlanner - [docs](https://docs.opentripplanner.org/en/v2.4.0/) - [mbta/otp-deploy](https://github.com/mbta/otp-deploy)
+#### OpenTripPlanner - [docs](https://docs.opentripplanner.org/en/v2.4.0/) - [mbta/otp-deploy](https://github.com/mbta/otp-deploy)
 
 We're not currently using OTP for anything, but have code in place to connect to it, and will likely rely on it in the future. The otp-deploy repo is used for deploying and configuring the MBTA OTP instance, see its readme for details on running locally.
 
-##### Algolia - [docs](https://www.algolia.com/doc/rest-api/search/) - [dashboard](https://dashboard.algolia.com/) - [keys](https://dashboard.algolia.com/account/api-keys/all)
+#### Algolia - [docs](https://www.algolia.com/doc/rest-api/search/) - [dashboard](https://dashboard.algolia.com/) - [keys](https://dashboard.algolia.com/account/api-keys/all)
 
 Algolia provides well indexed route and stop data for incremental search results.
 
-##### Sentry - [docs](https://docs.sentry.io/platforms/elixir/) - [keys](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
+#### Sentry - [docs](https://docs.sentry.io/platforms/elixir/) - [keys](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
 
 Sentry is used for error logging and aggregation.
 
