@@ -4,7 +4,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
   import Ecto.Query
   require Logger
 
-  alias MBTAV3API.{Alert, RoutePattern, Schedule}
+  alias MBTAV3API.{Alert, RoutePattern}
   alias MBTAV3API.Store.Alerts
   alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.GlobalDataCache
@@ -136,9 +136,15 @@ defmodule MobileAppBackend.Notifications.Scheduler do
               now,
               global
             )
+
           Enum.each(outgoing_notifications, fn notification ->
-            log_alert_summary_type_issues(notification.alert, notification.summary, user.notification_subscriptions)
+            log_alert_summary_type_issues(
+              notification.alert,
+              notification.summary,
+              user.notification_subscriptions
+            )
           end)
+
           results = localize_notifications(user, outgoing_notifications)
           {[acc | results], success_count + 1, error_count}
         rescue
@@ -240,7 +246,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     summaries_per_alert
   end
 
-  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [UserNotificationSubscription.t()]) :: :ok
+  @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [Subscription.t()]) :: :ok
   defp log_alert_summary_type_issues(alert, alert_summary, user_notification_subscriptions) do
     case alert_summary do
       %AlertSummary.Standard{} ->
