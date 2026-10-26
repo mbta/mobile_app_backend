@@ -76,11 +76,11 @@ config :mobile_app_backend, Oban,
        {"@daily", MobileAppBackend.Notifications.StatsReporter}
      ],
      timezone: "America/New_York"},
-    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(30)},
+    {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(5)},
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     Oban.Plugins.Reindexer
   ],
-  queues: [default: 10],
+  queues: [default: [limit: 10, paused: true]],
   repo: MobileAppBackend.Repo
 
 config :mobile_app_backend, :logger, [

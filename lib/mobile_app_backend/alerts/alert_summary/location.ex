@@ -40,8 +40,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Location do
   end
 
   defmodule WholeRoute do
-    use Gettext, backend: MobileAppBackend.Gettext
-
     @type t :: %__MODULE__{route_label: String.t(), route_type: Route.type()}
     @derive PolymorphicJson
     defstruct [:route_label, :route_type]

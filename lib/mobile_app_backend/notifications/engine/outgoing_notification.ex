@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
-  use Gettext, backend: MobileAppBackend.Gettext
+  use MobileAppBackend.Gettext
 
   alias MBTAV3API.Alert
   alias MobileAppBackend.Alerts.AlertSummary
@@ -47,8 +47,14 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
 
     body =
       case outgoing_notification.type do
-        {:update, _} -> gettext("Update: %{body}", body: body)
-        _ -> body
+        {:update, _} ->
+          gettext("Update: %{body}",
+            comment: "Example: “Update: Service has ended”",
+            body: body
+          )
+
+        _ ->
+          body
       end
 
     %Localized{

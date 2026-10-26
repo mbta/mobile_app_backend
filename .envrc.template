@@ -9,10 +9,10 @@ export API_KEY=
 # Configuration for the Database
 # Used for managing notifications
 # Note: if DATABASE_PASSWORD is omitted, then RDS IAM auth will be used
-export DATABASE_USER=
+export DATABASE_USER=postgres
 export DATABASE_PASSWORD=
-export DATABASE_NAME=
-export DATABASE_HOST=
+export DATABASE_NAME=mobile_app_backend_test
+export DATABASE_HOST=localhost
 
 # Set DATABASE_DISABLE_SSL to 'insecure-yes' locally to disable SSL
 export DATABASE_DISABLE_SSL=
@@ -22,6 +22,7 @@ export DATABASE_DISABLE_SSL=
 export OTP_URL=
 
 # Configuration for [Alglolia](https://www.algolia.com/doc/rest-api/search/)
+# Find app ID and search key [here](https://dashboard.algolia.com/account/api-keys/all)
 # Used to power search bar
 export ALGOLIA_APP_ID=
 export ALGOLIA_SEARCH_KEY=
@@ -29,10 +30,11 @@ export ALGOLIA_READ_URL=
 
 # Configuration for [Sentry](https://mbtace.sentry.io/settings/projects/mobile_app_backend/keys/)
 # Do not use unless you need to send messages to Sentry from local env
-export SENTRY_DSN=
+# export SENTRY_DSN=
 export SENTRY_ENV=local
 
 # Configuration for [Mapbox](https://docs.mapbox.com/help/glossary/access-token/)
+# Keys are stored under "Mapbox (App Team)" in 1Password
 # deprecated: export MAPBOX_PUBLIC_TOKEN=
 export MAPBOX_PRIMARY_TOKEN=
 export MAPBOX_USERNAME=

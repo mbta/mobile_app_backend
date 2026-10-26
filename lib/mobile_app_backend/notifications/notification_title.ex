@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.NotificationTitle do
-  use Gettext, backend: MobileAppBackend.Gettext
+  use MobileAppBackend.Gettext
 
   alias MBTAV3API.Line
   alias MBTAV3API.Route
@@ -61,12 +61,16 @@ defmodule MobileAppBackend.Notifications.NotificationTitle do
 
         %ModeLabel{} ->
           gettext("%{label} %{mode_label}",
+            comment: nil,
             label: title.label,
             mode_label: PresentationStrings.route_type(title.mode, :singular, :lower_case)
           )
 
         %MultipleRoutes{} ->
-          gettext("Multiple routes")
+          gettext("Multiple routes",
+            comment:
+              "Title displayed in notification for alert that applies to multiple subscribed routes"
+          )
       end
     end)
   end
