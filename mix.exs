@@ -76,7 +76,7 @@ defmodule MobileAppBackend.MixProject do
       {:lcov_ex, "~> 0.3", only: [:test], runtime: false},
       {:logster, "~> 1.1"},
       {:mox, "~> 1.0", only: :test},
-      {:nebulex, "~> 3.0.4"},
+      {:nebulex, "~> 3.1.0"},
       {:nebulex_local, "~> 3.0"},
       {:oban, "~> 2.22"},
       {:oban_web, "~> 2.11"},
