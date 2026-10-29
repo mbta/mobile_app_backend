@@ -556,7 +556,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
 
       conn =
         post(conn, "/api/notifications/subscriptions/write", %{
-          fcm_token: user.fcm_token,
+          fcm_installation_id: user.fcm_installation_id,
           subscriptions: []
         })
 
@@ -569,7 +569,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
 
       conn =
         post(conn, "/api/notifications/subscriptions/write", %{
-          fcm_token: user.fcm_token,
+          fcm_installation_id: user.fcm_installation_id,
           subscriptions: []
         })
 
@@ -584,7 +584,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
 
       conn =
         post(conn, "/api/notifications/subscriptions/write", %{
-          fcm_token: user.fcm_token,
+          fcm_installation_id: user.fcm_installation_id,
           subscriptions: []
         })
 

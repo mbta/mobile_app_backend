@@ -78,14 +78,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
     tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
 
-    {installation_id, token} =
-      case user do
-        %User{fcm_installation_id: installation_id} when not is_nil(installation_id) ->
-          {installation_id, nil}
-
-        %User{fcm_installation_id: nil, fcm_token: token} ->
-          {nil, token}
-      end
+    {installation_id, token} = get_fcm_token_and_installation_id(user)
 
     request_body = %{
       message: %FCM.Message{
@@ -135,7 +128,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
           fcm_options: %FCM.FcmOptions{
             analytics_label: analytics_label
           },
-          token: user.fcm_token
+          token: token,
+          fid: installation_id
         }
       }
 
@@ -177,6 +171,17 @@ defmodule MobileAppBackend.Notifications.Deliverer do
 
             {:cancel, :error}
         end
+    end
+  end
+
+  @spec get_fcm_token_and_installation_id(User.t()) :: {String.t() | nil, String.t() | nil}
+  defp get_fcm_token_and_installation_id(user) do
+    case user do
+      %User{fcm_installation_id: installation_id} when not is_nil(installation_id) ->
+        {installation_id, nil}
+
+      %User{fcm_installation_id: nil, fcm_token: token} ->
+        {nil, token}
     end
   end
 
