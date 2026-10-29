@@ -123,8 +123,13 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   def all_clear(%{effect: effect}, true, location) do
     gettext("**Update:** %{effect_sentence_case} has ended%{summary_location}.",
       comment:
-        ~S|Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "[Update][Stop closure] has ended[ at Haymarket]." or \"[Update][Service suspension] has ended[ from Alewife to Harvard]”.|,
-      effect_sentence_case: PresentationStrings.effect(effect),
+        ~S|Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "[Update][Stop closure] has ended[ at Haymarket]." or \"[Update][Suspension] has ended[ from Alewife to Harvard]”.|,
+      effect_sentence_case:
+        case effect do
+          # Suspension effect needs to use the non-sentence case version or it will read "Service suspended has ended"
+          :suspension -> PresentationStrings.effect(effect)
+          _ -> PresentationStrings.effect_sentence_case(effect)
+        end,
       summary_location: location
     )
   end
