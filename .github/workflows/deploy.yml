@@ -33,6 +33,9 @@ jobs:
       contents: read
     environment: ${{ inputs.env }}
     steps:
+      # TODO: Remove once https://github.com/actions/runner-images/issues/15018 is resolved
+      - name: Upgrade CA certificates
+        run: sudo apt-get update && sudo apt-get install -y --only-upgrade ca-certificates
       - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
