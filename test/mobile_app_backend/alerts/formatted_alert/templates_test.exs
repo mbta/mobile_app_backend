@@ -134,6 +134,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
       assert "**Update:** Delay has ended at **Wood Island**." == summary
     end
 
+    test "track_change" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :track_change),
+          true,
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Track change has ended at **Wood Island**." == summary
+    end
+
     test "shuttle" do
       summary =
         Templates.all_clear(

@@ -109,6 +109,26 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "all clear track change" do
+      alert = build(:alert, effect: :track_change)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Oak Grove",
+          end_stop_name: "North Station",
+          downstream: false
+        },
+        has_multiple_active_alerts: true,
+        effect: alert.effect
+      }
+
+      assert "Update: Track change has ended from Oak Grove to North Station." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
   end
 
   describe "summary/2 standard" do
