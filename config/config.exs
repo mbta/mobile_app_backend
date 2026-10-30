@@ -73,7 +73,7 @@ config :mobile_app_backend, Oban,
      crontab: [
        {"@daily", MobileAppBackend.Notifications.DeliveredNotificationPruner},
        {"* * * * *", MobileAppBackend.Notifications.Scheduler},
-       {"@daily", MobileAppBackend.Notifications.StatsReporter}
+       {"@hourly", MobileAppBackend.Notifications.StatsReporter}
      ],
      timezone: "America/New_York"},
     {Oban.Plugins.Lifeline, rescue_after: :timer.minutes(5)},
