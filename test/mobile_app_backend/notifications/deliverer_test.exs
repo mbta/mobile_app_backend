@@ -16,9 +16,133 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
   setup :verify_on_exit!
   setup {Req.Test, :verify_on_exit!}
 
-  test "delivers notification via FCM and marks notification as delivered" do
+  test "delivers notification via FCM with new installation ID and marks notification as delivered" do
     start_link_supervised!(Alerts)
     user = NotificationsFactory.insert(:user, app_version: "2.1.5", platform: "Android")
+    user_id = user.id
+    fcm_installation_id = user.fcm_installation_id
+    alert = Factory.build(:alert)
+    Alerts.process_reset([alert], [])
+    alert_id = alert.id
+    upstream_timestamp = DateTime.utc_now(:second)
+    type = :notification
+
+    title = "Notification title"
+    body = "Notification body"
+    deep_link_path = "/a/#{alert_id}/r/1/s/1"
+    analytics_label = "route=1;effect=delay;type=notification"
+
+    reassign_persistent_term(GCPToken.default_key(), %GCPToken.StoredToken{
+      token: "gcp_token",
+      expires: ~U[9999-12-31 23:59:59Z]
+    })
+
+    string_list = [alert_id, type, title, body]
+
+    tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
+
+    Req.Test.expect(Util.GCP, fn conn ->
+      assert conn.method == "POST"
+
+      assert Plug.Conn.request_url(conn) ==
+               "https://fcm.googleapis.com/v1/projects/mbta-app-c574d/messages:send"
+
+      assert [
+               {"accept", "application/json"},
+               {"authorization", "Bearer gcp_token"},
+               {"content-type", "application/json"},
+               {"user-agent", "req/" <> _}
+             ] = Enum.sort(conn.req_headers)
+
+      assert conn.body_params == %{
+               "message" => %{
+                 "token" => nil,
+                 "fid" => fcm_installation_id,
+                 "notification" => %{"title" => title, "body" => body},
+                 "data" => %{
+                   "deep_link_path" => deep_link_path,
+                   "analytics_label" => analytics_label
+                 },
+                 "android" => %{
+                   "notification" => %{
+                     "tag" => tag,
+                     "sound" => "default",
+                     "visibility" => "public"
+                   }
+                 },
+                 "apns" => %{
+                   "payload" => %{"aps" => %{"sound" => "default", "thread-id" => alert_id}}
+                 },
+                 "fcm_options" => %{"analytics_label" => analytics_label}
+               }
+             }
+
+      Req.Test.json(conn, %{})
+    end)
+
+    Req.Test.expect(Util.GCP, fn conn ->
+      assert conn.method == "POST"
+
+      assert Plug.Conn.request_url(conn) ==
+               "https://fcm.googleapis.com/v1/projects/mbta-app-c574d/messages:send"
+
+      assert [
+               {"accept", "application/json"},
+               {"authorization", "Bearer gcp_token"},
+               {"content-type", "application/json"},
+               {"user-agent", "req/" <> _}
+             ] = Enum.sort(conn.req_headers)
+
+      assert conn.body_params == %{
+               "message" => %{
+                 "token" => nil,
+                 "fid" => fcm_installation_id,
+                 "data" => %{
+                   "alert_id" => alert_id,
+                   "title" => title,
+                   "body" => body,
+                   "tag" => tag
+                 },
+                 "fcm_options" => %{"analytics_label" => analytics_label},
+                 "android" => nil,
+                 "apns" => nil,
+                 "notification" => nil
+               }
+             }
+
+      Req.Test.json(conn, %{})
+    end)
+
+    :ok =
+      perform_job(Notifications.Deliverer, %{
+        user_id: user_id,
+        alert_id: alert_id,
+        title: title,
+        body: body,
+        deep_link_path: deep_link_path,
+        upstream_timestamp: upstream_timestamp,
+        type: type,
+        analytics_label: analytics_label
+      })
+
+    assert [
+             %DeliveredNotification{
+               user_id: ^user_id,
+               alert_id: ^alert_id,
+               upstream_timestamp: ^upstream_timestamp,
+               type: ^type
+             }
+           ] = Repo.all(DeliveredNotification)
+
+    assert DateTime.before?(user.fcm_last_verified, Repo.reload!(user).fcm_last_verified)
+  end
+
+  test "delivers notification via FCM with old token and marks notification as delivered" do
+    start_link_supervised!(Alerts)
+
+    user =
+      NotificationsFactory.insert(:user_with_old_token, app_version: "2.1.5", platform: "Android")
+
     user_id = user.id
     fcm_token = user.fcm_token
     alert = Factory.build(:alert)
@@ -57,6 +181,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       assert conn.body_params == %{
                "message" => %{
                  "token" => fcm_token,
+                 "fid" => nil,
                  "notification" => %{"title" => title, "body" => body},
                  "data" => %{
                    "deep_link_path" => deep_link_path,
@@ -95,6 +220,7 @@ defmodule MobileAppBackend.Notifications.DelivererTest do
       assert conn.body_params == %{
                "message" => %{
                  "token" => fcm_token,
+                 "fid" => nil,
                  "data" => %{
                    "alert_id" => alert_id,
                    "title" => title,
