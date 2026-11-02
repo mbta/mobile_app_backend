@@ -25,6 +25,9 @@ jobs:
       cache-key-asdf: ${{ steps.cache-keys.outputs.asdf }}
       cache-key-mix: ${{ steps.cache-keys.outputs.mix }}
     steps:
+      # TODO: Remove once https://github.com/actions/runner-images/issues/15018 is resolved
+      - name: Upgrade CA certificates
+        run: sudo apt-get update && sudo apt-get install -y --only-upgrade ca-certificates
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -89,6 +92,9 @@ jobs:
           POSTGRES_DB: ${{env.DATABASE_NAME}}
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
+      # TODO: Remove once https://github.com/actions/runner-images/issues/15018 is resolved
+      - name: Upgrade CA certificates
+        run: sudo apt-get update && sudo apt-get install -y --only-upgrade ca-certificates
       - name: asdf cache
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -133,6 +139,9 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
+      # TODO: Remove once https://github.com/actions/runner-images/issues/15018 is resolved
+      - name: Upgrade CA certificates
+        run: sudo apt-get update && sudo apt-get install -y --only-upgrade ca-certificates
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -164,6 +173,9 @@ jobs:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
+      # TODO: Remove once https://github.com/actions/runner-images/issues/15018 is resolved
+      - name: Upgrade CA certificates
+        run: sudo apt-get update && sudo apt-get install -y --only-upgrade ca-certificates
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

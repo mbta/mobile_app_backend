@@ -320,7 +320,7 @@ defmodule MobileAppBackend.PresentationStrings do
       :suspension ->
         gettext("Suspension", comment: "Possible alert effect")
 
-      :trackChange ->
+      :track_change ->
         gettext("Track Change", comment: "Possible alert effect")
 
       :other_effect ->
