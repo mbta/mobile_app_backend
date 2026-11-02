@@ -111,7 +111,7 @@ msgstr " jusqu’à demain"
 #: lib/mobile_app_backend/notifications/notification_title.ex:63
 #, elixir-autogen, elixir-format
 msgid "%{label} %{mode_label}"
-msgstr "%{mode_label} %{label}"
+msgstr "%{label} %{mode_label}"
 
 #. Bus route name label, with the value being the route number, ex. "1 bus", "66 bus"
 #: lib/presentation_strings.ex:72
@@ -1339,7 +1339,7 @@ msgstr ""
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
 #, elixir-autogen, elixir-format
 msgid "%{mode} %{skipped_effect}"
-msgstr "%{skipped_effect} %{mode}"
+msgstr "%{mode} %{skipped_effect}"
 
 #. Mode of travel prefixing alert summary e.g.: "Buses will not stop at..."
 #: lib/presentation_strings.ex:28
@@ -1399,14 +1399,14 @@ msgstr "%{trip_identity} sont suspendus %{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:273
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} rencontrer des retards%{delay_duration} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} connaît des retards%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:169
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} est annulé %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is suspended [today][ due to maintenance][ daily until friday]
@@ -1505,7 +1505,7 @@ msgstr " plus tard aujourd’hui"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:51
 #, elixir-autogen, elixir-format
 msgid "%{summary}. See alert details."
-msgstr "%{summary} vers Détails de l’alerte"
+msgstr "%{summary}. Consultez les détails de l’alerte."
 
 #. Assemble a full summary of an alert with the structure: \n**[Modified service]**[ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:71
@@ -1523,7 +1523,7 @@ msgstr "**Voie libre :** Le service normal a repris."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:124
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
-msgstr "**Mise à jour :** %{effect_sentence_case} est terminée%{summary_location}."
+msgstr "**Mise à jour :** %{effect_sentence_case} a pris fin%{summary_location}."
 
 #. Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:90
@@ -1531,7 +1531,7 @@ msgstr "**Mise à jour :** %{effect_sentence_case} est terminée%{summary_locati
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:114
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**Mise à jour :** %{mode} service a repris%{summary_location}."
+msgstr "**Mise à jour :** Le service %{mode} a repris%{summary_location}."
 
 #. Example: “Update: Service has ended”
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:51
@@ -1550,7 +1550,7 @@ msgstr " à %{stop_list}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:91
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
-msgstr "ne s’arrêtera pas à%{affected_stops_location} %{timeframe}"
+msgstr "ne s’arrêtera pas%{affected_stops_location} %{timeframe}"
 
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
