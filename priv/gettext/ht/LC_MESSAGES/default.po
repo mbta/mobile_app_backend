@@ -1385,7 +1385,7 @@ msgstr "%{trip_identity} afekte pa %{effect} %{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:158
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} yo anile %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} anile %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [These trips] are suspended [today][ due to maintenance][ daily until friday]
@@ -1399,14 +1399,14 @@ msgstr "%{trip_identity} yo sispann %{timeframe}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:273
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} ap fè fas ak reta%{delay_duration} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} ap gen reta%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:169
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} anile %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is suspended [today][ due to maintenance][ daily until friday]
@@ -1550,7 +1550,7 @@ msgstr " nan %{stop_list}"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:91
 #, elixir-autogen, elixir-format
 msgid "will not stop%{affected_stops_location} %{timeframe}"
-msgstr "p ap rete nan%{affected_stops_location} %{timeframe}"
+msgstr "p ap rete%{affected_stops_location} %{timeframe}"
 
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:12
