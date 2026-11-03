@@ -79,6 +79,8 @@ defmodule MobileAppBackend.Notifications.Deliverer do
     tag = Integer.to_string(:erlang.phash2(Enum.join(string_list)))
 
     {installation_id, token} = get_fcm_token_and_installation_id(user)
+    # TODO: Remove this before merging
+    Logger.info("#{__MODULE__} sending_notification user_id=#{user_id} has installation_id=#{installation_id != nil} and token=#{token != nil}")
 
     request_body = %{
       message: %FCM.Message{
