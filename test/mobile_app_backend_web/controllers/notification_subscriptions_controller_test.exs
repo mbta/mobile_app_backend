@@ -309,6 +309,94 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert %User{app_version: "1.2.3", platform: "iOS"} = Repo.reload(user)
     end
 
+    test "reports a recent write whose content differs", %{conn: conn, now: now} do
+      Sentry.Test.start_collecting_sentry_reports()
+
+      user =
+        insert(:user,
+          fcm_last_verified: DateTime.add(now, -2),
+          notification_subscriptions: [
+            build(:notification_subscription,
+              route_id: "Red",
+              stop_id: "place-sstat",
+              direction_id: 0,
+              include_accessibility: true
+            )
+          ]
+        )
+
+      post(conn, "/api/notifications/subscriptions/write", %{
+        fcm_token: user.fcm_token,
+        subscriptions: [
+          %{
+            route_id: "Red",
+            stop_id: "place-sstat",
+            direction_id: 0,
+            include_accessibility: false,
+            windows: []
+          }
+        ]
+      })
+
+      user_id = user.id
+
+      assert [%{message: %{formatted: message}, extra: %{user_id: ^user_id, changes: changes}}] =
+               Sentry.Test.pop_sentry_reports()
+
+      assert message =~ "near-duplicate"
+
+      assert %{
+               user_fields: [],
+               subscriptions: [%{action: :update, key: {"Red", "place-sstat", 0}}]
+             } = changes
+
+      refute inspect(changes) =~ user.fcm_token
+    end
+
+    test "does not report a recent write with identical content", %{conn: conn, now: now} do
+      Sentry.Test.start_collecting_sentry_reports()
+
+      payload = %{
+        fcm_token: "fake_token",
+        subscriptions: [
+          %{
+            route_id: "Red",
+            stop_id: "place-sstat",
+            direction_id: 0,
+            include_accessibility: true,
+            windows: [%{start_time: "08:00", end_time: "09:00", days_of_week: [1, 2, 3]}]
+          }
+        ]
+      }
+
+      assert conn |> post("/api/notifications/subscriptions/write", payload) |> json_response(:ok) ==
+               nil
+
+      conn = put_private(conn, :mobile_app_backend_now, DateTime.add(now, 1))
+
+      assert conn |> post("/api/notifications/subscriptions/write", payload) |> json_response(:ok) ==
+               nil
+
+      assert [] = Sentry.Test.pop_sentry_reports()
+    end
+
+    test "does not report a differing write that isn't recent", %{conn: conn, now: now} do
+      Sentry.Test.start_collecting_sentry_reports()
+
+      user =
+        insert(:user,
+          fcm_last_verified: DateTime.add(now, -60),
+          notification_subscriptions: [build(:notification_subscription)]
+        )
+
+      post(conn, "/api/notifications/subscriptions/write", %{
+        fcm_token: user.fcm_token,
+        subscriptions: []
+      })
+
+      assert [] = Sentry.Test.pop_sentry_reports()
+    end
+
     @tag :capture_log
     test "sends 400 on bad request", %{conn: conn} do
       conn =
