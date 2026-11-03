@@ -63,7 +63,7 @@ msgstr " sur **%{mode_label}**"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
 #, elixir-autogen, elixir-format
 msgid " replacing **%{mode_label}**"
-msgstr " remplacer **%{mode_label}**"
+msgstr " remplace **%{mode_label}**"
 
 #. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:141
@@ -129,19 +129,19 @@ msgstr "%{trip_identity} est remplacé par des navettes entre **%{start_stop}** 
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:143
 #, elixir-autogen, elixir-format
 msgid "**%{time}** %{vehicle} from **%{from_stop}**"
-msgstr "**%{time}** %{vehicle} de **%{from_stop}**"
+msgstr "Le/La %{vehicle} de **%{time}** depuis **%{from_stop}**"
 
 #. Trip identity in the form of ”[time] [vehicle type] from [headsign]”, ex “[12:13 PM] [train] from [Stoughton]”
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:112
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
-msgstr "**%{trip_time}** %{route_type} de **%{stop_name}**"
+msgstr "Le/La %{route_type} de **%{trip_time}** depuis **%{stop_name}**"
 
 #. Trip identity in the form of ”[time] [vehicle type] to [headsign]”, ex “[12:13 PM] [train] to [Stoughton]”
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:122
 #, elixir-autogen, elixir-format
 msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
-msgstr "**%{trip_time}** %{route_type} à **%{headsign}**"
+msgstr "Le/La %{route_type} de **%{trip_time}** en direction de **%{headsign}**"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:229
@@ -844,7 +844,7 @@ msgstr "Problème technique"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:105
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
-msgstr "Ce %{route_type}"
+msgstr "Ce/Cette %{route_type}"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:682
@@ -1253,13 +1253,13 @@ msgstr "problème technique"
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:156
 #, elixir-autogen, elixir-format
 msgid "the **%{time}** %{vehicle}"
-msgstr "le **%{time}** %{vehicle}"
+msgstr "le/la %{vehicle} de **%{time}**"
 
 #. Trip identity in the form of ”this [vehicle type]”, ex ”this [train]”
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:170
 #, elixir-autogen, elixir-format
 msgid "this %{vehicle}"
-msgstr "ce %{vehicle}"
+msgstr "ce/cette %{vehicle}"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:497
@@ -1378,7 +1378,7 @@ msgstr "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:295
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity} affecté par %{effect} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity} est perturbé par %{effect} %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [These trips] are cancelled [today][ due to maintenance][ daily until friday]
@@ -1531,7 +1531,7 @@ msgstr "**Mise à jour :** %{effect_sentence_case} a pris fin%{summary_location
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:114
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**Mise à jour :** Le service %{mode} a repris%{summary_location}."
+msgstr "**Mise à jour :** le service de %{mode} a repris%{summary_location}."
 
 #. Example: “Update: Service has ended”
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:51
