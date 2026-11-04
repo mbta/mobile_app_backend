@@ -11,6 +11,9 @@ config :mobile_app_backend, MobileAppBackend.Repo, pool: Ecto.Adapters.SQL.Sandb
 
 config :mobile_app_backend, Oban, testing: :manual
 
+# Collect Sentry reports in-process so tests can assert on them
+config :sentry, test_mode: true
+
 # Don't start the real stream store processes so we can test with
 # isolated fake processes
 config :mobile_app_backend, start_stream_stores?: false
