@@ -17,7 +17,7 @@ defmodule MobileAppBackend.Notifications.Window do
   @doc """
   Returns `true` if the given window is open at the specified `DateTime`.
   The `DateTime` is converted to the "America/New_York" timezone for comparison.
-  If the end time is earlier than the start time, the window is considered to go past midnight into the next calendar day.
+  If the end time is earlier than or equal to the start time, the window is considered to go past midnight into the next calendar day.
   """
   @spec open?(t(), DateTime.t()) :: boolean()
   def open?(%__MODULE__{} = window, now) do
@@ -49,9 +49,9 @@ defmodule MobileAppBackend.Notifications.Window do
 
     dynamic(
       [{^binding, w}],
-      (w.start_time <= w.end_time and w.start_time <= ^time and ^time <= w.end_time and
+      (w.start_time < w.end_time and w.start_time <= ^time and ^time <= w.end_time and
          ^day_of_week in w.days_of_week) or
-        (w.start_time > w.end_time and
+        (w.start_time >= w.end_time and
            ((w.start_time <= ^time and ^day_of_week in w.days_of_week) or
               (^time <= w.end_time and ^previous_day_of_week in w.days_of_week)))
     )
@@ -118,7 +118,7 @@ defmodule MobileAppBackend.Notifications.Window do
 
   # A window whose end time is in the calendar day after its selected day of the week
   defp overnight?(%__MODULE__{start_time: start_time, end_time: end_time}) do
-    Time.compare(start_time, end_time) == :gt
+    Time.compare(start_time, end_time) != :lt
   end
 
   defp previous_day_of_week(1), do: 7
