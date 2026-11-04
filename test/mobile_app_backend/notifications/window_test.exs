@@ -144,6 +144,13 @@ defmodule MobileAppBackend.Notifications.WindowTest do
       assert Window.next_overlap([p2, p1], [w2, w1], now) == expected
     end
 
+    test "24-hour window with equal start and end times overlaps the period" do
+      period = %Alert.ActivePeriod{start: ~B[2026-03-20 15:00:00], end: nil}
+      window = %Window{start_time: ~T[03:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      now = ~B[2026-03-20 15:00:00]
+      assert Window.next_overlap(period, window, now) == ~B[2026-03-20 15:00:00]
+    end
+
     test "overnight window start when window starts after period starts" do
       period = %Alert.ActivePeriod{start: ~B[2026-03-20 20:00:00], end: nil}
 
@@ -185,6 +192,12 @@ defmodule MobileAppBackend.Notifications.WindowTest do
   end
 
   describe "next_overlap/3 on DateTimes" do
+    test "open during a 24-hour window with equal start and end times" do
+      datetime = ~B[2026-03-20 15:00:00]
+      window = %Window{start_time: ~T[03:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      assert Window.next_overlap(datetime, window, datetime) == datetime
+    end
+
     test "nil when window ends before datetime" do
       datetime = ~B[2026-03-20 16:11:00]
 
@@ -252,6 +265,29 @@ defmodule MobileAppBackend.Notifications.WindowTest do
   end
 
   describe "open?/2" do
+    test "equal start and end times make a 24-hour window from the selected day" do
+      window = %Window{start_time: ~T[03:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      assert Window.open?(window, ~B[2026-03-20 03:30:00])
+      assert Window.open?(window, ~B[2026-03-20 15:00:00])
+      assert Window.open?(window, ~B[2026-03-20 23:59:00])
+      assert Window.open?(window, ~B[2026-03-21 02:59:00])
+    end
+
+    test "midnight to midnight is open for the whole selected day" do
+      window = %Window{start_time: ~T[00:00:00], end_time: ~T[00:00:00], days_of_week: [5]}
+      assert Window.open?(window, ~B[2026-03-20 00:00:00])
+      assert Window.open?(window, ~B[2026-03-20 12:00:00])
+      assert Window.open?(window, ~B[2026-03-20 23:59:59])
+      refute Window.open?(window, ~B[2026-03-19 12:00:00])
+      refute Window.open?(window, ~B[2026-03-21 12:00:00])
+    end
+
+    test "equal start and end times close outside the 24-hour window" do
+      window = %Window{start_time: ~T[03:00:00], end_time: ~T[03:00:00], days_of_week: [5]}
+      refute Window.open?(window, ~B[2026-03-20 02:59:00])
+      refute Window.open?(window, ~B[2026-03-21 03:30:00])
+    end
+
     test "open within a normal same-day window" do
       window = %Window{start_time: ~T[08:00:00], end_time: ~T[09:00:00], days_of_week: [5]}
       assert Window.open?(window, ~B[2026-03-20 08:30:00])

@@ -85,6 +85,7 @@ defmodule MobileAppBackend.Notifications.WritePayload do
         direction_id: desired.direction_id,
         include_accessibility: desired.include_accessibility
       )
+      |> Changeset.unique_constraint(:route_id, name: :user_rsd_unique_index)
       |> Changeset.put_assoc(:windows, windows)
     end
 
