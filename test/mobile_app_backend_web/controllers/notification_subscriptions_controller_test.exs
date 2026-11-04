@@ -361,6 +361,53 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert %User{locale: "en"} = Repo.reload(user)
     end
 
+    test "reports a recent write whose content differs", %{conn: conn, now: now} do
+      Sentry.Test.start_collecting_sentry_reports()
+
+      user =
+        insert(:user,
+          fcm_last_verified: DateTime.add(now, -2),
+          notification_subscriptions: [
+            build(:notification_subscription,
+              route_id: "Red",
+              stop_id: "place-sstat",
+              direction_id: 0,
+              include_accessibility: true
+            )
+          ]
+        )
+
+      conn =
+        post(conn, "/api/notifications/subscriptions/write", %{
+          fcm_installation_id: user.fcm_installation_id,
+          subscriptions: [
+            %{
+              route_id: "Red",
+              stop_id: "place-sstat",
+              direction_id: 0,
+              include_accessibility: false,
+              windows: []
+            }
+          ]
+        })
+
+      assert json_response(conn, :ok) == nil
+
+      user_id = user.id
+
+      assert [%{message: %{formatted: message}, extra: %{user_id: ^user_id, changes: changes}}] =
+               Sentry.Test.pop_sentry_reports()
+
+      assert message =~ "near-duplicate"
+
+      assert %{
+               user_fields: [],
+               subscriptions: [%{action: :update, key: {"Red", "place-sstat", 0}}]
+             } = changes
+
+      refute inspect(changes) =~ user.fcm_installation_id
+    end
+
     @tag :capture_log
     test "sends 400 on bad request", %{conn: conn} do
       conn =
@@ -596,7 +643,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       Sentry.Test.start_collecting_sentry_reports()
 
       user =
-        insert(:user,
+        insert(:user_with_old_token,
           fcm_last_verified: DateTime.add(now, -2),
           notification_subscriptions: [
             build(:notification_subscription,

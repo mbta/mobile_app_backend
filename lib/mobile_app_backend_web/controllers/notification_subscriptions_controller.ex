@@ -83,7 +83,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     conn |> put_status(status) |> json(nil)
   end
 
-  # A write for a token that was last verified this recently is probably a duplicate request
+  # A write for a token/fid that was last verified this recently is probably a duplicate request
   @duplicate_window_seconds 5
 
   @spec perform_write(WritePayload.t(), DateTime.t()) :: {:ok, :ok} | {:error, term()}
@@ -91,9 +91,14 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     user_where = FCMTarget.user_where(payload.fcm_target)
 
     Repo.transact(fn ->
-      # Serialize all writes for the same token so that concurrent requests can’t both decide
+      # Serialize all writes for the same token/fid so that concurrent requests can’t both decide
       # to insert the same user or subscription. The lock is released when the transaction ends.
-      Repo.query!("SELECT pg_advisory_xact_lock(hashtext($1))", [fcm_token])
+      {target_type, target_value} = payload.fcm_target
+
+      Repo.query!(
+        "SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))",
+        [Atom.to_string(target_type), target_value]
+      )
 
       user =
         Repo.one(
@@ -110,6 +115,9 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
         user
         |> Ecto.Changeset.change(fcm_last_verified: now)
         |> Ecto.Changeset.unique_constraint(:fcm_token, name: :fcm_unique_index)
+        |> Ecto.Changeset.unique_constraint(:fcm_installation_id,
+          name: :fcm_installation_id_unique_index
+        )
         |> WritePayload.changeset(payload)
 
       report_conflicting_duplicate(user, changeset, now)
@@ -146,7 +154,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     end
   end
 
-  # Describes which fields changed, without including the FCM token
+  # Describes which fields changed, without including the FCM token/fid
   @spec change_summary(Ecto.Changeset.t(User.t())) :: map() | nil
   defp change_summary(%Ecto.Changeset{changes: changes}) do
     {subscription_changesets, user_changes} =
