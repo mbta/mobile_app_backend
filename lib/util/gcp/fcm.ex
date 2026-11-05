@@ -84,7 +84,11 @@ defmodule Util.GCP.FCM do
       base_url: "https://fcm.googleapis.com",
       auth: {:bearer, token},
       url: "/v1/#{parent}/messages:send",
-      json: body
+      json: body,
+      # Allowing retry on POST request
+      retry: :transient,
+      # Total of two requests total, one initial and one retry
+      max_retries: 1
     )
   end
 end

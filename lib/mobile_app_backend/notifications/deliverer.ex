@@ -116,7 +116,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
       |> handle_fcm_response(user)
 
     Logger.info(
-      "#{__MODULE__} notification_sent result=#{result} type=#{type} alert_id=#{alert_id}"
+      "#{__MODULE__} notification_sent result=#{result} user_id=#{user_id} type=#{type} alert_id=#{alert_id}"
     )
 
     # This section is only to allow Android to group notifications on version greater than 2.1.4
@@ -142,7 +142,7 @@ defmodule MobileAppBackend.Notifications.Deliverer do
         |> handle_fcm_response(user)
 
       Logger.info(
-        "#{__MODULE__} data_notification_sent result=#{data_notification_result} type=#{type} alert_id=#{alert_id}"
+        "#{__MODULE__} data_notification_sent result=#{data_notification_result} user_id=#{user_id} type=#{type} alert_id=#{alert_id}"
       )
     end
 
