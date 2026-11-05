@@ -7,25 +7,31 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
   alias MobileAppBackend.Notifications.WritePayload
   alias MobileAppBackend.Repo
   alias MobileAppBackend.User
+  alias Util.FCMTarget
 
   def set_include_accessibility(conn, params) do
     status =
-      with {:ok, fcm_token} <- Map.fetch(params, "fcm_token"),
+      with {:ok, fcm_target} <- FCMTarget.parse(params),
            {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
         locale = params["locale"]
 
         now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
 
+        user_where = FCMTarget.user_where(fcm_target)
+
         Repo.update_all(
           from(u in User,
-            where: u.fcm_token == ^fcm_token,
+            where: ^user_where,
             update: [set: [fcm_last_verified: ^now, locale: coalesce(^locale, u.locale)]]
           ),
           []
         )
 
         Repo.update_all(
-          from(ns in Subscription, join: u in assoc(ns, :user), where: u.fcm_token == ^fcm_token),
+          from(ns in Subscription,
+            join: u in subquery(from u in User, where: ^user_where),
+            on: ns.user_id == u.id
+          ),
           set: [include_accessibility: include_accessibility]
         )
 
@@ -77,26 +83,31 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     conn |> put_status(status) |> json(nil)
   end
 
-  # A write for a token that was last verified this recently is probably a duplicate request
+  # A write for a token/fid that was last verified this recently is probably a duplicate request
   @duplicate_window_seconds 5
 
   @spec perform_write(WritePayload.t(), DateTime.t()) :: {:ok, :ok} | {:error, term()}
   defp perform_write(payload, now) do
-    fcm_token = payload.fcm_token
+    user_where = FCMTarget.user_where(payload.fcm_target)
 
     Repo.transact(fn ->
-      # Serialize all writes for the same token so that concurrent requests can’t both decide
+      # Serialize all writes for the same token/fid so that concurrent requests can’t both decide
       # to insert the same user or subscription. The lock is released when the transaction ends.
-      Repo.query!("SELECT pg_advisory_xact_lock(hashtext($1))", [fcm_token])
+      {target_type, target_value} = payload.fcm_target
+
+      Repo.query!(
+        "SELECT pg_advisory_xact_lock(hashtext($1), hashtext($2))",
+        [Atom.to_string(target_type), target_value]
+      )
 
       user =
         Repo.one(
           from u in User,
-            where: u.fcm_token == ^fcm_token,
+            where: ^user_where,
             preload: [notification_subscriptions: :windows]
         )
         |> case do
-          nil -> %User{fcm_token: fcm_token}
+          nil -> FCMTarget.new_user(payload.fcm_target)
           user -> user
         end
 
@@ -104,6 +115,9 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
         user
         |> Ecto.Changeset.change(fcm_last_verified: now)
         |> Ecto.Changeset.unique_constraint(:fcm_token, name: :fcm_unique_index)
+        |> Ecto.Changeset.unique_constraint(:fcm_installation_id,
+          name: :fcm_installation_id_unique_index
+        )
         |> WritePayload.changeset(payload)
 
       report_conflicting_duplicate(user, changeset, now)
@@ -140,7 +154,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     end
   end
 
-  # Describes which fields changed, without including the FCM token
+  # Describes which fields changed, without including the FCM token/fid
   @spec change_summary(Ecto.Changeset.t(User.t())) :: map() | nil
   defp change_summary(%Ecto.Changeset{changes: changes}) do
     {subscription_changesets, user_changes} =

@@ -127,8 +127,8 @@ config :logger, :default_handler, config: [drop_mode_qlen: 500]
 config :phoenix, :json_library, Jason
 
 # Filter FCM tokens from logs
-config :phoenix, :filter_parameters, ["fcm_token"]
-config :logster, :filter_parameters, ["fcm_token"]
+config :phoenix, :filter_parameters, ["fcm_token", "fcm_installation_id"]
+config :logster, :filter_parameters, ["fcm_token", "fcm_installation_id"]
 
 # Use Req for making HTTP requests
 config :mobile_app_backend, MobileAppBackend.HTTP, Req

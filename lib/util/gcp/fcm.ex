@@ -65,10 +65,11 @@ defmodule Util.GCP.FCM do
             android: AndroidConfig.t() | nil,
             apns: ApnsConfig.t() | nil,
             fcm_options: FcmOptions.t() | nil,
-            token: String.t() | nil
+            token: String.t() | nil,
+            fid: String.t() | nil
           }
     @derive Jason.Encoder
-    defstruct [:data, :notification, :android, :apns, :fcm_options, :token]
+    defstruct [:data, :notification, :android, :apns, :fcm_options, :token, :fid]
   end
 
   @doc "https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages/send"

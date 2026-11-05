@@ -14,6 +14,13 @@ defmodule MobileAppBackend.NotificationsFactory do
 
   def user_factory do
     %MobileAppBackend.User{
+      fcm_installation_id: :rand.bytes(64) |> Base.url_encode64(padding: false),
+      fcm_last_verified: DateTime.from_unix!(0)
+    }
+  end
+
+  def user_with_old_token_factory do
+    %MobileAppBackend.User{
       fcm_token: :rand.bytes(64) |> Base.url_encode64(padding: false),
       fcm_last_verified: DateTime.from_unix!(0)
     }

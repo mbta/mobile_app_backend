@@ -6,7 +6,7 @@ defmodule MobileAppBackend.Notifications.SubscriptionTest do
   test "can insert subscription for user" do
     %{id: user_id} =
       MobileAppBackend.Repo.insert!(%User{
-        fcm_token: "fake",
+        fcm_installation_id: "fake",
         fcm_last_verified: ~U[2025-09-10 00:00:00Z]
       })
 
