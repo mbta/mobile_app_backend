@@ -1,7 +1,7 @@
 # For smoke testing the Docker container in CI
 services:
   db:
-    image: postgres:18.6@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
+    image: postgres:15@sha256:1149d80408a63791782d07a0e2bd3b06a7adbcdc86e8dcc18d6ee01bacfe04ab
     environment:
       - POSTGRES_PASSWORD=insecure
     healthcheck:
