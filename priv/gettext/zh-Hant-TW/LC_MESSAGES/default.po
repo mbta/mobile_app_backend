@@ -21,7 +21,7 @@ msgstr " 在**%{stop_name}**"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:128
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
-msgstr " 每日%{recurrence_text}"
+msgstr "每日%{recurrence_text}"
 
 #. An alert cause interpolated into an alert summary: ex. "due to [maintenance]", in a longer string like "Trip 101 experiencing delays of about 10 minutes today due to maintenance daily until Friday"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
@@ -69,7 +69,7 @@ msgstr " 替代**%{mode_label}**"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:141
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
-msgstr " 部分日期%{recurrence_text}"
+msgstr "%{recurrence_text}期間的部分日子"
 
 #. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:288
@@ -1091,31 +1091,31 @@ msgstr "港口結冰"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:171
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
-msgstr " 直至%{1}"
+msgstr "直至%{1}"
 
 #. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:181
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
-msgstr " 直至%{1}"
+msgstr "直至%{1}"
 
 #. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
-msgstr " 至%{1}"
+msgstr "直至%{1}"
 
 #. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
-msgstr " 至%{1}"
+msgstr "直至%{1}"
 
 #. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:275
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
-msgstr " 至%{1}"
+msgstr "直至%{1}"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:431
@@ -1378,7 +1378,7 @@ msgstr "%{recurrence}，%{cause}，%{trip_identity}%{skipped_effect}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:295
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}將受%{effect}影響，%{recurrence}"
+msgstr "%{trip_identity}%{timeframe}%{cause}造成%{effect}，影響期間為%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [These trips] are cancelled [today][ due to maintenance][ daily until friday]
@@ -1399,7 +1399,7 @@ msgstr "%{cause}，%{trip_identity}%{timeframe}已暫停，%{recurrence}"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:273
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}延誤了%{delay_duration}，%{recurrence}"
+msgstr "%{trip_identity}%{timeframe}%{cause}延遲%{delay_duration}，影響期間為%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
@@ -1427,7 +1427,7 @@ msgstr "%{cause}，%{trip_identity}%{timeframe}將在%{terminating_stop}終止�
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "%{due_to_cause}，%{summary_location}%{summary_timeframe}會**延誤**%{delay_duration}，%{summary_recurrence}"
+msgstr "%{summary_location}%{due_to_cause}**延遲**%{delay_duration}，影響%{summary_timeframe}%{summary_recurrence}"
 
 #. Ex: delays [of about 10 minutes]
 #: lib/presentation_strings.ex:86
@@ -1523,7 +1523,7 @@ msgstr "**通行正常：**服務已恢復正常。"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:124
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
-msgstr "**更新：** %{summary_location}的%{effect_sentence_case}已結束。"
+msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結束。"
 
 #. Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:90
@@ -1531,13 +1531,13 @@ msgstr "**更新：** %{summary_location}的%{effect_sentence_case}已結束。"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:114
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**更新：** %{summary_location}的%{mode}服務已恢復。"
+msgstr "**最新消息：** %{summary_location}的%{mode}已恢復服務。"
 
 #. Example: “Update: Service has ended”
 #: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:51
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
-msgstr "更新：%{body}"
+msgstr "最新消息：%{body}"
 
 #. Alert summary when there are multiple locations For example "Service suspended at [Downtown Crossing and Oak Grove]" or "Service suspended at [multiple stops]"
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:68
