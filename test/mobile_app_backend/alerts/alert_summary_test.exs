@@ -2642,6 +2642,37 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    test "deduplicates successive stops with the same endpoints" do
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :suspension
+        )
+
+      summary1 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Boylston",
+          end_stop_name: "Riverside",
+          downstream: true
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      summary2 = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Boylston",
+          end_stop_name: "Riverside",
+          downstream: false
+        },
+        timeframe: %Timeframe.UntilFurtherNotice{}
+      }
+
+      assert summary1 ==
+               AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
     test "keeps stop to direction if given both directions" do
       alert =
         build(:alert,

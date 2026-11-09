@@ -174,6 +174,18 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @spec deduplicate_locations([Location.t()], Alert.t()) :: Location.t()
   defp deduplicate_locations(locations, alert) do
+    locations =
+      Enum.uniq_by(locations, fn
+        %Location.SuccessiveStops{
+          start_stop_name: start_stop,
+          end_stop_name: end_stop
+        } ->
+          {Location.SuccessiveStops, start_stop, end_stop}
+
+        location ->
+          location
+      end)
+
     case locations do
       [] ->
         Logger.warning("Combining locations: [] for alert: #{alert.id} reason is known")
