@@ -182,7 +182,7 @@ defmodule MobileAppBackend.Alerts.WithSummaryPubSubTest do
       assert to_alert_map([
                AlertWithSummaries.from_alert(
                  alert_2,
-                 [%SummaryEntity{summary: "**Delays** on **66 bus** due to rail defect"}],
+                 [%SummaryEntity{summary: "**Delays** on **66 bus** due to a rail defect"}],
                  state.now
                )
              ]) == new_alerts
