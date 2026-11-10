@@ -380,7 +380,7 @@ defmodule MobileAppBackend.PresentationStrings do
 
       :crossing_malfunction ->
         #
-        gettext(" due to crossing malfunction",
+        gettext(" due to a crossing malfunction",
           comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
@@ -451,7 +451,9 @@ defmodule MobileAppBackend.PresentationStrings do
         gettext(" due to a hurricane", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :ice_in_harbor ->
-        gettext(" due to ice in harbor", comment: "Alert cause, used in 'Delays [due to cause]'")
+        gettext(" due to ice in the harbor",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :maintenance ->
         gettext(" due to maintenance", comment: "Alert cause, used in 'Delays [due to cause]'")
@@ -512,7 +514,7 @@ defmodule MobileAppBackend.PresentationStrings do
         )
 
       :slippery_rail ->
-        gettext(" due to a slippery rail",
+        gettext(" due to slippery rail",
           comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
@@ -541,7 +543,7 @@ defmodule MobileAppBackend.PresentationStrings do
         )
 
       :technical_problem ->
-        gettext(" due to technical problem",
+        gettext(" due to a technical problem",
           comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 

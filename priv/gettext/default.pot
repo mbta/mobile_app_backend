@@ -999,85 +999,79 @@ msgid " due to a hurricane"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:460
+#: lib/presentation_strings.ex:462
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical issue"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:465
+#: lib/presentation_strings.ex:467
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:470
+#: lib/presentation_strings.ex:472
 #, elixir-autogen, elixir-format
 msgid " due to a medical emergency"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:475
+#: lib/presentation_strings.ex:477
 #, elixir-autogen, elixir-format
 msgid " due to a parade"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:483
+#: lib/presentation_strings.ex:485
 #, elixir-autogen, elixir-format
 msgid " due to a power problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:493
+#: lib/presentation_strings.ex:495
 #, elixir-autogen, elixir-format
 msgid " due to a rail defect"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:502
+#: lib/presentation_strings.ex:504
 #, elixir-autogen, elixir-format
 msgid " due to a signal issue"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:505
+#: lib/presentation_strings.ex:507
 #, elixir-autogen, elixir-format
 msgid " due to a signal problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:515
-#, elixir-autogen, elixir-format
-msgid " due to a slippery rail"
-msgstr ""
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:523
+#: lib/presentation_strings.ex:525
 #, elixir-autogen, elixir-format
 msgid " due to a special event"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:528
+#: lib/presentation_strings.ex:530
 #, elixir-autogen, elixir-format
 msgid " due to a speed restriction"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:536
+#: lib/presentation_strings.ex:538
 #, elixir-autogen, elixir-format
 msgid " due to a switch issue"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:539
+#: lib/presentation_strings.ex:541
 #, elixir-autogen, elixir-format
 msgid " due to a switch problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:554
+#: lib/presentation_strings.ex:556
 #, elixir-autogen, elixir-format
 msgid " due to a track problem"
 msgstr ""
@@ -1101,7 +1095,7 @@ msgid " due to an earlier signal problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:568
+#: lib/presentation_strings.ex:570
 #, elixir-autogen, elixir-format
 msgid " due to an unruly passenger"
 msgstr ""
@@ -1122,12 +1116,6 @@ msgstr ""
 #: lib/presentation_strings.ex:374
 #, elixir-autogen, elixir-format
 msgid " due to construction"
-msgstr ""
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:383
-#, elixir-autogen, elixir-format
-msgid " due to crossing malfunction"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
@@ -1173,63 +1161,51 @@ msgid " due to high winds"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:454
-#, elixir-autogen, elixir-format
-msgid " due to ice in harbor"
-msgstr ""
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:457
+#: lib/presentation_strings.ex:459
 #, elixir-autogen, elixir-format
 msgid " due to maintenance"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:478
+#: lib/presentation_strings.ex:480
 #, elixir-autogen, elixir-format
 msgid " due to police activity"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:488
+#: lib/presentation_strings.ex:490
 #, elixir-autogen, elixir-format
 msgid " due to presence of whales"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:496
+#: lib/presentation_strings.ex:498
 #, elixir-autogen, elixir-format
 msgid " due to rough seas"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:499
+#: lib/presentation_strings.ex:501
 #, elixir-autogen, elixir-format
 msgid " due to severe weather"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:510
+#: lib/presentation_strings.ex:512
 #, elixir-autogen, elixir-format
 msgid " due to single tracking"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:520
+#: lib/presentation_strings.ex:522
 #, elixir-autogen, elixir-format
 msgid " due to snow"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:533
+#: lib/presentation_strings.ex:535
 #, elixir-autogen, elixir-format
 msgid " due to strike"
-msgstr ""
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:544
-#, elixir-autogen, elixir-format
-msgid " due to technical problem"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
@@ -1239,49 +1215,73 @@ msgid " due to the holiday"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:549
+#: lib/presentation_strings.ex:551
 #, elixir-autogen, elixir-format
 msgid " due to tie replacement"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:559
+#: lib/presentation_strings.ex:561
 #, elixir-autogen, elixir-format
 msgid " due to track work"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:562
+#: lib/presentation_strings.ex:564
 #, elixir-autogen, elixir-format
 msgid " due to traffic"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:565
+#: lib/presentation_strings.ex:567
 #, elixir-autogen, elixir-format
 msgid " due to train traffic"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:573
+#: lib/presentation_strings.ex:575
 #, elixir-autogen, elixir-format
 msgid " due to utility work"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:576
+#: lib/presentation_strings.ex:578
 #, elixir-autogen, elixir-format
 msgid " due to vessel substitution"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:581
+#: lib/presentation_strings.ex:583
 #, elixir-autogen, elixir-format
 msgid " due to vessel traffic"
 msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:584
+#: lib/presentation_strings.ex:586
 #, elixir-autogen, elixir-format
 msgid " due to weather"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:383
+#, elixir-autogen, elixir-format
+msgid " due to a crossing malfunction"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:546
+#, elixir-autogen, elixir-format
+msgid " due to a technical problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:454
+#, elixir-autogen, elixir-format
+msgid " due to ice in the harbor"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:517
+#, elixir-autogen, elixir-format
+msgid " due to slippery rail"
 msgstr ""
