@@ -1644,15 +1644,15 @@ msgstr ""
 
 #. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
-msgstr "**更新：** %{effect_sentence_case}已结束%{summary_location}。"
+msgstr ""
 
 #. Alert effect as a plural noun, ex. "Delays are still in effect"
 #: lib/presentation_strings.ex:229
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Delays"
-msgstr "延误"
+msgstr ""
 
 #. Sentence following an all clear summary when multiple other alerts remain active
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
@@ -1662,18 +1662,18 @@ msgstr ""
 
 #. Alert effect as a noun, ex. "Dock closure is still in effect"
 #: lib/presentation_strings.ex:234
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Dock closure"
-msgstr "码头关闭"
+msgstr ""
 
 #. Alert effect as a noun, ex. "Station closure is still in effect"
 #: lib/presentation_strings.ex:239
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Station closure"
-msgstr "车站关闭"
+msgstr ""
 
 #. Alert effect as a noun, ex. "Stop closure is still in effect"
 #: lib/presentation_strings.ex:244
-#, elixir-autogen, elixir-format, fuzzy
+#, elixir-autogen, elixir-format
 msgid "Stop closure"
-msgstr "站点关闭"
+msgstr ""
