@@ -674,6 +674,333 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     )
   end
 
+  test "all clear describes other active alerts" do
+    now = DateTime.now!("America/New_York")
+
+    closed_alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -25, :hour),
+            end: DateTime.add(now, -4, :minute)
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -20, :minute),
+        closed_timestamp: DateTime.add(now, -20, :minute)
+      )
+
+    active_alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{start: DateTime.add(now, -2, :hour)}
+        ],
+        effect: :detour,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -1, :hour)
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user.id,
+      alert_id: closed_alert.id,
+      type: :notification,
+      upstream_timestamp:
+        DateTime.add(now, -3, :hour)
+        |> DateTime.shift_zone!("Etc/UTC")
+        |> DateTime.truncate(:second)
+    })
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([closed_alert, active_alert], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{
+        "user_id" => user.id,
+        "alert_id" => closed_alert.id,
+        "body" => "Update: Suspension has ended. Detour is still in effect.",
+        "deep_link_path" => "/a/#{active_alert.id}/r/66",
+        "type" => "all_clear"
+      }
+    )
+  end
+
+  describe "all clear other active alerts" do
+    test "several other alerts gives a generic sentence and the usual link" do
+      %{args: args} =
+        perform_all_clear_with_others(fn now ->
+          [
+            other_alert(now, effect: :detour),
+            other_alert(now, effect: :suspension)
+          ]
+        end)
+
+      assert "Update: Suspension has ended. Other disruptions are still in effect." ==
+               args["body"]
+
+      assert "/s/1/r/66/d/0" == args["deep_link_path"]
+    end
+
+    test "ignores other alerts that are themselves all clear" do
+      %{args: args} =
+        perform_all_clear_with_others(fn now ->
+          [
+            other_alert(now,
+              effect: :detour,
+              last_push_notification_timestamp: DateTime.add(now, -20, :minute),
+              closed_timestamp: DateTime.add(now, -20, :minute)
+            )
+          ]
+        end)
+
+      assert "All clear: Normal service has resumed." == args["body"]
+      assert "/s/1/r/66/d/0" == args["deep_link_path"]
+    end
+
+    test "ignores other alerts that have already ended" do
+      %{args: args} =
+        perform_all_clear_with_others(fn now ->
+          [
+            other_alert(now,
+              effect: :detour,
+              active_period: [
+                %MBTAV3API.Alert.ActivePeriod{
+                  start: DateTime.add(now, -3, :hour),
+                  end: DateTime.add(now, -1, :hour)
+                }
+              ]
+            )
+          ]
+        end)
+
+      assert "All clear: Normal service has resumed." == args["body"]
+    end
+
+    test "ignores other elevator closures" do
+      %{args: args} =
+        perform_all_clear_with_others(fn now ->
+          [other_alert(now, effect: :elevator_closure)]
+        end)
+
+      assert "All clear: Normal service has resumed." == args["body"]
+    end
+  end
+
+  describe "all clear with locations for both alerts" do
+    test "includes both locations when the other alert has the same effect" do
+      %{notification: notification, open_alerts: [open_alert]} =
+        all_clear_with_open_suspensions([[1, 2]])
+
+      assert "Update: Suspension has ended from Stop 2 to Stop 3. Suspension is still in effect from Stop 1 to Stop 2." ==
+               notification.body
+
+      assert open_alert.id == notification.deep_link_alert_id
+    end
+
+    test "is generic when several other alerts have the same effect" do
+      %{notification: notification} = all_clear_with_open_suspensions([[1, 2], [1, 2, 3]])
+
+      assert "Update: Suspension has ended from Stop 2 to Stop 3. Other disruptions are still in effect." ==
+               notification.body
+
+      assert is_nil(notification.deep_link_alert_id)
+    end
+  end
+
+  # Closed suspension at stops 2 and 3, plus open suspensions at the given stop numbers, on one line.
+  # The subscription is at stop 1, so open alerts must include it to count as other alerts.
+  defp all_clear_with_open_suspensions(open_stop_numbers) do
+    now = DateTime.now!("America/New_York")
+    route = build(:route, type: :heavy_rail)
+    stops = Enum.map(1..6, &build(:stop, name: "Stop #{&1}"))
+    trip = build(:trip, stop_ids: Enum.map(stops, & &1.id))
+
+    pattern =
+      build(:route_pattern,
+        route_id: route.id,
+        direction_id: 0,
+        representative_trip_id: trip.id
+      )
+
+    global = %{
+      lines: %{},
+      routes: %{route.id => route},
+      route_patterns: %{pattern.id => pattern},
+      stops: Map.new(stops, &{&1.id, &1}),
+      trips: %{trip.id => trip},
+      pattern_ids_by_stop: %{}
+    }
+
+    suspension = fn stop_numbers, overrides ->
+      build(
+        :alert,
+        Keyword.merge(
+          [
+            effect: :suspension,
+            informed_entity:
+              Enum.map(stop_numbers, fn number ->
+                %MBTAV3API.Alert.InformedEntity{
+                  activities: ~w(board exit ride)a,
+                  route: route.id,
+                  stop: Enum.at(stops, number - 1).id
+                }
+              end)
+          ],
+          overrides
+        )
+      )
+    end
+
+    closed_alert =
+      suspension.([2, 3],
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -25, :hour),
+            end: DateTime.add(now, -4, :minute)
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -20, :minute),
+        closed_timestamp: DateTime.add(now, -20, :minute)
+      )
+
+    open_alerts =
+      Enum.map(
+        open_stop_numbers,
+        &suspension.(&1,
+          active_period: [%MBTAV3API.Alert.ActivePeriod{start: DateTime.add(now, -2, :hour)}],
+          last_push_notification_timestamp: DateTime.add(now, -1, :hour)
+        )
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: route.id,
+      stop_id: hd(stops).id,
+      direction_id: 0,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user.id,
+      alert_id: closed_alert.id,
+      type: :notification,
+      upstream_timestamp:
+        DateTime.add(now, -3, :hour)
+        |> DateTime.shift_zone!("Etc/UTC")
+        |> DateTime.truncate(:second)
+    })
+
+    {_user, notification} =
+      [Repo.preload(user, notification_subscriptions: :windows)]
+      |> Notifications.Scheduler.new_notifications([closed_alert | open_alerts], now, global)
+      |> Enum.find(fn {_user, notification} -> notification.alert_id == closed_alert.id end)
+
+    %{notification: notification, open_alerts: open_alerts}
+  end
+
+  defp other_alert(now, overrides) do
+    build(
+      :alert,
+      Keyword.merge(
+        [
+          active_period: [%MBTAV3API.Alert.ActivePeriod{start: DateTime.add(now, -2, :hour)}],
+          effect: :detour,
+          informed_entity: [
+            %MBTAV3API.Alert.InformedEntity{
+              activities: [:board, :exit, :ride],
+              route: "66",
+              route_type: :bus
+            }
+          ],
+          last_push_notification_timestamp: DateTime.add(now, -1, :hour)
+        ],
+        overrides
+      )
+    )
+  end
+
+  # Returns the enqueued all clear job for a closed suspension on route 66 alongside the given alerts.
+  defp perform_all_clear_with_others(build_other_alerts) do
+    now = DateTime.now!("America/New_York")
+
+    closed_alert =
+      build(:alert,
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{
+            start: DateTime.add(now, -25, :hour),
+            end: DateTime.add(now, -4, :minute)
+          }
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: DateTime.add(now, -20, :minute),
+        closed_timestamp: DateTime.add(now, -20, :minute)
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [NotificationsFactory.perpetual_window_factory()]
+    )
+
+    Repo.insert!(%DeliveredNotification{
+      user_id: user.id,
+      alert_id: closed_alert.id,
+      type: :notification,
+      upstream_timestamp:
+        DateTime.add(now, -3, :hour)
+        |> DateTime.shift_zone!("Etc/UTC")
+        |> DateTime.truncate(:second)
+    })
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([closed_alert | build_other_alerts.(now)], [])
+    {:ok, _} = perform_job(MobileAppBackend.Notifications.Scheduler, %{})
+
+    [job] =
+      Enum.filter(all_enqueued(worker: Notifications.Deliverer), fn job ->
+        job.args["alert_id"] == closed_alert.id and job.args["type"] == "all_clear"
+      end)
+
+    job
+  end
+
   test "skips notifications that have ended without a closed timestamp" do
     now = DateTime.now!("America/New_York")
 
@@ -1525,7 +1852,7 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
         )
       end
     )
-    |> expect(:trips, 4, fn params, _ ->
+    |> expect(:trips, 3, fn params, _ ->
       case params do
         [filter: [id: trip_id]] ->
           ok_response([Map.get(trips, trip_id)])

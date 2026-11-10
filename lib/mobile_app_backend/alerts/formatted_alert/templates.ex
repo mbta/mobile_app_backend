@@ -5,6 +5,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   use MobileAppBackend.Gettext
 
   alias MBTAV3API.Alert
+  alias MobileAppBackend.Alerts.AlertSummary
   alias MobileAppBackend.Alerts.FormattedAlert.TemplateFragments
   alias MobileAppBackend.PresentationStrings
 
@@ -84,9 +85,25 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # All Clear
   # ===========================================================================
 
-  # All clear with multiple active alerts and closure effect
-  def all_clear(%{effect: effect}, true, location)
-      when effect in [:dock_closure, :station_closure, :stop_closure] do
+  @spec all_clear(Alert.t(), [AlertSummary.OtherActiveAlert.t()], String.t()) :: String.t()
+  # All clear with no other active alerts
+  def all_clear(_alert, [], _location) do
+    gettext("**All clear:** Normal service has resumed.",
+      comment: ~S|Alert summary in the format of \"All clear: Normal service has resumed.\"|
+    )
+  end
+
+  # All clear with other active alerts: the update followed by what is still in effect
+  def all_clear(alert, other_active_alerts, location) do
+    update = all_clear_update(alert, location)
+    still_in_effect = still_in_effect(alert, other_active_alerts)
+
+    "#{update} #{still_in_effect}"
+  end
+
+  # closure effect
+  defp all_clear_update(%{effect: effect}, location)
+       when effect in [:dock_closure, :station_closure, :stop_closure] do
     gettext("**Update:** %{mode} service has resumed%{summary_location}.",
       comment:
         ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|,
@@ -95,8 +112,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
-  # All clear with multiple active alerts and elevator closure effect
-  def all_clear(%{effect: :elevator_closure}, true, location) do
+  # All clear for elevator closure effect
+  defp all_clear_update(%{effect: :elevator_closure}, location) do
     gettext("**Update:** %{mode} service has resumed%{summary_location}.",
       comment:
         ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|,
@@ -105,12 +122,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
-  # All clear with multiple active alerts and shuttle effect
-  def all_clear(
-        %{effect: :shuttle, informed_entity: [%{route_type: route_type} | _rest]},
-        true,
-        location
-      ) do
+  # All clear for shuttle effect
+  defp all_clear_update(
+         %{effect: :shuttle, informed_entity: [%{route_type: route_type} | _rest]},
+         location
+       ) do
     gettext("**Update:** %{mode} service has resumed%{summary_location}.",
       comment:
         ~s|Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."|,
@@ -119,27 +135,57 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
     )
   end
 
-  # All clear with multiple active alerts
-  def all_clear(%{effect: effect}, true, location) do
-    gettext("**Update:** %{effect_sentence_case} has ended%{summary_location}.",
-      comment:
-        ~S|Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "[Update][Stop closure] has ended[ at Haymarket]." or \"[Update][Suspension] has ended[ from Alewife to Harvard]”.|,
-      effect_sentence_case:
-        case effect do
-          # Suspension effect needs to use the non-sentence case version or it will read "Service suspended has ended"
-          :suspension -> PresentationStrings.effect(effect)
-          _ -> PresentationStrings.effect_sentence_case(effect)
-        end,
-      summary_location: location
+  defp all_clear_update(%{effect: effect}, location) do
+    if plural_effect?(effect) do
+      gettext("**Update:** %{effect_sentence_case} have ended%{summary_location}.",
+        comment:
+          ~S|Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."|,
+        effect_sentence_case: PresentationStrings.effect_noun_sentence_case(effect),
+        summary_location: location
+      )
+    else
+      gettext("**Update:** %{effect_sentence_case} has ended%{summary_location}.",
+        comment:
+          ~S|Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "Update: [Stop closure] has ended[ at Haymarket]." or "Update: [Suspension] has ended[ from Alewife to Harvard]."|,
+        effect_sentence_case: PresentationStrings.effect_noun_sentence_case(effect),
+        summary_location: location
+      )
+    end
+  end
+
+  # Only a single other alert is named; the location is included when it has the same effect.
+  defp still_in_effect(%{effect: effect}, [other]) do
+    location =
+      if other.effect == effect do
+        TemplateFragments.location(other.effect, other.location)
+      else
+        ""
+      end
+
+    if plural_effect?(other.effect) do
+      gettext("%{effect} are still in effect%{summary_location}.",
+        comment:
+          ~S|Alert summary sentence in the format of "[Plural alert effect] are still in effect[ at location].", ex "Shuttle buses are still in effect from Kenmore to Copley."|,
+        effect: PresentationStrings.effect_noun_sentence_case(other.effect),
+        summary_location: location
+      )
+    else
+      gettext("%{effect} is still in effect%{summary_location}.",
+        comment:
+          ~S|Alert summary sentence in the format of "[Alert effect] is still in effect[ at location].", ex "Detour is still in effect at Haymarket."|,
+        effect: PresentationStrings.effect_noun_sentence_case(other.effect),
+        summary_location: location
+      )
+    end
+  end
+
+  defp still_in_effect(_alert, _other_active_alerts) do
+    gettext("Other disruptions are still in effect.",
+      comment: "Sentence following an all clear summary when multiple other alerts remain active"
     )
   end
 
-  # All clear with no other active alerts
-  def all_clear(_alert, _has_multiple_active_alerts, _location) do
-    gettext("**All clear:** Normal service has resumed.",
-      comment: ~S|Alert summary in the format of \"All clear: Normal service has resumed.\"|
-    )
-  end
+  defp plural_effect?(effect), do: effect in [:delay, :shuttle]
 
   @spec trip_specific(
           String.t(),

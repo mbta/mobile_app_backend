@@ -62,5 +62,48 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotificationTest do
                type: {:update, ~U[2026-08-26 12:00:00Z]}
              } = OutgoingNotification.localize(outgoing_notification, "en")
     end
+
+    test "all clear with a single other active alert links to that alert", %{
+      alert: alert,
+      title: title
+    } do
+      outgoing_notification = %OutgoingNotification{
+        title: title,
+        summary: %AlertSummary.AllClear{
+          effect: :suspension,
+          other_active_alerts: [%AlertSummary.OtherActiveAlert{alert_id: "other", effect: :delay}]
+        },
+        subscriptions: [],
+        alert: alert,
+        type: :all_clear
+      }
+
+      assert %OutgoingNotification.Localized{
+               alert_id: "alert-id",
+               deep_link_alert_id: "other"
+             } = OutgoingNotification.localize(outgoing_notification, "en")
+    end
+
+    test "all clear with several other active alerts has no alert link", %{
+      alert: alert,
+      title: title
+    } do
+      outgoing_notification = %OutgoingNotification{
+        title: title,
+        summary: %AlertSummary.AllClear{
+          effect: :suspension,
+          other_active_alerts: [
+            %AlertSummary.OtherActiveAlert{alert_id: "other-1", effect: :delay},
+            %AlertSummary.OtherActiveAlert{alert_id: "other-2", effect: :detour}
+          ]
+        },
+        subscriptions: [],
+        alert: alert,
+        type: :all_clear
+      }
+
+      assert %OutgoingNotification.Localized{deep_link_alert_id: nil} =
+               OutgoingNotification.localize(outgoing_notification, "en")
+    end
   end
 end

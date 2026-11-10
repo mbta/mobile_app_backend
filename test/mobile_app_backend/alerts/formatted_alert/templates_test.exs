@@ -2,7 +2,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
   use ExUnit.Case, async: true
   import MobileAppBackend.Factory
 
+  alias MobileAppBackend.Alerts.AlertSummary.Location
+  alias MobileAppBackend.Alerts.AlertSummary.OtherActiveAlert
   alias MobileAppBackend.Alerts.FormattedAlert.Templates
+
+  @other_detour [%OtherActiveAlert{effect: :detour}]
 
   describe "standard/5" do
     test "dock_closure" do
@@ -116,62 +120,238 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
       summary =
         Templates.all_clear(
           build(:alert, effect: :station_closure),
-          true,
+          @other_detour,
           " at **Wood Island**"
         )
 
-      assert "**Update:** Train service has resumed at **Wood Island**." == summary
+      assert "**Update:** Train service has resumed at **Wood Island**. Detour is still in effect." ==
+               summary
     end
 
     test "delay" do
       summary =
         Templates.all_clear(
           build(:alert, effect: :delay),
-          true,
+          @other_detour,
           " at **Wood Island**"
         )
 
-      assert "**Update:** Delay has ended at **Wood Island**." == summary
+      assert "**Update:** Delays have ended at **Wood Island**. Detour is still in effect." ==
+               summary
     end
 
     test "track_change" do
       summary =
         Templates.all_clear(
           build(:alert, effect: :track_change),
-          true,
+          @other_detour,
           " at **Wood Island**"
         )
 
-      assert "**Update:** Track change has ended at **Wood Island**." == summary
+      assert "**Update:** Track change has ended at **Wood Island**. Detour is still in effect." ==
+               summary
     end
 
     test "shuttle" do
       summary =
         Templates.all_clear(
           build(:alert, effect: :shuttle, informed_entity: [%{route_type: :bus}]),
-          true,
+          @other_detour,
           " at **Wood Island**"
         )
 
-      assert "**Update:** Bus service has resumed at **Wood Island**." == summary
+      assert "**Update:** Bus service has resumed at **Wood Island**. Detour is still in effect." ==
+               summary
     end
 
     test "with no location" do
       summary =
         Templates.all_clear(
           build(:alert, effect: :detour),
-          true,
+          @other_detour,
           ""
         )
 
-      assert "**Update:** Detour has ended." == summary
+      assert "**Update:** Detour has ended. Detour is still in effect." == summary
+    end
+
+    test "elevator_closure" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :elevator_closure),
+          @other_detour,
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Elevator service has resumed at **Wood Island**. Detour is still in effect." ==
+               summary
+    end
+
+    test "uses the closure noun for another closure still in effect" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          [%OtherActiveAlert{effect: :stop_closure}],
+          ""
+        )
+
+      assert "**Update:** Detour has ended. Stop closure is still in effect." == summary
+    end
+
+    test "uses the suspension noun for another suspension still in effect" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          [%OtherActiveAlert{effect: :suspension}],
+          ""
+        )
+
+      assert "**Update:** Detour has ended. Suspension is still in effect." == summary
+    end
+
+    test "is generic when several other alerts are still in effect" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :suspension),
+          [%OtherActiveAlert{effect: :detour}, %OtherActiveAlert{effect: :delay}],
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Suspension has ended at **Wood Island**. Other disruptions are still in effect." ==
+               summary
+    end
+
+    test "includes the location of another shuttle with different start and end stops" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :shuttle, informed_entity: [%{route_type: :bus}]),
+          [
+            %OtherActiveAlert{
+              effect: :shuttle,
+              location: %Location.SuccessiveStops{
+                start_stop_name: "Kenmore",
+                end_stop_name: "Copley",
+                downstream: false
+              }
+            }
+          ],
+          " from **Riverside** to **Newton Highlands**"
+        )
+
+      assert "**Update:** Bus service has resumed from **Riverside** to **Newton Highlands**. Shuttle buses are still in effect from **Kenmore** to **Copley**." ==
+               summary
+    end
+
+    test "includes the whole route of another shuttle" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :shuttle, informed_entity: [%{route_type: :bus}]),
+          [
+            %OtherActiveAlert{
+              effect: :shuttle,
+              location: %Location.WholeRoute{route_label: "Green Line B", route_type: :light_rail}
+            }
+          ],
+          ""
+        )
+
+      assert "**Update:** Bus service has resumed. Shuttle buses are still in effect replacing **Green Line B**." ==
+               summary
+    end
+
+    test "includes the location of another station closure" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :station_closure),
+          [
+            %OtherActiveAlert{
+              effect: :station_closure,
+              location: %Location.AffectedStops{stops: ["Malden Center", "Oak Grove"]}
+            }
+          ],
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Train service has resumed at **Wood Island**. Station closure is still in effect at **Malden Center** and **Oak Grove**." ==
+               summary
+    end
+
+    test "includes the location of another suspension" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :suspension),
+          [
+            %OtherActiveAlert{
+              effect: :suspension,
+              location: %Location.SuccessiveStops{
+                start_stop_name: "Alewife",
+                end_stop_name: "Harvard",
+                downstream: true
+              }
+            }
+          ],
+          " from **Oak Grove** to **North Station**"
+        )
+
+      assert "**Update:** Suspension has ended from **Oak Grove** to **North Station**. Suspension is still in effect from **Alewife** to **Harvard**." ==
+               summary
+    end
+
+    test "includes the location of other delays" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :delay),
+          [
+            %OtherActiveAlert{
+              effect: :delay,
+              location: %Location.SingleStop{stop_name: "Ruggles", downstream: false}
+            }
+          ],
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Delays have ended at **Wood Island**. Delays are still in effect at **Ruggles**." ==
+               summary
+    end
+
+    test "has no location for another alert with the same effect when it has none" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          [%OtherActiveAlert{effect: :detour, location: nil}],
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Detour has ended at **Wood Island**. Detour is still in effect." ==
+               summary
+    end
+
+    test "omits the location of another alert with a different effect" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :detour),
+          [
+            %OtherActiveAlert{
+              effect: :shuttle,
+              location: %Location.SuccessiveStops{
+                start_stop_name: "Kenmore",
+                end_stop_name: "Copley",
+                downstream: false
+              }
+            }
+          ],
+          " at **Wood Island**"
+        )
+
+      assert "**Update:** Detour has ended at **Wood Island**. Shuttle buses are still in effect." ==
+               summary
     end
 
     test "returns normal service resumed when single all clear" do
       summary =
         Templates.all_clear(
           build(:alert, effect: :detour),
-          false,
+          [],
           " at **Wood Island**"
         )
 
