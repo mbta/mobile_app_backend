@@ -71,14 +71,14 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
       ) do
     with %AlertSummary.Location.SuccessiveStops{
            start_stop_name: location_start_stop_name,
-           end_stop_name: end_stop_name,
-           downstream: downstream
+           end_stop_name: end_stop_name
          } <-
            AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global),
          %Stop{name: current_stop_name} <- global.stops[stop_id],
+         stop_affected = AlertSummary.stop_affected?(alert, stop_id, patterns, global),
          start_stop_name <-
-           resolve_start_stop_name(downstream, location_start_stop_name, current_stop_name),
-         identity_stop_name <- resolve_trip_identity_stop_name(downstream, current_stop_name),
+           resolve_start_stop_name(stop_affected, location_start_stop_name, current_stop_name),
+         identity_stop_name <- resolve_trip_identity_stop_name(stop_affected, current_stop_name),
          trip_identity when not is_nil(trip_identity) <-
            trip_identity(identity_stop_name, patterns, informed_schedules, global, context) do
       %__MODULE__{
@@ -93,18 +93,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripShuttle do
     end
   end
 
-  defp resolve_start_stop_name(downstream, location_start_stop_name, current_stop_name) do
-    case downstream do
-      false -> current_stop_name
-      _ -> location_start_stop_name
-    end
+  defp resolve_start_stop_name(stop_affected, location_start_stop_name, current_stop_name) do
+    if stop_affected, do: current_stop_name, else: location_start_stop_name
   end
 
-  defp resolve_trip_identity_stop_name(downstream, current_stop_name) do
-    case downstream do
-      false -> nil
-      _ -> current_stop_name
-    end
+  defp resolve_trip_identity_stop_name(stop_affected, current_stop_name) do
+    if stop_affected, do: nil, else: current_stop_name
   end
 
   @doc """
