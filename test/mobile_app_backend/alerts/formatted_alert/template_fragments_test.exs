@@ -24,8 +24,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
     test "single stop" do
       assert " at **Downtown Crossing**" ==
                TemplateFragments.location(:suspension, %Location.SingleStop{
-                 stop_name: "Downtown Crossing",
-                 downstream: false
+                 stop_name: "Downtown Crossing"
                })
     end
 

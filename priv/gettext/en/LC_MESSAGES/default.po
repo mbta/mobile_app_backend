@@ -684,13 +684,13 @@ msgstr "trains"
 #: lib/mobile_app_backend_web/components/core_components.ex:488
 #, elixir-autogen, elixir-format, import-optional
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:78
 #: lib/mobile_app_backend_web/components/core_components.ex:135
 #, elixir-autogen, elixir-format, import-optional
 msgid "close"
-msgstr ""
+msgstr "close"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
 #, elixir-autogen, elixir-format
