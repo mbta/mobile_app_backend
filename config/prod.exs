@@ -6,7 +6,8 @@ import Config
 # which you should run after static files are built and
 # before starting your production server.
 config :mobile_app_backend, MobileAppBackendWeb.Endpoint,
-  cache_static_manifest: "priv/static/cache_manifest.json"
+  cache_static_manifest: "priv/static/cache_manifest.json",
+  force_ssl: [hsts: true]
 
 config :mobile_app_backend, :redirect_http?, true
 

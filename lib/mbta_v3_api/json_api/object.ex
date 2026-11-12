@@ -294,6 +294,7 @@ defmodule MBTAV3API.JsonApi.Object do
       :child_stop_ids
   """
   @spec key_for_include_name(atom()) :: atom()
+  # sobelow_skip ["DOS.StringToAtom"]
   def key_for_include_name(name) do
     name_string = to_string(name)
 

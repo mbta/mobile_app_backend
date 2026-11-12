@@ -1,6 +1,7 @@
 defmodule MobileAppBackendWeb.Endpoint do
   use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :mobile_app_backend
+  # sobelow_skip ["Config.CSWH"] - Socket intentionally exposed to external traffic
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
