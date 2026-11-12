@@ -24,13 +24,13 @@ msgid " daily%{recurrence_text}"
 msgstr " chak jou%{recurrence_text}"
 
 #. An alert cause interpolated into an alert summary: ex. "due to [maintenance]", in a longer string like "Trip 101 experiencing delays of about 10 minutes today due to maintenance daily until Friday"
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr " akòz %{cause}"
 
 #. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:295
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:294
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr " soti nan %{start_time} rive nan %{end_time}"
@@ -72,32 +72,32 @@ msgid " some days%{recurrence_text}"
 msgstr " kèk jou%{recurrence_text}"
 
 #. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:288
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:287
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr " kòmanse **%{formatted_time}** jodi a"
 
 #. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:282
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:281
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr " kòmanse demen"
 
 #. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:240
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr " jiska fen sèvis la"
 
 #. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:249
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:248
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr " jiska demen"
 
 #. Alert summary timeframe with no known end. The leading space should be retained.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:159
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr " jiskaske yo bay lòt avi"
@@ -155,12 +155,6 @@ msgstr "Pwoblèm Aksè"
 msgid "Access issue"
 msgstr "Pwoblèm aksè"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:535
-#, elixir-autogen, elixir-format
-msgid "Accident"
-msgstr "Aksidan"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:232
 #, elixir-autogen, elixir-format
@@ -194,44 +188,6 @@ msgstr "Avètisman Amber"
 msgid "Amber alert"
 msgstr "Avètisman amber"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#. Possible alert cause
-#: lib/presentation_strings.ex:341
-#: lib/presentation_strings.ex:538
-#, elixir-autogen, elixir-format
-msgid "Amtrak"
-msgstr "Amtrak"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:541
-#, elixir-autogen, elixir-format
-msgid "Amtrak Train Traffic"
-msgstr "Trafik tren Amtrak"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:344
-#, elixir-autogen, elixir-format
-msgid "Amtrak train traffic"
-msgstr "Trafik tren Amtrak"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:544
-#, elixir-autogen, elixir-format
-msgid "An Earlier Mechanical Problem"
-msgstr "Yon Pwoblèm Mekanik Ki Rive Pi Bonè"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:547
-#, elixir-autogen, elixir-format
-msgid "An Earlier Signal Problem"
-msgstr "Yon Siyal Ki Rive Pi Bonè"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:550
-#, elixir-autogen, elixir-format
-msgid "Autos Impeding Service"
-msgstr "Machin Ki Bloke Sèvis la"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:238
 #, elixir-autogen, elixir-format
@@ -250,42 +206,6 @@ msgstr "Pwoblèm bisiklèt"
 msgid "Cancellation"
 msgstr "Anilasyon"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:553
-#, elixir-autogen, elixir-format
-msgid "Coast Guard Restriction"
-msgstr "Gad Kot Mete Restriksyon"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:360
-#, elixir-autogen, elixir-format
-msgid "Coast Guard restriction"
-msgstr "Restriksyon Gad Kòt"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:556
-#, elixir-autogen, elixir-format
-msgid "Congestion"
-msgstr "Blokis"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:559
-#, elixir-autogen, elixir-format
-msgid "Construction"
-msgstr "Konstriksyon"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:562
-#, elixir-autogen, elixir-format
-msgid "Crossing Issue"
-msgstr "Pwoblèm nan Pasaj a Nivo yo"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:565
-#, elixir-autogen, elixir-format
-msgid "Crossing Malfunction"
-msgstr "Pasaj a Nivo ki p ap Fonksyone"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:135
 #: lib/presentation_strings.ex:244
@@ -293,30 +213,12 @@ msgstr "Pasaj a Nivo ki p ap Fonksyone"
 msgid "Delay"
 msgstr "Reta"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:568
-#, elixir-autogen, elixir-format
-msgid "Demonstration"
-msgstr "Demonstrasyon"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:138
 #: lib/presentation_strings.ex:247
 #, elixir-autogen, elixir-format
 msgid "Detour"
 msgstr "Detou"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:571
-#, elixir-autogen, elixir-format
-msgid "Disabled Bus"
-msgstr "Bis Ki Pa Aktif"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:574
-#, elixir-autogen, elixir-format
-msgid "Disabled Train"
-msgstr "Tren Ki Pa Aktif"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:250
@@ -342,29 +244,11 @@ msgstr "Waf fèmen"
 msgid "Dock issue"
 msgstr "Pwoblèm waf"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:577
-#, elixir-autogen, elixir-format
-msgid "Drawbridge Being Raised"
-msgstr "Y ap Leve Pon ki ka Bouje a"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:580
-#, elixir-autogen, elixir-format
-msgid "Drawbridge Issue"
-msgstr "Pwoblèm Pon Levab"
-
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:8
 #, elixir-autogen, elixir-format
 msgid "Eastbound"
 msgstr "Pran direksyon lès"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:583
-#, elixir-autogen, elixir-format
-msgid "Electrical Work"
-msgstr "Travay Elektrik"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:256
@@ -414,101 +298,17 @@ msgstr "Pwoblèm Lokal"
 msgid "Facility issue"
 msgstr "Pwoblèm lokal"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:586
-#, elixir-autogen, elixir-format
-msgid "Fire"
-msgstr "Dife"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:589
-#, elixir-autogen, elixir-format
-msgid "Fire Department Activity"
-msgstr "Aktivite Ponpye"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:592
-#, elixir-autogen, elixir-format
-msgid "Flooding"
-msgstr "Inondasyon"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:595
-#, elixir-autogen, elixir-format
-msgid "Fog"
-msgstr "Bwouya"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:598
-#, elixir-autogen, elixir-format
-msgid "Freight Train Interference"
-msgstr "Blokaj Nan Tren Machandiz"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:601
-#, elixir-autogen, elixir-format
-msgid "Hazmat Condition"
-msgstr "Eta Matyè Danjere"
-
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:23
 #, elixir-autogen, elixir-format
 msgid "Heading"
 msgstr "Prale nan direksyon"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:604
-#, elixir-autogen, elixir-format
-msgid "Heavy Ridership"
-msgstr "Anpil Moun Ap Pase la"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:607
-#, elixir-autogen, elixir-format
-msgid "High Winds"
-msgstr "Gwo Van"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:610
-#, elixir-autogen, elixir-format
-msgid "Holiday"
-msgstr "Vakans"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:613
-#, elixir-autogen, elixir-format
-msgid "Ice In Harbor"
-msgstr "Glas Nan Pò a"
-
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:10
 #, elixir-autogen, elixir-format
 msgid "Inbound"
 msgstr "Antran"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:616
-#, elixir-autogen, elixir-format
-msgid "Maintenance"
-msgstr "Antretyen"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:619
-#, elixir-autogen, elixir-format
-msgid "Mechanical Issue"
-msgstr "Pwoblèm Mekanik"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:622
-#, elixir-autogen, elixir-format
-msgid "Mechanical Problem"
-msgstr "Pwoblèm Mekanik"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:625
-#, elixir-autogen, elixir-format
-msgid "Medical Emergency"
-msgstr "Ijans Medikal"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:268
@@ -565,12 +365,6 @@ msgstr "Avi"
 msgid "Outbound"
 msgstr "Soti"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:628
-#, elixir-autogen, elixir-format
-msgid "Parade"
-msgstr "Parad"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:277
 #, elixir-autogen, elixir-format
@@ -595,12 +389,6 @@ msgstr "Pakin fèmen"
 msgid "Parking issue"
 msgstr "Pwoblèm pakin"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:631
-#, elixir-autogen, elixir-format
-msgid "Police Activity"
-msgstr "Aktivite Polis"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:283
 #, elixir-autogen, elixir-format
@@ -612,18 +400,6 @@ msgstr "Chanjman Règleman"
 #, elixir-autogen, elixir-format
 msgid "Policy change"
 msgstr "Chanjman règleman"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:634
-#, elixir-autogen, elixir-format
-msgid "Power Problem"
-msgstr "Pwoblèm Kouran"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:640
-#, elixir-autogen, elixir-format
-msgid "Rail Defect"
-msgstr "Defo nan ray tren yo"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:286
@@ -656,12 +432,6 @@ msgstr "Chanjman sèvis"
 msgid "Service suspended"
 msgstr "Sèvis ki kanpe"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:646
-#, elixir-autogen, elixir-format
-msgid "Severe Weather"
-msgstr "Move Tan"
-
 #. Possible alert effect
 #. The status label for a shuttled trip
 #: lib/presentation_strings.ex:292
@@ -681,36 +451,6 @@ msgstr "Otobis k ap fè lanavèt"
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "Bis navèt yo ranplase %{trip_identity} soti **%{start_stop}** pou rive **%{end_stop}**%{recurrence}"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:649
-#, elixir-autogen, elixir-format
-msgid "Signal Issue"
-msgstr "Pwoblèm Siyal"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:652
-#, elixir-autogen, elixir-format
-msgid "Signal Problem"
-msgstr "Pwoblèm Siyal"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:655
-#, elixir-autogen, elixir-format
-msgid "Single Tracking"
-msgstr "Yon sèl ray pou de direksyon"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:658
-#, elixir-autogen, elixir-format
-msgid "Slippery Rail"
-msgstr "Ray ki Glise"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:661
-#, elixir-autogen, elixir-format
-msgid "Snow"
-msgstr "Nèj"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:297
 #, elixir-autogen, elixir-format
@@ -728,18 +468,6 @@ msgstr "Wout denèjman"
 #, elixir-autogen, elixir-format
 msgid "Southbound"
 msgstr "Nan direksyon sid"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:664
-#, elixir-autogen, elixir-format
-msgid "Special Event"
-msgstr "Evènman Espesyal"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:667
-#, elixir-autogen, elixir-format
-msgid "Speed Restriction"
-msgstr "Limit Vitès"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:300
@@ -803,12 +531,6 @@ msgstr "Arè Fèmen"
 msgid "Stop shoveling"
 msgstr "Arè denèjman"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:670
-#, elixir-autogen, elixir-format
-msgid "Strike"
-msgstr "Grèv"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:207
 #: lib/presentation_strings.ex:318
@@ -822,35 +544,11 @@ msgstr "Rezime"
 msgid "Suspension"
 msgstr "Sispansyon"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:673
-#, elixir-autogen, elixir-format
-msgid "Switch Issue"
-msgstr "Pwoblèm nan switch ray"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:676
-#, elixir-autogen, elixir-format
-msgid "Switch Problem"
-msgstr "Pann nan switch ray"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:679
-#, elixir-autogen, elixir-format
-msgid "Technical Problem"
-msgstr "Pwoblèm Teknik"
-
 #. Trip identity in the form of ”This [vehicle type]”, ex ”This [train]”
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:105
 #, elixir-autogen, elixir-format
 msgid "This %{route_type}"
 msgstr "Sa a %{route_type}"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:682
-#, elixir-autogen, elixir-format
-msgid "Tie Replacement"
-msgstr "Ranplasman kòd"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:324
@@ -858,35 +556,11 @@ msgstr "Ranplasman kòd"
 msgid "Track Change"
 msgstr "Suiv Chanjman"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:685
-#, elixir-autogen, elixir-format
-msgid "Track Problem"
-msgstr "Pwoblèm sou Ray"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:688
-#, elixir-autogen, elixir-format
-msgid "Track Work"
-msgstr "Travay sou Ray"
-
 #. Possible alert effect
 #: lib/presentation_strings.ex:215
 #, elixir-autogen, elixir-format
 msgid "Track change"
 msgstr "Suiv chanjman"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:691
-#, elixir-autogen, elixir-format
-msgid "Traffic"
-msgstr "Sikilasyon"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:694
-#, elixir-autogen, elixir-format
-msgid "Train Traffic"
-msgstr "Trafik tren"
 
 #. Header for a cancelled trip card on stop details
 #. Possible alert effect
@@ -895,47 +569,11 @@ msgstr "Trafik tren"
 msgid "Trip cancelled"
 msgstr "Vwayaj la anile"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:697
-#, elixir-autogen, elixir-format
-msgid "Unruly Passenger"
-msgstr "Pasaje Ki Pa Respekte Règ"
-
-#. Possible alert cause
-#: lib/presentation_strings.ex:709
-#, elixir-autogen, elixir-format
-msgid "Weather"
-msgstr "Tan"
-
 #. A route direction label
 #: lib/mobile_app_backend/alerts/direction_label.ex:9
 #, elixir-autogen, elixir-format
 msgid "Westbound"
 msgstr "Pran direksyon lwès"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:338
-#, elixir-autogen, elixir-format
-msgid "accident"
-msgstr "aksidan"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:347
-#, elixir-autogen, elixir-format
-msgid "an earlier mechanical problem"
-msgstr "yon pwoblèm mekanik ki te pase anvan"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:352
-#, elixir-autogen, elixir-format
-msgid "an earlier signal problem"
-msgstr "yon pwoblèm siyal ki te pase anvan"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:357
-#, elixir-autogen, elixir-format
-msgid "autos impeding service"
-msgstr "oto ap anpeche sèvis la"
 
 #. bus
 #: lib/presentation_strings.ex:16
@@ -949,68 +587,8 @@ msgstr "bis"
 msgid "buses"
 msgstr "bis yo"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:365
-#, elixir-autogen, elixir-format
-msgid "congestion"
-msgstr "anbouteyaj"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:368
-#, elixir-autogen, elixir-format
-msgid "construction"
-msgstr "konstriksyon"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:371
-#, elixir-autogen, elixir-format
-msgid "crossing issue"
-msgstr "pwoblèm nan pasaj a nivo"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:374
-#, elixir-autogen, elixir-format
-msgid "crossing malfunction"
-msgstr "malfonksyònman nan pasaj a nivo"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:377
-#, elixir-autogen, elixir-format
-msgid "demonstration"
-msgstr "manifestasyon"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:380
-#, elixir-autogen, elixir-format
-msgid "disabled bus"
-msgstr "otobis anpann"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:383
-#, elixir-autogen, elixir-format
-msgid "disabled train"
-msgstr "tren anpann"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:386
-#, elixir-autogen, elixir-format
-msgid "drawbridge being raised"
-msgstr "pon levasyon ap monte"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:391
-#, elixir-autogen, elixir-format
-msgid "drawbridge issue"
-msgstr "pwoblèm pon leve"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:394
-#, elixir-autogen, elixir-format
-msgid "electrical work"
-msgstr "travay elektrik"
-
 #. Used when an alert ends at the end of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:319
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:318
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr "fen sèvis"
@@ -1027,66 +605,6 @@ msgstr "bato yo"
 msgid "ferry"
 msgstr "bato"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:397
-#, elixir-autogen, elixir-format
-msgid "fire"
-msgstr "dife"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:400
-#, elixir-autogen, elixir-format
-msgid "fire department activity"
-msgstr "aktivite ponpye"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:405
-#, elixir-autogen, elixir-format
-msgid "flooding"
-msgstr "inondasyon"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:408
-#, elixir-autogen, elixir-format
-msgid "fog"
-msgstr "bwouya"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:411
-#, elixir-autogen, elixir-format
-msgid "freight train interference"
-msgstr "entèferans tren machandiz"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:416
-#, elixir-autogen, elixir-format
-msgid "hazmat condition"
-msgstr "kondisyon danje"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:419
-#, elixir-autogen, elixir-format
-msgid "heavy ridership"
-msgstr "Anpil pasaje"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:422
-#, elixir-autogen, elixir-format
-msgid "high winds"
-msgstr "gwo van"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:425
-#, elixir-autogen, elixir-format
-msgid "holiday"
-msgstr "jou ferye"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:428
-#, elixir-autogen, elixir-format
-msgid "ice in harbor"
-msgstr "glas nan pò"
-
 #. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:171
 #, elixir-autogen, elixir-format
@@ -1100,46 +618,22 @@ msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr " jiska %{1}"
 
 #. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:254
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr " jiska %{1}"
 
 #. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:264
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr " jiska %{1}"
 
 #. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:275
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:274
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr " jiska %{1}"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:431
-#, elixir-autogen, elixir-format
-msgid "maintenance"
-msgstr "antretyen"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:434
-#, elixir-autogen, elixir-format
-msgid "mechanical issue"
-msgstr "pwoblèm mekanik"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:437
-#, elixir-autogen, elixir-format
-msgid "mechanical problem"
-msgstr "pwoblèm mekanik"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:440
-#, elixir-autogen, elixir-format
-msgid "medical emergency"
-msgstr "ijans medikal"
 
 #. Trip identity referring to more than one specific trip
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:181
@@ -1147,107 +641,11 @@ msgstr "ijans medikal"
 msgid "multiple trips"
 msgstr "plizyè vwayaj"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:443
-#, elixir-autogen, elixir-format
-msgid "parade"
-msgstr "parad"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:446
-#, elixir-autogen, elixir-format
-msgid "police activity"
-msgstr "aktivite lapolis"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:449
-#, elixir-autogen, elixir-format
-msgid "power problem"
-msgstr "pwoblèm kouran"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:455
-#, elixir-autogen, elixir-format
-msgid "rail defect"
-msgstr "defo nan ray"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:461
-#, elixir-autogen, elixir-format
-msgid "severe weather"
-msgstr "move tan"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:464
-#, elixir-autogen, elixir-format
-msgid "signal issue"
-msgstr "pwoblèm siyal"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:467
-#, elixir-autogen, elixir-format
-msgid "signal problem"
-msgstr "pann siyal"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:470
-#, elixir-autogen, elixir-format
-msgid "single tracking"
-msgstr "yon sèl ray pou de direksyon"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:473
-#, elixir-autogen, elixir-format
-msgid "slippery rail"
-msgstr "ray glise"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:476
-#, elixir-autogen, elixir-format
-msgid "snow"
-msgstr "nèj"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:479
-#, elixir-autogen, elixir-format
-msgid "special event"
-msgstr "evènman espesyal"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:482
-#, elixir-autogen, elixir-format
-msgid "speed restriction"
-msgstr "restriksyon vitès"
-
 #. Used when an alert begins at the start of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:314
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:313
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr "kòmansman sèvis"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:485
-#, elixir-autogen, elixir-format
-msgid "strike"
-msgstr "grèv"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:488
-#, elixir-autogen, elixir-format
-msgid "switch issue"
-msgstr "pwoblèm nan switch ray"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:491
-#, elixir-autogen, elixir-format
-msgid "switch problem"
-msgstr "pann nan switch ray"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:494
-#, elixir-autogen, elixir-format
-msgid "technical problem"
-msgstr "pwoblèm teknik"
 
 #. Trip identity in the format of “the [time] [vehicle]”, ex “the [12:13 PM] [train]
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:156
@@ -1261,12 +659,6 @@ msgstr "**%{time}** %{vehicle} la"
 msgid "this %{vehicle}"
 msgstr "%{vehicle} sa a"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:497
-#, elixir-autogen, elixir-format
-msgid "tie replacement"
-msgstr "ranplasman mare"
-
 #: lib/mobile_app_backend/alerts/formatted_alert.ex:83
 #, elixir-autogen, elixir-format
 msgid "today"
@@ -1277,53 +669,17 @@ msgstr "jodi a"
 msgid "tomorrow"
 msgstr "demen"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:500
-#, elixir-autogen, elixir-format
-msgid "track problem"
-msgstr "pwoblèm sou ray"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:503
-#, elixir-autogen, elixir-format
-msgid "track work"
-msgstr "travay ap fèt sou ray"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:506
-#, elixir-autogen, elixir-format
-msgid "traffic"
-msgstr "trafik"
-
 #. train
 #: lib/presentation_strings.ex:52
 #, elixir-autogen, elixir-format
 msgid "train"
 msgstr "tren"
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:509
-#, elixir-autogen, elixir-format
-msgid "train traffic"
-msgstr "trafik tren"
-
 #. trains
 #: lib/presentation_strings.ex:56
 #, elixir-autogen, elixir-format
 msgid "trains"
 msgstr "tren yo"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:512
-#, elixir-autogen, elixir-format
-msgid "unruly passenger"
-msgstr "pasaje ap fè dezòd"
-
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:524
-#, elixir-autogen, elixir-format
-msgid "weather"
-msgstr "move tan"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:488
 #, elixir-autogen, elixir-format, import-optional
@@ -1496,7 +852,7 @@ msgid "Train"
 msgstr "tren"
 
 #. Alert summary timeframe ending today at an unspecified time. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:225
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:224
 #, elixir-autogen, elixir-format
 msgid " until later today"
 msgstr " pita jodi a"
@@ -1570,62 +926,362 @@ msgstr "Nan sans kontrè zegwi mont lan (goch mont)"
 msgid "Looping"
 msgstr "Boukl"
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:637
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:343
 #, elixir-autogen, elixir-format
-msgid "Presence of Whales"
-msgstr "Prezans Balèn"
+msgid " due to Amtrak"
+msgstr ""
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:643
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:346
 #, elixir-autogen, elixir-format
-msgid "Rough Seas"
-msgstr "Lanmè Ajite"
+msgid " due to Amtrak train traffic"
+msgstr ""
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:700
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:366
 #, elixir-autogen, elixir-format
-msgid "Utility Work"
-msgstr "Travay sou Rezo Piblik yo"
+msgid " due to a Coast Guard restriction"
+msgstr ""
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:703
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:377
 #, elixir-autogen, elixir-format
-msgid "Vessel Substitution"
-msgstr "Ranplasman Bato"
+msgid " due to a crossing issue"
+msgstr ""
 
-#. Possible alert cause
-#: lib/presentation_strings.ex:706
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:383
 #, elixir-autogen, elixir-format
-msgid "Vessel Traffic"
-msgstr "Trafik bato"
+msgid " due to a crossing malfunction"
+msgstr ""
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:452
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:388
 #, elixir-autogen, elixir-format
-msgid "presence of whales"
-msgstr "prezans balèn"
+msgid " due to a demonstration"
+msgstr ""
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:458
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:393
 #, elixir-autogen, elixir-format
-msgid "rough seas"
-msgstr "lanmè ajite"
+msgid " due to a disabled bus"
+msgstr ""
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:515
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:396
 #, elixir-autogen, elixir-format
-msgid "utility work"
-msgstr "travay sou rezo piblik yo"
+msgid " due to a disabled train"
+msgstr ""
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:518
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:401
 #, elixir-autogen, elixir-format
-msgid "vessel substitution"
-msgstr "ranplasman bato"
+msgid " due to a drawbridge being raised"
+msgstr ""
 
-#. Alert cause, used in 'Delays due to [cause]'
-#: lib/presentation_strings.ex:521
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:406
 #, elixir-autogen, elixir-format
-msgid "vessel traffic"
+msgid " due to a drawbridge issue"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:416
+#, elixir-autogen, elixir-format
+msgid " due to a fire"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:435
+#, elixir-autogen, elixir-format
+msgid " due to a hazmat condition"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:451
+#, elixir-autogen, elixir-format
+msgid " due to a hurricane"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:462
+#, elixir-autogen, elixir-format
+msgid " due to a mechanical issue"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:467
+#, elixir-autogen, elixir-format
+msgid " due to a mechanical problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:472
+#, elixir-autogen, elixir-format
+msgid " due to a medical emergency"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:477
+#, elixir-autogen, elixir-format
+msgid " due to a parade"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:485
+#, elixir-autogen, elixir-format
+msgid " due to a power problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:495
+#, elixir-autogen, elixir-format
+msgid " due to a rail defect"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:504
+#, elixir-autogen, elixir-format
+msgid " due to a signal issue"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:507
+#, elixir-autogen, elixir-format
+msgid " due to a signal problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:525
+#, elixir-autogen, elixir-format
+msgid " due to a special event"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:530
+#, elixir-autogen, elixir-format
+msgid " due to a speed restriction"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:538
+#, elixir-autogen, elixir-format
+msgid " due to a switch issue"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:541
+#, elixir-autogen, elixir-format
+msgid " due to a switch problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:546
+#, elixir-autogen, elixir-format
+msgid " due to a technical problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:556
+#, elixir-autogen, elixir-format
+msgid " due to a track problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:340
+#, elixir-autogen, elixir-format
+msgid " due to an accident"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:351
+#, elixir-autogen, elixir-format
+msgid " due to an earlier mechanical problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:356
+#, elixir-autogen, elixir-format
+msgid " due to an earlier signal problem"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:570
+#, elixir-autogen, elixir-format
+msgid " due to an unruly passenger"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:361
+#, elixir-autogen, elixir-format
+msgid " due to autos impeding service"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:371
+#, elixir-autogen, elixir-format
+msgid " due to congestion"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:374
+#, elixir-autogen, elixir-format
+msgid " due to construction"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:411
+#, elixir-autogen, elixir-format
+msgid " due to electrical work"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:419
+#, elixir-autogen, elixir-format
+msgid " due to fire department activity"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:424
+#, elixir-autogen, elixir-format
+msgid " due to flooding"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:427
+#, elixir-autogen, elixir-format
+msgid " due to fog"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:430
+#, elixir-autogen, elixir-format
+msgid " due to freight train interference"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:440
+#, elixir-autogen, elixir-format
+msgid " due to heavy ridership"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:445
+#, elixir-autogen, elixir-format
+msgid " due to high winds"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:454
+#, elixir-autogen, elixir-format
+msgid " due to ice in the harbor"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:459
+#, elixir-autogen, elixir-format
+msgid " due to maintenance"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:480
+#, elixir-autogen, elixir-format
+msgid " due to police activity"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:490
+#, elixir-autogen, elixir-format
+msgid " due to presence of whales"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:498
+#, elixir-autogen, elixir-format
+msgid " due to rough seas"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:501
+#, elixir-autogen, elixir-format
+msgid " due to severe weather"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:512
+#, elixir-autogen, elixir-format
+msgid " due to single tracking"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:517
+#, elixir-autogen, elixir-format
+msgid " due to slippery rail"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:522
+#, elixir-autogen, elixir-format
+msgid " due to snow"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:535
+#, elixir-autogen, elixir-format
+msgid " due to strike"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:448
+#, elixir-autogen, elixir-format
+msgid " due to the holiday"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:551
+#, elixir-autogen, elixir-format
+msgid " due to tie replacement"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:561
+#, elixir-autogen, elixir-format
+msgid " due to track work"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:564
+#, elixir-autogen, elixir-format
+msgid " due to traffic"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:567
+#, elixir-autogen, elixir-format
+msgid " due to train traffic"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:575
+#, elixir-autogen, elixir-format
+msgid " due to utility work"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:578
+#, elixir-autogen, elixir-format
+msgid " due to vessel substitution"
+msgstr ""
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:583
+#, elixir-autogen, elixir-format, fuzzy
+msgid " due to vessel traffic"
 msgstr "trafik bato"
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:586
+#, elixir-autogen, elixir-format
+msgid " due to weather"
+msgstr ""
