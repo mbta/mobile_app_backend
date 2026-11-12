@@ -94,6 +94,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
       timeframe: timeframe,
       affected_stops_location: affected_stops_location
     )
+    |> String.trim_trailing()
   end
 
   @spec affected_stop_list([Stop.id()]) :: String.t()
