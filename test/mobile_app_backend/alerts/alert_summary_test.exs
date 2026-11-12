@@ -445,6 +445,28 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    test "summary with an open-ended delay has no timeframe" do
+      now = ~B[2026-03-12 12:00:00]
+
+      alert =
+        build(:alert,
+          effect: :delay,
+          active_period: [%Alert.ActivePeriod{start: ~B[2026-03-12 11:00:00], end: nil}],
+          duration_certainty: :known
+        )
+
+      assert %AlertSummary.Standard{effect: :delay, timeframe: nil} =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "", direction_id: 0},
+                 [],
+                 now,
+                 nil,
+                 %{},
+                 :notification
+               )
+    end
+
     test "summary with an upcoming delay" do
       now = ~B[2026-03-12 12:00:00]
       start_time = ~B[2026-03-12 14:00:00]
@@ -584,6 +606,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "summary with until further notice timeframe", %{now: now} do
       alert =
         build(:alert,
+          effect: :suspension,
           active_period: [
             %Alert.ActivePeriod{
               start: DateTime.add(now, -1, :hour),
@@ -625,7 +648,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    test "summary with estimated later today timeframe", %{now: now} do
+    test "summary with estimated duration has no timeframe", %{now: now} do
       end_time = DateTime.add(now, 1, :hour)
 
       alert =
@@ -634,7 +657,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: end_time}]
         )
 
-      assert %AlertSummary.Standard{timeframe: %AlertSummary.Timeframe.LaterToday{}} =
+      assert %AlertSummary.Standard{timeframe: nil} =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: "", direction_id: 0},

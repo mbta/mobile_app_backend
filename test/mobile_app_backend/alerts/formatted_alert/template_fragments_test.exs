@@ -95,7 +95,8 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
     end
 
     test "tomorrow" do
-      assert " through tomorrow" == TemplateFragments.timeframe(%Timeframe.Tomorrow{})
+      assert " through tomorrow" ==
+               TemplateFragments.timeframe(%Timeframe.Tomorrow{})
     end
 
     test "later date" do
@@ -114,7 +115,9 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragmentsTest do
 
     test "time" do
       assert " through 10:31 AM" ==
-               TemplateFragments.timeframe(%Timeframe.Time{time: ~B[2026-04-29 10:31:00]})
+               TemplateFragments.timeframe(%Timeframe.Time{
+                 time: ~B[2026-04-29 10:31:00]
+               })
     end
 
     test "starting tomorrow" do

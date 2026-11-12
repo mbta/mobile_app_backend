@@ -143,6 +143,22 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
+    test "non-delay keeps until further notice timeframe" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :suspension,
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: nil
+      }
+
+      assert "Service suspended until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "upcoming delay" do
       alert = build(:alert, effect: :delay)
 
