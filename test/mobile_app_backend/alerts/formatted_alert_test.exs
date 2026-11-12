@@ -129,11 +129,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert = build(:alert, effect: :station_closure)
 
       alert_summary = %AlertSummary.AllClear{
-        location: %Location.SingleStop{stop_name: "Oak Grove", downstream: false},
+        location: %Location.SingleStop{stop_name: "Oak Grove"},
         other_active_alerts: [
           %AlertSummary.OtherActiveAlert{
             effect: :station_closure,
-            location: %Location.SingleStop{stop_name: "Malden Center", downstream: false}
+            location: %Location.SingleStop{stop_name: "Malden Center"}
           }
         ],
         effect: alert.effect
@@ -156,8 +156,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
             effect: :shuttle,
             location: %Location.SuccessiveStops{
               start_stop_name: "Kenmore",
-              end_stop_name: "Copley",
-              downstream: false
+              end_stop_name: "Copley"
             }
           }
         ],
@@ -187,16 +186,14 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SuccessiveStops{
           start_stop_name: "Cleveland Circle",
-          end_stop_name: "Coolidge Corner",
-          downstream: false
+          end_stop_name: "Coolidge Corner"
         },
         other_active_alerts: [
           %AlertSummary.OtherActiveAlert{
             effect: :shuttle,
             location: %Location.SuccessiveStops{
               start_stop_name: "Kenmore",
-              end_stop_name: "Copley",
-              downstream: false
+              end_stop_name: "Copley"
             }
           }
         ],

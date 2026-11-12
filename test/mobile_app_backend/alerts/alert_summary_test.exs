@@ -241,7 +241,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                    type: "other_active_alert",
                    alert_id: "other",
                    effect: "delay",
-                   location: %{type: "single_stop", stop_name: "Lechmere", downstream: nil}
+                   location: %{type: "single_stop", stop_name: "Lechmere"}
                  }
                ],
                location: %{
@@ -2581,7 +2581,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
   describe "OtherActiveAlert.new/2" do
     test "uses the location of a standard summary" do
       alert = build(:alert, effect: :detour)
-      location = %Location.SingleStop{stop_name: "Ruggles", downstream: false}
+      location = %Location.SingleStop{stop_name: "Ruggles"}
       summary = %AlertSummary.Standard{effect: :detour, location: location}
 
       assert %AlertSummary.OtherActiveAlert{
@@ -2970,7 +2970,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
     test "all clear combines other active alerts from each summary" do
       alert = build(:alert, effect: :suspension)
-      same_location = %Location.SingleStop{stop_name: "A", downstream: false}
+      same_location = %Location.SingleStop{stop_name: "A"}
       delay = %AlertSummary.OtherActiveAlert{effect: :delay}
       detour = %AlertSummary.OtherActiveAlert{effect: :detour}
 

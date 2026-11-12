@@ -230,8 +230,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
               effect: :shuttle,
               location: %Location.SuccessiveStops{
                 start_stop_name: "Kenmore",
-                end_stop_name: "Copley",
-                downstream: false
+                end_stop_name: "Copley"
               }
             }
           ],
@@ -285,8 +284,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
               effect: :suspension,
               location: %Location.SuccessiveStops{
                 start_stop_name: "Alewife",
-                end_stop_name: "Harvard",
-                downstream: true
+                end_stop_name: "Harvard"
               }
             }
           ],
@@ -304,7 +302,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           [
             %OtherActiveAlert{
               effect: :delay,
-              location: %Location.SingleStop{stop_name: "Ruggles", downstream: false}
+              location: %Location.SingleStop{stop_name: "Ruggles"}
             }
           ],
           " at **Wood Island**"
@@ -335,8 +333,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
               effect: :shuttle,
               location: %Location.SuccessiveStops{
                 start_stop_name: "Kenmore",
-                end_stop_name: "Copley",
-                downstream: false
+                end_stop_name: "Copley"
               }
             }
           ],
