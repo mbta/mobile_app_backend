@@ -365,7 +365,6 @@ defmodule MBTAV3API.AlertTest do
             :station_closure -> :major
             :stop_closure -> :major
             :suspension -> :major
-            :track_change -> :minor
             :cancellation -> :secondary
             _ -> nil
           end

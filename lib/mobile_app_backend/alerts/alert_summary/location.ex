@@ -6,37 +6,34 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Location do
   defmodule DirectionToStop do
     @type t :: %__MODULE__{
             direction: Direction.t(),
-            end_stop_name: String.t(),
-            downstream: boolean() | nil
+            end_stop_name: String.t()
           }
     @derive PolymorphicJson
-    defstruct [:direction, :end_stop_name, :downstream]
+    defstruct [:direction, :end_stop_name]
   end
 
   defmodule SingleStop do
-    @type t :: %__MODULE__{stop_name: String.t(), downstream: boolean() | nil}
+    @type t :: %__MODULE__{stop_name: String.t()}
     @derive PolymorphicJson
-    defstruct [:stop_name, :downstream]
+    defstruct [:stop_name]
   end
 
   defmodule StopToDirection do
     @type t :: %__MODULE__{
             start_stop_name: String.t(),
-            direction: Direction.t(),
-            downstream: boolean() | nil
+            direction: Direction.t()
           }
     @derive PolymorphicJson
-    defstruct [:start_stop_name, :direction, :downstream]
+    defstruct [:start_stop_name, :direction]
   end
 
   defmodule SuccessiveStops do
     @type t :: %__MODULE__{
             start_stop_name: String.t(),
-            end_stop_name: String.t(),
-            downstream: boolean() | nil
+            end_stop_name: String.t()
           }
     @derive PolymorphicJson
-    defstruct [:start_stop_name, :end_stop_name, :downstream]
+    defstruct [:start_stop_name, :end_stop_name]
   end
 
   defmodule WholeRoute do

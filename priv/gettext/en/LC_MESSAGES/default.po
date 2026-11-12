@@ -1328,13 +1328,13 @@ msgstr "weather"
 #: lib/mobile_app_backend_web/components/core_components.ex:488
 #, elixir-autogen, elixir-format, import-optional
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:78
 #: lib/mobile_app_backend_web/components/core_components.ex:135
 #, elixir-autogen, elixir-format, import-optional
 msgid "close"
-msgstr ""
+msgstr "close"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:16
 #, elixir-autogen, elixir-format
@@ -1574,106 +1574,106 @@ msgstr "Looping"
 #: lib/presentation_strings.ex:669
 #, elixir-autogen, elixir-format
 msgid "Presence of Whales"
-msgstr ""
+msgstr "Presence of Whales"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:675
 #, elixir-autogen, elixir-format
 msgid "Rough Seas"
-msgstr ""
+msgstr "Rough Seas"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:732
 #, elixir-autogen, elixir-format
 msgid "Utility Work"
-msgstr ""
+msgstr "Utility Work"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:735
 #, elixir-autogen, elixir-format
 msgid "Vessel Substitution"
-msgstr ""
+msgstr "Vessel Substitution"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:738
 #, elixir-autogen, elixir-format
 msgid "Vessel Traffic"
-msgstr ""
+msgstr "Vessel Traffic"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:484
 #, elixir-autogen, elixir-format
 msgid "presence of whales"
-msgstr ""
+msgstr "presence of whales"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:490
 #, elixir-autogen, elixir-format
 msgid "rough seas"
-msgstr ""
+msgstr "rough seas"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:547
 #, elixir-autogen, elixir-format
 msgid "utility work"
-msgstr ""
+msgstr "utility work"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:550
 #, elixir-autogen, elixir-format
 msgid "vessel substitution"
-msgstr ""
+msgstr "vessel substitution"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:553
 #, elixir-autogen, elixir-format
 msgid "vessel traffic"
-msgstr ""
+msgstr "vessel traffic"
 
 #. Alert summary sentence in the format of "[Plural alert effect] are still in effect[ at location].", ex "Shuttle buses are still in effect from Kenmore to Copley."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:166
 #, elixir-autogen, elixir-format
 msgid "%{effect} are still in effect%{summary_location}."
-msgstr ""
+msgstr "%{effect} are still in effect%{summary_location}."
 
 #. Alert summary sentence in the format of "[Alert effect] is still in effect[ at location].", ex "Detour is still in effect at Haymarket."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:173
 #, elixir-autogen, elixir-format
 msgid "%{effect} is still in effect%{summary_location}."
-msgstr ""
+msgstr "%{effect} is still in effect%{summary_location}."
 
 #. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
-msgstr ""
+msgstr "**Update:** %{effect_sentence_case} have ended%{summary_location}."
 
 #. Alert effect as a plural noun, ex. "Delays are still in effect"
 #: lib/presentation_strings.ex:229
 #, elixir-autogen, elixir-format
 msgid "Delays"
-msgstr ""
+msgstr "Delays"
 
 #. Sentence following an all clear summary when multiple other alerts remain active
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
 #, elixir-autogen, elixir-format
 msgid "Other disruptions are still in effect."
-msgstr ""
+msgstr "Other disruptions are still in effect."
 
 #. Alert effect as a noun, ex. "Dock closure is still in effect"
 #: lib/presentation_strings.ex:234
 #, elixir-autogen, elixir-format
 msgid "Dock closure"
-msgstr ""
+msgstr "Dock closure"
 
 #. Alert effect as a noun, ex. "Station closure is still in effect"
 #: lib/presentation_strings.ex:239
 #, elixir-autogen, elixir-format
 msgid "Station closure"
-msgstr ""
+msgstr "Station closure"
 
 #. Alert effect as a noun, ex. "Stop closure is still in effect"
 #: lib/presentation_strings.ex:244
 #, elixir-autogen, elixir-format
 msgid "Stop closure"
-msgstr ""
+msgstr "Stop closure"

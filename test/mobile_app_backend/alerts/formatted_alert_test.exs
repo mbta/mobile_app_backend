@@ -22,8 +22,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SuccessiveStops{
           start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
+          end_stop_name: "North Station"
         },
         other_active_alerts: [],
         effect: alert.effect
@@ -58,8 +57,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SuccessiveStops{
           start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
+          end_stop_name: "North Station"
         },
         other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
@@ -77,8 +75,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SingleStop{
-          stop_name: "Ruggles",
-          downstream: false
+          stop_name: "Ruggles"
         },
         other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
@@ -96,8 +93,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SingleStop{
-          stop_name: "Oak Grove",
-          downstream: false
+          stop_name: "Oak Grove"
         },
         other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :shuttle}],
         effect: alert.effect
@@ -116,8 +112,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert_summary = %AlertSummary.AllClear{
         location: %Location.SuccessiveStops{
           start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
+          end_stop_name: "North Station"
         },
         other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
@@ -310,7 +305,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
       alert_summary = %AlertSummary.Standard{
         effect: :delay,
-        location: %Location.SingleStop{stop_name: "Ruggles", downstream: false},
+        location: %Location.SingleStop{stop_name: "Ruggles"},
         timeframe: %Timeframe.Time{time: ~B[2026-03-09 13:00:00]},
         recurrence: nil
       }
@@ -328,8 +323,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
       alert_summary = %AlertSummary.Standard{
         location: %Location.SuccessiveStops{
           start_stop_name: "Oak Grove",
-          end_stop_name: "North Station",
-          downstream: false
+          end_stop_name: "North Station"
         },
         timeframe: %Timeframe.UntilFurtherNotice{},
         recurrence: %Recurrence.Daily{}

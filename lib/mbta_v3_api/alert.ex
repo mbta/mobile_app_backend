@@ -331,7 +331,6 @@ defmodule MBTAV3API.Alert do
 
   def significance(%__MODULE__{effect: :service_change}), do: :secondary
   def significance(%__MODULE__{effect: :elevator_closure}), do: :accessibility
-  def significance(%__MODULE__{effect: :track_change}), do: :minor
 
   def significance(%__MODULE__{effect: :delay} = alert) do
     if (alert.severity >= 3 and Enum.any?(alert.informed_entity, &(&1.route_type != :bus))) or
