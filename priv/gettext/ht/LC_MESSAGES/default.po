@@ -1328,13 +1328,13 @@ msgstr "move tan"
 #: lib/mobile_app_backend_web/components/core_components.ex:488
 #, elixir-autogen, elixir-format, import-optional
 msgid "Actions"
-msgstr ""
+msgstr "Aksyon yo"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:78
 #: lib/mobile_app_backend_web/components/core_components.ex:135
 #, elixir-autogen, elixir-format, import-optional
 msgid "close"
-msgstr ""
+msgstr "Fèmen"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
 #, elixir-autogen, elixir-format
@@ -1574,58 +1574,58 @@ msgstr "Boukl"
 #: lib/presentation_strings.ex:637
 #, elixir-autogen, elixir-format
 msgid "Presence of Whales"
-msgstr ""
+msgstr "Prezans Balèn"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:643
 #, elixir-autogen, elixir-format
 msgid "Rough Seas"
-msgstr ""
+msgstr "Lanmè Ajite"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:700
 #, elixir-autogen, elixir-format
 msgid "Utility Work"
-msgstr ""
+msgstr "Travay sou Rezo Piblik yo"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:703
 #, elixir-autogen, elixir-format
 msgid "Vessel Substitution"
-msgstr ""
+msgstr "Ranplasman Bato"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:706
 #, elixir-autogen, elixir-format
 msgid "Vessel Traffic"
-msgstr ""
+msgstr "Trafik bato"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:452
 #, elixir-autogen, elixir-format
 msgid "presence of whales"
-msgstr ""
+msgstr "prezans balèn"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:458
 #, elixir-autogen, elixir-format
 msgid "rough seas"
-msgstr ""
+msgstr "lanmè ajite"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:515
 #, elixir-autogen, elixir-format
 msgid "utility work"
-msgstr ""
+msgstr "travay sou rezo piblik yo"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:518
 #, elixir-autogen, elixir-format
 msgid "vessel substitution"
-msgstr ""
+msgstr "ranplasman bato"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:521
 #, elixir-autogen, elixir-format
 msgid "vessel traffic"
-msgstr ""
+msgstr "trafik bato"

@@ -1328,13 +1328,13 @@ msgstr "météo"
 #: lib/mobile_app_backend_web/components/core_components.ex:488
 #, elixir-autogen, elixir-format, import-optional
 msgid "Actions"
-msgstr ""
+msgstr "Actions"
 
 #: lib/mobile_app_backend_web/components/core_components.ex:78
 #: lib/mobile_app_backend_web/components/core_components.ex:135
 #, elixir-autogen, elixir-format, import-optional
 msgid "close"
-msgstr ""
+msgstr "Fermer"
 
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
 #, elixir-autogen, elixir-format
@@ -1574,58 +1574,58 @@ msgstr "Boucle"
 #: lib/presentation_strings.ex:637
 #, elixir-autogen, elixir-format
 msgid "Presence of Whales"
-msgstr ""
+msgstr "Présence de baleines"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:643
 #, elixir-autogen, elixir-format
 msgid "Rough Seas"
-msgstr ""
+msgstr "Mer agitée"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:700
 #, elixir-autogen, elixir-format
 msgid "Utility Work"
-msgstr ""
+msgstr "Travaux sur les réseaux"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:703
 #, elixir-autogen, elixir-format
 msgid "Vessel Substitution"
-msgstr ""
+msgstr "Remplacement de navire"
 
 #. Possible alert cause
 #: lib/presentation_strings.ex:706
 #, elixir-autogen, elixir-format
 msgid "Vessel Traffic"
-msgstr ""
+msgstr "Trafic maritime"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:452
 #, elixir-autogen, elixir-format
 msgid "presence of whales"
-msgstr ""
+msgstr "présence de baleines"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:458
 #, elixir-autogen, elixir-format
 msgid "rough seas"
-msgstr ""
+msgstr "mer agitée"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:515
 #, elixir-autogen, elixir-format
 msgid "utility work"
-msgstr ""
+msgstr "travaux sur les réseaux"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:518
 #, elixir-autogen, elixir-format
 msgid "vessel substitution"
-msgstr ""
+msgstr "remplacement de navire"
 
 #. Alert cause, used in 'Delays due to [cause]'
 #: lib/presentation_strings.ex:521
 #, elixir-autogen, elixir-format
 msgid "vessel traffic"
-msgstr ""
+msgstr "trafic maritime"
