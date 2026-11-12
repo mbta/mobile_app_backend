@@ -54,6 +54,12 @@ Run command `mix test` to run all tests.
 
 Integration tests use snapshots of data returned by the MBTA V3 API. To update those data snapshots used by a particular test module, run the [UpdateTestData](https://github.com/mbta/mobile_app_backend/blob/main/lib/mix/tasks/update_test_data.ex) mix task with command `mix updateTestData [pathToTestFile]`
 
+### i18n
+
+We have translation strings that live on the backend, mostly for alert notification templates. We use gettext, the PO files are in [priv/gettext](https://github.com/mbta/mobile_app_backend/blob/main/priv/gettext). These files are then picked up and translated by Smartling in CI.
+
+Any strings that you add to the code with a `gettext` call must be extracted into the PO files by running `mix gettext.update`. This is a custom wrapper for `gettext.extract`, which also does an extra stop to copy any `msgid` values into `msgstr` when `msgstr` is blank, because otherwise Smartling won't ingest it.
+
 ### Editing Code
 
 - Create each new feature in its own branch named with the following naming format: initials-description (for example, Jane Smith writing a search function might create a branch called js-search-function).
