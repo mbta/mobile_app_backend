@@ -15,6 +15,8 @@ defmodule MobileAppBackendWeb.HealthController do
         {:service_unavailable, "Service Unavailable"}
       end
 
-    send_resp(conn, code, body)
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(code, body)
   end
 end
