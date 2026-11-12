@@ -174,18 +174,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
   @spec deduplicate_locations([Location.t()], Alert.t()) :: Location.t()
   defp deduplicate_locations(locations, alert) do
-    locations =
-      Enum.uniq_by(locations, fn
-        %Location.SuccessiveStops{
-          start_stop_name: start_stop,
-          end_stop_name: end_stop
-        } ->
-          {Location.SuccessiveStops, start_stop, end_stop}
-
-        location ->
-          location
-      end)
-
     case locations do
       [] ->
         Logger.warning("Combining locations: [] for alert: #{alert.id} reason is known")
@@ -287,32 +275,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     with nil <- alert_location_for_whole_gl(alert, routes, patterns, direction_id, global),
          nil <- alert_location_for_whole_route(alert, direction_id, routes) do
       affected_stops = get_alert_affected_stops(global, alert, routes)
-      downstream = Enum.all?(affected_stops, &(&1.id != stop_id))
 
       cond do
-        # Special case for alert with ID "1037115", will delete after the alert is closed
-        (alert.id == "1037115" or alert.id == "1037123") and
-            global.stops[stop_id].name == "Foxboro" ->
-          %Location.SuccessiveStops{
-            start_stop_name: "Foxboro",
-            end_stop_name: "Walpole",
-            downstream: downstream
-          }
-
-        alert.id == "1037115" or alert.id == "1037123" ->
-          %Location.SuccessiveStops{
-            start_stop_name: "Walpole",
-            end_stop_name: "Foxboro",
-            downstream: downstream
-          }
-
         alert_location_is_closure?(alert, affected_stops) ->
           %Location.AffectedStops{
             stops: Enum.map(affected_stops, fn stop -> stop.name end)
           }
 
         length(affected_stops) == 1 ->
-          %Location.SingleStop{stop_name: hd(affected_stops).name, downstream: downstream}
+          %Location.SingleStop{stop_name: hd(affected_stops).name}
 
         # Never show multiple stops for bus
         Enum.any?(routes, &(&1.type == :bus and not String.starts_with?(&1.id, "Shuttle"))) ->
@@ -325,13 +296,26 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
             direction_id,
             patterns,
             routes,
-            downstream,
             global
           )
       end
     else
       location -> location
     end
+  end
+
+  @doc """
+  Whether the given stop is one of the stops directly affected by the alert on the routes of the given patterns.
+  When it isn't, the alert's location is downstream of the stop.
+  """
+  @spec stop_affected?(Alert.t(), Stop.id(), [RoutePattern.t()], GlobalDataCache.data()) ::
+          boolean()
+  def stop_affected?(alert, stop_id, patterns, global) do
+    routes = routes_for_patterns(patterns, global)
+
+    global
+    |> get_alert_affected_stops(alert, routes)
+    |> Enum.any?(&(&1.id == stop_id))
   end
 
   @spec alert_timeframe(Alert.t(), DateTime.t(), boolean()) ::
@@ -496,7 +480,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          direction_id,
          patterns,
          routes,
-         downstream,
          global
        ) do
     aumented_patterns =
@@ -519,7 +502,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           affected_pattern_stops,
           stop_id,
           direction_id,
-          downstream,
           global,
           alert,
           patterns
@@ -532,7 +514,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           affected_pattern_stops :: %{RoutePattern.t() => [String.t()]},
           stop_id :: String.t() | nil,
           direction_id :: 0 | 1,
-          downstream :: boolean(),
           global :: GlobalDataCache.data(),
           alert :: Alert.t(),
           patterns :: [RoutePattern.t()]
@@ -542,7 +523,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          affected_pattern_stops,
          stop_id,
          direction_id,
-         downstream,
          global,
          alert,
          patterns
@@ -556,7 +536,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         digraph,
         patterns,
         direction_id,
-        downstream,
         global,
         alert
       )
@@ -748,7 +727,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           :digraph.graph(),
           [RoutePattern.t()],
           0 | 1,
-          boolean(),
           GlobalDataCache.data(),
           Alert.t()
         ) :: Location.t() | nil
@@ -756,7 +734,6 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
          digraph,
          patterns,
          direction_id,
-         downstream,
          global,
          alert
        ) do
@@ -771,8 +748,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
       %{first_stops: [first_stop], last_stops: [last_stop]} ->
         %Location.SuccessiveStops{
           start_stop_name: first_stop.name,
-          end_stop_name: last_stop.name,
-          downstream: downstream
+          end_stop_name: last_stop.name
         }
 
       %{first_stops: [first_stop], last_stops: _last_stops} ->
@@ -781,8 +757,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         %Location.StopToDirection{
           start_stop_name: first_stop.name,
-          direction: Enum.at(directions, direction_id),
-          downstream: downstream
+          direction: Enum.at(directions, direction_id)
         }
 
       %{first_stops: _first_stops, last_stops: [last_stop]} ->
@@ -791,8 +766,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         %Location.DirectionToStop{
           direction: Enum.at(directions, 1 - direction_id),
-          end_stop_name: last_stop.name,
-          downstream: downstream
+          end_stop_name: last_stop.name
         }
 
       _ ->

@@ -287,27 +287,22 @@ defmodule MobileAppBackend.Alerts.AlertSummary.TripSpecific do
          patterns,
          global
        ) do
-    location =
-      AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global)
+    if AlertSummary.stop_affected?(alert, stop_id, patterns, global) do
+      nil
+    else
+      case AlertSummary.alert_location(alert, stop_id, direction_id, patterns, global) do
+        %AlertSummary.Location.SingleStop{stop_name: stop_name} ->
+          [stop_name]
 
-    effect_stop =
-      case location do
-        %AlertSummary.Location.SingleStop{downstream: true, stop_name: stop_name} ->
-          stop_name
+        %AlertSummary.Location.SuccessiveStops{start_stop_name: stop_name} ->
+          [stop_name]
 
-        %AlertSummary.Location.SuccessiveStops{downstream: true, start_stop_name: stop_name} ->
-          stop_name
-
-        %AlertSummary.Location.StopToDirection{downstream: true, start_stop_name: stop_name} ->
-          stop_name
+        %AlertSummary.Location.StopToDirection{start_stop_name: stop_name} ->
+          [stop_name]
 
         _ ->
           nil
       end
-
-    case effect_stop do
-      nil -> nil
-      stop_name -> [stop_name]
     end
   end
 
