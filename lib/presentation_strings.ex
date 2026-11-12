@@ -331,382 +331,259 @@ defmodule MobileAppBackend.PresentationStrings do
     end
   end
 
-  @spec cause_lower_case(Alert.cause()) :: String.t() | nil
-  def cause_lower_case(cause) do
+  # Using alerts UI as the source of truth for articules
+  # https://github.com/mbta/alerts_ui/blob/cc2fa6d28f28464abc15528ca789564c8eb50f45/lib/alerts_ui_web/live/form_components/helpers/auto_text/build_auto_text.ex#L62C4-L62C27
+  @spec due_to_cause(Alert.cause()) :: String.t() | nil
+  def due_to_cause(cause) do
     case cause do
       :accident ->
-        gettext("accident", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to an accident", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :amtrak ->
-        gettext("Amtrak", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to Amtrak", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :amtrak_train_traffic ->
-        gettext("Amtrak train traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to Amtrak train traffic",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :an_earlier_mechanical_problem ->
-        gettext("an earlier mechanical problem",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to an earlier mechanical problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :an_earlier_signal_problem ->
-        gettext("an earlier signal problem",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to an earlier signal problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :autos_impeding_service ->
-        gettext("autos impeding service", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to autos impeding service",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :coast_guard_restriction ->
-        gettext("Coast Guard restriction",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to a Coast Guard restriction",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :congestion ->
-        gettext("congestion", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to congestion", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :construction ->
-        gettext("construction", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to construction", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :crossing_issue ->
-        gettext("crossing issue", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a crossing issue",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :crossing_malfunction ->
-        gettext("crossing malfunction", comment: "Alert cause, used in 'Delays due to [cause]'")
+        #
+        gettext(" due to a crossing malfunction",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :demonstration ->
-        gettext("demonstration", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a demonstration",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :disabled_bus ->
-        gettext("disabled bus", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a disabled bus", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :disabled_train ->
-        gettext("disabled train", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a disabled train",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :drawbridge_being_raised ->
-        gettext("drawbridge being raised",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to a drawbridge being raised",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :drawbridge_issue ->
-        gettext("drawbridge issue", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a drawbridge issue",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :electrical_work ->
-        gettext("electrical work", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to electrical work",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :fire ->
-        gettext("fire", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a fire", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :fire_department_activity ->
-        gettext("fire department activity",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to fire department activity",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :flooding ->
-        gettext("flooding", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to flooding", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :fog ->
-        gettext("fog", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to fog", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :freight_train_interference ->
-        gettext("freight train interference",
-          comment: "Alert cause, used in 'Delays due to [cause]'"
+        gettext(" due to freight train interference",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
         )
 
       :hazmat_condition ->
-        gettext("hazmat condition", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a hazmat condition",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :heavy_ridership ->
-        gettext("heavy ridership", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to heavy ridership",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :high_winds ->
-        gettext("high winds", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to high winds", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :holiday ->
-        gettext("holiday", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to the holiday", comment: "Alert cause, used in 'Delays [due to cause]'")
+
+      :hurricane ->
+        gettext(" due to a hurricane", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :ice_in_harbor ->
-        gettext("ice in harbor", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to ice in the harbor",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :maintenance ->
-        gettext("maintenance", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to maintenance", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :mechanical_issue ->
-        gettext("mechanical issue", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a mechanical issue",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :mechanical_problem ->
-        gettext("mechanical problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a mechanical problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :medical_emergency ->
-        gettext("medical emergency", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a medical emergency",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :parade ->
-        gettext("parade", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a parade", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :police_activity ->
-        gettext("police activity", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to police activity",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :power_problem ->
-        gettext("power problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a power problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :presence_of_whales ->
-        gettext("presence of whales", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to presence of whales",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :rail_defect ->
-        gettext("rail defect", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a rail defect", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :rough_seas ->
-        gettext("rough seas", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to rough seas", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :severe_weather ->
-        gettext("severe weather", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to severe weather", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :signal_issue ->
-        gettext("signal issue", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a signal issue", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :signal_problem ->
-        gettext("signal problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a signal problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :single_tracking ->
-        gettext("single tracking", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to single tracking",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :slippery_rail ->
-        gettext("slippery rail", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to slippery rail",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :snow ->
-        gettext("snow", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to snow", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :special_event ->
-        gettext("special event", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a special event",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :speed_restriction ->
-        gettext("speed restriction", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a speed restriction",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :strike ->
-        gettext("strike", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to strike", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :switch_issue ->
-        gettext("switch issue", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a switch issue", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :switch_problem ->
-        gettext("switch problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a switch problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :technical_problem ->
-        gettext("technical problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a technical problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :tie_replacement ->
-        gettext("tie replacement", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to tie replacement",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :track_problem ->
-        gettext("track problem", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to a track problem",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :track_work ->
-        gettext("track work", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to track work", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :traffic ->
-        gettext("traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to traffic", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :train_traffic ->
-        gettext("train traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to train traffic", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :unruly_passenger ->
-        gettext("unruly passenger", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to an unruly passenger",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :utility_work ->
-        gettext("utility work", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to utility work", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :vessel_substitution ->
-        gettext("vessel substitution", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to vessel substitution",
+          comment: "Alert cause, used in 'Delays [due to cause]'"
+        )
 
       :vessel_traffic ->
-        gettext("vessel traffic", comment: "Alert cause, used in 'Delays due to [cause]'")
+        gettext(" due to vessel traffic", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       :weather ->
-        gettext("weather", comment: "Alert cause, used in 'Delays due to [cause]'")
-
-      _ ->
-        nil
-    end
-  end
-
-  @spec cause(Alert.cause()) :: String.t() | nil
-  def cause(cause) do
-    case cause do
-      :accident ->
-        gettext("Accident", comment: "Possible alert cause")
-
-      :amtrak ->
-        gettext("Amtrak", comment: "Possible alert cause")
-
-      :amtrak_train_traffic ->
-        gettext("Amtrak Train Traffic", comment: "Possible alert cause")
-
-      :an_earlier_mechanical_problem ->
-        gettext("An Earlier Mechanical Problem", comment: "Possible alert cause")
-
-      :an_earlier_signal_problem ->
-        gettext("An Earlier Signal Problem", comment: "Possible alert cause")
-
-      :autos_impeding_service ->
-        gettext("Autos Impeding Service", comment: "Possible alert cause")
-
-      :coast_guard_restriction ->
-        gettext("Coast Guard Restriction", comment: "Possible alert cause")
-
-      :congestion ->
-        gettext("Congestion", comment: "Possible alert cause")
-
-      :construction ->
-        gettext("Construction", comment: "Possible alert cause")
-
-      :crossing_issue ->
-        gettext("Crossing Issue", comment: "Possible alert cause")
-
-      :crossing_malfunction ->
-        gettext("Crossing Malfunction", comment: "Possible alert cause")
-
-      :demonstration ->
-        gettext("Demonstration", comment: "Possible alert cause")
-
-      :disabled_bus ->
-        gettext("Disabled Bus", comment: "Possible alert cause")
-
-      :disabled_train ->
-        gettext("Disabled Train", comment: "Possible alert cause")
-
-      :drawbridge_being_raised ->
-        gettext("Drawbridge Being Raised", comment: "Possible alert cause")
-
-      :drawbridge_issue ->
-        gettext("Drawbridge Issue", comment: "Possible alert cause")
-
-      :electrical_work ->
-        gettext("Electrical Work", comment: "Possible alert cause")
-
-      :fire ->
-        gettext("Fire", comment: "Possible alert cause")
-
-      :fire_department_activity ->
-        gettext("Fire Department Activity", comment: "Possible alert cause")
-
-      :flooding ->
-        gettext("Flooding", comment: "Possible alert cause")
-
-      :fog ->
-        gettext("Fog", comment: "Possible alert cause")
-
-      :freight_train_interference ->
-        gettext("Freight Train Interference", comment: "Possible alert cause")
-
-      :hazmat_condition ->
-        gettext("Hazmat Condition", comment: "Possible alert cause")
-
-      :heavy_ridership ->
-        gettext("Heavy Ridership", comment: "Possible alert cause")
-
-      :high_winds ->
-        gettext("High Winds", comment: "Possible alert cause")
-
-      :holiday ->
-        gettext("Holiday", comment: "Possible alert cause")
-
-      :ice_in_harbor ->
-        gettext("Ice In Harbor", comment: "Possible alert cause")
-
-      :maintenance ->
-        gettext("Maintenance", comment: "Possible alert cause")
-
-      :mechanical_issue ->
-        gettext("Mechanical Issue", comment: "Possible alert cause")
-
-      :mechanical_problem ->
-        gettext("Mechanical Problem", comment: "Possible alert cause")
-
-      :medical_emergency ->
-        gettext("Medical Emergency", comment: "Possible alert cause")
-
-      :parade ->
-        gettext("Parade", comment: "Possible alert cause")
-
-      :police_activity ->
-        gettext("Police Activity", comment: "Possible alert cause")
-
-      :power_problem ->
-        gettext("Power Problem", comment: "Possible alert cause")
-
-      :presence_of_whales ->
-        gettext("Presence of Whales", comment: "Possible alert cause")
-
-      :rail_defect ->
-        gettext("Rail Defect", comment: "Possible alert cause")
-
-      :rough_seas ->
-        gettext("Rough Seas", comment: "Possible alert cause")
-
-      :severe_weather ->
-        gettext("Severe Weather", comment: "Possible alert cause")
-
-      :signal_issue ->
-        gettext("Signal Issue", comment: "Possible alert cause")
-
-      :signal_problem ->
-        gettext("Signal Problem", comment: "Possible alert cause")
-
-      :single_tracking ->
-        gettext("Single Tracking", comment: "Possible alert cause")
-
-      :slippery_rail ->
-        gettext("Slippery Rail", comment: "Possible alert cause")
-
-      :snow ->
-        gettext("Snow", comment: "Possible alert cause")
-
-      :special_event ->
-        gettext("Special Event", comment: "Possible alert cause")
-
-      :speed_restriction ->
-        gettext("Speed Restriction", comment: "Possible alert cause")
-
-      :strike ->
-        gettext("Strike", comment: "Possible alert cause")
-
-      :switch_issue ->
-        gettext("Switch Issue", comment: "Possible alert cause")
-
-      :switch_problem ->
-        gettext("Switch Problem", comment: "Possible alert cause")
-
-      :technical_problem ->
-        gettext("Technical Problem", comment: "Possible alert cause")
-
-      :tie_replacement ->
-        gettext("Tie Replacement", comment: "Possible alert cause")
-
-      :track_problem ->
-        gettext("Track Problem", comment: "Possible alert cause")
-
-      :track_work ->
-        gettext("Track Work", comment: "Possible alert cause")
-
-      :traffic ->
-        gettext("Traffic", comment: "Possible alert cause")
-
-      :train_traffic ->
-        gettext("Train Traffic", comment: "Possible alert cause")
-
-      :unruly_passenger ->
-        gettext("Unruly Passenger", comment: "Possible alert cause")
-
-      :utility_work ->
-        gettext("Utility Work", comment: "Possible alert cause")
-
-      :vessel_substitution ->
-        gettext("Vessel Substitution", comment: "Possible alert cause")
-
-      :vessel_traffic ->
-        gettext("Vessel Traffic", comment: "Possible alert cause")
-
-      :weather ->
-        gettext("Weather", comment: "Possible alert cause")
+        gettext(" due to weather", comment: "Alert cause, used in 'Delays [due to cause]'")
 
       _ ->
         nil

@@ -197,8 +197,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
 
   def due_to_cause(due_to_cause) when not is_nil(due_to_cause) and is_atom(due_to_cause) do
     due_to_cause
-    |> PresentationStrings.cause_lower_case()
-    |> due_to_cause()
+    |> PresentationStrings.due_to_cause()
   end
 
   def due_to_cause(due_to_cause) when is_binary(due_to_cause) or is_nil(due_to_cause) do
