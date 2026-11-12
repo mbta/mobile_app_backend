@@ -23,7 +23,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
         Templates.standard(
           build(:alert, effect: :delay, severity: 3),
           "",
-          " until further notice",
+          "",
           "",
           :notification
         )

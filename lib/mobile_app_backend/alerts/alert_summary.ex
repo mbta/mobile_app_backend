@@ -260,7 +260,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Location.t() | nil
 
   def alert_location(alert, stop_id, direction_id, [], _global) do
-    # Seen on ferry patterns, no patterns match provided becuase they are all in the same direction
+    # Seen on ferry patterns, no patterns match provided because they are all in the same direction
     Logger.notice(
       "#{__MODULE__}: No patterns match for alert: #{alert.id} at stop: #{stop_id} with direction: #{direction_id}"
     )
@@ -322,13 +322,17 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Timeframe.t() | nil
   defp alert_timeframe(alert, at_time, has_recurrence?)
 
-  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _),
-    do: %Timeframe.LaterToday{}
+  # Estimated durations aren't precise enough to be worth showing
+  defp alert_timeframe(%Alert{duration_certainty: :estimated}, _, _), do: nil
 
   defp alert_timeframe(alert, at_time, has_recurrence?) do
     service_date = Util.DateTime.datetime_to_gtfs(at_time)
 
     case Alert.current_period(alert, at_time) do
+      # Delays are inherently open-ended, so "until further notice" adds nothing
+      %Alert.ActivePeriod{end: nil} when alert.effect == :delay ->
+        nil
+
       %Alert.ActivePeriod{end: nil} ->
         %Timeframe.UntilFurtherNotice{}
 

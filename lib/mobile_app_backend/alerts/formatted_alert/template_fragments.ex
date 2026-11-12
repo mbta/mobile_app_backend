@@ -290,10 +290,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
           end_time: time_range_boundary(timeframe.end_time)
         )
 
-      # "Until later today" isn't informative enough to include
-      %Timeframe.LaterToday{} ->
-        ""
-
       _ ->
         ""
     end

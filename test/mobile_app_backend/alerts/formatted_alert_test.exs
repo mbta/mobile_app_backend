@@ -143,57 +143,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
-    test "omits until later today timeframe" do
-      alert = build(:alert, effect: :suspension, cause: :maintenance)
-
-      alert_summary = %AlertSummary.Standard{
-        effect: :suspension,
-        location: %Location.SuccessiveStops{start_stop_name: "Alewife", end_stop_name: "Harvard"},
-        timeframe: %Timeframe.LaterToday{},
-        recurrence: nil
-      }
-
-      assert "Service suspended from Alewife to Harvard due to maintenance" ==
-               FormattedAlert.summary(
-                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
-                 "en"
-               )
-    end
-
-    test "omits until later today timeframe without trailing whitespace" do
-      alert = build(:alert, effect: :stop_closure)
-
-      alert_summary = %AlertSummary.Standard{
-        effect: :stop_closure,
-        location: %Location.SingleStop{stop_name: "Haymarket"},
-        timeframe: %Timeframe.LaterToday{},
-        recurrence: nil
-      }
-
-      assert "Buses will not stop at Haymarket" ==
-               FormattedAlert.summary(
-                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
-                 "en"
-               )
-    end
-
-    test "delay omits until further notice timeframe" do
-      alert = build(:alert, effect: :delay, severity: 5, cause: :unknown_cause)
-
-      alert_summary = %AlertSummary.Standard{
-        effect: :delay,
-        location: %Location.SuccessiveStops{start_stop_name: "Alewife", end_stop_name: "Harvard"},
-        timeframe: %Timeframe.UntilFurtherNotice{},
-        recurrence: nil
-      }
-
-      assert "Delays of about 20 minutes from Alewife to Harvard" ==
-               FormattedAlert.summary(
-                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
-                 "en"
-               )
-    end
-
     test "non-delay keeps until further notice timeframe" do
       alert = build(:alert, effect: :suspension)
 
