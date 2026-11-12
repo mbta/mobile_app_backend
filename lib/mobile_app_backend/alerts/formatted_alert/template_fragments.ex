@@ -94,6 +94,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
       timeframe: timeframe,
       affected_stops_location: affected_stops_location
     )
+    |> String.trim_trailing()
   end
 
   @spec affected_stop_list([Stop.id()]) :: String.t()
@@ -221,14 +222,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
     )
   end
 
-  def until_later_today do
-    gettext(" until later today",
-      comment:
-        "Alert summary timeframe ending today at an unspecified time. The leading space should be retained."
-    )
-  end
-
-  def indefinite_end_time_strings, do: [until_further_notice(), until_later_today()]
+  def indefinite_end_time_strings, do: [until_further_notice()]
 
   @spec timeframe(Timeframe.t() | nil) :: String.t()
   def timeframe(timeframe) do
@@ -241,9 +235,6 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplateFragments do
           comment:
             "Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template."
         )
-
-      %Timeframe.LaterToday{} ->
-        until_later_today()
 
       %Timeframe.Tomorrow{} ->
         gettext(" through tomorrow",

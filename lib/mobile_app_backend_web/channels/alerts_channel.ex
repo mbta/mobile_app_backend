@@ -127,11 +127,7 @@ defmodule MobileAppBackendWeb.AlertsChannel do
   @spec alert_hashes(%{String.t() => Alert.t()}) :: %{String.t() => String.t()}
   defp alert_hashes(alert_map) do
     Map.new(alert_map, fn {key, val} ->
-      {key,
-       val.summaries_updated_at
-       |> :erlang.term_to_binary()
-       |> then(&:crypto.hash(:md5, &1))
-       |> Base.encode16()}
+      {key, val.summaries_updated_at}
     end)
   end
 end

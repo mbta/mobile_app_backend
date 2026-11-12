@@ -18,19 +18,19 @@ msgid " at **%{stop_name}**"
 msgstr "在**%{stop_name}**"
 
 #. Alert summary recurrence every day until the indicated date, e.g. “ daily[ until Friday]”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:128
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:129
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
 msgstr "每日%{recurrence_text}"
 
 #. An alert cause interpolated into an alert summary: ex. "due to [maintenance]", in a longer string like "Trip 101 experiencing delays of about 10 minutes today due to maintenance daily until Friday"
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:207
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr "由于%{cause}"
 
 #. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:295
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:286
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr "从%{start_time}至%{end_time}"
@@ -66,44 +66,44 @@ msgid " replacing **%{mode_label}**"
 msgstr "替代**%{mode_label}**"
 
 #. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:141
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:142
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
 msgstr "部分日子%{recurrence_text}"
 
 #. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:288
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:279
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr "自今日**%{formatted_time}**起"
 
 #. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:282
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:273
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr " 自明日起"
 
 #. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:240
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:234
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr " 直至服务结束"
 
 #. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:249
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:240
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr " 直至明天"
 
 #. Alert summary timeframe with no known end. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:159
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:220
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr " 直至另行通知"
 
 #. Alert summary recurrence ending tomorrow. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:165
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
 #, elixir-autogen, elixir-format
 msgid " until tomorrow"
 msgstr " 截至明日"
@@ -1010,7 +1010,7 @@ msgid "electrical work"
 msgstr "电力作业"
 
 #. Used when an alert ends at the end of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:319
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:310
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr "服务结束"
@@ -1088,31 +1088,31 @@ msgid "ice in harbor"
 msgstr "港口结冰"
 
 #. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:171
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:172
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
 msgstr "直至%{1}"
 
 #. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:181
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr "直至%{1}"
 
 #. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:246
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr "至%{1}"
 
 #. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:256
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr "至%{1}"
 
 #. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:275
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:266
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr "至%{1}"
@@ -1220,7 +1220,7 @@ msgid "speed restriction"
 msgstr "速度限制"
 
 #. Used when an alert begins at the start of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:314
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:305
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr "服务开始"
@@ -1360,7 +1360,7 @@ msgid "Ferries"
 msgstr "渡轮"
 
 #. Used when more than 3 stops are affected
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:102
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
 #, elixir-autogen, elixir-format
 msgid "**multiple stops**"
 msgstr "**多个站点**"
@@ -1495,12 +1495,6 @@ msgstr "轮渡"
 msgid "Train"
 msgstr "列车"
 
-#. Alert summary timeframe ending today at an unspecified time. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:225
-#, elixir-autogen, elixir-format
-msgid " until later today"
-msgstr "今天晚些时候"
-
 #. Text in a notification prompting users to click to learn more
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:52
 #, elixir-autogen, elixir-format
@@ -1534,7 +1528,7 @@ msgid "**Update:** %{mode} service has resumed%{summary_location}."
 msgstr "**更新：**%{mode}服务已恢复%{summary_location}。"
 
 #. Example: “Update: Service has ended”
-#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:61
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:67
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "更新：%{body}"
