@@ -14,7 +14,6 @@ defmodule MobileAppBackendWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
-  # Socket intentionally exposed to external traffic
   socket "/socket", MobileAppBackendWeb.UserSocket,
     websocket: [compress: true],
     longpoll: false,
