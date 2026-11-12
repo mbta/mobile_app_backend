@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           :notification
         )
 
-      assert "**Delays** of about 10 minutes until further notice" == summary
+      assert "**Delays** of about 10 minutes" == summary
     end
 
     test "fallback" do

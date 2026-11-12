@@ -176,6 +176,40 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                  "en"
                )
     end
+
+    test "delay omits until further notice timeframe" do
+      alert = build(:alert, effect: :delay, severity: 5, cause: :unknown_cause)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :delay,
+        location: %Location.SuccessiveStops{start_stop_name: "Alewife", end_stop_name: "Harvard"},
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: nil
+      }
+
+      assert "Delays of about 20 minutes from Alewife to Harvard" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "non-delay keeps until further notice timeframe" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :suspension,
+        timeframe: %Timeframe.UntilFurtherNotice{},
+        recurrence: nil
+      }
+
+      assert "Service suspended until further notice" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
     test "upcoming delay" do
       alert = build(:alert, effect: :delay)
 

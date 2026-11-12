@@ -25,6 +25,10 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
 
   # [Disruption description] [delay duration] [Affected stop(s)] [end time] [due to cause].
   def standard(%{effect: :delay} = alert, location, timeframe, recurrence, _context) do
+    # Delays are inherently open-ended, so "until further notice" adds nothing
+    timeframe =
+      if timeframe == TemplateFragments.until_further_notice(), do: "", else: timeframe
+
     gettext(
       "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}",
       comment: [
