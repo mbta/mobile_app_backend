@@ -111,6 +111,46 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotificationTest do
                OutgoingNotification.localize(notification, "en")
     end
 
+    test "omits until later today timeframe" do
+      notification =
+        delay_notification(
+          %NotificationTitle.BareLabel{label: "Red Line"},
+          %AlertSummary.Location.SuccessiveStops{
+            start_stop_name: "Alewife",
+            end_stop_name: "Harvard"
+          }
+        )
+
+      notification = %OutgoingNotification{
+        notification
+        | summary: %AlertSummary.Standard{
+            notification.summary
+            | timeframe: %Timeframe.LaterToday{}
+          }
+      }
+
+      assert %{body: "Delays of about 20 minutes from Alewife to Harvard"} =
+               OutgoingNotification.localize(notification, "en")
+    end
+
+    test "omits until later today timeframe without leaving trailing whitespace" do
+      notification = %OutgoingNotification{
+        title: %NotificationTitle.ModeLabel{label: "66", mode: :bus},
+        summary: %AlertSummary.Standard{
+          effect: :stop_closure,
+          location: %AlertSummary.Location.SingleStop{stop_name: "Haymarket"},
+          timeframe: %Timeframe.LaterToday{},
+          recurrence: nil
+        },
+        subscriptions: [],
+        alert: build(:alert, id: "alert-id", effect: :stop_closure),
+        type: {:notification, ~U[2026-08-26 12:00:00Z]}
+      }
+
+      assert %{body: "Buses will not stop at Haymarket"} =
+               OutgoingNotification.localize(notification, "en")
+    end
+
     test "non-delay keeps whole route location matching the title" do
       notification =
         delay_notification(

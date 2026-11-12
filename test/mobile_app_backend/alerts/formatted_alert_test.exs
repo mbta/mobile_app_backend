@@ -143,6 +143,39 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
                )
     end
 
+    test "omits until later today timeframe" do
+      alert = build(:alert, effect: :suspension, cause: :maintenance)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :suspension,
+        location: %Location.SuccessiveStops{start_stop_name: "Alewife", end_stop_name: "Harvard"},
+        timeframe: %Timeframe.LaterToday{},
+        recurrence: nil
+      }
+
+      assert "Service suspended from Alewife to Harvard due to maintenance" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "omits until later today timeframe without trailing whitespace" do
+      alert = build(:alert, effect: :stop_closure)
+
+      alert_summary = %AlertSummary.Standard{
+        effect: :stop_closure,
+        location: %Location.SingleStop{stop_name: "Haymarket"},
+        timeframe: %Timeframe.LaterToday{},
+        recurrence: nil
+      }
+
+      assert "Buses will not stop at Haymarket" ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
     test "upcoming delay" do
       alert = build(:alert, effect: :delay)
 
