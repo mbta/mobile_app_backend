@@ -366,7 +366,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
 
       user =
         insert(:user,
-          fcm_last_verified: DateTime.add(now, -2),
+          fcm_last_verified: DateTime.add(now, -100, :microsecond),
           notification_subscriptions: [
             build(:notification_subscription,
               route_id: "Red",
@@ -644,7 +644,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
 
       user =
         insert(:user_with_old_token,
-          fcm_last_verified: DateTime.add(now, -2),
+          fcm_last_verified: DateTime.add(now, -100, :microsecond),
           notification_subscriptions: [
             build(:notification_subscription,
               route_id: "Red",
