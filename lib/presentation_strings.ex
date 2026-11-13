@@ -222,6 +222,38 @@ defmodule MobileAppBackend.PresentationStrings do
     end
   end
 
+  @spec effect_noun_sentence_case(Alert.effect()) :: String.t()
+  def effect_noun_sentence_case(effect) do
+    case effect do
+      :delay ->
+        gettext("Delays",
+          comment: ~s|Alert effect as a plural noun, ex. "Delays are still in effect"|
+        )
+
+      :dock_closure ->
+        gettext("Dock closure",
+          comment: ~s|Alert effect as a noun, ex. "Dock closure is still in effect"|
+        )
+
+      :station_closure ->
+        gettext("Station closure",
+          comment: ~s|Alert effect as a noun, ex. "Station closure is still in effect"|
+        )
+
+      :stop_closure ->
+        gettext("Stop closure",
+          comment: ~s|Alert effect as a noun, ex. "Stop closure is still in effect"|
+        )
+
+      # The sentence case effect would read "Service suspended has ended"
+      :suspension ->
+        effect(:suspension)
+
+      _ ->
+        effect_sentence_case(effect)
+    end
+  end
+
   @spec effect(Alert.effect()) :: String.t()
   def effect(effect) do
     case effect do

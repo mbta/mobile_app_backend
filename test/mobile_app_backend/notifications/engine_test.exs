@@ -61,7 +61,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    }
                  },
                  %{alert.id => alert},
@@ -113,7 +113,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    }
                  },
                  %{alert.id => alert},
@@ -171,7 +171,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -220,7 +220,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -284,7 +284,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -341,7 +341,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -391,7 +391,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -443,7 +443,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -488,7 +488,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -536,7 +536,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -577,7 +577,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -626,7 +626,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -675,7 +675,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -717,7 +717,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -760,7 +760,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -774,7 +774,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -848,10 +848,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription_now) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    },
                    Subscription.key_properties(subscription_later) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    }
                  },
                  %{alert.id => alert},
@@ -925,10 +925,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    }
                  },
                  %{alert.id => alert},
@@ -1014,10 +1014,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => %{default: summary, multiple_active: summary}
+                     alert.id => summary
                    }
                  },
                  %{alert.id => alert},
@@ -1078,7 +1078,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => %{default: "fake", multiple_active: "fake"}
+                     alert.id => "fake"
                    }
                  },
                  %{alert.id => alert},
@@ -1171,10 +1171,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => %{default: summary1, multiple_active: summary1}
+                     alert.id => summary1
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => %{default: summary2, multiple_active: summary2}
+                     alert.id => summary2
                    }
                  },
                  %{alert.id => alert},
@@ -1418,172 +1418,28 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1_early) => %{
-                     alert1.id => %{default: "fake1_early", multiple_active: "fake1_early"}
+                     alert1.id => "fake1_early"
                    },
                    Subscription.key_properties(subscription1_matching) => %{
-                     alert1.id => %{default: "fake1_matching", multiple_active: "fake1_matching"}
+                     alert1.id => "fake1_matching"
                    },
                    Subscription.key_properties(subscription1_late) => %{
-                     alert1.id => %{default: "fake1_late", multiple_active: "fake1_late"}
+                     alert1.id => "fake1_late"
                    },
                    Subscription.key_properties(subscription2_early) => %{
-                     alert2.id => %{default: "fake2_early", multiple_active: "fake2_early"}
+                     alert2.id => "fake2_early"
                    },
                    Subscription.key_properties(subscription2_matching) => %{
-                     alert2.id => %{default: "fake2_matching", multiple_active: "fake2_matching"}
+                     alert2.id => "fake2_matching"
                    },
                    Subscription.key_properties(subscription2_late) => %{
-                     alert2.id => %{default: "fake2_late", multiple_active: "fake2_late"}
+                     alert2.id => "fake2_late"
                    }
                  },
                  %{alert1.id => alert1, alert2.id => alert2},
                  now,
                  GlobalDataCache.get_data()
                )
-    end
-
-    test "uses right summary when multiple active alerts on route" do
-      now = DateTime.now!("America/New_York")
-      upstream_timestamp = DateTime.add(now, -2)
-
-      alert_1 =
-        build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          effect: :suspension,
-          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-          last_push_notification_timestamp: upstream_timestamp
-        )
-
-      alert_2 =
-        build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          effect: :delay,
-          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-          last_push_notification_timestamp: upstream_timestamp
-        )
-
-      subscription =
-        NotificationsFactory.build(:notification_subscription,
-          user_id: 1,
-          route_id: "Red",
-          stop_id: "place-sstat",
-          windows: [
-            NotificationsFactory.build(:window,
-              start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
-              end_time: now |> DateTime.add(1) |> DateTime.to_time(),
-              days_of_week: Range.to_list(0..6)
-            )
-          ]
-        )
-
-      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
-
-      assert [
-               %OutgoingNotification{
-                 subscriptions: [^subscription],
-                 summary: "fake_1_multiple_alert",
-                 alert: ^alert_1,
-                 type: {:notification, ^upstream_timestamp}
-               },
-               %OutgoingNotification{
-                 subscriptions: [^subscription],
-                 summary: "fake_2_multiple_alert",
-                 alert: ^alert_2,
-                 type: {:notification, ^upstream_timestamp}
-               }
-             ] =
-               user
-               |> Engine.user_notifications(
-                 %{},
-                 %{
-                   Subscription.key_properties(subscription) => %{
-                     alert_1.id => %{
-                       default: "fake_1_single_alert",
-                       multiple_active: "fake_1_multiple_alert"
-                     },
-                     alert_2.id => %{
-                       default: "fake_2_single_alert",
-                       multiple_active: "fake_2_multiple_alert"
-                     }
-                   }
-                 },
-                 %{alert_1.id => alert_1, alert_2.id => alert_2},
-                 now,
-                 GlobalDataCache.get_data()
-               )
-               |> Enum.sort_by(& &1.summary)
-    end
-
-    test "uses regular summary when other active alert is elevator closure" do
-      now = DateTime.now!("America/New_York")
-      upstream_timestamp = DateTime.add(now, -2)
-
-      alert_1 =
-        build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          effect: :suspension,
-          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-          last_push_notification_timestamp: upstream_timestamp
-        )
-
-      alert_2 =
-        build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
-          effect: :elevator_closure,
-          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
-          last_push_notification_timestamp: upstream_timestamp
-        )
-
-      subscription =
-        NotificationsFactory.build(:notification_subscription,
-          user_id: 1,
-          route_id: "Red",
-          stop_id: "place-sstat",
-          windows: [
-            NotificationsFactory.build(:window,
-              start_time: now |> DateTime.add(-1) |> DateTime.to_time(),
-              end_time: now |> DateTime.add(1) |> DateTime.to_time(),
-              days_of_week: Range.to_list(0..6)
-            )
-          ]
-        )
-
-      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
-
-      assert [
-               %OutgoingNotification{
-                 subscriptions: [^subscription],
-                 summary: "fake_1_single_alert",
-                 alert: ^alert_1,
-                 type: {:notification, ^upstream_timestamp}
-               },
-               %OutgoingNotification{
-                 subscriptions: [^subscription],
-                 summary: "fake_2_multiple_alert",
-                 alert: ^alert_2,
-                 type: {:notification, ^upstream_timestamp}
-               }
-             ] =
-               user
-               |> Engine.user_notifications(
-                 %{},
-                 %{
-                   Subscription.key_properties(subscription) => %{
-                     alert_1.id => %{
-                       default: "fake_1_single_alert",
-                       multiple_active: "fake_1_multiple_alert"
-                     },
-                     alert_2.id => %{
-                       default: "fake_2_single_alert",
-                       multiple_active: "fake_2_multiple_alert"
-                     }
-                   }
-                 },
-                 %{alert_1.id => alert_1, alert_2.id => alert_2},
-                 now,
-                 GlobalDataCache.get_data()
-               )
-               |> Enum.sort_by(& &1.summary)
     end
   end
 

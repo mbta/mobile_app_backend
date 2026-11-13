@@ -222,7 +222,13 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     test "can serialize all clear summary" do
       assert json_round_trip(%AlertSummary.AllClear{
                effect: :station_closure,
-               has_multiple_active_alerts: true,
+               other_active_alerts: [
+                 %AlertSummary.OtherActiveAlert{
+                   alert_id: "other",
+                   effect: :delay,
+                   location: %AlertSummary.Location.SingleStop{stop_name: "Lechmere"}
+                 }
+               ],
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Lechmere",
                  end_stop_name: "Government Center"
@@ -230,7 +236,14 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
              }) == %{
                type: "all_clear",
                effect: "station_closure",
-               has_multiple_active_alerts: true,
+               other_active_alerts: [
+                 %{
+                   type: "other_active_alert",
+                   alert_id: "other",
+                   effect: "delay",
+                   location: %{type: "single_stop", stop_name: "Lechmere"}
+                 }
+               ],
                location: %{
                  type: "successive_stops",
                  start_stop_name: "Lechmere",
@@ -1452,7 +1465,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           last_push_notification_timestamp: end_time
         )
 
-      assert %AlertSummary.AllClear{} =
+      assert %AlertSummary.AllClear{other_active_alerts: []} =
                AlertSummary.summarizing(
                  alert,
                  %Subscription{stop_id: "", direction_id: 0},
@@ -2588,6 +2601,53 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
   end
 
+  describe "OtherActiveAlert.new/2" do
+    test "uses the location of a standard summary" do
+      alert = build(:alert, effect: :detour)
+      location = %Location.SingleStop{stop_name: "Ruggles"}
+      summary = %AlertSummary.Standard{effect: :detour, location: location}
+
+      assert %AlertSummary.OtherActiveAlert{
+               alert_id: alert_id,
+               effect: :detour,
+               location: ^location
+             } = AlertSummary.OtherActiveAlert.new(alert, summary)
+
+      assert alert_id == alert.id
+    end
+
+    test "uses the shuttled stops of a trip shuttle summary" do
+      alert = build(:alert, effect: :shuttle)
+
+      summary = %AlertSummary.TripShuttle{
+        trip_identity: %TripShuttle.MultipleTrips{},
+        start_stop_name: "Kenmore",
+        end_stop_name: "Copley"
+      }
+
+      assert %AlertSummary.OtherActiveAlert{
+               effect: :shuttle,
+               location: %Location.SuccessiveStops{
+                 start_stop_name: "Kenmore",
+                 end_stop_name: "Copley"
+               }
+             } = AlertSummary.OtherActiveAlert.new(alert, summary)
+    end
+
+    test "has no location for a trip specific summary" do
+      alert = build(:alert, effect: :cancellation)
+
+      summary = %AlertSummary.TripSpecific{
+        trip_identity: %TripSpecific.ThisTrip{route_type: :commuter_rail},
+        effect: :cancellation,
+        is_today: true
+      }
+
+      assert %AlertSummary.OtherActiveAlert{effect: :cancellation, location: nil} =
+               AlertSummary.OtherActiveAlert.new(alert, summary)
+    end
+  end
+
   describe "combine_summaries/2" do
     test "keeps identical summary from multiple routes" do
       now = DateTime.now!("America/New_York")
@@ -2879,19 +2939,17 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       summary1 = %AlertSummary.AllClear{
         effect: :suspension,
-        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
       }
 
       summary2 = %AlertSummary.AllClear{
         effect: :suspension,
-        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "C", end_stop_name: "D"}
       }
 
       assert %AlertSummary.AllClear{
                effect: :suspension,
-               has_multiple_active_alerts: false,
+               other_active_alerts: [],
                location: %Location.Omit{reason: :combine_unknown}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
@@ -2917,22 +2975,44 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       summary1 = %AlertSummary.AllClear{
         effect: :suspension,
-        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
       }
 
       summary2 = %AlertSummary.AllClear{
         effect: :suspension,
-        has_multiple_active_alerts: false,
         location: %Location.SuccessiveStops{start_stop_name: "B", end_stop_name: "A"}
       }
 
       assert %AlertSummary.AllClear{
                effect: :suspension,
-               has_multiple_active_alerts: false,
+               other_active_alerts: [],
                location: %Location.SuccessiveStops{start_stop_name: "A", end_stop_name: "B"}
              } =
                AlertSummary.combine_summaries(alert, [summary1, summary2])
+    end
+
+    test "all clear combines other active alerts from each summary" do
+      alert = build(:alert, effect: :suspension)
+      same_location = %Location.SingleStop{stop_name: "A"}
+      delay = %AlertSummary.OtherActiveAlert{effect: :delay}
+      detour = %AlertSummary.OtherActiveAlert{effect: :detour}
+
+      summary1 = %AlertSummary.AllClear{
+        effect: :suspension,
+        location: same_location,
+        other_active_alerts: [delay]
+      }
+
+      summary2 = %AlertSummary.AllClear{
+        effect: :suspension,
+        location: same_location,
+        other_active_alerts: [delay, detour]
+      }
+
+      assert %AlertSummary.AllClear{
+               location: ^same_location,
+               other_active_alerts: [^delay, ^detour]
+             } = AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
     test "all clear doesn't return affected stops for closure alerts" do
@@ -2976,7 +3056,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
 
       assert %AlertSummary.AllClear{
                effect: :stop_closure,
-               has_multiple_active_alerts: false,
+               other_active_alerts: [],
                location: %AlertSummary.Location.SuccessiveStops{
                  start_stop_name: "Harvard Sq @ Garden St - Dawes Island",
                  end_stop_name: "Last Stop"

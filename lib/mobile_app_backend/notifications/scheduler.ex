@@ -182,7 +182,7 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           DateTime.t(),
           GlobalDataCache.data()
         ) ::
-          %{Alert.id() => %{default: AlertSummary.t(), multiple_active: AlertSummary.t()}}
+          %{Alert.id() => AlertSummary.t()}
 
   defp summaries_by_subscription_key(subscription_key, alerts, now, global) do
     relevant_alerts = Engine.alerts_for_subscription_key(subscription_key, alerts, now, global)
@@ -195,56 +195,70 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         global
       )
 
+    subscription = %Subscription{
+      route_id: subscription_key.route_id,
+      stop_id: subscription_key.stop_id,
+      direction_id: subscription_key.direction_id,
+      include_accessibility: subscription_key.include_accessibility
+    }
+
     summaries_per_alert =
-      Map.new(
-        relevant_alerts,
-        fn alert ->
-          schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
+      Map.new(relevant_alerts, fn alert ->
+        schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
 
-          summary_no_other_active_alerts =
-            AlertSummary.summarizing(
-              alert,
-              %Subscription{
-                route_id: subscription_key.route_id,
-                stop_id: subscription_key.stop_id,
-                direction_id: subscription_key.direction_id,
-                include_accessibility: subscription_key.include_accessibility
-              },
-              patterns,
-              now,
-              schedules,
-              global,
-              :notification,
-              false
-            )
+        {alert.id,
+         AlertSummary.summarizing(
+           alert,
+           subscription,
+           patterns,
+           now,
+           schedules,
+           global,
+           :notification
+         )}
+      end)
 
-          summary_has_multiple_active_alerts =
-            AlertSummary.summarizing(
-              alert,
-              %Subscription{
-                route_id: subscription_key.route_id,
-                stop_id: subscription_key.stop_id,
-                direction_id: subscription_key.direction_id,
-                include_accessibility: subscription_key.include_accessibility
-              },
-              patterns,
-              now,
-              schedules,
-              global,
-              :notification,
-              true
-            )
-
-          {alert.id,
-           %{
-             default: summary_no_other_active_alerts,
-             multiple_active: summary_has_multiple_active_alerts
-           }}
-        end
-      )
-
-    summaries_per_alert
+    Map.new(relevant_alerts, fn alert ->
+      {alert.id,
+       with_other_active_alerts(
+         summaries_per_alert[alert.id],
+         alert,
+         relevant_alerts,
+         summaries_per_alert,
+         now
+       )}
+    end)
   end
+
+  # Other alerts' summaries are built without reference to this one, so this can't be circular.
+  @spec with_other_active_alerts(
+          AlertSummary.t(),
+          Alert.t(),
+          [Alert.t()],
+          %{Alert.id() => AlertSummary.t()},
+          DateTime.t()
+        ) :: AlertSummary.t()
+  defp with_other_active_alerts(
+         %AlertSummary.AllClear{} = summary,
+         alert,
+         relevant_alerts,
+         summaries_per_alert,
+         now
+       ) do
+    other_active_alerts =
+      relevant_alerts
+      |> Enum.filter(
+        &(&1.id != alert.id and &1.effect != :elevator_closure and Alert.active?(&1, now) and
+            not Alert.all_clear?(&1))
+      )
+      |> Enum.sort_by(& &1.id)
+      |> Enum.map(&AlertSummary.OtherActiveAlert.new(&1, summaries_per_alert[&1.id]))
+
+    %{summary | other_active_alerts: other_active_alerts}
+  end
+
+  defp with_other_active_alerts(summary, _alert, _relevant_alerts, _summaries_per_alert, _now),
+    do: summary
 
   @spec log_alert_summary_type_issues(Alert.t(), AlertSummary.t(), [Subscription.t()]) :: :ok
   defp log_alert_summary_type_issues(alert, alert_summary, user_notification_subscriptions) do
@@ -318,7 +332,12 @@ defmodule MobileAppBackend.Notifications.Scheduler do
       alert_id: notification.alert_id,
       title: notification.title,
       body: notification.body,
-      deep_link_path: deep_link_path(notification.alert_id, subscriptions),
+      deep_link_path:
+        deep_link_path(
+          notification.deep_link_alert_id || notification.alert_id,
+          subscriptions,
+          notification.deep_link_alert_id != nil
+        ),
       upstream_timestamp: upstream_timestamp,
       type: type,
       analytics_label: analytics_label(subscriptions, notification.alert_effect, type),
@@ -326,10 +345,12 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     })
   end
 
-  @spec deep_link_path(Alert.id(), [
-          %{route: MBTAV3API.Route.id(), stop: MBTAV3API.Stop.id(), direction: 0 | 1}
-        ]) :: String.t()
-  defp deep_link_path(alert_id, subscriptions) do
+  @spec deep_link_path(
+          Alert.id(),
+          [%{route: MBTAV3API.Route.id(), stop: MBTAV3API.Stop.id(), direction: 0 | 1}],
+          boolean()
+        ) :: String.t()
+  defp deep_link_path(alert_id, subscriptions, force_alert_details?) do
     stop_piece =
       subscriptions
       |> Enum.uniq_by(& &1.stop)
@@ -354,10 +375,10 @@ defmodule MobileAppBackend.Notifications.Scheduler do
         _ -> ""
       end
 
-    if stop_piece != "" do
+    if stop_piece != "" and not force_alert_details? do
       stop_piece <> route_piece <> direction_piece
     else
-      "/a/#{alert_id}" <> route_piece <> stop_piece
+      "/a/#{alert_id}" <> route_piece
     end
   end
 
