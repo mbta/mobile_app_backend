@@ -1628,46 +1628,46 @@ msgstr "trafik bato"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:166
 #, elixir-autogen, elixir-format
 msgid "%{effect} are still in effect%{summary_location}."
-msgstr "%{effect} are still in effect%{summary_location}."
+msgstr "%{effect} toujou an vigè%{summary_location}."
 
 #. Alert summary sentence in the format of "[Alert effect] is still in effect[ at location].", ex "Detour is still in effect at Haymarket."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:173
 #, elixir-autogen, elixir-format
 msgid "%{effect} is still in effect%{summary_location}."
-msgstr "%{effect} is still in effect%{summary_location}."
+msgstr "%{effect} toujou an vigè%{summary_location}."
 
 #. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
-msgstr "**Update:** %{effect_sentence_case} have ended%{summary_location}."
+msgstr "**Mizajou:** %{effect_sentence_case} fini%{summary_location}."
 
 #. Alert effect as a plural noun, ex. "Delays are still in effect"
 #: lib/presentation_strings.ex:229
 #, elixir-autogen, elixir-format
 msgid "Delays"
-msgstr "Delays"
+msgstr "Reta"
 
 #. Sentence following an all clear summary when multiple other alerts remain active
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
 #, elixir-autogen, elixir-format
 msgid "Other disruptions are still in effect."
-msgstr "Other disruptions are still in effect."
+msgstr "Lòt entèripsyon yo toujou an vigè."
 
 #. Alert effect as a noun, ex. "Dock closure is still in effect"
 #: lib/presentation_strings.ex:234
 #, elixir-autogen, elixir-format
 msgid "Dock closure"
-msgstr "Dock closure"
+msgstr "Fèmti waf la"
 
 #. Alert effect as a noun, ex. "Station closure is still in effect"
 #: lib/presentation_strings.ex:239
 #, elixir-autogen, elixir-format
 msgid "Station closure"
-msgstr "Station closure"
+msgstr "Fèmti estasyon"
 
 #. Alert effect as a noun, ex. "Stop closure is still in effect"
 #: lib/presentation_strings.ex:244
 #, elixir-autogen, elixir-format
 msgid "Stop closure"
-msgstr "Stop closure"
+msgstr "Arè ki fèmen"
