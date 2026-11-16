@@ -1284,13 +1284,13 @@ msgstr " 因天候因素"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:166
 #, elixir-autogen, elixir-format
 msgid "%{effect} are still in effect%{summary_location}."
-msgstr ""
+msgstr "%{effect}仍持續生效%{summary_location}。"
 
 #. Alert summary sentence in the format of "[Alert effect] is still in effect[ at location].", ex "Detour is still in effect at Haymarket."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:173
 #, elixir-autogen, elixir-format
 msgid "%{effect} is still in effect%{summary_location}."
-msgstr ""
+msgstr "%{effect}仍持續生效%{summary_location}。"
 
 #. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
@@ -1308,7 +1308,7 @@ msgstr "延誤"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
 #, elixir-autogen, elixir-format
 msgid "Other disruptions are still in effect."
-msgstr ""
+msgstr "其他服務異常仍持續中。"
 
 #. Alert effect as a noun, ex. "Dock closure is still in effect"
 #: lib/presentation_strings.ex:234
