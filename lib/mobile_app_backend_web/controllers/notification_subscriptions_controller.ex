@@ -84,7 +84,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
   end
 
   # A write for a token/fid that was last verified this recently is probably a duplicate request
-  @duplicate_window_seconds 5
+  @duplicate_window_seconds 1
 
   @spec perform_write(WritePayload.t(), DateTime.t()) :: {:ok, :ok} | {:error, term()}
   defp perform_write(payload, now) do
