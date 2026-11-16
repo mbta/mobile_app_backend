@@ -921,361 +921,409 @@ msgid "Looping"
 msgstr "Lặp lại"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:343
+#: lib/presentation_strings.ex:375
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak"
 msgstr " do Amtrak"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:346
+#: lib/presentation_strings.ex:378
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak train traffic"
 msgstr " do giao thông đường sắt Amtrak"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:366
+#: lib/presentation_strings.ex:398
 #, elixir-autogen, elixir-format
 msgid " due to a Coast Guard restriction"
 msgstr " do hạn chế của Cảnh sát biển"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:377
+#: lib/presentation_strings.ex:409
 #, elixir-autogen, elixir-format
 msgid " due to a crossing issue"
 msgstr " do sự cố tại điểm giao cắt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:383
+#: lib/presentation_strings.ex:415
 #, elixir-autogen, elixir-format
 msgid " due to a crossing malfunction"
 msgstr " do trục trặc tại điểm giao cắt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:388
+#: lib/presentation_strings.ex:420
 #, elixir-autogen, elixir-format
 msgid " due to a demonstration"
 msgstr " do biểu tình"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:393
+#: lib/presentation_strings.ex:425
 #, elixir-autogen, elixir-format
 msgid " due to a disabled bus"
 msgstr " do xe buýt gặp sự cố"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:396
+#: lib/presentation_strings.ex:428
 #, elixir-autogen, elixir-format
 msgid " due to a disabled train"
 msgstr " do tàu gặp sự cố"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:401
+#: lib/presentation_strings.ex:433
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge being raised"
 msgstr " do cầu kéo đang được nâng lên"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:406
+#: lib/presentation_strings.ex:438
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge issue"
 msgstr " do sự cố cầu kéo"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:416
+#: lib/presentation_strings.ex:448
 #, elixir-autogen, elixir-format
 msgid " due to a fire"
 msgstr " do hỏa hoạn"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:435
+#: lib/presentation_strings.ex:467
 #, elixir-autogen, elixir-format
 msgid " due to a hazmat condition"
 msgstr " do tình trạng có vật liệu nguy hiểm"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:451
+#: lib/presentation_strings.ex:483
 #, elixir-autogen, elixir-format
 msgid " due to a hurricane"
 msgstr " do bão"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:462
+#: lib/presentation_strings.ex:494
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical issue"
 msgstr " do vấn đề cơ khí"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:467
+#: lib/presentation_strings.ex:499
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical problem"
 msgstr " do sự cố cơ khí"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:472
+#: lib/presentation_strings.ex:504
 #, elixir-autogen, elixir-format
 msgid " due to a medical emergency"
 msgstr " do trường hợp cấp cứu y tế"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:477
+#: lib/presentation_strings.ex:509
 #, elixir-autogen, elixir-format
 msgid " due to a parade"
 msgstr " do cuộc diễu hành"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:485
+#: lib/presentation_strings.ex:517
 #, elixir-autogen, elixir-format
 msgid " due to a power problem"
 msgstr " do sự cố về điện"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:495
+#: lib/presentation_strings.ex:527
 #, elixir-autogen, elixir-format
 msgid " due to a rail defect"
 msgstr " do lỗi đường ray"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:504
+#: lib/presentation_strings.ex:536
 #, elixir-autogen, elixir-format
 msgid " due to a signal issue"
 msgstr " do sự cố về đèn tín hiệu"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:507
+#: lib/presentation_strings.ex:539
 #, elixir-autogen, elixir-format
 msgid " due to a signal problem"
 msgstr " do vấn đề về đèn tín hiệu"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:525
+#: lib/presentation_strings.ex:557
 #, elixir-autogen, elixir-format
 msgid " due to a special event"
 msgstr " do một sự kiện đặc biệt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:530
+#: lib/presentation_strings.ex:562
 #, elixir-autogen, elixir-format
 msgid " due to a speed restriction"
 msgstr " do hạn chế tốc độ"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:538
+#: lib/presentation_strings.ex:570
 #, elixir-autogen, elixir-format
 msgid " due to a switch issue"
 msgstr " do sự cố về chuyển đổi"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:541
+#: lib/presentation_strings.ex:573
 #, elixir-autogen, elixir-format
 msgid " due to a switch problem"
 msgstr " do vấn đề về chuyển đổi"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:546
+#: lib/presentation_strings.ex:578
 #, elixir-autogen, elixir-format
 msgid " due to a technical problem"
 msgstr " do sự cố kỹ thuật"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:556
+#: lib/presentation_strings.ex:588
 #, elixir-autogen, elixir-format
 msgid " due to a track problem"
 msgstr " do sự cố về đường ray"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:340
+#: lib/presentation_strings.ex:372
 #, elixir-autogen, elixir-format
 msgid " due to an accident"
 msgstr " do tai nạn"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:351
+#: lib/presentation_strings.ex:383
 #, elixir-autogen, elixir-format
 msgid " due to an earlier mechanical problem"
 msgstr " do sự cố cơ khí trước đó"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:356
+#: lib/presentation_strings.ex:388
 #, elixir-autogen, elixir-format
 msgid " due to an earlier signal problem"
 msgstr " do vấn đề về đèn tín hiệu trước đó"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:570
+#: lib/presentation_strings.ex:602
 #, elixir-autogen, elixir-format
 msgid " due to an unruly passenger"
 msgstr " do hành khách gây rối"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:361
+#: lib/presentation_strings.ex:393
 #, elixir-autogen, elixir-format
 msgid " due to autos impeding service"
 msgstr " do xe hơi cản trở dịch vụ"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:371
+#: lib/presentation_strings.ex:403
 #, elixir-autogen, elixir-format
 msgid " due to congestion"
 msgstr " do tắc nghẽn"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:374
+#: lib/presentation_strings.ex:406
 #, elixir-autogen, elixir-format
 msgid " due to construction"
 msgstr " do thi công"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:411
+#: lib/presentation_strings.ex:443
 #, elixir-autogen, elixir-format
 msgid " due to electrical work"
 msgstr " do thi công điện"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:419
+#: lib/presentation_strings.ex:451
 #, elixir-autogen, elixir-format
 msgid " due to fire department activity"
 msgstr " do hoạt động của sở cứu hỏa"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:424
+#: lib/presentation_strings.ex:456
 #, elixir-autogen, elixir-format
 msgid " due to flooding"
 msgstr " do lũ lụt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:427
+#: lib/presentation_strings.ex:459
 #, elixir-autogen, elixir-format
 msgid " due to fog"
 msgstr " do sương mù"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:430
+#: lib/presentation_strings.ex:462
 #, elixir-autogen, elixir-format
 msgid " due to freight train interference"
 msgstr " do tàu chở hàng cản trở"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:440
+#: lib/presentation_strings.ex:472
 #, elixir-autogen, elixir-format
 msgid " due to heavy ridership"
 msgstr " do lượng hành khách lớn"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:445
+#: lib/presentation_strings.ex:477
 #, elixir-autogen, elixir-format
 msgid " due to high winds"
 msgstr " do gió mạnh"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:454
+#: lib/presentation_strings.ex:486
 #, elixir-autogen, elixir-format
 msgid " due to ice in the harbor"
 msgstr " do băng ở bến cảng"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:459
+#: lib/presentation_strings.ex:491
 #, elixir-autogen, elixir-format
 msgid " due to maintenance"
 msgstr " do bảo trì"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:480
+#: lib/presentation_strings.ex:512
 #, elixir-autogen, elixir-format
 msgid " due to police activity"
 msgstr " do hoạt động của cảnh sát"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:490
+#: lib/presentation_strings.ex:522
 #, elixir-autogen, elixir-format
 msgid " due to presence of whales"
 msgstr " do sự xuất hiện của cá voi"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:498
+#: lib/presentation_strings.ex:530
 #, elixir-autogen, elixir-format
 msgid " due to rough seas"
 msgstr " do biển động"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:501
+#: lib/presentation_strings.ex:533
 #, elixir-autogen, elixir-format
 msgid " due to severe weather"
 msgstr " do thời tiết khắc nghiệt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:512
+#: lib/presentation_strings.ex:544
 #, elixir-autogen, elixir-format
 msgid " due to single tracking"
 msgstr " do đường ray đơn"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:517
+#: lib/presentation_strings.ex:549
 #, elixir-autogen, elixir-format
 msgid " due to slippery rail"
 msgstr " do đường ray trơn trượt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:522
+#: lib/presentation_strings.ex:554
 #, elixir-autogen, elixir-format
 msgid " due to snow"
 msgstr " do tuyết"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:535
+#: lib/presentation_strings.ex:567
 #, elixir-autogen, elixir-format
 msgid " due to strike"
 msgstr " do đình công"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:448
+#: lib/presentation_strings.ex:480
 #, elixir-autogen, elixir-format
 msgid " due to the holiday"
 msgstr " do ngày nghỉ lễ"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:551
+#: lib/presentation_strings.ex:583
 #, elixir-autogen, elixir-format
 msgid " due to tie replacement"
 msgstr " do thay tà vẹt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:561
+#: lib/presentation_strings.ex:593
 #, elixir-autogen, elixir-format
 msgid " due to track work"
 msgstr " do thi công đường ray"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:564
+#: lib/presentation_strings.ex:596
 #, elixir-autogen, elixir-format
 msgid " due to traffic"
 msgstr " do giao thông"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:567
+#: lib/presentation_strings.ex:599
 #, elixir-autogen, elixir-format
 msgid " due to train traffic"
 msgstr " do giao thông đường sắt"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:575
+#: lib/presentation_strings.ex:607
 #, elixir-autogen, elixir-format
 msgid " due to utility work"
 msgstr " do thi công hạ tầng tiện ích"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:578
+#: lib/presentation_strings.ex:610
 #, elixir-autogen, elixir-format
 msgid " due to vessel substitution"
 msgstr " do thay thế tàu"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:583
+#: lib/presentation_strings.ex:615
 #, elixir-autogen, elixir-format, fuzzy
 msgid " due to vessel traffic"
 msgstr "lưu lượng tàu thuyền"
 
 #. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:586
+#: lib/presentation_strings.ex:618
 #, elixir-autogen, elixir-format
 msgid " due to weather"
 msgstr " do thời tiết"
+
+#. Alert summary sentence in the format of "[Plural alert effect] are still in effect[ at location].", ex "Shuttle buses are still in effect from Kenmore to Copley."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:166
+#, elixir-autogen, elixir-format
+msgid "%{effect} are still in effect%{summary_location}."
+msgstr ""
+
+#. Alert summary sentence in the format of "[Alert effect] is still in effect[ at location].", ex "Detour is still in effect at Haymarket."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:173
+#, elixir-autogen, elixir-format
+msgid "%{effect} is still in effect%{summary_location}."
+msgstr ""
+
+#. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
+#, elixir-autogen, elixir-format, fuzzy
+msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
+msgstr "**Cập nhật:** %{effect_sentence_case} đã kết thúc%{summary_location}."
+
+#. Alert effect as a plural noun, ex. "Delays are still in effect"
+#: lib/presentation_strings.ex:229
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Delays"
+msgstr "Trễ"
+
+#. Sentence following an all clear summary when multiple other alerts remain active
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
+#, elixir-autogen, elixir-format
+msgid "Other disruptions are still in effect."
+msgstr ""
+
+#. Alert effect as a noun, ex. "Dock closure is still in effect"
+#: lib/presentation_strings.ex:234
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Dock closure"
+msgstr "Đóng bến tàu"
+
+#. Alert effect as a noun, ex. "Station closure is still in effect"
+#: lib/presentation_strings.ex:239
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Station closure"
+msgstr "Đóng ga"
+
+#. Alert effect as a noun, ex. "Stop closure is still in effect"
+#: lib/presentation_strings.ex:244
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Stop closure"
+msgstr "Đóng điểm dừng"
