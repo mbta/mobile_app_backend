@@ -18,19 +18,19 @@ msgid " at **%{stop_name}**"
 msgstr " tại **%{stop_name}**"
 
 #. Alert summary recurrence every day until the indicated date, e.g. “ daily[ until Friday]”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:128
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:129
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
 msgstr " hằng ngày%{recurrence_text}"
 
 #. An alert cause interpolated into an alert summary: ex. "due to [maintenance]", in a longer string like "Trip 101 experiencing delays of about 10 minutes today due to maintenance daily until Friday"
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr " do %{cause}"
 
 #. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:294
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:285
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr " từ %{start_time} đến %{end_time}"
@@ -66,44 +66,44 @@ msgid " replacing **%{mode_label}**"
 msgstr " thay thế **%{mode_label}**"
 
 #. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:141
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:142
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
 msgstr " một số ngày%{recurrence_text}"
 
 #. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:287
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:278
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr " bắt đầu từ **%{formatted_time}** hôm nay"
 
 #. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:281
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:272
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr " bắt đầu từ ngày mai"
 
 #. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:233
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr " đến cuối dịch vụ"
 
 #. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:248
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr " đến ngày mai"
 
 #. Alert summary timeframe with no known end. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:159
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr " cho đến khi có thông báo mới"
 
 #. Alert summary recurrence ending tomorrow. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:165
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
 #, elixir-autogen, elixir-format
 msgid " until tomorrow"
 msgstr " cho đến ngày mai"
@@ -588,7 +588,7 @@ msgid "buses"
 msgstr "xe buýt"
 
 #. Used when an alert ends at the end of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:318
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:309
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr "kết thúc dịch vụ"
@@ -606,31 +606,31 @@ msgid "ferry"
 msgstr "phà"
 
 #. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:171
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:172
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
 msgstr " cho đến %{1}"
 
 #. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:181
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr " cho đến %{1}"
 
 #. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:254
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:245
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr " đến %{1}"
 
 #. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:264
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr " đến %{1}"
 
 #. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:274
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr " đến %{1}"
@@ -642,7 +642,7 @@ msgid "multiple trips"
 msgstr "nhiều chuyến đi"
 
 #. Used when an alert begins at the start of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:313
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:304
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr "bắt đầu dịch vụ"
@@ -716,7 +716,7 @@ msgid "Ferries"
 msgstr "Phà"
 
 #. Used when more than 3 stops are affected
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:102
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
 #, elixir-autogen, elixir-format
 msgid "**multiple stops**"
 msgstr "**nhiều điểm dừng**"
@@ -851,12 +851,6 @@ msgstr "Phà"
 msgid "Train"
 msgstr "tàu"
 
-#. Alert summary timeframe ending today at an unspecified time. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:224
-#, elixir-autogen, elixir-format
-msgid " until later today"
-msgstr " trong ngày hôm nay"
-
 #. Text in a notification prompting users to click to learn more
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:51
 #, elixir-autogen, elixir-format
@@ -890,7 +884,7 @@ msgid "**Update:** %{mode} service has resumed%{summary_location}."
 msgstr "**Cập nhật:** Dịch vụ %{mode} đã hoạt động trở lại%{summary_location}."
 
 #. Example: “Update: Service has ended”
-#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:51
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:57
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "Cập nhật: %{body}"
@@ -930,349 +924,349 @@ msgstr "Lặp lại"
 #: lib/presentation_strings.ex:343
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak"
-msgstr " do Amtrak"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:346
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak train traffic"
-msgstr " do giao thông đường sắt Amtrak"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:366
 #, elixir-autogen, elixir-format
 msgid " due to a Coast Guard restriction"
-msgstr " do hạn chế của Cảnh sát biển"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:377
 #, elixir-autogen, elixir-format
 msgid " due to a crossing issue"
-msgstr " do sự cố tại điểm giao cắt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:383
 #, elixir-autogen, elixir-format
 msgid " due to a crossing malfunction"
-msgstr " do trục trặc tại điểm giao cắt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:388
 #, elixir-autogen, elixir-format
 msgid " due to a demonstration"
-msgstr " do biểu tình"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:393
 #, elixir-autogen, elixir-format
 msgid " due to a disabled bus"
-msgstr " do xe buýt gặp sự cố"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:396
 #, elixir-autogen, elixir-format
 msgid " due to a disabled train"
-msgstr " do tàu gặp sự cố"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:401
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge being raised"
-msgstr " do cầu kéo đang được nâng lên"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:406
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge issue"
-msgstr " do sự cố cầu kéo"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:416
 #, elixir-autogen, elixir-format
 msgid " due to a fire"
-msgstr " do hỏa hoạn"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:435
 #, elixir-autogen, elixir-format
 msgid " due to a hazmat condition"
-msgstr " do tình trạng có vật liệu nguy hiểm"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:451
 #, elixir-autogen, elixir-format
 msgid " due to a hurricane"
-msgstr " do bão"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:462
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical issue"
-msgstr " do vấn đề cơ khí"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:467
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical problem"
-msgstr " do sự cố cơ khí"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:472
 #, elixir-autogen, elixir-format
 msgid " due to a medical emergency"
-msgstr " do trường hợp cấp cứu y tế"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:477
 #, elixir-autogen, elixir-format
 msgid " due to a parade"
-msgstr " do cuộc diễu hành"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:485
 #, elixir-autogen, elixir-format
 msgid " due to a power problem"
-msgstr " do sự cố về điện"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:495
 #, elixir-autogen, elixir-format
 msgid " due to a rail defect"
-msgstr " do lỗi đường ray"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:504
 #, elixir-autogen, elixir-format
 msgid " due to a signal issue"
-msgstr " do sự cố về đèn tín hiệu"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:507
 #, elixir-autogen, elixir-format
 msgid " due to a signal problem"
-msgstr " do vấn đề về đèn tín hiệu"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:525
 #, elixir-autogen, elixir-format
 msgid " due to a special event"
-msgstr " do một sự kiện đặc biệt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:530
 #, elixir-autogen, elixir-format
 msgid " due to a speed restriction"
-msgstr " do hạn chế tốc độ"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:538
 #, elixir-autogen, elixir-format
 msgid " due to a switch issue"
-msgstr " do sự cố về chuyển đổi"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:541
 #, elixir-autogen, elixir-format
 msgid " due to a switch problem"
-msgstr " do vấn đề về chuyển đổi"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:546
 #, elixir-autogen, elixir-format
 msgid " due to a technical problem"
-msgstr " do sự cố kỹ thuật"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:556
 #, elixir-autogen, elixir-format
 msgid " due to a track problem"
-msgstr " do sự cố về đường ray"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:340
 #, elixir-autogen, elixir-format
 msgid " due to an accident"
-msgstr " do tai nạn"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:351
 #, elixir-autogen, elixir-format
 msgid " due to an earlier mechanical problem"
-msgstr " do sự cố cơ khí trước đó"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:356
 #, elixir-autogen, elixir-format
 msgid " due to an earlier signal problem"
-msgstr " do vấn đề về đèn tín hiệu trước đó"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:570
 #, elixir-autogen, elixir-format
 msgid " due to an unruly passenger"
-msgstr " do hành khách gây rối"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:361
 #, elixir-autogen, elixir-format
 msgid " due to autos impeding service"
-msgstr " do xe hơi cản trở dịch vụ"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:371
 #, elixir-autogen, elixir-format
 msgid " due to congestion"
-msgstr " do tắc nghẽn"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:374
 #, elixir-autogen, elixir-format
 msgid " due to construction"
-msgstr " do thi công"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:411
 #, elixir-autogen, elixir-format
 msgid " due to electrical work"
-msgstr " do thi công điện"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:419
 #, elixir-autogen, elixir-format
 msgid " due to fire department activity"
-msgstr " do hoạt động của sở cứu hỏa"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:424
 #, elixir-autogen, elixir-format
 msgid " due to flooding"
-msgstr " do lũ lụt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:427
 #, elixir-autogen, elixir-format
 msgid " due to fog"
-msgstr " do sương mù"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:430
 #, elixir-autogen, elixir-format
 msgid " due to freight train interference"
-msgstr " do tàu chở hàng cản trở"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:440
 #, elixir-autogen, elixir-format
 msgid " due to heavy ridership"
-msgstr " do lượng hành khách lớn"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:445
 #, elixir-autogen, elixir-format
 msgid " due to high winds"
-msgstr " do gió mạnh"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:454
 #, elixir-autogen, elixir-format
 msgid " due to ice in the harbor"
-msgstr " do băng ở bến cảng"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:459
 #, elixir-autogen, elixir-format
 msgid " due to maintenance"
-msgstr " do bảo trì"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:480
 #, elixir-autogen, elixir-format
 msgid " due to police activity"
-msgstr " do hoạt động của cảnh sát"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:490
 #, elixir-autogen, elixir-format
 msgid " due to presence of whales"
-msgstr " do sự xuất hiện của cá voi"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:498
 #, elixir-autogen, elixir-format
 msgid " due to rough seas"
-msgstr " do biển động"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:501
 #, elixir-autogen, elixir-format
 msgid " due to severe weather"
-msgstr " do thời tiết khắc nghiệt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:512
 #, elixir-autogen, elixir-format
 msgid " due to single tracking"
-msgstr " do đường ray đơn"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:517
 #, elixir-autogen, elixir-format
 msgid " due to slippery rail"
-msgstr " do đường ray trơn trượt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:522
 #, elixir-autogen, elixir-format
 msgid " due to snow"
-msgstr " do tuyết"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:535
 #, elixir-autogen, elixir-format
 msgid " due to strike"
-msgstr " do đình công"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:448
 #, elixir-autogen, elixir-format
 msgid " due to the holiday"
-msgstr " do ngày nghỉ lễ"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:551
 #, elixir-autogen, elixir-format
 msgid " due to tie replacement"
-msgstr " do thay tà vẹt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:561
 #, elixir-autogen, elixir-format
 msgid " due to track work"
-msgstr " do thi công đường ray"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:564
 #, elixir-autogen, elixir-format
 msgid " due to traffic"
-msgstr " do giao thông"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:567
 #, elixir-autogen, elixir-format
 msgid " due to train traffic"
-msgstr " do giao thông đường sắt"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:575
 #, elixir-autogen, elixir-format
 msgid " due to utility work"
-msgstr " do thi công hạ tầng tiện ích"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:578
 #, elixir-autogen, elixir-format
 msgid " due to vessel substitution"
-msgstr " do thay thế tàu"
+msgstr ""
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:583
@@ -1284,4 +1278,4 @@ msgstr "lưu lượng tàu thuyền"
 #: lib/presentation_strings.ex:586
 #, elixir-autogen, elixir-format
 msgid " due to weather"
-msgstr " do thời tiết"
+msgstr ""

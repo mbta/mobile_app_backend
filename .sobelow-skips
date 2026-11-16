@@ -1,0 +1,4 @@
+Config.CSWH: Cross-Site Websocket Hijacking,lib/mobile_app_backend_web/endpoint.ex:15,29B3C2E
+Config.CSWH: Cross-Site Websocket Hijacking,lib/mobile_app_backend_web/endpoint.ex:17,26174AF
+Config.CSWH: Cross-Site Websocket Hijacking,lib/mobile_app_backend_web/endpoint.ex:35,5A97539
+Config.HTTPS: HTTPS Not Enabled,config/prod.exs:0,2B5C077

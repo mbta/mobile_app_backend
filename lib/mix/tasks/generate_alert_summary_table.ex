@@ -207,7 +207,7 @@ if Mix.env() == :test do
     end
 
     defp here_and_now_rl_shuttle do
-      scenario("Here + Now (RL/Shuttle/StopToDirection/LaterToday)", ~T[12:00:00])
+      scenario("Here + Now (RL/Shuttle/StopToDirection)", ~T[12:00:00])
       |> subscription(route: "Red", stop: "place-jfk", direction: 0)
       |> alert(effect: :shuttle)
       |> active_period(:service_start, ~T[23:00:00])

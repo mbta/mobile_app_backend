@@ -18,19 +18,19 @@ msgid " at **%{stop_name}**"
 msgstr ""
 
 #. Alert summary recurrence every day until the indicated date, e.g. “ daily[ until Friday]”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:128
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:129
 #, elixir-autogen, elixir-format
 msgid " daily%{recurrence_text}"
 msgstr ""
 
 #. An alert cause interpolated into an alert summary: ex. "due to [maintenance]", in a longer string like "Trip 101 experiencing delays of about 10 minutes today due to maintenance daily until Friday"
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:205
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:206
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr ""
 
 #. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:294
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:285
 #, elixir-autogen, elixir-format
 msgid " from %{start_time} to %{end_time}"
 msgstr ""
@@ -66,44 +66,44 @@ msgid " replacing **%{mode_label}**"
 msgstr ""
 
 #. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:141
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:142
 #, elixir-autogen, elixir-format
 msgid " some days%{recurrence_text}"
 msgstr ""
 
 #. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:287
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:278
 #, elixir-autogen, elixir-format
 msgid " starting **%{formatted_time}** today"
 msgstr ""
 
 #. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:281
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:272
 #, elixir-autogen, elixir-format
 msgid " starting tomorrow"
 msgstr ""
 
 #. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:233
 #, elixir-autogen, elixir-format
 msgid " through end of service"
 msgstr ""
 
 #. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:248
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
 #, elixir-autogen, elixir-format
 msgid " through tomorrow"
 msgstr ""
 
 #. Alert summary timeframe with no known end. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:159
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:218
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
 #, elixir-autogen, elixir-format
 msgid " until further notice"
 msgstr ""
 
 #. Alert summary recurrence ending tomorrow. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:165
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
 #, elixir-autogen, elixir-format
 msgid " until tomorrow"
 msgstr ""
@@ -588,7 +588,7 @@ msgid "buses"
 msgstr ""
 
 #. Used when an alert ends at the end of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:318
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:309
 #, elixir-autogen, elixir-format
 msgid "end of service"
 msgstr ""
@@ -606,31 +606,31 @@ msgid "ferry"
 msgstr ""
 
 #. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:171
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:172
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_later_date"
 msgstr ""
 
 #. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:181
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_recurrence_end_day_this_week"
 msgstr ""
 
 #. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:254
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:245
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_later_date"
 msgstr ""
 
 #. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:264
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_this_week"
 msgstr ""
 
 #. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:274
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
 #, elixir-autogen, elixir-format
 msgid "key/alert_summary_timeframe_time"
 msgstr ""
@@ -642,7 +642,7 @@ msgid "multiple trips"
 msgstr ""
 
 #. Used when an alert begins at the start of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:313
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:304
 #, elixir-autogen, elixir-format
 msgid "start of service"
 msgstr ""
@@ -716,7 +716,7 @@ msgid "Ferries"
 msgstr ""
 
 #. Used when more than 3 stops are affected
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:102
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
 #, elixir-autogen, elixir-format
 msgid "**multiple stops**"
 msgstr ""
@@ -851,12 +851,6 @@ msgstr ""
 msgid "Train"
 msgstr ""
 
-#. Alert summary timeframe ending today at an unspecified time. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:224
-#, elixir-autogen, elixir-format
-msgid " until later today"
-msgstr ""
-
 #. Text in a notification prompting users to click to learn more
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:51
 #, elixir-autogen, elixir-format
@@ -890,7 +884,7 @@ msgid "**Update:** %{mode} service has resumed%{summary_location}."
 msgstr ""
 
 #. Example: “Update: Service has ended”
-#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:51
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:57
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr ""

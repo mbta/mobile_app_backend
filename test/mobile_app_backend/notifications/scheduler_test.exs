@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Notifications.SchedulerTest do
-  use MobileAppBackend.DataCase, async: true
+  use MobileAppBackend.DataCase, async: false
   use Oban.Testing, repo: MobileAppBackend.Repo
   use HttpStub.Case
 

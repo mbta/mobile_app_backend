@@ -55,6 +55,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary.Location do
             | :combine_unknown
             | :combination_with_no_route_patterns
             | :stop_not_found_in_digraph
+            | :matches_title
             | :unknown
 
     @type t :: %__MODULE__{reason: omit_reason()}

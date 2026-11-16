@@ -1,5 +1,5 @@
 defmodule MobileAppBackend.Search.Algolia.QueryPayloadTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
   import Test.Support.Helpers
   alias MobileAppBackend.Search.Algolia.QueryPayload
 

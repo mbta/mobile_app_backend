@@ -2,6 +2,12 @@ defmodule Test.Support.Helpers do
   @moduledoc "Test helpers"
 
   defmacro reassign_env(app, var, value) do
+    case_opts = Module.get_attribute(__CALLER__.module, :ex_unit_module)
+
+    if Keyword.get(case_opts, :async, false) do
+      raise "Don't use reassign_env from async test case"
+    end
+
     quote do
       old_value = Application.get_env(unquote(app), unquote(var))
       Application.put_env(unquote(app), unquote(var), unquote(value))

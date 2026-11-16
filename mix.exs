@@ -112,6 +112,7 @@ defmodule MobileAppBackend.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "assets.setup", "assets.build", "ecto.setup"],
+      sobelow: ["sobelow --skip --exit=low"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
