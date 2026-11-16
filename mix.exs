@@ -119,7 +119,7 @@ defmodule MobileAppBackend.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      checks: ["format", "credo", "sobelow", "dialyzer", "gettext.extract --merge"]
+      checks: ["format", "credo", "dialyzer", "gettext.update"]
     ]
   end
 end

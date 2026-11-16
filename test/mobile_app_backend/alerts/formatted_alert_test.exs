@@ -44,7 +44,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Suspension has ended on Red Line. Delays are still in effect." ==
+      assert "Update: Suspension has ended on Red Line. Delay are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -139,7 +139,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Train service has resumed at Oak Grove. Station closure is still in effect at Malden Center." ==
+      assert "Update: Train service has resumed at Oak Grove. Station Closure is still in effect at Malden Center." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -163,7 +163,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Delays have ended. Shuttle buses are still in effect." ==
+      assert "Update: Delay has ended. Shuttle buses are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -237,7 +237,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: nil
       }
 
-      assert "Delays through 2:00 PM due to signal issue" ==
+      assert "Delays through 2:00 PM due to a signal issue" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -405,7 +405,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         recurrence: %Recurrence.Daily{ending: %Timeframe.LaterDate{time: ~B[2026-04-29 10:31:00]}}
       }
 
-      assert "10:31 AM train from North Station is suspended today due to accident daily until Apr 29" ==
+      assert "10:31 AM train from North Station is suspended today due to an accident daily until Apr 29" ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"

@@ -55,6 +55,7 @@ defmodule MBTAV3API.Alert do
       :heavy_ridership,
       :high_winds,
       :holiday,
+      :hurricane,
       :ice_in_harbor,
       :maintenance,
       :mechanical_issue,
