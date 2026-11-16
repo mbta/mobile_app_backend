@@ -1640,7 +1640,7 @@ msgstr "%{effect}仍持續生效%{summary_location}。"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
-msgstr "**Update:** %{effect_sentence_case} have ended%{summary_location}."
+msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結束。"
 
 #. Alert effect as a plural noun, ex. "Delays are still in effect"
 #: lib/presentation_strings.ex:229
@@ -1670,4 +1670,4 @@ msgstr "車站關閉"
 #: lib/presentation_strings.ex:244
 #, elixir-autogen, elixir-format
 msgid "Stop closure"
-msgstr "Stop closure"
+msgstr "站點關閉"
