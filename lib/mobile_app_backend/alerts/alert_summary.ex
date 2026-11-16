@@ -36,14 +36,46 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     defstruct [:effect, :location, :timeframe, :recurrence, :context]
   end
 
-  defmodule AllClear do
+  defmodule OtherActiveAlert do
+    alias MobileAppBackend.Alerts.AlertSummary
+
     @type t :: %__MODULE__{
+            alert_id: Alert.id() | nil,
             effect: Alert.effect(),
-            has_multiple_active_alerts: boolean(),
             location: Location.t() | nil
           }
     @derive PolymorphicJson
-    defstruct [:effect, :has_multiple_active_alerts, :location]
+    defstruct [:alert_id, :effect, :location]
+
+    @doc """
+    Describes a still-active alert using its summary for the same subscription.
+    """
+    @spec new(Alert.t(), AlertSummary.t()) :: t()
+    def new(%Alert{} = alert, summary) do
+      location =
+        case summary do
+          %Standard{location: location} ->
+            location
+
+          %TripShuttle{start_stop_name: start_stop, end_stop_name: end_stop} ->
+            %Location.SuccessiveStops{start_stop_name: start_stop, end_stop_name: end_stop}
+
+          _ ->
+            nil
+        end
+
+      %__MODULE__{alert_id: alert.id, effect: alert.effect, location: location}
+    end
+  end
+
+  defmodule AllClear do
+    @type t :: %__MODULE__{
+            effect: Alert.effect(),
+            location: Location.t() | nil,
+            other_active_alerts: [OtherActiveAlert.t()]
+          }
+    @derive PolymorphicJson
+    defstruct [:effect, :location, other_active_alerts: []]
   end
 
   defmodule Unknown do
@@ -63,19 +95,10 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
         at_time,
         schedules,
         global,
-        context,
-        has_multiple_active_alerts \\ false
+        context
       ) do
     cond do
-      all_clear =
-          all_clear_summary(
-            alert,
-            stop_id,
-            direction_id,
-            patterns,
-            has_multiple_active_alerts,
-            global
-          ) ->
+      all_clear = all_clear_summary(alert, stop_id, direction_id, patterns, global) ->
         all_clear
 
       trip_specific =
@@ -131,8 +154,8 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
 
         %__MODULE__.AllClear{
           effect: effect,
-          has_multiple_active_alerts: summaries |> Enum.any?(& &1.has_multiple_active_alerts),
-          location: location
+          location: location,
+          other_active_alerts: summaries |> Enum.flat_map(& &1.other_active_alerts) |> Enum.uniq()
         }
 
       Enum.all?(summaries, &match?(%__MODULE__.Standard{}, &1)) ->
@@ -231,21 +254,12 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           Stop.id(),
           0 | 1,
           [RoutePattern.t()],
-          boolean(),
           GlobalDataCache.data()
         ) :: AllClear.t() | nil
-  defp all_clear_summary(
-         alert,
-         stop_id,
-         direction_id,
-         patterns,
-         has_multiple_active_alerts,
-         global
-       ) do
+  defp all_clear_summary(alert, stop_id, direction_id, patterns, global) do
     if Alert.all_clear?(alert) do
       %AllClear{
         effect: alert.effect,
-        has_multiple_active_alerts: has_multiple_active_alerts,
         location: alert_location(alert, stop_id, direction_id, patterns, global)
       }
     end

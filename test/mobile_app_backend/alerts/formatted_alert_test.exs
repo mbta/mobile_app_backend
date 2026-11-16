@@ -24,7 +24,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           start_stop_name: "Oak Grove",
           end_stop_name: "North Station"
         },
-        has_multiple_active_alerts: false,
+        other_active_alerts: [],
         effect: alert.effect
       }
 
@@ -40,11 +40,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
 
       alert_summary = %AlertSummary.AllClear{
         location: %Location.WholeRoute{route_type: :heavy_rail, route_label: "Red Line"},
-        has_multiple_active_alerts: true,
+        other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :delay}],
         effect: alert.effect
       }
 
-      assert "Update: Suspension has ended on Red Line." ==
+      assert "Update: Suspension has ended on Red Line. Delays are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -59,11 +59,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           start_stop_name: "Oak Grove",
           end_stop_name: "North Station"
         },
-        has_multiple_active_alerts: true,
+        other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
       }
 
-      assert "Update: Suspension has ended from Oak Grove to North Station." ==
+      assert "Update: Suspension has ended from Oak Grove to North Station. Detour is still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -77,11 +77,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         location: %Location.SingleStop{
           stop_name: "Ruggles"
         },
-        has_multiple_active_alerts: true,
+        other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
       }
 
-      assert "Update: Suspension has ended at Ruggles." ==
+      assert "Update: Suspension has ended at Ruggles. Detour is still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -95,11 +95,11 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         location: %Location.SingleStop{
           stop_name: "Oak Grove"
         },
-        has_multiple_active_alerts: true,
+        other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :shuttle}],
         effect: alert.effect
       }
 
-      assert "Update: Train service has resumed at Oak Grove." ==
+      assert "Update: Train service has resumed at Oak Grove. Shuttle buses are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -114,11 +114,112 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
           start_stop_name: "Oak Grove",
           end_stop_name: "North Station"
         },
-        has_multiple_active_alerts: true,
+        other_active_alerts: [%AlertSummary.OtherActiveAlert{effect: :detour}],
         effect: alert.effect
       }
 
-      assert "Update: Track change has ended from Oak Grove to North Station." ==
+      assert "Update: Track change has ended from Oak Grove to North Station. Detour is still in effect." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear includes location of other alert with the same effect" do
+      alert = build(:alert, effect: :station_closure)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SingleStop{stop_name: "Oak Grove"},
+        other_active_alerts: [
+          %AlertSummary.OtherActiveAlert{
+            effect: :station_closure,
+            location: %Location.SingleStop{stop_name: "Malden Center"}
+          }
+        ],
+        effect: alert.effect
+      }
+
+      assert "Update: Train service has resumed at Oak Grove. Station closure is still in effect at Malden Center." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear omits location of other alert with a different effect" do
+      alert = build(:alert, effect: :delay)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: nil,
+        other_active_alerts: [
+          %AlertSummary.OtherActiveAlert{
+            effect: :shuttle,
+            location: %Location.SuccessiveStops{
+              start_stop_name: "Kenmore",
+              end_stop_name: "Copley"
+            }
+          }
+        ],
+        effect: alert.effect
+      }
+
+      assert "Update: Delays have ended. Shuttle buses are still in effect." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear includes location of other plural alert with the same effect" do
+      alert =
+        build(:alert,
+          effect: :shuttle,
+          informed_entity: [
+            %MBTAV3API.Alert.InformedEntity{
+              activities: [:board, :exit, :ride],
+              route: "Green-C",
+              route_type: :light_rail
+            }
+          ]
+        )
+
+      alert_summary = %AlertSummary.AllClear{
+        location: %Location.SuccessiveStops{
+          start_stop_name: "Cleveland Circle",
+          end_stop_name: "Coolidge Corner"
+        },
+        other_active_alerts: [
+          %AlertSummary.OtherActiveAlert{
+            effect: :shuttle,
+            location: %Location.SuccessiveStops{
+              start_stop_name: "Kenmore",
+              end_stop_name: "Copley"
+            }
+          }
+        ],
+        effect: alert.effect
+      }
+
+      assert "Update: Train service has resumed from Cleveland Circle to Coolidge Corner. Shuttle buses are still in effect from Kenmore to Copley." ==
+               FormattedAlert.summary(
+                 %FormattedAlert{alert: alert, alert_summary: alert_summary},
+                 "en"
+               )
+    end
+
+    test "all clear with several other alerts is generic" do
+      alert = build(:alert, effect: :suspension)
+
+      alert_summary = %AlertSummary.AllClear{
+        location: nil,
+        other_active_alerts: [
+          %AlertSummary.OtherActiveAlert{effect: :detour},
+          %AlertSummary.OtherActiveAlert{effect: :delay}
+        ],
+        effect: alert.effect
+      }
+
+      assert "Update: Suspension has ended. Other disruptions are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"

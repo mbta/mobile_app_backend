@@ -120,7 +120,7 @@ msgid "%{name} bus"
 msgstr "%{name}巴士"
 
 #. Alert summary in the format of “[trip identity] is replaced by shuttle buses from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [the 12:13 PM train] from [Ruggles] to [Forest Hills][ some days until Friday]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:315
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:361
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "%{trip_identity}从**%{start_stop}**至**%{end_stop}**%{recurrence}由接驳巴士替代运营"
@@ -144,7 +144,7 @@ msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
 msgstr "**%{trip_time}**%{route_type}至**%{headsign}**"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:229
+#: lib/presentation_strings.ex:261
 #, elixir-autogen, elixir-format
 msgid "Access Issue"
 msgstr "无障碍问题"
@@ -156,7 +156,7 @@ msgid "Access issue"
 msgstr "无障碍问题"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:232
+#: lib/presentation_strings.ex:264
 #, elixir-autogen, elixir-format
 msgid "Additional Service"
 msgstr "附加服务"
@@ -170,14 +170,14 @@ msgstr "附加服务"
 #. Possible alert effect
 #: lib/presentation_strings.ex:218
 #: lib/presentation_strings.ex:221
-#: lib/presentation_strings.ex:327
-#: lib/presentation_strings.ex:330
+#: lib/presentation_strings.ex:359
+#: lib/presentation_strings.ex:362
 #, elixir-autogen, elixir-format
 msgid "Alert"
 msgstr "警报"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:235
+#: lib/presentation_strings.ex:267
 #, elixir-autogen, elixir-format
 msgid "Amber Alert"
 msgstr "安珀警报"
@@ -189,7 +189,7 @@ msgid "Amber alert"
 msgstr "安珀警报"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:238
+#: lib/presentation_strings.ex:270
 #, elixir-autogen, elixir-format
 msgid "Bike Issue"
 msgstr "自行车问题"
@@ -201,33 +201,33 @@ msgid "Bike issue"
 msgstr "自行车问题"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:241
+#: lib/presentation_strings.ex:273
 #, elixir-autogen, elixir-format
 msgid "Cancellation"
 msgstr "取消"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:135
-#: lib/presentation_strings.ex:244
+#: lib/presentation_strings.ex:276
 #, elixir-autogen, elixir-format
 msgid "Delay"
 msgstr "延误"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:138
-#: lib/presentation_strings.ex:247
+#: lib/presentation_strings.ex:279
 #, elixir-autogen, elixir-format
 msgid "Detour"
 msgstr "交通改道"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:250
+#: lib/presentation_strings.ex:282
 #, elixir-autogen, elixir-format
 msgid "Dock Closure"
 msgstr "码头关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:253
+#: lib/presentation_strings.ex:285
 #, elixir-autogen, elixir-format
 msgid "Dock Issue"
 msgstr "停靠区域问题"
@@ -251,7 +251,7 @@ msgid "Eastbound"
 msgstr "东行"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:256
+#: lib/presentation_strings.ex:288
 #, elixir-autogen, elixir-format
 msgid "Elevator Closure"
 msgstr "电梯关停"
@@ -263,7 +263,7 @@ msgid "Elevator closed"
 msgstr "直梯已关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:259
+#: lib/presentation_strings.ex:291
 #, elixir-autogen, elixir-format
 msgid "Escalator Closure"
 msgstr "自动扶梯关闭"
@@ -275,7 +275,7 @@ msgid "Escalator closed"
 msgstr "自动扶梯已关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:262
+#: lib/presentation_strings.ex:294
 #, elixir-autogen, elixir-format
 msgid "Extra Service"
 msgstr "额外服务"
@@ -287,7 +287,7 @@ msgid "Extra service"
 msgstr "额外服务"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:265
+#: lib/presentation_strings.ex:297
 #, elixir-autogen, elixir-format
 msgid "Facility Issue"
 msgstr "设施问题"
@@ -311,7 +311,7 @@ msgid "Inbound"
 msgstr "进站"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:268
+#: lib/presentation_strings.ex:300
 #, elixir-autogen, elixir-format
 msgid "Modified Service"
 msgstr "调整后的服务"
@@ -335,7 +335,7 @@ msgid "Multiple trips"
 msgstr "多个班次"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:271
+#: lib/presentation_strings.ex:303
 #, elixir-autogen, elixir-format
 msgid "No Service"
 msgstr "无服务"
@@ -354,7 +354,7 @@ msgstr "北行"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:165
-#: lib/presentation_strings.ex:274
+#: lib/presentation_strings.ex:306
 #, elixir-autogen, elixir-format
 msgid "Notice"
 msgstr "通知"
@@ -366,13 +366,13 @@ msgid "Outbound"
 msgstr "出站"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:277
+#: lib/presentation_strings.ex:309
 #, elixir-autogen, elixir-format
 msgid "Parking Closure"
 msgstr "停车关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:280
+#: lib/presentation_strings.ex:312
 #, elixir-autogen, elixir-format
 msgid "Parking Issue"
 msgstr "停车问题"
@@ -390,7 +390,7 @@ msgid "Parking issue"
 msgstr "停车问题"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:283
+#: lib/presentation_strings.ex:315
 #, elixir-autogen, elixir-format
 msgid "Policy Change"
 msgstr "政策变化"
@@ -402,7 +402,7 @@ msgid "Policy change"
 msgstr "政策变化"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:286
+#: lib/presentation_strings.ex:318
 #, elixir-autogen, elixir-format
 msgid "Schedule Change"
 msgstr "时刻表变更"
@@ -414,7 +414,7 @@ msgid "Schedule change"
 msgstr "时刻表变更"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:289
+#: lib/presentation_strings.ex:321
 #, elixir-autogen, elixir-format
 msgid "Service Change"
 msgstr "服务变更"
@@ -434,7 +434,7 @@ msgstr "服务暂停"
 
 #. Possible alert effect
 #. The status label for a shuttled trip
-#: lib/presentation_strings.ex:292
+#: lib/presentation_strings.ex:324
 #, elixir-autogen, elixir-format
 msgid "Shuttle"
 msgstr "摆渡巴士"
@@ -446,13 +446,13 @@ msgid "Shuttle buses"
 msgstr "摆渡巴士"
 
 #. Alert summary in the format of “Shuttle buses replace [trip identity] from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [this train] from [Ruggles] to [Forest Hills][ some days until Friday]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:325
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:371
 #, elixir-autogen, elixir-format
 msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
 msgstr "接驳巴士替代从**%{start_stop}**至**%{end_stop}**%{recurrence}的%{trip_identity}"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:297
+#: lib/presentation_strings.ex:329
 #, elixir-autogen, elixir-format
 msgid "Snow Route"
 msgstr "雪地线路"
@@ -470,13 +470,13 @@ msgid "Southbound"
 msgstr "南行"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:300
+#: lib/presentation_strings.ex:332
 #, elixir-autogen, elixir-format
 msgid "Station Closure"
 msgstr "车站关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:303
+#: lib/presentation_strings.ex:335
 #, elixir-autogen, elixir-format
 msgid "Station Issue"
 msgstr "车站问题"
@@ -494,20 +494,20 @@ msgid "Station issue"
 msgstr "车站问题"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:306
+#: lib/presentation_strings.ex:338
 #, elixir-autogen, elixir-format
 msgid "Stop Closure"
 msgstr "站点关闭"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:309
-#: lib/presentation_strings.ex:312
+#: lib/presentation_strings.ex:341
+#: lib/presentation_strings.ex:344
 #, elixir-autogen, elixir-format
 msgid "Stop Moved"
 msgstr "站点已移动"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:315
+#: lib/presentation_strings.ex:347
 #, elixir-autogen, elixir-format
 msgid "Stop Shoveling"
 msgstr "站点铲雪中"
@@ -533,13 +533,13 @@ msgstr "站点铲雪中"
 
 #. Possible alert effect
 #: lib/presentation_strings.ex:207
-#: lib/presentation_strings.ex:318
+#: lib/presentation_strings.ex:350
 #, elixir-autogen, elixir-format
 msgid "Summary"
 msgstr "概要"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:321
+#: lib/presentation_strings.ex:353
 #, elixir-autogen, elixir-format
 msgid "Suspension"
 msgstr "暂停"
@@ -551,7 +551,7 @@ msgid "This %{route_type}"
 msgstr "该%{route_type}"
 
 #. Possible alert effect
-#: lib/presentation_strings.ex:324
+#: lib/presentation_strings.ex:356
 #, elixir-autogen, elixir-format
 msgid "Track Change"
 msgstr "轨道变更"
@@ -692,7 +692,7 @@ msgstr "行动"
 msgid "close"
 msgstr "关闭"
 
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:15
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:16
 #, elixir-autogen, elixir-format
 msgid "%{mode} %{skipped_effect}"
 msgstr "%{mode} %{skipped_effect}"
@@ -724,63 +724,63 @@ msgstr "**多个站点**"
 #. Assemble a summary of an alert with the structure:
 #. [This trip] [will not stop at  stop A][ due to maintenance][ daily until friday]
 #. Alert summary in the format of “[trip identity] [is affected][due to cause][until recurrence]”, ex “[12:13 PM from Ruggles] [is cancelled today][ due to a mechanical issue][ some days until Wednesday]” or “[Multiple trips] [are suspended today][][]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:197
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:243
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 msgstr "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] affected by [detour] [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:300
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:346
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}受%{effect}影响%{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [These trips] are cancelled [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:163
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:209
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity} 已取消 %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [These trips] are suspended [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:246
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:292
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}暂停%{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [Trip 101] experiencing delays[ of about 10 minutes][ today][ due to maintenance][ daily until Friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:278
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:324
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}出现延误%{delay_duration} %{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:174
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:220
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}已取消%{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] is suspended [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:257
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:303
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}暂停%{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. [This trip] will terminate at [Porter][ today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:221
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:267
 #, elixir-autogen, elixir-format
 msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
 msgstr "%{trip_identity}将在%{terminating_stop}终止运营%{timeframe}%{cause}%{recurrence}"
 
 #. Assemble a summary of an alert with the structure:
 #. **Delays**[ of about 15 minutes][ due to weather][ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:28
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:29
 #, elixir-autogen, elixir-format
 msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr "**延误**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
@@ -834,7 +834,7 @@ msgid "Bus"
 msgstr "巴士"
 
 #. Elevator Service
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:103
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:120
 #, elixir-autogen, elixir-format
 msgid "Elevator"
 msgstr "电梯"
@@ -852,39 +852,39 @@ msgid "Train"
 msgstr "列车"
 
 #. Text in a notification prompting users to click to learn more
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:51
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:52
 #, elixir-autogen, elixir-format
 msgid "%{summary}. See alert details."
 msgstr "%{summary}。查看警报详情。"
 
 #. Assemble a full summary of an alert with the structure: \n**[Modified service]**[ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:71
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:72
 #, elixir-autogen, elixir-format
 msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 msgstr "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
 
 #. Alert summary in the format of \"All clear: Normal service has resumed.\"
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:139
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:91
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Normal service has resumed."
 msgstr "**通行正常：**服务已恢复正常。"
 
-#. Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "[Update][Stop closure] has ended[ at Haymarket]." or \"[Update][Suspension] has ended[ from Alewife to Harvard]”.
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:124
+#. Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "Update: [Stop closure] has ended[ at Haymarket]." or "Update: [Suspension] has ended[ from Alewife to Harvard]."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:147
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
 msgstr "**更新：** %{effect_sentence_case}已结束%{summary_location}。"
 
 #. Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:90
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:100
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:114
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:107
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:117
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:130
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{mode} service has resumed%{summary_location}."
 msgstr "**更新：**%{mode}服务已恢复%{summary_location}。"
 
 #. Example: “Update: Service has ended”
-#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:57
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:67
 #, elixir-autogen, elixir-format
 msgid "Update: %{body}"
 msgstr "更新：%{body}"
