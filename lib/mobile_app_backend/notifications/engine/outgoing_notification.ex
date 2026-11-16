@@ -27,10 +27,20 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
             subscriptions: [Subscription.t()],
             alert_id: Alert.id(),
             alert_effect: Alert.effect(),
+            deep_link_alert_id: Alert.id() | nil,
             type: DeliveredNotification.type(),
             locale: Gettext.locale()
           }
-    defstruct [:title, :body, :subscriptions, :alert_id, :alert_effect, :type, :locale]
+    defstruct [
+      :title,
+      :body,
+      :subscriptions,
+      :alert_id,
+      :alert_effect,
+      :deep_link_alert_id,
+      :type,
+      :locale
+    ]
   end
 
   @spec localize(t(), Gettext.locale()) :: Localized.t()
@@ -69,10 +79,16 @@ defmodule MobileAppBackend.Notifications.Engine.OutgoingNotification do
       subscriptions: outgoing_notification.subscriptions,
       alert_id: outgoing_notification.alert.id,
       alert_effect: outgoing_notification.alert.effect,
+      deep_link_alert_id: single_other_active_alert_id(outgoing_notification.summary),
       type: outgoing_notification.type,
       locale: locale
     }
   end
+
+  defp single_other_active_alert_id(%AlertSummary.AllClear{other_active_alerts: [other]}),
+    do: other.alert_id
+
+  defp single_other_active_alert_id(_summary), do: nil
 
   # A delay on the whole route that's already named by the title doesn't need to repeat it in the body.
   # Comparing the localized strings means a "Green Line" title still keeps a "Green Line C" location.

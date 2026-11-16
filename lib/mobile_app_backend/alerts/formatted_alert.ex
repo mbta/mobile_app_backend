@@ -28,7 +28,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert do
           %AlertSummary.AllClear{} ->
             Templates.all_clear(
               alert,
-              alert_summary.has_multiple_active_alerts,
+              alert_summary.other_active_alerts,
               TemplateFragments.location(alert_summary.effect, alert_summary.location)
             )
 

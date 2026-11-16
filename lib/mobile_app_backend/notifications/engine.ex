@@ -19,7 +19,7 @@ defmodule MobileAppBackend.Notifications.Engine do
           User.t(),
           %{Alert.id() => DeliveredNotification.t()},
           %{
-            Subscription.key_properties() => %{Alert.id() => {AlertSummary.t(), AlertSummary.t()}}
+            Subscription.key_properties() => %{Alert.id() => AlertSummary.t()}
           },
           %{Alert.id() => Alert.t()},
           DateTime.t(),
@@ -49,17 +49,10 @@ defmodule MobileAppBackend.Notifications.Engine do
       if is_nil(type) do
         []
       else
-        subscription_key_to_alerts =
-          subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id)
-
-        has_more_active_alerts =
-          has_more_active_alerts?(alert, subscription_key_to_alerts, subscriptions, now)
-
         build_outgoing_notification(
           alert,
           subscriptions,
           summaries_by_subscription_key,
-          has_more_active_alerts,
           type,
           global_data
         )
@@ -71,7 +64,7 @@ defmodule MobileAppBackend.Notifications.Engine do
           User.t(),
           %{Alert.id() => DeliveredNotification.t()},
           %{
-            Subscription.key_properties() => %{Alert.id() => {AlertSummary.t(), AlertSummary.t()}}
+            Subscription.key_properties() => %{Alert.id() => AlertSummary.t()}
           },
           %{Alert.id() => Alert.t()},
           GlobalDataCache.data(),
@@ -125,20 +118,6 @@ defmodule MobileAppBackend.Notifications.Engine do
         )
 
       {alert, matching_subscriptions}
-    end)
-  end
-
-  defp subscription_key_to_alerts(summaries_by_subscription_key, alerts_by_id) do
-    summaries_by_subscription_key
-    |> Map.new(fn {subscription_key, summaries_by_alert_id} ->
-      alert_ids =
-        summaries_by_alert_id
-        |> Map.keys()
-
-      {subscription_key,
-       alerts_by_id
-       |> Map.take(alert_ids)
-       |> Map.values()}
     end)
   end
 
@@ -223,17 +202,10 @@ defmodule MobileAppBackend.Notifications.Engine do
          alert,
          subscriptions,
          summaries_by_subscription_key,
-         has_more_active_alerts,
          type,
          global_data
        ) do
-    summary =
-      build_summary(
-        alert,
-        subscriptions,
-        summaries_by_subscription_key,
-        has_more_active_alerts
-      )
+    summary = build_summary(alert, subscriptions, summaries_by_subscription_key)
 
     if summary do
       [
@@ -252,33 +224,6 @@ defmodule MobileAppBackend.Notifications.Engine do
 
       []
     end
-  end
-
-  # Are there other active alerts that affect the same subscriptions as the given alert?
-  # Excludes elevator closures
-  @spec has_more_active_alerts?(
-          Alert.t(),
-          %{Subscription.key_properties() => [Alert.t()]},
-          [Subscription.t()],
-          DateTime.t()
-        ) :: boolean()
-  defp has_more_active_alerts?(
-         alert,
-         subscription_key_to_alerts,
-         subscriptions_matching_alert,
-         now
-       ) do
-    target_keys = Enum.map(subscriptions_matching_alert, &Subscription.key_properties(&1))
-
-    subscription_key_to_alerts
-    |> Map.take(target_keys)
-    |> Map.values()
-    |> List.flatten()
-    |> Enum.count(
-      &(&1.id != alert.id &&
-          &1.effect != :elevator_closure &&
-          Alert.active?(&1, now))
-    ) > 0
   end
 
   defp filter_trip_alerts_serving_stop(alerts, now, target_stop_with_children) do
@@ -462,56 +407,24 @@ defmodule MobileAppBackend.Notifications.Engine do
     NotificationTitle.from_lines_or_routes(title_lines_or_routes)
   end
 
-  defp build_summary(
-         alert,
-         [subscription],
-         summaries_by_subscription_key,
-         has_multiple_active_alerts?
-       ) do
-    summary_for_subscription(
-      alert,
-      subscription,
-      summaries_by_subscription_key,
-      has_multiple_active_alerts?
-    )
+  defp build_summary(alert, [subscription], summaries_by_subscription_key) do
+    summary_for_subscription(alert, subscription, summaries_by_subscription_key)
   end
 
-  defp build_summary(
-         alert,
-         subscriptions,
-         summaries_by_subscription_key,
-         has_multiple_active_alerts?
-       ) do
+  defp build_summary(alert, subscriptions, summaries_by_subscription_key) do
     individual_summaries =
       Enum.map(subscriptions, fn subscription ->
-        summary_for_subscription(
-          alert,
-          subscription,
-          summaries_by_subscription_key,
-          has_multiple_active_alerts?
-        )
+        summary_for_subscription(alert, subscription, summaries_by_subscription_key)
       end)
 
     AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
-  defp summary_for_subscription(
-         alert,
-         subscription,
-         summaries_by_subscription_key,
-         has_multiple_active_alerts?
-       ) do
-    %{default: default_summary, multiple_active: has_multiple_active_alerts_summary} =
-      get_in(summaries_by_subscription_key, [
-        Subscription.key_properties(subscription),
-        alert.id
-      ])
-
-    if has_multiple_active_alerts? do
-      has_multiple_active_alerts_summary
-    else
-      default_summary
-    end
+  defp summary_for_subscription(alert, subscription, summaries_by_subscription_key) do
+    get_in(summaries_by_subscription_key, [
+      Subscription.key_properties(subscription),
+      alert.id
+    ])
   end
 
   defp schedule_matches_subscription_key?(
