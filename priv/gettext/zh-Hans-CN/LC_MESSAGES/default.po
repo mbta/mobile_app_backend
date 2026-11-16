@@ -930,349 +930,349 @@ msgstr "循环"
 #: lib/presentation_strings.ex:343
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak"
-msgstr ""
+msgstr " 因 Amtrak 方面原因"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:346
 #, elixir-autogen, elixir-format
 msgid " due to Amtrak train traffic"
-msgstr ""
+msgstr "因 Amtrak 火车交通"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:366
 #, elixir-autogen, elixir-format
 msgid " due to a Coast Guard restriction"
-msgstr ""
+msgstr " 因海岸警卫队限制措施"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:377
 #, elixir-autogen, elixir-format
 msgid " due to a crossing issue"
-msgstr ""
+msgstr " 由于铁路道口问题"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:383
 #, elixir-autogen, elixir-format
 msgid " due to a crossing malfunction"
-msgstr ""
+msgstr " 因铁路道口故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:388
 #, elixir-autogen, elixir-format
 msgid " due to a demonstration"
-msgstr ""
+msgstr " 因示威活动"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:393
 #, elixir-autogen, elixir-format
 msgid " due to a disabled bus"
-msgstr ""
+msgstr " 因巴士抛锚"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:396
 #, elixir-autogen, elixir-format
 msgid " due to a disabled train"
-msgstr ""
+msgstr " 因列车故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:401
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge being raised"
-msgstr ""
+msgstr " 因吊桥升起"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:406
 #, elixir-autogen, elixir-format
 msgid " due to a drawbridge issue"
-msgstr ""
+msgstr " 因开合桥故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:416
 #, elixir-autogen, elixir-format
 msgid " due to a fire"
-msgstr ""
+msgstr " 因火灾"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:435
 #, elixir-autogen, elixir-format
 msgid " due to a hazmat condition"
-msgstr ""
+msgstr " 因危险物质状况"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:451
 #, elixir-autogen, elixir-format
 msgid " due to a hurricane"
-msgstr ""
+msgstr " 由于飓风"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:462
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical issue"
-msgstr ""
+msgstr " 由于机械问题"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:467
 #, elixir-autogen, elixir-format
 msgid " due to a mechanical problem"
-msgstr ""
+msgstr " 因机械故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:472
 #, elixir-autogen, elixir-format
 msgid " due to a medical emergency"
-msgstr ""
+msgstr "因医疗急救"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:477
 #, elixir-autogen, elixir-format
 msgid " due to a parade"
-msgstr ""
+msgstr " 因游行活动"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:485
 #, elixir-autogen, elixir-format
 msgid " due to a power problem"
-msgstr ""
+msgstr " 因电力故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:495
 #, elixir-autogen, elixir-format
 msgid " due to a rail defect"
-msgstr ""
+msgstr "因轨道缺陷"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:504
 #, elixir-autogen, elixir-format
 msgid " due to a signal issue"
-msgstr ""
+msgstr " 因信号问题"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:507
 #, elixir-autogen, elixir-format
 msgid " due to a signal problem"
-msgstr ""
+msgstr " 因信号故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:525
 #, elixir-autogen, elixir-format
 msgid " due to a special event"
-msgstr ""
+msgstr "因特殊事件"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:530
 #, elixir-autogen, elixir-format
 msgid " due to a speed restriction"
-msgstr ""
+msgstr " 由于速度限制"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:538
 #, elixir-autogen, elixir-format
 msgid " due to a switch issue"
-msgstr ""
+msgstr " 因道岔问题"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:541
 #, elixir-autogen, elixir-format
 msgid " due to a switch problem"
-msgstr ""
+msgstr " 因道岔故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:546
 #, elixir-autogen, elixir-format
 msgid " due to a technical problem"
-msgstr ""
+msgstr " 因技术故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:556
 #, elixir-autogen, elixir-format
 msgid " due to a track problem"
-msgstr ""
+msgstr " 因轨道故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:340
 #, elixir-autogen, elixir-format
 msgid " due to an accident"
-msgstr ""
+msgstr " 由于事故"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:351
 #, elixir-autogen, elixir-format
 msgid " due to an earlier mechanical problem"
-msgstr ""
+msgstr " 由于早前的机械故障"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:356
 #, elixir-autogen, elixir-format
 msgid " due to an earlier signal problem"
-msgstr ""
+msgstr " 由于早前的信号问题"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:570
 #, elixir-autogen, elixir-format
 msgid " due to an unruly passenger"
-msgstr ""
+msgstr " 因乘客干扰"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:361
 #, elixir-autogen, elixir-format
 msgid " due to autos impeding service"
-msgstr ""
+msgstr " 由于道路车辆阻碍运营"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:371
 #, elixir-autogen, elixir-format
 msgid " due to congestion"
-msgstr ""
+msgstr " 由于交通拥堵"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:374
 #, elixir-autogen, elixir-format
 msgid " due to construction"
-msgstr ""
+msgstr "因建筑施工"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:411
 #, elixir-autogen, elixir-format
 msgid " due to electrical work"
-msgstr ""
+msgstr " 因电力作业"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:419
 #, elixir-autogen, elixir-format
 msgid " due to fire department activity"
-msgstr ""
+msgstr " 因消防部门行动"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:424
 #, elixir-autogen, elixir-format
 msgid " due to flooding"
-msgstr ""
+msgstr " 因洪水"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:427
 #, elixir-autogen, elixir-format
 msgid " due to fog"
-msgstr ""
+msgstr " 因雾"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:430
 #, elixir-autogen, elixir-format
 msgid " due to freight train interference"
-msgstr ""
+msgstr " 因货运列车干扰"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:440
 #, elixir-autogen, elixir-format
 msgid " due to heavy ridership"
-msgstr ""
+msgstr " 因客流过大"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:445
 #, elixir-autogen, elixir-format
 msgid " due to high winds"
-msgstr ""
+msgstr " 因强风"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:454
 #, elixir-autogen, elixir-format
 msgid " due to ice in the harbor"
-msgstr ""
+msgstr " 因港口结冰"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:459
 #, elixir-autogen, elixir-format
 msgid " due to maintenance"
-msgstr ""
+msgstr " 因维护"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:480
 #, elixir-autogen, elixir-format
 msgid " due to police activity"
-msgstr ""
+msgstr " 由于警方行动"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:490
 #, elixir-autogen, elixir-format
 msgid " due to presence of whales"
-msgstr ""
+msgstr " 因鲸鱼出没"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:498
 #, elixir-autogen, elixir-format
 msgid " due to rough seas"
-msgstr ""
+msgstr " 因风浪较大"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:501
 #, elixir-autogen, elixir-format
 msgid " due to severe weather"
-msgstr ""
+msgstr " 因恶劣天气"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:512
 #, elixir-autogen, elixir-format
 msgid " due to single tracking"
-msgstr ""
+msgstr " 因单线运行"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:517
 #, elixir-autogen, elixir-format
 msgid " due to slippery rail"
-msgstr ""
+msgstr "因轨道湿滑"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:522
 #, elixir-autogen, elixir-format
 msgid " due to snow"
-msgstr ""
+msgstr " 因降雪"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:535
 #, elixir-autogen, elixir-format
 msgid " due to strike"
-msgstr ""
+msgstr " 因罢工"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:448
 #, elixir-autogen, elixir-format
 msgid " due to the holiday"
-msgstr ""
+msgstr " 因节假日"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:551
 #, elixir-autogen, elixir-format
 msgid " due to tie replacement"
-msgstr ""
+msgstr " 因更换轨枕"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:561
 #, elixir-autogen, elixir-format
 msgid " due to track work"
-msgstr ""
+msgstr " 由于轨道作业"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:564
 #, elixir-autogen, elixir-format
 msgid " due to traffic"
-msgstr ""
+msgstr "因交通"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:567
 #, elixir-autogen, elixir-format
 msgid " due to train traffic"
-msgstr ""
+msgstr "因火车交通"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:575
 #, elixir-autogen, elixir-format
 msgid " due to utility work"
-msgstr ""
+msgstr " 因公用设施施工"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:578
 #, elixir-autogen, elixir-format
 msgid " due to vessel substitution"
-msgstr ""
+msgstr " 因船舶替换"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:583
@@ -1284,4 +1284,4 @@ msgstr "船舶交通"
 #: lib/presentation_strings.ex:586
 #, elixir-autogen, elixir-format
 msgid " due to weather"
-msgstr ""
+msgstr " 因天气原因"
