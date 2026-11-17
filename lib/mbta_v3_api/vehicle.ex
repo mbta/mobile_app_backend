@@ -10,7 +10,7 @@ defmodule MBTAV3API.Vehicle do
           current_status: current_status(),
           current_stop_sequence: integer() | nil,
           direction_id: 0 | 1,
-          label: String.t(),
+          label: String.t() | nil,
           latitude: float(),
           longitude: float(),
           occupancy_status: occupancy_status(),
