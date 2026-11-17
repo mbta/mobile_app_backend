@@ -10,6 +10,7 @@ defmodule MBTAV3API.Vehicle do
           current_status: current_status(),
           current_stop_sequence: integer() | nil,
           direction_id: 0 | 1,
+          label: String.t() | nil,
           latitude: float(),
           longitude: float(),
           occupancy_status: occupancy_status(),
@@ -50,6 +51,7 @@ defmodule MBTAV3API.Vehicle do
     :current_status,
     :current_stop_sequence,
     :direction_id,
+    :label,
     :latitude,
     :longitude,
     :occupancy_status,
@@ -69,6 +71,7 @@ defmodule MBTAV3API.Vehicle do
       :current_status,
       :current_stop_sequence,
       :direction_id,
+      :label,
       :latitude,
       :longitude,
       :occupancy_status,
@@ -98,6 +101,7 @@ defmodule MBTAV3API.Vehicle do
           nil -> raise "vehicle has nil direction_id"
           direction_id -> direction_id
         end,
+      label: item.attributes["label"],
       latitude: item.attributes["latitude"],
       longitude: item.attributes["longitude"],
       occupancy_status: parse_optional_occupancy(item.attributes["occupancy_status"]),
