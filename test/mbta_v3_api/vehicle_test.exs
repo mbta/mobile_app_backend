@@ -15,6 +15,7 @@ defmodule MBTAV3API.VehicleTest do
              current_stop_sequence: 30,
              decoration: nil,
              direction_id: 0,
+             label: "1886",
              latitude: 42.359901428222656,
              longitude: -71.09449005126953,
              occupancy_status: :many_seats_available,
@@ -33,6 +34,7 @@ defmodule MBTAV3API.VehicleTest do
                  "current_stop_sequence" => 30,
                  "occupancy_status" => "MANY_SEATS_AVAILABLE",
                  "direction_id" => 0,
+                 "label" => "1886",
                  "latitude" => 42.359901428222656,
                  "longitude" => -71.09449005126953,
                  "updated_at" => "2024-01-24T17:08:51-05:00"
