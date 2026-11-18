@@ -12,8 +12,10 @@ defmodule MobileAppBackend.Notifications.StatsReporterTest do
   end
 
   test "reports route and user stats" do
-    user_1 = NotificationsFactory.insert(:user)
-    user_2 = NotificationsFactory.insert(:user)
+    user_1 =
+      NotificationsFactory.insert(:user, fcm_installation_id: "installation_1", fcm_token: nil)
+
+    user_2 = NotificationsFactory.insert(:user, fcm_installation_id: nil, fcm_token: "token_1")
 
     NotificationsFactory.insert(:notification_subscription,
       user_id: user_1.id,
@@ -72,6 +74,8 @@ defmodule MobileAppBackend.Notifications.StatsReporterTest do
     assert log =~ "[info] #{StatsReporter} users_by_route route_id=66 count=1\n"
     assert log =~ "[info] #{StatsReporter} users_by_route route_id=Red count=2\n"
     assert log =~ "[info] #{StatsReporter} users_by_route route_id=line-Green count=1\n"
-    assert log =~ "[info] #{StatsReporter} subscriptions_per_user user_count=2 avg=3.0 max=5\n"
+
+    assert log =~
+             "[info] #{StatsReporter} subscriptions_per_user total_user_count=2 fcm_token_user_count=1 installation_id_user_count=1 avg=3.0 max=5\n"
   end
 end
