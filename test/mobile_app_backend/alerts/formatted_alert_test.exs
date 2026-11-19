@@ -44,7 +44,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Suspension has ended on Red Line. Delay are still in effect." ==
+      assert "Update: Suspension has ended on Red Line. Delays are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -139,7 +139,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Train service has resumed at Oak Grove. Station Closure is still in effect at Malden Center." ==
+      assert "Update: Train service has resumed at Oak Grove. Station closure is still in effect at Malden Center." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
@@ -163,7 +163,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlertTest do
         effect: alert.effect
       }
 
-      assert "Update: Delay has ended. Shuttle buses are still in effect." ==
+      assert "Update: Delays have ended. Shuttle buses are still in effect." ==
                FormattedAlert.summary(
                  %FormattedAlert{alert: alert, alert_summary: alert_summary},
                  "en"
