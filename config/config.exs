@@ -9,6 +9,8 @@ import Config
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
+config :ex_aws, http_client: ExAws.Request.Req
+
 config :mobile_app_backend,
   ecto_repos: [MobileAppBackend.Repo]
 
