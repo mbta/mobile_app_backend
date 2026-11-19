@@ -1,6 +1,7 @@
 defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
   use MobileAppBackend.DataCase
   import MobileAppBackend.NotificationsFactory
+  alias MBTAV3API.Alert.ActivePeriod
   alias MobileAppBackend.Factory
   alias MobileAppBackend.Notifications.DeliveredNotification
 
@@ -74,6 +75,30 @@ defmodule MobileAppBackend.Notifications.DeliveredNotificationTest do
       alert = Factory.build(:alert)
 
       assert DeliveredNotification.can_send?(alert, nil, :reminder)
+    end
+
+    test "reminders require creation before the earliest active period" do
+      first_start = ~U[2026-03-20 04:00:00Z]
+
+      periods = [
+        %ActivePeriod{start: ~U[2026-03-21 04:00:00Z]},
+        %ActivePeriod{start: first_start}
+      ]
+
+      for {created_at, expected} <- [
+            {DateTime.add(first_start, -1), true},
+            {first_start, false},
+            {DateTime.add(first_start, 1), false},
+            {DateTime.add(first_start, 33), false}
+          ] do
+        alert = Factory.build(:alert, active_period: periods, created_at: created_at)
+        assert DeliveredNotification.can_send?(alert, nil, :reminder) == expected
+      end
+    end
+
+    test "no reminder without an active period" do
+      alert = Factory.build(:alert, active_period: [])
+      refute DeliveredNotification.can_send?(alert, nil, :reminder)
     end
 
     test "no reminder if already reminded" do
