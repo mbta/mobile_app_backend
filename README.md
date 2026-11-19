@@ -60,6 +60,8 @@ We have translation strings that live on the backend, mostly for alert notificat
 
 Any strings that you add to the code with a `gettext` call must be extracted into the PO files by running `mix gettext.update`. This is a custom wrapper for `gettext.extract`, which also does an extra stop to copy any `msgid` values into `msgstr` when `msgstr` is blank, because otherwise Smartling won't ingest it.
 
+CI runs `mix gettext.check`, which fails if any English PO entry has an empty `msgstr` (including plural forms) or is missing from the corresponding `.pot` template. If this check fails, run `mix gettext.update` and commit the updated PO files.
+
 ### Editing Code
 
 - Create each new feature in its own branch named with the following naming format: initials-description (for example, Jane Smith writing a search function might create a branch called js-search-function).
