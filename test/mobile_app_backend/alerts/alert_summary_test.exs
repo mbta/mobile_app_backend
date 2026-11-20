@@ -2445,6 +2445,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     # This test specifies the current behavior that should be changed.
+    @tag :capture_log
     test "trip specific reminder no schedules today" do
       now = ~B[2026-03-12 12:00:00]
       stop = build(:stop, name: "Ruggles")
@@ -2848,6 +2849,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "discards location if disagreements" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
@@ -2881,6 +2883,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "keeps timeframe if same" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
@@ -2919,6 +2922,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "returns a single all clear when multiple subscriptions match" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
