@@ -607,14 +607,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           alert_applies_to_whole_gl_route(alert, route_id, direction_id, global)
         end)
 
-      route = Enum.find(routes, &(&1.id in affected_branches))
-
       cond do
         Enum.sort(affected_branches) == Enum.sort(@gl_routes) ->
           %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
 
-        length(affected_branches) == 1 and route != nil ->
-          %Location.WholeRoute{route_label: Route.label(route), route_type: :light_rail}
+        length(affected_branches) == 1 ->
+          %Location.WholeRoute{
+            route_label: Route.label(global.routes[List.first(affected_branches)]),
+            route_type: :light_rail
+          }
 
         true ->
           nil

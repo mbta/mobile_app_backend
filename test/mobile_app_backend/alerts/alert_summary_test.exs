@@ -1705,7 +1705,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    test "summary for whole other green line branch", %{now: now} do
+    test "summary for whole green line branch", %{now: now} do
       green_route_ids = ~w(Green-B Green-C Green-D Green-E)
 
       routes =
@@ -1776,9 +1776,10 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    test "summary for one delay on GL branch not served by stop", %{now: now} do
+    test "summary for whole GL branch alert when stop not served by branch", %{now: now} do
       Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
       global = GlobalDataCache.get_data()
+
       alert =
         build(:alert,
           effect: :delay,
@@ -1792,14 +1793,15 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
           ]
         )
 
-        patterns = MBTAV3API.RoutePattern.get_relevant_patterns("line-Green", "place-balsq", 0, global)
+      patterns =
+        MBTAV3API.RoutePattern.get_relevant_patterns("line-Green", "place-balsq", 0, global)
 
-  assert %AlertSummary.Standard{
+      assert %AlertSummary.Standard{
                location: %AlertSummary.Location.WholeRoute{
-                 route_label: "Green-D",
+                 route_label: "Green Line D",
                  route_type: :light_rail
                },
-               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+               timeframe: nil
              } =
                AlertSummary.summarizing(
                  alert,
