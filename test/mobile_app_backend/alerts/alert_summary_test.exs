@@ -1776,6 +1776,42 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
+    test "summary for one delay on GL branch not served by stop", %{now: now} do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+      alert =
+        build(:alert,
+          effect: :delay,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: "Green-D",
+              route_type: :light_rail
+            }
+          ]
+        )
+
+        patterns = MBTAV3API.RoutePattern.get_relevant_patterns("line-Green", "place-balsq", 0, global)
+
+  assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green-D",
+                 route_type: :light_rail
+               },
+               timeframe: %AlertSummary.Timeframe.UntilFurtherNotice{}
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "place-balsq", direction_id: 0},
+                 patterns,
+                 now,
+                 nil,
+                 global,
+                 :notification
+               )
+    end
+
     test "summary when alert affects only parent stop", %{now: now} do
       Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
       global = GlobalDataCache.get_data()
