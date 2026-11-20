@@ -48,7 +48,7 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   # Only alerts created before their first active period are eligible for reminders.
   def can_send?(alert, last_delivered, :reminder) do
     last_delivered == nil and
-      Enum.any?(alert.active_period) and
+      alert.active_period != [] and
       Enum.all?(alert.active_period, &DateTime.before?(alert.created_at, &1.start))
   end
 
