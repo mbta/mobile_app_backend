@@ -10,43 +10,17 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
   alias Util.FCMTarget
 
   def set_include_accessibility(conn, params) do
-    status =
-      with {:ok, fcm_target} <- FCMTarget.parse(params),
-           {:ok, include_accessibility} <- Map.fetch(params, "include_accessibility") do
-        locale = params["locale"]
-
-        now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
-
-        user_where = FCMTarget.user_where(fcm_target)
-
-        Repo.update_all(
-          from(u in User,
-            where: ^user_where,
-            update: [set: [fcm_last_verified: ^now, locale: coalesce(^locale, u.locale)]]
-          ),
-          []
-        )
-
-        Repo.update_all(
-          from(ns in Subscription,
-            join: u in subquery(from u in User, where: ^user_where),
-            on: ns.user_id == u.id
-          ),
-          set: [include_accessibility: include_accessibility]
-        )
-
-        :ok
-      else
-        :error -> :bad_request
-      end
-
-    conn |> put_status(status) |> json(nil)
+    set_setting(conn, params, :include_accessibility)
   end
 
   def set_include_parking(conn, params) do
+    set_setting(conn, params, :include_parking)
+  end
+
+  def set_setting(conn, params, setting_name) do
     status =
       with {:ok, fcm_target} <- FCMTarget.parse(params),
-           {:ok, include_parking} <- Map.fetch(params, "include_parking") do
+           {:ok, include_setting} <- Map.fetch(params, Atom.to_string(setting_name)) do
         locale = params["locale"]
 
         now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
@@ -66,7 +40,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
             join: u in subquery(from u in User, where: ^user_where),
             on: ns.user_id == u.id
           ),
-          set: [include_parking: include_parking]
+          set: [{setting_name, include_setting}]
         )
 
         :ok
