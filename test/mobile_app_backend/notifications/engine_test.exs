@@ -1610,6 +1610,57 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  GlobalDataCache.get_data()
                )
     end
+
+    test "returns single notification when alert appears in both general and accessibility maps" do
+      now = DateTime.now!("America/New_York")
+
+      # An alert that could apply to both general and accessibility contexts
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :elevator_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:board, :exit, :ride, :using_wheelchair],
+              stop: "place-davis"
+            }
+          ]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-davis",
+          direction_id: 0,
+          include_accessibility: true,
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      summary = "elevator_summary"
+
+      [%OutgoingNotification{alert: ^alert, subscriptions: [^subscription]}] =
+        Engine.user_notifications(
+          user,
+          %{},
+          %{
+            Subscription.key_properties(subscription) => %{
+              general: %{
+                alert.id => summary
+              },
+              accessibility: %{
+                alert.id => summary
+              },
+              parking: %{}
+            }
+          },
+          %{alert.id => alert},
+          now,
+          GlobalDataCache.get_data()
+        )
+    end
   end
 
   describe "alerts_for_subscription_key/4" do

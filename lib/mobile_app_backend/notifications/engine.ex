@@ -203,7 +203,7 @@ defmodule MobileAppBackend.Notifications.Engine do
         %{}
       end
 
-    Map.keys(general_alerts) ++ Map.keys(elevator_alerts) ++ Map.keys(parking_alerts)
+    Enum.uniq(Map.keys(general_alerts) ++ Map.keys(elevator_alerts) ++ Map.keys(parking_alerts))
   end
 
   @doc """
