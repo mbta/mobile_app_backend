@@ -1,7 +1,8 @@
 defmodule Mix.Tasks.Gettext.Update do
   @moduledoc """
-  Runs `mix gettext.extract --merge`, then copies the `msgid` into the `msgstr`
-  of every entry with an empty `msgstr` in `priv/gettext/en/LC_MESSAGES/default.po`.
+  Runs `mix gettext.extract` and `mix gettext.merge priv/gettext --no-fuzzy`,
+  then copies the `msgid` into the `msgstr` of every entry with an empty `msgstr` in
+  `priv/gettext/en/LC_MESSAGES/default.po`.
   The `default.pot` template is left with empty `msgstr`s.
 
   Usage:
@@ -18,7 +19,8 @@ defmodule Mix.Tasks.Gettext.Update do
 
   @impl Mix.Task
   def run(_args) do
-    Mix.Task.run("gettext.extract", ["--merge"])
+    Mix.Task.run("gettext.extract")
+    Mix.Task.run("gettext.merge", ["priv/gettext", "--no-fuzzy"])
 
     transform_file(@po_file, &fill_message/1)
     Mix.shell().info("Filled empty msgstrs in #{@po_file}")
