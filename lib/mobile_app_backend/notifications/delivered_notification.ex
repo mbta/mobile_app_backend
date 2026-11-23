@@ -45,8 +45,11 @@ defmodule MobileAppBackend.Notifications.DeliveredNotification do
   @spec can_send?(Alert.t(), t() | nil, type()) :: boolean()
   def can_send?(alert, last_delivered, type)
 
-  def can_send?(_alert, last_delivered, :reminder) do
-    last_delivered == nil
+  # Only alerts created before their first active period are eligible for reminders.
+  def can_send?(alert, last_delivered, :reminder) do
+    last_delivered == nil and
+      alert.active_period != [] and
+      Enum.all?(alert.active_period, &DateTime.before?(alert.created_at, &1.start))
   end
 
   def can_send?(_alert, last_delivered, {:notification, _upstream_timestamp}) do

@@ -12,6 +12,7 @@ defmodule MobileAppBackend.Factory do
           end: ~B[2024-02-14T12:34:41]
         }
       ],
+      created_at: ~B[2020-01-01T00:00:00],
       effect: :delay,
       informed_entity: [
         %MBTAV3API.Alert.InformedEntity{
