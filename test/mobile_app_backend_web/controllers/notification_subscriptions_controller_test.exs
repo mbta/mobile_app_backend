@@ -390,6 +390,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
               stop_id: old_subscription.stop_id,
               direction_id: old_subscription.direction_id,
               include_accessibility: not old_subscription.include_accessibility,
+              include_parking: not old_subscription.include_parking,
               windows: new_windows
             }
           ]
@@ -405,6 +406,7 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsControllerTest do
       assert new_subscription.direction_id == old_subscription.direction_id
 
       assert new_subscription.include_accessibility == not old_subscription.include_accessibility
+      assert new_subscription.include_parking == not old_subscription.include_parking
       assert length(new_subscription.windows) == length(old_subscription.windows) - 1
 
       Enum.each(new_subscription.windows, fn actual_window ->

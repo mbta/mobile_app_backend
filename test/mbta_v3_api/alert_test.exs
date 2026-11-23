@@ -323,6 +323,8 @@ defmodule MBTAV3API.AlertTest do
           :modified_service,
           :no_service,
           :other_effect,
+          :parking_closure,
+          :parking_issue,
           :policy_change,
           :schedule_change,
           :service_change,
