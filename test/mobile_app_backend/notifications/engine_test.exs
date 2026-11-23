@@ -1569,7 +1569,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         route_id: "Red",
         stop_id: "place-sstat",
         direction_id: 0,
-        include_accessibility: false
+        include_accessibility: false,
+        include_parking: false
       }
 
       global = GlobalDataCache.get_data()
@@ -1710,7 +1711,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         route_id: route.id,
         stop_id: hull.id,
         direction_id: 1,
-        include_accessibility: false
+        include_accessibility: false,
+        include_parking: false
       }
 
       assert [alert_route] ==
@@ -1848,7 +1850,8 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         route_id: "Red",
         stop_id: "place-sstat",
         direction_id: 0,
-        include_accessibility: false
+        include_accessibility: false,
+        include_parking: false
       }
 
       global_data = GlobalDataCache.get_data()
