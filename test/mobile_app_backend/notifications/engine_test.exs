@@ -61,7 +61,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -113,7 +115,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -171,7 +175,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -220,7 +226,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -284,7 +292,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -341,7 +351,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -391,7 +403,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -443,7 +457,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -488,7 +504,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -536,7 +554,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -577,7 +597,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -626,7 +648,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -675,7 +699,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -717,7 +743,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -760,7 +788,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -774,7 +804,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -848,10 +880,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription_now) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    },
                    Subscription.key_properties(subscription_later) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -925,10 +961,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -1014,10 +1054,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => summary
+                     general: %{
+                       alert.id => summary
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -1078,7 +1122,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     alert.id => "fake"
+                     general: %{
+                       alert.id => "fake"
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -1171,10 +1217,14 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     alert.id => summary1
+                     general: %{
+                       alert.id => summary1
+                     }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     alert.id => summary2
+                     general: %{
+                       alert.id => summary2
+                     }
                    }
                  },
                  %{alert.id => alert},
@@ -1418,25 +1468,144 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1_early) => %{
-                     alert1.id => "fake1_early"
+                     general: %{
+                       alert1.id => "fake1_early"
+                     }
                    },
                    Subscription.key_properties(subscription1_matching) => %{
-                     alert1.id => "fake1_matching"
+                     general: %{
+                       alert1.id => "fake1_matching"
+                     }
                    },
                    Subscription.key_properties(subscription1_late) => %{
-                     alert1.id => "fake1_late"
+                     general: %{
+                       alert1.id => "fake1_late"
+                     }
                    },
                    Subscription.key_properties(subscription2_early) => %{
-                     alert2.id => "fake2_early"
+                     general: %{
+                       alert2.id => "fake2_early"
+                     }
                    },
                    Subscription.key_properties(subscription2_matching) => %{
-                     alert2.id => "fake2_matching"
+                     general: %{
+                       alert2.id => "fake2_matching"
+                     }
                    },
                    Subscription.key_properties(subscription2_late) => %{
-                     alert2.id => "fake2_late"
+                     general: %{
+                       alert2.id => "fake2_late"
+                     }
                    }
                  },
                  %{alert1.id => alert1, alert2.id => alert2},
+                 now,
+                 GlobalDataCache.get_data()
+               )
+    end
+
+    test "includes elevator alerts when include_accessibility is true" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :elevator_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: [:using_wheelchair],
+              stop: "place-davis"
+            }
+          ]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-davis",
+          direction_id: 0,
+          include_accessibility: true,
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      summary = "elevator_summary"
+
+      assert [
+               %OutgoingNotification{
+                 summary: ^summary,
+                 subscriptions: [^subscription],
+                 alert: ^alert
+               }
+             ] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     general: %{},
+                     accessibility: %{
+                       alert.id => summary
+                     },
+                     parking: %{}
+                   }
+                 },
+                 %{alert.id => alert},
+                 now,
+                 GlobalDataCache.get_data()
+               )
+    end
+
+    test "includes parking alerts when include_parking is true" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :parking_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              stop: "place-davis"
+            }
+          ]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-davis",
+          direction_id: 0,
+          include_parking: true,
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      summary = "parking_summary"
+
+      assert [
+               %OutgoingNotification{
+                 summary: ^summary,
+                 subscriptions: [^subscription],
+                 alert: ^alert
+               }
+             ] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 %{
+                   Subscription.key_properties(subscription) => %{
+                     general: %{},
+                     accessibility: %{},
+                     parking: %{
+                       alert.id => summary
+                     }
+                   }
+                 },
+                 %{alert.id => alert},
                  now,
                  GlobalDataCache.get_data()
                )
@@ -1489,7 +1658,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           windows: [NotificationsFactory.build(:perpetual_window)]
         )
 
-      assert [^downstream_alert] =
+      assert %{general: [^downstream_alert], accessibility: [], parking: []} =
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription),
                  [upstream_alert, downstream_alert],
@@ -1498,7 +1667,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                )
     end
 
-    test "includes elevator closures if requested" do
+    test "includes elevator closures" do
       now = DateTime.now!("America/New_York")
 
       alert =
@@ -1513,41 +1682,20 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           ]
         )
 
-      subscription_including =
-        NotificationsFactory.build(:notification_subscription,
-          route_id: "Orange",
-          stop_id: "place-chncl",
-          direction_id: 0,
-          include_accessibility: true,
-          windows: [NotificationsFactory.build(:perpetual_window)]
-        )
-
-      assert [^alert] =
+      assert %{general: [], accessibility: [^alert], parking: []} =
                Engine.alerts_for_subscription_key(
-                 Subscription.key_properties(subscription_including),
-                 [alert],
-                 now,
-                 GlobalDataCache.get_data()
-               )
-
-      subscription_excluding =
-        NotificationsFactory.build(:notification_subscription,
-          route_id: "Orange",
-          stop_id: "place-chncl",
-          direction_id: 0,
-          include_accessibility: false
-        )
-
-      assert [] =
-               Engine.alerts_for_subscription_key(
-                 Subscription.key_properties(subscription_excluding),
+                 %{
+                   route_id: "Orange",
+                   stop_id: "place-chncl",
+                   direction_id: 0
+                 },
                  [alert],
                  now,
                  GlobalDataCache.get_data()
                )
     end
 
-    test "includes parking alerts if requested" do
+    test "includes parking alerts" do
       now = DateTime.now!("America/New_York")
 
       alert =
@@ -1561,34 +1709,9 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           ]
         )
 
-      subscription_including =
-        NotificationsFactory.build(:notification_subscription,
-          route_id: "Orange",
-          stop_id: "place-chncl",
-          direction_id: 0,
-          include_parking: true,
-          windows: [NotificationsFactory.build(:perpetual_window)]
-        )
-
-      assert [^alert] =
+      assert %{general: [], accessibility: [], parking: [^alert]} =
                Engine.alerts_for_subscription_key(
-                 Subscription.key_properties(subscription_including),
-                 [alert],
-                 now,
-                 GlobalDataCache.get_data()
-               )
-
-      subscription_excluding =
-        NotificationsFactory.build(:notification_subscription,
-          route_id: "Orange",
-          stop_id: "place-chncl",
-          direction_id: 0,
-          include_parking: false
-        )
-
-      assert [] =
-               Engine.alerts_for_subscription_key(
-                 Subscription.key_properties(subscription_excluding),
+                 %{route_id: "Orange", stop_id: "place-chncl", direction_id: 0},
                  [alert],
                  now,
                  GlobalDataCache.get_data()
@@ -1616,9 +1739,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       subscription_key = %{
         route_id: "Red",
         stop_id: "place-sstat",
-        direction_id: 0,
-        include_accessibility: false,
-        include_parking: false
+        direction_id: 0
       }
 
       global = GlobalDataCache.get_data()
@@ -1633,7 +1754,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         end
       )
 
-      assert [^alert] =
+      assert %{general: [^alert], accessibility: [], parking: []} =
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription_key),
                  [alert],
@@ -1758,12 +1879,10 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       subscription_key = %{
         route_id: route.id,
         stop_id: hull.id,
-        direction_id: 1,
-        include_accessibility: false,
-        include_parking: false
+        direction_id: 1
       }
 
-      assert [alert_route] ==
+      assert %{general: [alert_route], accessibility: [], parking: []} ==
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription_key),
                  [alert_route, alert_trip_specific],
@@ -1897,9 +2016,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
       subscription_key = %{
         route_id: "Red",
         stop_id: "place-sstat",
-        direction_id: 0,
-        include_accessibility: false,
-        include_parking: false
+        direction_id: 0
       }
 
       global_data = GlobalDataCache.get_data()
