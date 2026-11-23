@@ -62,6 +62,12 @@ defmodule MobileAppBackendWeb.Router do
       :set_include_accessibility
     )
 
+    post(
+      "/notifications/subscriptions/parking",
+      NotificationSubscriptionsController,
+      :set_include_parking
+    )
+
     post("/notifications/subscriptions/write", NotificationSubscriptionsController, :write)
     get("/route/stop-graph", RouteController, :stop_graph)
     get("/schedules", ScheduleController, :schedules)

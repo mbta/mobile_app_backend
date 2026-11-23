@@ -43,6 +43,40 @@ defmodule MobileAppBackendWeb.NotificationSubscriptionsController do
     conn |> put_status(status) |> json(nil)
   end
 
+  def set_include_parking(conn, params) do
+    status =
+      with {:ok, fcm_target} <- FCMTarget.parse(params),
+           {:ok, include_parking} <- Map.fetch(params, "include_parking") do
+        locale = params["locale"]
+
+        now = Map.get_lazy(conn.private, :mobile_app_backend_now, &DateTime.utc_now/0)
+
+        user_where = FCMTarget.user_where(fcm_target)
+
+        Repo.update_all(
+          from(u in User,
+            where: ^user_where,
+            update: [set: [fcm_last_verified: ^now, locale: coalesce(^locale, u.locale)]]
+          ),
+          []
+        )
+
+        Repo.update_all(
+          from(ns in Subscription,
+            join: u in subquery(from u in User, where: ^user_where),
+            on: ns.user_id == u.id
+          ),
+          set: [include_parking: include_parking]
+        )
+
+        :ok
+      else
+        :error -> :bad_request
+      end
+
+    conn |> put_status(status) |> json(nil)
+  end
+
   def write(conn, params) do
     user_agent =
       conn
