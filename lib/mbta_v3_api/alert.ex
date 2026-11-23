@@ -314,7 +314,7 @@ defmodule MBTAV3API.Alert do
     active?(alert, now) or active_soon?(alert, now) or all_clear?(alert)
   end
 
-  @type significance :: :major | :secondary | :accessibility | :minor | nil
+  @type significance :: :major | :secondary | :accessibility | :parking | :minor | nil
 
   def significance(alert)
 
@@ -332,6 +332,8 @@ defmodule MBTAV3API.Alert do
 
   def significance(%__MODULE__{effect: :service_change}), do: :secondary
   def significance(%__MODULE__{effect: :elevator_closure}), do: :accessibility
+  def significance(%__MODULE__{effect: :parking_closure}), do: :parking
+  def significance(%__MODULE__{effect: :parking_issue}), do: :parking
 
   def significance(%__MODULE__{effect: :delay} = alert) do
     if (alert.severity >= 3 and Enum.any?(alert.informed_entity, &(&1.route_type != :bus))) or
@@ -454,6 +456,16 @@ defmodule MBTAV3API.Alert do
         any_informed_entity_satisfies(alert, fn ie ->
           InformedEntity.activity_in?(ie, [:using_wheelchair]) and
             InformedEntity.stop_in?(ie, stop_ids)
+        end)
+    end)
+  end
+
+  @spec parking_alerts([t()], [Stop.id()]) :: [t()]
+  def parking_alerts(alerts, stop_ids) do
+    Enum.filter(alerts, fn alert ->
+      (alert.effect == :parking_closure || alert.effect == :parking_issue) and
+        any_informed_entity_satisfies(alert, fn ie ->
+          InformedEntity.stop_in?(ie, stop_ids)
         end)
     end)
   end

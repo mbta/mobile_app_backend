@@ -1547,6 +1547,54 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                )
     end
 
+    test "includes parking alerts if requested" do
+      now = DateTime.now!("America/New_York")
+
+      alert =
+        build(:alert,
+          active_period: [%Alert.ActivePeriod{start: DateTime.from_unix!(0), end: nil}],
+          effect: :parking_closure,
+          informed_entity: [
+            %Alert.InformedEntity{
+              stop: "place-chncl"
+            }
+          ]
+        )
+
+      subscription_including =
+        NotificationsFactory.build(:notification_subscription,
+          route_id: "Orange",
+          stop_id: "place-chncl",
+          direction_id: 0,
+          include_parking: true,
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      assert [^alert] =
+               Engine.alerts_for_subscription_key(
+                 Subscription.key_properties(subscription_including),
+                 [alert],
+                 now,
+                 GlobalDataCache.get_data()
+               )
+
+      subscription_excluding =
+        NotificationsFactory.build(:notification_subscription,
+          route_id: "Orange",
+          stop_id: "place-chncl",
+          direction_id: 0,
+          include_parking: false
+        )
+
+      assert [] =
+               Engine.alerts_for_subscription_key(
+                 Subscription.key_properties(subscription_excluding),
+                 [alert],
+                 now,
+                 GlobalDataCache.get_data()
+               )
+    end
+
     test "includes trip-specific alerts" do
       now = DateTime.now!("America/New_York")
       service_day = Util.DateTime.datetime_to_gtfs(now)

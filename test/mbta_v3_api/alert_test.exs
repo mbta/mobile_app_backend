@@ -323,8 +323,6 @@ defmodule MBTAV3API.AlertTest do
           :modified_service,
           :no_service,
           :other_effect,
-          :parking_closure,
-          :parking_issue,
           :policy_change,
           :schedule_change,
           :service_change,
@@ -359,6 +357,8 @@ defmodule MBTAV3API.AlertTest do
             :detour -> if specified_stops, do: :major, else: :secondary
             :dock_closure -> :major
             :elevator_closure -> :accessibility
+            :parking_closure -> :parking
+            :parking_issue -> :parking
             :service_change -> :secondary
             :shuttle -> :major
             :snow_route -> if specified_stops, do: :major, else: :secondary
@@ -1000,6 +1000,41 @@ defmodule MBTAV3API.AlertTest do
       )
 
     assert Alert.elevator_alerts([service_alert, elevator_alert], [stop.id]) == [elevator_alert]
+  end
+
+  test "parking_alerts matches parking closure and issue alerts" do
+    stop = build(:stop)
+
+    parking_closure =
+      build(:alert,
+        effect: :parking_closure,
+        informed_entity: [%InformedEntity{stop: stop.id}]
+      )
+
+    parking_issue =
+      build(:alert,
+        effect: :parking_issue,
+        informed_entity: [%InformedEntity{stop: stop.id}]
+      )
+
+    other_effect =
+      build(:alert,
+        effect: :delay,
+        informed_entity: [%InformedEntity{stop: stop.id}]
+      )
+
+    other_stop =
+      build(:alert,
+        effect: :parking_issue,
+        informed_entity: [%InformedEntity{stop: "other"}]
+      )
+
+    assert Alert.parking_alerts([parking_closure, parking_issue, other_effect, other_stop], [
+             stop.id
+           ]) == [
+             parking_closure,
+             parking_issue
+           ]
   end
 
   test "alertsDownstreamForPatterns returns alert for downstream stop" do

@@ -171,7 +171,14 @@ defmodule MobileAppBackend.Notifications.Engine do
         []
       end
 
-    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    parking_alerts =
+      if subscription_key.include_parking do
+        parking_alerts(alerts, target_stop_with_children)
+      else
+        []
+      end
+
+    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts ++ parking_alerts)
   end
 
   @doc """
@@ -299,6 +306,10 @@ defmodule MobileAppBackend.Notifications.Engine do
 
   defp elevator_alerts(alerts, target_stop_with_children) do
     Alert.elevator_alerts(alerts, target_stop_with_children)
+  end
+
+  defp parking_alerts(alerts, target_stop_with_children) do
+    Alert.parking_alerts(alerts, target_stop_with_children)
   end
 
   @spec notification_type(
