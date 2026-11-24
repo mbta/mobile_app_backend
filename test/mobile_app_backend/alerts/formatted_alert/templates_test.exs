@@ -136,7 +136,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**Update:** Delay has ended at **Wood Island**. Detour is still in effect." ==
+      assert "**Update:** Delays have ended at **Wood Island**. Detour is still in effect." ==
                summary
     end
 
@@ -195,7 +195,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           ""
         )
 
-      assert "**Update:** Detour has ended. Stop Closure is still in effect." == summary
+      assert "**Update:** Detour has ended. Stop closure is still in effect." == summary
     end
 
     test "uses the suspension noun for another suspension still in effect" do
@@ -271,7 +271,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**Update:** Train service has resumed at **Wood Island**. Station Closure is still in effect at **Malden Center** and **Oak Grove**." ==
+      assert "**Update:** Train service has resumed at **Wood Island**. Station closure is still in effect at **Malden Center** and **Oak Grove**." ==
                summary
     end
 
@@ -308,7 +308,7 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
           " at **Wood Island**"
         )
 
-      assert "**Update:** Delay has ended at **Wood Island**. Delay are still in effect at **Ruggles**." ==
+      assert "**Update:** Delays have ended at **Wood Island**. Delays are still in effect at **Ruggles**." ==
                summary
     end
 

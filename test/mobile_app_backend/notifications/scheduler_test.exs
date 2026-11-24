@@ -505,6 +505,61 @@ defmodule MobileAppBackend.Notifications.SchedulerTest do
     refute_enqueued(worker: Notifications.Deliverer)
   end
 
+  test "waits for the open window to notify about an unplanned alert" do
+    alert =
+      build(:alert,
+        created_at: ~B[2026-03-20 04:00:33],
+        active_period: [
+          %MBTAV3API.Alert.ActivePeriod{start: ~B[2026-03-20 04:00:00]}
+        ],
+        effect: :suspension,
+        informed_entity: [
+          %MBTAV3API.Alert.InformedEntity{
+            activities: [:board, :exit, :ride],
+            route: "66",
+            route_type: :bus
+          }
+        ],
+        last_push_notification_timestamp: ~B[2026-03-20 04:00:33]
+      )
+
+    user = NotificationsFactory.insert(:user)
+
+    NotificationsFactory.insert(:notification_subscription,
+      user_id: user.id,
+      route_id: "66",
+      stop_id: "1",
+      direction_id: 0,
+      windows: [
+        NotificationsFactory.build(:window,
+          start_time: ~T[08:00:00],
+          end_time: ~T[20:00:00],
+          days_of_week: Range.to_list(1..7)
+        )
+      ]
+    )
+
+    start_link_supervised!(Store.Alerts)
+    Store.Alerts.process_reset([alert], [])
+
+    assert {:ok, _} =
+             perform_job(MobileAppBackend.Notifications.Scheduler, %{
+               "now" => "2026-03-20T04:30:00-04:00"
+             })
+
+    refute_enqueued(worker: Notifications.Deliverer)
+
+    assert {:ok, _} =
+             perform_job(MobileAppBackend.Notifications.Scheduler, %{
+               "now" => "2026-03-20T08:00:00-04:00"
+             })
+
+    assert_enqueued(
+      worker: Notifications.Deliverer,
+      args: %{"user_id" => user.id, "alert_id" => alert.id, "type" => "notification"}
+    )
+  end
+
   test "sends notifications preminders starting less than a day in the future" do
     now = DateTime.now!("America/New_York")
 

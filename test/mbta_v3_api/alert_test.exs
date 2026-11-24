@@ -89,6 +89,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"start" => "2024-02-12T11:49:00-05:00", "end" => "2024-02-12T14:26:40-05:00"}
                ],
                "cause" => "FIRE",
+               "created_at" => "2024-02-12T11:48:33-05:00",
                "description" => "Description",
                "duration_certainty" => "ESTIMATED",
                "effect" => "DELAY",
@@ -107,6 +108,7 @@ defmodule MBTAV3API.AlertTest do
                %Alert.ActivePeriod{start: ~B[2024-02-12 11:49:00], end: ~B[2024-02-12 14:26:40]}
              ],
              cause: :fire,
+             created_at: ~B[2024-02-12 11:48:33],
              description: "Description",
              duration_certainty: :estimated,
              effect: :delay,
@@ -156,6 +158,7 @@ defmodule MBTAV3API.AlertTest do
              Alert.parse!(%JsonApi.Item{
                attributes: %{
                  "active_period" => [],
+                 "created_at" => "2026-01-26T09:43:00-05:00",
                  "informed_entity" => [
                    %{"activities" => ["BOARD", "EXIT", "RIDE"], "route_type" => 3}
                  ],
@@ -177,6 +180,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"start" => "2024-02-12T11:49:00-05:00", "end" => "2024-02-12T14:26:40-05:00"}
                ],
                "cause" => "ALIENS",
+               "created_at" => "2024-02-12T11:48:00-05:00",
                "description" => "Description",
                "duration_certainty" => "BEYOND_MORTAL_COMPREHENSION",
                "effect" => "TELEPORTATION",
@@ -194,6 +198,7 @@ defmodule MBTAV3API.AlertTest do
                %Alert.ActivePeriod{start: ~B[2024-02-12 11:49:00], end: ~B[2024-02-12 14:26:40]}
              ],
              cause: :unknown_cause,
+             created_at: ~B[2024-02-12 11:48:00],
              description: "Description",
              duration_certainty: :unknown,
              effect: :unknown_effect,
@@ -263,6 +268,7 @@ defmodule MBTAV3API.AlertTest do
                  %{"start" => "2025-05-11T03:00:00-04:00", "end" => "2025-05-12T02:59:00-04:00"}
                ],
                "cause" => "CONSTRUCTION",
+               "created_at" => "2025-03-17T15:17:11-04:00",
                "description" => "Description",
                "duration_certainty" => "KNOWN",
                "effect" => "STOP_CLOSURE",
@@ -286,6 +292,7 @@ defmodule MBTAV3API.AlertTest do
                %Alert.ActivePeriod{start: ~B[2025-03-28 03:00:00], end: ~B[2025-05-12 02:59:00]}
              ],
              cause: :construction,
+             created_at: ~B[2025-03-17 15:17:11],
              description: "Description",
              duration_certainty: :known,
              effect: :stop_closure,

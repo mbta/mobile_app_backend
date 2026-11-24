@@ -60,10 +60,12 @@ We have translation strings that live on the backend, mostly for alert notificat
 
 Any strings that you add to the code with a `gettext` call must be extracted into the PO files by running `mix gettext.update`. This is a custom wrapper for `gettext.extract`, which also does an extra stop to copy any `msgid` values into `msgstr` when `msgstr` is blank, because otherwise Smartling won't ingest it.
 
+CI runs `mix gettext.check`, which fails if any English PO entry has an empty `msgstr` (including plural forms) or is missing from the corresponding `.pot` template. If this check fails, run `mix gettext.update` and commit the updated PO files.
+
 ### Editing Code
 
 - Create each new feature in its own branch named with the following naming format: initials-description (for example, Jane Smith writing a search function might create a branch called js-search-function).
-- This repo uses [pre-commit hooks](https://pre-commit.com/), which will automatically run and update files before committing. Install with `brew install pre-commit` and set up the git hook scripts by running `pre-commit install`.
+- Install [pre-commit](https://pre-commit.com/) with `brew install pre-commit`, then run `pre-commit install` from the repository root. Before each commit, the hooks run general file checks and `mix checks`. If a hook updates files, review and stage those changes before retrying the commit. The dialyzer check may take a long time on the first run with a new otp/elixir version, but it will speed up once the PLT is in place.
 - Use meaningfully descriptive commit messages to help reviewers understand the changes. Consider following [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0-beta.2/) guidelines.
 
 ### Code Review

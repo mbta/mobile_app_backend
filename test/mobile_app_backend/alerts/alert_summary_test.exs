@@ -1705,7 +1705,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                )
     end
 
-    test "summary for whole other green line branch", %{now: now} do
+    test "summary for whole green line branch", %{now: now} do
       green_route_ids = ~w(Green-B Green-C Green-D Green-E)
 
       routes =
@@ -1772,6 +1772,44 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                    trips: trips,
                    stops: stops
                  },
+                 :notification
+               )
+    end
+
+    test "summary for whole GL branch alert when stop not served by branch", %{now: now} do
+      Mox.stub_with(MobileAppBackend.HTTPMock, Test.Support.HTTPStub)
+      global = GlobalDataCache.get_data()
+
+      alert =
+        build(:alert,
+          effect: :delay,
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1, :hour), end: nil}],
+          informed_entity: [
+            %Alert.InformedEntity{
+              activities: ~w(board exit ride)a,
+              route: "Green-D",
+              route_type: :light_rail
+            }
+          ]
+        )
+
+      patterns =
+        MBTAV3API.RoutePattern.get_relevant_patterns("line-Green", "place-balsq", 0, global)
+
+      assert %AlertSummary.Standard{
+               location: %AlertSummary.Location.WholeRoute{
+                 route_label: "Green Line D",
+                 route_type: :light_rail
+               },
+               timeframe: nil
+             } =
+               AlertSummary.summarizing(
+                 alert,
+                 %Subscription{stop_id: "place-balsq", direction_id: 0},
+                 patterns,
+                 now,
+                 nil,
+                 global,
                  :notification
                )
     end
@@ -2445,6 +2483,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
     end
 
     # This test specifies the current behavior that should be changed.
+    @tag :capture_log
     test "trip specific reminder no schedules today" do
       now = ~B[2026-03-12 12:00:00]
       stop = build(:stop, name: "Ruggles")
@@ -2848,6 +2887,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "discards location if disagreements" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
@@ -2881,6 +2921,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "keeps timeframe if same" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)
@@ -2919,6 +2960,7 @@ defmodule MobileAppBackend.Alerts.AlertSummaryTest do
                AlertSummary.combine_summaries(alert, [summary1, summary2])
     end
 
+    @tag :capture_log
     test "returns a single all clear when multiple subscriptions match" do
       now = DateTime.now!("America/New_York")
       upstream_timestamp = DateTime.add(now, -2)

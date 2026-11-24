@@ -122,6 +122,8 @@ jobs:
         run: mix format --check-formatted
       - name: Check gettext.extract
         run: mix gettext.extract --check-up-to-date
+      - name: Check if mix gettext.update has been run
+        run: mix gettext.check
       - name: Run tests
         run: mix test --cover
       - name: Report test coverage

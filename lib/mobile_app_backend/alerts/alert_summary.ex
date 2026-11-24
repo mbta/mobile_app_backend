@@ -286,7 +286,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
   def alert_location(alert, stop_id, direction_id, patterns, global) do
     routes = routes_for_patterns(patterns, global)
 
-    with nil <- alert_location_for_whole_gl(alert, routes, patterns, direction_id, global),
+    with nil <- alert_location_for_whole_gl(alert, patterns, direction_id, global),
          nil <- alert_location_for_whole_route(alert, direction_id, routes) do
       affected_stops = get_alert_affected_stops(global, alert, routes)
 
@@ -591,7 +591,7 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
     end
   end
 
-  defp alert_location_for_whole_gl(alert, routes, patterns, direction_id, global) do
+  defp alert_location_for_whole_gl(alert, patterns, direction_id, global) do
     typical_routes =
       patterns
       |> Enum.filter(&(&1.typicality == :typical))
@@ -607,14 +607,15 @@ defmodule MobileAppBackend.Alerts.AlertSummary do
           alert_applies_to_whole_gl_route(alert, route_id, direction_id, global)
         end)
 
-      route = Enum.find(routes, &(&1.id in affected_branches))
-
       cond do
         Enum.sort(affected_branches) == Enum.sort(@gl_routes) ->
           %Location.WholeRoute{route_label: @gl_label, route_type: :light_rail}
 
-        length(affected_branches) == 1 and route != nil ->
-          %Location.WholeRoute{route_label: Route.label(route), route_type: :light_rail}
+        length(affected_branches) == 1 ->
+          %Location.WholeRoute{
+            route_label: Route.label(global.routes[List.first(affected_branches)]),
+            route_type: :light_rail
+          }
 
         true ->
           nil

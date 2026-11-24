@@ -414,6 +414,63 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                )
     end
 
+    test "does not send reminders for an alert created after its first active period starts" do
+      now = ~B[2026-03-20 04:30:00]
+
+      alert =
+        build(:alert,
+          created_at: ~B[2026-03-20 04:00:33],
+          active_period: [
+            %Alert.ActivePeriod{start: ~B[2026-03-20 04:00:00], end: ~B[2026-03-20 05:00:00]},
+            %Alert.ActivePeriod{start: ~B[2026-03-20 09:00:00], end: nil}
+          ],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: ~B[2026-03-20 04:00:33]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [
+            NotificationsFactory.build(:window,
+              start_time: ~T[08:00:00],
+              end_time: ~T[20:00:00],
+              days_of_week: Range.to_list(1..7)
+            )
+          ]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+      summaries = %{Subscription.key_properties(subscription) => %{alert.id => "fake"}}
+      alerts = %{alert.id => alert}
+      global_data = GlobalDataCache.get_data()
+
+      assert [] = Engine.user_notifications(user, %{}, summaries, alerts, now, global_data)
+
+      assert [] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 summaries,
+                 alerts,
+                 ~B[2026-03-20 08:00:00],
+                 global_data
+               )
+
+      assert [%OutgoingNotification{type: {:notification, _}}] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 summaries,
+                 alerts,
+                 ~B[2026-03-20 09:00:00],
+                 global_data
+               )
+    end
+
     test "sends reminder at 24h-1s if open before active" do
       now = DateTime.now!("America/New_York")
 

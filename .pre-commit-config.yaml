@@ -1,0 +1,27 @@
+default_install_hook_types:
+  [pre-commit, post-checkout, post-rewrite, post-merge]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-yaml
+        stages: [pre-commit]
+      - id: end-of-file-fixer
+        stages: [pre-commit]
+      - id: trailing-whitespace
+        stages: [pre-commit]
+      - id: pretty-format-json
+        stages: [pre-commit]
+        types: [text]
+        files: \.(json|arb)$
+        args: [--autofix]
+  - repo: local
+    hooks:
+      - id: mix-checks
+        name: mix checks
+        entry: mix checks
+        language: system
+        stages: [pre-commit]
+        always_run: true
+        pass_filenames: false
