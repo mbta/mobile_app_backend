@@ -17,9 +17,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
   @type key_properties() :: %{
           route_id: String.t(),
           stop_id: String.t(),
-          direction_id: integer(),
-          include_accessibility: boolean(),
-          include_parking: boolean()
+          direction_id: integer()
         }
 
   @spec key_properties(t()) :: key_properties()
@@ -27,9 +25,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
     %{
       route_id: subscription.route_id,
       stop_id: subscription.stop_id,
-      direction_id: subscription.direction_id,
-      include_accessibility: subscription.include_accessibility,
-      include_parking: subscription.include_parking
+      direction_id: subscription.direction_id
     }
   end
 end
