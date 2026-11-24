@@ -882,7 +882,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
       alert =
         build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           effect: :suspension,
           informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "place-sstat"}],
           last_push_notification_timestamp: upstream_timestamp
@@ -1721,6 +1721,111 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           now,
           GlobalDataCache.get_data()
         )
+    end
+
+    test "does not send notification before an alert at the start of service becomes active" do
+      alert =
+        build(:alert,
+          created_at: ~B[2026-03-20 02:30:00],
+          active_period: [%Alert.ActivePeriod{start: ~B[2026-03-20 03:00:00], end: nil}],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: ~B[2026-03-20 02:30:00]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      summaries = %{
+        Subscription.key_properties(subscription) => %{service: %{alert.id => "fake"}}
+      }
+
+      alerts = %{alert.id => alert}
+      global_data = GlobalDataCache.get_data()
+
+      # the reminder has already been sent, so nothing else is eligible until the alert starts
+      delivered_reminder = %DeliveredNotification{
+        user_id: user.id,
+        alert_id: alert.id,
+        type: :reminder
+      }
+
+      last_delivered = %{alert.id => delivered_reminder}
+
+      for before_start <- [
+            ~B[2026-03-20 02:59:00],
+            ~B[2026-03-20 02:59:30],
+            ~B[2026-03-20 02:59:59],
+            DateTime.add(~B[2026-03-20 02:59:59], 500, :millisecond)
+          ] do
+        assert [] =
+                 Engine.user_notifications(
+                   user,
+                   last_delivered,
+                   summaries,
+                   alerts,
+                   before_start,
+                   global_data
+                 ),
+               "expected no notification at #{before_start}"
+      end
+
+      for at_or_after_start <- [
+            ~B[2026-03-20 03:00:00],
+            DateTime.add(~B[2026-03-20 03:00:00], 500, :millisecond),
+            ~B[2026-03-20 03:00:30]
+          ] do
+        assert [%OutgoingNotification{type: {:notification, _}}] =
+                 Engine.user_notifications(
+                   user,
+                   last_delivered,
+                   summaries,
+                   alerts,
+                   at_or_after_start,
+                   global_data
+                 ),
+               "expected a notification at #{at_or_after_start}"
+      end
+    end
+
+    test "does not send a notification instead of a reminder just before an alert becomes active" do
+      alert =
+        build(:alert,
+          created_at: ~B[2026-03-20 02:30:00],
+          active_period: [%Alert.ActivePeriod{start: ~B[2026-03-20 03:00:00], end: nil}],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: ~B[2026-03-20 02:30:00]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      assert [%OutgoingNotification{type: :reminder}] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 %{
+                   Subscription.key_properties(subscription) => %{service: %{alert.id => "fake"}}
+                 },
+                 %{alert.id => alert},
+                 ~B[2026-03-20 02:59:30],
+                 GlobalDataCache.get_data()
+               )
     end
   end
 

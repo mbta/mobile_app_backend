@@ -363,7 +363,7 @@ defmodule MobileAppBackend.Notifications.Engine do
       Window.next_overlap(overlap_targets, subscription.windows, now)
 
     next_overlap_in_hours = if next_overlap, do: DateTime.diff(next_overlap, now, :minute) / 60
-    active_now? = next_overlap_in_hours <= 0
+    active_now? = not is_nil(next_overlap) and DateTime.compare(next_overlap, now) != :gt
 
     cond do
       open_now? and Alert.all_clear?(alert) ->
