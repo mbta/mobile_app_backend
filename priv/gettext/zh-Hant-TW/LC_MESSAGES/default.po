@@ -11,6 +11,13 @@ msgstr ""
 "Language: zh_TW\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#. Alert summary when there are multiple locations For example "Service suspended at [Downtown Crossing and Oak Grove]" or "Service suspended at [multiple stops]"
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:68
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:75
+#, elixir-autogen, elixir-format
+msgid " at %{stop_list}"
+msgstr " 在%{stop_list}"
+
 #. Alert summary location for a single stop in the format of " at [Stop name]" ex. " at [Haymarket]" or " at [Green St @ Magazine St]". The leading space should be retained for interpolation into a full alert summary template.
 #: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:30
 #, elixir-autogen, elixir-format
@@ -28,909 +35,6 @@ msgstr "每日%{recurrence_text}"
 #, elixir-autogen, elixir-format
 msgid " due to %{cause}"
 msgstr " 由於%{cause}"
-
-#. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:285
-#, elixir-autogen, elixir-format
-msgid " from %{start_time} to %{end_time}"
-msgstr " 從%{start_time}至%{end_time}"
-
-#. Alert summary location for branching routes in the format of " from [direction] stops to [Stop name]" ex. " from [Westbound] stops to [Kenmore]" or " from [Eastbound] stops to [Government Center]". The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:22
-#, elixir-autogen, elixir-format
-msgid " from **%{direction_name}** stops to **%{end_stop_name}**"
-msgstr " 從**%{direction_name}**站到**%{end_stop_name}**"
-
-#. Alert summary location for consecutive stops in the format of " from [Stop name] to [Other stop name]" ex. " from [Alewife] to [Harvard]" or " from [Lechmere] to [Park Street]". The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:45
-#, elixir-autogen, elixir-format
-msgid " from **%{start_stop}** to **%{end_stop}**"
-msgstr " 從**%{start_stop}**到**%{end_stop}**"
-
-#. Alert summary location for branching routes in the format of " from [Stop name] to [direction] stops" ex. " from [Kenmore] to [Westbound] stops" or " from [JFK/UMass] to [Southbound] stops". The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:37
-#, elixir-autogen, elixir-format
-msgid " from **%{stop_name}** to **%{direction_name}** stops"
-msgstr " 從**%{stop_name}**到**%{direction_name}**站"
-
-#. Alert summary location for an entire route in the format of " on [RouteLabel]" ex. " on [Green Line C]" or " on [1 bus]". The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:60
-#, elixir-autogen, elixir-format
-msgid " on **%{mode_label}**"
-msgstr " 在**%{mode_label}**"
-
-#. Alert summary location for an entire route with shuttle service in the format of " replacing [RouteLabel]" ex. " replacing [Green Line C]" or " replacing [Orangle Line]". The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
-#, elixir-autogen, elixir-format
-msgid " replacing **%{mode_label}**"
-msgstr " 替代**%{mode_label}**"
-
-#. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:142
-#, elixir-autogen, elixir-format
-msgid " some days%{recurrence_text}"
-msgstr "%{recurrence_text}期間的部分日子"
-
-#. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:278
-#, elixir-autogen, elixir-format
-msgid " starting **%{formatted_time}** today"
-msgstr " 自今日**%{formatted_time}**起"
-
-#. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:272
-#, elixir-autogen, elixir-format
-msgid " starting tomorrow"
-msgstr " 自明日起"
-
-#. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:233
-#, elixir-autogen, elixir-format
-msgid " through end of service"
-msgstr " 直至服務結束"
-
-#. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
-#, elixir-autogen, elixir-format
-msgid " through tomorrow"
-msgstr " 直至明天"
-
-#. Alert summary timeframe with no known end. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
-#, elixir-autogen, elixir-format
-msgid " until further notice"
-msgstr " 直至另行通知"
-
-#. Alert summary recurrence ending tomorrow. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
-#, elixir-autogen, elixir-format
-msgid " until tomorrow"
-msgstr " 截至明日"
-
-#: lib/mobile_app_backend/notifications/notification_title.ex:63
-#, elixir-autogen, elixir-format
-msgid "%{label} %{mode_label}"
-msgstr "%{label} %{mode_label}"
-
-#. Bus route name label, with the value being the route number, ex. "1 bus", "66 bus"
-#: lib/presentation_strings.ex:72
-#, elixir-autogen, elixir-format
-msgid "%{name} bus"
-msgstr "%{name}號巴士"
-
-#. Alert summary in the format of “[trip identity] is replaced by shuttle buses from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [the 12:13 PM train] from [Ruggles] to [Forest Hills][ some days until Friday]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:361
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "%{trip_identity}從**%{start_stop}**至**%{end_stop}**路段%{recurrence}將由接駁巴士替代營運"
-
-#. Trip identity in the format of “[time] [vehicle] from [stop]”, ex “[12:13 PM] [train] from [South Station]“
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
-#, elixir-autogen, elixir-format
-msgid "**%{time}** %{vehicle} from **%{from_stop}**"
-msgstr "**%{time}**%{vehicle}從**%{from_stop}**出發"
-
-#. Trip identity in the form of ”[time] [vehicle type] from [headsign]”, ex “[12:13 PM] [train] from [Stoughton]”
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:112
-#, elixir-autogen, elixir-format
-msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
-msgstr "**%{trip_time}**%{route_type}從**%{stop_name}**出發"
-
-#. Trip identity in the form of ”[time] [vehicle type] to [headsign]”, ex “[12:13 PM] [train] to [Stoughton]”
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:122
-#, elixir-autogen, elixir-format
-msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
-msgstr "**%{trip_time}**%{route_type}前往**%{headsign}**"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:261
-#, elixir-autogen, elixir-format
-msgid "Access Issue"
-msgstr "無障礙問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:115
-#, elixir-autogen, elixir-format
-msgid "Access issue"
-msgstr "無障礙問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:264
-#, elixir-autogen, elixir-format
-msgid "Additional Service"
-msgstr "附加服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:118
-#, elixir-autogen, elixir-format
-msgid "Additional service"
-msgstr "附加服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:218
-#: lib/presentation_strings.ex:221
-#: lib/presentation_strings.ex:359
-#: lib/presentation_strings.ex:362
-#, elixir-autogen, elixir-format
-msgid "Alert"
-msgstr "警報"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:267
-#, elixir-autogen, elixir-format
-msgid "Amber Alert"
-msgstr "安珀警報"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:121
-#, elixir-autogen, elixir-format
-msgid "Amber alert"
-msgstr "安珀警報"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:270
-#, elixir-autogen, elixir-format
-msgid "Bike Issue"
-msgstr "自行車問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:124
-#, elixir-autogen, elixir-format
-msgid "Bike issue"
-msgstr "自行車問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:273
-#, elixir-autogen, elixir-format
-msgid "Cancellation"
-msgstr "取消"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:135
-#: lib/presentation_strings.ex:276
-#, elixir-autogen, elixir-format
-msgid "Delay"
-msgstr "延誤"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:138
-#: lib/presentation_strings.ex:279
-#, elixir-autogen, elixir-format
-msgid "Detour"
-msgstr "交通改道"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:282
-#, elixir-autogen, elixir-format
-msgid "Dock Closure"
-msgstr "碼頭關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:285
-#, elixir-autogen, elixir-format
-msgid "Dock Issue"
-msgstr "停靠區域問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:141
-#, elixir-autogen, elixir-format
-msgid "Dock closed"
-msgstr "停靠區域已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:144
-#, elixir-autogen, elixir-format
-msgid "Dock issue"
-msgstr "停靠區域問題"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:8
-#, elixir-autogen, elixir-format
-msgid "Eastbound"
-msgstr "東行"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:288
-#, elixir-autogen, elixir-format
-msgid "Elevator Closure"
-msgstr "電梯關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:147
-#, elixir-autogen, elixir-format
-msgid "Elevator closed"
-msgstr "直梯已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:291
-#, elixir-autogen, elixir-format
-msgid "Escalator Closure"
-msgstr "自動扶梯關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:150
-#, elixir-autogen, elixir-format
-msgid "Escalator closed"
-msgstr "自動扶梯已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:294
-#, elixir-autogen, elixir-format
-msgid "Extra Service"
-msgstr "額外服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:153
-#, elixir-autogen, elixir-format
-msgid "Extra service"
-msgstr "額外服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:297
-#, elixir-autogen, elixir-format
-msgid "Facility Issue"
-msgstr "設施問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:156
-#, elixir-autogen, elixir-format
-msgid "Facility issue"
-msgstr "設施問題"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:23
-#, elixir-autogen, elixir-format
-msgid "Heading"
-msgstr "方向"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:10
-#, elixir-autogen, elixir-format
-msgid "Inbound"
-msgstr "進站"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:300
-#, elixir-autogen, elixir-format
-msgid "Modified Service"
-msgstr "調整後的服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:159
-#, elixir-autogen, elixir-format
-msgid "Modified service"
-msgstr "調整後的服務"
-
-#. Title displayed in notification for alert that applies to multiple subscribed routes
-#: lib/mobile_app_backend/notifications/notification_title.ex:70
-#, elixir-autogen, elixir-format
-msgid "Multiple routes"
-msgstr "多條線路"
-
-#. Trip identity referring to more than one specific trip
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:132
-#, elixir-autogen, elixir-format
-msgid "Multiple trips"
-msgstr "多個班次"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:303
-#, elixir-autogen, elixir-format
-msgid "No Service"
-msgstr "無服務"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:162
-#, elixir-autogen, elixir-format
-msgid "No service"
-msgstr "無服務"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:6
-#, elixir-autogen, elixir-format
-msgid "Northbound"
-msgstr "北行"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:165
-#: lib/presentation_strings.ex:306
-#, elixir-autogen, elixir-format
-msgid "Notice"
-msgstr "通知"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:11
-#, elixir-autogen, elixir-format
-msgid "Outbound"
-msgstr "出站"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:309
-#, elixir-autogen, elixir-format
-msgid "Parking Closure"
-msgstr "停車關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:312
-#, elixir-autogen, elixir-format
-msgid "Parking Issue"
-msgstr "停車問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:168
-#, elixir-autogen, elixir-format
-msgid "Parking closed"
-msgstr "停車已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:171
-#, elixir-autogen, elixir-format
-msgid "Parking issue"
-msgstr "停車問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:315
-#, elixir-autogen, elixir-format
-msgid "Policy Change"
-msgstr "政策變化"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:174
-#, elixir-autogen, elixir-format
-msgid "Policy change"
-msgstr "政策變化"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:318
-#, elixir-autogen, elixir-format
-msgid "Schedule Change"
-msgstr "時刻表變更"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:177
-#, elixir-autogen, elixir-format
-msgid "Schedule change"
-msgstr "時刻表變更"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:321
-#, elixir-autogen, elixir-format
-msgid "Service Change"
-msgstr "服務變更"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:180
-#, elixir-autogen, elixir-format
-msgid "Service change"
-msgstr "服務變更"
-
-#. Possible alert effect
-#. Suspension alert VoiceOver text
-#: lib/presentation_strings.ex:210
-#, elixir-autogen, elixir-format
-msgid "Service suspended"
-msgstr "服務暫停"
-
-#. Possible alert effect
-#. The status label for a shuttled trip
-#: lib/presentation_strings.ex:324
-#, elixir-autogen, elixir-format
-msgid "Shuttle"
-msgstr "擺渡巴士"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:183
-#, elixir-autogen, elixir-format
-msgid "Shuttle buses"
-msgstr "擺渡巴士"
-
-#. Alert summary in the format of “Shuttle buses replace [trip identity] from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [this train] from [Ruggles] to [Forest Hills][ some days until Friday]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:371
-#, elixir-autogen, elixir-format
-msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
-msgstr "接駁巴士替代從**%{start_stop}**至**%{end_stop}**%{recurrence}的%{trip_identity}"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:329
-#, elixir-autogen, elixir-format
-msgid "Snow Route"
-msgstr "雪地線路"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:186
-#, elixir-autogen, elixir-format
-msgid "Snow route"
-msgstr "雪道"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:7
-#, elixir-autogen, elixir-format
-msgid "Southbound"
-msgstr "南行"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:332
-#, elixir-autogen, elixir-format
-msgid "Station Closure"
-msgstr "車站關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:335
-#, elixir-autogen, elixir-format
-msgid "Station Issue"
-msgstr "車站問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:189
-#, elixir-autogen, elixir-format
-msgid "Station closed"
-msgstr "車站已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:192
-#, elixir-autogen, elixir-format
-msgid "Station issue"
-msgstr "車站問題"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:338
-#, elixir-autogen, elixir-format
-msgid "Stop Closure"
-msgstr "網站關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:341
-#: lib/presentation_strings.ex:344
-#, elixir-autogen, elixir-format
-msgid "Stop Moved"
-msgstr "網站已移動"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:347
-#, elixir-autogen, elixir-format
-msgid "Stop Shoveling"
-msgstr "網站鏟雪中"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:195
-#, elixir-autogen, elixir-format
-msgid "Stop closed"
-msgstr "站點已關閉"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:198
-#: lib/presentation_strings.ex:201
-#, elixir-autogen, elixir-format
-msgid "Stop moved"
-msgstr "網站已移動"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:204
-#, elixir-autogen, elixir-format
-msgid "Stop shoveling"
-msgstr "網站鏟雪中"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:207
-#: lib/presentation_strings.ex:350
-#, elixir-autogen, elixir-format
-msgid "Summary"
-msgstr "概觀"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:353
-#, elixir-autogen, elixir-format
-msgid "Suspension"
-msgstr "暫停"
-
-#. Trip identity in the form of ”This [vehicle type]”, ex ”This [train]”
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:105
-#, elixir-autogen, elixir-format
-msgid "This %{route_type}"
-msgstr "該%{route_type}"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:356
-#, elixir-autogen, elixir-format
-msgid "Track Change"
-msgstr "軌道變更"
-
-#. Possible alert effect
-#: lib/presentation_strings.ex:215
-#, elixir-autogen, elixir-format
-msgid "Track change"
-msgstr "軌道變更"
-
-#. Header for a cancelled trip card on stop details
-#. Possible alert effect
-#: lib/presentation_strings.ex:127
-#, elixir-autogen, elixir-format
-msgid "Trip cancelled"
-msgstr "行程已取消"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:9
-#, elixir-autogen, elixir-format
-msgid "Westbound"
-msgstr "西行"
-
-#. bus
-#: lib/presentation_strings.ex:16
-#, elixir-autogen, elixir-format
-msgid "bus"
-msgstr "巴士"
-
-#. buses
-#: lib/presentation_strings.ex:20
-#, elixir-autogen, elixir-format
-msgid "buses"
-msgstr "巴士"
-
-#. Used when an alert ends at the end of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:309
-#, elixir-autogen, elixir-format
-msgid "end of service"
-msgstr "服務結束"
-
-#. ferries
-#: lib/presentation_strings.ex:38
-#, elixir-autogen, elixir-format
-msgid "ferries"
-msgstr "輪渡"
-
-#. ferry
-#: lib/presentation_strings.ex:34
-#, elixir-autogen, elixir-format
-msgid "ferry"
-msgstr "輪渡"
-
-#. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:172
-#, elixir-autogen, elixir-format
-msgid "key/alert_summary_recurrence_end_day_later_date"
-msgstr "直至%{1}"
-
-#. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
-#, elixir-autogen, elixir-format
-msgid "key/alert_summary_recurrence_end_day_this_week"
-msgstr "直至%{1}"
-
-#. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:245
-#, elixir-autogen, elixir-format
-msgid "key/alert_summary_timeframe_later_date"
-msgstr "直至%{1}"
-
-#. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
-#, elixir-autogen, elixir-format
-msgid "key/alert_summary_timeframe_this_week"
-msgstr "直至%{1}"
-
-#. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
-#, elixir-autogen, elixir-format
-msgid "key/alert_summary_timeframe_time"
-msgstr "直至%{1}"
-
-#. Trip identity referring to more than one specific trip
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:181
-#, elixir-autogen, elixir-format
-msgid "multiple trips"
-msgstr "多個班次"
-
-#. Used when an alert begins at the start of a service day
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:304
-#, elixir-autogen, elixir-format
-msgid "start of service"
-msgstr "服務開始"
-
-#. Trip identity in the format of “the [time] [vehicle]”, ex “the [12:13 PM] [train]
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:156
-#, elixir-autogen, elixir-format
-msgid "the **%{time}** %{vehicle}"
-msgstr "**%{time}** %{vehicle}"
-
-#. Trip identity in the form of ”this [vehicle type]”, ex ”this [train]”
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:170
-#, elixir-autogen, elixir-format
-msgid "this %{vehicle}"
-msgstr "該%{vehicle}"
-
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:83
-#, elixir-autogen, elixir-format
-msgid "today"
-msgstr "今日"
-
-#: lib/mobile_app_backend/alerts/formatted_alert.ex:84
-#, elixir-autogen, elixir-format
-msgid "tomorrow"
-msgstr "明日"
-
-#. train
-#: lib/presentation_strings.ex:52
-#, elixir-autogen, elixir-format
-msgid "train"
-msgstr "列車"
-
-#. trains
-#: lib/presentation_strings.ex:56
-#, elixir-autogen, elixir-format
-msgid "trains"
-msgstr "列車"
-
-#: lib/mobile_app_backend_web/components/core_components.ex:488
-#, elixir-autogen, elixir-format, import-optional
-msgid "Actions"
-msgstr "行動"
-
-#: lib/mobile_app_backend_web/components/core_components.ex:78
-#: lib/mobile_app_backend_web/components/core_components.ex:135
-#, elixir-autogen, elixir-format, import-optional
-msgid "close"
-msgstr "關閉"
-
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:16
-#, elixir-autogen, elixir-format
-msgid "%{mode} %{skipped_effect}"
-msgstr "%{mode} %{skipped_effect}"
-
-#. Mode of travel prefixing alert summary e.g.: "Buses will not stop at..."
-#: lib/presentation_strings.ex:28
-#, elixir-autogen, elixir-format
-msgid "Buses"
-msgstr "巴士"
-
-#. Mode of travel prefixing alert summary e.g.: "Trains will not stop at..."
-#: lib/presentation_strings.ex:64
-#, elixir-autogen, elixir-format
-msgid "Trains"
-msgstr "列車"
-
-#. Mode of travel prefixing alert summary e.g.: "Ferries will not stop at..."
-#: lib/presentation_strings.ex:46
-#, elixir-autogen, elixir-format
-msgid "Ferries"
-msgstr "渡輪"
-
-#. Used when more than 3 stops are affected
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
-#, elixir-autogen, elixir-format
-msgid "**multiple stops**"
-msgstr "**多個網站**"
-
-#. Assemble a summary of an alert with the structure:
-#. [This trip] [will not stop at  stop A][ due to maintenance][ daily until friday]
-#. Alert summary in the format of “[trip identity] [is affected][due to cause][until recurrence]”, ex “[12:13 PM from Ruggles] [is cancelled today][ due to a mechanical issue][ some days until Wednesday]” or “[Multiple trips] [are suspended today][][]”
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:243
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
-msgstr "%{recurrence}，%{cause}，%{trip_identity}%{skipped_effect}"
-
-#. Assemble a summary of an alert with the structure:
-#. [This trip] affected by [detour] [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:346
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity}%{timeframe}%{cause}造成%{effect}，影響期間為%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [These trips] are cancelled [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:209
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}已取消，%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [These trips] are suspended [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:292
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}已暫停，%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [Trip 101] experiencing delays[ of about 10 minutes][ today][ due to maintenance][ daily until Friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:324
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{trip_identity}%{timeframe}%{cause}延遲%{delay_duration}，影響期間為%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:220
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}已取消，%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [This trip] is suspended [today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:303
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}已暫停，%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. [This trip] will terminate at [Porter][ today][ due to maintenance][ daily until friday]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:267
-#, elixir-autogen, elixir-format
-msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
-msgstr "%{cause}，%{trip_identity}%{timeframe}將在%{terminating_stop}終止營運，%{recurrence}"
-
-#. Assemble a summary of an alert with the structure:
-#. **Delays**[ of about 15 minutes][ due to weather][ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:29
-#, elixir-autogen, elixir-format
-msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "%{summary_location}%{due_to_cause}**延遲**%{delay_duration}，影響%{summary_timeframe}%{summary_recurrence}"
-
-#. Ex: delays [of about 10 minutes]
-#: lib/presentation_strings.ex:86
-#, elixir-autogen, elixir-format
-msgid "of about 10 minutes"
-msgstr "大約10分鐘"
-
-#. Ex: delays [of about 15 minutes]
-#: lib/presentation_strings.ex:89
-#, elixir-autogen, elixir-format
-msgid "of about 15 minutes"
-msgstr "大約15分鐘"
-
-#. Ex: delays [of about 20 minutes]
-#: lib/presentation_strings.ex:92
-#, elixir-autogen, elixir-format
-msgid "of about 20 minutes"
-msgstr "大約20分鐘"
-
-#. Ex: delays [of about 25 minutes]
-#: lib/presentation_strings.ex:95
-#, elixir-autogen, elixir-format
-msgid "of about 25 minutes"
-msgstr "大約25分鐘"
-
-#. Ex: delays [of about 30 minutes]
-#: lib/presentation_strings.ex:98
-#, elixir-autogen, elixir-format
-msgid "of about 30 minutes"
-msgstr "大約30分鐘"
-
-#. Ex: delays [of more than 30 minutes]
-#: lib/presentation_strings.ex:101
-#, elixir-autogen, elixir-format
-msgid "of more than 30 minutes"
-msgstr "超過30分鐘"
-
-#. Ex: delays [of more than an hour]
-#: lib/presentation_strings.ex:104
-#, elixir-autogen, elixir-format
-msgid "of more than an hour"
-msgstr "超過一個小時"
-
-#. Label for bus routes in the route picker view
-#: lib/presentation_strings.ex:24
-#, elixir-autogen, elixir-format
-msgid "Bus"
-msgstr "巴士"
-
-#. Elevator Service
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:120
-#, elixir-autogen, elixir-format
-msgid "Elevator"
-msgstr "電梯"
-
-#. Label for ferry routes in the route picker view
-#: lib/presentation_strings.ex:42
-#, elixir-autogen, elixir-format
-msgid "Ferry"
-msgstr "輪渡"
-
-#. Train
-#: lib/presentation_strings.ex:60
-#, elixir-autogen, elixir-format
-msgid "Train"
-msgstr "列車"
-
-#. Text in a notification prompting users to click to learn more
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:52
-#, elixir-autogen, elixir-format
-msgid "%{summary}. See alert details."
-msgstr "%{summary}。查看警報詳情。"
-
-#. Assemble a full summary of an alert with the structure: \n**[Modified service]**[ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:72
-#, elixir-autogen, elixir-format
-msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
-msgstr "%{due_to_cause}，%{summary_location}%{summary_timeframe}**%{effect_sentence_case}**，%{summary_recurrence}"
-
-#. Alert summary in the format of \"All clear: Normal service has resumed.\"
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:91
-#, elixir-autogen, elixir-format
-msgid "**All clear:** Normal service has resumed."
-msgstr "**通行正常：**服務已恢復正常。"
-
-#. Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "Update: [Stop closure] has ended[ at Haymarket]." or "Update: [Suspension] has ended[ from Alewife to Harvard]."
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:147
-#, elixir-autogen, elixir-format
-msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
-msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結束。"
-
-#. Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:107
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:117
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:130
-#, elixir-autogen, elixir-format
-msgid "**Update:** %{mode} service has resumed%{summary_location}."
-msgstr "**最新消息：** %{summary_location}的%{mode}已恢復服務。"
-
-#. Example: “Update: Service has ended”
-#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:67
-#, elixir-autogen, elixir-format
-msgid "Update: %{body}"
-msgstr "最新消息：%{body}"
-
-#. Alert summary when there are multiple locations For example "Service suspended at [Downtown Crossing and Oak Grove]" or "Service suspended at [multiple stops]"
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:68
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:75
-#, elixir-autogen, elixir-format
-msgid " at %{stop_list}"
-msgstr " 在%{stop_list}"
-
-#. Alert effect denoting station bypass, ex “will not stop[ at Back Bay and Ruggles] [today]”
-#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:91
-#, elixir-autogen, elixir-format
-msgid "will not stop%{affected_stops_location} %{timeframe}"
-msgstr "%{timeframe}將不停靠%{affected_stops_location}"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:12
-#, elixir-autogen, elixir-format
-msgid "Clockwise"
-msgstr "順時針"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:13
-#, elixir-autogen, elixir-format
-msgid "Counterclockwise"
-msgstr "逆時針"
-
-#. A route direction label
-#: lib/mobile_app_backend/alerts/direction_label.ex:14
-#, elixir-autogen, elixir-format
-msgid "Looping"
-msgstr "循環"
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:375
-#, elixir-autogen, elixir-format
-msgid " due to Amtrak"
-msgstr " 由於 Amtrak"
-
-#. Alert cause, used in 'Delays [due to cause]'
-#: lib/presentation_strings.ex:378
-#, elixir-autogen, elixir-format
-msgid " due to Amtrak train traffic"
-msgstr "因 Amtrak 列車行駛狀況"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:398
@@ -1081,6 +185,18 @@ msgstr " 由於技術故障"
 #, elixir-autogen, elixir-format
 msgid " due to a track problem"
 msgstr " 由於軌道故障"
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:375
+#, elixir-autogen, elixir-format
+msgid " due to Amtrak"
+msgstr " 由於 Amtrak"
+
+#. Alert cause, used in 'Delays [due to cause]'
+#: lib/presentation_strings.ex:378
+#, elixir-autogen, elixir-format
+msgid " due to Amtrak train traffic"
+msgstr "因 Amtrak 列車行駛狀況"
 
 #. Alert cause, used in 'Delays [due to cause]'
 #: lib/presentation_strings.ex:372
@@ -1280,6 +396,85 @@ msgstr "，因船舶交通繁忙"
 msgid " due to weather"
 msgstr " 因天候因素"
 
+#. Alert summary timeframe with a range today that will recur in the future, e.g. “from 9:00 PM to end of service”. The leading space should be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:285
+#, elixir-autogen, elixir-format
+msgid " from %{start_time} to %{end_time}"
+msgstr " 從%{start_time}至%{end_time}"
+
+#. Alert summary location for branching routes in the format of " from [direction] stops to [Stop name]" ex. " from [Westbound] stops to [Kenmore]" or " from [Eastbound] stops to [Government Center]". The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:22
+#, elixir-autogen, elixir-format
+msgid " from **%{direction_name}** stops to **%{end_stop_name}**"
+msgstr " 從**%{direction_name}**站到**%{end_stop_name}**"
+
+#. Alert summary location for consecutive stops in the format of " from [Stop name] to [Other stop name]" ex. " from [Alewife] to [Harvard]" or " from [Lechmere] to [Park Street]". The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:45
+#, elixir-autogen, elixir-format
+msgid " from **%{start_stop}** to **%{end_stop}**"
+msgstr " 從**%{start_stop}**到**%{end_stop}**"
+
+#. Alert summary location for branching routes in the format of " from [Stop name] to [direction] stops" ex. " from [Kenmore] to [Westbound] stops" or " from [JFK/UMass] to [Southbound] stops". The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:37
+#, elixir-autogen, elixir-format
+msgid " from **%{stop_name}** to **%{direction_name}** stops"
+msgstr " 從**%{stop_name}**到**%{direction_name}**站"
+
+#. Alert summary location for an entire route in the format of " on [RouteLabel]" ex. " on [Green Line C]" or " on [1 bus]". The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:60
+#, elixir-autogen, elixir-format
+msgid " on **%{mode_label}**"
+msgstr " 在**%{mode_label}**"
+
+#. Alert summary location for an entire route with shuttle service in the format of " replacing [RouteLabel]" ex. " replacing [Green Line C]" or " replacing [Orangle Line]". The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:54
+#, elixir-autogen, elixir-format
+msgid " replacing **%{mode_label}**"
+msgstr " 替代**%{mode_label}**"
+
+#. Alert summary recurrence on only certain days until the indicated date, e.g. “some days until Jan 16”. The leading space must be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:142
+#, elixir-autogen, elixir-format
+msgid " some days%{recurrence_text}"
+msgstr "%{recurrence_text}期間的部分日子"
+
+#. Alert summary timeframe starting on a specific time later today. ex. " starting 10:00 PM today". The time component is localized by the OS. The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:278
+#, elixir-autogen, elixir-format
+msgid " starting **%{formatted_time}** today"
+msgstr " 自今日**%{formatted_time}**起"
+
+#. Alert summary timeframe starting tomorrow. The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:272
+#, elixir-autogen, elixir-format
+msgid " starting tomorrow"
+msgstr " 自明日起"
+
+#. Alert summary timeframe ending at the end of service on the current day. The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:233
+#, elixir-autogen, elixir-format
+msgid " through end of service"
+msgstr " 直至服務結束"
+
+#. Alert summary timeframe ending tomorrow. The leading space should be retained for interpolation into a full alert summary template.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:239
+#, elixir-autogen, elixir-format
+msgid " through tomorrow"
+msgstr " 直至明天"
+
+#. Alert summary timeframe with no known end. The leading space should be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:160
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:219
+#, elixir-autogen, elixir-format
+msgid " until further notice"
+msgstr " 直至另行通知"
+
+#. Alert summary recurrence ending tomorrow. The leading space should be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:166
+#, elixir-autogen, elixir-format
+msgid " until tomorrow"
+msgstr " 截至明日"
+
 #. Alert summary sentence in the format of "[Plural alert effect] are still in effect[ at location].", ex "Shuttle buses are still in effect from Kenmore to Copley."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:166
 #, elixir-autogen, elixir-format
@@ -1292,11 +487,270 @@ msgstr "%{effect}仍持續生效%{summary_location}。"
 msgid "%{effect} is still in effect%{summary_location}."
 msgstr "%{effect}仍持續生效%{summary_location}。"
 
+#: lib/mobile_app_backend/notifications/notification_title.ex:63
+#, elixir-autogen, elixir-format
+msgid "%{label} %{mode_label}"
+msgstr "%{label} %{mode_label}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:16
+#, elixir-autogen, elixir-format
+msgid "%{mode} %{skipped_effect}"
+msgstr "%{mode} %{skipped_effect}"
+
+#. Bus route name label, with the value being the route number, ex. "1 bus", "66 bus"
+#: lib/presentation_strings.ex:72
+#, elixir-autogen, elixir-format
+msgid "%{name} bus"
+msgstr "%{name}號巴士"
+
+#. Text in a notification prompting users to click to learn more
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:52
+#, elixir-autogen, elixir-format
+msgid "%{summary}. See alert details."
+msgstr "%{summary}。查看警報詳情。"
+
+#. Assemble a summary of an alert with the structure:
+#. [This trip] [will not stop at  stop A][ due to maintenance][ daily until friday]
+#. Alert summary in the format of “[trip identity] [is affected][due to cause][until recurrence]”, ex “[12:13 PM from Ruggles] [is cancelled today][ due to a mechanical issue][ some days until Wednesday]” or “[Multiple trips] [are suspended today][][]”
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:243
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} %{skipped_effect}%{cause}%{recurrence}"
+msgstr "%{recurrence}，%{cause}，%{trip_identity}%{skipped_effect}"
+
+#. Assemble a summary of an alert with the structure:
+#. [This trip] affected by [detour] [today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:346
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} affected by %{effect} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity}%{timeframe}%{cause}造成%{effect}，影響期間為%{recurrence}"
+
+#. Assemble a summary of an alert with the structure:
+#. [These trips] are cancelled [today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:209
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} are cancelled %{timeframe}%{cause}%{recurrence}"
+msgstr "%{cause}，%{trip_identity}%{timeframe}已取消，%{recurrence}"
+
+#. Assemble a summary of an alert with the structure:
+#. [These trips] are suspended [today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:292
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} are suspended %{timeframe}%{cause}%{recurrence}"
+msgstr "%{cause}，%{trip_identity}%{timeframe}已暫停，%{recurrence}"
+
+#. Assemble a summary of an alert with the structure:
+#. [Trip 101] experiencing delays[ of about 10 minutes][ today][ due to maintenance][ daily until Friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:324
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} experiencing delays%{delay_duration} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{trip_identity}%{timeframe}%{cause}延遲%{delay_duration}，影響期間為%{recurrence}"
+
+#. Assemble a summary of an alert with the structure:
+#. [This trip] is cancelled [today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:220
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} is cancelled %{timeframe}%{cause}%{recurrence}"
+msgstr "%{cause}，%{trip_identity}%{timeframe}已取消，%{recurrence}"
+
+#. Alert summary in the format of “[trip identity] is replaced by shuttle buses from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [the 12:13 PM train] from [Ruggles] to [Forest Hills][ some days until Friday]”
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:361
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} is replaced by shuttle buses from **%{start_stop}** to **%{end_stop}**%{recurrence}"
+msgstr "%{trip_identity}從**%{start_stop}**至**%{end_stop}**路段%{recurrence}將由接駁巴士替代營運"
+
+#. Assemble a summary of an alert with the structure:
+#. [This trip] is suspended [today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:303
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} is suspended %{timeframe}%{cause}%{recurrence}"
+msgstr "%{cause}，%{trip_identity}%{timeframe}已暫停，%{recurrence}"
+
+#. Assemble a summary of an alert with the structure:
+#. [This trip] will terminate at [Porter][ today][ due to maintenance][ daily until friday]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:267
+#, elixir-autogen, elixir-format
+msgid "%{trip_identity} will terminate at %{terminating_stop} %{timeframe}%{cause}%{recurrence}"
+msgstr "%{cause}，%{trip_identity}%{timeframe}將在%{terminating_stop}終止營運，%{recurrence}"
+
+#. Assemble a full summary of an alert with the structure: \n**[Modified service]**[ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:72
+#, elixir-autogen, elixir-format
+msgid "**%{effect_sentence_case}**%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "%{due_to_cause}，%{summary_location}%{summary_timeframe}**%{effect_sentence_case}**，%{summary_recurrence}"
+
+#. Trip identity in the format of “[time] [vehicle] from [stop]”, ex “[12:13 PM] [train] from [South Station]“
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:143
+#, elixir-autogen, elixir-format
+msgid "**%{time}** %{vehicle} from **%{from_stop}**"
+msgstr "**%{time}**%{vehicle}從**%{from_stop}**出發"
+
+#. Trip identity in the form of ”[time] [vehicle type] from [headsign]”, ex “[12:13 PM] [train] from [Stoughton]”
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:112
+#, elixir-autogen, elixir-format
+msgid "**%{trip_time}** %{route_type} from **%{stop_name}**"
+msgstr "**%{trip_time}**%{route_type}從**%{stop_name}**出發"
+
+#. Trip identity in the form of ”[time] [vehicle type] to [headsign]”, ex “[12:13 PM] [train] to [Stoughton]”
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:122
+#, elixir-autogen, elixir-format
+msgid "**%{trip_time}** %{route_type} to **%{headsign}**"
+msgstr "**%{trip_time}**%{route_type}前往**%{headsign}**"
+
+#. Alert summary in the format of \"All clear: Normal service has resumed.\"
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:91
+#, elixir-autogen, elixir-format
+msgid "**All clear:** Normal service has resumed."
+msgstr "**通行正常：**服務已恢復正常。"
+
+#. Assemble a summary of an alert with the structure:
+#. **Delays**[ of about 15 minutes][ due to weather][ from Porter to Havard][ starting today][ daily until Friday][ due to maintenance]
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:29
+#, elixir-autogen, elixir-format
+msgid "**Delays**%{delay_duration}%{summary_location}%{summary_timeframe}%{summary_recurrence}%{due_to_cause}"
+msgstr "%{summary_location}%{due_to_cause}**延遲**%{delay_duration}，影響%{summary_timeframe}%{summary_recurrence}"
+
+#. Used when more than 3 stops are affected
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:103
+#, elixir-autogen, elixir-format
+msgid "**multiple stops**"
+msgstr "**多個網站**"
+
+#. Alert summary in the format of "Update: [Alert effect] has ended[ at location].", ex "Update: [Stop closure] has ended[ at Haymarket]." or "Update: [Suspension] has ended[ from Alewife to Harvard]."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:147
+#, elixir-autogen, elixir-format
+msgid "**Update:** %{effect_sentence_case} has ended%{summary_location}."
+msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結束。"
+
 #. Alert summary in the format of "Update: [Plural alert effect] have ended[ at location].", ex "Update: [Delays] have ended[ from Alewife to Harvard]."
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:140
 #, elixir-autogen, elixir-format
 msgid "**Update:** %{effect_sentence_case} have ended%{summary_location}."
 msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結束。"
+
+#. Alert summary in the format of "Update: [Vehicle type] service has resumed[ at location].", ex "Update: [Train] service has resumed[ from Riverside to Newton Highlands]." or "Update: [Bus] service has resumed[ at Market St @ Lothrop St]."
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:107
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:117
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:130
+#, elixir-autogen, elixir-format
+msgid "**Update:** %{mode} service has resumed%{summary_location}."
+msgstr "**最新消息：** %{summary_location}的%{mode}已恢復服務。"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:261
+#, elixir-autogen, elixir-format
+msgid "Access Issue"
+msgstr "無障礙問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:115
+#, elixir-autogen, elixir-format
+msgid "Access issue"
+msgstr "無障礙問題"
+
+#: lib/mobile_app_backend_web/components/core_components.ex:488
+#, elixir-autogen, elixir-format, import-optional
+msgid "Actions"
+msgstr "行動"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:264
+#, elixir-autogen, elixir-format
+msgid "Additional Service"
+msgstr "附加服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:118
+#, elixir-autogen, elixir-format
+msgid "Additional service"
+msgstr "附加服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:218
+#: lib/presentation_strings.ex:221
+#: lib/presentation_strings.ex:359
+#: lib/presentation_strings.ex:362
+#, elixir-autogen, elixir-format
+msgid "Alert"
+msgstr "警報"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:267
+#, elixir-autogen, elixir-format
+msgid "Amber Alert"
+msgstr "安珀警報"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:121
+#, elixir-autogen, elixir-format
+msgid "Amber alert"
+msgstr "安珀警報"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:270
+#, elixir-autogen, elixir-format
+msgid "Bike Issue"
+msgstr "自行車問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:124
+#, elixir-autogen, elixir-format
+msgid "Bike issue"
+msgstr "自行車問題"
+
+#. bus
+#: lib/presentation_strings.ex:16
+#, elixir-autogen, elixir-format
+msgid "bus"
+msgstr "巴士"
+
+#. Label for bus routes in the route picker view
+#: lib/presentation_strings.ex:24
+#, elixir-autogen, elixir-format
+msgid "Bus"
+msgstr "巴士"
+
+#. buses
+#: lib/presentation_strings.ex:20
+#, elixir-autogen, elixir-format
+msgid "buses"
+msgstr "巴士"
+
+#. Mode of travel prefixing alert summary e.g.: "Buses will not stop at..."
+#: lib/presentation_strings.ex:28
+#, elixir-autogen, elixir-format
+msgid "Buses"
+msgstr "巴士"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:273
+#, elixir-autogen, elixir-format
+msgid "Cancellation"
+msgstr "取消"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:12
+#, elixir-autogen, elixir-format
+msgid "Clockwise"
+msgstr "順時針"
+
+#: lib/mobile_app_backend_web/components/core_components.ex:78
+#: lib/mobile_app_backend_web/components/core_components.ex:135
+#, elixir-autogen, elixir-format, import-optional
+msgid "close"
+msgstr "關閉"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:13
+#, elixir-autogen, elixir-format
+msgid "Counterclockwise"
+msgstr "逆時針"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:135
+#: lib/presentation_strings.ex:276
+#, elixir-autogen, elixir-format
+msgid "Delay"
+msgstr "延誤"
 
 #. Alert effect as a plural noun, ex. "Delays are still in effect"
 #: lib/presentation_strings.ex:229
@@ -1304,11 +758,24 @@ msgstr "**最新消息：** %{summary_location}的%{effect_sentence_case}已結�
 msgid "Delays"
 msgstr "延誤"
 
-#. Sentence following an all clear summary when multiple other alerts remain active
-#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
+#. Possible alert effect
+#: lib/presentation_strings.ex:138
+#: lib/presentation_strings.ex:279
 #, elixir-autogen, elixir-format
-msgid "Other disruptions are still in effect."
-msgstr "其他服務異常仍持續中。"
+msgid "Detour"
+msgstr "交通改道"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:141
+#, elixir-autogen, elixir-format
+msgid "Dock closed"
+msgstr "停靠區域已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:282
+#, elixir-autogen, elixir-format
+msgid "Dock Closure"
+msgstr "碼頭關閉"
 
 #. Alert effect as a noun, ex. "Dock closure is still in effect"
 #: lib/presentation_strings.ex:234
@@ -1316,14 +783,547 @@ msgstr "其他服務異常仍持續中。"
 msgid "Dock closure"
 msgstr "碼頭關閉"
 
+#. Possible alert effect
+#: lib/presentation_strings.ex:285
+#, elixir-autogen, elixir-format
+msgid "Dock Issue"
+msgstr "停靠區域問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:144
+#, elixir-autogen, elixir-format
+msgid "Dock issue"
+msgstr "停靠區域問題"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:8
+#, elixir-autogen, elixir-format
+msgid "Eastbound"
+msgstr "東行"
+
+#. Elevator Service
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:120
+#, elixir-autogen, elixir-format
+msgid "Elevator"
+msgstr "電梯"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:147
+#, elixir-autogen, elixir-format
+msgid "Elevator closed"
+msgstr "直梯已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:288
+#, elixir-autogen, elixir-format
+msgid "Elevator Closure"
+msgstr "電梯關閉"
+
+#. Used when an alert ends at the end of a service day
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:309
+#, elixir-autogen, elixir-format
+msgid "end of service"
+msgstr "服務結束"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:150
+#, elixir-autogen, elixir-format
+msgid "Escalator closed"
+msgstr "自動扶梯已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:291
+#, elixir-autogen, elixir-format
+msgid "Escalator Closure"
+msgstr "自動扶梯關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:294
+#, elixir-autogen, elixir-format
+msgid "Extra Service"
+msgstr "額外服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:153
+#, elixir-autogen, elixir-format
+msgid "Extra service"
+msgstr "額外服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:297
+#, elixir-autogen, elixir-format
+msgid "Facility Issue"
+msgstr "設施問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:156
+#, elixir-autogen, elixir-format
+msgid "Facility issue"
+msgstr "設施問題"
+
+#. ferries
+#: lib/presentation_strings.ex:38
+#, elixir-autogen, elixir-format
+msgid "ferries"
+msgstr "輪渡"
+
+#. Mode of travel prefixing alert summary e.g.: "Ferries will not stop at..."
+#: lib/presentation_strings.ex:46
+#, elixir-autogen, elixir-format
+msgid "Ferries"
+msgstr "渡輪"
+
+#. ferry
+#: lib/presentation_strings.ex:34
+#, elixir-autogen, elixir-format
+msgid "ferry"
+msgstr "輪渡"
+
+#. Label for ferry routes in the route picker view
+#: lib/presentation_strings.ex:42
+#, elixir-autogen, elixir-format
+msgid "Ferry"
+msgstr "輪渡"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:23
+#, elixir-autogen, elixir-format
+msgid "Heading"
+msgstr "方向"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:10
+#, elixir-autogen, elixir-format
+msgid "Inbound"
+msgstr "進站"
+
+#. Alert summary recurrence ending on a specific date in the future. ex. " until May 11". The date component is localized by the OS. The leading space should be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:172
+#, elixir-autogen, elixir-format
+msgid "key/alert_summary_recurrence_end_day_later_date"
+msgstr "直至%{1}"
+
+#. Alert summary recurrence ending on a specific day later this week. ex. " until Thursday". The weekday component is localized by the OS. The leading space should be retained.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:182
+#, elixir-autogen, elixir-format
+msgid "key/alert_summary_recurrence_end_day_this_week"
+msgstr "直至%{1}"
+
+#. Alert summary timeframe ending on a specific date in the future. ex. " through May 11". The date component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:245
+#, elixir-autogen, elixir-format
+msgid "key/alert_summary_timeframe_later_date"
+msgstr "直至%{1}"
+
+#. Alert summary timeframe ending on a specific day later this week. ex. " through Thursday". The weekday component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:255
+#, elixir-autogen, elixir-format
+msgid "key/alert_summary_timeframe_this_week"
+msgstr "直至%{1}"
+
+#. Alert summary timeframe ending on a specific time later today. ex. " through 10:00 PM". The time component is localized by the OS. The leading space should be retained, because this will be added in the %3 position of the "**%1$@**%2$@%3$@" alert summary template which may or may not include a timeframe fragment.
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:265
+#, elixir-autogen, elixir-format
+msgid "key/alert_summary_timeframe_time"
+msgstr "直至%{1}"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:14
+#, elixir-autogen, elixir-format
+msgid "Looping"
+msgstr "循環"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:300
+#, elixir-autogen, elixir-format
+msgid "Modified Service"
+msgstr "調整後的服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:159
+#, elixir-autogen, elixir-format
+msgid "Modified service"
+msgstr "調整後的服務"
+
+#. Title displayed in notification for alert that applies to multiple subscribed routes
+#: lib/mobile_app_backend/notifications/notification_title.ex:70
+#, elixir-autogen, elixir-format
+msgid "Multiple routes"
+msgstr "多條線路"
+
+#. Trip identity referring to more than one specific trip
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:132
+#, elixir-autogen, elixir-format
+msgid "Multiple trips"
+msgstr "多個班次"
+
+#. Trip identity referring to more than one specific trip
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:181
+#, elixir-autogen, elixir-format
+msgid "multiple trips"
+msgstr "多個班次"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:303
+#, elixir-autogen, elixir-format
+msgid "No Service"
+msgstr "無服務"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:162
+#, elixir-autogen, elixir-format
+msgid "No service"
+msgstr "無服務"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:6
+#, elixir-autogen, elixir-format
+msgid "Northbound"
+msgstr "北行"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:165
+#: lib/presentation_strings.ex:306
+#, elixir-autogen, elixir-format
+msgid "Notice"
+msgstr "通知"
+
+#. Ex: delays [of about 10 minutes]
+#: lib/presentation_strings.ex:86
+#, elixir-autogen, elixir-format
+msgid "of about 10 minutes"
+msgstr "大約10分鐘"
+
+#. Ex: delays [of about 15 minutes]
+#: lib/presentation_strings.ex:89
+#, elixir-autogen, elixir-format
+msgid "of about 15 minutes"
+msgstr "大約15分鐘"
+
+#. Ex: delays [of about 20 minutes]
+#: lib/presentation_strings.ex:92
+#, elixir-autogen, elixir-format
+msgid "of about 20 minutes"
+msgstr "大約20分鐘"
+
+#. Ex: delays [of about 25 minutes]
+#: lib/presentation_strings.ex:95
+#, elixir-autogen, elixir-format
+msgid "of about 25 minutes"
+msgstr "大約25分鐘"
+
+#. Ex: delays [of about 30 minutes]
+#: lib/presentation_strings.ex:98
+#, elixir-autogen, elixir-format
+msgid "of about 30 minutes"
+msgstr "大約30分鐘"
+
+#. Ex: delays [of more than 30 minutes]
+#: lib/presentation_strings.ex:101
+#, elixir-autogen, elixir-format
+msgid "of more than 30 minutes"
+msgstr "超過30分鐘"
+
+#. Ex: delays [of more than an hour]
+#: lib/presentation_strings.ex:104
+#, elixir-autogen, elixir-format
+msgid "of more than an hour"
+msgstr "超過一個小時"
+
+#. Sentence following an all clear summary when multiple other alerts remain active
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:183
+#, elixir-autogen, elixir-format
+msgid "Other disruptions are still in effect."
+msgstr "其他服務異常仍持續中。"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:11
+#, elixir-autogen, elixir-format
+msgid "Outbound"
+msgstr "出站"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:168
+#, elixir-autogen, elixir-format
+msgid "Parking closed"
+msgstr "停車已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:309
+#, elixir-autogen, elixir-format
+msgid "Parking Closure"
+msgstr "停車關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:312
+#, elixir-autogen, elixir-format
+msgid "Parking Issue"
+msgstr "停車問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:171
+#, elixir-autogen, elixir-format
+msgid "Parking issue"
+msgstr "停車問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:315
+#, elixir-autogen, elixir-format
+msgid "Policy Change"
+msgstr "政策變化"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:174
+#, elixir-autogen, elixir-format
+msgid "Policy change"
+msgstr "政策變化"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:318
+#, elixir-autogen, elixir-format
+msgid "Schedule Change"
+msgstr "時刻表變更"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:177
+#, elixir-autogen, elixir-format
+msgid "Schedule change"
+msgstr "時刻表變更"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:321
+#, elixir-autogen, elixir-format
+msgid "Service Change"
+msgstr "服務變更"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:180
+#, elixir-autogen, elixir-format
+msgid "Service change"
+msgstr "服務變更"
+
+#. Possible alert effect
+#. Suspension alert VoiceOver text
+#: lib/presentation_strings.ex:210
+#, elixir-autogen, elixir-format
+msgid "Service suspended"
+msgstr "服務暫停"
+
+#. Possible alert effect
+#. The status label for a shuttled trip
+#: lib/presentation_strings.ex:324
+#, elixir-autogen, elixir-format
+msgid "Shuttle"
+msgstr "擺渡巴士"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:183
+#, elixir-autogen, elixir-format
+msgid "Shuttle buses"
+msgstr "擺渡巴士"
+
+#. Alert summary in the format of “Shuttle buses replace [trip identity] from [stop] to [stop][until recurrence]”, ex “Shuttle buses replace [this train] from [Ruggles] to [Forest Hills][ some days until Friday]”
+#: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:371
+#, elixir-autogen, elixir-format
+msgid "Shuttle buses replace %{trip_identity} from **%{start_stop}** to **%{end_stop}**%{recurrence}"
+msgstr "接駁巴士替代從**%{start_stop}**至**%{end_stop}**%{recurrence}的%{trip_identity}"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:329
+#, elixir-autogen, elixir-format
+msgid "Snow Route"
+msgstr "雪地線路"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:186
+#, elixir-autogen, elixir-format
+msgid "Snow route"
+msgstr "雪道"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:7
+#, elixir-autogen, elixir-format
+msgid "Southbound"
+msgstr "南行"
+
+#. Used when an alert begins at the start of a service day
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:304
+#, elixir-autogen, elixir-format
+msgid "start of service"
+msgstr "服務開始"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:189
+#, elixir-autogen, elixir-format
+msgid "Station closed"
+msgstr "車站已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:332
+#, elixir-autogen, elixir-format
+msgid "Station Closure"
+msgstr "車站關閉"
+
 #. Alert effect as a noun, ex. "Station closure is still in effect"
 #: lib/presentation_strings.ex:239
 #, elixir-autogen, elixir-format
 msgid "Station closure"
 msgstr "車站關閉"
 
+#. Possible alert effect
+#: lib/presentation_strings.ex:335
+#, elixir-autogen, elixir-format
+msgid "Station Issue"
+msgstr "車站問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:192
+#, elixir-autogen, elixir-format
+msgid "Station issue"
+msgstr "車站問題"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:195
+#, elixir-autogen, elixir-format
+msgid "Stop closed"
+msgstr "站點已關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:338
+#, elixir-autogen, elixir-format
+msgid "Stop Closure"
+msgstr "網站關閉"
+
 #. Alert effect as a noun, ex. "Stop closure is still in effect"
 #: lib/presentation_strings.ex:244
 #, elixir-autogen, elixir-format
 msgid "Stop closure"
 msgstr "站點關閉"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:341
+#: lib/presentation_strings.ex:344
+#, elixir-autogen, elixir-format
+msgid "Stop Moved"
+msgstr "網站已移動"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:198
+#: lib/presentation_strings.ex:201
+#, elixir-autogen, elixir-format
+msgid "Stop moved"
+msgstr "網站已移動"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:347
+#, elixir-autogen, elixir-format
+msgid "Stop Shoveling"
+msgstr "網站鏟雪中"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:204
+#, elixir-autogen, elixir-format
+msgid "Stop shoveling"
+msgstr "網站鏟雪中"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:207
+#: lib/presentation_strings.ex:350
+#, elixir-autogen, elixir-format
+msgid "Summary"
+msgstr "概觀"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:353
+#, elixir-autogen, elixir-format
+msgid "Suspension"
+msgstr "暫停"
+
+#. Trip identity in the format of “the [time] [vehicle]”, ex “the [12:13 PM] [train]
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:156
+#, elixir-autogen, elixir-format
+msgid "the **%{time}** %{vehicle}"
+msgstr "**%{time}** %{vehicle}"
+
+#. Trip identity in the form of ”This [vehicle type]”, ex ”This [train]”
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:105
+#, elixir-autogen, elixir-format
+msgid "This %{route_type}"
+msgstr "該%{route_type}"
+
+#. Trip identity in the form of ”this [vehicle type]”, ex ”this [train]”
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:170
+#, elixir-autogen, elixir-format
+msgid "this %{vehicle}"
+msgstr "該%{vehicle}"
+
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:83
+#, elixir-autogen, elixir-format
+msgid "today"
+msgstr "今日"
+
+#: lib/mobile_app_backend/alerts/formatted_alert.ex:84
+#, elixir-autogen, elixir-format
+msgid "tomorrow"
+msgstr "明日"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:356
+#, elixir-autogen, elixir-format
+msgid "Track Change"
+msgstr "軌道變更"
+
+#. Possible alert effect
+#: lib/presentation_strings.ex:215
+#, elixir-autogen, elixir-format
+msgid "Track change"
+msgstr "軌道變更"
+
+#. train
+#: lib/presentation_strings.ex:52
+#, elixir-autogen, elixir-format
+msgid "train"
+msgstr "列車"
+
+#. Train
+#: lib/presentation_strings.ex:60
+#, elixir-autogen, elixir-format
+msgid "Train"
+msgstr "列車"
+
+#. trains
+#: lib/presentation_strings.ex:56
+#, elixir-autogen, elixir-format
+msgid "trains"
+msgstr "列車"
+
+#. Mode of travel prefixing alert summary e.g.: "Trains will not stop at..."
+#: lib/presentation_strings.ex:64
+#, elixir-autogen, elixir-format
+msgid "Trains"
+msgstr "列車"
+
+#. Header for a cancelled trip card on stop details
+#. Possible alert effect
+#: lib/presentation_strings.ex:127
+#, elixir-autogen, elixir-format
+msgid "Trip cancelled"
+msgstr "行程已取消"
+
+#. Example: “Update: Service has ended”
+#: lib/mobile_app_backend/notifications/engine/outgoing_notification.ex:67
+#, elixir-autogen, elixir-format
+msgid "Update: %{body}"
+msgstr "最新消息：%{body}"
+
+#. A route direction label
+#: lib/mobile_app_backend/alerts/direction_label.ex:9
+#, elixir-autogen, elixir-format
+msgid "Westbound"
+msgstr "西行"
+
+#. Alert effect denoting station bypass, ex “will not stop[ at Back Bay and Ruggles] [today]”
+#: lib/mobile_app_backend/alerts/formatted_alert/template_fragments.ex:91
+#, elixir-autogen, elixir-format
+msgid "will not stop%{affected_stops_location} %{timeframe}"
+msgstr "%{timeframe}將不停靠%{affected_stops_location}"
