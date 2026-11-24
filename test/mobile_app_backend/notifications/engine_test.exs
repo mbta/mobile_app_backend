@@ -444,7 +444,11 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         )
 
       user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
-      summaries = %{Subscription.key_properties(subscription) => %{alert.id => "fake"}}
+
+      summaries = %{
+        Subscription.key_properties(subscription) => %{service: %{alert.id => "fake"}}
+      }
+
       alerts = %{alert.id => alert}
       global_data = GlobalDataCache.get_data()
 
