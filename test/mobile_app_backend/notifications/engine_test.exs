@@ -882,7 +882,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
 
       alert =
         build(:alert,
-          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, 1), end: nil}],
+          active_period: [%Alert.ActivePeriod{start: DateTime.add(now, -1), end: nil}],
           effect: :suspension,
           informed_entity: [%Alert.InformedEntity{activities: [:board], stop: "place-sstat"}],
           last_push_notification_timestamp: upstream_timestamp
@@ -1721,6 +1721,76 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           now,
           GlobalDataCache.get_data()
         )
+    end
+
+    test "sends notifications correctly when they begin at start of service" do
+      alert =
+        build(:alert,
+          created_at: ~B[2026-03-20 02:30:00],
+          active_period: [%Alert.ActivePeriod{start: ~B[2026-03-20 03:00:00], end: nil}],
+          effect: :suspension,
+          informed_entity: [%Alert.InformedEntity{activities: [:board], route: "Red"}],
+          last_push_notification_timestamp: ~B[2026-03-20 02:30:00]
+        )
+
+      subscription =
+        NotificationsFactory.build(:notification_subscription,
+          user_id: 1,
+          route_id: "Red",
+          stop_id: "place-sstat",
+          windows: [NotificationsFactory.build(:perpetual_window)]
+        )
+
+      user = NotificationsFactory.build(:user, id: 1, notification_subscriptions: [subscription])
+
+      summaries = %{
+        Subscription.key_properties(subscription) => %{service: %{alert.id => "fake"}}
+      }
+
+      alerts = %{alert.id => alert}
+      global_data = GlobalDataCache.get_data()
+
+      assert [%OutgoingNotification{type: :reminder}] =
+               Engine.user_notifications(
+                 user,
+                 %{},
+                 summaries,
+                 alerts,
+                 ~B[2026-03-20 02:59:00],
+                 global_data
+               ),
+             "expected a reminder before start"
+
+      # the reminder has already been sent, so nothing else is eligible until the alert starts
+      last_delivered = %{
+        alert.id => %DeliveredNotification{
+          user_id: user.id,
+          alert_id: alert.id,
+          type: :reminder
+        }
+      }
+
+      assert [] =
+               Engine.user_notifications(
+                 user,
+                 last_delivered,
+                 summaries,
+                 alerts,
+                 ~B[2026-03-20 02:59:59],
+                 global_data
+               ),
+             "expected no notification before start if there was already a reminder"
+
+      assert [%OutgoingNotification{type: {:notification, _}}] =
+               Engine.user_notifications(
+                 user,
+                 last_delivered,
+                 summaries,
+                 alerts,
+                 ~B[2026-03-20 03:00:30],
+                 global_data
+               ),
+             "expected a notification after start"
     end
   end
 
