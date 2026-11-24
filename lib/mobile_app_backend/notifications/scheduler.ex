@@ -181,11 +181,9 @@ defmodule MobileAppBackend.Notifications.Scheduler do
           [Alert.t()],
           DateTime.t(),
           GlobalDataCache.data()
-        ) ::
-          %{Alert.id() => AlertSummary.t()}
-
+        ) :: Engine.summaries_by_subscription_key()
   defp summaries_by_subscription_key(subscription_key, alerts, now, global) do
-    relevant_alerts = Engine.alerts_for_subscription_key(subscription_key, alerts, now, global)
+    alerts_by_type = Engine.alerts_for_subscription_key(subscription_key, alerts, now, global)
 
     patterns =
       RoutePattern.get_relevant_patterns(
@@ -198,12 +196,14 @@ defmodule MobileAppBackend.Notifications.Scheduler do
     subscription = %Subscription{
       route_id: subscription_key.route_id,
       stop_id: subscription_key.stop_id,
-      direction_id: subscription_key.direction_id,
-      include_accessibility: subscription_key.include_accessibility
+      direction_id: subscription_key.direction_id
     }
 
     summaries_per_alert =
-      Map.new(relevant_alerts, fn alert ->
+      alerts_by_type
+      |> Map.values()
+      |> List.flatten()
+      |> Map.new(fn alert ->
         schedules = Engine.schedules_for_alert_trips(alert, subscription_key, global, now)
 
         {alert.id,
@@ -218,15 +218,18 @@ defmodule MobileAppBackend.Notifications.Scheduler do
          )}
       end)
 
-    Map.new(relevant_alerts, fn alert ->
-      {alert.id,
-       with_other_active_alerts(
-         summaries_per_alert[alert.id],
-         alert,
-         relevant_alerts,
-         summaries_per_alert,
-         now
-       )}
+    Map.new(alerts_by_type, fn {type, alerts} ->
+      {type,
+       Map.new(alerts, fn alert ->
+         {alert.id,
+          with_other_active_alerts(
+            summaries_per_alert[alert.id],
+            alert,
+            alerts,
+            summaries_per_alert,
+            now
+          )}
+       end)}
     end)
   end
 

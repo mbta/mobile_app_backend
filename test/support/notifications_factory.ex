@@ -8,6 +8,7 @@ defmodule MobileAppBackend.NotificationsFactory do
       stop_id: sequence("stop"),
       direction_id: sequence(:direction, [0, 1]),
       include_accessibility: sequence(:include_accessibility, [false, true]),
+      include_parking: false,
       windows: [build(:window)]
     }
   end

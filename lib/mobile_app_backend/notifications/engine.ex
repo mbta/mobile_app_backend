@@ -14,13 +14,19 @@ defmodule MobileAppBackend.Notifications.Engine do
   alias MobileAppBackend.Notifications.Window
   alias MobileAppBackend.User
 
+  @type summaries_by_subscription_key :: %{
+          Subscription.key_properties() => %{
+            service: %{Alert.id() => AlertSummary.t()},
+            accessibility: %{Alert.id() => AlertSummary.t()},
+            parking: %{Alert.id() => AlertSummary.t()}
+          }
+        }
+
   # Function gets called for a single user at a time from a Oban worker
   @spec user_notifications(
           User.t(),
           %{Alert.id() => DeliveredNotification.t()},
-          %{
-            Subscription.key_properties() => %{Alert.id() => AlertSummary.t()}
-          },
+          summaries_by_subscription_key(),
           %{Alert.id() => Alert.t()},
           DateTime.t(),
           GlobalDataCache.data()
@@ -63,9 +69,7 @@ defmodule MobileAppBackend.Notifications.Engine do
   @spec alert_to_matching_subscriptions(
           User.t(),
           %{Alert.id() => DeliveredNotification.t()},
-          %{
-            Subscription.key_properties() => %{Alert.id() => AlertSummary.t()}
-          },
+          summaries_by_subscription_key(),
           %{Alert.id() => Alert.t()},
           GlobalDataCache.data(),
           DateTime.t()
@@ -84,10 +88,8 @@ defmodule MobileAppBackend.Notifications.Engine do
     alert_to_subscriptions =
       user.notification_subscriptions
       |> Enum.flat_map(fn subscription ->
-        subscription_key = Subscription.key_properties(subscription)
-
-        summaries_by_subscription_key[subscription_key]
-        |> Map.keys()
+        subscription
+        |> alert_ids_for_user_subscription(summaries_by_subscription_key)
         |> Enum.map(fn alert_id -> {alert_id, subscription} end)
       end)
       |> Enum.group_by(
@@ -126,9 +128,12 @@ defmodule MobileAppBackend.Notifications.Engine do
           [Alert.t()],
           DateTime.t(),
           map()
-        ) :: [
-          Alert.t()
-        ]
+        ) :: %{
+          service: [Alert.t()],
+          accessibility: [Alert.t()],
+          parking: [Alert.t()]
+        }
+
   def alerts_for_subscription_key(
         subscription_key,
         alerts,
@@ -164,14 +169,41 @@ defmodule MobileAppBackend.Notifications.Engine do
     downstream_alerts =
       downstream_alerts(alerts, route_ids, target_stop_with_children, global_data)
 
+    elevator_alerts = elevator_alerts(alerts, target_stop_with_children)
+
+    parking_alerts = parking_alerts(alerts, target_stop_with_children)
+
+    %{
+      service: Enum.uniq(applicable_alerts ++ downstream_alerts),
+      accessibility: elevator_alerts,
+      parking: parking_alerts
+    }
+  end
+
+  @spec alert_ids_for_user_subscription(Subscription.t(), summaries_by_subscription_key()) :: [
+          Alert.id()
+        ]
+  defp alert_ids_for_user_subscription(subscription, summaries_by_subscription_key) do
+    subscription_key = Subscription.key_properties(subscription)
+
+    alerts_by_type = Map.get(summaries_by_subscription_key, subscription_key)
+    general_alerts = Map.get(alerts_by_type, :service, %{})
+
     elevator_alerts =
-      if subscription_key.include_accessibility do
-        elevator_alerts(alerts, target_stop_with_children)
+      if subscription.include_accessibility do
+        Map.get(alerts_by_type, :accessibility, %{})
       else
-        []
+        %{}
       end
 
-    Enum.uniq(applicable_alerts ++ downstream_alerts ++ elevator_alerts)
+    parking_alerts =
+      if subscription.include_parking do
+        Map.get(alerts_by_type, :parking, %{})
+      else
+        %{}
+      end
+
+    Enum.uniq(Map.keys(general_alerts) ++ Map.keys(elevator_alerts) ++ Map.keys(parking_alerts))
   end
 
   @doc """
@@ -301,6 +333,10 @@ defmodule MobileAppBackend.Notifications.Engine do
     Alert.elevator_alerts(alerts, target_stop_with_children)
   end
 
+  defp parking_alerts(alerts, target_stop_with_children) do
+    Alert.parking_alerts(alerts, target_stop_with_children)
+  end
+
   @spec notification_type(
           Subscription.t(),
           Alert.t(),
@@ -420,11 +456,19 @@ defmodule MobileAppBackend.Notifications.Engine do
     AlertSummary.combine_summaries(alert, individual_summaries)
   end
 
+  @spec summary_for_subscription(
+          Alert.t(),
+          Subscription.t(),
+          summaries_by_subscription_key :: map()
+        ) :: AlertSummary.t() | nil
   defp summary_for_subscription(alert, subscription, summaries_by_subscription_key) do
-    get_in(summaries_by_subscription_key, [
-      Subscription.key_properties(subscription),
-      alert.id
-    ])
+    summaries_by_subscription_key
+    |> Map.get(Subscription.key_properties(subscription), %{})
+    |> Map.values()
+    |> Enum.reduce(%{}, fn alert_type_map, all_types_map ->
+      Map.merge(all_types_map, alert_type_map)
+    end)
+    |> Map.get(alert.id)
   end
 
   defp schedule_matches_subscription_key?(

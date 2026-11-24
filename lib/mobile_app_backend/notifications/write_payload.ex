@@ -43,22 +43,35 @@ defmodule MobileAppBackend.Notifications.WritePayload do
             stop_id: String.t(),
             direction_id: 0 | 1,
             include_accessibility: boolean(),
+            include_parking: boolean(),
             windows: MapSet.t(Window.t())
           }
-    defstruct [:route_id, :stop_id, :direction_id, :include_accessibility, :windows]
+    defstruct [
+      :route_id,
+      :stop_id,
+      :direction_id,
+      :include_accessibility,
+      :include_parking,
+      :windows
+    ]
 
-    def parse!(%{
-          "route_id" => route_id,
-          "stop_id" => stop_id,
-          "direction_id" => direction_id,
-          "include_accessibility" => include_accessibility,
-          "windows" => windows
-        }) do
+    def parse!(
+          %{
+            "route_id" => route_id,
+            "stop_id" => stop_id,
+            "direction_id" => direction_id,
+            "include_accessibility" => include_accessibility,
+            "windows" => windows
+          } = params
+        ) do
+      include_parking = Map.get(params, "include_parking", false)
+
       %__MODULE__{
         route_id: route_id,
         stop_id: stop_id,
         direction_id: direction_id,
         include_accessibility: include_accessibility,
+        include_parking: include_parking,
         windows: MapSet.new(windows, &Window.parse!/1)
       }
     end
@@ -83,7 +96,8 @@ defmodule MobileAppBackend.Notifications.WritePayload do
         route_id: desired.route_id,
         stop_id: desired.stop_id,
         direction_id: desired.direction_id,
-        include_accessibility: desired.include_accessibility
+        include_accessibility: desired.include_accessibility,
+        include_parking: desired.include_parking
       )
       |> Changeset.unique_constraint(:route_id, name: :user_rsd_unique_index)
       |> Changeset.put_assoc(:windows, windows)

@@ -8,6 +8,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
     field(:stop_id, :string, null: false)
     field(:direction_id, :integer, null: false)
     field(:include_accessibility, :boolean, null: false)
+    field(:include_parking, :boolean, null: false)
     has_many(:windows, MobileAppBackend.Notifications.Window, on_replace: :delete_if_exists)
 
     timestamps(type: :utc_datetime)
@@ -16,8 +17,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
   @type key_properties() :: %{
           route_id: String.t(),
           stop_id: String.t(),
-          direction_id: integer(),
-          include_accessibility: boolean()
+          direction_id: integer()
         }
 
   @spec key_properties(t()) :: key_properties()
@@ -25,8 +25,7 @@ defmodule MobileAppBackend.Notifications.Subscription do
     %{
       route_id: subscription.route_id,
       stop_id: subscription.stop_id,
-      direction_id: subscription.direction_id,
-      include_accessibility: subscription.include_accessibility
+      direction_id: subscription.direction_id
     }
   end
 end

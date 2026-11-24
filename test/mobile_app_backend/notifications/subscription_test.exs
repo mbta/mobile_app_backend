@@ -15,7 +15,8 @@ defmodule MobileAppBackend.Notifications.SubscriptionTest do
       route_id: "Red",
       stop_id: "place-davis",
       direction_id: 0,
-      include_accessibility: true
+      include_accessibility: true,
+      include_parking: true
     })
   end
 end
