@@ -354,6 +354,17 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.TemplatesTest do
 
       assert "**All clear:** Normal service has resumed." == summary
     end
+
+    test "returns elevator service resumed with station when no other alerts" do
+      summary =
+        Templates.all_clear(
+          build(:alert, effect: :elevator_closure),
+          [],
+          " at **Wood Island**"
+        )
+
+      assert "**All clear:** Elevator service has resumed at **Wood Island**." == summary
+    end
   end
 
   describe "trip_specific/6" do
