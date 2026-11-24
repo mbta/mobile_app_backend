@@ -16,7 +16,7 @@ defmodule MobileAppBackend.Notifications.Engine do
 
   @type summaries_by_subscription_key :: %{
           Subscription.key_properties() => %{
-            general: %{Alert.id() => AlertSummary.t()},
+            service: %{Alert.id() => AlertSummary.t()},
             accessibility: %{Alert.id() => AlertSummary.t()},
             parking: %{Alert.id() => AlertSummary.t()}
           }
@@ -129,7 +129,7 @@ defmodule MobileAppBackend.Notifications.Engine do
           DateTime.t(),
           map()
         ) :: %{
-          general: [Alert.t()],
+          service: [Alert.t()],
           accessibility: [Alert.t()],
           parking: [Alert.t()]
         }
@@ -174,7 +174,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     parking_alerts = parking_alerts(alerts, target_stop_with_children)
 
     %{
-      general: Enum.uniq(applicable_alerts ++ downstream_alerts),
+      service: Enum.uniq(applicable_alerts ++ downstream_alerts),
       accessibility: elevator_alerts,
       parking: parking_alerts
     }
@@ -187,7 +187,7 @@ defmodule MobileAppBackend.Notifications.Engine do
     subscription_key = Subscription.key_properties(subscription)
 
     alerts_by_type = Map.get(summaries_by_subscription_key, subscription_key)
-    general_alerts = Map.get(alerts_by_type, :general, %{})
+    general_alerts = Map.get(alerts_by_type, :service, %{})
 
     elevator_alerts =
       if subscription.include_accessibility do

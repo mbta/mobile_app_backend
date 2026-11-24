@@ -61,7 +61,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    }
@@ -115,7 +115,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    }
@@ -175,7 +175,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -226,7 +226,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -292,7 +292,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -351,7 +351,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -403,7 +403,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -457,7 +457,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -504,7 +504,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -554,7 +554,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -597,7 +597,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -648,7 +648,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -699,7 +699,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -743,7 +743,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -788,7 +788,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -804,7 +804,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -880,12 +880,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription_now) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    },
                    Subscription.key_properties(subscription_later) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    }
@@ -961,12 +961,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    }
@@ -1054,12 +1054,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary
                      }
                    }
@@ -1122,7 +1122,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{alert.id => delivered_notification},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{
+                     service: %{
                        alert.id => "fake"
                      }
                    }
@@ -1217,12 +1217,12 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary1
                      }
                    },
                    Subscription.key_properties(subscription2) => %{
-                     general: %{
+                     service: %{
                        alert.id => summary2
                      }
                    }
@@ -1468,32 +1468,32 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription1_early) => %{
-                     general: %{
+                     service: %{
                        alert1.id => "fake1_early"
                      }
                    },
                    Subscription.key_properties(subscription1_matching) => %{
-                     general: %{
+                     service: %{
                        alert1.id => "fake1_matching"
                      }
                    },
                    Subscription.key_properties(subscription1_late) => %{
-                     general: %{
+                     service: %{
                        alert1.id => "fake1_late"
                      }
                    },
                    Subscription.key_properties(subscription2_early) => %{
-                     general: %{
+                     service: %{
                        alert2.id => "fake2_early"
                      }
                    },
                    Subscription.key_properties(subscription2_matching) => %{
-                     general: %{
+                     service: %{
                        alert2.id => "fake2_matching"
                      }
                    },
                    Subscription.key_properties(subscription2_late) => %{
-                     general: %{
+                     service: %{
                        alert2.id => "fake2_late"
                      }
                    }
@@ -1545,7 +1545,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{},
+                     service: %{},
                      accessibility: %{
                        alert.id => summary
                      },
@@ -1598,7 +1598,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
                  %{},
                  %{
                    Subscription.key_properties(subscription) => %{
-                     general: %{},
+                     service: %{},
                      accessibility: %{},
                      parking: %{
                        alert.id => summary
@@ -1647,7 +1647,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           %{},
           %{
             Subscription.key_properties(subscription) => %{
-              general: %{
+              service: %{
                 alert.id => summary
               },
               accessibility: %{
@@ -1709,7 +1709,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           windows: [NotificationsFactory.build(:perpetual_window)]
         )
 
-      assert %{general: [^downstream_alert], accessibility: [], parking: []} =
+      assert %{service: [^downstream_alert], accessibility: [], parking: []} =
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription),
                  [upstream_alert, downstream_alert],
@@ -1733,7 +1733,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           ]
         )
 
-      assert %{general: [], accessibility: [^alert], parking: []} =
+      assert %{service: [], accessibility: [^alert], parking: []} =
                Engine.alerts_for_subscription_key(
                  %{
                    route_id: "Orange",
@@ -1760,7 +1760,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
           ]
         )
 
-      assert %{general: [], accessibility: [], parking: [^alert]} =
+      assert %{service: [], accessibility: [], parking: [^alert]} =
                Engine.alerts_for_subscription_key(
                  %{route_id: "Orange", stop_id: "place-chncl", direction_id: 0},
                  [alert],
@@ -1805,7 +1805,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         end
       )
 
-      assert %{general: [^alert], accessibility: [], parking: []} =
+      assert %{service: [^alert], accessibility: [], parking: []} =
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription_key),
                  [alert],
@@ -1933,7 +1933,7 @@ defmodule MobileAppBackend.Notifications.EngineTest do
         direction_id: 1
       }
 
-      assert %{general: [alert_route], accessibility: [], parking: []} ==
+      assert %{service: [alert_route], accessibility: [], parking: []} ==
                Engine.alerts_for_subscription_key(
                  Subscription.key_properties(subscription_key),
                  [alert_route, alert_trip_specific],
