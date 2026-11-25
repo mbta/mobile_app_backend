@@ -600,7 +600,7 @@ msgstr "Le/La %{route_type} de **%{trip_time}** en direction de **%{headsign}**"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:91
 #, elixir-autogen, elixir-format
 msgid "**All clear:** Elevator service has resumed%{summary_location}."
-msgstr ""
+msgstr "**Voie libre :** les ascenseurs sont de nouveau en service%{summary_location}."
 
 #. Alert summary in the format of \"All clear: Normal service has resumed.\"
 #: lib/mobile_app_backend/alerts/formatted_alert/templates.ex:100
