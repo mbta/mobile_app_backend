@@ -86,6 +86,15 @@ defmodule MobileAppBackend.Alerts.FormattedAlert.Templates do
   # ===========================================================================
 
   @spec all_clear(Alert.t(), [AlertSummary.OtherActiveAlert.t()], String.t()) :: String.t()
+  # Elevator all clear with no other active alerts
+  def all_clear(%{effect: :elevator_closure}, [], location) do
+    gettext("**All clear:** Elevator service has resumed%{summary_location}.",
+      comment:
+        ~S|Alert summary in the format of "All clear: Elevator service has resumed[ at location].", ex "All clear: Elevator service has resumed at Wood Island."|,
+      summary_location: location
+    )
+  end
+
   # All clear with no other active alerts
   def all_clear(_alert, [], _location) do
     gettext("**All clear:** Normal service has resumed.",
